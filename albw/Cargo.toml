@@ -1,0 +1,16 @@
+[package]
+name = "albw"
+version = "0.2.0"
+authors = ["Kevin Marsolais <kevin@kevinmarsolais.co>"]
+edition = "2018"
+license = "GPL-2.0-or-later"
+
+[dependencies]
+bytey = { path = "../bytey" }
+csv = "1.1.6"
+log = "0.4.14"
+once_cell = "1.7.2"
+regex = "1.4.5"
+serde = { version = "1.0.125", features = ["derive"] }
+serde_repr = "0.1.6"
+yaz0 = "0.3.0"

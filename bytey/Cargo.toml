@@ -1,0 +1,8 @@
+[package]
+name = "bytey"
+version = "0.1.0"
+authors = ["Kevin Marsolais <kevin@kevinmarsolais.co>"]
+edition = "2018"
+
+[dependencies]
+bytey-macro = { path = "../bytey-macro" }

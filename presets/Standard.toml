@@ -1,0 +1,40 @@
+## Modifications to the game's core mechanics.
+[modifications]
+## Enabled the Y button from the start.
+# y_button_enabled = true
+
+## Modifications to logic.
+[logic]
+## Disables lamp requirement for dark areas.
+# dont_require_lamp_for_darkness = true
+## Requires seller's golden bee for Bee Badge check.
+# require_golden_bee_for_sale = true
+## Allows keys to be placed in an order that can lead to softlocks.
+# unsafe_key_placement = true
+
+## Modifications to certain items.
+[items]
+## Skips the Captain's Sword.
+# captains_sword = 'Skip'
+## Shuffles the Borrowed Sword.
+# borrowed_sword = 'Shuffled'
+## Shuffles the Lamp.
+# lamp = 'Shuffled'
+## Skips Ravio's first bracelet.
+# first_bracelet = 'Skip'
+
+## Modifications to game behavior.
+[behavior]
+## Starts the game in a pseudo-post-Sanctuary state.
+# open = true
+## Enables the barrier around Hyrule Castle from the start.
+# barrier = 'Start'
+
+## Excludes certain locations from having progression items.
+[exclude]
+## Use the names from the spoiler log.
+# [exclude.Lorule]
+# 'Death Mountain' = [
+#     'Treacherous Tower (Advanced 1)',
+#     'Treacherous Tower (Advanced 2)',
+# ]

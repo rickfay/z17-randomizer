@@ -1,0 +1,24 @@
+[package]
+name = "randomizer"
+version = "0.2.0"
+authors = ["Kevin Marsolais <kevin@kevinmarsolais.co>"]
+edition = "2018"
+license = "GPL-2.0-or-later"
+
+[dependencies]
+albw = { path = "../albw" }
+crc = "1.8.1"
+fs_extra = "1.2.0"
+linked-hash-map = "0.5.4"
+log = "0.4.14"
+rand = { version = "0.8.3", features = ["std_rng"] }
+serde = { version = "1.0.125", features = ["derive"] }
+serde_yaml = "0.8.17"
+sys = { path = "../sys" }
+tempfile = "3.2.0"
+toml = "0.5.8"
+try-insert-ext = "0.1.0"
+vec-drain-where = "1.0.1"
+
+[dev-dependencies]
+simplelog = "0.10.0"

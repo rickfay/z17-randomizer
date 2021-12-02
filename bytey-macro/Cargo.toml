@@ -1,0 +1,15 @@
+[package]
+name = "bytey-macro"
+version = "0.1.0"
+authors = ["Kevin Marsolais <kevin@kevinmarsolais.co>"]
+edition = "2018"
+license = "GPL-2.0-or-later"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+syn = { version = "1.0.69", features = ["full"] }
+quote = "1.0.9"
+proc-macro2 = "1.0.26"
+proc-macro-error = "1.0.4"
