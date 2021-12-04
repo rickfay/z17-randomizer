@@ -187,6 +187,25 @@ pub fn open_default() -> Settings {
     }
 }
 
+pub fn plando_settings() -> Settings {
+    Settings {
+        modifications: Modifications {
+            y_button_enabled: true,
+        },
+        items: Items {
+            captains_sword: Skippable::Skip,
+            borrowed_sword: Progression::Shuffled,
+            lamp: Progression::Shuffled,
+            first_bracelet: Skippable::Unchanged,
+        },
+        behavior: Behavior {
+            open: true,
+            barrier: Barrier::Start,
+        },
+        ..Default::default()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::Settings;

@@ -1,2 +1,2 @@
 [workspace]
-members = ["albw", "randomizer", "sys", "bytey", "bytey-macro"]
+members = ["albw", "randomizer", "sys", "bytey", "bytey-macro", "cli"]

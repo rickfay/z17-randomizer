@@ -1,0 +1,19 @@
+[package]
+name = "cli"
+version = "0.2.0-nightly"
+authors = ["Kevin Marsolais <kevin@kevinmarsolais.co>"]
+edition = "2018"
+license = "GPL-2.0-or-later"
+
+[dependencies]
+albw = { path = "../albw" }
+crc = "1.8.1"
+rand = "0.8.3"
+randomizer = { path = "../randomizer" }
+simplelog = "0.10.0"
+structopt = "0.3.21"
+sys = { path = "../sys" }
+
+[[bin]]
+name = "albw-randomizer"
+path = "src/main.rs"
