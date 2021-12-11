@@ -4,6 +4,7 @@ crate::region! {
     palace {
         paths: [
             floor1 :- can_sand_rod,
+            boss :- {|p| p.can_fire_rod() || p.can_bomb()},
         ],
     },
     floor1 {
@@ -12,18 +13,18 @@ crate::region! {
             "(1F) Sand Room (South)": LiverBlue @Chest(1[565]),
             "(1F) Sand Switch Room": Compass @Chest(1[289]),
             "(1F) Sand Room (North)": KeySmall @Chest(1[371]),
+            "(1F) Behind Rocks": KeySmall @Chest(1[349]) :- can_lift_big,
         ],
         paths: [
-            center :- {|p| p.small_keys(COURSE) > 0},
+            center,
         ],
     },
     center {
         locations: [
-            "(1F) Big Chest (Behind Wall)": PowerfulGlove @Chest(1[70]),
-            "(1F) Behind Rocks": KeySmall @Chest(1[349]) :- can_lift_big,
+            "(1F) Big Chest (Behind Wall)": PowerfulGlove @Chest(1[70]) :- {|p| p.small_keys(COURSE) > 0},
         ],
         paths: [
-            floor2 :- {|p| p.can_lift_big() && p.small_keys(COURSE) > 1},
+            floor2 :- {|p| (p.can_lift_big() && p.small_keys(COURSE) > 1) || (p.can_fire_rod() || p.can_bomb())},
         ],
     },
     floor2 {
@@ -36,7 +37,7 @@ crate::region! {
             "(2F) Red/Blue Switches": KeySmall @Chest(2[462]),
         ],
         paths: [
-            floor2west :- {|p| p.small_keys(COURSE) > 2},
+            floor2west :- {|p| p.small_keys(COURSE) > 2 || (p.can_fire_rod() || p.can_bomb())},
         ],
     },
     floor2west {
@@ -44,7 +45,7 @@ crate::region! {
             "(2F) Leever Room": KeySmall @Chest(2[257]),
         ],
         paths: [
-            floor3 :- {|p| p.small_keys(COURSE) > 3},
+            floor3 :- {|p| p.small_keys(COURSE) > 3 || (p.can_fire_rod() || p.can_bomb())},
         ],
     },
     floor3 {
@@ -53,7 +54,7 @@ crate::region! {
             "(3F) Armos Room": KeySmall @Chest(3[110]),
         ],
         paths: [
-            boss :- {|p| p.small_keys(COURSE) > 4 && p.has_boss_key(COURSE)},
+            boss :- {|p| (p.small_keys(COURSE) > 4 && p.has_boss_key(COURSE)) || (p.can_fire_rod() || p.can_bomb())},
         ],
     },
     boss {

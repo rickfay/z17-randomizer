@@ -24,7 +24,8 @@ crate::region! {
             "(B2) Moving Platform Room": KeySmall @Chest(2[105]),
         ],
         paths: [
-            end :- {|p| p.small_keys(COURSE) > 2},
+            end :- {|p| p.small_keys(COURSE) > 2 && p.can_light()},
+            boss :- {|p| p.small_keys(COURSE) > 2 && p.has_boss_key(COURSE)},
         ],
     },
     end {
@@ -34,7 +35,6 @@ crate::region! {
         ],
         paths: [
             lorule::skull::chest,
-            boss :- {|p| p.has_boss_key(COURSE)},
         ],
     },
     boss {

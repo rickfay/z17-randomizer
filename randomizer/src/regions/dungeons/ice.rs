@@ -29,7 +29,7 @@ crate::region! {
             "(B4) Switches": RupeeSilver @Chest(1[25]),
             "(B4) Southwest Chest (Fall)": RupeePurple @Chest(1[1122]),
             "(B4) Narrow Platform": LiverPurple @Chest(1[913]),
-            "(B2) Far North": RupeeSilver @Chest(1[838]) :- has_stamina_scroll,
+            "(B2) Far North": RupeeSilver @Chest(1[838]) :- {|p| p.has_stamina_scroll() || p.has_boots()},
             "(B4) Southeast Chest (Fall)": KeySmall @Chest(1[273]),
         ],
         paths: [

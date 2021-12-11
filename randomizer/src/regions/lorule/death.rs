@@ -7,7 +7,7 @@ crate::region! {
             "Behind Ice Gimos": RupeeSilver @Chest(4[94]) :- can_fire_rod,
         ],
         paths: [
-            west :- can_hookshot,
+            west,
             dungeons::ice::ruins :- can_fire_rod,
             hyrule::death::far_island :- can_tornado_rod,
         ],
@@ -15,7 +15,7 @@ crate::region! {
     west {
         locations: [
             "Ledge (West)": LiverBlue @Chest(3[108]),
-            "Ice Gimos (West)": RupeeSilver @Chest(3[109]) :- can_fire_rod,
+            "Ice Gimos (West)": RupeeSilver @Chest(3[109]),
         ],
         paths: [
             tower,
@@ -23,7 +23,7 @@ crate::region! {
     },
     tower {
         locations: [
-            "Treacherous Tower (Intermediate)": HeartPiece @Event(FieldDark_05_GameTower[0x7E]) :- can_hammer,
+            "Treacherous Tower (Intermediate)": HeartPiece @Event(FieldDark_05_GameTower[0x7E]) :- {|p| p.can_hammer() || p.can_tornado_rod() || p.can_bomb()},
         ],
     },
 }

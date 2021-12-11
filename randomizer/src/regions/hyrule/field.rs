@@ -16,9 +16,9 @@ crate::region! {
             "Castle Rocks": HeartPiece @Heart(18[209]) :- can_lift,
         ],
         paths: [
-            sanctuary::lobby :- sword,
+            sanctuary::lobby :- {|p| p.sword() || p.can_lift() || p.can_fire_rod() || p.can_ice_rod() || p.can_bomb() || p.can_lamp() || p.has_boots()},
             lost::woods,
-            death::mountain :- can_lift,
+            death::mountain, // :- can_lift,
             zoras::domain :- can_merge,
             kakariko::village,
             eastern::ruins,

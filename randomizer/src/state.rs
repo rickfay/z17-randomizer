@@ -107,6 +107,10 @@ impl<'settings> State<'settings> {
         self.can_bomb() || self.can_hookshot() || self.can_boomerang() || self.can_bow()
     }
 
+    // pub fn can_hit_switch(&self) -> bool {
+    //     self.sword() || self.can_bomb() || self.can_hookshot() || self.can_boomerang() || self.can_bow() || self.can_ice_rod()
+    // }
+
     pub fn has_ranged_attack(&self) -> bool {
         self.can_use_projectile() || self.has_master_sword()
     }
@@ -141,6 +145,10 @@ impl<'settings> State<'settings> {
 
     pub fn can_swim(&self) -> bool {
         self.player.flippers
+    }
+
+    pub fn fake_flippers(&self) -> bool {
+        self.player.flippers || (self.player.boots && (self.can_bomb() || self.can_bomb()))
     }
 
     pub fn can_merge(&self) -> bool {

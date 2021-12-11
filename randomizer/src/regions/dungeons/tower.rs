@@ -3,10 +3,10 @@ crate::region! {
     name: "Tower of Hera",
     hera {
         locations: [
-            "(1F) Outside": RupeePurple @Chest(1[6]) :- {|s| s.can_hammer() && s.can_merge()},
+            "(1F) Outside": RupeePurple @Chest(1[6]) :- can_merge,
         ],
         paths: [
-            floor2 :- {|p| p.can_merge() && p.can_hammer()},
+            floor2 :- {|p| p.can_merge() || (p.sword() && p.can_bomb())},
         ],
     },
     floor2 {
@@ -15,7 +15,7 @@ crate::region! {
             "(3F) Platform": KeySmall @Key(1[244]),
         ],
         paths: [
-            floor4 :- {|p| p.small_keys(COURSE) > 0},
+            floor4 :- {|p| p.small_keys(COURSE) > 0 || (p.can_bomb() && p.can_tornado_rod())},
         ],
     },
     floor4 {
@@ -25,7 +25,7 @@ crate::region! {
             "(6F) Right Mole": LiverPurple @Chest(1[694]),
         ],
         paths: [
-            floor7 :- {|p| p.small_keys(COURSE) > 1},
+            floor7 :- {|p| p.small_keys(COURSE) > 1 || (p.can_bomb() && p.can_tornado_rod())},
         ],
     },
     floor7 {

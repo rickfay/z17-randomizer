@@ -10,7 +10,7 @@ crate::region! {
         ],
         paths: [
             field::rentals,
-            upper :- can_merge,
+            upper, // :- can_merge,
             lorule::death::west :- lorule,
         ],
     },
@@ -30,7 +30,7 @@ crate::region! {
         locations: [
             "Ore Mine Column": HeartPiece @Heart(CaveLight 25[9]) :- can_hammer,
             "Bouldering Guy": ItemBottle @Event(FieldLight_05_Climber[0x06])
-                :- {|p| p.can_merge() && p.has_premium_milk()},
+                :- {|p| (p.can_merge() || (p.can_tornado_rod() && p.has_boots())) && p.has_premium_milk()},
             "Treasure Room": RupeeSilver @Chest(AttractionLight 4[89])
                 :- {|p| p.can_hookshot() && p.can_merge()},
         ],

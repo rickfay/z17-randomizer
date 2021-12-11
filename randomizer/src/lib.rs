@@ -441,7 +441,8 @@ impl ItemExt for Item {
             Item::ItemRentalIceRod => Item::ItemIceRod,
             Item::ItemRentalSandRod => Item::ItemSandRod,
             Item::ItemRentalTornadeRod => Item::ItemTornadeRod,
-            Item::ItemRentalBomb => Item::ItemBomb,
+            //Item::ItemRentalBomb => Item::ItemBomb, // I don't want to do Maiamai logic, so lets just give them Nice Bombs!
+            Item::ItemRentalBomb => Item::ItemBombLv2, // I don't want to do Maiamai logic, so lets just give them Nice Bombs!
             Item::ItemRentalFireRod => Item::ItemFireRod,
             Item::ItemRentalHookShot => Item::ItemHookShot,
             Item::ItemRentalBoomerang => Item::ItemBoomerang,
