@@ -5,12 +5,11 @@ crate::region! {
         locations: [
             "Delivery": PackageSword @None() where settings: !settings.items.captains_sword.is_skipped(),
             "Dampe": ItemSwordLv1 @Event(FieldLight_13_Sister[0x1D]),
-            "Rosso Cave": RupeeR @Chest(CaveLight 6[6]) :- can_hammer,
+            "Rosso Cave": RupeeR @Chest(CaveLight 6[6]) :- {|p| p.can_hammer() || p.can_boomerang() || p.can_hookshot()},
             "Sanctuary Pegs": RupeeSilver @Chest(11[89]) :- can_hammer,
-            "Treasure Room": RupeeSilver @Chest(AttractionLight 5[24])
-                :- {|p| p.can_bomb() && p.can_merge()},
-            "Behind Blacksmith": HeartPiece @Heart(17[95]) :- can_merge,
-            "Blacksmith Cave": HeartPiece @Heart(CaveLight 16[1]) :- can_lift_big,
+            "Treasure Room": RupeeSilver @Chest(AttractionLight 5[24]) :- {|p| p.can_bomb() && p.can_merge()},
+            "Behind Blacksmith": HeartPiece @Heart(17[95]) :- {|p| p.can_merge() || p.can_fire_rod() || p.can_bomb()},
+            "Blacksmith Cave": HeartPiece @Heart(CaveLight 16[1]) :- {|p| p.can_lift_big() || p.can_fire_rod() || p.can_bomb()},
             "Blacksmith": ItemSwordLv3 @Event(IndoorLight/FieldLight_22_BlackSmith[0x16])
                 :- {|p| p.lorule() && p.ore() >= 2},
             "Castle Rocks": HeartPiece @Heart(18[209]) :- can_lift,
