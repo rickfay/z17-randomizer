@@ -1,8 +1,9 @@
 use std::{fs, panic};
 use std::io::{stdin, stdout, Write};
 use std::path::Path;
+use log::info;
 
-use randomizer::{Seed, plando, Generator};
+use randomizer::{Seed, Generator};
 use simplelog::{LevelFilter, SimpleLogger};
 use structopt::StructOpt;
 use albw::Game;
@@ -18,8 +19,6 @@ struct Opt {
     no_patch: bool,
     #[structopt(long)]
     no_spoiler: bool,
-    #[structopt(short, long)]
-    verbose: bool,
 }
 
 fn prompt_until<F>(prompt: &str, until: F, error: &str) -> ::sys::Result<String>
@@ -41,7 +40,6 @@ fn prompt_until<F>(prompt: &str, until: F, error: &str) -> ::sys::Result<String>
 }
 
 fn create_paths() -> ::sys::Result<Paths> {
-
     let rom = prompt_until(
         "Path to ROM",
         |rom| Game::load(&rom).is_ok(),
@@ -59,28 +57,27 @@ fn create_paths() -> ::sys::Result<Paths> {
 
 fn main() -> randomizer::Result<()> {
     let opt = Opt::from_args();
-    let filter = if opt.verbose {
-        LOG_FILTER
-    } else {
-        LevelFilter::Off
-    };
+
     panic::catch_unwind(|| {
-        SimpleLogger::init(filter, Default::default()).expect("Could not initialize logger.");
+        SimpleLogger::init(LevelFilter::Info, Default::default()).expect("Could not initialize logger.");
+        info!("Initializing Z17 Randomizer...");
         let system = randomizer::system()?;
         let preset = if let Some(preset) = opt.preset {
             system.preset(&preset)?
         } else {
             Default::default()
         };
-        let seed = opt.seed.unwrap_or_else(rand::random);
 
-        Generator::new(&preset, seed).randomize().patch(
+        let seed = opt.seed.unwrap_or_else(rand::random);
+        let randomizer = Generator::new(&preset, seed);
+        let spoiler = randomizer.randomize();
+
+        spoiler.patch(
             system.get_or_create_paths(create_paths)?,
             !opt.no_patch,
             !opt.no_spoiler,
         )
-    })
-        .expect("A fatal error occurred. Please report this bug to the developers.")
+    }).expect("A fatal error occurred. Please report this bug to the developers.")
 }
 
 // fn main() -> () {
@@ -89,6 +86,3 @@ fn main() -> randomizer::Result<()> {
 //         ..plando();
 //     }).expect("Oh no it poo'd itself")
 // }
-
-#[cfg(debug_assertions)]
-const LOG_FILTER: LevelFilter = LevelFilter::Debug;

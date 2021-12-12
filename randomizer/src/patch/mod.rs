@@ -24,11 +24,10 @@ pub struct Patcher {
     rentals: [Item; 9],
     merchant: [Item; 3],
     courses: HashMap<course::Id, Course>,
-    hash: u32,
 }
 
 impl Patcher {
-    pub fn new(game: Game, hash: u32) -> Result<Self> {
+    pub fn new(game: Game) -> Result<Self> {
         let boot = game.boot()?;
         Ok(Self {
             game,
@@ -36,7 +35,6 @@ impl Patcher {
             rentals: [Item::KeySmall; 9],
             merchant: [Item::KeySmall; 3],
             courses: Default::default(),
-            hash,
         })
     }
 
@@ -362,9 +360,13 @@ fn cutscenes<'game, 'settings>(
                 542, 543, // Skip Bomb-Shop Man dialogue
                 599, // Disable Sand Rod return
                 899, // Enable Quick Equip
+                510, // Open Portals
+                524, 560, 600, 620, 640, // Skip Hilda Text
+
             ]) {
                 opening.add_event_flag(flag);
             }
+
             if open {
                 for flag in array::IntoIter::new([
                     20,  // Disable Gulley's callback
@@ -381,9 +383,9 @@ fn cutscenes<'game, 'settings>(
                 opening.add_event_flag(26); // Got delivery sword
                 opening.add_event_flag(84); // Enable Seres/Dampe conversation
             }
-            if items.first_bracelet.is_skipped() {
-                opening.add_event_flag(210); // Skip Ravio giving bracelet
-            }
+            // if items.first_bracelet.is_skipped() {
+            //     opening.add_event_flag(210); // Skip Ravio giving bracelet
+            // }
         }
         Ok(opening)
     })

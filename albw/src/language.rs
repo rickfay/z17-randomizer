@@ -53,19 +53,16 @@ pub struct Table {
 #[derive(Debug)]
 pub struct Language {
     flow: HashSet<String>,
-    message: HashSet<String>,
     archive: File<Sarc>,
 }
 
 impl Language {
-    pub(crate) fn new<F, M>(flow: F, message: M, archive: File<Sarc>) -> Self
+    pub(crate) fn new<F>(flow: F, archive: File<Sarc>) -> Self
     where
         F: IntoIterator<Item = String>,
-        M: IntoIterator<Item = String>,
     {
         Self {
             flow: flow.into_iter().collect(),
-            message: message.into_iter().collect(),
             archive,
         }
     }

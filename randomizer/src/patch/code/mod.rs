@@ -75,12 +75,6 @@ impl Code {
 }
 
 #[derive(Debug)]
-struct Block {
-    address: u32,
-    size: u32,
-}
-
-#[derive(Debug)]
 pub struct Segment<'a> {
     address: &'a mut u32,
     ips: &'a mut Ips,
@@ -350,26 +344,26 @@ fn progressive_items(code: &mut Code, settings: &Settings) {
             b(return_label),
         ])
     };
-    let progressive_bracelet = if settings.items.first_bracelet.is_skipped() {
+    let progressive_bracelet = //if settings.items.first_bracelet.is_skipped() {
         code.text().define([
             cmp(R5, 0x2A),
             cmp(R5, 0x2B).ne(),
             b(progressive_sword).ne(),
             mov(R5, 0x2B),
             b(return_label),
-        ])
-    } else {
-        code.text().define([
-            cmp(R5, 0x2A),
-            cmp(R5, 0x2B).ne(),
-            b(progressive_sword).ne(),
-            ldr(R0, (R0, 0x490)),
-            cmp(R0, 0),
-            mov(R5, 0x2A).eq(),
-            mov(R5, 0x2B).ne(),
-            b(return_label),
-        ])
-    };
+        ]);
+    // } else {
+    //     code.text().define([
+    //         cmp(R5, 0x2A),
+    //         cmp(R5, 0x2B).ne(),
+    //         b(progressive_sword).ne(),
+    //         ldr(R0, (R0, 0x490)),
+    //         cmp(R0, 0),
+    //         mov(R5, 0x2A).eq(),
+    //         mov(R5, 0x2B).ne(),
+    //         b(return_label),
+    //     ])
+    // };
     let progressive_glove = code.text().define([
         cmp(R5, 0x2F),
         b(progressive_bracelet).ne(),

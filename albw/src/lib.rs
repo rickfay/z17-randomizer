@@ -5,7 +5,7 @@ use std::{
     error::Error as StdError,
     fmt::{self, Display, Formatter},
     fs, io,
-    path::{Path, PathBuf},
+    path::{Path},
 };
 
 use log::info;
@@ -28,7 +28,7 @@ pub use files::{File, IntoBytes};
 use item::GetItem;
 pub use item::Item;
 pub use language::Language;
-use language::{FlowChart, Load};
+use language::{FlowChart};
 pub use scene::{Scene, Stage};
 
 pub type Result<T, E = Error> = ::std::result::Result<T, E>;
@@ -97,13 +97,11 @@ pub enum ErrorKind {
 /// Game info, loaded from a ROM
 #[derive(Debug)]
 pub struct Game {
-    path: PathBuf,
     id: u64,
     exheader: ExHeader,
     romfs: RefCell<RomFs<fs::File>>,
     flow_chart: File<FlowChart>,
     get_item: File<Vec<GetItem>>,
-    message: File<Load>,
 }
 
 impl Game {
@@ -131,18 +129,16 @@ impl Game {
                 .get()
                 .read("World/Byaml/GetItem.byaml")?
                 .try_map(|data| byaml::from_bytes(&data))?;
-            let message = region_boot
-                .get()
-                .read("World/Byaml/Message.byaml")?
-                .try_map(|data| byaml::from_bytes(&data))?;
+            // let message = region_boot
+            //     .get()
+            //     .read("World/Byaml/Message.byaml")?
+            //     .try_map(|data| byaml::from_bytes(&data))?;
             Ok(Self {
-                path,
                 id,
                 exheader,
                 romfs: RefCell::new(romfs),
                 flow_chart,
                 get_item,
-                message,
             })
         } else {
             Err(Error::new("Invalid ROM ID."))
@@ -171,13 +167,12 @@ impl Game {
 
     pub fn boot(&self) -> Result<Language> {
         let flow = self.flow_chart.get().load().boot()?.iter().cloned();
-        let message = self.message.get().boot()?.iter().cloned();
         let archive = self
             .romfs
             .borrow_mut()
             .read("US/RegionBoot.szs")?
             .map(Sarc::from);
-        Ok(Language::new(flow, message, archive))
+        Ok(Language::new(flow, archive))
     }
 
     pub fn common(&mut self) -> Result<Actors> {
@@ -209,19 +204,12 @@ impl Game {
             .unwrap_or_default()
             .iter()
             .cloned();
-        let message = self
-            .message
-            .get()
-            .course(course)
-            .unwrap_or_default()
-            .iter()
-            .cloned();
         let archive = self
             .romfs
             .borrow_mut()
             .read(format!("US_English/{}.szs", course.as_str()))?
             .map(Sarc::from);
-        Ok(Language::new(flow, message, archive))
+        Ok(Language::new(flow, archive))
     }
 
     pub(crate) fn scene(&self, course: course::Id, stage: u16) -> Result<Scene> {

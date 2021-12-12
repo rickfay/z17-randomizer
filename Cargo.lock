@@ -144,6 +144,7 @@ version = "0.2.0-nightly"
 dependencies = [
  "albw",
  "crc",
+ "log",
  "rand",
  "randomizer",
  "simplelog",

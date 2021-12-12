@@ -33,8 +33,7 @@ crate::region! {
     },
     post_sanc {
         locations: [
-            "Thanks": RingRental @Event(IndoorLight/FieldLight_2C_Rental[0xED])
-                where settings: !settings.items.first_bracelet.is_skipped(),
+            "Thanks": RingHekiga @Event(IndoorLight/FieldLight_2C_Rental[0xED]),
             "Ravio (5)": ItemRentalBow @Shop(Ravio(8)),
         ],
         paths: [

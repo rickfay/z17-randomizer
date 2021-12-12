@@ -1,7 +1,7 @@
 use std::collections::{HashMap, HashSet};
 
 use albw::{course, Item};
-use log::{debug, error};
+use log::{error};
 use vec_drain_where::VecDrainWhereExt;
 
 use crate::{
@@ -93,12 +93,12 @@ impl<'a> Filler<'a> {
 
     /// Sets a location's item and adds new reachable nodes.
     fn add_item_in_location(&mut self, item: Item, location: Location) {
-        debug!(
-            "placed {} in {}/{}",
-            item.normalize().as_str(),
-            location.subregion.name(),
-            location.name
-        );
+        // info!(
+        //     "placed {} in {}/{}",
+        //     item.normalize().as_str(),
+        //     location.subregion.name(),
+        //     location.name
+        // );
         self.state
             .add_item_with_location(item, location.subregion.course());
         self.layout.set(location, item);
@@ -250,7 +250,10 @@ fn fill_world(
     pool: Pool,
     start: &'static Subregion,
 ) -> Layout {
-    Filler::new(weights, State::new(settings), layout).fill(pool, start, |pool, filler| {
+
+    let filler = Filler::new(weights, State::new(settings), layout);
+
+    filler.fill(pool, start, |pool, filler| {
         pool.remove(|&item| filler.can_progress(item))
             .unwrap_or_else(|| {
                 error!("{:?}", filler.state);

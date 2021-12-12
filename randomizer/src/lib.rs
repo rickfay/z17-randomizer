@@ -227,6 +227,12 @@ impl Layout {
             name,
         } = location;
         self.get_node_mut(node).insert(name, item.normalize());
+        info!(
+            "Placed {} in {}/{}",
+            item.normalize().as_str(),
+            location.subregion.name(),
+            location.name
+        );
     }
 }
 
@@ -514,7 +520,7 @@ pub struct Spoiler<'settings> {
 impl<'settings> Spoiler<'settings> {
     pub fn patch(self, paths: Paths, patch: bool, spoiler: bool) -> Result<()> {
         let game = Game::load(paths.rom())?;
-        let mut patcher = Patcher::new(game, self.seed)?;
+        let mut patcher = Patcher::new(game)?;
         regions::patch(&mut patcher, &self.layout, self.settings)?;
         let patches = patcher.prepare(self.settings)?;
         if patch {
@@ -550,15 +556,19 @@ fn exclude(settings: &Settings) -> HashSet<Location> {
             "Entrance",
         ));
     }
-    if !settings.items.first_bracelet.is_shuffled() {
-        exclude.insert(Location::new(
-            regions::hyrule::field::post_sanc::SUBREGION,
-            "Thanks",
-        ));
-    }
+    // if !settings.items.first_bracelet.is_shuffled() {
+    //     exclude.insert(Location::new(
+    //         regions::hyrule::field::post_sanc::SUBREGION,
+    //         "Thanks",
+    //     ));
+    // }
     exclude.insert(Location::new(
         regions::hyrule::lake::hylia::SUBREGION,
         "Shore",
+    ));
+    exclude.insert(Location::new(
+        regions::hyrule::field::post_sanc::SUBREGION,
+        "Thanks",
     ));
     exclude
 }

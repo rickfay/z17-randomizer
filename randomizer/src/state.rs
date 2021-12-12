@@ -119,9 +119,9 @@ impl<'settings> State<'settings> {
         self.player.lamp
     }
 
-    pub fn can_see_in_dark(&self) -> bool {
-        self.settings.logic.dont_require_lamp_for_darkness || self.player.lamp
-    }
+    // pub fn can_see_in_dark(&self) -> bool {
+    //     self.settings.logic.dont_require_lamp_for_darkness || self.player.lamp
+    // }
 
     pub fn has_bottle(&self) -> bool {
         self.player.bottle
@@ -159,9 +159,9 @@ impl<'settings> State<'settings> {
         self.player.glove > 0
     }
 
-    pub fn can_insect_net(&self) -> bool {
-        self.can_use_items() && self.player.insect_net
-    }
+    // pub fn can_insect_net(&self) -> bool {
+    //     self.can_use_items() && self.player.insect_net
+    // }
 
     pub fn can_lift_big(&self) -> bool {
         self.player.glove > 1
@@ -212,7 +212,7 @@ impl<'settings> State<'settings> {
     }
 
     pub fn lorule(&self) -> bool {
-        self.player.lorule
+        self.can_merge()
     }
 
     pub fn has_seven_portraits(&self) -> bool {
