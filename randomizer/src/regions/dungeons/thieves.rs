@@ -18,18 +18,18 @@ crate::region! {
             "(B2) Eyegores": KeySmall @Chest(1[543]),
         ],
         paths: [
-            escape :- {|p| (p.small_keys(COURSE) > 0 && p.can_swim()) || (p.can_tornado_rod() && (p.can_ice_rod() || p.can_bomb()))},
+            escape :- {|p| (p.small_keys(COURSE) > 0 && p.can_swim()) || (p.glitched() && (p.can_tornado_rod() && (p.can_ice_rod() || p.can_bomb())))},
         ],
     },
     escape {
         locations: [
-            "(B1) Behind Wall": RupeeSilver @Chest(1[1359]), // might need Scoot Fruit if Small Key shows up here
+            "(B1) Behind Wall": RupeeSilver @Chest(1[1359]), // Need Scoot Fruit if Small Key shows up here
             "(B1) Big Chest (Entrance)": KeyBoss @Chest(1[580]),
             "(B3) Underwater": RupeeSilver @Chest(1[667]),
             "(B3) Big Chest (Hidden)": OreBlue @Chest(1[657]),
         ],
         paths: [
-            boss :- {|p| p.has_boss_key(COURSE) && p.can_merge() && p.small_keys(COURSE) > 0},
+            boss :- {|p| p.has_boss_key(COURSE) && p.can_merge() && p.small_keys(COURSE) > 0}, // Small Key check is to make sure we get Thief Girl
         ],
     },
     boss {

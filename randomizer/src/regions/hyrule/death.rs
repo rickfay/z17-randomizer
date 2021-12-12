@@ -5,11 +5,14 @@ crate::region! {
         locations: [
             "First Cave": RupeeB @Chest(CaveLight 3[58]),
             "Blocked Cave": RupeePurple @Chest(CaveLight 3[59]) :- {|p| p.can_merge() && p.can_bomb()},
-            "Fairy Cave": LiverPurple @Chest(CaveLight 3[83]) :- {|p| p.can_bomb() || ((p.can_merge() || p.can_fire_rod()) && p.can_hammer())},
+            "Fairy Cave": LiverPurple @Chest(CaveLight 3[83]) :- {
+                |p| (p.can_merge() && (p.can_bomb() || p.can_hammer()))
+                || (p.glitched() && (p.can_bomb() || ((p.can_merge() || p.can_fire_rod()) && p.can_hammer())))
+            },
         ],
         paths: [
             field::rentals,
-            upper,
+            upper :- {|p| p.can_merge() || p.glitched()},
             lorule::death::west :- lorule,
         ],
     },
@@ -29,7 +32,7 @@ crate::region! {
         locations: [
             "Ore Mine Column": HeartPiece @Heart(CaveLight 25[9]) :- can_hammer,
             "Bouldering Guy": ItemBottle @Event(FieldLight_05_Climber[0x06])
-                :- {|p| (p.can_merge() || (p.can_tornado_rod() && p.has_boots())) && p.has_premium_milk()},
+                :- {|p| p.has_premium_milk() && (p.can_merge() || (p.glitched() && (p.can_tornado_rod() && p.has_boots())))},
             "Treasure Room": RupeeSilver @Chest(AttractionLight 4[89])
                 :- {|p| p.can_hookshot() && p.can_merge()},
         ],

@@ -28,7 +28,7 @@ crate::region! {
             "(4F) Hidden Path": ClothesRed @Chest(1[725]),
         ],
         paths: [
-            lamp_trial,
+            lamp_trial :- {|p| p.can_light() || p.glitched()},
             hookshot_trial :- can_hookshot,
         ],
     },

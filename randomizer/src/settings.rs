@@ -51,6 +51,8 @@ pub struct Logic {
     pub require_golden_bee_for_sale: bool,
     /// Allows keys to be placed in such a way that the player can softlock.
     pub unsafe_key_placement: bool,
+    /// Glitched Logic
+    pub glitched_logic: bool
 }
 
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq, Deserialize, Serialize)]

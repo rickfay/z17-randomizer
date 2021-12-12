@@ -13,7 +13,7 @@ crate::region! {
             "(1F) Fire Bubbles": KeySmall @Chest(1[44]) :- can_merge,
         ],
         paths: [
-            floor1west :- {|p| p.small_keys(COURSE) > 0},
+            floor1west :- {|p| p.small_keys(COURSE) > 0 && (p.can_merge() || p.glitched())}, // glitched version can TRod onto blocks
         ],
     },
     floor1west {
@@ -36,10 +36,10 @@ crate::region! {
     },
     floor2outer {
         locations: [
-            "(2F) Fire Ring": KeySmall @Key(2[97]) :- {|p| p.can_merge() && (p.small_keys(COURSE) > 1 || p.has_boots())}, // Not requiring Armos Boost
+            "(2F) Fire Ring": KeySmall @Key(2[97]) :- {|p| p.can_merge() && (p.small_keys(COURSE) > 1 || (p.glitched() && p.has_boots()))}, // Not requiring Armos Boost
         ],
         paths: [
-            floor3 :- can_merge,
+            floor3 :- {|s| s.can_merge() && ((s.small_keys(COURSE) > 2 && s.can_damage()) || s.glitched())}, // TRod skip the 2F
         ],
     },
     floor3 {

@@ -6,7 +6,7 @@ crate::region! {
             "Chest": RupeeSilver @Chest(28[53]),
         ],
         paths: [
-            dungeons::turtle::rock :- {|p| (p.can_swim() || p.fake_flippers()) && p.can_ice_rod()},
+            dungeons::turtle::rock :- {|p| p.can_ice_rod() && (p.can_swim() || (p.glitched() && p.fake_flippers()))},
         ],
     },
     balcony {

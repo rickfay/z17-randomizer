@@ -7,10 +7,10 @@ crate::region! {
             "Ledge Chest": RupeeR @Chest(35[155]) :- can_merge,
             "Bird Lover": ItemBottle @Event(FieldLight_2D_UnderBridgeStranger[0x2A]) :- can_swim,
             "Secret Cave": RupeeGold @Chest(CaveLight 9[12]) :- can_bomb,
-            "Shore": MessageBottle @None() :- {|p| p.can_swim() || p.can_fire_rod() || p.can_bomb()},
+            "Shore": MessageBottle @None() :- {|p| p.can_swim() || (p.glitched() && (p.can_fire_rod() || p.can_bomb()))},
         ],
         paths: [
-            island :- {|p| p.can_swim() || p.fake_flippers() || (p.can_ice_rod() && p.can_hookshot())},
+            island :- {|p| p.can_swim() || (p.glitched() && (p.fake_flippers() || (p.can_ice_rod() && p.can_hookshot())))},
             hotfoot :- did_eastern,
             lorule::lake::lorule :- lorule,
         ],

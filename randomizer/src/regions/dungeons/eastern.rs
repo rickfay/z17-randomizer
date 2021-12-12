@@ -4,7 +4,7 @@ crate::region! {
     palace {
         locations: [
             "(1F) Outside (East)": RupeeSilver @Chest(1[244]) :- can_merge,
-            "(1F) Near Entrance": RupeeR @Chest(1[132]),
+            "(1F) Near Entrance": RupeeR @Chest(1[132]) :- {|p| p.has_ranged_attack() || p.glitched()}, // glitched can throw a pot
         ],
         paths: [
             floor1 :- {|p| p.has_ranged_attack() || p.can_merge()},
@@ -24,18 +24,16 @@ crate::region! {
         locations: [
             "(2F) Ball Room": LiverPurple @Chest(2[147]),
             "(2F) Defeat Popos": LiverPurple @Chest(2[115]),
-            "(2F) Switch Room": KeySmall @Chest(2[52]),
+            "(2F) Switch Room": KeySmall @Chest(2[52]) :- {|p| p.has_ranged_attack() || p.glitched()}, // glitched can throw pots,
         ],
         paths: [
-            boss_key :- {|p| p.small_keys(COURSE) > 1},
+            boss_key :- {|p| (p.small_keys(COURSE) > 1 && p.has_ranged_attack()) || (p.glitched() && p.can_tornado_rod())},
+            boss :- {|p| p.can_use_projectile() && (p.has_boss_key(COURSE) || (p.glitched() && p.can_tornado_rod()))},
         ],
     },
     boss_key {
         locations: [
             "(2F) Big Chest": KeyBoss @Chest(2[44]),
-        ],
-        paths: [
-            boss :- {|p| (p.has_boss_key(COURSE) || p.can_tornado_rod()) && p.can_use_projectile()},
         ],
     },
     boss {

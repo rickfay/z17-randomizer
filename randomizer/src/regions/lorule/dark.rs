@@ -14,7 +14,7 @@ crate::region! {
             "Hinox (6)": RupeeGold @Event(CaveDark/FieldDark_17_NpcHinox [0x16]),
         ],
         paths: [
-            dungeons::dark::palace :- can_bomb,
+            dungeons::dark::palace :- {|s| s.can_bomb() && s.can_see_in_dark()},
         ],
     },
 }

@@ -129,8 +129,9 @@ impl<'settings> Generator<'settings> {
 
     /// Randomize world and generate files according to settings.
     pub fn randomize(&self) -> Spoiler {
-        info!("Using seed {}", self.seed);
-        info!("Hash: {}", self.hash().0);
+        info!("Using Logic: {}", if self.settings.logic.glitched_logic {"Glitched"} else {"Normal"});
+        info!("Using Seed:  {}", self.seed);
+        info!("Hash:        {}", self.hash().0);
         let rng = StdRng::seed_from_u64(self.seed as u64);
         let (randomized, layout) = Randomized::new(rng, &self.settings, exclude(&self.settings));
         let layout = fill::fill(

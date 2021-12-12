@@ -5,27 +5,28 @@ crate::region! {
         locations: [
             "Delivery": PackageSword @None() where settings: !settings.items.captains_sword.is_skipped(),
             "Dampe": ItemSwordLv1 @Event(FieldLight_13_Sister[0x1D]),
-            "Rosso Cave": RupeeR @Chest(CaveLight 6[6]) :- {|p| p.can_hammer() || p.can_boomerang() || p.can_hookshot()},
+            "Rosso Cave": RupeeR @Chest(CaveLight 6[6]) :- {|p| p.can_hammer() || (p.glitched() && (p.can_boomerang() || p.can_hookshot()))},
             "Sanctuary Pegs": RupeeSilver @Chest(11[89]) :- can_hammer,
             "Treasure Room": RupeeSilver @Chest(AttractionLight 5[24]) :- {|p| p.can_bomb() && p.can_merge()},
-            "Behind Blacksmith": HeartPiece @Heart(17[95]) :- {|p| p.can_merge() || p.can_fire_rod() || p.can_bomb()},
-            "Blacksmith Cave": HeartPiece @Heart(CaveLight 16[1]) :- {|p| p.can_lift_big() || p.can_fire_rod() || p.can_bomb()},
+            "Behind Blacksmith": HeartPiece @Heart(17[95]) :- {|p| p.can_merge() || (p.glitched() && (p.can_fire_rod() || p.can_bomb()))},
+            "Blacksmith Cave": HeartPiece @Heart(CaveLight 16[1]) :- {|p| p.can_lift_big() || (p.glitched() && (p.can_fire_rod() || p.can_bomb()))},
             "Blacksmith": ItemSwordLv3 @Event(IndoorLight/FieldLight_22_BlackSmith[0x16])
                 :- {|p| p.lorule() && p.ore() >= 2},
             "Castle Rocks": HeartPiece @Heart(18[209]) :- can_lift,
+            "Rosso": PowerGlove @Chest(IndoorLight 10[7]) :- {|p| p.did_eastern() || p.lorule()},
         ],
         paths: [
             sanctuary::lobby :- {|p| p.sword() || p.can_lift() || p.can_fire_rod() || p.can_ice_rod() || p.can_bomb() || p.can_lamp() || p.has_boots()},
             lost::woods,
-            death::mountain, // :- can_lift,
-            zoras::domain :- can_merge,
+            death::mountain :- {|p| p.can_lift() || p.glitched()},
+            zoras::domain,
             kakariko::village,
             eastern::ruins,
             southern::ruins,
             lake::hylia,
             post_sanc :- did_sanctuary,
             post_eastern :- did_eastern,
-            castle :- {|s| s.is_barrier_up() && s.has_master_sword()},
+            castle :- has_master_sword,
             lorule::field::main :- lorule,
             lorule::graveyard::field :- lorule,
             lorule::field::ledge :- lorule,
@@ -42,7 +43,6 @@ crate::region! {
     },
     post_eastern {
         locations: [
-            "Rosso": PowerGlove @Chest(IndoorLight 10[7]),
             "Clean Rocks": RupeePurple @Chest(IndoorLight 10[25]) :- can_lift,
             "Irene": ItemBell @Event[
                 FieldLight_11_Maple[0x06],
