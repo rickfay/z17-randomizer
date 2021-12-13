@@ -348,7 +348,8 @@ fn cutscenes<'game, 'settings>(
         {
             let opening = opening.get_mut();
             for flag in array::IntoIter::new([
-                7, 9, 10, 11, // Skip Gulley in prologue
+                7, 9, 10, // Skip Gulley in prologue
+                11, // Fix Hyrule lighting, skip Gulley dialogue at Blacksmith
                 55, // ?
                 222, 223, 231, // Skip Hyrule Castle events
                 236, // Enable Stamina bar
@@ -357,15 +358,26 @@ fn cutscenes<'game, 'settings>(
                 315, // Shop open???
                 321, 322, // Skip first Oren cutscenes
                 415, // Skip Yuga capturing Zelda
-                542, 543, // Skip Bomb-Shop Man dialogue
-                599, // Disable Sand Rod return
-                899, // Enable Quick Equip
                 510, // Open Portals
-                524, 560, 600, 620, 640, // Skip Hilda Text
+                522, // Skip Hilda Lorule Blacksmith Text + get Map Swap icon on lower screen
+                524, // Hilda Text
+                525, // Skip Sahasrahla outside Link's House
+                542, 543, // Skip Bomb-Shop Man dialogue
+                560, // Hilda Text
+                599, // Disable Sand Rod return
+                600, // Hilda Text
+                620, // Hilda Text
+                640, // Hilda Text
+                899, // Enable Quick Equip
 
             ]) {
                 opening.add_event_flag(flag);
             }
+
+            // Currently Trying to: n/a
+            //for x in 525..527 {
+            //    opening.add_event_flag(x);
+            //}
 
             if open {
                 for flag in array::IntoIter::new([
