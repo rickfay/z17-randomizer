@@ -11,7 +11,6 @@ crate::region! {
             },
         ],
         paths: [
-            field::rentals,
             upper :- {|p| p.can_merge() || p.glitched()},
             lorule::death::west :- lorule,
         ],

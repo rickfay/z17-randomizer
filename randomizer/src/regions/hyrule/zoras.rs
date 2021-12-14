@@ -9,7 +9,6 @@ crate::region! {
         ],
         paths: [
             kakariko::shady_guy :- can_merge,
-            field::rentals :- {|p| p.can_merge() && p.has_smooth_gem()},
         ],
     },
 }

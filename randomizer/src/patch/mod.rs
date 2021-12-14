@@ -76,8 +76,8 @@ impl Patcher {
     }
 
     fn language<C>(&mut self, course: C) -> Result<&mut Language>
-    where
-        C: Into<Option<course::Id>>,
+        where
+            C: Into<Option<course::Id>>,
     {
         Ok(if let Some(course) = course.into() {
             &mut self.course(course)?.language
@@ -87,8 +87,8 @@ impl Patcher {
     }
 
     fn flow<C>(&mut self, course: C) -> Result<albw::language::LoadedMut<FlowMut>>
-    where
-        C: Into<Option<course::Id>>,
+        where
+            C: Into<Option<course::Id>>,
     {
         Ok(self.language(course)?.flow_mut())
     }
@@ -291,8 +291,8 @@ pub struct Patches {
 
 impl Patches {
     pub fn dump<P>(self, path: P) -> Result<()>
-    where
-        P: AsRef<Path>,
+        where
+            P: AsRef<Path>,
     {
         let temp = tempdir()?;
         let moddir = temp.path().join(&format!("{:016X}", self.game.id()));
@@ -312,7 +312,7 @@ impl Patches {
                 ..Default::default()
             },
         )
-        .map_err(Error::io)?;
+            .map_err(Error::io)?;
         Ok(())
     }
 }
@@ -322,15 +322,15 @@ struct Files(Vec<File<Box<[u8]>>>);
 
 impl Files {
     pub fn add<T>(&mut self, file: File<T>)
-    where
-        T: IntoBytes,
+        where
+            T: IntoBytes,
     {
         self.0.push(file.into_bytes());
     }
 
     pub fn add_serialize<T>(&mut self, file: File<T>)
-    where
-        T: Serialize,
+        where
+            T: Serialize,
     {
         self.0.push(file.serialize());
     }
@@ -340,9 +340,9 @@ impl Files {
 fn cutscenes<'game, 'settings>(
     game: &'game Game,
     settings: &'settings Settings,
-) -> impl Iterator<Item = Result<File<Demo>>> + 'game {
-    let open = settings.behavior.open;
-    let Settings { items, .. } = settings.clone();
+) -> impl Iterator<Item=Result<File<Demo>>> + 'game {
+
+    let Settings { items, behavior, .. } = settings.clone();
     let early = iter::once_with(move || {
         let mut opening = game.demo(0)?.map(truncate_cutscene);
         {
@@ -350,58 +350,64 @@ fn cutscenes<'game, 'settings>(
             for flag in array::IntoIter::new([
                 7, 9, 10, // Skip Gulley in prologue
                 11, // Fix Hyrule lighting, skip Gulley dialogue at Blacksmith
+                20,  // Disable Gulley's callback
                 55, // ?
-                222, 223, 231, // Skip Hyrule Castle events
+                107, // Spawn enemies
+                110, // Post Sanctuary
+                210, // Skip Thanks item
+                222, 223, // Skip Hyrule Castle events
+                224, // Skip Zelda dialogue
+                225, // Correct field music
+                231, // Skip Hyrule Castle events
+                232, // Enable Ravio's freebie
+                233, // Ravio's Shop fully opened
                 236, // Enable Stamina bar
                 241, // Skip Osfala intro
                 248, // Skip Yuga killing Osfala
                 315, // Shop open???
                 321, 322, // Skip first Oren cutscenes
                 415, // Skip Yuga capturing Zelda
-                510, // Open Portals
                 522, // Skip Hilda Lorule Blacksmith Text + get Map Swap icon on lower screen
-                524, // Hilda Text
+                524, // Hilda ??? Text
                 525, // Skip Sahasrahla outside Link's House
                 542, 543, // Skip Bomb-Shop Man dialogue
-                560, // Hilda Text
+                560, // Hilda ??? Text
                 599, // Disable Sand Rod return
-                600, // Hilda Text
-                620, // Hilda Text
-                640, // Hilda Text
+                600, // Hilda ??? Text
+                620, // Hilda ??? Text
+                640, // Hilda ??? Text
                 899, // Enable Quick Equip
-
+                906, // Monster Guts
+                907, // Monster Tail
+                908, // Monster Horn
+                950, // Maiamai
+                955, // Master Ore UI
             ]) {
                 opening.add_event_flag(flag);
             }
 
-            // Currently Trying to: n/a
-            //for x in 525..527 {
-            //    opening.add_event_flag(x);
+            // Open Portals, Activate Hyrule Castle Midway, screw up Chamber of Sages
+            if behavior.portals_open {
+                opening.add_event_flag(510);
+            }
+
+            // THE BIG GUESSING GAME
+            //
+            // Open Ravio's Shop 233 234
+            // Open Maiamai Cave
+            // Need to find flag to clear Not Interested? text
+            //for x in 232..235 {
+                //opening.add_event_flag(233);
             //}
 
-            if open {
-                for flag in array::IntoIter::new([
-                    20,  // Disable Gulley's callback
-                    107, // Spawn enemies
-                    110, // Post Sanctuary
-                    224, // Skip Zelda dialogue
-                    225, // Correct field music
-                    232, // Enable Ravio's freebie
-                ]) {
-                    opening.add_event_flag(flag);
-                }
-            }
             if items.captains_sword.is_skipped() {
                 opening.add_event_flag(26); // Got delivery sword
                 opening.add_event_flag(84); // Enable Seres/Dampe conversation
             }
-            // if items.first_bracelet.is_skipped() {
-            //     opening.add_event_flag(210); // Skip Ravio giving bracelet
-            // }
         }
         Ok(opening)
     })
-    .chain((1..4).map(move |i| Ok(game.demo(i)?.map(truncate_cutscene))));
+        .chain((1..4).map(move |i| Ok(game.demo(i)?.map(truncate_cutscene))));
     let late = iter::once_with(move || {
         let mut midgame = game.demo(4)?.map(truncate_cutscene);
         {
@@ -415,7 +421,7 @@ fn cutscenes<'game, 'settings>(
         }
         Ok(midgame)
     })
-    .chain((5..8).map(move |i| Ok(game.demo(i)?.map(truncate_cutscene))));
+        .chain((5..8).map(move |i| Ok(game.demo(i)?.map(truncate_cutscene))));
     early.chain(late)
 }
 

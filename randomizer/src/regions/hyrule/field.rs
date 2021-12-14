@@ -16,6 +16,7 @@ crate::region! {
             "Rosso": PowerGlove @Chest(IndoorLight 10[7]) :- {|p| p.did_eastern() || p.lorule()},
         ],
         paths: [
+            rentals,
             sanctuary::lobby :- {|p| p.sword() || p.can_lift() || p.can_fire_rod() || p.can_ice_rod() || p.can_bomb() || p.can_lamp() || p.has_boots()},
             lost::woods,
             death::mountain :- {|p| p.can_lift() || p.glitched()},
@@ -34,7 +35,7 @@ crate::region! {
     },
     post_sanc {
         locations: [
-            "Thanks": RingHekiga @Event(IndoorLight/FieldLight_2C_Rental[0xED]),
+            //"Thanks": RingRental @Event(IndoorLight/FieldLight_2C_Rental[0xED]),
             "Ravio (5)": ItemRentalBow @Shop(Ravio(8)),
         ],
         paths: [

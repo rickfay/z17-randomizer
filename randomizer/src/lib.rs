@@ -4,7 +4,7 @@ use std::path::Path;
 
 use crc::{crc32, Hasher32};
 use linked_hash_map::LinkedHashMap;
-use log::info;
+use log::{info, warn};
 use rand::prelude::*;
 use serde::{ser::SerializeMap, Serialize, Serializer};
 
@@ -132,6 +132,10 @@ impl<'settings> Generator<'settings> {
         info!("Using Logic: {}", if self.settings.logic.glitched_logic {"Glitched"} else {"Normal"});
         info!("Using Seed:  {}", self.seed);
         info!("Hash:        {}", self.hash().0);
+        if (self.settings.behavior.portals_open) {
+            warn!("Portals are Open! Seed will not be completable!!!");
+        }
+
         let rng = StdRng::seed_from_u64(self.seed as u64);
         let (randomized, layout) = Randomized::new(rng, &self.settings, exclude(&self.settings));
         let layout = fill::fill(
@@ -557,20 +561,12 @@ fn exclude(settings: &Settings) -> HashSet<Location> {
             "Entrance",
         ));
     }
-    // if !settings.items.first_bracelet.is_shuffled() {
-    //     exclude.insert(Location::new(
-    //         regions::hyrule::field::post_sanc::SUBREGION,
-    //         "Thanks",
-    //     ));
-    // }
+
     exclude.insert(Location::new(
         regions::hyrule::lake::hylia::SUBREGION,
         "Shore",
     ));
-    exclude.insert(Location::new(
-        regions::hyrule::field::post_sanc::SUBREGION,
-        "Thanks",
-    ));
+
     exclude
 }
 

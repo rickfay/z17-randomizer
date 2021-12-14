@@ -216,7 +216,7 @@ impl<'settings> State<'settings> {
     }
 
     pub fn lorule(&self) -> bool {
-        self.can_merge()
+        self.player.lorule || (self.settings.behavior.portals_open && self.can_merge())
     }
 
     pub fn has_seven_portraits(&self) -> bool {

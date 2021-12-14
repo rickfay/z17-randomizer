@@ -17,7 +17,6 @@ crate::region! {
     },
     island {
         paths: [
-            field::rentals,
             dungeons::house::gales :- can_tornado_rod,
         ],
     },

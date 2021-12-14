@@ -63,13 +63,13 @@ impl<'a> Filler<'a> {
                 } else {
                     &mut self.locations
                 }
-                .push(
-                    *self
-                        .weights
-                        .get(location)
-                        .expect("Locations were not initialized properly."),
-                    location.clone(),
-                );
+                    .push(
+                        *self
+                            .weights
+                            .get(location)
+                            .expect("Locations were not initialized properly."),
+                        location.clone(),
+                    );
             }
         }
     }
@@ -134,8 +134,8 @@ impl<'a> Filler<'a> {
 
     /// Create a world layout by filling items in random locations.
     fn fill<F>(mut self, pool: Pool, start: &'static Subregion, f: F) -> Layout
-    where
-        F: Fn(&mut Queue<Item>, &Filler) -> Item,
+        where
+            F: Fn(&mut Queue<Item>, &Filler) -> Item,
     {
         let Pool {
             mut progression,
@@ -226,19 +226,19 @@ fn fill_dungeon(
     pool: Pool,
     start: &'static Subregion,
 ) -> Layout {
-    Filler::new(weights, State::with_all_overworld_items(settings), layout).fill(
-        pool,
-        start,
-        |pool, filler| {
+
+    let filler = Filler::new(weights, State::with_all_overworld_items(settings), layout);
+
+    filler.fill(pool, start, |pool, filler| {
             if filler.locations.len() == 1 && pool.peek() == Some(&Item::KeyBoss) {
                 pool.remove(|item| *item == Item::KeySmall)
             } else {
                 pool.pop()
             }
-            .unwrap_or_else(|| {
-                unreachable!("{:?}", pool)
-                //filler.error(&pool)
-            })
+                .unwrap_or_else(|| {
+                    unreachable!("{:?}", pool)
+                    //filler.error(&pool)
+                })
         },
     )
 }
@@ -250,7 +250,6 @@ fn fill_world(
     pool: Pool,
     start: &'static Subregion,
 ) -> Layout {
-
     let filler = Filler::new(weights, State::new(settings), layout);
 
     filler.fill(pool, start, |pool, filler| {

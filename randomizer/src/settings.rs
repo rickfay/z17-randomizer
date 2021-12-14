@@ -52,7 +52,7 @@ pub struct Logic {
     /// Allows keys to be placed in such a way that the player can softlock.
     pub unsafe_key_placement: bool,
     /// Glitched Logic
-    pub glitched_logic: bool
+    pub glitched_logic: bool,
 }
 
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq, Deserialize, Serialize)]
@@ -69,6 +69,7 @@ pub struct Items {
 pub struct Behavior {
     pub open: bool,
     pub barrier: Barrier,
+    pub portals_open: bool, // Experimental - Does not yet make seeds completable
 }
 
 /// A setting for useless items.
@@ -184,6 +185,7 @@ pub fn open_default() -> Settings {
         behavior: Behavior {
             open: true,
             barrier: Barrier::Start,
+            portals_open: false,
         },
         ..Default::default()
     }
@@ -203,6 +205,8 @@ pub fn plando_settings() -> Settings {
         behavior: Behavior {
             open: true,
             barrier: Barrier::Start,
+            portals_open: false,
+
         },
         ..Default::default()
     }
