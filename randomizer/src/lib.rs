@@ -4,7 +4,7 @@ use std::path::Path;
 
 use crc::{crc32, Hasher32};
 use linked_hash_map::LinkedHashMap;
-use log::{info, warn};
+use log::{debug, info};
 use rand::prelude::*;
 use serde::{ser::SerializeMap, Serialize, Serializer};
 
@@ -129,12 +129,9 @@ impl<'settings> Generator<'settings> {
 
     /// Randomize world and generate files according to settings.
     pub fn randomize(&self) -> Spoiler {
-        info!("Using Logic: {}", if self.settings.logic.glitched_logic {"Glitched"} else {"Normal"});
-        info!("Using Seed:  {}", self.seed);
-        info!("Hash:        {}", self.hash().0);
-        if (self.settings.behavior.portals_open) {
-            warn!("Portals are Open! Seed will not be completable!!!");
-        }
+        info!("Seed:  {}", self.seed);
+        info!("Hash:  {}", self.hash().0);
+        info!("Logic: {}", if self.settings.logic.glitched_logic {"Glitched"} else {"Normal"});
 
         let rng = StdRng::seed_from_u64(self.seed as u64);
         let (randomized, layout) = Randomized::new(rng, &self.settings, exclude(&self.settings));
@@ -232,7 +229,7 @@ impl Layout {
             name,
         } = location;
         self.get_node_mut(node).insert(name, item.normalize());
-        info!(
+        debug!(
             "Placed {} in {}/{}",
             item.normalize().as_str(),
             location.subregion.name(),
@@ -245,7 +242,6 @@ impl Layout {
 pub enum Quest {
     Sanctuary,
     Pendant(Pendant),
-    Lorule,
     Portrait(Portrait),
 }
 

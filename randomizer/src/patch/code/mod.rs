@@ -209,7 +209,7 @@ pub fn create(patcher: &Patcher, settings: &Settings) -> Code {
         let actor = actor_names
             .get(rental)
             .copied()
-            .expect("Could not find actor name.");
+            .expect(&*format!("Could not find actor name for {}", rental.as_str()));
         code.text().define([
             ldr(R1, actor),
             str_(R4, (R0, actor_offset)),

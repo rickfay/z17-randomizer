@@ -1,0 +1,1057 @@
+ID: 0
+ID: 1
+ID: 2	BossDoor
+ID: 3
+ID: 4
+ID: 5
+ID: 6
+ID: 7
+ID: 8	(stage transition?)
+ID: 9
+ID: 10
+ID: 11
+ID: 12	KnuckleMaster
+ID: 13
+ID: 14
+ID: 15
+ID: 16
+ID: 17
+ID: 18
+ID: 19	(mid-boss warp)
+ID: 20
+ID: 21	(room mesh actor?)
+ID: 22
+ID: 23
+ID: 24	(room transition?)
+ID: 25
+ID: 26
+ID: 27
+ID: 28
+ID: 29	(timed crystal switch)
+ID: 30	?
+ID: 31	Amos
+ID: 32	(some weird struture. makes noise)			(todo: learn how to load models)
+ID: 33	(Stalfos)
+ID: 34	(big chest)									(todo: learn how to load models)
+ID: 35	(small chest)
+ID: 36	(small key)
+ID: 37	DoorKey
+ID: 38	Tektight
+ID: 39	?
+ID: 40	Salamander
+ID: 41	?
+ID: 42	?
+ID: 43	(shadow with collision)	
+ID: 44	(block of ice?)								(todo: learn how to load models)
+ID: 45	(shadow with collision)						(todo: learn how to load models)
+ID: 46	(fire rod fire spout)
+ID: 47	DoorHolocaust
+ID: 48	(shadow with collision)						(todo: learn how to load models)
+ID: 49	(magic jar)
+ID: 50	HeartContainer
+ID: 51	(bush)
+ID: 52	(shadow with collision)						(todo: learn how to load models)
+ID: 53	(acts like wackamole pads)					(todo: learn how to load models)
+ID: 54	(acts like wackamole pads) 					(todo: learn how to load models)
+ID: 55	(turtles?)									(todo: learn how to load models)
+ID: 56	?
+ID: 57	?
+ID: 58	(rope?)										(todo: learn how to load models)
+ID: 59	(bumper beetle?)							(todo: learn how to load models)
+ID: 60	?
+ID: 61	?
+ID: 62	?
+ID: 63	(hurts on contact)							(todo: learn how to load models)
+ID: 64	(crashes on load)
+ID: 65	(guay guay shadow)							(todo: learn how to load models)
+ID: 66	(moldorm shadow)							(todo: learn how to load models)
+ID: 67	(shadow with collision)						(todo: learn how to load models)
+ID: 68	(shadow with collision)						(todo: learn how to load models)
+ID: 69	?
+ID: 70	(a couple dust clouds that hurts link?)		(todo: learn how to load models)
+ID: 71	?
+ID: 72	(battle dark link. poofs just after loading in)
+ID: 73	(green soldier. sword & shield)
+ID: 74	(npc? crashes when talked to)				(todo: learn how to load models)
+ID: 75	?
+ID: 76	(horned blue soldier. sword & shield)
+ID: 77	(green soldier. dagger)
+ID: 78	?
+ID: 79	(crash on load)
+ID: 80	(broken bumper? makes boing sound when hit) (todo: learn how to load models)
+ID: 81 
+ID: 82 
+ID: 83	?
+ID: 84 
+ID: 85 
+ID: 86 
+ID: 87 
+ID: 88 
+ID: 89	(pot?)
+ID: 90 
+ID: 91 
+ID: 92 
+ID: 93 
+ID: 94 
+ID: 95 
+ID: 96	(fairy)
+ID: 97
+ID: 98	FallMaster
+ID: 99	HeartPiece
+ID: 100
+ID: 101
+ID: 102
+ID: 103
+ID: 104
+ID: 105
+ID: 106
+ID: 107
+ID: 108
+ID: 109	SwitchStep
+ID: 110
+ID: 111
+ID: 112 SwitchCandle
+ID: 113	(another type of door?)
+ID: 114
+ID: 115
+ID: 116
+ID: 117
+ID: 118
+ID: 119
+ID: 120
+ID: 121
+ID: 122
+ID: 123
+ID: 124
+ID: 125
+ID: 126
+ID: 127
+ID: 128
+ID: 129
+ID: 130
+ID: 131
+ID: 132	Gibdo
+ID: 133
+ID: 134 Medium_Enemy
+ID: 135	Gimos
+ID: 136
+ID: 137	EyeStand
+ID: 138
+ID: 139 zelda
+ID: 140
+ID: 141
+ID: 142
+ID: 143
+ID: 144
+ID: 145
+ID: 146
+ID: 147
+ID: 148
+ID: 149
+ID: 150
+ID: 151
+ID: 152
+ID: 153
+ID: 154
+ID: 155
+ID: 156
+ID: 157
+ID: 158
+ID: 159
+ID: 160
+ID: 161
+ID: 162
+ID: 163
+ID: 164
+ID: 165
+ID: 166	(freestanding rupee)
+ID: 167
+ID: 168
+ID: 169
+ID: 170
+ID: 171
+ID: 172
+ID: 173
+ID: 174
+ID: 175
+ID: 176	?
+ID: 177
+ID: 178
+ID: 179
+ID: 180
+ID: 181
+ID: 182	SwitchPull
+ID: 183
+ID: 184
+ID: 185
+ID: 186
+ID: 187
+ID: 188	(moving geometre)	(geometre determined by NME value?)
+ID: 189
+ID: 190
+ID: 191
+ID: 192
+ID: 193
+ID: 194
+ID: 195	FloorBreakDokuro
+ID: 196
+ID: 197	camera zoom modifiyer
+ID: 198
+ID: 199
+ID: 200
+ID: 201
+ID: 202
+ID: 203
+ID: 204
+ID: 205
+ID: 206
+ID: 207
+ID: 208
+ID: 209
+ID: 210
+ID: 211
+ID: 212
+ID: 213
+ID: 214
+ID: 215
+ID: 216
+ID: 217
+ID: 218
+ID: 219
+ID: 220
+ID: 221
+ID: 222
+ID: 223
+ID: 224
+ID: 225
+ID: 226
+ID: 227
+ID: 228
+ID: 229
+ID: 230
+ID: 231
+ID: 232
+ID: 233
+ID: 234
+ID: 235
+ID: 236
+ID: 237
+ID: 238
+ID: 239
+ID: 240
+ID: 241
+ID: 242
+ID: 243	(popo)
+ID: 244
+ID: 245
+ID: 246
+ID: 247
+ID: 248
+ID: 249
+ID: 250
+ID: 251
+ID: 252
+ID: 253
+ID: 254
+ID: 255
+ID: 256
+ID: 257
+ID: 258
+ID: 259
+ID: 260
+ID: 261
+ID: 262
+ID: 263
+ID: 264
+ID: 265
+ID: 266
+ID: 267
+ID: 268
+ID: 269
+ID: 270
+ID: 271
+ID: 272
+ID: 273
+ID: 274
+ID: 275
+ID: 276
+ID: 277
+ID: 278
+ID: 279
+ID: 280
+ID: 281
+ID: 282
+ID: 283
+ID: 284
+ID: 285
+ID: 286
+ID: 287
+ID: 288
+ID: 289
+ID: 290
+ID: 291
+ID: 292	Chasupa
+ID: 293
+ID: 294
+ID: 295
+ID: 296
+ID: 297
+ID: 298
+ID: 299
+ID: 300 hilda
+ID: 301
+ID: 302
+ID: 303
+ID: 304
+ID: 305
+ID: 306
+ID: 307
+ID: 308
+ID: 309
+ID: 310
+ID: 311
+ID: 312
+ID: 313
+ID: 314
+ID: 315
+ID: 316
+ID: 317
+ID: 318
+ID: 319
+ID: 320
+ID: 321
+ID: 322
+ID: 323
+ID: 324
+ID: 325
+ID: 326
+ID: 327
+ID: 328
+ID: 329
+ID: 330
+ID: 331
+ID: 332
+ID: 333
+ID: 334
+ID: 335
+ID: 336
+ID: 337
+ID: 338
+ID: 339
+ID: 340
+ID: 341
+ID: 342	?
+ID: 343
+ID: 344
+ID: 345
+ID: 346
+ID: 347
+ID: 348
+ID: 349
+ID: 350
+ID: 351 
+ID: 352
+ID: 353
+ID: 354
+ID: 355
+ID: 356
+ID: 357 SwitchTile_dgnDokuro_A
+ID: 358	(octagon tile switch)
+ID: 359	(square tile switch)
+ID: 360
+ID: 361
+ID: 362	?
+ID: 363
+ID: 364
+ID: 365
+ID: 366
+ID: 367	?Ganon barrier effect?
+ID: 368
+ID: 369
+ID: 370
+ID: 371
+ID: 372
+ID: 373
+ID: 374
+ID: 375
+ID: 376
+ID: 377
+ID: 378
+ID: 379
+ID: 380
+ID: 381
+ID: 382
+ID: 383
+ID: 384
+ID: 385
+ID: 386
+ID: 387
+ID: 388
+ID: 389
+ID: 390
+ID: 391
+ID: 392
+ID: 393
+ID: 394
+ID: 395
+ID: 396
+ID: 397
+ID: 398
+ID: 399
+ID: 400
+ID: 401
+ID: 402	UraTail
+ID: 403
+ID: 404
+ID: 405
+ID: 406
+ID: 407
+ID: 408
+ID: 409
+ID: 410
+ID: 411
+ID: 412
+ID: 413
+ID: 414
+ID: 415
+ID: 416
+ID: 417
+ID: 418
+ID: 419
+ID: 420
+ID: 421
+ID: 422
+ID: 423	(painting)
+ID: 424
+ID: 425
+ID: 426
+ID: 427
+ID: 428
+ID: 429
+ID: 430
+ID: 431
+ID: 432
+ID: 433
+ID: 434 ?
+ID: 435
+ID: 436
+ID: 437
+ID: 438
+ID: 439
+ID: 440
+ID: 441
+ID: 442
+ID: 443
+ID: 444
+ID: 445
+ID: 446
+ID: 447
+ID: 448
+ID: 449
+ID: 450
+ID: 451
+ID: 452
+ID: 453
+ID: 454
+ID: 455
+ID: 456
+ID: 457
+ID: 458
+ID: 459
+ID: 460
+ID: 461
+ID: 462
+ID: 463
+ID: 464
+ID: 465
+ID: 466
+ID: 467
+ID: 468
+ID: 469
+ID: 470
+ID: 471
+ID: 472
+ID: 473
+ID: 474
+ID: 475
+ID: 476
+ID: 477
+ID: 478
+ID: 479
+ID: 480
+ID: 481
+ID: 482
+ID: 483
+ID: 484
+ID: 485
+ID: 486
+ID: 487
+ID: 488
+ID: 489
+ID: 490
+ID: 491
+ID: 492
+ID: 493
+ID: 494
+ID: 495
+ID: 496
+ID: 497
+ID: 498
+ID: 499
+ID: 500
+ID: 501
+ID: 502
+ID: 503
+ID: 504
+ID: 505
+ID: 506
+ID: 507
+ID: 508
+ID: 509
+ID: 510
+ID: 511
+ID: 512
+ID: 513
+ID: 514
+ID: 515
+ID: 516
+ID: 517
+ID: 518
+ID: 519
+ID: 520
+ID: 521
+ID: 522
+ID: 523
+ID: 524 ganon darkness pound
+ID: 525
+ID: 526
+ID: 527
+ID: 528
+ID: 529
+ID: 530
+ID: 531
+ID: 532
+ID: 533
+ID: 534
+ID: 535
+ID: 536
+ID: 537
+ID: 538
+ID: 539
+ID: 540
+ID: 541
+ID: 542
+ID: 543
+ID: 544
+ID: 545
+ID: 546
+ID: 547
+ID: 548
+ID: 549
+ID: 550
+ID: 551
+ID: 552
+ID: 553
+ID: 554
+ID: 555
+ID: 556
+ID: 557
+ID: 558
+ID: 559
+ID: 560
+ID: 561
+ID: 562
+ID: 563
+ID: 564	CandleWallDokuro
+ID: 565
+ID: 566
+ID: 567
+ID: 568
+ID: 569
+ID: 570
+ID: 571
+ID: 572
+ID: 573
+ID: 574
+ID: 575
+ID: 576
+ID: 577
+ID: 578
+ID: 579
+ID: 580
+ID: 581
+ID: 582
+ID: 583
+ID: 584
+ID: 585
+ID: 586
+ID: 587
+ID: 588
+ID: 589
+ID: 590
+ID: 591
+ID: 592
+ID: 593
+ID: 594
+ID: 595
+ID: 596
+ID: 597
+ID: 598
+ID: 599
+ID: 600
+ID: 601
+ID: 602
+ID: 603
+ID: 604
+ID: 605
+ID: 606
+ID: 607
+ID: 608
+ID: 609
+ID: 610
+ID: 611
+ID: 612
+ID: 613
+ID: 614
+ID: 615
+ID: 616
+ID: 617
+ID: 618
+ID: 619
+ID: 620
+ID: 621
+ID: 622
+ID: 623
+ID: 624
+ID: 625
+ID: 626
+ID: 627
+ID: 628
+ID: 629
+ID: 630
+ID: 631
+ID: 632
+ID: 633
+ID: 634
+ID: 635
+ID: 636
+ID: 637
+ID: 638
+ID: 639
+ID: 640
+ID: 641
+ID: 642
+ID: 643
+ID: 644
+ID: 645
+ID: 646
+ID: 647
+ID: 648
+ID: 649
+ID: 650
+ID: 651
+ID: 652
+ID: 653
+ID: 654
+ID: 655
+ID: 656
+ID: 657
+ID: 658
+ID: 659
+ID: 660
+ID: 661
+ID: 662
+ID: 663
+ID: 664
+ID: 665
+ID: 666
+ID: 667
+ID: 668
+ID: 669
+ID: 670
+ID: 671
+ID: 672
+ID: 673
+ID: 674
+ID: 675
+ID: 676
+ID: 677
+ID: 678
+ID: 679
+ID: 680
+ID: 681
+ID: 682
+ID: 683
+ID: 684
+ID: 685
+ID: 686
+ID: 687
+ID: 688
+ID: 689
+ID: 690
+ID: 691
+ID: 692
+ID: 693
+ID: 694
+ID: 695
+ID: 696
+ID: 697
+ID: 698
+ID: 699
+ID: 700
+ID: 701
+ID: 702
+ID: 703
+ID: 704
+ID: 705
+ID: 706
+ID: 707
+ID: 708
+ID: 709
+ID: 710
+ID: 711
+ID: 712
+ID: 713
+ID: 714
+ID: 715
+ID: 716
+ID: 717
+ID: 718
+ID: 719
+ID: 720
+ID: 721
+ID: 722
+ID: 723
+ID: 724
+ID: 725
+ID: 726
+ID: 727
+ID: 728
+ID: 729
+ID: 730
+ID: 731
+ID: 732
+ID: 733
+ID: 734
+ID: 735
+ID: 736
+ID: 737
+ID: 738
+ID: 739
+ID: 740
+ID: 741
+ID: 742
+ID: 743
+ID: 744
+ID: 745
+ID: 746
+ID: 747
+ID: 748
+ID: 749
+ID: 750
+ID: 751
+ID: 752
+ID: 753
+ID: 754
+ID: 755
+ID: 756
+ID: 757
+ID: 758
+ID: 759
+ID: 760
+ID: 761
+ID: 762
+ID: 763
+ID: 764
+ID: 765
+ID: 766
+ID: 767
+ID: 768
+ID: 769
+ID: 770
+ID: 771
+ID: 772
+ID: 773
+ID: 774
+ID: 775
+ID: 776
+ID: 777
+ID: 778
+ID: 779
+ID: 780
+ID: 781
+ID: 782
+ID: 783
+ID: 784
+ID: 785
+ID: 786
+ID: 787
+ID: 788
+ID: 789
+ID: 790
+ID: 791
+ID: 792
+ID: 793
+ID: 794
+ID: 795
+ID: 796
+ID: 797
+ID: 798
+ID: 799
+ID: 800
+ID: 801
+ID: 802
+ID: 803
+ID: 804
+ID: 805
+ID: 806
+ID: 807
+ID: 808
+ID: 809
+ID: 810
+ID: 811
+ID: 812
+ID: 813
+ID: 814
+ID: 815
+ID: 816
+ID: 817
+ID: 818
+ID: 819
+ID: 820
+ID: 821
+ID: 822
+ID: 823
+ID: 824
+ID: 825
+ID: 826
+ID: 827
+ID: 828
+ID: 829
+ID: 830
+ID: 831
+ID: 832
+ID: 833
+ID: 834
+ID: 835
+ID: 836
+ID: 837
+ID: 838
+ID: 839
+ID: 840
+ID: 841
+ID: 842
+ID: 843
+ID: 844
+ID: 845
+ID: 846
+ID: 847
+ID: 848
+ID: 849
+ID: 850
+ID: 851
+ID: 852
+ID: 853
+ID: 854
+ID: 855
+ID: 856
+ID: 857
+ID: 858
+ID: 859
+ID: 860
+ID: 861
+ID: 862
+ID: 863
+ID: 864
+ID: 865
+ID: 866
+ID: 867
+ID: 868
+ID: 869
+ID: 870
+ID: 871
+ID: 872
+ID: 873
+ID: 874
+ID: 875
+ID: 876
+ID: 877
+ID: 878
+ID: 879
+ID: 880
+ID: 881
+ID: 882
+ID: 883
+ID: 884
+ID: 885
+ID: 886
+ID: 887
+ID: 888
+ID: 889
+ID: 890
+ID: 891
+ID: 892
+ID: 893
+ID: 894
+ID: 895
+ID: 896
+ID: 897
+ID: 898
+ID: 899
+ID: 900
+ID: 901
+ID: 902
+ID: 903
+ID: 904
+ID: 905
+ID: 906
+ID: 907
+ID: 908
+ID: 909
+ID: 910
+ID: 911
+ID: 912
+ID: 913
+ID: 914
+ID: 915
+ID: 916
+ID: 917
+ID: 918
+ID: 919
+ID: 920
+ID: 921
+ID: 922
+ID: 923
+ID: 924
+ID: 925
+ID: 926
+ID: 927
+ID: 928
+ID: 929
+ID: 930
+ID: 931
+ID: 932
+ID: 933
+ID: 934
+ID: 935
+ID: 936
+ID: 937
+ID: 938
+ID: 939
+ID: 940
+ID: 941
+ID: 942
+ID: 943
+ID: 944
+
+obj
+3
+4
+6
+8
+9
+10
+12
+13
+17
+48
+51
+54
+57
+61
+62
+63
+64
+68
+77
+79
+84
+103
+104
+109
+112
+113
+115
+131
+132
+133
+134
+136
+148
+150
+151
+154
+155
+156
+157
+158
+159
+160
+161
+162
+165
+175
+178
+179
+185
+186
+187
+system
+1
+5
+7
+11
+14
+15
+50
+69
+84
+85
+86
+88
+89
+91
+92
+107
+136
+141
+143
+144
+145
+146
+147
+151
+152
+153
+163
+164
+165
+166
+169
+170
+171
+172
+173
+174
+176
+177
+180
+181
+182
+183
+186
+
+
+
+
+
+
+
+
+
+57obj
+
+
+
+
+

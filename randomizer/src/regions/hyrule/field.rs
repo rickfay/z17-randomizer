@@ -79,12 +79,6 @@ crate::region! {
             "Castle (Indoors)": RupeeB @Chest(IndoorLight 12[48]),
             "Castle Balcony": RupeePurple @Chest(18[224]),
         ],
-        paths: [
-            castle_top :- can_merge,
-        ],
-    },
-    castle_top {
-        quest: Lorule,
     },
     sanctuary_cave {
         locations: [

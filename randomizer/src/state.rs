@@ -54,9 +54,9 @@ impl<'settings> State<'settings> {
         self.player != other.player
     }
 
-    pub fn is_barrier_up(&self) -> bool {
-        self.settings.behavior.barrier.is_start() || self.did_eastern()
-    }
+    // pub fn is_barrier_up(&self) -> bool {
+    //     self.settings.behavior.barrier.is_start() || self.did_eastern()
+    // }
 
     fn can_use_items(&self) -> bool {
         self.settings.modifications.y_button_enabled || self.player.lamp
@@ -216,7 +216,7 @@ impl<'settings> State<'settings> {
     }
 
     pub fn lorule(&self) -> bool {
-        self.player.lorule || (self.settings.behavior.portals_open && self.can_merge())
+        self.can_merge()
     }
 
     pub fn has_seven_portraits(&self) -> bool {
@@ -257,7 +257,6 @@ impl<'settings> State<'settings> {
             Quest::Pendant(Pendant::Courage) => self.player.courage = true,
             Quest::Pendant(Pendant::Wisdom) => self.player.wisdom = true,
             Quest::Pendant(Pendant::Power) => self.player.power = true,
-            Quest::Lorule => self.player.lorule = true,
             Quest::Portrait(_) => self.player.portraits += 1,
         }
     }

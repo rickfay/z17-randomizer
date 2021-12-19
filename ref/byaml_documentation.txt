@@ -1,0 +1,90 @@
+objs
+	dictionary[#]
+		CLP	int32	[#]							**unsure.**
+		ID	int32	[#]							**ID of actor to spawn from actor list.**
+		NME	string	[words]						**name of actor instance i guess? not sure if its used at all by game.**
+		SER	int32	[#]							**serialization? seems to always count up from 0 for each dictionary. maybe way to prioritize actors.**
+		TYP	int32	[#]							**unsure. assuming its a way to switch between types of actors? may not work on all actors**
+		UNQ	int32	[#]							**unique number. used to link actors?**
+		
+			ARG									**unsure what any of this does. i assume its arguments**
+				[#]	system.int32	[#]			**off screen respawning (0 is as soon as you leave, 1 is you have to leave two areas away before it respawns)**
+				[#]	system.int32	[#]
+				[#]	system.int32	[#]
+				[#]	system.int32	[#]
+				[#]	system.int32	[#]
+				[#]	system.int32	[#]
+				[#]	system.int32	[#]
+				[#]	system.int32	[#]
+				[#]	system.int32	[#]
+				[#]	system.int32	[#]
+				[#]	system.int32	[#]
+				[#]	system.int32	[#]
+				[#]	system.int32	[#]
+				[#]	system.int32	[#]
+			
+			FLG									**unsure what these do exactly. on testing it controls when to spawn (like diffrent actors depending on story progression)**
+				[#]	system.int32	[#]
+				[#]	system.int32	[#]
+				[#]	system.int32	[#]
+				[#]	system.int32	[#]
+			
+			LNK									**actor linking.**
+				<array>#
+					[#]	system.int32	[#]		**the first one always seems to be the UNQ number of another actor**
+					[#]	system.int32	[#]		 **unsure what the other two are for**
+					[#]	system.int32	[#]
+			
+			RIL									**presumably for the rail system.**
+				<array>#
+					[#]	system.int32	[#]		**first one is the rails UNQ number**
+					[#]	system.int32	[#]		**unsure**
+			
+			SRT									**Scale Rotation Translation. seems to be in X,Z,Y, order**
+				[#]	system.single	[#]
+				[#]	system.single	[#]
+				[#]	system.single	[#]
+				[#]	system.single	[#]
+				[#]	system.single	[#]
+				[#]	system.single	[#]
+				[#]	system.single	[#]
+				[#]	system.single	[#]
+				[#]	system.single	[#]
+
+rails											**im guessing rails are splines?**
+	dictionary[#]
+		[RNG]	boolean	[true/false]			**unsure. something to do with RNG? or RNG as in a circuler RING?**
+		[UNQ]	int32	[#]						**unique number. not sure if actor unq and rail unq are tied or sepperated**
+			
+		ARG
+			[#]	system.int32	[#]				**unsure**
+			[#]	system.int32	[#]
+			[#]	system.int32	[#]
+			[#]	system.int32	[#]
+			[#]	system.int32	[#]
+			[#]	system.int32	[#]
+		
+		PNT										**points for rail?**
+			dictionary
+				ARG								**arguments for rail points?**
+				
+				CTL								**control?**
+					[#]	system.single	[#]		**unsure**
+					[#]	system.single	[#]
+					[#]	system.single	[#]
+					[#]	system.single	[#]
+					[#]	system.single	[#]
+					[#]	system.single	[#]
+				
+				LNK								**linking system for rail points?**
+				
+				SRT								**position of point**
+				
+system											**unsure. seems to work just like objs**
+	dictionary[#]
+		ARG
+		FLG
+		LNK
+		SRT
+	
+					

@@ -1,0 +1,12 @@
+Method
+* Export a ‘simple’ model as an smd (e.g. using SPICA),
+* Import the smd file into blender using Blender Source Tools (or any other tool that can import and export smd files),
+* Make your desired edits (ideally so they’re clearly visible,
+* Export as an smd,
+* Open the resulting smd in a text editor (I used atom),
+* Replace the final “0” on each line with “1 0 1.0” (or similar),
+  * This replaces the final “0” (which is a “links” value) with “links”, “Bone ID”, and “Weight” values.
+  * Apparently, these values are optional, however, this was the key change that made the model visible in both the game and SPICA (although Ohana 3ds Rebirth could render the model without this change).
+* Import this resulting smd into SPICA (fork), correctly name the model “ShieldB”,
+* Save the model as bch v33,
+* Load into the game and test :p

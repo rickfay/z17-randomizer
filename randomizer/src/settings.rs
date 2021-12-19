@@ -69,7 +69,6 @@ pub struct Items {
 pub struct Behavior {
     pub open: bool,
     pub barrier: Barrier,
-    pub portals_open: bool, // Experimental - Does not yet make seeds completable
 }
 
 /// A setting for useless items.
@@ -185,7 +184,6 @@ pub fn open_default() -> Settings {
         behavior: Behavior {
             open: true,
             barrier: Barrier::Start,
-            portals_open: false,
         },
         ..Default::default()
     }
@@ -205,7 +203,6 @@ pub fn plando_settings() -> Settings {
         behavior: Behavior {
             open: true,
             barrier: Barrier::Start,
-            portals_open: false,
 
         },
         ..Default::default()

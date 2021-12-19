@@ -16,5 +16,5 @@ structopt = "0.3.21"
 sys = { path = "../sys" }
 
 [[bin]]
-name = "albw-randomizer"
+name = "z17-randomizer"
 path = "src/main.rs"

@@ -342,7 +342,7 @@ fn cutscenes<'game, 'settings>(
     settings: &'settings Settings,
 ) -> impl Iterator<Item=Result<File<Demo>>> + 'game {
 
-    let Settings { items, behavior, .. } = settings.clone();
+    let Settings { items, .. } = settings.clone();
     let early = iter::once_with(move || {
         let mut opening = game.demo(0)?.map(truncate_cutscene);
         {
@@ -367,6 +367,8 @@ fn cutscenes<'game, 'settings>(
                 315, // Shop open???
                 321, 322, // Skip first Oren cutscenes
                 415, // Skip Yuga capturing Zelda
+                430, // Fix Chamber of Sages Softlock
+                510, // Open Portals, Activate Hyrule Castle Midway
                 522, // Skip Hilda Lorule Blacksmith Text + get Map Swap icon on lower screen
                 524, // Hilda ??? Text
                 525, // Skip Sahasrahla outside Link's House
@@ -386,25 +388,17 @@ fn cutscenes<'game, 'settings>(
                 opening.add_event_flag(flag);
             }
 
-            // Open Portals, Activate Hyrule Castle Midway, screw up Chamber of Sages
-            if behavior.portals_open {
-                opening.add_event_flag(510);
-            }
-
-            // THE BIG GUESSING GAME
-            //
-            // Open Ravio's Shop 233 234
-            // Open Maiamai Cave
-            // Need to find flag to clear Not Interested? text
-            //for x in 232..235 {
-                //opening.add_event_flag(233);
-            //}
+            // if behavior.portals_open {
+            //     opening.add_event_flag(430); // Fixes Chamber of Sages
+            //     opening.add_event_flag(510); // Open Portals, Activate Hyrule Castle Midway
+            // }
 
             if items.captains_sword.is_skipped() {
                 opening.add_event_flag(26); // Got delivery sword
                 opening.add_event_flag(84); // Enable Seres/Dampe conversation
             }
         }
+
         Ok(opening)
     })
         .chain((1..4).map(move |i| Ok(game.demo(i)?.map(truncate_cutscene))));

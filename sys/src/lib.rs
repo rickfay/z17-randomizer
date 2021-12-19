@@ -137,7 +137,7 @@ impl Paths {
 }
 
 fn config_dir() -> Option<PathBuf> {
-    ProjectDirs::from("", "", "albw-randomizer").map(|dirs| dirs.config_dir().into())
+    ProjectDirs::from("", "", "z17-randomizer").map(|dirs| dirs.config_dir().into())
 }
 
 fn standard_preset() -> (&'static str, String) {

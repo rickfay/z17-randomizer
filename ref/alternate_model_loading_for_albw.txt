@@ -1,0 +1,22 @@
+ok it turns out at one point in develpoment
+they were loading model.bch files right from World/Actor
+
+the folder doesnt exsist in the vanilla game
+but the coding to load models from there is still active
+as long as the filename is correct the game will load the .bch from there instead of looking in the areas .szs archive
+
+assuming that there is no drawbacks
+this could cut down on a lot of copy and pasting models and file size inflation
+
+all you need to do is go into a .szs archive
+take and extract a actors .bch file
+name it accourdingly (more on names later)
+then put it in World/Actor/[name].bch
+then you can call the actor with its model from any area
+
+
+
+-----names-----
+finding names is easy for the most part
+usually the name of the mesh is the same name as the file name
+but if it isnt then you may need to dig through the code.bin to find it

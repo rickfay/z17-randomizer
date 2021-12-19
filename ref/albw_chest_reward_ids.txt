@@ -1,0 +1,101 @@
+the first arg controls which item is in the chest
+
+0	nothing
+1	small key
+2	small key
+3	compass
+4	heart container
+5	red rupee
+6	green rupee
+7 	blue rupee
+8	piece of heart
+9	ice rod
+10	sand rod
+11	tornado rod
+12	bombs
+13	fire rod
+14	hookshot
+15	boomerang
+16	hammer
+17	bow
+18	shield
+19	bottle
+20	red potion
+21	blue potion
+22	smooth gem
+23	pendant of power
+24	pendant of wisdom
+25	pendant of courage
+26	lamp
+27	sword
+28	master sword
+29	blazing master sword
+30	gilded master sword
+31	zoras flippers
+32	rented ice rod
+33	rented sand rod
+34	rented tornado rod
+35	rented bombs
+36	rented fire rod
+37	rented hookshot
+38	rented boomerang
+39	rented hammer
+40	rented bow
+41	shield
+42	ravios bracelet
+43	ravios bracelet empowered
+44	bell
+45	gold rupee
+46	silver rupee
+47	power glove
+48	net
+49	titans mitt
+50	maiamai
+51	bee badge
+52	golden bee
+53	hint glasses
+54	scoot fruit
+55	foul fruit
+56	bee
+57	fairy
+58	monster tail
+59	monster guts
+60	monster horn
+61	captains sword
+62	special charm
+63	blue mail
+64	red mail
+65	hylian shield
+66	master ore 1
+67	master ore 2
+68	master ore 3
+69	stamina scroll
+70	pouch
+71	pegasus boots
+72	master ore 4
+73	letter in a bottle
+74	premium milk
+75	purple potion
+76	yellow potion
+77	nice ice rod
+78	nice sand rod
+79	nice tornado rod
+80	nice bombs
+81	nice fire rod
+82	nice hookshot
+83	nice boomerang
+84	nice hammer
+85	nice bow
+86	great spin
+87	milk
+88	super lamp
+89	super net
+90	energy potion
+91	purple rupee
+92	bow of light
+93	triforce of courage
+94	the young woman blew you a heart. how toughtful
+95	osfalas sand rod
+96	golden bee
+97	"japanese text"
+

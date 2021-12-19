@@ -28,12 +28,14 @@ crate::region! {
         ],
         paths: [
             boss_key :- {|p| (p.small_keys(COURSE) > 1 && p.has_ranged_attack()) || (p.glitched() && p.can_tornado_rod())},
-            boss :- {|p| p.can_use_projectile() && (p.has_boss_key(COURSE) || (p.glitched() && p.can_tornado_rod()))},
         ],
     },
     boss_key {
         locations: [
             "(2F) Big Chest": KeyBoss @Chest(2[44]),
+        ],
+        paths: [
+            boss :- {|p| p.can_use_projectile() && (p.has_boss_key(COURSE) || (p.glitched() && p.can_tornado_rod()))},
         ],
     },
     boss {
