@@ -58,9 +58,9 @@ impl<'settings> State<'settings> {
     //     self.settings.behavior.barrier.is_start() || self.did_eastern()
     // }
 
-    fn can_use_items(&self) -> bool {
-        self.settings.modifications.y_button_enabled || self.player.lamp
-    }
+    // fn can_use_items(&self) -> bool {
+    //     self.settings.modifications.y_button_enabled || self.player.lamp
+    // }
 
     pub fn can_damage(&self) -> bool {
         self.sword()
@@ -72,39 +72,39 @@ impl<'settings> State<'settings> {
     }
 
     pub fn can_ice_rod(&self) -> bool {
-        self.can_use_items() && self.player.ice_rod
+        self.player.ice_rod
     }
 
     pub fn can_sand_rod(&self) -> bool {
-        self.can_use_items() && self.player.sand_rod
+        self.player.sand_rod
     }
 
     pub fn can_tornado_rod(&self) -> bool {
-        self.can_use_items() && self.player.tornado_rod
+        self.player.tornado_rod
     }
 
     pub fn can_bomb(&self) -> bool {
-        self.can_use_items() && self.player.bomb
+        self.player.bomb
     }
 
     pub fn can_fire_rod(&self) -> bool {
-        self.can_use_items() && self.player.fire_rod
+        self.player.fire_rod
     }
 
     pub fn can_hookshot(&self) -> bool {
-        self.can_use_items() && self.player.hookshot
+        self.player.hookshot
     }
 
     pub fn can_boomerang(&self) -> bool {
-        self.can_use_items() && self.player.boomerang
+        self.player.boomerang
     }
 
     pub fn can_hammer(&self) -> bool {
-        self.can_use_items() && self.player.hammer
+        self.player.hammer
     }
 
     pub fn can_bow(&self) -> bool {
-        self.can_use_items() && self.player.bow
+        self.player.bow
     }
 
     pub fn can_use_projectile(&self) -> bool {

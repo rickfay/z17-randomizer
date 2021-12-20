@@ -11,7 +11,6 @@ use crate::{regions, Location};
 #[derive(Clone, Debug, Default, Deserialize, Hash, Serialize)]
 #[serde(default, deny_unknown_fields)]
 pub struct Settings {
-    pub modifications: Modifications,
     pub logic: Logic,
     pub items: Items,
     pub behavior: Behavior,
@@ -32,13 +31,6 @@ impl Settings {
             .map(|region| region.contains(location.name()))
             .unwrap_or(false)
     }
-}
-
-/// Modifications to the core game mechanics.
-#[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq, Deserialize, Serialize)]
-#[serde(default, deny_unknown_fields)]
-pub struct Modifications {
-    pub y_button_enabled: bool,
 }
 
 /// Settings to change the randomizer's logic checks.
@@ -172,9 +164,6 @@ impl Hash for World {
 
 pub fn open_default() -> Settings {
     Settings {
-        modifications: Modifications {
-            y_button_enabled: true,
-        },
         items: Items {
             captains_sword: Skippable::Skip,
             borrowed_sword: Progression::Shuffled,
@@ -191,9 +180,6 @@ pub fn open_default() -> Settings {
 
 pub fn plando_settings() -> Settings {
     Settings {
-        modifications: Modifications {
-            y_button_enabled: true,
-        },
         items: Items {
             captains_sword: Skippable::Skip,
             borrowed_sword: Progression::Shuffled,

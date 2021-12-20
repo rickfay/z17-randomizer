@@ -155,9 +155,10 @@ impl Ips {
 
 pub fn create(patcher: &Patcher, settings: &Settings) -> Code {
     let mut code = Code::new(patcher.game.exheader());
-    if settings.modifications.y_button_enabled {
-        code.text().patch(0x47B2C8, [mov(R0, 1)]);
-    }
+
+    // Enable Y Button
+    code.text().patch(0x47B2C8, [mov(R0, 1)]);
+
     // instant text
     code.overwrite(0x17A430, [0xFF]);
     rental_items(&mut code);
