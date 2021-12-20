@@ -23,7 +23,7 @@ crate::region! {
     hotfoot {
         locations: [
             "Hyrule Hotfoot": HeartPiece @Event(FieldLight_HyruleRace[0x14]) :-
-                {|p| p.has_boots() && p.has_master_sword()},
+                {|p| p.has_boots() && p.did_eastern()}, // Present after Irene Trigger
         ],
     },
 }
