@@ -9,7 +9,7 @@ use serde::Serialize;
 use tempfile::tempdir;
 use try_insert_ext::*;
 
-use crate::{Error, Result, Settings};
+use crate::{Error, Result};
 
 use self::code::Code;
 
@@ -165,7 +165,7 @@ impl Patcher {
         Ok(())
     }
 
-    pub fn prepare(mut self, settings: &Settings) -> Result<Patches> {
+    pub fn prepare(mut self) -> Result<Patches> {
         let mut item_actors = HashMap::new();
         for (item, get_item) in self.game.get_item() {
             let name = get_item.actor_name()?;
@@ -181,7 +181,7 @@ impl Patcher {
         self.scene(course::Id::FieldLight, 33)?
             .actors_mut()
             .add(chest)?;
-        scenes::apply(&mut self, settings)?;
+        scenes::apply(&mut self)?;
         let free = self.rentals[8];
         flow::apply(&mut self, free)?;
         {
@@ -211,7 +211,7 @@ impl Patcher {
             kakariko_actors.add(item_actors.get(&merchant[0]).unwrap().clone())?;
             kakariko_actors.add(item_actors.get(&merchant[2]).unwrap().clone())?;
         }
-        let code = code::create(&self, settings);
+        let code = code::create(&self);
         let Self {
             game,
             boot,
@@ -230,7 +230,7 @@ impl Patcher {
                 romfs.add_serialize(stage);
             }
         }
-        for cutscene in cutscenes(&game, settings) {
+        for cutscene in cutscenes(&game) {
             romfs.add(cutscene?);
         }
         Ok(Patches { game, code, romfs })
@@ -339,10 +339,8 @@ impl Files {
 /// Removes extraneous events from all important cutscenes.
 fn cutscenes<'game, 'settings>(
     game: &'game Game,
-    settings: &'settings Settings,
 ) -> impl Iterator<Item=Result<File<Demo>>> + 'game {
 
-    let Settings { items, .. } = settings.clone();
     let early = iter::once_with(move || {
         let mut opening = game.demo(0)?.map(truncate_cutscene);
         {
@@ -351,7 +349,9 @@ fn cutscenes<'game, 'settings>(
                 7, 9, 10, // Skip Gulley in prologue
                 11, // Fix Hyrule lighting, skip Gulley dialogue at Blacksmith
                 20,  // Disable Gulley's callback
+                26, // Skip Blacksmith Package Sword
                 55, // ?
+                84, // Enable Dampe + Seres conversation
                 107, // Spawn enemies
                 110, // Post Sanctuary
                 //131, // Suppress Bow Slot Item gift
@@ -391,18 +391,6 @@ fn cutscenes<'game, 'settings>(
                 964, // Night Mode!
             ]) {
                 opening.add_event_flag(flag);
-            }
-
-            // Looking for: suppress Ravio's Signs
-            // also suppress double Kakariko characters
-            // 235 237
-            //for x in 232..235 {
-                //opening.add_event_flag(235);
-            //}
-
-            if items.captains_sword.is_skipped() {
-                opening.add_event_flag(26); // Got delivery sword
-                opening.add_event_flag(84); // Enable Seres/Dampe conversation
             }
         }
 

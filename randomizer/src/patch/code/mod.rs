@@ -8,7 +8,7 @@ use std::{
 
 use albw::{ExHeader, Item};
 
-use crate::{Result, Settings};
+use crate::{Result};
 
 mod arm;
 
@@ -153,7 +153,7 @@ impl Ips {
     }
 }
 
-pub fn create(patcher: &Patcher, settings: &Settings) -> Code {
+pub fn create(patcher: &Patcher) -> Code {
     let mut code = Code::new(patcher.game.exheader());
 
     // Enable Y Button
@@ -162,7 +162,7 @@ pub fn create(patcher: &Patcher, settings: &Settings) -> Code {
     // instant text
     code.overwrite(0x17A430, [0xFF]);
     rental_items(&mut code);
-    progressive_items(&mut code, settings);
+    progressive_items(&mut code);
     bracelet(&mut code);
     ore_progress(&mut code);
     merchant(&mut code);
@@ -312,16 +312,16 @@ fn rental_items(code: &mut Code) {
     code.patch(0x652E34, [b(setter).eq()]);
 }
 
-fn progressive_items(code: &mut Code, settings: &Settings) {
+fn progressive_items(code: &mut Code) {
     let return_label = 0x2922C4;
-    let first_sword = code.text().define([
+    /*let first_sword = code.text().define([
         ldr(R0, (R0, 0x4C4)),
         cmp(R0, 0),
         mov(R5, 0x3D).eq(),
         mov(R5, 0x1B).ne(),
         b(return_label),
-    ]);
-    let progressive_sword = if settings.items.captains_sword.is_skipped() {
+    ]);*/
+    let progressive_sword = //if settings.items.captains_sword.is_skipped() {
         code.text().define([
             cmp(R5, 0x1B),
             cmp(R5, 0x1C).ne(),
@@ -330,9 +330,9 @@ fn progressive_items(code: &mut Code, settings: &Settings) {
             cmp(R3, 0),
             mov(R3, 1).eq(),
             add(R5, R3, 0x1A),
-            b(return_label),
-        ])
-    } else {
+            b(return_label)
+        ]);
+    /*} else {
         code.text().define([
             cmp(R5, 0x1B),
             cmp(R5, 0x1C).ne(),
@@ -344,7 +344,7 @@ fn progressive_items(code: &mut Code, settings: &Settings) {
             add(R5, R3, 0x1A),
             b(return_label),
         ])
-    };
+    };*/
     let progressive_bracelet = //if settings.items.first_bracelet.is_skipped() {
         code.text().define([
             cmp(R5, 0x2A),

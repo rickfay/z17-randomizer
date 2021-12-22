@@ -15,16 +15,19 @@ pub struct State<'settings> {
 
 impl<'settings> State<'settings> {
     pub fn new(settings: &'settings Settings) -> Self {
-        let sword = if settings.items.captains_sword.is_skipped() {
+
+        let sword = 1; /*if settings.items.captains_sword.is_skipped() {
             1
         } else {
             0
-        };
-        let bracelet = if settings.items.first_bracelet.is_skipped() {
+        };*/
+
+        let bracelet = 1; /*if settings.items.first_bracelet.is_skipped() {
             1
         } else {
             0
-        };
+        };*/
+
         Self {
             settings,
             player: Player {
@@ -192,7 +195,7 @@ impl<'settings> State<'settings> {
     }
 
     pub fn did_sanctuary(&self) -> bool {
-        self.settings.behavior.open || self.player.sanctuary
+        true //self.settings.behavior.open || self.player.sanctuary
     }
 
     pub fn did_eastern(&self) -> bool {

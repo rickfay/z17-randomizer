@@ -134,7 +134,7 @@ impl<'settings> Generator<'settings> {
         info!("Logic: {}", if self.settings.logic.glitched_logic {"Glitched"} else {"Normal"});
 
         let rng = StdRng::seed_from_u64(self.seed as u64);
-        let (randomized, layout) = Randomized::new(rng, &self.settings, exclude(&self.settings));
+        let (randomized, layout) = Randomized::new(rng, exclude(&self.settings));
         let layout = fill::fill(
             &self.settings,
             randomized.locations,
@@ -448,8 +448,8 @@ impl ItemExt for Item {
             Item::ItemRentalIceRod => Item::ItemIceRod,
             Item::ItemRentalSandRod => Item::ItemSandRod,
             Item::ItemRentalTornadeRod => Item::ItemTornadeRod,
-            //Item::ItemRentalBomb => Item::ItemBomb, // I don't want to do Maiamai logic, so lets just give them Nice Bombs!
-            Item::ItemRentalBomb => Item::ItemBombLv2, // I don't want to do Maiamai logic, so lets just give them Nice Bombs!
+            Item::ItemRentalBomb => Item::ItemBomb,
+            //Item::ItemRentalBomb => Item::ItemBombLv2,
             Item::ItemRentalFireRod => Item::ItemFireRod,
             Item::ItemRentalHookShot => Item::ItemHookShot,
             Item::ItemRentalBoomerang => Item::ItemBoomerang,
@@ -471,7 +471,7 @@ struct Randomized {
 }
 
 impl Randomized {
-    fn new<R>(mut rng: R, settings: &Settings, exclude: HashSet<Location>) -> (Self, Layout)
+    fn new<R>(mut rng: R, exclude: HashSet<Location>) -> (Self, Layout)
         where
             R: Rng,
     {
@@ -481,13 +481,15 @@ impl Randomized {
         let mut layout = Layout::default();
         for (location, item) in regions::items() {
             if exclude.contains(&location) {
-                let skipped =
-                    (item == Item::PackageSword && settings.items.captains_sword.is_skipped())
-                        || (item == Item::RingRental && settings.items.first_bracelet.is_skipped()
-                    );
-                if !skipped {
-                    layout.set(location, item);
-                }
+                // let skipped =
+                //     (item == Item::PackageSword && settings.items.captains_sword.is_skipped())
+                //         || (item == Item::RingRental && settings.items.first_bracelet.is_skipped()
+                //     );
+                // if !skipped {
+
+                layout.set(location, item);
+
+                //}
             } else {
                 if item.is_dungeon() {
                     dungeons
@@ -524,7 +526,7 @@ impl<'settings> Spoiler<'settings> {
         let game = Game::load(paths.rom())?;
         let mut patcher = Patcher::new(game)?;
         regions::patch(&mut patcher, &self.layout, self.settings)?;
-        let patches = patcher.prepare(self.settings)?;
+        let patches = patcher.prepare()?;
         if patch {
             patches.dump(paths.output())?;
         }
@@ -540,24 +542,27 @@ impl<'settings> Spoiler<'settings> {
 
 fn exclude(settings: &Settings) -> HashSet<Location> {
     let mut exclude = HashSet::new();
-    if !settings.items.captains_sword.is_shuffled() {
-        exclude.insert(Location::new(
-            regions::hyrule::field::main::SUBREGION,
-            "Delivery",
-        ));
-    }
-    if !settings.items.borrowed_sword.is_shuffled() {
-        exclude.insert(Location::new(
-            regions::hyrule::field::main::SUBREGION,
-            "Dampe",
-        ));
-    }
-    if !settings.items.lamp.is_shuffled() {
-        exclude.insert(Location::new(
-            regions::hyrule::sanctuary::lobby::SUBREGION,
-            "Entrance",
-        ));
-    }
+
+    // if !settings.items.captains_sword.is_shuffled() {
+    //     exclude.insert(Location::new(
+    //         regions::hyrule::field::main::SUBREGION,
+    //         "Delivery",
+    //     ));
+    // }
+
+    // if !settings.items.borrowed_sword.is_shuffled() {
+    //     exclude.insert(Location::new(
+    //         regions::hyrule::field::main::SUBREGION,
+    //         "Dampe",
+    //     ));
+    // }
+
+    // if !settings.items.lamp.is_shuffled() {
+    //     exclude.insert(Location::new(
+    //         regions::hyrule::sanctuary::lobby::SUBREGION,
+    //         "Entrance",
+    //     ));
+    // }
 
     exclude.insert(Location::new(
         regions::hyrule::lake::hylia::SUBREGION,

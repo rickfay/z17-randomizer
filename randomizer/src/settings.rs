@@ -12,8 +12,6 @@ use crate::{regions, Location};
 #[serde(default, deny_unknown_fields)]
 pub struct Settings {
     pub logic: Logic,
-    pub items: Items,
-    pub behavior: Behavior,
     #[serde(skip_serializing_if = "Exclude::is_empty")]
     exclude: Exclude,
 }
@@ -47,22 +45,6 @@ pub struct Logic {
     pub glitched_logic: bool,
     /// If true shuffles the Bracelet, else it'll be in Ravio's Shop
     pub shuffle_bracelet: bool,
-}
-
-#[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq, Deserialize, Serialize)]
-#[serde(default, deny_unknown_fields)]
-pub struct Items {
-    pub captains_sword: Skippable,
-    pub borrowed_sword: Progression,
-    pub lamp: Progression,
-    pub first_bracelet: Skippable,
-}
-
-#[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq, Deserialize, Serialize)]
-#[serde(default, deny_unknown_fields)]
-pub struct Behavior {
-    pub open: bool,
-    pub barrier: Barrier,
 }
 
 /// A setting for useless items.
@@ -166,33 +148,12 @@ impl Hash for World {
 
 pub fn open_default() -> Settings {
     Settings {
-        items: Items {
-            captains_sword: Skippable::Skip,
-            borrowed_sword: Progression::Shuffled,
-            lamp: Progression::Shuffled,
-            first_bracelet: Skippable::Skip,
-        },
-        behavior: Behavior {
-            open: true,
-            barrier: Barrier::Start,
-        },
         ..Default::default()
     }
 }
 
 pub fn plando_settings() -> Settings {
     Settings {
-        items: Items {
-            captains_sword: Skippable::Skip,
-            borrowed_sword: Progression::Shuffled,
-            lamp: Progression::Shuffled,
-            first_bracelet: Skippable::Unchanged,
-        },
-        behavior: Behavior {
-            open: true,
-            barrier: Barrier::Start,
-
-        },
         ..Default::default()
     }
 }

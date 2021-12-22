@@ -3,7 +3,7 @@ crate::region! {
     name: "Hyrule Field",
     main {
         locations: [
-            "Delivery": PackageSword @None() where settings: !settings.items.captains_sword.is_skipped(),
+            //"Delivery": PackageSword @None() where settings: !settings.items.captains_sword.is_skipped(),
             "Dampe": ItemSwordLv1 @Event(FieldLight_13_Sister[0x1D]),
             "Rosso Cave": RupeeR @Chest(CaveLight 6[6]) :- {|p| p.can_hammer() || (p.glitched() && (p.can_boomerang() || p.can_hookshot()))},
             "Sanctuary Pegs": RupeeSilver @Chest(11[89]) :- can_hammer,

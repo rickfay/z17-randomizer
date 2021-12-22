@@ -4,7 +4,7 @@ use albw::{
 };
 
 use super::Patcher;
-use crate::{Result, Settings};
+use crate::Result;
 
 macro_rules! apply {
     ($patcher:expr, $($course:ident $stage:literal {
@@ -53,7 +53,7 @@ macro_rules! action {
     };
 }
 
-pub fn apply(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
+pub fn apply(patcher: &mut Patcher) -> Result<()> {
     apply!(patcher,
         // Lost Woods
         FieldLight 1 {
@@ -146,16 +146,19 @@ pub fn apply(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
             [22].enable(415),
         },
     );
-    if settings.behavior.barrier.is_start() {
-        apply!(patcher,
-            // Hyrule Castle
-            FieldLight 18 {
-                [155].enable(1),
-                [165].active(1),
-                [393].disable(Flag::Event(1)),
-            },
-        );
-    }
+
+    //if settings.behavior.barrier.is_start() {
+
+    apply!(patcher,
+        // Hyrule Castle
+        FieldLight 18 {
+            [155].enable(1),
+            [165].active(1),
+            [393].disable(Flag::Event(1)),
+        },
+    );
+
+    //}
     Ok(())
 }
 
@@ -166,7 +169,7 @@ mod tests {
 
     #[test]
     fn it_works() -> Result<()> {
-        let mut patcher = Patcher::new(test_game()?, 0)?;
-        apply(&mut patcher, &Default::default())
+        let mut patcher = Patcher::new(test_game()?)?;
+        apply(&mut patcher)
     }
 }
