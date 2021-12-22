@@ -36,8 +36,8 @@ pub struct Error {
 
 impl Error {
     fn game<S>(err: S) -> Self
-    where
-        S: Into<Box<dyn StdError + Send + Sync + 'static>>,
+        where
+            S: Into<Box<dyn StdError + Send + Sync + 'static>>,
     {
         Self {
             kind: ErrorKind::Game,
@@ -46,8 +46,8 @@ impl Error {
     }
 
     fn io<S>(err: S) -> Self
-    where
-        S: Into<Box<dyn StdError + Send + Sync + 'static>>,
+        where
+            S: Into<Box<dyn StdError + Send + Sync + 'static>>,
     {
         Self {
             kind: ErrorKind::Io,
@@ -266,15 +266,15 @@ pub enum Portrait {
 pub(crate) type World = LinkedHashMap<&'static str, BTreeMap<&'static str, Item>>;
 
 fn serialize_world<S>(region: &World, ser: S) -> Result<S::Ok, S::Error>
-where
-    S: Serializer,
+    where
+        S: Serializer,
 {
     struct Wrap<'a>(&'a BTreeMap<&'static str, Item>);
 
     impl<'a> Serialize for Wrap<'a> {
         fn serialize<S>(&self, ser: S) -> Result<S::Ok, S::Error>
-        where
-            S: Serializer,
+            where
+                S: Serializer,
         {
             let mut map = ser.serialize_map(Some(self.0.len()))?;
             for (k, v) in self.0 {
@@ -372,7 +372,7 @@ impl Pool {
         } else {
             &mut self.rest
         }
-        .push(weight, item)
+            .push(weight, item)
     }
 
     fn insert_unique(&mut self, weight: u32, item: Item) {
@@ -381,7 +381,7 @@ impl Pool {
         } else {
             &mut self.rest
         }
-        .push(weight, item)
+            .push(weight, item)
     }
 }
 
@@ -472,8 +472,8 @@ struct Randomized {
 
 impl Randomized {
     fn new<R>(mut rng: R, settings: &Settings, exclude: HashSet<Location>) -> (Self, Layout)
-    where
-        R: Rng,
+        where
+            R: Rng,
     {
         let mut world = Pool::default();
         let mut dungeons = HashMap::<_, Pool>::new();
@@ -481,9 +481,10 @@ impl Randomized {
         let mut layout = Layout::default();
         for (location, item) in regions::items() {
             if exclude.contains(&location) {
-                let skipped = (item == Item::PackageSword
-                    && settings.items.captains_sword.is_skipped())
-                    || (item == Item::RingRental && settings.items.first_bracelet.is_skipped());
+                let skipped =
+                    (item == Item::PackageSword && settings.items.captains_sword.is_skipped())
+                        || (item == Item::RingRental && settings.items.first_bracelet.is_skipped()
+                    );
                 if !skipped {
                     layout.set(location, item);
                 }
@@ -595,7 +596,6 @@ fn prompt_until<F>(prompt: &str, until: F, error: &str) -> ::sys::Result<String>
 }
 
 fn create_paths() -> ::sys::Result<Paths> {
-
     let rom = prompt_until(
         "Path to ROM",
         |rom| Game::load(&rom).is_ok(),
@@ -611,7 +611,6 @@ fn create_paths() -> ::sys::Result<Paths> {
 }
 
 pub fn plando() -> Result<(), Error> {
-
     info!("Start the Plando!");
 
     let system = system()?;
