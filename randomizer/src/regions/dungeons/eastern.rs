@@ -40,7 +40,7 @@ crate::region! {
     },
     boss {
         locations: [
-            "(3F) After Cutscene": RingHekiga @Event(East[0x1C]),
+            "(3F) After Cutscene": ItemRentalBow @Event(East[0x1C]),
             "Yuga": HeartContainer @Heart(3[94]),
         ],
         paths: [

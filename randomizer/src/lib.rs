@@ -564,6 +564,13 @@ fn exclude(settings: &Settings) -> HashSet<Location> {
         "Shore",
     ));
 
+    if !settings.logic.shuffle_bracelet {
+        exclude.insert(Location::new(
+            regions::hyrule::field::rentals::SUBREGION,
+            "Ravio (5)",
+        ));
+    }
+
     exclude
 }
 
@@ -800,7 +807,7 @@ pub fn plando() -> Result<(), Error> {
     layout.set(Location::new(regions::hyrule::field::main::SUBREGION, "Blacksmith Cave"), Item::ItemSwordLv1);
     layout.set(Location::new(regions::hyrule::field::main::SUBREGION, "Blacksmith"), Item::ItemSwordLv1);
     layout.set(Location::new(regions::hyrule::field::main::SUBREGION, "Castle Rocks"), Item::RupeeGold);
-    layout.set(Location::new(regions::hyrule::field::post_sanc::SUBREGION, "Thanks"), Item::BadgeBee);
+    //layout.set(Location::new(regions::hyrule::field::post_sanc::SUBREGION, "Thanks"), Item::BadgeBee);
     layout.set(Location::new(regions::hyrule::field::post_eastern::SUBREGION, "Rosso"), Item::RupeeGold);
     layout.set(Location::new(regions::hyrule::field::post_eastern::SUBREGION, "Clean Rocks"), Item::RupeeGold);
     layout.set(Location::new(regions::hyrule::field::post_eastern::SUBREGION, "Irene"), Item::RupeeGold);
@@ -809,7 +816,7 @@ pub fn plando() -> Result<(), Error> {
     layout.set(Location::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (2)"), Item::HeartContainer);
     layout.set(Location::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (3)"), Item::HeartContainer);
     layout.set(Location::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (4)"), Item::HeartContainer);
-    layout.set(Location::new(regions::hyrule::field::post_sanc::SUBREGION, "Ravio (5)"), Item::HeartContainer);
+    layout.set(Location::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (5)"), Item::HeartContainer);
     layout.set(Location::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (6)"), Item::HeartContainer);
     layout.set(Location::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (7)"), Item::HeartContainer);
     layout.set(Location::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (8)"), Item::HeartContainer);

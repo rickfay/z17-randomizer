@@ -354,7 +354,7 @@ fn cutscenes<'game, 'settings>(
                 55, // ?
                 107, // Spawn enemies
                 110, // Post Sanctuary
-                131, // Suppress Bow Slot Item gift
+                //131, // Suppress Bow Slot Item gift
                 210, // Skip Thanks item
                 222, 223, // Skip Hyrule Castle events
                 224, // Skip Zelda dialogue
@@ -362,11 +362,13 @@ fn cutscenes<'game, 'settings>(
                 231, // Skip Hyrule Castle events
                 232, // Enable Ravio's freebie
                 233, // Ravio's Shop fully opened
+                //235, // Suppress Ravio's Signs, Huh? Not Interested? text, but also Freebie =\
                 236, // Enable Stamina bar
                 239, // Ravio Sign Trigger
                 241, // Skip Osfala intro
                 248, // Skip Yuga killing Osfala
                 315, // Shop open???
+                320, // Shady Guy Trigger
                 321, 322, // Skip first Oren cutscenes
                 415, // Skip Yuga capturing Zelda
                 430, // Fix Chamber of Sages Softlock
@@ -390,6 +392,13 @@ fn cutscenes<'game, 'settings>(
             ]) {
                 opening.add_event_flag(flag);
             }
+
+            // Looking for: suppress Ravio's Signs
+            // also suppress double Kakariko characters
+            // 235 237
+            //for x in 232..235 {
+                //opening.add_event_flag(235);
+            //}
 
             if items.captains_sword.is_skipped() {
                 opening.add_event_flag(26); // Got delivery sword

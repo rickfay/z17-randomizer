@@ -45,6 +45,8 @@ pub struct Logic {
     pub unsafe_key_placement: bool,
     /// Glitched Logic
     pub glitched_logic: bool,
+    /// If true shuffles the Bracelet, else it'll be in Ravio's Shop
+    pub shuffle_bracelet: bool,
 }
 
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq, Deserialize, Serialize)]

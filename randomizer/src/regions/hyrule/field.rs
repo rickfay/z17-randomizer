@@ -25,21 +25,11 @@ crate::region! {
             eastern::ruins,
             southern::ruins,
             lake::hylia,
-            post_sanc :- did_sanctuary,
             post_eastern :- did_eastern,
             castle :- has_master_sword,
             lorule::field::main :- lorule,
             lorule::graveyard::field :- lorule,
             lorule::field::ledge :- lorule,
-        ],
-    },
-    post_sanc {
-        locations: [
-            //"Thanks": RingRental @Event(IndoorLight/FieldLight_2C_Rental[0xED]),
-            "Ravio (5)": ItemRentalBow @Shop(Ravio(8)),
-        ],
-        paths: [
-            kakariko::post_sanc,
         ],
     },
     post_eastern {
@@ -60,6 +50,7 @@ crate::region! {
             "Ravio (2)": ItemRentalHookShot @Shop(Ravio(5)),
             "Ravio (3)": ItemRentalTornadeRod @Shop(Ravio(2)),
             "Ravio (4)": ItemRentalBomb @Shop(Ravio(3)),
+            "Ravio (5)": RingHekiga @Shop(Ravio(8)),
             "Ravio (6)": ItemRentalSandRod @Shop(Ravio(1)) :- osfala,
             "Ravio (7)": ItemRentalHammer @Shop(Ravio(7)),
             "Ravio (8)": ItemRentalBoomerang @Shop(Ravio(6)),
