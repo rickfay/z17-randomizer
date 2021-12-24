@@ -9,7 +9,7 @@ use serde::Serialize;
 use tempfile::tempdir;
 use try_insert_ext::*;
 
-use crate::{Error, Result};
+use crate::{Error, Result, Settings};
 
 use self::code::Code;
 
@@ -165,7 +165,7 @@ impl Patcher {
         Ok(())
     }
 
-    pub fn prepare(mut self) -> Result<Patches> {
+    pub fn prepare(mut self, settings: &Settings) -> Result<Patches> {
         let mut item_actors = HashMap::new();
         for (item, get_item) in self.game.get_item() {
             let name = get_item.actor_name()?;
@@ -230,7 +230,7 @@ impl Patcher {
                 romfs.add_serialize(stage);
             }
         }
-        for cutscene in cutscenes(&game) {
+        for cutscene in cutscenes(&game, settings) {
             romfs.add(cutscene?);
         }
         Ok(Patches { game, code, romfs })
@@ -339,8 +339,10 @@ impl Files {
 /// Removes extraneous events from all important cutscenes.
 fn cutscenes<'game, 'settings>(
     game: &'game Game,
+    settings: &'settings Settings,
 ) -> impl Iterator<Item=Result<File<Demo>>> + 'game {
 
+    let Settings { logic, .. } = settings.clone();
     let early = iter::once_with(move || {
         let mut opening = game.demo(0)?.map(truncate_cutscene);
         {
@@ -354,7 +356,6 @@ fn cutscenes<'game, 'settings>(
                 84, // Enable Dampe + Seres conversation
                 107, // Spawn enemies
                 110, // Post Sanctuary
-                //131, // Suppress Bow Slot Item gift
                 210, // Skip Thanks item
                 222, 223, // Skip Hyrule Castle events
                 224, // Skip Zelda dialogue
@@ -373,7 +374,8 @@ fn cutscenes<'game, 'settings>(
                 415, // Skip Yuga capturing Zelda
                 430, // Fix Chamber of Sages Softlock
                 510, // Open Portals, Activate Hyrule Castle Midway
-                522, // Skip Hilda Lorule Blacksmith Text + get Map Swap icon on lower screen
+                522, // Hilda Blacksmith Text + get Map Swap icon on lower screen
+                523, // Hilda Graveyard Text
                 524, // Hilda ??? Text
                 525, // Skip Sahasrahla outside Link's House
                 542, 543, // Skip Bomb-Shop Man dialogue
@@ -389,9 +391,22 @@ fn cutscenes<'game, 'settings>(
                 950, // Maiamai
                 955, // Master Ore UI
                 964, // Night Mode!
+                965, // Suppress Energy Potion
             ]) {
                 opening.add_event_flag(flag);
             }
+
+            if logic.shuffle_bracelet {
+                opening.add_event_flag(131); // Suppress Bow Slot Item gift
+            }
+
+            // for x in 500..700 {
+            //     opening.add_event_flag(x); // Give all paintings and other stuff
+            // }
+            //
+            // for x in 900..1100 {
+            //     opening.add_event_flag(x);
+            // }
         }
 
         Ok(opening)

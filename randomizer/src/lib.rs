@@ -526,7 +526,7 @@ impl<'settings> Spoiler<'settings> {
         let game = Game::load(paths.rom())?;
         let mut patcher = Patcher::new(game)?;
         regions::patch(&mut patcher, &self.layout, self.settings)?;
-        let patches = patcher.prepare()?;
+        let patches = patcher.prepare(self.settings)?;
         if patch {
             patches.dump(paths.output())?;
         }

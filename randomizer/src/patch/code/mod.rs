@@ -504,7 +504,7 @@ const ACTOR_NAME_OFFSETS: [(Item, u32); 29] = [
     (Item::HeartPiece, 0x5D7B94),
 ];
 
-const ACTOR_NAMES: [(Item, &str); 17] = [
+const ACTOR_NAMES: [(Item, &str); 26] = [
     (Item::KeyBoss, "KeyBoss"),
     (Item::Compass, "Compass"),
     (Item::ItemKandelaar, "GtEvKandelaar"),
@@ -522,22 +522,40 @@ const ACTOR_NAMES: [(Item, &str); 17] = [
     (Item::GanbariPowerUp, "PowerUp"),
     (Item::DashBoots, "GtEvBoots"),
     (Item::OreRed, "OreSword"),
+    (Item::ItemIceRodLv2, "GtEvRodIceB"),
+    (Item::ItemSandRodLv2, "GtEvRodSandB"),
+    (Item::ItemTornadeRodLv2, "GtEvTornadoB"),
+    (Item::ItemBombLv2, "BombM"),
+    (Item::ItemFireRodLv2, "GtEvRodFireB"),
+    (Item::ItemHookShotLv2, "GtEvHookshotB"),
+    (Item::ItemBoomerangLv2, "GtEvBoomerangB"),
+    (Item::ItemHammerLv2, "GtEvHammerB"),
+    (Item::ItemBowLv2, "GtEvBowB"),
     //(Item::MilkMatured, "GtEvBottleMedicine"),
 ];
 
-const ITEM_NAME_OFFSETS: [(Item, u32); 14] = [
+const ITEM_NAME_OFFSETS: [(Item, u32); 23] = [
     (Item::ItemBomb, 0x6F9A9A),
+    (Item::ItemBombLv2, 0x6F9A9A),
     (Item::ItemSandRod, 0x6F9AD0),
+    (Item::ItemSandRodLv2, 0x6F9AD0),
     (Item::ItemIceRod, 0x6F9AE2),
+    (Item::ItemIceRodLv2, 0x6F9AE2),
     (Item::ItemTornadeRod, 0x6F9AF3),
+    (Item::ItemTornadeRodLv2, 0x6F9AF3),
     (Item::ItemFireRod, 0x6F9B08),
+    (Item::ItemFireRodLv2, 0x6F9B08),
     (Item::LiverPurple, 0x6F9B55),
     (Item::ItemBottle, 0x6F9B6C),
     (Item::LiverBlue, 0x6F9B94),
     (Item::ItemBoomerang, 0x6F9BA9),
+    (Item::ItemBoomerangLv2, 0x6F9BA9),
     (Item::ItemHammer, 0x6F9CCC),
+    (Item::ItemHammerLv2, 0x6F9CCC),
     (Item::ItemHookShot, 0x6F9CDD),
+    (Item::ItemHookShotLv2, 0x6F9CDD),
     (Item::ItemBow, 0x6F9D08),
+    (Item::ItemBowLv2, 0x6F9D08),
     (Item::LiverYellow, 0x6F9D2F),
     (Item::ItemStoneBeauty, 0x6F9D56),
 ];

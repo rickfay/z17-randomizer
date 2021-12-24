@@ -30,7 +30,7 @@ pub use item::Item;
 pub use language::Language;
 use language::{FlowChart};
 pub use scene::{Scene, Stage};
-//use crate::language::Load;
+use crate::language::Load;
 
 pub type Result<T, E = Error> = ::std::result::Result<T, E>;
 
@@ -103,7 +103,7 @@ pub struct Game {
     romfs: RefCell<RomFs<fs::File>>,
     flow_chart: File<FlowChart>,
     get_item: File<Vec<GetItem>>,
-    //message: File<Load>,
+    message: File<Load>,
 }
 
 impl Game {
@@ -131,17 +131,17 @@ impl Game {
                 .get()
                 .read("World/Byaml/GetItem.byaml")?
                 .try_map(|data| byaml::from_bytes(&data))?;
-            // let message = region_boot
-            //     .get()
-            //     .read("World/Byaml/Message.byaml")?
-            //     .try_map(|data| byaml::from_bytes(&data))?;
+            let message = region_boot
+                .get()
+                .read("World/Byaml/Message.byaml")?
+                .try_map(|data| byaml::from_bytes(&data))?;
             Ok(Self {
                 id,
                 exheader,
                 romfs: RefCell::new(romfs),
                 flow_chart,
                 get_item,
-                //message,
+                message,
             })
         } else {
             Err(Error::new("Invalid ROM ID."))
