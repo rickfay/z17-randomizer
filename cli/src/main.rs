@@ -3,7 +3,7 @@ use std::io::{stdin, stdout, Write};
 use std::path::Path;
 use log::info;
 
-use randomizer::{Seed, Generator};
+use randomizer::{Seed, Generator, plando};
 use simplelog::{LevelFilter, SimpleLogger};
 use structopt::StructOpt;
 use albw::Game;
@@ -67,6 +67,9 @@ fn main() -> randomizer::Result<()> {
         } else {
             Default::default()
         };
+
+
+        //plando()
 
         let seed = opt.seed.unwrap_or_else(rand::random);
         let randomizer = Generator::new(&preset, seed);

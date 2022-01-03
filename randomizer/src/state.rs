@@ -86,8 +86,90 @@ impl<'settings> State<'settings> {
         self.player.tornado_rod
     }
 
+    pub fn can_ledge_boost(&self) -> bool {
+        self.can_fire_rod() || self.nice_bombs()
+    }
+
     pub fn can_bomb(&self) -> bool {
         self.player.bomb
+    }
+
+    pub fn nice_bombs(&self) -> bool {
+        self.can_bomb() && self.can_get_10_maiamai()
+    }
+
+    /*
+        This is used just to determine if we can get Nice Bombs really
+        - Nice Bombs tricks aren't considered as we can't have them yet (also to avoid recursion lol)
+        - Fake Flippers is not considered as we'd need boots and that would already return true
+        - Glitched Logic is assumed
+     */
+    fn can_get_10_maiamai(&self) -> bool {
+
+        // Merge or Boots enable more than 10, easy logic if we have them
+        if self.can_merge() || self.has_boots() {
+            true
+        } else {
+
+            // 2 Maiamai initially available under bushes in Kakariko and Lost Woods
+            let mut maiamai = 2;
+
+            // Power Glove
+            if self.can_lift() {
+                maiamai += 3; // LW, DM West, Kak Rooftop. DM East needs Merge or Boots.
+
+                // Kakariko path to Lost Woods Maiamai
+                if self.can_hammer() || self.can_hookshot() || self.can_lift_big() ||
+                    ((self.can_boomerang() || self.can_hookshot()) && self.can_escape()) {
+                    maiamai += 1;
+                }
+
+                // Rosso's Ore Mine Maiamai (not including for now because it sucks)
+                // if self.can_hookshot() && self.can_fire_rod() {
+                //     maiamai += 1;
+                // }
+            }
+
+            // Titan's Mitt
+            if self.can_lift_big() {
+                maiamai += 2; // Southern Ruins and Moldorm Cave Big Rocks. Others require Merge
+            }
+
+            // Sand Rod
+            if self.can_sand_rod() {
+                maiamai += 1;
+            }
+
+            // Tornado Rod
+            if self.can_tornado_rod() {
+                maiamai += 2;
+
+                // House of Gales Wind Tile
+                if self.can_swim() || (self.can_hookshot() && self.can_ice_rod()) {
+                    maiamai += 1;
+                }
+            }
+
+            // Flippers - Not including Zora's Domain as that needs Merge or Bee Boost
+            if self.can_swim() {
+                maiamai += 6;
+
+                // Southern Ruins bomb cave
+                if self.can_bomb() {
+                    maiamai += 1;
+                }
+            }
+
+            maiamai >= 10
+        }
+    }
+
+    pub fn can_escape(&self) -> bool {
+        self.has_bell() || self.can_bomb() || self.can_fire_rod()
+    }
+
+    pub fn has_bell(&self) -> bool {
+        self.player.bell
     }
 
     pub fn can_fire_rod(&self) -> bool {
@@ -155,7 +237,7 @@ impl<'settings> State<'settings> {
     }
 
     pub fn fake_flippers(&self) -> bool {
-        self.player.flippers || (self.player.boots && (self.can_bomb() || self.can_bomb()))
+        self.player.flippers || (self.player.boots && self.can_ledge_boost())
     }
 
     pub fn can_merge(&self) -> bool {
@@ -276,6 +358,7 @@ pub struct Player {
     boomerang: bool,
     hammer: bool,
     bow: bool,
+    bell: bool,
     bottle: bool,
     smooth_gem: bool,
     lamp: bool,
@@ -347,6 +430,7 @@ impl Player {
             Item::MessageBottle => self.message = true,
             Item::MilkMatured => self.premium_milk = true,
             Item::GanbariPowerUp => self.scroll = true,
+            Item::ItemBell => self.bell = true,
             _ => {}
         }
     }

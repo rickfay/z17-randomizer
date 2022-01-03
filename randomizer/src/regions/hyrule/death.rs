@@ -7,7 +7,7 @@ crate::region! {
             "Blocked Cave": RupeePurple @Chest(CaveLight 3[59]) :- {|p| p.can_merge() && p.can_bomb()},
             "Fairy Cave": LiverPurple @Chest(CaveLight 3[83]) :- {
                 |p| (p.can_merge() && (p.can_bomb() || p.can_hammer()))
-                || (p.glitched() && (p.can_bomb() || ((p.can_merge() || p.can_fire_rod()) && p.can_hammer())))
+                || (p.glitched() && (p.nice_bombs() || (p.can_fire_rod() && (p.can_bomb() || p.can_hammer()))))
             },
         ],
         paths: [

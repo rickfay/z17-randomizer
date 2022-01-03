@@ -399,14 +399,6 @@ fn cutscenes<'game, 'settings>(
             if logic.shuffle_bracelet {
                 opening.add_event_flag(131); // Suppress Bow Slot Item gift
             }
-
-            // for x in 500..700 {
-            //     opening.add_event_flag(x); // Give all paintings and other stuff
-            // }
-            //
-            // for x in 900..1100 {
-            //     opening.add_event_flag(x);
-            // }
         }
 
         Ok(opening)

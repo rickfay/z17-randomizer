@@ -504,15 +504,17 @@ const ACTOR_NAME_OFFSETS: [(Item, u32); 29] = [
     (Item::HeartPiece, 0x5D7B94),
 ];
 
-const ACTOR_NAMES: [(Item, &str); 26] = [
+const ACTOR_NAMES: [(Item, &str); 28] = [
     (Item::KeyBoss, "KeyBoss"),
     (Item::Compass, "Compass"),
     (Item::ItemKandelaar, "GtEvKandelaar"),
+    (Item::ItemKandelaarLv2, "GtEvKandelaar"),
     (Item::ItemMizukaki, "GtEvFin"),
     (Item::RingHekiga, "RingRental"),
     (Item::ItemBell, "GtEvBell"),
     (Item::PowerGlove, "GtEvGloveA"),
     (Item::ItemInsectNet, "GtEvNet"),
+    (Item::ItemInsectNetLv2, "GtEvNet"),
     (Item::BadgeBee, "BadgeBee"),
     (Item::ClothesBlue, "GtEvCloth"),
     (Item::HyruleShield, "GtEvShieldB"),
@@ -560,7 +562,7 @@ const ITEM_NAME_OFFSETS: [(Item, u32); 23] = [
     (Item::ItemStoneBeauty, 0x6F9D56),
 ];
 
-const ITEM_NAMES: [(Item, &str); 23] = [
+const ITEM_NAMES: [(Item, &str); 25] = [
     (Item::HeartContainer, "heartcontioner"),
     (Item::HeartPiece, "heartpiece"),
     (Item::ItemBell, "bell"),
@@ -569,10 +571,12 @@ const ITEM_NAMES: [(Item, &str); 23] = [
     (Item::ClothesBlue, "clothes_blue"),
     (Item::GanbariPowerUp, "ganbari_power_up"),
     (Item::ItemKandelaar, "lantern"),
+    (Item::ItemKandelaarLv2, "lantern"),
     (Item::ItemSwordLv2, "mastersword"),
     (Item::MessageBottle, "messagebottle"),
     (Item::MilkMatured, "milk_matured"),
     (Item::ItemInsectNet, "net"),
+    (Item::ItemInsectNetLv2, "net"),
     (Item::DashBoots, "pegasus"),
     (Item::Pouch, "pouch"),
     (Item::PowerGlove, "powergloves"),

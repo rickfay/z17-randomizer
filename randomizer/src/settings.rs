@@ -154,6 +154,10 @@ pub fn open_default() -> Settings {
 
 pub fn plando_settings() -> Settings {
     Settings {
+        logic: Logic {
+            shuffle_bracelet: false, // False = get Bow Slot Item gift, True = don't
+            ..Default::default()
+        },
         ..Default::default()
     }
 }

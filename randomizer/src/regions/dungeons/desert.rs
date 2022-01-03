@@ -23,7 +23,7 @@ crate::region! {
             "(1F) Big Chest (Behind Wall)": PowerfulGlove @Chest(1[70]) :- {|p| p.small_keys(COURSE) > 0},
         ],
         paths: [
-            floor2 :- {|p| (p.can_lift_big() && p.small_keys(COURSE) > 1) || (p.glitched() && (p.can_fire_rod() || p.can_bomb()))},
+            floor2 :- {|p| (p.can_lift_big() && p.small_keys(COURSE) > 1) || (p.glitched() && p.can_ledge_boost())},
         ],
     },
     floor2 {
@@ -36,7 +36,7 @@ crate::region! {
             "(2F) Red/Blue Switches": KeySmall @Chest(2[462]),
         ],
         paths: [
-            floor2west :- {|p| p.small_keys(COURSE) > 2 || (p.glitched() && (p.can_fire_rod() || p.can_bomb()))},
+            floor2west :- {|p| p.small_keys(COURSE) > 2 || (p.glitched() && p.can_ledge_boost())},
         ],
     },
     floor2west {
@@ -44,7 +44,7 @@ crate::region! {
             "(2F) Leever Room": KeySmall @Chest(2[257]),
         ],
         paths: [
-            floor3 :- {|p| p.small_keys(COURSE) > 3 || (p.glitched() && (p.can_fire_rod() || p.can_bomb()))},
+            floor3 :- {|p| p.small_keys(COURSE) > 3 || (p.glitched() && p.can_ledge_boost())},
         ],
     },
     floor3 {
@@ -53,7 +53,7 @@ crate::region! {
             "(3F) Armos Room": KeySmall @Chest(3[110]),
         ],
         paths: [
-            boss :- {|p| (p.small_keys(COURSE) > 4 && p.has_boss_key(COURSE)) || (p.glitched() && (p.can_fire_rod() || p.can_bomb()))},
+            boss :- {|p| (p.small_keys(COURSE) > 4 && p.has_boss_key(COURSE)) || (p.glitched() && p.can_ledge_boost())},
         ],
     },
     boss {
