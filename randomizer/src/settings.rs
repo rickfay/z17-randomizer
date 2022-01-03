@@ -12,6 +12,7 @@ use crate::{regions, Location};
 #[serde(default, deny_unknown_fields)]
 pub struct Settings {
     pub logic: Logic,
+    pub options: Options,
     #[serde(skip_serializing_if = "Exclude::is_empty")]
     exclude: Exclude,
 }
@@ -37,14 +38,20 @@ impl Settings {
 pub struct Logic {
     /// Disables lamp requirement for dark areas.
     pub dont_require_lamp_for_darkness: bool,
-    /// Requires seller's golden bee for Bee Badge check.
-    pub require_golden_bee_for_sale: bool,
     /// Allows keys to be placed in such a way that the player can softlock.
     pub unsafe_key_placement: bool,
     /// Glitched Logic
     pub glitched_logic: bool,
     /// If true shuffles the Bracelet, else it'll be in Ravio's Shop
     pub shuffle_bracelet: bool,
+}
+
+/// Settings to change the randomizer's logic checks.
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq, Deserialize, Serialize)]
+#[serde(default, deny_unknown_fields)]
+pub struct Options {
+    /// Experimental: Change Hyrule to the nighttime color scheme (until visiting Lorule)
+    pub night_mode: bool,
 }
 
 /// A setting for useless items.

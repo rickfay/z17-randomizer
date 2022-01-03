@@ -342,7 +342,7 @@ fn cutscenes<'game, 'settings>(
     settings: &'settings Settings,
 ) -> impl Iterator<Item=Result<File<Demo>>> + 'game {
 
-    let Settings { logic, .. } = settings.clone();
+    let Settings { logic, options, .. } = settings.clone();
     let early = iter::once_with(move || {
         let mut opening = game.demo(0)?.map(truncate_cutscene);
         {
@@ -390,7 +390,6 @@ fn cutscenes<'game, 'settings>(
                 908, // Monster Horn
                 950, // Maiamai
                 955, // Master Ore UI
-                964, // Night Mode!
                 965, // Suppress Energy Potion
             ]) {
                 opening.add_event_flag(flag);
@@ -398,6 +397,10 @@ fn cutscenes<'game, 'settings>(
 
             if logic.shuffle_bracelet {
                 opening.add_event_flag(131); // Suppress Bow Slot Item gift
+            }
+
+            if options.night_mode {
+                opening.add_event_flag(964); // Night Mode
             }
         }
 
