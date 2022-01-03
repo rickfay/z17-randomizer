@@ -504,7 +504,7 @@ const ACTOR_NAME_OFFSETS: [(Item, u32); 29] = [
     (Item::HeartPiece, 0x5D7B94),
 ];
 
-const ACTOR_NAMES: [(Item, &str); 28] = [
+const ACTOR_NAMES: [(Item, &str); 29] = [
     (Item::KeyBoss, "KeyBoss"),
     (Item::Compass, "Compass"),
     (Item::ItemKandelaar, "GtEvKandelaar"),
@@ -533,7 +533,7 @@ const ACTOR_NAMES: [(Item, &str); 28] = [
     (Item::ItemBoomerangLv2, "GtEvBoomerangB"),
     (Item::ItemHammerLv2, "GtEvHammerB"),
     (Item::ItemBowLv2, "GtEvBowB"),
-    //(Item::MilkMatured, "GtEvBottleMedicine"),
+    (Item::MilkMatured, "GtEvBottleMedicine"), // Red Milk lol
 ];
 
 const ITEM_NAME_OFFSETS: [(Item, u32); 23] = [

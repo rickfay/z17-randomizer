@@ -129,9 +129,9 @@ impl<'settings> Generator<'settings> {
 
     /// Randomize world and generate files according to settings.
     pub fn randomize(&self) -> Spoiler {
-        info!("Seed:  {}", self.seed);
-        info!("Hash:  {}", self.hash().0);
-        info!("Logic: {}", if self.settings.logic.glitched_logic {"Glitched"} else {"Normal"});
+        info!("Seed:   {}", self.seed);
+        info!("Hash:   {}", self.hash().0);
+        info!("Logic:  {}", if self.settings.logic.glitched_logic {"Glitched"} else {"Normal"});
 
         let rng = StdRng::seed_from_u64(self.seed as u64);
         let (randomized, layout) = Randomized::new(rng, exclude(&self.settings));
@@ -532,7 +532,7 @@ impl<'settings> Spoiler<'settings> {
         }
         if spoiler {
             let path = paths.output().join(format!("spoiler {}.yaml", self.seed));
-            info!("Writing spoiler to {}", path.display());
+            info!("Writing spoiler to:  {}", path.display());
             serde_yaml::to_writer(File::create(path)?, &self)
                 .expect("Could not write the spoiler log.");
         }

@@ -1,9 +1,9 @@
 use std::{fs, panic};
 use std::io::{stdin, stdout, Write};
 use std::path::Path;
-use log::info;
+use log::{error, info};
 
-use randomizer::{Seed, Generator, plando};
+use randomizer::{Seed, Generator, plando, Spoiler};
 use simplelog::{LevelFilter, SimpleLogger};
 use structopt::StructOpt;
 use albw::Game;
@@ -58,29 +58,47 @@ fn create_paths() -> ::sys::Result<Paths> {
 fn main() -> randomizer::Result<()> {
     let opt = Opt::from_args();
 
-    panic::catch_unwind(|| {
-        SimpleLogger::init(LevelFilter::Info, Default::default()).expect("Could not initialize logger.");
-        info!("Initializing Z17 Randomizer...");
-        let system = randomizer::system()?;
-        let preset = if let Some(preset) = opt.preset {
-            system.preset(&preset)?
-        } else {
-            Default::default()
-        };
+    SimpleLogger::init(LevelFilter::Info, Default::default()).expect("Could not initialize logger.");
 
+    info!("Initializing Z17 Randomizer...");
 
-        //plando()
+    let system = randomizer::system()?;
+    let preset = if let Some(ref preset) = opt.preset {
+        system.preset(&preset)?
+    } else {
+        Default::default()
+    };
+
+    let max_retries = 50;
+    let mut result = Ok(());
+
+    for x in 0..max_retries {
+
 
         let seed = opt.seed.unwrap_or_else(rand::random);
-        let randomizer = Generator::new(&preset, seed);
-        let spoiler = randomizer.randomize();
 
-        spoiler.patch(
-            system.get_or_create_paths(create_paths)?,
-            !opt.no_patch,
-            !opt.no_spoiler,
-        )
-    }).expect("A fatal error occurred. Please report this bug to the developers.")
+        info!("Attempt #{}", x + 1);
+        info!("Preset: {}", opt.preset.as_ref().unwrap());
+
+        let randomizer = Generator::new(&preset, seed);
+        let spoiler = panic::catch_unwind(|| randomizer.randomize());
+
+        if spoiler.is_ok() {
+            result = spoiler.unwrap().patch(
+                system.get_or_create_paths(create_paths)?,
+                !opt.no_patch,
+                !opt.no_spoiler,
+            );
+            info!("Successfully generated seed :D");
+            break;
+        } else if x >= max_retries - 1 {
+            panic!("Too many retry attempts have failed to generate a successful seed.");
+        } else {
+            info!("Failed to generate completable seed, retrying...\n");
+        }
+    }
+
+    result
 }
 
 // fn main() -> () {

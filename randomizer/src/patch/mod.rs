@@ -303,7 +303,7 @@ impl Patches {
             file.dump(&romfs)?;
         }
         let path = path.as_ref();
-        info!("Copying files to {}", path.display());
+        info!("Copying files to:    {}", path.display());
         fs_extra::copy_items(
             &[moddir],
             path,

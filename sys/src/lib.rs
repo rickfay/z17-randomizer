@@ -6,6 +6,7 @@ use std::{
     path::{Path, PathBuf},
 };
 
+use log::info;
 use directories::ProjectDirs;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
@@ -24,8 +25,8 @@ pub struct Error {
 
 impl Error {
     pub fn new<E>(err: E) -> Self
-    where
-        E: Into<Box<dyn StdError + Send + Sync + 'static>>,
+        where
+            E: Into<Box<dyn StdError + Send + Sync + 'static>>,
     {
         Self { inner: err.into() }
     }
@@ -58,9 +59,9 @@ pub struct System<P> {
 
 impl<P> System<P> {
     pub fn new<I>(presets: I) -> Result<Self>
-    where
-        P: Serialize,
-        I: IntoIterator<Item = (&'static str, P)>,
+        where
+            P: Serialize,
+            I: IntoIterator<Item=(&'static str, P)>,
     {
         let config = config_dir()
             .ok_or_else(|| Error::new("Could not find suitable configuration directory."))?;
@@ -68,12 +69,12 @@ impl<P> System<P> {
             let presets_dir = config.join("presets");
             fs::create_dir_all(&presets_dir)?;
             for (name, preset) in
-                iter::once_with(standard_preset).chain(presets.into_iter().map(|(name, preset)| {
-                    (
-                        name,
-                        toml::to_string_pretty(&preset).expect("Could not create builtin presets."),
-                    )
-                }))
+            iter::once_with(standard_preset).chain(presets.into_iter().map(|(name, preset)| {
+                (
+                    name,
+                    toml::to_string_pretty(&preset).expect("Could not create builtin presets."),
+                )
+            }))
             {
                 fs::write(presets_dir.join(format!("{}.toml", name)), preset)?
             }
@@ -95,13 +96,16 @@ impl<P> System<P> {
     }
 
     pub fn get_or_create_paths<F>(&self, create: F) -> Result<Paths>
-    where
-        F: FnOnce() -> Result<Paths>,
+        where
+            F: FnOnce() -> Result<Paths>,
     {
         let file = self.config.join("Rando.toml");
         if file.exists() {
+            info!("Reading config from: {}", file.to_path_buf().display());
             Ok(toml::from_slice::<Paths>(&fs::read(file)?).map_err(Error::new)?)
         } else {
+            info!("No config found at {}", file.to_path_buf().display());
+            info!("Please enter configuration info:");
             let paths = create()?;
             fs::write(
                 file,
