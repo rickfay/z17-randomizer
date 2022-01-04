@@ -97,6 +97,7 @@ pub enum ErrorKind {
 
 /// Game info, loaded from a ROM
 #[derive(Debug)]
+#[allow(dead_code)]
 pub struct Game {
     id: u64,
     exheader: ExHeader,
