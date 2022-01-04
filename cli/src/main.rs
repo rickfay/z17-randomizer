@@ -63,6 +63,8 @@ fn main() -> randomizer::Result<()> {
     info!("Initializing Z17 Randomizer...");
 
     let system = randomizer::system()?;
+
+    info!("Loading preset...");
     let preset = if let Some(ref preset) = opt.preset {
         system.preset(&preset)?
     } else {
