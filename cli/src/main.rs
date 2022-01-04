@@ -64,7 +64,6 @@ fn main() -> randomizer::Result<()> {
 
     let system = randomizer::system()?;
 
-    info!("Loading preset...");
     let preset = if let Some(ref preset) = opt.preset {
         system.preset(&preset)?
     } else {

@@ -89,8 +89,12 @@ impl<P> System<P> {
     where
         P: DeserializeOwned,
     {
+        let path = self.config.join("presets").join(format!("{}.toml", name));
+
+        info!("Loading preset from: {}\n", path.display());
+
         toml::from_slice(&fs::read(
-            self.config.join("presets").join(format!("{}.toml", name)),
+            path,
         )?)
         .map_err(Error::new)
     }
