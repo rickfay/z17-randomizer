@@ -14,7 +14,7 @@ pub struct Settings {
     pub logic: Logic,
     pub options: Options,
     #[serde(skip_serializing_if = "Exclude::is_empty")]
-    exclude: Exclude,
+    pub exclude: Exclude,
 }
 
 impl Settings {
@@ -43,7 +43,9 @@ pub struct Logic {
     /// Glitched Logic
     pub glitched_logic: bool,
     /// If true shuffles the Bracelet, else it'll be in Ravio's Shop
-    pub shuffle_bracelet: bool,
+    pub start_with_bracelet: bool,
+    /// Excludes Cucco Ranch, both Rupee Rushes, Treacherous Tower, Octoball Derby, and Hyrule Hotfoot
+    pub minigames_excluded: bool,
 }
 
 /// Settings to change the randomizer's logic checks.
@@ -162,7 +164,7 @@ pub fn open_default() -> Settings {
 pub fn plando_settings() -> Settings {
     Settings {
         logic: Logic {
-            shuffle_bracelet: false, // False = get Bow Slot Item gift, True = don't
+            start_with_bracelet: true, // False = get Bow Slot Item gift, True = don't
             ..Default::default()
         },
         ..Default::default()

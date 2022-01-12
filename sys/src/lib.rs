@@ -63,8 +63,10 @@ impl<P> System<P> {
             P: Serialize,
             I: IntoIterator<Item=(&'static str, P)>,
     {
-        let config = config_dir()
-            .ok_or_else(|| Error::new("Could not find suitable configuration directory."))?;
+
+        let config = PathBuf::from("");
+        // let config = config_dir()
+        //     .ok_or_else(|| Error::new("Could not find suitable configuration directory."))?;
         if !config.exists() {
             let presets_dir = config.join("presets");
             fs::create_dir_all(&presets_dir)?;
@@ -103,9 +105,8 @@ impl<P> System<P> {
         where
             F: FnOnce() -> Result<Paths>,
     {
-        let file = self.config.join("Rando.toml");
+        let file = self.config.join("config.toml");
         if file.exists() {
-            info!("Reading config from: {}", file.to_path_buf().display());
             Ok(toml::from_slice::<Paths>(&fs::read(file)?).map_err(Error::new)?)
         } else {
             info!("No config found at {}", file.to_path_buf().display());

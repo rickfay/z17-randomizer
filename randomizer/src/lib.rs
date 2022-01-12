@@ -569,10 +569,43 @@ fn exclude(settings: &Settings) -> HashSet<Location> {
         "Shore",
     ));
 
-    if !settings.logic.shuffle_bracelet {
+    if settings.logic.start_with_bracelet {
         exclude.insert(Location::new(
             regions::hyrule::field::rentals::SUBREGION,
             "Ravio (5)",
+        ));
+    }
+
+    if settings.logic.minigames_excluded {
+
+        exclude.insert(Location::new(
+            regions::hyrule::kakariko::post_sanc::SUBREGION,
+            "Cucco Ranch",
+        ));
+
+        exclude.insert(Location::new(
+            regions::hyrule::field::rupee_rush::SUBREGION,
+            "Rupee Rush",
+        ));
+
+        exclude.insert(Location::new(
+            regions::lorule::field::main::SUBREGION,
+            "Rupee Rush",
+        ));
+
+        exclude.insert(Location::new(
+            regions::lorule::death::tower::SUBREGION,
+            "Treacherous Tower (Intermediate)",
+        ));
+
+        exclude.insert(Location::new(
+            regions::lorule::field::main::SUBREGION,
+            "Octoball Derby",
+        ));
+
+        exclude.insert(Location::new(
+            regions::hyrule::lake::hotfoot::SUBREGION,
+            "Hyrule Hotfoot",
         ));
     }
 
@@ -581,7 +614,7 @@ fn exclude(settings: &Settings) -> HashSet<Location> {
 
 /// Gets the system object for the platform.
 pub fn system() -> sys::Result<System<Settings>> {
-    System::new(array::IntoIter::new([("Open", settings::open_default())]))
+    System::new(array::IntoIter::new([]))
 }
 
 #[cfg(test)]

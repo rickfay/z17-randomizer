@@ -1,12 +1,13 @@
 use std::{fs, panic};
-use std::io::{stdin, stdout, Write};
+use std::io::{stdin, stdout, Read, Write};
 use std::path::Path;
 use log::{error, info};
 
-use randomizer::{Seed, Generator};
+use randomizer::{Seed, Generator, Error, plando, Settings};
 use simplelog::{LevelFilter, SimpleLogger};
 use structopt::StructOpt;
 use albw::Game;
+use randomizer::settings::Logic;
 use sys::Paths;
 
 #[derive(Debug, StructOpt)]
@@ -19,6 +20,25 @@ struct Opt {
     no_patch: bool,
     #[structopt(long)]
     no_spoiler: bool,
+}
+
+fn prompt_until_bool(prompt: &str) -> ::sys::Result<bool>
+{
+    loop {
+        print!("{}: ", prompt);
+        stdout().flush()?;
+        let mut input = String::new();
+        stdin().read_line(&mut input)?;
+        input = input.trim().to_string();
+
+        if "y".eq_ignore_ascii_case(&input) {
+            break Ok(true);
+        } else if "n".eq_ignore_ascii_case(&input) {
+            break Ok(false);
+        } else {
+            eprintln!("Please enter either 'y' or 'n'");
+        }
+    }
 }
 
 fn prompt_until<F>(prompt: &str, until: F, error: &str) -> ::sys::Result<String>
@@ -54,6 +74,48 @@ fn create_paths() -> ::sys::Result<Paths> {
     Ok(Paths::new(rom.into(), output.into()))
 }
 
+fn preset_ui() -> Settings {
+
+    info!("No preset has been specified. Options UI will be used instead.");
+    println!("\nSeed Options\nFor the following questions please answer either 'y' for yes or 'n' for no:");
+
+    let start_with_bracelet = prompt_until_bool(
+        "Start with Ravio's Bracelet?"
+    ).unwrap();
+
+    let glitched_logic = prompt_until_bool(
+        "Use Glitched Logic?"
+    ).unwrap();
+
+    let dont_require_lamp_for_darkness = prompt_until_bool(
+        "Don't require Lamp for dark rooms?"
+    ).unwrap();
+
+    let minigames_excluded = prompt_until_bool(
+        "Exclude all minigames?"
+    ).unwrap();
+
+    println!("Starting seed generation...\n");
+
+    Settings {
+        logic: Logic {
+            dont_require_lamp_for_darkness,
+            //unsafe_key_placement,
+            glitched_logic,
+            start_with_bracelet,
+            minigames_excluded,
+            ..Default::default()
+        },
+        ..Default::default()
+    }
+}
+
+fn pause() {
+    let mut stdout = stdout();
+    stdout.write(b"\nPress Enter to continue...").unwrap();
+    stdout.flush().unwrap();
+    stdin().read(&mut [0]).unwrap();
+}
 
 fn main() -> randomizer::Result<()> {
     let opt = Opt::from_args();
@@ -67,10 +129,12 @@ fn main() -> randomizer::Result<()> {
     let preset = if let Some(ref preset) = opt.preset {
         system.preset(&preset)?
     } else {
-        Default::default()
+        preset_ui()
+        //Default::default()
     };
 
-    //plando()
+    // plando();
+    // Ok(())
 
     let max_retries = 50;
     let mut result = Ok(());
@@ -104,6 +168,8 @@ fn main() -> randomizer::Result<()> {
         Ok(_) => info!("Successfully generated Z17R seed :D"),
         Err(_) => error!("Failed to generate Z17R seed D:"),
     }
+
+    pause();
 
     result
 }

@@ -395,7 +395,7 @@ fn cutscenes<'game, 'settings>(
                 opening.add_event_flag(flag);
             }
 
-            if logic.shuffle_bracelet {
+            if !logic.start_with_bracelet {
                 opening.add_event_flag(131); // Suppress Bow Slot Item gift
             }
 
