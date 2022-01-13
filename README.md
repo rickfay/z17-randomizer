@@ -6,7 +6,7 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
 
 - Highlights:
   - Portals to Lorule are open from game start
-  - Ravio's Bracelet given out immediately (option)
+  - Start with Ravio's Bracelet option
   - Glitched Logic option
   - Ravio's Shop is fully open from game start
   - Maiamai are available to be collected from game start (still need bombs to turn them in)
@@ -25,8 +25,8 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
   - Maiamai Map available by default
   - Map Swap icon available by default
   - Master Ore UI element present by default
-  - Experimental option "Night Mode" changes Hyrule's lighting until you visit Lorule
   - Remove Standard Mode option
+  - Experimental option "Night Mode" changes Hyrule's lighting until you visit Lorule. There are some performance issues on console, so not advised for races.
 
 ## Setup
 
@@ -53,6 +53,75 @@ There are two ways you can run Z17R:
    - Examples:
      - `$ ./z17-randomizer.exe --preset racerman`
      - `$ ./z17-randomizer.exe --seed 4057320268`
+
+## Game Options
+
+`start_with_bracelet`
+- Causes Ravio to give out the Bracelet at the start of the game. More specifically, the Bracelet will be placed in the Bow Item's Slot in the shop, and Ravio will give you the item on that slot.
+
+`glitched_logic`
+- Enables items to be placed in locations that may require glitches/tricks to obtain. A complete list of potentially required glitches/tricks is below.
+
+`dont_require_lamp_for_darkness`
+- If enabled, the logic may place required items behind completely dark rooms without giving you the Lamp first.
+
+`minigames_excluded`
+- Excludes Cucco Rush, Hyrule Hotfoot, Treacherous Tower, Octoball Derby, and both Rupee Rush minigames from having progression.
+
+`unsafe_key_placement`
+- Randomizes the keys in an unsafe way that assumes the player will make the best possible routing choices. It's recommended that you don't enable this unless you know what you're doing.
+
+## Glitched Logic Breakdown
+
+The following tricks may potentially be required in a Glitched Logic seed:
+
+- Rosso Cave with Boomerang or Hookshot (not TRod + Shield)
+- Blacksmith Cave with Fire Rod or Nice Bombs
+- Reach Death Mountain with Power Glove Skip
+- Eastern Ruins Pegs with Boomerang or Hookshot or Tornado Rod (no Sand Rod)
+- Flipperless Message in a Bottle with Fire Rod or Nice Bombs
+- Access HoG with Fake Flippers or Ice Rod + Hookshot
+- Lost Woods Chest with Boomerang or Hookshot and a means of escape (FRod, Bombs, or Bell. No Crow)
+- Reverse Sanctuary (door is open after opening Gravestone, just need damage source to defeat Poes)
+- Flippers Treasure Dungeon tricks. Need either Titan's Mitt or Ice Rod to enter. Then either just Hookshot + Flippers OR simply the Nice Bombs. Nice Ice Rod and Great Spin not considered.
+- Zora's Waterfall Cave with the Crow Boost (FRod not needed)
+- Pegasus Boots Dungeon with just Master Sword, Bombs, or Boomerang (Nice Bow and Nice Ice Rod not considered)
+- Access Turtle Rock with Fake Flippers
+- Misery Mire HP without Sand Rod. With just Bombs (regular works with Vulture boosting) or FRod + Boots
+
+- Eastern Palace
+  - Left entrance chest with a thrown Pot
+  - 4 Switches Room with thrown Pots
+  - TRod Armos Boost to get to Boss Key or Boss room without the appropriate key
+- House of Gales
+  - 2F Fire Ring Key using HoG Skip Skip to do 2F backwards if key missing (incredibly specific, unlikely)
+  - Skip Skip Skip to reach 3F without keys
+- Thieves' Hideout
+  - Flipperless Thieves using TRod + a way to hit the switch (IRod or Bombs, no sword beams)
+- Ice Ruins
+  - Scroll Skip with Boots
+- Desert Palace
+  - Reverse DP means keys can show up anywhere in the dungeon if you have FRod or Nice Bombs
+- Lorule Castle
+  - Lamp Trial doesn't need the Lamp
+
+Mergeless Tricks if `start_with_bracelet` is false:
+- Behind Blacksmith with Fire Rod or Nice Bombs
+- Death Mountain climb
+- DM Fairy Cave with Fire Rod or Nice Bombs
+- Bouldering Guy with TRod + Boots
+- Access Eastern Ruins with just Power Glove
+- Eastern Ruins Merge Chest with TRod, FRod, or Nice Bombs
+- Lost Woods Alcove with Boomerang or Hookshot and a means of escape (FRod, Bombs, or Bell. No Crow)
+- House of Gales TRod onto moving block in 1F East Room (if key logic allows access)
+- Mergeless Hera with Bombs and Sword to bypass lobby. TRod needed for floors higher than 3F
+
+
+Fake Flippers requires Pegasus Boots and either Fire Rod or Nice Bombs
+
+Some notes about Nice Bombs:
+  - Glitched logic *DOES* guarantee at least 10 Maiamai will be available for any checks requiring Nice Bombs
+  - If you spend your Maiamai on anything other than Nice Bombs, you may potentially doom your seed. Regular Bomb boosts may save you, but if progression is on Southern Ruins TDungeon with Nice Bombs there's no salvaging it. YOU HAVE BEEN WARNED.
 
 ## Known Issues
 
