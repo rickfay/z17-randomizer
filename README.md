@@ -88,7 +88,6 @@ The following tricks may potentially be required in a Glitched Logic seed:
 - Pegasus Boots Dungeon with just Master Sword, Bombs, or Boomerang (Nice Bow and Nice Ice Rod not considered)
 - Access Turtle Rock with Fake Flippers
 - Misery Mire HP without Sand Rod. With just Bombs (regular works with Vulture boosting) or FRod + Boots
-
 - Eastern Palace
   - Left entrance chest with a thrown Pot
   - 4 Switches Room with thrown Pots
@@ -105,6 +104,7 @@ The following tricks may potentially be required in a Glitched Logic seed:
 - Lorule Castle
   - Lamp Trial doesn't need the Lamp
 
+  
 Mergeless Tricks if `start_with_bracelet` is false:
 - Behind Blacksmith with Fire Rod or Nice Bombs
 - Death Mountain climb
@@ -118,6 +118,7 @@ Mergeless Tricks if `start_with_bracelet` is false:
 
 
 Fake Flippers requires Pegasus Boots and either Fire Rod or Nice Bombs
+
 
 Some notes about Nice Bombs:
   - Glitched logic *DOES* guarantee at least 10 Maiamai will be available for any checks requiring Nice Bombs
