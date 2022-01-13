@@ -151,6 +151,11 @@ Time and technical knowledge (or lack thereof) are the main barriers to future p
 
 ![future.png](docs/future.png)
 
+## Special Thanks
+
+- Tocapa for building the ALBWR foundation this hack built from
+- My Beta Testers: Br00ty, j_im, flora, and Herreteman
+
 ## License
 
 This program is licensed under the GNU General Public License v2.0.
