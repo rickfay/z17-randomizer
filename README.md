@@ -17,7 +17,7 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
   - All Hilda Text cutscenes have been skipped (except Dark Maze)
   - Skip Sahasrahla outside Link's House
   - Skip Ravio's Sign Trigger cutscene
-  - Shady Guy Trigger is active from game start
+  - Shady Guy and Merchant's right-side item are available from game start
   - Hyrule Hotfoot open from game start
   - Monster Guts/Horn/Tail initial pickup scenes skipped
   - Energy Potion initial pickup scene skipped
@@ -122,10 +122,11 @@ Fake Flippers requires Pegasus Boots and either Fire Rod or Nice Bombs
 
 Some notes about Nice Bombs:
   - Glitched logic *DOES* guarantee at least 10 Maiamai will be available for any checks requiring Nice Bombs
-  - If you spend your Maiamai on anything other than Nice Bombs, you may potentially doom your seed. Regular Bomb boosts may save you, but if progression is on Southern Ruins TDungeon with Nice Bombs there's no salvaging it. YOU HAVE BEEN WARNED.
+  - If you spend your Maiamai on anything other than Nice Bombs, you may potentially doom your seed. Regular Bomb boosts may save you, but if progression is on Southern Ruins Treasure Dungeon with Nice Bombs there's no salvaging it. YOU HAVE BEEN WARNED.
 
 ## Known Issues
 
+- Bow of Light crashes the game if used outside the final boss arena (on console)
 - After Ravio gives out the Bracelet from the Bow Item Slot in his shop, the model remains until you leave and reenter.
 - Despite Maiamais being available for collection from game start, the Maiamai cave itself is still sealed shut and thus Bombs are still required to turn in any Maiamai
 - Opening the Portals early has some side effects:
