@@ -35,21 +35,21 @@ crate::region! {
     post_eastern {
         locations: [
             "Clean Rocks": RupeePurple @Chest(IndoorLight 10[25]) :- can_lift,
-            "Irene": ItemBell @Event[
+            "Irene": ItemRentalBomb @Event[
                 FieldLight_11_Maple[0x06],
                 FieldLight_12_Maple[0x08],
                 FieldLight_12_Maple[0x26],
                 FieldLight_2D_Maple[0x07],
             ],
-            "Woods": Pouch @Event(FieldLight_2A_BlacksmithWife[0x15]),
+            "Woods": ItemRentalTornadeRod @Event(FieldLight_2A_BlacksmithWife[0x15]),
         ],
     },
     rentals {
         locations: [
             "Ravio (1)": ItemRentalIceRod @Shop(Ravio(0)),
             "Ravio (2)": ItemRentalHookShot @Shop(Ravio(5)),
-            "Ravio (3)": ItemRentalTornadeRod @Shop(Ravio(2)),
-            "Ravio (4)": ItemRentalBomb @Shop(Ravio(3)),
+            "Ravio (3)": Pouch @Shop(Ravio(2)),
+            "Ravio (4)": ItemBell @Shop(Ravio(3)),
             "Ravio (5)": RingHekiga @Shop(Ravio(8)),
             "Ravio (6)": ItemRentalSandRod @Shop(Ravio(1)) :- osfala,
             "Ravio (7)": ItemRentalHammer @Shop(Ravio(7)),

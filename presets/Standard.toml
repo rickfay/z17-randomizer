@@ -2,6 +2,10 @@
 [logic]
 ## Ravio will give out the Bracelet at the very start of the game
 start_with_bracelet = true
+## The Bell will be placed in Ravio's Shop
+bell_in_shop = false
+## The Pouch will be placed in Ravio's Shop
+pouch_in_shop = false
 ## Place items using logic that potentially requires glitches to complete
 glitched_logic = false
 ## Disables lamp requirement for dark areas.
@@ -11,6 +15,10 @@ minigames_excluded = false
 ## Allows keys to be placed in an order that can lead to softlocks.
 unsafe_key_placement = false
 
+[options]
+## Experimental option to change Hyrule's lighting until you visit Lorule for the first time.
+## Causes performance issues on console.
+night_mode = true
 
 ## Excludes certain locations from having progression items.
 [exclude]

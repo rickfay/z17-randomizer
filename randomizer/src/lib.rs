@@ -569,6 +569,20 @@ fn exclude(settings: &Settings) -> HashSet<Location> {
         "Shore",
     ));
 
+    if settings.logic.pouch_in_shop {
+        exclude.insert(Location::new(
+            regions::hyrule::field::rentals::SUBREGION,
+            "Ravio (3)",
+        ));
+    }
+
+    if settings.logic.bell_in_shop {
+        exclude.insert(Location::new(
+            regions::hyrule::field::rentals::SUBREGION,
+            "Ravio (4)",
+        ));
+    }
+
     if settings.logic.start_with_bracelet {
         exclude.insert(Location::new(
             regions::hyrule::field::rentals::SUBREGION,

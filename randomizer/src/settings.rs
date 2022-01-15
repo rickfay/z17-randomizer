@@ -44,6 +44,10 @@ pub struct Logic {
     pub glitched_logic: bool,
     /// If true shuffles the Bracelet, else it'll be in Ravio's Shop
     pub start_with_bracelet: bool,
+    /// Places the Bell in Ravio's Shop
+    pub bell_in_shop: bool,
+    /// Places the Pouch in Ravio's Shop
+    pub pouch_in_shop: bool,
     /// Excludes Cucco Ranch, both Rupee Rushes, Treacherous Tower, Octoball Derby, and Hyrule Hotfoot
     pub minigames_excluded: bool,
 }

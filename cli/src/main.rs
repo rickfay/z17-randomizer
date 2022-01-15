@@ -83,6 +83,14 @@ fn preset_ui() -> Settings {
         "Start with Ravio's Bracelet?"
     ).unwrap();
 
+    let bell_in_shop = prompt_until_bool(
+        "Place Bell in Ravio's Shop?"
+    ).unwrap();
+
+    let pouch_in_shop = prompt_until_bool(
+        "Place Pouch in Ravio's Shop?"
+    ).unwrap();
+
     let glitched_logic = prompt_until_bool(
         "Use Glitched Logic?"
     ).unwrap();
@@ -100,6 +108,8 @@ fn preset_ui() -> Settings {
     Settings {
         logic: Logic {
             dont_require_lamp_for_darkness,
+            bell_in_shop,
+            pouch_in_shop,
             //unsafe_key_placement,
             glitched_logic,
             start_with_bracelet,
