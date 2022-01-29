@@ -6,14 +6,18 @@ start_with_bracelet = true
 bell_in_shop = false
 ## The Pouch will be placed in Ravio's Shop
 pouch_in_shop = false
+## The Pegasus Boots will be placed in Ravio's Shop
+boots_in_shop = false
 ## Place items using logic that potentially requires glitches to complete
 glitched_logic = false
 ## Disables lamp requirement for dark areas.
 dont_require_lamp_for_darkness = false
 ## Exclude all minigames (Cucco Ranch, both Rupee Rushes, Hyrule Hotfoot, Treacherous Tower, and Octoball Derby)
 minigames_excluded = false
-## Allows keys to be placed in an order that can lead to softlocks.
-unsafe_key_placement = false
+## Swordless Mode. Removes all Swords from the game. You will need the Net to play Tennis with Yuganon.
+swordless_mode = false
+## Unsafe Key placement has been deprecated. Please remove it from your presets as it is no longer supported.
+#unsafe_key_placement = false
 
 [options]
 ## Experimental option to change Hyrule's lighting until you visit Lorule for the first time.

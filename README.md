@@ -2,7 +2,22 @@
 
 A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [original ALBW Randomizer](https://gitlab.com/marsolk/albw-randomizer).
 
-## New Features
+## Updates
+
+#### Version 0.0.2:
+
+- Highlights:
+  - Introduction of Swordless Mode Option. I regret this already :^)
+  - New options to place Bell, Pouch, and/or Pegasus Boots in Ravio's Shop
+  - Expanded Glitched Logic to include more tricks in all dungeons
+  - UI updates should provide more useful feedback when seeds fail to generate
+
+- Additional Changes:
+  - Smooth Gem is now locked to its original location in Kakariko (temporary fix for related bug)
+  - Fix logic bug that could place Bracelet on Fire Cave Pillar in a Glitched No Bracelet seed
+  - Removed `unsafe_key_logic` option. Please remove this from your presets.
+
+#### Version 0.0.1:
 
 - Highlights:
   - Portals to Lorule are open from game start
@@ -43,6 +58,7 @@ Download: [Latest Stable Release](https://github.com/rickfay/z17-randomizer/rele
 There are two ways you can run Z17R:
 
 1. Double click `z17-randomizer.exe` to start the randomizer with basic settings. The randomizer will provide a simple interface for setting game options, after which it will attempt to generate a completable seed.
+   - The randomizer may make multiple attempts to generate a completable seed. This is normal, and will happen automatically.
 
 ![cli-example.png](docs/cli-example.png)
 
@@ -54,27 +70,57 @@ There are two ways you can run Z17R:
      - `$ ./z17-randomizer.exe --preset racerman`
      - `$ ./z17-randomizer.exe --seed 4057320268`
 
+## Installing Seeds
+
+After you've generated your seed in the above section, you'll need to install it in order to actually play the randomizer.
+
+The randomizer will generate a folder called `00040000000EC300`. This folder is the patch you need to install to play your seed.
+
+For 3DS hardware:
+- Copy `00040000000EC300` to `/luma/titles` on your SD card.
+- Ensure that `Enable game patching` is selected in Luma's config (this can be opened by holding `Select` when powering on the console).
+
+For Citra (emulator):
+- Copy `00040000000EC300` to `<Citra folder>/load/mods/`. You may need to create these folders.
+- You can find the Citra folder by selecting `File > Open Citra folder...` in Citra.
+
+
 ## Game Options
 
 `start_with_bracelet`
 - Causes Ravio to give out the Bracelet at the start of the game. More specifically, the Bracelet will be placed in the Bow Item's Slot in the shop, and Ravio will give you the item on that slot.
 
+`bell_in_shop`
+- If enabled, guarantees the Bell will be placed in Ravio's Shop.
+
+`pouch_in_shop`
+- If enabled, guarantees the Pouch will be placed in Ravio's Shop.
+
 `glitched_logic`
 - Enables items to be placed in locations that may require glitches/tricks to obtain. A complete list of potentially required glitches/tricks is below.
-
-`dont_require_lamp_for_darkness`
-- If enabled, the logic may place required items behind completely dark rooms without giving you the Lamp first.
 
 `minigames_excluded`
 - Excludes Cucco Rush, Hyrule Hotfoot, Treacherous Tower, Octoball Derby, and both Rupee Rush minigames from having progression.
 
-`unsafe_key_placement`
-- Randomizes the keys in an unsafe way that assumes the player will make the best possible routing choices. It's recommended that you don't enable this unless you know what you're doing.
+`swordless_mode`
+- Generates a seed with no Swords. Things you should know about Swordless:
+  - The 2 Chests in Hyrule Castle are unobtainable, but they are excluded from containing progression.
+  - You will need the [Net to play Tennis with Yuganon](https://www.twitch.tv/videos/1265170513). Good luck finding it!
+
+#### The following options are only available when creating a seed using a preset:
+
+`boots_in_shop`
+- If enabled, guarantees the Pegasus Boots will be placed in Ravio's Shop.
+
+`dont_require_lamp_for_darkness`
+- If enabled, the logic may place required items behind completely dark rooms without giving you the Lamp first.
+
 
 ## Glitched Logic Breakdown
 
 The following tricks may potentially be required in a Glitched Logic seed:
 
+- Lamp, Net, and Pegasus Boots are considered damage sources
 - Rosso Cave with Boomerang or Hookshot (not TRod + Shield)
 - Blacksmith Cave with Fire Rod or Nice Bombs
 - Reach Death Mountain with Power Glove Skip
@@ -91,16 +137,28 @@ The following tricks may potentially be required in a Glitched Logic seed:
 - Eastern Palace
   - Left entrance chest with a thrown Pot
   - 4 Switches Room with thrown Pots
+  - Bombs to activate switch opening path to Boss Door early
   - TRod Armos Boost to get to Boss Key or Boss room without the appropriate key
 - House of Gales
   - 2F Fire Ring Key using HoG Skip Skip to do 2F backwards if key missing (incredibly specific, unlikely)
   - Skip Skip Skip to reach 3F without keys
+- Tower of Hera
+  - Bomb Rods can be used to climb the tower without any keys
+- Swamp Palace
+  - Early access to 1F SW/SE rooms with Ice Rod to raise water level
+  - Miniboss Skips with Ice Rod/Tornado Rod or Boots
+  - Early Big Chest with Ice Rod or Boots
+  - Big Key Skip with Ice Rod and Tornado Rod
 - Thieves' Hideout
   - Flipperless Thieves using TRod + a way to hit the switch (IRod or Bombs, no sword beams)
+    - Softlock chest behind wall NOT in logic unless you can also get Bombs or Fire Rod (but really, bring a Scoot Fruit)
+    - Big Key chest accessible, Boots made available
 - Ice Ruins
-  - Scroll Skip with Boots
+  - All dungeon checks accessible without keys if you have Boots. The ones behind B1 locked doors also require Tornado Rod.
 - Desert Palace
-  - Reverse DP means keys can show up anywhere in the dungeon if you have FRod or Nice Bombs
+  - Reverse DP means keys can show up anywhere in the dungeon if you have Fire Rod or Nice Bombs
+- Turtle Rock
+  - Big Key Skip using a Bomb Rod
 - Lorule Castle
   - Lamp Trial doesn't need the Lamp
 
@@ -122,6 +180,7 @@ Fake Flippers requires Pegasus Boots and either Fire Rod or Nice Bombs
 
 Some notes about Nice Bombs:
   - Glitched logic *DOES* guarantee at least 10 Maiamai will be available for any checks requiring Nice Bombs
+  - The logic guarantees Nice Bombs are obtainable for any Bomb Rods or Lemon Boosts
   - If you spend your Maiamai on anything other than Nice Bombs, you may potentially doom your seed. Regular Bomb boosts may save you, but if progression is on Southern Ruins Treasure Dungeon with Nice Bombs there's no salvaging it. YOU HAVE BEEN WARNED.
 
 ## Known Issues

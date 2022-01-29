@@ -129,12 +129,13 @@ impl<'settings> Generator<'settings> {
 
     /// Randomize world and generate files according to settings.
     pub fn randomize(&self) -> Spoiler {
-        info!("Seed:   {}", self.seed);
-        info!("Hash:   {}", self.hash().0);
-        info!("Logic:  {}", if self.settings.logic.glitched_logic {"Glitched"} else {"Normal"});
+        info!("Seed:    {}", self.seed);
+        info!("Hash:    {}", self.hash().0);
+        info!("Logic:   {}", if self.settings.logic.glitched_logic {"Glitched"} else {"Normal"});
+        info!("Swords:  {}", if self.settings.logic.swordless_mode {"No"} else {"Yes"});
 
         let rng = StdRng::seed_from_u64(self.seed as u64);
-        let (randomized, layout) = Randomized::new(rng, exclude(&self.settings));
+        let (randomized, layout) = Randomized::new(rng, exclude(&self.settings), &self.settings);
         let layout = fill::fill(
             &self.settings,
             randomized.locations,
@@ -388,6 +389,7 @@ impl Pool {
 trait ItemExt {
     fn is_dungeon(&self) -> bool;
     fn is_progression(&self) -> bool;
+    fn is_sword(&self) -> bool;
     fn is_ore(&self) -> bool;
     fn normalize(self) -> Self;
 }
@@ -433,6 +435,16 @@ impl ItemExt for Item {
         )
     }
 
+    fn is_sword(&self) -> bool {
+        matches!(
+            self,
+            Item::ItemSwordLv1 |
+            Item::ItemSwordLv2 |
+            Item::ItemSwordLv3 |
+            Item::ItemSwordLv4
+        )
+    }
+
     fn is_ore(&self) -> bool {
         matches!(
             self,
@@ -471,7 +483,7 @@ struct Randomized {
 }
 
 impl Randomized {
-    fn new<R>(mut rng: R, exclude: HashSet<Location>) -> (Self, Layout)
+    fn new<R>(mut rng: R, exclude: HashSet<Location>, settings: &&Settings) -> (Self, Layout)
         where
             R: Rng,
     {
@@ -497,7 +509,14 @@ impl Randomized {
                         .or_default()
                         .insert(rng.next_u32(), item);
                 } else {
-                    world.insert_unique(rng.next_u32(), item);
+
+                    let i = if settings.logic.swordless_mode && item.is_sword() {
+                        Item::RupeeG
+                    } else {
+                        item
+                    };
+
+                    world.insert_unique(rng.next_u32(), i);
                 }
                 locations.insert(location, rng.next_u32());
             }
@@ -564,10 +583,36 @@ fn exclude(settings: &Settings) -> HashSet<Location> {
     //     ));
     // }
 
+    // Lock Message in a Bottle to its original spot
     exclude.insert(Location::new(
         regions::hyrule::lake::hylia::SUBREGION,
         "Shore",
     ));
+
+    // Lock Smooth Gem to its original spot
+    exclude.insert(Location::new(
+        regions::hyrule::kakariko::shady_guy::SUBREGION,
+        "Merchant (Right)",
+    ));
+
+    if settings.logic.swordless_mode {
+        exclude.insert(Location::new(
+            regions::hyrule::field::castle::SUBREGION,
+            "Castle (Indoors)",
+        ));
+
+        exclude.insert(Location::new(
+            regions::hyrule::field::castle::SUBREGION,
+            "Castle Balcony",
+        ));
+    }
+
+    if settings.logic.boots_in_shop {
+        exclude.insert(Location::new(
+            regions::hyrule::field::rentals::SUBREGION,
+            "Ravio (2)",
+        ));
+    }
 
     if settings.logic.pouch_in_shop {
         exclude.insert(Location::new(
@@ -689,7 +734,7 @@ pub fn plando() -> Result<(), Error> {
     layout.set(Location::new(regions::dungeons::eastern::floor2::SUBREGION, "(2F) Ball Room"), Item::RupeeGold);
     layout.set(Location::new(regions::dungeons::eastern::floor2::SUBREGION, "(2F) Defeat Popos"), Item::RupeeGold);
     layout.set(Location::new(regions::dungeons::eastern::floor2::SUBREGION, "(2F) Switch Room"), Item::RupeeGold);
-    layout.set(Location::new(regions::dungeons::eastern::boss_key::SUBREGION, "(2F) Big Chest"), Item::KeySmall);
+    layout.set(Location::new(regions::dungeons::eastern::floor2::SUBREGION, "(2F) Big Chest"), Item::KeySmall);
     layout.set(Location::new(regions::dungeons::eastern::boss::SUBREGION, "(3F) After Cutscene"), Item::RingRental);
     layout.set(Location::new(regions::dungeons::eastern::post_boss::SUBREGION, "Yuga"), Item::ItemBell);
     layout.set(Location::new(regions::dungeons::eastern::post_boss::SUBREGION, "(3F) Outside (North)"), Item::KeyBoss);
@@ -743,17 +788,17 @@ pub fn plando() -> Result<(), Error> {
     layout.set(Location::new(regions::dungeons::dark::boss::SUBREGION, "Gemesaur King"), Item::RupeeGold);
 
     // Swamp Palace
-    layout.set(Location::new(regions::dungeons::swamp::floor1::SUBREGION, "(B1) Center"), Item::RupeeGold);
-    layout.set(Location::new(regions::dungeons::swamp::floor1::SUBREGION, "(B1) Raft Room (Left)"), Item::RupeeGold);
-    layout.set(Location::new(regions::dungeons::swamp::floor1::SUBREGION, "(B1) Raft Room (Right)"), Item::RupeeGold);
-    layout.set(Location::new(regions::dungeons::swamp::floor1::SUBREGION, "(B1) Gyorm"), Item::RupeeGold);
-    layout.set(Location::new(regions::dungeons::swamp::floor1::SUBREGION, "(B1) Waterfall Room"), Item::RupeeGold);
-    layout.set(Location::new(regions::dungeons::swamp::miniboss::SUBREGION, "(B1) Raft Room (Pillar)"), Item::RupeeGold);
-    layout.set(Location::new(regions::dungeons::swamp::deep::SUBREGION, "(B1) Big Chest (Secret)"), Item::KeySmall);
-    layout.set(Location::new(regions::dungeons::swamp::deep::SUBREGION, "(1F) Water Puzzle"), Item::KeySmall);
-    layout.set(Location::new(regions::dungeons::swamp::deep::SUBREGION, "(1F) East Room"), Item::KeySmall);
-    layout.set(Location::new(regions::dungeons::swamp::deep::SUBREGION, "(1F) West Room"), Item::KeySmall);
-    layout.set(Location::new(regions::dungeons::swamp::end::SUBREGION, "(1F) Big Chest (Fire)"), Item::ItemSwordLv1);
+    layout.set(Location::new(regions::dungeons::swamp::dungeon::SUBREGION, "(B1) Center"), Item::RupeeGold);
+    layout.set(Location::new(regions::dungeons::swamp::dungeon::SUBREGION, "(B1) Raft Room (Left)"), Item::RupeeGold);
+    layout.set(Location::new(regions::dungeons::swamp::dungeon::SUBREGION, "(B1) Raft Room (Right)"), Item::RupeeGold);
+    layout.set(Location::new(regions::dungeons::swamp::dungeon::SUBREGION, "(B1) Gyorm"), Item::RupeeGold);
+    layout.set(Location::new(regions::dungeons::swamp::dungeon::SUBREGION, "(B1) Waterfall Room"), Item::RupeeGold);
+    layout.set(Location::new(regions::dungeons::swamp::dungeon::SUBREGION, "(B1) Raft Room (Pillar)"), Item::RupeeGold);
+    layout.set(Location::new(regions::dungeons::swamp::dungeon::SUBREGION, "(B1) Big Chest (Secret)"), Item::KeySmall);
+    layout.set(Location::new(regions::dungeons::swamp::dungeon::SUBREGION, "(1F) Water Puzzle"), Item::KeySmall);
+    layout.set(Location::new(regions::dungeons::swamp::dungeon::SUBREGION, "(1F) East Room"), Item::KeySmall);
+    layout.set(Location::new(regions::dungeons::swamp::dungeon::SUBREGION, "(1F) West Room"), Item::KeySmall);
+    layout.set(Location::new(regions::dungeons::swamp::dungeon::SUBREGION, "(1F) Big Chest (Fire)"), Item::ItemSwordLv1);
     layout.set(Location::new(regions::dungeons::swamp::boss::SUBREGION, "Arrghus"), Item::KeyBoss);
 
     // Skull Woods
@@ -798,11 +843,11 @@ pub fn plando() -> Result<(), Error> {
 
     // Desert Palace
     layout.set(Location::new(regions::dungeons::desert::floor1::SUBREGION, "(1F) Entrance"), Item::RupeeGold);
-    layout.set(Location::new(regions::dungeons::desert::floor1::SUBREGION, "(1F) Sand Room (South)"), Item::RupeeGold);
-    layout.set(Location::new(regions::dungeons::desert::floor1::SUBREGION, "(1F) Sand Switch Room"), Item::RupeeGold);
-    layout.set(Location::new(regions::dungeons::desert::floor1::SUBREGION, "(1F) Sand Room (North)"), Item::RupeeGold);
-    layout.set(Location::new(regions::dungeons::desert::center::SUBREGION, "(1F) Big Chest (Behind Wall)"), Item::KeyBoss);
-    layout.set(Location::new(regions::dungeons::desert::center::SUBREGION, "(1F) Behind Rocks"), Item::RupeeGold);
+    layout.set(Location::new(regions::dungeons::desert::post_miniboss::SUBREGION, "(1F) Sand Room (South)"), Item::RupeeGold);
+    layout.set(Location::new(regions::dungeons::desert::post_miniboss::SUBREGION, "(1F) Sand Switch Room"), Item::RupeeGold);
+    layout.set(Location::new(regions::dungeons::desert::post_miniboss::SUBREGION, "(1F) Sand Room (North)"), Item::RupeeGold);
+    layout.set(Location::new(regions::dungeons::desert::post_miniboss::SUBREGION, "(1F) Big Chest (Behind Wall)"), Item::KeyBoss);
+    layout.set(Location::new(regions::dungeons::desert::post_miniboss::SUBREGION, "(1F) Behind Rocks"), Item::RupeeGold);
     layout.set(Location::new(regions::dungeons::desert::floor2::SUBREGION, "(2F) Under Rock (Left)"), Item::RupeeGold);
     layout.set(Location::new(regions::dungeons::desert::floor2::SUBREGION, "(2F) Beamos Room"), Item::RupeeGold);
     layout.set(Location::new(regions::dungeons::desert::floor2::SUBREGION, "(2F) Under Rock (Right)"), Item::RupeeGold);
@@ -868,9 +913,9 @@ pub fn plando() -> Result<(), Error> {
 
     layout.set(Location::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (1)"), Item::RupeeGold);
     layout.set(Location::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (2)"), Item::MilkMatured);
-    layout.set(Location::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (3)"), Item::MessageBottle);
-    layout.set(Location::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (4)"), Item::ItemBowLv2);
-    layout.set(Location::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (5)"), Item::RingHekiga);
+    layout.set(Location::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (3)"), Item::DashBoots);
+    layout.set(Location::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (4)"), Item::RingHekiga);
+    layout.set(Location::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (5)"), Item::RupeeGold);
     layout.set(Location::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (6)"), Item::ClothesBlue);
     layout.set(Location::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (7)"), Item::ItemBombLv2);
     layout.set(Location::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (8)"), Item::ItemTornadeRodLv2);

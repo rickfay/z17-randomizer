@@ -17,7 +17,7 @@ crate::region! {
             "(1F) Switch Puzzle": KeySmall @Chest(1[74]) :- can_use_projectile,
         ],
         paths: [
-            floor2 :- {|s| s.small_keys(COURSE) > 0 && s.can_damage()},
+            floor2 :- {|s| s.small_keys(COURSE) >= 1 && s.can_damage()},
         ],
     },
     floor2 {
@@ -25,17 +25,14 @@ crate::region! {
             "(2F) Ball Room": LiverPurple @Chest(2[147]),
             "(2F) Defeat Popos": LiverPurple @Chest(2[115]),
             "(2F) Switch Room": KeySmall @Chest(2[52]) :- {|p| p.has_ranged_attack() || p.glitched()}, // glitched can throw pots,
+
+            "(2F) Big Chest": KeyBoss @Chest(2[44]) :- {|p| p.small_keys(COURSE) >= 2 || (p.glitched() && p.can_tornado_rod())},
         ],
         paths: [
-            boss_key :- {|p| (p.small_keys(COURSE) > 1 && p.has_ranged_attack()) || (p.glitched() && p.can_tornado_rod())},
-        ],
-    },
-    boss_key {
-        locations: [
-            "(2F) Big Chest": KeyBoss @Chest(2[44]),
-        ],
-        paths: [
-            boss :- {|p| p.can_use_projectile() && (p.has_boss_key(COURSE) || (p.glitched() && p.can_tornado_rod()))},
+            boss :- {|p| p.can_use_projectile() && (
+                (p.small_keys(COURSE) >= 2 && p.has_boss_key(COURSE))
+                || (p.glitched() && (p.can_tornado_rod() || (p.has_boss_key(COURSE) && p.can_bomb())))
+            )},
         ],
     },
     boss {

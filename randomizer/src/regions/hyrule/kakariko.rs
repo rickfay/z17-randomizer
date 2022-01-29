@@ -8,7 +8,7 @@ crate::region! {
             "Jail": RupeeSilver @Chest(IndoorLight 3[3]) :- can_merge,
         ],
         paths: [
-            post_sanc :- did_sanctuary,
+            post_sanc,
         ],
     },
     post_sanc {
@@ -23,7 +23,7 @@ crate::region! {
     },
     shady_guy {
         locations: [
-            "Shady Guy": DashBoots @Event(FieldLight_18_Touzoku[0x12]),
+            "Shady Guy": ItemRentalHookShot @Event(FieldLight_18_Touzoku[0x12]),
             "Merchant (Right)": ItemStoneBeauty @Shop(Merchant(2)),
         ],
     },

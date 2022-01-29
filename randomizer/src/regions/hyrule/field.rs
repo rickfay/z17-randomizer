@@ -26,7 +26,7 @@ crate::region! {
             southern::ruins,
             lake::hylia,
             post_eastern :- did_eastern,
-            castle :- has_master_sword,
+            castle :- {|s| s.has_master_sword() || s.swordless_mode()},
             lorule::field::main :- lorule,
             lorule::graveyard::field :- lorule,
             lorule::field::ledge :- lorule,
@@ -47,7 +47,7 @@ crate::region! {
     rentals {
         locations: [
             "Ravio (1)": ItemRentalIceRod @Shop(Ravio(0)),
-            "Ravio (2)": ItemRentalHookShot @Shop(Ravio(5)),
+            "Ravio (2)": DashBoots @Shop(Ravio(5)),
             "Ravio (3)": Pouch @Shop(Ravio(2)),
             "Ravio (4)": ItemBell @Shop(Ravio(3)),
             "Ravio (5)": RingHekiga @Shop(Ravio(8)),

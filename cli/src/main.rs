@@ -3,7 +3,7 @@ use std::io::{stdin, stdout, Read, Write};
 use std::path::Path;
 use log::{error, info};
 
-use randomizer::{Seed, Generator, Error, plando, Settings};
+use randomizer::{Seed, Generator, Settings};
 use simplelog::{LevelFilter, SimpleLogger};
 use structopt::StructOpt;
 use albw::Game;
@@ -25,7 +25,7 @@ struct Opt {
 fn prompt_until_bool(prompt: &str) -> ::sys::Result<bool>
 {
     loop {
-        print!("{}: ", prompt);
+        print!("\n{}\nEnter (y/n): ", prompt);
         stdout().flush()?;
         let mut input = String::new();
         stdin().read_line(&mut input)?;
@@ -36,7 +36,7 @@ fn prompt_until_bool(prompt: &str) -> ::sys::Result<bool>
         } else if "n".eq_ignore_ascii_case(&input) {
             break Ok(false);
         } else {
-            eprintln!("Please enter either 'y' or 'n'");
+            eprintln!("\nPlease enter either 'y' or 'n'");
         }
     }
 }
@@ -76,44 +76,26 @@ fn create_paths() -> ::sys::Result<Paths> {
 
 fn preset_ui() -> Settings {
 
-    info!("No preset has been specified. Options UI will be used instead.");
-    println!("\nSeed Options\nFor the following questions please answer either 'y' for yes or 'n' for no:");
+    info!("No preset has been specified. Seed Options UI will be used instead.\n");
+    println!("--- Seed Options ---");
 
-    let start_with_bracelet = prompt_until_bool(
-        "Start with Ravio's Bracelet?"
-    ).unwrap();
+    let start_with_bracelet = prompt_until_bool("Start with Ravio's Bracelet?").unwrap();
+    let bell_in_shop = prompt_until_bool("Place Bell in Ravio's Shop?").unwrap();
+    let pouch_in_shop = prompt_until_bool("Place Pouch in Ravio's Shop?").unwrap();
+    let minigames_excluded = prompt_until_bool("Exclude all minigames?").unwrap();
+    let glitched_logic = prompt_until_bool("Use Glitched Logic? (advanced)").unwrap();
+    let swordless_mode = prompt_until_bool("Play in Swordless Mode? (advanced)").unwrap();
 
-    let bell_in_shop = prompt_until_bool(
-        "Place Bell in Ravio's Shop?"
-    ).unwrap();
-
-    let pouch_in_shop = prompt_until_bool(
-        "Place Pouch in Ravio's Shop?"
-    ).unwrap();
-
-    let glitched_logic = prompt_until_bool(
-        "Use Glitched Logic?"
-    ).unwrap();
-
-    let dont_require_lamp_for_darkness = prompt_until_bool(
-        "Don't require Lamp for dark rooms?"
-    ).unwrap();
-
-    let minigames_excluded = prompt_until_bool(
-        "Exclude all minigames?"
-    ).unwrap();
-
-    println!("Starting seed generation...\n");
+    println!("\nStarting seed generation...\n");
 
     Settings {
         logic: Logic {
-            dont_require_lamp_for_darkness,
             bell_in_shop,
             pouch_in_shop,
-            //unsafe_key_placement,
             glitched_logic,
             start_with_bracelet,
             minigames_excluded,
+            swordless_mode,
             ..Default::default()
         },
         ..Default::default()
@@ -134,26 +116,26 @@ fn main() -> randomizer::Result<()> {
 
     info!("Initializing Z17 Randomizer...");
 
+    // plando();
+    // Ok(())
+
     let system = randomizer::system()?;
 
     let preset = if let Some(ref preset) = opt.preset {
         system.preset(&preset)?
     } else {
         preset_ui()
-        //Default::default()
     };
 
-    // plando();
-    // Ok(())
-
-    let max_retries = 50;
+    let max_retries = 100;
     let mut result = Ok(());
 
     for x in 0..max_retries {
         let seed = opt.seed.unwrap_or_else(rand::random);
 
-        info!("Attempt #{}", x + 1);
-        info!("Preset: {}", opt.preset.as_ref().unwrap_or(&String::from("<None>")));
+        info!("Attempt: #{}", x + 1);
+        info!("Preset:  {}", opt.preset.as_ref().unwrap_or(&String::from("<None>")));
+        info!("Version: 0.0.2");
 
         let randomizer = Generator::new(&preset, seed);
         let spoiler = panic::catch_unwind(|| randomizer.randomize());
@@ -170,7 +152,7 @@ fn main() -> randomizer::Result<()> {
             // FIXME I hate this, but I'm struggling with Rust error handling so leaving it for now
             panic!("Too many retry attempts have failed. Aborting...");
         } else {
-            info!("Failed to generate completable seed, retrying...\n");
+            info!("Seed was not completable (this is normal). Retrying...\n");
         }
     }
 

@@ -72,6 +72,22 @@ impl<'settings> State<'settings> {
             || self.can_fire_rod()
             || self.can_hammer()
             || self.can_bow()
+            || (self.glitched() && (
+                self.can_lamp() ||
+                    self.has_boots() ||
+                    self.has_net()
+            ))
+    }
+
+    pub fn can_hit_switch(&self) -> bool {
+        self.sword()
+            || self.can_bow()
+            || self.can_boomerang()
+            || self.can_hookshot()
+            || self.can_bomb()
+            || self.can_ice_rod()
+            || self.can_hammer()
+            || (self.glitched() && self.has_boots())
     }
 
     pub fn can_ice_rod(&self) -> bool {
@@ -208,6 +224,10 @@ impl<'settings> State<'settings> {
         self.player.lamp
     }
 
+    pub fn has_net(&self) -> bool {
+        self.player.insect_net
+    }
+
     pub fn can_see_in_dark(&self) -> bool {
         self.settings.logic.dont_require_lamp_for_darkness || self.player.lamp
     }
@@ -232,6 +252,10 @@ impl<'settings> State<'settings> {
         self.player.sword > 2
     }
 
+    pub fn swordless_mode(&self) -> bool {
+        self.settings.logic.swordless_mode
+    }
+
     pub fn can_swim(&self) -> bool {
         self.player.flippers
     }
@@ -247,10 +271,6 @@ impl<'settings> State<'settings> {
     pub fn can_lift(&self) -> bool {
         self.player.glove > 0
     }
-
-    // pub fn can_insect_net(&self) -> bool {
-    //     self.can_use_items() && self.player.insect_net
-    // }
 
     pub fn can_lift_big(&self) -> bool {
         self.player.glove > 1
@@ -274,10 +294,6 @@ impl<'settings> State<'settings> {
 
     pub fn has_stamina_scroll(&self) -> bool {
         self.player.scroll
-    }
-
-    pub fn did_sanctuary(&self) -> bool {
-        true //self.settings.behavior.open || self.player.sanctuary
     }
 
     pub fn did_eastern(&self) -> bool {

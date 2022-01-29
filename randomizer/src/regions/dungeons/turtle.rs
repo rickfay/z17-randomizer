@@ -13,10 +13,10 @@ crate::region! {
             "(B1) Grate Chest (Small)": RupeePurple @Chest(2[5]),
             "(B1) Big Chest (Center)": HyruleShield @Chest(2[180]),
             "(B1) Platform": RupeeSilver @Chest(2[183]),
-            "(B1) Big Chest (Top)": KeyBoss @Chest(2[29]) :- {|s| super::key_check(s)},
+            "(B1) Big Chest (Top)": KeyBoss @Chest(2[29]) :- {|s| s.small_keys(COURSE) >= 1},
         ],
         paths: [
-            boss :- {|s| super::key_check(s) && s.has_boss_key(COURSE)},
+            boss :- {|s| (s.small_keys(COURSE) >= 3 && s.has_boss_key(COURSE)) || (s.glitched() && s.can_tornado_rod() && s.nice_bombs())},
             lorule::lake::balcony,
         ],
     },
@@ -26,13 +26,4 @@ crate::region! {
         ],
         quest: Portrait::Impa,
     },
-}
-
-fn key_check(state: &crate::state::State) -> bool {
-    let keys = if state.settings().logic.unsafe_key_placement {
-        0
-    } else {
-        2
-    };
-    state.small_keys(COURSE) > keys
 }

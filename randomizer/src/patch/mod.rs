@@ -1,10 +1,11 @@
 use std::{array, collections::HashMap, fs, iter, path::Path};
+use std::io::{Read, stdin, stdout, Write};
 
 use albw::{
     course, demo::Timed, flow::FlowMut, Demo, File, Game, IntoBytes, Item, Language, Scene,
 };
 use fs_extra::dir::CopyOptions;
-use log::info;
+use log::{error, info};
 use serde::Serialize;
 use tempfile::tempdir;
 use try_insert_ext::*;
@@ -289,6 +290,14 @@ pub struct Patches {
     romfs: Files,
 }
 
+// FIXME unnecssary duplicate
+fn pause() {
+    let mut stdout = stdout();
+    stdout.write(b"\nPress Enter to continue...").unwrap();
+    stdout.flush().unwrap();
+    stdin().read(&mut [0]).unwrap();
+}
+
 impl Patches {
     pub fn dump<P>(self, path: P) -> Result<()>
         where
@@ -304,16 +313,23 @@ impl Patches {
         }
         let path = path.as_ref();
         info!("Copying files to:    {}", path.display());
-        fs_extra::copy_items(
+
+        match fs_extra::copy_items(
             &[moddir],
             path,
             &CopyOptions {
                 overwrite: true,
                 ..Default::default()
             },
-        )
-            .map_err(Error::io)?;
-        Ok(())
+        ).map_err(Error::io) {
+            Ok(_) => Ok(()),
+            Err(_) => {
+                error!("Couldn't write results to: \"{}\"", path.display());
+                error!("Please check that config.toml points to a valid output destination.");
+                pause();
+                std::process::exit(1);
+            }
+        }
     }
 }
 

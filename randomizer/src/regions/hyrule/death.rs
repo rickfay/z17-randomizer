@@ -29,9 +29,9 @@ crate::region! {
     },
     east {
         locations: [
-            "Ore Mine Column": HeartPiece @Heart(CaveLight 25[9]) :- can_hammer,
+            "Ore Mine Column": HeartPiece @Heart(CaveLight 25[9]) :- {|s| s.can_merge() && s.can_hammer()},
             "Bouldering Guy": ItemBottle @Event(FieldLight_05_Climber[0x06])
-                :- {|p| p.has_premium_milk() && (p.can_merge() || (p.glitched() && (p.can_tornado_rod() && p.has_boots())))},
+                :- {|p| p.has_premium_milk() && (p.can_merge() || (p.glitched() && p.can_tornado_rod() && p.has_boots()))},
             "Treasure Room": RupeeSilver @Chest(AttractionLight 4[89])
                 :- {|p| p.can_hookshot() && p.can_merge()},
         ],

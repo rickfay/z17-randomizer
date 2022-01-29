@@ -1,7 +1,6 @@
 use std::collections::{HashMap, HashSet};
 
 use albw::{course, Item};
-use log::{error};
 use vec_drain_where::VecDrainWhereExt;
 
 use crate::{
@@ -226,20 +225,19 @@ fn fill_dungeon(
     pool: Pool,
     start: &'static Subregion,
 ) -> Layout {
-
     let filler = Filler::new(weights, State::with_all_overworld_items(settings), layout);
 
     filler.fill(pool, start, |pool, filler| {
-            if filler.locations.len() == 1 && pool.peek() == Some(&Item::KeyBoss) {
-                pool.remove(|item| *item == Item::KeySmall)
-            } else {
-                pool.pop()
-            }
-                .unwrap_or_else(|| {
-                    unreachable!("{:?}", pool)
-                    //filler.error(&pool)
-                })
-        },
+        if filler.locations.len() == 1 && pool.peek() == Some(&Item::KeyBoss) {
+            pool.remove(|item| *item == Item::KeySmall)
+        } else {
+            pool.pop()
+        }
+            .unwrap_or_else(|| {
+                unreachable!("{:?}", pool)
+                //filler.error(&pool)
+            })
+    },
     )
 }
 
@@ -255,12 +253,12 @@ fn fill_world(
     filler.fill(pool, start, |pool, filler| {
         pool.remove(|&item| filler.can_progress(item))
             .unwrap_or_else(|| {
-                error!("{:?}", filler.state);
-                error!("{:?}", filler.layout);
-                error!("{:?}", pool);
-                for (_, edge) in &filler.edges {
-                    error!("-> {:?}", edge);
-                }
+                // error!("{:?}", filler.state);
+                // error!("{:?}", filler.layout);
+                // error!("{:?}", pool);
+                // for (_, edge) in &filler.edges {
+                //     error!("-> {:?}", edge);
+                // }
                 panic!("Could not find an overworld progression item.")
             })
     })

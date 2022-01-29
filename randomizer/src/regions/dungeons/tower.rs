@@ -15,7 +15,7 @@ crate::region! {
             "(3F) Platform": KeySmall @Key(1[244]),
         ],
         paths: [
-            floor4 :- {|p| (p.can_merge() && p.small_keys(COURSE) > 0) || (p.glitched() && (p.nice_bombs() && p.can_tornado_rod()))},
+            floor4 :- {|p| (p.can_merge() && p.small_keys(COURSE) >= 1) || (p.glitched() && p.nice_bombs() && p.can_tornado_rod())},
         ],
     },
     floor4 {
@@ -25,7 +25,7 @@ crate::region! {
             "(6F) Right Mole": LiverPurple @Chest(1[694]),
         ],
         paths: [
-            floor7 :- {|p| (p.can_merge() && p.small_keys(COURSE) > 1) || (p.glitched() && (p.nice_bombs() && p.can_tornado_rod()))},
+            floor7 :- {|p| (p.can_merge() && p.small_keys(COURSE) >= 2) || (p.glitched() && p.nice_bombs() && p.can_tornado_rod())},
         ],
     },
     floor7 {

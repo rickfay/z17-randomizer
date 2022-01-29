@@ -1,4 +1,6 @@
 use std::{fs, io::prelude::*, path::Path};
+use std::io::{stdin, stdout};
+use log::error;
 
 pub mod byaml;
 pub mod exheader;
@@ -41,12 +43,30 @@ where
     }
 }
 
+// FIXME unnecssary duplicate
+fn pause() {
+    let mut stdout = stdout();
+    stdout.write(b"\nPress Enter to continue...").unwrap();
+    stdout.flush().unwrap();
+    stdin().read(&mut [0]).unwrap();
+}
+
 impl Cxi<fs::File> {
     pub fn open<P>(path: P) -> Result<Self>
     where
         P: AsRef<Path>,
     {
-        let mut file = fs::File::open(path)?;
+        let path = path.as_ref();
+        let mut file = match fs::File::open(path) {
+            Ok(file) => file,
+            Err(_) => {
+                error!("Couldn't load ROM from: \"{}\"", path.display());
+                error!("Please check that config.toml points to a valid ROM.");
+                pause();
+                std::process::exit(1);
+            }
+        };
+
         bytey::typedef! { struct NCSD: TryFromBytes<'_> [HEADER_LEN] {
             #b"NCSD",
             [8] id: u64,

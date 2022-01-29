@@ -7,7 +7,7 @@ crate::region! {
             "(1F) Narrow Ledge": KeySmall @Key(2[25]),
         ],
         paths: [
-            floor1 :- {|p| p.small_keys(COURSE) > 0},
+            floor1 :- {|p| p.small_keys(COURSE) >= 1},
         ],
     },
     floor1 {
@@ -21,8 +21,8 @@ crate::region! {
             "(B1) Helmasaur Room (Fall)": LiverYellow @Chest(1[100]),
         ],
         paths: [
-            boss_key :- {|s| super::key_check(s)},
-            floor2 :- {|s| super::key_check(s)},
+            boss_key :- {|s| s.small_keys(COURSE) >= 4},
+            floor2 :- {|s| s.small_keys(COURSE) >= 4},
         ],
     },
     floor2 {
@@ -46,13 +46,4 @@ crate::region! {
         ],
         quest: Portrait::Gulley,
     },
-}
-
-fn key_check(state: &crate::state::State) -> bool {
-    let keys = if state.settings().logic.unsafe_key_placement {
-        1
-    } else {
-        3
-    };
-    state.small_keys(COURSE) > keys
 }

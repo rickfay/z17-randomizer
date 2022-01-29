@@ -9,7 +9,7 @@ crate::region! {
             "Ledge": KeySmall @Key(2[31]),
         ],
         paths: [
-            lorule::graveyard::cave :- {|s| s.small_keys(COURSE) > 0},
+            lorule::graveyard::cave :- {|s| s.small_keys(COURSE) >= 1},
         ],
     },
 }

@@ -3,21 +3,14 @@ crate::region! {
     name: "Lorule Castle",
     lorule {
         locations: [
-            "(1F) Ledge": RupeeR @Chest(1[714]) :- can_merge,
+            "(1F) Ledge": RupeeR @Chest(1[714]),
             "(1F) Center": KeySmall @Chest(1[723]),
             "(2F) Near Torches": RupeeR @Chest(1[994]),
             "(2F) Hidden Path": RupeeSilver @Chest(1[995]),
             "(2F) Ledge": LiverYellow @Chest(1[717]),
         ],
         paths: [
-            floor4 :- {|s| {
-                let keys = if s.settings().logic.unsafe_key_placement {
-                    0
-                } else {
-                    2
-                };
-                s.small_keys(COURSE) > keys
-            }},
+            floor4 :- {|s| s.small_keys(COURSE) >= 3},
             bomb_trial :- can_bomb,
             ball_trial,
         ],
@@ -57,7 +50,7 @@ crate::region! {
     },
     boss {
         locations: [
-            "Zelda": ItemBowLight @Event(DungeonBoss/Ganon[0x42]),
+            "Zelda": ItemBowLight @Event(DungeonBoss/Ganon[0x42]) :- {|s| s.sword() || s.has_net()},
         ],
     },
 }

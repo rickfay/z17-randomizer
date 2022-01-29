@@ -7,7 +7,6 @@ use std::{
 };
 
 use log::info;
-use directories::ProjectDirs;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
 use prelude::*;
@@ -145,9 +144,9 @@ impl Paths {
     }
 }
 
-fn config_dir() -> Option<PathBuf> {
-    ProjectDirs::from("", "", "z17-randomizer").map(|dirs| dirs.config_dir().into())
-}
+// fn config_dir() -> Option<PathBuf> {
+//     ProjectDirs::from("", "", "z17-randomizer").map(|dirs| dirs.config_dir().into())
+// }
 
 fn standard_preset() -> (&'static str, String) {
     (

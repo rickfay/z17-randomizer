@@ -48,8 +48,12 @@ pub struct Logic {
     pub bell_in_shop: bool,
     /// Places the Pouch in Ravio's Shop
     pub pouch_in_shop: bool,
+    /// Places the Pegasus Boots in Ravio's Shop
+    pub boots_in_shop: bool,
     /// Excludes Cucco Ranch, both Rupee Rushes, Treacherous Tower, Octoball Derby, and Hyrule Hotfoot
     pub minigames_excluded: bool,
+    /// Swordless Mode
+    pub swordless_mode: bool,
 }
 
 /// Settings to change the randomizer's logic checks.
