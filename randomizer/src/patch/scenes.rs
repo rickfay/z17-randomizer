@@ -96,6 +96,11 @@ pub fn apply(patcher: &mut Patcher) -> Result<()> {
                 id(0x23), // replace with chest
             ],
         },
+        // Lake Hylia
+        FieldLight 35 {
+            [233].disable(), // Open Maiamai Cave
+            [235].disable(), // Remove the Sign
+        },
         // Your house
         IndoorLight 1 {
             [46].disable(), // Disable Ravio's bye-bye
