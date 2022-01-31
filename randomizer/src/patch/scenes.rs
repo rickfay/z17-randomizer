@@ -111,6 +111,11 @@ pub fn apply(patcher: &mut Patcher) -> Result<()> {
             [58].disable(), // Disable Ravio's welcome
             [59].disable(), // Disable Ravio's welcome
         },
+        // Zelda's Study
+        IndoorLight 7 {
+            [26].disable(), // Disable Curtain
+            [29].disable(), // Disable AreaDisableWallIn
+        },
         // Rosso's house
         IndoorLight 10 {
             [7].each [
