@@ -75,6 +75,13 @@ pub fn apply(patcher: &mut Patcher) -> Result<()> {
             [197].disable(), // Disable merchant's Smooth Gem text
             [299].disable(), // Disable merchant's bottle text
         },
+        // Hyrule Castle
+        FieldLight 18 {
+            [155].enable(1), // AreaChangeScene
+            [165].active(1), // MojBarrier
+            [393].disable(None), // Seal off door to Inside Hyrule Castle
+            //[393].disable(Flag::Event(1)), // Open door to Inside Hyrule Castle
+        },
         // Outside your house
         FieldLight 27 {
             [158].disable(), // Disable Blacksmith's Wife
@@ -126,7 +133,7 @@ pub fn apply(patcher: &mut Patcher) -> Result<()> {
         },
         // Hyrule Castle
         IndoorLight 12 {
-            [48].call {|obj: &mut Obj| {obj.arg_mut().5 = 3;}},
+            [48].call {|obj: &mut Obj| {obj.arg_mut().5 = 3;}}, // Fix chest to not respawn
         },
         // Bar
         IndoorLight 15 {
@@ -135,6 +142,10 @@ pub fn apply(patcher: &mut Patcher) -> Result<()> {
         // Blacksmith's House
         IndoorLight 19 {
             [0x10].disable(), // Remove captain
+        },
+        // Donkey Cave
+        CaveLight 1 {
+            [84].disable(), // Remove a MojVolcanicRock to fix a vanilla softlock
         },
         // Zora's Domain
         CaveLight 7 {
@@ -148,7 +159,7 @@ pub fn apply(patcher: &mut Patcher) -> Result<()> {
                 enable(),
             ],
         },
-        // Hyrule Castle
+        // Inside Hyrule Castle
         DungeonCastle 7 {
             [19].enable(415),
             [20].enable(415),
@@ -157,18 +168,6 @@ pub fn apply(patcher: &mut Patcher) -> Result<()> {
         },
     );
 
-    //if settings.behavior.barrier.is_start() {
-
-    apply!(patcher,
-        // Hyrule Castle
-        FieldLight 18 {
-            [155].enable(1),
-            [165].active(1),
-            [393].disable(Flag::Event(1)),
-        },
-    );
-
-    //}
     Ok(())
 }
 
