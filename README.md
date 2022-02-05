@@ -96,6 +96,9 @@ For Citra (emulator):
 `pouch_in_shop`
 - If enabled, guarantees the Pouch will be placed in Ravio's Shop.
 
+`super_items`
+- If enabled, includes the Super Lamp and Super Net in the shuffled item pool as progressive upgrades to the base Lamp and Net.
+
 `glitched_logic`
 - Enables items to be placed in locations that may require glitches/tricks to obtain. A complete list of potentially required glitches/tricks is below.
 

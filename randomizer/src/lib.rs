@@ -129,10 +129,11 @@ impl<'settings> Generator<'settings> {
 
     /// Randomize world and generate files according to settings.
     pub fn randomize(&self) -> Spoiler {
-        info!("Seed:    {}", self.seed);
-        info!("Hash:    {}", self.hash().0);
-        info!("Logic:   {}", if self.settings.logic.glitched_logic {"Glitched"} else {"Normal"});
-        info!("Swords:  {}", if self.settings.logic.swordless_mode {"No"} else {"Yes"});
+        info!("Seed:        {}", self.seed);
+        info!("Hash:        {}", self.hash().0);
+        info!("Logic:       {}", if self.settings.logic.glitched_logic {"Glitched"} else {"Normal"});
+        info!("Swords:      {}", if self.settings.logic.swordless_mode {"Swordless Mode - No Swords"} else {"Normal"});
+        info!("Super Items: {}", if self.settings.logic.super_items {"Included"} else {"Not Included"});
 
         let rng = StdRng::seed_from_u64(self.seed as u64);
         let (randomized, layout) = Randomized::new(rng, exclude(&self.settings), &self.settings);
@@ -390,6 +391,7 @@ trait ItemExt {
     fn is_dungeon(&self) -> bool;
     fn is_progression(&self) -> bool;
     fn is_sword(&self) -> bool;
+    fn is_super(&self) -> bool;
     fn is_ore(&self) -> bool;
     fn normalize(self) -> Self;
 }
@@ -445,6 +447,14 @@ impl ItemExt for Item {
         )
     }
 
+    fn is_super(&self) -> bool {
+        matches! {
+            self,
+            Item::ItemKandelaarLv2 |
+            Item::ItemInsectNetLv2
+        }
+    }
+
     fn is_ore(&self) -> bool {
         matches!(
             self,
@@ -470,6 +480,8 @@ impl ItemExt for Item {
             Item::PowerfulGlove => Item::PowerGlove,
             Item::ClothesRed => Item::ClothesBlue,
             Item::RingRental => Item::RingHekiga,
+            Item::ItemKandelaarLv2 => Item::ItemKandelaar,
+            Item::ItemInsectNetLv2 => Item::ItemInsectNet,
             item => item,
         }
     }
@@ -512,6 +524,8 @@ impl Randomized {
 
                     let i = if settings.logic.swordless_mode && item.is_sword() {
                         Item::RupeeG
+                    } else if !settings.logic.super_items && item.is_super() {
+                        Item::RupeePurple
                     } else {
                         item
                     };
@@ -911,15 +925,15 @@ pub fn plando() -> Result<(), Error> {
     layout.set(Location::new(regions::hyrule::field::post_eastern::SUBREGION, "Woods"), Item::RupeeGold);
 
 
-    layout.set(Location::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (1)"), Item::RupeeGold);
-    layout.set(Location::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (2)"), Item::MilkMatured);
-    layout.set(Location::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (3)"), Item::DashBoots);
-    layout.set(Location::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (4)"), Item::RingHekiga);
-    layout.set(Location::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (5)"), Item::RupeeGold);
-    layout.set(Location::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (6)"), Item::ClothesBlue);
-    layout.set(Location::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (7)"), Item::ItemBombLv2);
-    layout.set(Location::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (8)"), Item::ItemTornadeRodLv2);
-    layout.set(Location::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (9)"), Item::RupeeGold);
+    layout.set(Location::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (1)"), Item::Heart);
+    layout.set(Location::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (2)"), Item::Heart);
+    layout.set(Location::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (3)"), Item::Heart);
+    layout.set(Location::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (4)"), Item::Heart);
+    layout.set(Location::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (5)"), Item::Heart);
+    layout.set(Location::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (6)"), Item::Heart);
+    layout.set(Location::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (7)"), Item::Heart);
+    layout.set(Location::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (8)"), Item::Heart);
+    layout.set(Location::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (9)"), Item::Heart);
 
 
 
@@ -956,14 +970,14 @@ pub fn plando() -> Result<(), Error> {
     layout.set(Location::new(regions::hyrule::kakariko::village::SUBREGION, "Well (Chest)"), Item::ClothesBlue);
     layout.set(Location::new(regions::hyrule::kakariko::village::SUBREGION, "Well (Upper)"), Item::ClothesBlue);
     layout.set(Location::new(regions::hyrule::kakariko::village::SUBREGION, "Jail"), Item::RupeeGold);
-    layout.set(Location::new(regions::hyrule::kakariko::post_sanc::SUBREGION, "Merchant (Left)"), Item::RupeeGold);
+    layout.set(Location::new(regions::hyrule::kakariko::post_sanc::SUBREGION, "Merchant (Left)"), Item::Heart);
     layout.set(Location::new(regions::hyrule::kakariko::post_sanc::SUBREGION, "Bee Guy"), Item::HintGlasses);
     layout.set(Location::new(regions::hyrule::kakariko::post_sanc::SUBREGION, "Bee Guy (Golden Bee)"), Item::ItemFireRod);
     layout.set(Location::new(regions::hyrule::kakariko::post_sanc::SUBREGION, "Fortune Teller"), Item::Pouch);
     layout.set(Location::new(regions::hyrule::kakariko::post_sanc::SUBREGION, "Milk Bar Owner"), Item::MilkMatured);
     layout.set(Location::new(regions::hyrule::kakariko::post_sanc::SUBREGION, "Cucco Ranch"), Item::RupeeGold);
     layout.set(Location::new(regions::hyrule::kakariko::shady_guy::SUBREGION, "Shady Guy"), Item::RupeeGold);
-    layout.set(Location::new(regions::hyrule::kakariko::shady_guy::SUBREGION, "Merchant (Right)"), Item::RupeeGold);
+    layout.set(Location::new(regions::hyrule::kakariko::shady_guy::SUBREGION, "Merchant (Right)"), Item::Heart);
     layout.set(Location::new(regions::hyrule::kakariko::closed::SUBREGION, "Stylish Woman"), Item::RupeeGold);
 
     // Zora's Domain

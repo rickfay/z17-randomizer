@@ -401,11 +401,12 @@ fn cutscenes<'game, 'settings>(
                 620, // Hilda ??? Text
                 640, // Hilda ??? Text
                 899, // Enable Quick Equip
+                902, // StreetPass Tree
                 906, // Monster Guts
                 907, // Monster Tail
                 908, // Monster Horn
                 950, // Maiamai
-                955, // Master Ore UI
+                //955, // Master Ore UI
                 965, // Suppress Energy Potion
             ]) {
                 opening.add_event_flag(flag);
