@@ -108,6 +108,21 @@ pub fn apply(patcher: &mut Patcher) -> Result<()> {
             [233].disable(), // Open Maiamai Cave
             [235].disable(), // Remove the Sign
         },
+        // Dark Maze
+        FieldDark 20 {
+            [235].disable(), // Hilda Text
+
+            [63].disable(),  // AreaEventTalk
+            [115].disable(), // AreaEventTalk
+            [116].disable(), // AreaEventTalk
+            [119].disable(), // AreaEventTalk
+            [122].disable(), // AreaEventTalk
+            [188].disable(), // AreaEventTalk
+            [231].disable(), // AreaEventTalk
+
+            [195].disable(), // NpcGuardMan
+            [196].disable(), // NpcGuardMan
+        },
         // Your house
         IndoorLight 1 {
             [46].disable(), // Disable Ravio's bye-bye
@@ -165,6 +180,11 @@ pub fn apply(patcher: &mut Patcher) -> Result<()> {
             [20].enable(415),
             [21].enable(415),
             [22].enable(415),
+        },
+        // Thieves' Hideout
+        DungeonHagure 1 {
+            [1371].disable(), // Spear Boy AreaEventTalk
+            [1372].disable(), // Spear Boy
         },
     );
 
