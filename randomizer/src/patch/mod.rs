@@ -405,6 +405,8 @@ fn cutscenes<'game, 'settings>(
                 906, // Monster Guts
                 907, // Monster Tail
                 908, // Monster Horn
+                920, // Link's House Weather Vane
+                940, // Vacant House Weather Vane
                 950, // Maiamai
                 //955, // Master Ore UI
                 965, // Suppress Energy Potion
