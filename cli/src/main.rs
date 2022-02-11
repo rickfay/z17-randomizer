@@ -87,7 +87,8 @@ fn preset_ui() -> Settings {
     let glitched_logic = prompt_until_bool("Use Glitched Logic? (advanced)").unwrap();
     let swordless_mode = prompt_until_bool("Play in Swordless Mode? (advanced)").unwrap();
 
-    println!("\nStarting seed generation...\n");
+    println!();
+    info!("Starting seed generation...\n");
 
     Settings {
         logic: Logic {
@@ -137,9 +138,9 @@ fn main() -> randomizer::Result<()> {
         for x in 0..max_retries {
             let seed = opt.seed.unwrap_or_else(rand::random);
 
-            info!("Attempt:     #{}", x + 1);
-            info!("Preset:      {}", opt.preset.as_ref().unwrap_or(&String::from("<None>")));
-            info!("Version:     0.0.3");
+            info!("Attempt:\t\t\t\t#{}", x + 1);
+            info!("Preset:\t\t\t\t\t{}", opt.preset.as_ref().unwrap_or(&String::from("<None>")));
+            info!("Version:\t\t\t\t0.0.3");
 
             let randomizer = Generator::new(&preset, seed);
             let spoiler = panic::catch_unwind(|| randomizer.randomize());

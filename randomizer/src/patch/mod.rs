@@ -1,9 +1,7 @@
 use std::{array, collections::HashMap, fs, iter, path::Path};
 use std::io::{Read, stdin, stdout, Write};
 
-use albw::{
-    course, demo::Timed, flow::FlowMut, Demo, File, Game, IntoBytes, Item, Language, Scene,
-};
+use albw::{course, demo::Timed, flow::FlowMut, Demo, File, Game, IntoBytes, Item, Language, Scene};
 use fs_extra::dir::CopyOptions;
 use log::{error, info};
 use serde::Serialize;
@@ -312,7 +310,7 @@ impl Patches {
             file.dump(&romfs)?;
         }
         let path = path.as_ref();
-        info!("Copying files to:    {}", path.display());
+        info!("Writing patch to:\t\t{}\\{:016X}", path.display(), self.game.id());
 
         match fs_extra::copy_items(
             &[moddir],
@@ -324,7 +322,7 @@ impl Patches {
         ).map_err(Error::io) {
             Ok(_) => Ok(()),
             Err(_) => {
-                error!("Couldn't write results to: \"{}\"", path.display());
+                error!("Couldn't write to: \t{}", path.display());
                 error!("Please check that config.toml points to a valid output destination.");
                 pause();
                 std::process::exit(1);
