@@ -925,15 +925,15 @@ pub fn plando() -> Result<(), Error> {
     layout.set(Location::new(regions::hyrule::field::post_eastern::SUBREGION, "Woods"), Item::RupeeGold);
 
 
-    layout.set(Location::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (1)"), Item::Heart);
-    layout.set(Location::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (2)"), Item::Heart);
-    layout.set(Location::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (3)"), Item::Heart);
-    layout.set(Location::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (4)"), Item::Heart);
-    layout.set(Location::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (5)"), Item::Heart);
-    layout.set(Location::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (6)"), Item::Heart);
-    layout.set(Location::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (7)"), Item::Heart);
-    layout.set(Location::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (8)"), Item::Heart);
-    layout.set(Location::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (9)"), Item::Heart);
+    layout.set(Location::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (1)"), Item::RupeeGold);
+    layout.set(Location::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (2)"), Item::MilkMatured);
+    layout.set(Location::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (3)"), Item::DashBoots);
+    layout.set(Location::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (4)"), Item::RingHekiga);
+    layout.set(Location::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (5)"), Item::RupeeGold);
+    layout.set(Location::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (6)"), Item::ClothesBlue);
+    layout.set(Location::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (7)"), Item::ItemBombLv2);
+    layout.set(Location::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (8)"), Item::ItemTornadeRodLv2);
+    layout.set(Location::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (9)"), Item::RupeeGold);
 
 
 
@@ -970,14 +970,14 @@ pub fn plando() -> Result<(), Error> {
     layout.set(Location::new(regions::hyrule::kakariko::village::SUBREGION, "Well (Chest)"), Item::ClothesBlue);
     layout.set(Location::new(regions::hyrule::kakariko::village::SUBREGION, "Well (Upper)"), Item::ClothesBlue);
     layout.set(Location::new(regions::hyrule::kakariko::village::SUBREGION, "Jail"), Item::RupeeGold);
-    layout.set(Location::new(regions::hyrule::kakariko::post_sanc::SUBREGION, "Merchant (Left)"), Item::Heart);
+    layout.set(Location::new(regions::hyrule::kakariko::post_sanc::SUBREGION, "Merchant (Left)"), Item::RupeeGold);
     layout.set(Location::new(regions::hyrule::kakariko::post_sanc::SUBREGION, "Bee Guy"), Item::HintGlasses);
     layout.set(Location::new(regions::hyrule::kakariko::post_sanc::SUBREGION, "Bee Guy (Golden Bee)"), Item::ItemFireRod);
     layout.set(Location::new(regions::hyrule::kakariko::post_sanc::SUBREGION, "Fortune Teller"), Item::Pouch);
     layout.set(Location::new(regions::hyrule::kakariko::post_sanc::SUBREGION, "Milk Bar Owner"), Item::MilkMatured);
     layout.set(Location::new(regions::hyrule::kakariko::post_sanc::SUBREGION, "Cucco Ranch"), Item::RupeeGold);
     layout.set(Location::new(regions::hyrule::kakariko::shady_guy::SUBREGION, "Shady Guy"), Item::RupeeGold);
-    layout.set(Location::new(regions::hyrule::kakariko::shady_guy::SUBREGION, "Merchant (Right)"), Item::Heart);
+    layout.set(Location::new(regions::hyrule::kakariko::shady_guy::SUBREGION, "Merchant (Right)"), Item::RupeeGold);
     layout.set(Location::new(regions::hyrule::kakariko::closed::SUBREGION, "Stylish Woman"), Item::RupeeGold);
 
     // Zora's Domain

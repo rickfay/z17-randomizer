@@ -55,6 +55,30 @@ macro_rules! action {
 
 pub fn apply(patcher: &mut Patcher) -> Result<()> {
     apply!(patcher,
+
+        // Eastern Ruins Treasure Dungeon
+        AttractionLight 1 {
+            [15].disable(), // Skip Cutscene
+        },
+        // Southern Ruins Treasure Dungeon
+        AttractionLight 2 {
+            [54].disable(), // Skip Cutscene
+        },
+        // Haunted Grove Treasure Dungeon
+        AttractionLight 3 {
+            [47].disable(), // Skip Cutscene
+        },
+        // Death Mountain Treasure Dungeon
+        AttractionLight 4 {
+            [118].disable(), // Skip Cutscene
+        },
+        // Sanctuary Treasure Dungeon
+        AttractionLight 5 {
+            [26].disable(), // Skip Cutscene
+        },
+
+
+
         // Lost Woods
         FieldLight 1 {
             [34].active(375), // Skip Poes
@@ -108,6 +132,9 @@ pub fn apply(patcher: &mut Patcher) -> Result<()> {
             [233].disable(), // Open Maiamai Cave
             [235].disable(), // Remove the Sign
         },
+
+
+
         // Dark Maze
         FieldDark 20 {
             [235].disable(), // Hilda Text
@@ -123,6 +150,9 @@ pub fn apply(patcher: &mut Patcher) -> Result<()> {
             [195].disable(), // NpcGuardMan
             [196].disable(), // NpcGuardMan
         },
+
+
+
         // Your house
         IndoorLight 1 {
             [46].disable(), // Disable Ravio's bye-bye
@@ -158,6 +188,9 @@ pub fn apply(patcher: &mut Patcher) -> Result<()> {
         IndoorLight 19 {
             [0x10].disable(), // Remove captain
         },
+
+
+
         // Donkey Cave
         CaveLight 1 {
             [84].disable(), // Remove a MojVolcanicRock to fix a vanilla softlock
@@ -166,6 +199,9 @@ pub fn apply(patcher: &mut Patcher) -> Result<()> {
         CaveLight 7 {
             [0x84].enable(), // Enable Zora Queen event always
         },
+
+
+
         // Eastern Palace
         DungeonEast 3 {
             // Open door after defeating Yuga
