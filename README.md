@@ -4,6 +4,19 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
 
 ## Updates
 
+#### Version 0.0.3:
+
+- Highlights:
+  - Super Lamp and Super Net inclusion option added. These are progressive updates to the base Lamp and Net, meaning there will be 2 of each in the item pool if the option is enabled.
+  - Maiamai Cave is open by default, bombs are no longer necessary.
+  - The Curtain bug in Zelda's Study is fixed.
+  - Many small cutscenes have been removed, most notably in the Dark Maze. Sorry Hilda Hey fans.
+
+- Additional Changes:
+  - The Inside Hyrule Castle dungeon door is now sealed shut. Remember, there is no need to enter this dungeon in this version of the randomizer.
+  - A boulder was removed from the Donkey Cave to fix a potential vanilla softlock
+  - Minor UI tweaks
+
 #### Version 0.0.2:
 
 - Highlights:
@@ -215,7 +228,7 @@ Time and technical knowledge (or lack thereof) are the main barriers to future p
 
 ## Special Thanks
 
-- Tocapa for building the ALBWR foundation this hack built from
+- Tocapa for building the original ALBWR foundation this hack is built from
 - My Beta Testers: Br00ty, j_im, flora, and Herreteman
 
 ## License
