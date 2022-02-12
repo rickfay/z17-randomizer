@@ -310,7 +310,7 @@ impl Patches {
             file.dump(&romfs)?;
         }
         let path = path.as_ref();
-        info!("Writing patch to:\t\t{}\\{:016X}", path.display(), self.game.id());
+        info!("Writing patch to:               {}\\{:016X}", path.display(), self.game.id());
 
         match fs_extra::copy_items(
             &[moddir],
@@ -322,7 +322,7 @@ impl Patches {
         ).map_err(Error::io) {
             Ok(_) => Ok(()),
             Err(_) => {
-                error!("Couldn't write to: \t{}", path.display());
+                error!("Couldn't write to:              {}", path.display());
                 error!("Please check that config.toml points to a valid output destination.");
                 pause();
                 std::process::exit(1);

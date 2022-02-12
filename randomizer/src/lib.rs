@@ -129,11 +129,11 @@ impl<'settings> Generator<'settings> {
 
     /// Randomize world and generate files according to settings.
     pub fn randomize(&self) -> Spoiler {
-        info!("Seed:\t\t\t\t\t{}", self.seed);
-        info!("Hash:\t\t\t\t\t{}", self.hash().0);
-        info!("Logic:\t\t\t\t\t{}", if self.settings.logic.glitched_logic {"Glitched"} else {"Normal"});
-        info!("Swords:\t\t\t\t\t{}", if self.settings.logic.swordless_mode {"Swordless Mode - No Swords"} else {"Normal"});
-        info!("Super Items:\t\t\t{}", if self.settings.logic.super_items {"Included"} else {"Not Included"});
+        info!("Seed:                           {}", self.seed);
+        info!("Hash:                           {}", self.hash().0);
+        info!("Logic:                          {}", if self.settings.logic.glitched_logic {"Glitched"} else {"Normal"});
+        info!("Swords:                         {}", if self.settings.logic.swordless_mode {"Swordless Mode - No Swords"} else {"Normal"});
+        info!("Super Items:                    {}", if self.settings.logic.super_items {"Included"} else {"Not Included"});
 
         let rng = StdRng::seed_from_u64(self.seed as u64);
         let (randomized, layout) = Randomized::new(rng, exclude(&self.settings), &self.settings);
@@ -565,7 +565,7 @@ impl<'settings> Spoiler<'settings> {
         }
         if spoiler {
             let path = paths.output().join(format!("spoiler {}.yaml", self.seed));
-            info!("Writing spoiler to:\t\t{}", path.display());
+            info!("Writing spoiler to:             {}", path.display());
             serde_yaml::to_writer(File::create(path)?, &self)
                 .expect("Could not write the spoiler log.");
         }

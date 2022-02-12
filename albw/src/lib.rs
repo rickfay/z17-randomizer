@@ -117,7 +117,7 @@ impl Game {
         P: AsRef<Path>,
     {
         let path = path.as_ref().to_path_buf();
-        info!("Loading ROM from:\t\t{}", path.display());
+        info!("Loading ROM from:               {}", path.display());
         let mut cxi = Cxi::open(&path)?;
         if cxi.id() == US_ID {
             let id = cxi.id();
