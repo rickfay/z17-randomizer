@@ -10,6 +10,7 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
   - Super Lamp and Super Net inclusion option added. These are progressive updates to the base Lamp and Net, meaning there will be 2 of each in the item pool if the option is enabled.
   - Maiamai Cave is open by default, bombs are no longer necessary.
   - The Curtain bug in Zelda's Study is fixed.
+  - The Weather Vanes by Link's House and the Vacant House are pre-activated.
   - Many small cutscenes have been removed, most notably in the Dark Maze. Sorry Hilda Hey fans.
 
 - Additional Changes:
