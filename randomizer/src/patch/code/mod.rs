@@ -166,7 +166,7 @@ pub fn create(patcher: &Patcher) -> Code {
     bracelet(&mut code);
     ore_progress(&mut code);
     merchant(&mut code);
-    // fix castle barrer?
+    // fix castle barrier?
     let master_sword_flag = code.text().define([
         ldr(R0, EVENT_FLAG_PTR),
         ldr(R1, 410),

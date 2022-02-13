@@ -92,7 +92,7 @@ impl<P> System<P> {
     {
         let path = self.config.join("presets").join(format!("{}.toml", name));
 
-        info!("Loading preset from: {}\n", path.display());
+        info!("Loading preset from:            {}\n", path.display());
 
         toml::from_slice(&fs::read(
             path,

@@ -12,7 +12,7 @@ crate::region! {
     },
     chest {
         locations: [
-            "Chest": RupeePurple @Chest(1[515]),
+            "Chest": ItemKandelaarLv2 @Chest(1[515]),
         ],
     },
 }

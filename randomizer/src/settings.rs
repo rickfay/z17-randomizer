@@ -54,6 +54,8 @@ pub struct Logic {
     pub minigames_excluded: bool,
     /// Swordless Mode
     pub swordless_mode: bool,
+    /// Shuffle Super Lamp and Super Net
+    pub super_items: bool,
 }
 
 /// Settings to change the randomizer's logic checks.

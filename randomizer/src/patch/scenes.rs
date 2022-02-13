@@ -55,6 +55,30 @@ macro_rules! action {
 
 pub fn apply(patcher: &mut Patcher) -> Result<()> {
     apply!(patcher,
+
+        // Eastern Ruins Treasure Dungeon
+        AttractionLight 1 {
+            [15].disable(), // Skip Cutscene
+        },
+        // Southern Ruins Treasure Dungeon
+        AttractionLight 2 {
+            [54].disable(), // Skip Cutscene
+        },
+        // Haunted Grove Treasure Dungeon
+        AttractionLight 3 {
+            [47].disable(), // Skip Cutscene
+        },
+        // Death Mountain Treasure Dungeon
+        AttractionLight 4 {
+            [118].disable(), // Skip Cutscene
+        },
+        // Sanctuary Treasure Dungeon
+        AttractionLight 5 {
+            [26].disable(), // Skip Cutscene
+        },
+
+
+
         // Lost Woods
         FieldLight 1 {
             [34].active(375), // Skip Poes
@@ -74,6 +98,13 @@ pub fn apply(patcher: &mut Patcher) -> Result<()> {
         FieldLight 16 {
             [197].disable(), // Disable merchant's Smooth Gem text
             [299].disable(), // Disable merchant's bottle text
+        },
+        // Hyrule Castle
+        FieldLight 18 {
+            [155].enable(1), // AreaChangeScene
+            [165].active(1), // MojBarrier
+            [393].disable(None), // Seal off door to Inside Hyrule Castle
+            //[393].disable(Flag::Event(1)), // Open door to Inside Hyrule Castle
         },
         // Outside your house
         FieldLight 27 {
@@ -96,6 +127,32 @@ pub fn apply(patcher: &mut Patcher) -> Result<()> {
                 id(0x23), // replace with chest
             ],
         },
+        // Lake Hylia
+        FieldLight 35 {
+            [233].disable(), // Open Maiamai Cave
+            [235].disable(), // Remove the Sign
+        },
+
+
+
+        // Dark Maze
+        FieldDark 20 {
+            [235].disable(), // Hilda Text
+
+            [63].disable(),  // AreaEventTalk
+            [115].disable(), // AreaEventTalk
+            [116].disable(), // AreaEventTalk
+            [119].disable(), // AreaEventTalk
+            [122].disable(), // AreaEventTalk
+            [188].disable(), // AreaEventTalk
+            [231].disable(), // AreaEventTalk
+
+            [195].disable(), // NpcGuardMan
+            [196].disable(), // NpcGuardMan
+        },
+
+
+
         // Your house
         IndoorLight 1 {
             [46].disable(), // Disable Ravio's bye-bye
@@ -105,6 +162,11 @@ pub fn apply(patcher: &mut Patcher) -> Result<()> {
             [57].disable(Flag::Course(244)),
             [58].disable(), // Disable Ravio's welcome
             [59].disable(), // Disable Ravio's welcome
+        },
+        // Zelda's Study
+        IndoorLight 7 {
+            [26].disable(), // Disable Curtain
+            [29].disable(), // Disable AreaDisableWallIn
         },
         // Rosso's house
         IndoorLight 10 {
@@ -116,7 +178,7 @@ pub fn apply(patcher: &mut Patcher) -> Result<()> {
         },
         // Hyrule Castle
         IndoorLight 12 {
-            [48].call {|obj: &mut Obj| {obj.arg_mut().5 = 3;}},
+            [48].call {|obj: &mut Obj| {obj.arg_mut().5 = 3;}}, // Fix chest to not respawn
         },
         // Bar
         IndoorLight 15 {
@@ -126,10 +188,20 @@ pub fn apply(patcher: &mut Patcher) -> Result<()> {
         IndoorLight 19 {
             [0x10].disable(), // Remove captain
         },
+
+
+
+        // Donkey Cave
+        CaveLight 1 {
+            [84].disable(), // Remove a MojVolcanicRock to fix a vanilla softlock
+        },
         // Zora's Domain
         CaveLight 7 {
             [0x84].enable(), // Enable Zora Queen event always
         },
+
+
+
         // Eastern Palace
         DungeonEast 3 {
             // Open door after defeating Yuga
@@ -138,27 +210,20 @@ pub fn apply(patcher: &mut Patcher) -> Result<()> {
                 enable(),
             ],
         },
-        // Hyrule Castle
+        // Inside Hyrule Castle
         DungeonCastle 7 {
             [19].enable(415),
             [20].enable(415),
             [21].enable(415),
             [22].enable(415),
         },
-    );
-
-    //if settings.behavior.barrier.is_start() {
-
-    apply!(patcher,
-        // Hyrule Castle
-        FieldLight 18 {
-            [155].enable(1),
-            [165].active(1),
-            [393].disable(Flag::Event(1)),
+        // Thieves' Hideout
+        DungeonHagure 1 {
+            [1371].disable(), // Spear Boy AreaEventTalk
+            [1372].disable(), // Spear Boy
         },
     );
 
-    //}
     Ok(())
 }
 

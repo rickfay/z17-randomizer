@@ -129,10 +129,11 @@ impl<'settings> Generator<'settings> {
 
     /// Randomize world and generate files according to settings.
     pub fn randomize(&self) -> Spoiler {
-        info!("Seed:    {}", self.seed);
-        info!("Hash:    {}", self.hash().0);
-        info!("Logic:   {}", if self.settings.logic.glitched_logic {"Glitched"} else {"Normal"});
-        info!("Swords:  {}", if self.settings.logic.swordless_mode {"No"} else {"Yes"});
+        info!("Seed:                           {}", self.seed);
+        info!("Hash:                           {}", self.hash().0);
+        info!("Logic:                          {}", if self.settings.logic.glitched_logic {"Glitched"} else {"Normal"});
+        info!("Swords:                         {}", if self.settings.logic.swordless_mode {"Swordless Mode - No Swords"} else {"Normal"});
+        info!("Super Items:                    {}", if self.settings.logic.super_items {"Included"} else {"Not Included"});
 
         let rng = StdRng::seed_from_u64(self.seed as u64);
         let (randomized, layout) = Randomized::new(rng, exclude(&self.settings), &self.settings);
@@ -390,6 +391,7 @@ trait ItemExt {
     fn is_dungeon(&self) -> bool;
     fn is_progression(&self) -> bool;
     fn is_sword(&self) -> bool;
+    fn is_super(&self) -> bool;
     fn is_ore(&self) -> bool;
     fn normalize(self) -> Self;
 }
@@ -445,6 +447,14 @@ impl ItemExt for Item {
         )
     }
 
+    fn is_super(&self) -> bool {
+        matches! {
+            self,
+            Item::ItemKandelaarLv2 |
+            Item::ItemInsectNetLv2
+        }
+    }
+
     fn is_ore(&self) -> bool {
         matches!(
             self,
@@ -470,6 +480,8 @@ impl ItemExt for Item {
             Item::PowerfulGlove => Item::PowerGlove,
             Item::ClothesRed => Item::ClothesBlue,
             Item::RingRental => Item::RingHekiga,
+            Item::ItemKandelaarLv2 => Item::ItemKandelaar,
+            Item::ItemInsectNetLv2 => Item::ItemInsectNet,
             item => item,
         }
     }
@@ -512,6 +524,8 @@ impl Randomized {
 
                     let i = if settings.logic.swordless_mode && item.is_sword() {
                         Item::RupeeG
+                    } else if !settings.logic.super_items && item.is_super() {
+                        Item::RupeePurple
                     } else {
                         item
                     };
@@ -551,7 +565,7 @@ impl<'settings> Spoiler<'settings> {
         }
         if spoiler {
             let path = paths.output().join(format!("spoiler {}.yaml", self.seed));
-            info!("Writing spoiler to:  {}", path.display());
+            info!("Writing spoiler to:             {}", path.display());
             serde_yaml::to_writer(File::create(path)?, &self)
                 .expect("Could not write the spoiler log.");
         }
