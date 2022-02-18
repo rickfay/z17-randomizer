@@ -59,7 +59,7 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
 
 ## Setup
 
-Download: [Latest Stable Release](https://github.com/rickfay/z17-randomizer/releases/download/v0.0.2/z17-rando-0.0.2.zip)
+Download: [Latest Stable Release](https://github.com/rickfay/z17-randomizer/releases/download/v0.0.3/z17r-0.0.3.zip)
 
 1. Unzip the download to your directory of choice.
 2. Move your A Link Between Worlds ROM into the same folder. Name it: `A Link Between Worlds (USA).3ds`
