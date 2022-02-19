@@ -165,6 +165,9 @@ pub fn apply(patcher: &mut Patcher) -> Result<()> {
         },
         // Zelda's Study
         IndoorLight 7 {
+            [10].call {|obj: &mut Obj| {
+                obj.arg_mut().3 = 0; // Prevent Long Portal Transition
+            }},
             [26].disable(), // Disable Curtain
             [29].disable(), // Disable AreaDisableWallIn
         },
