@@ -89,6 +89,10 @@ impl Obj {
         &mut self.arg
     }
 
+    pub fn srt_mut(&mut self) -> &mut Transform {
+        &mut self.srt
+    }
+
     pub fn set_active_flag<F>(&mut self, flag: F)
     where
         F: Into<Option<Flag>>,
@@ -177,9 +181,9 @@ pub type Lnk = (u16, i16, i16);
 
 #[derive(Debug)]
 pub struct Transform {
-    scale: Vec3,
-    rotate: Vec3,
-    translate: Vec3,
+    pub scale: Vec3,
+    pub rotate: Vec3,
+    pub translate: Vec3,
 }
 
 impl<'de> Deserialize<'de> for Transform {
@@ -263,9 +267,9 @@ impl Serialize for Transform {
 
 #[derive(Debug)]
 pub struct Vec3 {
-    x: f32,
-    y: f32,
-    z: f32,
+    pub x: f32,
+    pub y: f32,
+    pub z: f32,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
