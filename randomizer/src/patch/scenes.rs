@@ -132,6 +132,13 @@ pub fn apply(patcher: &mut Patcher) -> Result<()> {
             [233].disable(), // Open Maiamai Cave
             [235].disable(), // Remove the Sign
         },
+        // Sacred Realm
+        FieldLight 43 {
+            [23].disable(), // seichi - "Sanctuary" - Initial text
+            [26].disable(), // zelda_talk - Chat after standing up
+            [33].disable(), // zelda_talk_b - Wait for Zelda
+            [34].disable(), // zelda_talk_c - Last chat before triangles
+        },
 
 
 
