@@ -109,7 +109,7 @@ fn validate_rom(file: &fs::File) {
 
     let valid_checksum = String::from("4071DC95F6948669C7A13D378509D5A224E167B77CF8FD2E163484BA9AF8B64D");
 
-    if !valid_checksum.eq(&HEXUPPER.encode(context.finish().as_ref())) {
+    if valid_checksum.eq(&HEXUPPER.encode(context.finish().as_ref())) {
         info!("ROM is valid.");
     } else {
         error!("ROM is invalid. Please provide a decrypted, North American ROM of The Legend of Zelda: A Link Between Worlds.");
