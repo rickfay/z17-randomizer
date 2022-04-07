@@ -90,6 +90,12 @@ pub fn apply(patcher: &mut Patcher) -> Result<()> {
             [135].disable(), // Disable IndoorLight4
             [136].enable(250), // Replace with IndoorLight10
         },
+
+        // Outside Sanctuary
+        FieldLight 11 {
+            [102].disable(), // Bye Seres
+        },
+
         // Outside witch's house
         FieldLight 14 {
             [123].disable(), // Disable surprised Zora
@@ -160,12 +166,25 @@ pub fn apply(patcher: &mut Patcher) -> Result<()> {
 
 
 
-        // Your house
+        // Link's House
         IndoorLight 1 {
+
+            // Convert standing Ravio into shopkeeper Ravio
+            [56].call {|obj: &mut Obj| {
+                obj.arg_mut().3 = 0;
+
+                obj.set_active_flag(Flag::Event(233));
+                obj.set_inactive_flag(Flag::Event(597));
+
+                obj.set_enable_flag(Flag::Event(233));
+                obj.set_disable_flag(None);
+
+                obj.set_translate(-1.0, 0.0, -5.5);
+            }},
+
             [46].disable(), // Disable Ravio's bye-bye
             [54].disable(), // Disable Ravio's welcome
             [55].disable(Flag::Course(244)),
-            [56].disable(Flag::Course(244)),
             [57].disable(Flag::Course(244)),
             [58].disable(), // Disable Ravio's welcome
             [59].disable(), // Disable Ravio's welcome
@@ -210,6 +229,11 @@ pub fn apply(patcher: &mut Patcher) -> Result<()> {
             [0x84].enable(), // Enable Zora Queen event always
         },
 
+        // Thief Girl Cave
+        CaveDark 15 {
+            [10].disable(), // Entrance text
+            [13].disable(), // It's a secret to everyone
+        },
 
 
         // Eastern Palace
@@ -229,6 +253,7 @@ pub fn apply(patcher: &mut Patcher) -> Result<()> {
         },
         // Thieves' Hideout
         DungeonHagure 1 {
+            [541].enable(), // Thief Girl - Keep her from despawning after dungeon clear
             [1371].disable(), // Spear Boy AreaEventTalk
             [1372].disable(), // Spear Boy
         },

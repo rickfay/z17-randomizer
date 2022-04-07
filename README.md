@@ -4,6 +4,16 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
 
 ## Updates
 
+#### Version 0.0.4:
+  - **FIX:** Prevent players missing the Big Key Chest in Thieves' Hideout.
+    - Thief Girl will now remain in the dungeon even after completing it.
+  - ROMs are now validated using an SHA-256 checksum prior to patching, and will provide better feedback when a ROM is not valid.
+  - _True_ Double Ravio
+  - Long Portal animation from Zelda's Study has been shortened
+  - Sacred Realm cutscenes removed
+  - Thief Girl Cave cutscenes removed
+  - Bye Seres
+
 #### Version 0.0.3:
 
 - Highlights:

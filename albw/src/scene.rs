@@ -154,6 +154,12 @@ impl Obj {
     pub fn set_id(&mut self, id: i16) {
         self.id = id;
     }
+
+    pub fn set_translate(&mut self, x: f32, y: f32, z: f32) {
+        self.srt.translate.x = x;
+        self.srt.translate.y = y;
+        self.srt.translate.z = z;
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize)]
