@@ -407,6 +407,7 @@ fn cutscenes<'game, 'settings>(
                 940, // Vacant House Weather Vane
                 950, // Maiamai
                 //955, // Master Ore UI
+                960, // Blacksmith's Wife
                 965, // Suppress Energy Potion
             ]) {
                 opening.add_event_flag(flag);
