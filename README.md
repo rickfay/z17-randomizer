@@ -13,6 +13,7 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
   - Sacred Realm cutscenes removed
   - Thief Girl Cave cutscenes removed
   - Kakariko rental cutscene removed
+  - Blacksmith Wife cutscenes removed
   - Bye Seres
 
 #### Version 0.0.3:
