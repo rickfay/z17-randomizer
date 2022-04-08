@@ -64,6 +64,14 @@ impl Stage {
             None
         }
     }
+
+    pub fn get_mut_system(&mut self, unq: u16) -> Option<&mut Obj> {
+        if let Some(i) = self.system.iter().position(|sys| sys.unq == unq) {
+            self.system.get_mut(i)
+        } else {
+            None
+        }
+    }
 }
 
 #[derive(Debug, Deserialize, Serialize)]

@@ -20,6 +20,20 @@ macro_rules! apply {
     };
 }
 
+macro_rules! apply_system {
+    ($patcher:expr, $($course:ident $stage:literal {
+        $([$unq:literal].$action:ident $value:tt,)+
+    },)+) => {
+        $({
+            let stage = $patcher.scene(course::Id::$course, $stage - 1)?.stage_mut().get_mut();
+            $(action!((stage
+                .get_mut_system($unq)
+                .ok_or_else(|| $crate::Error::game("Could not find scene."))?
+            ).$action $value);)+
+        })+
+    };
+}
+
 macro_rules! action {
     ($unq:tt.id($id:literal)) => {
         $unq.set_id($id);
@@ -183,10 +197,18 @@ pub fn apply(patcher: &mut Patcher) -> Result<()> {
                 obj.set_translate(-1.0, 0.0, -5.5);
             }},
 
+            // Double Sheerow
+            [57].call {|obj: &mut Obj| {
+                obj.set_active_flag(None);
+                obj.set_enable_flag(Flag::Event(233));
+
+                obj.set_disable_flag(None);
+                obj.set_translate(-2.0, 0.0, -6.0)
+            }},
+
             [46].disable(), // Disable Ravio's bye-bye
             [54].disable(), // Disable Ravio's welcome
             [55].disable(Flag::Course(244)),
-            [57].disable(Flag::Course(244)),
             [58].disable(), // Disable Ravio's welcome
             [59].disable(), // Disable Ravio's welcome
         },
@@ -256,6 +278,18 @@ pub fn apply(patcher: &mut Patcher) -> Result<()> {
             [541].enable(), // Thief Girl - Keep her from despawning after dungeon clear
             [1371].disable(), // Spear Boy AreaEventTalk
             [1372].disable(), // Spear Boy
+        },
+    );
+
+    apply_system!(patcher,
+
+        // Link's House
+        IndoorLight 1 {
+            // Default Spawn Point
+            [47].call {|obj: &mut Obj| {
+                obj.srt_mut().rotate.y = 0.0;
+                obj.set_translate(0.0, 0.0, -6.5);
+            }},
         },
     );
 
