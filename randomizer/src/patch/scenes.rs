@@ -103,6 +103,7 @@ pub fn apply(patcher: &mut Patcher) -> Result<()> {
         // Kakariko Village
         FieldLight 16 {
             [197].disable(), // Disable merchant's Smooth Gem text
+            [265].disable(), // Disable girl/dad text
             [299].disable(), // Disable merchant's bottle text
         },
         // Hyrule Castle
@@ -232,9 +233,8 @@ pub fn apply(patcher: &mut Patcher) -> Result<()> {
         // Thief Girl Cave
         CaveDark 15 {
             [10].disable(), // Entrance text
-            [13].disable(), // It's a secret to everyone
+            [13].disable(), // It's a secret to everybody
         },
-
 
         // Eastern Palace
         DungeonEast 3 {
