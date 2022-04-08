@@ -12,6 +12,7 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
   - Long Portal animation from Zelda's Study has been shortened
   - Sacred Realm cutscenes removed
   - Thief Girl Cave cutscenes removed
+  - Kakariko rental cutscene removed
   - Bye Seres
 
 #### Version 0.0.3:
