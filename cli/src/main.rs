@@ -82,6 +82,7 @@ fn preset_ui() -> Settings {
     let start_with_bracelet = prompt_until_bool("Start with Ravio's Bracelet?");
     let bell_in_shop = prompt_until_bool("Place Bell in Ravio's Shop?");
     let pouch_in_shop = prompt_until_bool("Place Pouch in Ravio's Shop?");
+    let boots_in_shop = prompt_until_bool("Place Pegasus Boots in Ravio's Shop?");
     let super_items = prompt_until_bool("Include the Super Lamp and Super Net?");
     let minigames_excluded = prompt_until_bool("Exclude all minigames?");
     let skip_trials = prompt_until_bool("Skip the Lorule Castle Trials?");
@@ -95,6 +96,7 @@ fn preset_ui() -> Settings {
         logic: Logic {
             bell_in_shop,
             pouch_in_shop,
+            boots_in_shop,
             super_items,
             glitched_logic,
             start_with_bracelet,
