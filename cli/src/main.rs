@@ -22,19 +22,19 @@ struct Opt {
     no_spoiler: bool,
 }
 
-fn prompt_until_bool(prompt: &str) -> ::sys::Result<bool>
+fn prompt_until_bool(prompt: &str) -> bool
 {
     loop {
         print!("\n{}\nEnter (y/n): ", prompt);
-        stdout().flush()?;
+        stdout().flush().unwrap();
         let mut input = String::new();
-        stdin().read_line(&mut input)?;
+        stdin().read_line(&mut input).unwrap();
         input = input.trim().to_string();
 
         if "y".eq_ignore_ascii_case(&input) {
-            break Ok(true);
+            break true;
         } else if "n".eq_ignore_ascii_case(&input) {
-            break Ok(false);
+            break false;
         } else {
             eprintln!("\nPlease enter either 'y' or 'n'");
         }
@@ -79,13 +79,14 @@ fn preset_ui() -> Settings {
     info!("No preset has been specified. Seed Options UI will be used instead.\n");
     println!("--- Seed Options ---");
 
-    let start_with_bracelet = prompt_until_bool("Start with Ravio's Bracelet?").unwrap();
-    let bell_in_shop = prompt_until_bool("Place Bell in Ravio's Shop?").unwrap();
-    let pouch_in_shop = prompt_until_bool("Place Pouch in Ravio's Shop?").unwrap();
-    let super_items = prompt_until_bool("Include the Super Lamp and Super Net?").unwrap();
-    let minigames_excluded = prompt_until_bool("Exclude all minigames?").unwrap();
-    let glitched_logic = prompt_until_bool("Use Glitched Logic? (advanced)").unwrap();
-    let swordless_mode = prompt_until_bool("Play in Swordless Mode? (advanced)").unwrap();
+    let start_with_bracelet = prompt_until_bool("Start with Ravio's Bracelet?");
+    let bell_in_shop = prompt_until_bool("Place Bell in Ravio's Shop?");
+    let pouch_in_shop = prompt_until_bool("Place Pouch in Ravio's Shop?");
+    let super_items = prompt_until_bool("Include the Super Lamp and Super Net?");
+    let minigames_excluded = prompt_until_bool("Exclude all minigames?");
+    let skip_trials = prompt_until_bool("Skip the Lorule Castle Trials?");
+    let glitched_logic = prompt_until_bool("Use Glitched Logic? (advanced)");
+    let swordless_mode = prompt_until_bool("Play in Swordless Mode? (advanced)");
 
     println!();
     info!("Starting seed generation...\n");
@@ -99,6 +100,7 @@ fn preset_ui() -> Settings {
             start_with_bracelet,
             minigames_excluded,
             swordless_mode,
+            skip_trials,
             ..Default::default()
         },
         ..Default::default()

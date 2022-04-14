@@ -4,7 +4,7 @@ use albw::{
 };
 
 use super::Patcher;
-use crate::Result;
+use crate::{Result, Settings};
 
 macro_rules! apply {
     ($patcher:expr, $($course:ident $stage:literal {
@@ -67,7 +67,7 @@ macro_rules! action {
     };
 }
 
-pub fn apply(patcher: &mut Patcher) -> Result<()> {
+pub fn apply(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
     apply!(patcher,
 
         // Eastern Ruins Treasure Dungeon
@@ -281,6 +281,16 @@ pub fn apply(patcher: &mut Patcher) -> Result<()> {
         },
     );
 
+    // Skip Trials Option
+    if settings.logic.skip_trials {
+        apply!(patcher,
+            DungeonGanon 1 {
+                [158].disable(),
+            },
+        );
+    }
+
+    // Change 'System' properties
     apply_system!(patcher,
 
         // Link's House
@@ -294,16 +304,4 @@ pub fn apply(patcher: &mut Patcher) -> Result<()> {
     );
 
     Ok(())
-}
-
-#[cfg(test)]
-mod tests {
-    use super::apply;
-    use crate::{patch::Patcher, test_game, Result};
-
-    #[test]
-    fn it_works() -> Result<()> {
-        let mut patcher = Patcher::new(test_game()?)?;
-        apply(&mut patcher)
-    }
 }

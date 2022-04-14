@@ -7,6 +7,7 @@ use log::{error, info};
 use serde::Serialize;
 use tempfile::tempdir;
 use try_insert_ext::*;
+use albw::scene::Arg;
 
 use crate::{Error, Result, Settings};
 
@@ -92,23 +93,32 @@ impl Patcher {
         Ok(self.language(course)?.flow_mut())
     }
 
+    fn parse_args(&mut self, course: course::Id, stage: u16, unq: u16) -> &mut Arg {
+        self.scene(course, stage).unwrap()
+            .stage_mut()
+            .get_mut()
+            .get_mut(unq)
+            .ok_or_else(|| {
+                Error::game(format!(
+                    "{}{} [{}] not found",
+                    course.as_str(),
+                    stage + 1,
+                    unq
+                ))
+            }).unwrap().arg_mut()
+    }
+
     fn apply(&mut self, patch: Patch, item: Item) -> Result<()> {
         match patch {
             Patch::Chest { course, stage, unq } => {
-                self.scene(course, stage)?
-                    .stage_mut()
-                    .get_mut()
-                    .get_mut(unq)
-                    .ok_or_else(|| {
-                        Error::game(format!(
-                            "{}{} [{}] not found",
-                            course.as_str(),
-                            stage + 1,
-                            unq
-                        ))
-                    })?
-                    .arg_mut()
-                    .0 = item as i32;
+                self.parse_args(course, stage, unq).0 = item as i32;
+            }
+            Patch::Heart { course, scene, unq } |
+            Patch::Key { course, scene, unq } => {
+                self.parse_args(course, scene, unq).1 = item as i32;
+            }
+            Patch::Maiamai { course, scene, unq } => {
+                self.parse_args(course, scene, unq).2 = item as i32;
             }
             Patch::Event {
                 course,
@@ -131,22 +141,6 @@ impl Patcher {
                     .into_action()
                     .ok_or_else(|| Error::game("Not an action."))?
                     .set_value(item as u32);
-            }
-            Patch::Heart { course, scene, unq } | Patch::Key { course, scene, unq } => {
-                self.scene(course, scene)?
-                    .stage_mut()
-                    .get_mut()
-                    .get_mut(unq)
-                    .ok_or_else(|| {
-                        Error::game(format!(
-                            "{}{} [{}] not found",
-                            course.as_str(),
-                            scene + 1,
-                            unq
-                        ))
-                    })?
-                    .arg_mut()
-                    .1 = item as i32;
             }
             Patch::Shop(Shop::Ravio(index)) => {
                 self.rentals[index as usize] = item;
@@ -180,7 +174,7 @@ impl Patcher {
         self.scene(course::Id::FieldLight, 33)?
             .actors_mut()
             .add(chest)?;
-        scenes::apply(&mut self)?;
+        scenes::apply(&mut self, settings)?;
         let free = self.rentals[8];
         flow::apply(&mut self, free)?;
         {
@@ -260,6 +254,11 @@ pub enum Patch {
         unq: u16,
     },
     Key {
+        course: course::Id,
+        scene: u16,
+        unq: u16,
+    },
+    Maiamai {
         course: course::Id,
         scene: u16,
         unq: u16,
