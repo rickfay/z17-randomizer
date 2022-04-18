@@ -4,7 +4,7 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
 
 ## Updates
 
-<details>
+<details open="open">
 <summary>Version 0.0.4</summary>
 
   - **FIX:** Prevent players missing the Big Key Chest in Thieves' Hideout.
