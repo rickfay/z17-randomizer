@@ -4,7 +4,7 @@ use albw::{
 };
 
 use super::Patcher;
-use crate::Result;
+use crate::{Result, Settings};
 
 macro_rules! apply {
     ($patcher:expr, $($course:ident $stage:literal {
@@ -14,6 +14,20 @@ macro_rules! apply {
             let stage = $patcher.scene(course::Id::$course, $stage - 1)?.stage_mut().get_mut();
             $(action!((stage
                 .get_mut($unq)
+                .ok_or_else(|| $crate::Error::game("Could not find scene."))?
+            ).$action $value);)+
+        })+
+    };
+}
+
+macro_rules! apply_system {
+    ($patcher:expr, $($course:ident $stage:literal {
+        $([$unq:literal].$action:ident $value:tt,)+
+    },)+) => {
+        $({
+            let stage = $patcher.scene(course::Id::$course, $stage - 1)?.stage_mut().get_mut();
+            $(action!((stage
+                .get_mut_system($unq)
                 .ok_or_else(|| $crate::Error::game("Could not find scene."))?
             ).$action $value);)+
         })+
@@ -53,7 +67,7 @@ macro_rules! action {
     };
 }
 
-pub fn apply(patcher: &mut Patcher) -> Result<()> {
+pub fn apply(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
     apply!(patcher,
 
         // Eastern Ruins Treasure Dungeon
@@ -90,6 +104,12 @@ pub fn apply(patcher: &mut Patcher) -> Result<()> {
             [135].disable(), // Disable IndoorLight4
             [136].enable(250), // Replace with IndoorLight10
         },
+
+        // Outside Sanctuary
+        FieldLight 11 {
+            [102].disable(), // Bye Seres
+        },
+
         // Outside witch's house
         FieldLight 14 {
             [123].disable(), // Disable surprised Zora
@@ -97,6 +117,7 @@ pub fn apply(patcher: &mut Patcher) -> Result<()> {
         // Kakariko Village
         FieldLight 16 {
             [197].disable(), // Disable merchant's Smooth Gem text
+            [265].disable(), // Disable girl/dad text
             [299].disable(), // Disable merchant's bottle text
         },
         // Hyrule Castle
@@ -132,6 +153,13 @@ pub fn apply(patcher: &mut Patcher) -> Result<()> {
             [233].disable(), // Open Maiamai Cave
             [235].disable(), // Remove the Sign
         },
+        // Sacred Realm
+        FieldLight 43 {
+            [23].disable(), // seichi - "Sanctuary" - Initial text
+            [26].disable(), // zelda_talk - Chat after standing up
+            [33].disable(), // zelda_talk_b - Wait for Zelda
+            [34].disable(), // zelda_talk_c - Last chat before triangles
+        },
 
 
 
@@ -153,18 +181,42 @@ pub fn apply(patcher: &mut Patcher) -> Result<()> {
 
 
 
-        // Your house
+        // Link's House
         IndoorLight 1 {
+
+            // Convert standing Ravio into shopkeeper Ravio
+            [56].call {|obj: &mut Obj| {
+                obj.arg_mut().3 = 0;
+
+                obj.set_active_flag(Flag::Event(233));
+                obj.set_inactive_flag(Flag::Event(597));
+
+                obj.set_enable_flag(Flag::Event(233));
+                obj.set_disable_flag(None);
+
+                obj.set_translate(-1.0, 0.0, -5.5);
+            }},
+
+            // Double Sheerow
+            [57].call {|obj: &mut Obj| {
+                obj.set_active_flag(None);
+                obj.set_enable_flag(Flag::Event(233));
+
+                obj.set_disable_flag(None);
+                obj.set_translate(-2.0, 0.0, -6.0)
+            }},
+
             [46].disable(), // Disable Ravio's bye-bye
             [54].disable(), // Disable Ravio's welcome
             [55].disable(Flag::Course(244)),
-            [56].disable(Flag::Course(244)),
-            [57].disable(Flag::Course(244)),
             [58].disable(), // Disable Ravio's welcome
             [59].disable(), // Disable Ravio's welcome
         },
         // Zelda's Study
         IndoorLight 7 {
+            [10].call {|obj: &mut Obj| {
+                obj.arg_mut().3 = 0; // Prevent Long Portal Transition
+            }},
             [26].disable(), // Disable Curtain
             [29].disable(), // Disable AreaDisableWallIn
         },
@@ -200,7 +252,11 @@ pub fn apply(patcher: &mut Patcher) -> Result<()> {
             [0x84].enable(), // Enable Zora Queen event always
         },
 
-
+        // Thief Girl Cave
+        CaveDark 15 {
+            [10].disable(), // Entrance text
+            [13].disable(), // It's a secret to everybody
+        },
 
         // Eastern Palace
         DungeonEast 3 {
@@ -219,22 +275,33 @@ pub fn apply(patcher: &mut Patcher) -> Result<()> {
         },
         // Thieves' Hideout
         DungeonHagure 1 {
+            [541].enable(), // Thief Girl - Keep her from despawning after dungeon clear
             [1371].disable(), // Spear Boy AreaEventTalk
             [1372].disable(), // Spear Boy
         },
     );
 
-    Ok(())
-}
-
-#[cfg(test)]
-mod tests {
-    use super::apply;
-    use crate::{patch::Patcher, test_game, Result};
-
-    #[test]
-    fn it_works() -> Result<()> {
-        let mut patcher = Patcher::new(test_game()?)?;
-        apply(&mut patcher)
+    // Skip Trials Option
+    if settings.logic.skip_trials {
+        apply!(patcher,
+            DungeonGanon 1 {
+                [158].disable(),
+            },
+        );
     }
+
+    // Change 'System' properties
+    apply_system!(patcher,
+
+        // Link's House
+        IndoorLight 1 {
+            // Default Spawn Point
+            [47].call {|obj: &mut Obj| {
+                obj.srt_mut().rotate.y = 0.0;
+                obj.set_translate(0.0, 0.0, -6.5);
+            }},
+        },
+    );
+
+    Ok(())
 }

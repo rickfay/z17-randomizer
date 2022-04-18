@@ -134,6 +134,7 @@ impl<'settings> Generator<'settings> {
         info!("Logic:                          {}", if self.settings.logic.glitched_logic {"Glitched"} else {"Normal"});
         info!("Swords:                         {}", if self.settings.logic.swordless_mode {"Swordless Mode - No Swords"} else {"Normal"});
         info!("Super Items:                    {}", if self.settings.logic.super_items {"Included"} else {"Not Included"});
+        info!("Trials:                         {}", if self.settings.logic.skip_trials {"Skipped"} else {"Normal"});
 
         let rng = StdRng::seed_from_u64(self.seed as u64);
         let (randomized, layout) = Randomized::new(rng, exclude(&self.settings), &self.settings);

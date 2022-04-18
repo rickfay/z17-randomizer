@@ -4,7 +4,26 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
 
 ## Updates
 
-#### Version 0.0.3:
+<details open="open">
+<summary>Version 0.0.4</summary>
+
+  - **FIX:** Prevent players missing the Big Key Chest in Thieves' Hideout.
+    - Thief Girl will now remain in the dungeon even after completing it.
+  - `skip_trials` option added. Removes the Trials Door in Lorule Castle if enabled.
+  - `boots_in_shop` promoted to a UI option instead of requiring a preset to use.
+  - Glitched logic now considers using the Ice Rod to reach the Eastern Palace Boss door.
+  - Long Portal animation from Zelda's Study has been shortened.
+  - The following cutscenes have been removed:
+    - Zelda in the Sacred Realm
+    - Thief Girl Cave
+    - Kakariko Girl/Papa (if you didn't get anything from Ravio)
+    - Blacksmith's Wife
+  - The randomizer now calculates your ROM's SHA256 checksum for troubleshooting purposes.
+  - Bye Seres
+  - _True_ Double Ravio.
+</details>
+<details>
+<summary>Version 0.0.3</summary>
 
 - Highlights:
   - Super Lamp and Super Net inclusion option added. These are progressive updates to the base Lamp and Net, meaning there will be 2 of each in the item pool if the option is enabled.
@@ -17,8 +36,9 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
   - The Inside Hyrule Castle dungeon door is now sealed shut. Remember, there is no need to enter this dungeon in this version of the randomizer.
   - A boulder was removed from the Donkey Cave to fix a potential vanilla softlock
   - Minor UI tweaks
-
-#### Version 0.0.2:
+</details>
+<details>
+<summary>Version 0.0.2</summary>
 
 - Highlights:
   - Introduction of Swordless Mode Option. I regret this already :^)
@@ -30,8 +50,9 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
   - Smooth Gem is now locked to its original location in Kakariko (temporary fix for related bug)
   - Fix logic bug that could place Bracelet on Fire Cave Pillar in a Glitched No Bracelet seed
   - Removed `unsafe_key_logic` option. Please remove this from your presets.
-
-#### Version 0.0.1:
+</details>
+<details>
+<summary>Version 0.0.1</summary>
 
 - Highlights:
   - Portals to Lorule are open from game start
@@ -56,10 +77,11 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
   - Master Ore UI element present by default
   - Remove Standard Mode option
   - Experimental option "Night Mode" changes Hyrule's lighting until you visit Lorule. There are some performance issues on console, so not advised for races.
+</details>
 
 ## Setup
 
-Download: [Latest Stable Release](https://github.com/rickfay/z17-randomizer/releases/download/v0.0.3/z17r-0.0.3.zip)
+Download: [Latest Stable Release (0.0.4)](https://github.com/rickfay/z17-randomizer/releases/download/v0.0.4/z17r-0.0.4.zip)
 
 1. Unzip the download to your directory of choice.
 2. Move your A Link Between Worlds ROM into the same folder. Name it: `A Link Between Worlds (USA).3ds`
@@ -110,14 +132,20 @@ For Citra (emulator):
 `pouch_in_shop`
 - If enabled, guarantees the Pouch will be placed in Ravio's Shop.
 
+`boots_in_shop`
+- If enabled, guarantees the Pegasus Boots will be placed in Ravio's Shop.
+
 `super_items`
 - If enabled, includes the Super Lamp and Super Net in the shuffled item pool as progressive upgrades to the base Lamp and Net.
 
-`glitched_logic`
-- Enables items to be placed in locations that may require glitches/tricks to obtain. A complete list of potentially required glitches/tricks is below.
+`skip_trials`
+- If enabled, the Trials door in Lorule Castle will be removed.
 
 `minigames_excluded`
 - Excludes Cucco Rush, Hyrule Hotfoot, Treacherous Tower, Octoball Derby, and both Rupee Rush minigames from having progression.
+
+`glitched_logic`
+- Enables items to be placed in locations that may require glitches/tricks to obtain. A complete list of potentially required glitches/tricks is below.
 
 `swordless_mode`
 - Generates a seed with no Swords. Things you should know about Swordless:
@@ -126,8 +154,6 @@ For Citra (emulator):
 
 #### The following options are only available when creating a seed using a preset:
 
-`boots_in_shop`
-- If enabled, guarantees the Pegasus Boots will be placed in Ravio's Shop.
 
 `dont_require_lamp_for_darkness`
 - If enabled, the logic may place required items behind completely dark rooms without giving you the Lamp first.
@@ -154,7 +180,7 @@ The following tricks may potentially be required in a Glitched Logic seed:
 - Eastern Palace
   - Left entrance chest with a thrown Pot
   - 4 Switches Room with thrown Pots
-  - Bombs to activate switch opening path to Boss Door early
+  - Bombs or Ice Rod to activate switch opening path to Boss Door early
   - TRod Armos Boost to get to Boss Key or Boss room without the appropriate key
 - House of Gales
   - 2F Fire Ring Key using HoG Skip Skip to do 2F backwards if key missing (incredibly specific, unlikely)

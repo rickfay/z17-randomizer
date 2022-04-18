@@ -31,7 +31,9 @@ crate::region! {
         paths: [
             boss :- {|p| p.can_use_projectile() && (
                 (p.small_keys(COURSE) >= 2 && p.has_boss_key(COURSE))
-                || (p.glitched() && (p.can_tornado_rod() || (p.has_boss_key(COURSE) && p.can_bomb())))
+                || (p.glitched() && (
+                    p.can_tornado_rod() || (p.has_boss_key(COURSE) && (p.can_bomb() || p.can_ice_rod()))
+                ))
             )},
         ],
     },

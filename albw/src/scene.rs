@@ -64,6 +64,14 @@ impl Stage {
             None
         }
     }
+
+    pub fn get_mut_system(&mut self, unq: u16) -> Option<&mut Obj> {
+        if let Some(i) = self.system.iter().position(|sys| sys.unq == unq) {
+            self.system.get_mut(i)
+        } else {
+            None
+        }
+    }
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -87,6 +95,10 @@ pub struct Obj {
 impl Obj {
     pub fn arg_mut(&mut self) -> &mut Arg {
         &mut self.arg
+    }
+
+    pub fn srt_mut(&mut self) -> &mut Transform {
+        &mut self.srt
     }
 
     pub fn set_active_flag<F>(&mut self, flag: F)
@@ -150,6 +162,12 @@ impl Obj {
     pub fn set_id(&mut self, id: i16) {
         self.id = id;
     }
+
+    pub fn set_translate(&mut self, x: f32, y: f32, z: f32) {
+        self.srt.translate.x = x;
+        self.srt.translate.y = y;
+        self.srt.translate.z = z;
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -177,9 +195,9 @@ pub type Lnk = (u16, i16, i16);
 
 #[derive(Debug)]
 pub struct Transform {
-    scale: Vec3,
-    rotate: Vec3,
-    translate: Vec3,
+    pub scale: Vec3,
+    pub rotate: Vec3,
+    pub translate: Vec3,
 }
 
 impl<'de> Deserialize<'de> for Transform {
@@ -263,9 +281,9 @@ impl Serialize for Transform {
 
 #[derive(Debug)]
 pub struct Vec3 {
-    x: f32,
-    y: f32,
-    z: f32,
+    pub x: f32,
+    pub y: f32,
+    pub z: f32,
 }
 
 #[derive(Debug, Deserialize, Serialize)]

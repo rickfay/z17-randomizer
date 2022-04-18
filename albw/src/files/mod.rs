@@ -1,19 +1,19 @@
-use std::{fs, io::prelude::*, path::Path};
-use std::io::{stdin, stdout};
-use log::error;
+use bytey::*;
+use data_encoding::HEXUPPER;
+use log::{info, error};
+use ring::digest::{Context, SHA256};
+use serde::Serialize;
+use std::{fs, io::{BufReader, prelude::*, stdin, stdout}, path::Path};
+
+use crate::{Error, Result};
+
+use self::{exheader::ExHeader, romfs::RomFs};
 
 pub mod byaml;
 pub mod exheader;
 pub mod msgbn;
 pub mod romfs;
 pub mod sarc;
-
-use bytey::*;
-use serde::Serialize;
-
-use crate::{Error, Result};
-
-use self::{exheader::ExHeader, romfs::RomFs};
 
 #[derive(Debug)]
 pub struct Cxi<R> {
@@ -23,8 +23,8 @@ pub struct Cxi<R> {
 }
 
 impl<R> Cxi<R>
-where
-    R: Read + Seek,
+    where
+        R: Read + Seek,
 {
     pub fn id(&self) -> u64 {
         self.id
@@ -53,8 +53,8 @@ fn pause() {
 
 impl Cxi<fs::File> {
     pub fn open<P>(path: P) -> Result<Self>
-    where
-        P: AsRef<Path>,
+        where
+            P: AsRef<Path>,
     {
         let path = path.as_ref();
         let mut file = match fs::File::open(path) {
@@ -66,6 +66,8 @@ impl Cxi<fs::File> {
                 std::process::exit(1);
             }
         };
+
+        validate_rom(&file);
 
         bytey::typedef! { struct NCSD: TryFromBytes<'_> [HEADER_LEN] {
             #b"NCSD",
@@ -88,6 +90,42 @@ impl Cxi<fs::File> {
             offset,
         })
     }
+}
+
+fn validate_rom(file: &fs::File) {
+    //info!("Calculating Checksum...");
+
+    let mut reader = BufReader::new(file);
+    let mut context = Context::new(&SHA256);
+    let mut buffer = [0; 1024];
+
+    loop {
+        let count = reader.read(&mut buffer).unwrap();
+        if count == 0 {
+            break;
+        }
+        context.update(&buffer[..count]);
+    }
+
+    let checksum = &HEXUPPER.encode(context.finish().as_ref());
+    info!("SHA256 Checksum:                {}", checksum);
+
+    // let valid_checksum = String::from("4071DC95F6948669C7A13D378509D5A224E167B77CF8FD2E163484BA9AF8B64D");
+    // let encrypted_checksum = String::from("tbd"); // TODO determine this value
+    //
+    // if valid_checksum.eq(checksum) {
+    //     info!("ROM is valid.");
+    // } else {
+    //     if encrypted_checksum.eq(checksum) {
+    //         error!("ROM is encrypted. Please decrypt this ROM before using the randomizer.");
+    //     } else {
+    //         error!("Invalid checksum: {}", checksum);
+    //         error!("ROM is invalid. Please provide a decrypted, North American ROM of The Legend of Zelda: A Link Between Worlds.");
+    //     }
+    //
+    //     pause();
+    //     std::process::exit(1);
+    // }
 }
 
 #[derive(Clone, Debug)]
@@ -118,23 +156,23 @@ impl<T> File<T> {
     }
 
     pub fn map<F, U>(self, f: F) -> File<U>
-    where
-        F: FnOnce(T) -> U,
+        where
+            F: FnOnce(T) -> U,
     {
         File::new(self.path, f(self.inner))
     }
 
     pub fn try_map<F, U>(self, f: F) -> Result<File<U>>
-    where
-        F: FnOnce(T) -> Result<U>,
+        where
+            F: FnOnce(T) -> Result<U>,
     {
         Ok(File::new(self.path, f(self.inner)?))
     }
 }
 
 impl<T> File<T>
-where
-    T: IntoBytes,
+    where
+        T: IntoBytes,
 {
     pub fn into_bytes(self) -> File<Box<[u8]>> {
         File {
@@ -144,8 +182,8 @@ where
     }
 
     pub fn dump<P>(self, path: P) -> Result<()>
-    where
-        P: AsRef<Path>,
+        where
+            P: AsRef<Path>,
     {
         let path = path.as_ref().join(self.path);
         if let Some(parent) = path.parent() {
@@ -160,8 +198,8 @@ where
 }
 
 impl<T> File<T>
-where
-    T: Serialize,
+    where
+        T: Serialize,
 {
     pub fn serialize(self) -> File<Box<[u8]>> {
         let mut buf = vec![];
@@ -214,8 +252,8 @@ pub trait FromFile {
 
     fn path(args: &Self::PathArgs) -> String;
     fn from_file(input: Self::Input) -> Result<Self>
-    where
-        Self: Sized;
+        where
+            Self: Sized;
 }
 
 fn cmp_id(left: u64, right: u64) -> Result<()> {

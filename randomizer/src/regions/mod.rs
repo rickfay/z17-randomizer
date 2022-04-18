@@ -346,6 +346,12 @@ macro_rules! patch {
     (Key($scene:literal[$unq:literal])) => {
         Patch::Key { course: COURSE, scene: $scene - 1, unq: $unq }
     };
+    (Maiamai($course:ident $scene:literal[$unq:literal])) => {
+        Patch::Maiamai { course: albw::course::Id::$course, scene: $scene - 1, unq: $unq }
+    };
+    (Maiamai($scene:literal[$unq:literal])) => {
+        Patch::Maiamai { course: COURSE, scene: $scene - 1, unq: $unq }
+    };
     (Shop($variant:ident$($args:tt)?)) => {
         Patch::Shop(crate::patch::Shop::$variant $($args)?)
     };

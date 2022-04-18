@@ -56,6 +56,8 @@ pub struct Logic {
     pub swordless_mode: bool,
     /// Shuffle Super Lamp and Super Net
     pub super_items: bool,
+    /// Skip Trials Door in Lorule Castle
+    pub skip_trials: bool,
 }
 
 /// Settings to change the randomizer's logic checks.
