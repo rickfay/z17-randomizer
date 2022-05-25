@@ -927,13 +927,13 @@ pub fn plando() -> Result<(), Error> {
 
 
     layout.set(Location::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (1)"), Item::RupeeGold);
-    layout.set(Location::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (2)"), Item::MilkMatured);
-    layout.set(Location::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (3)"), Item::DashBoots);
-    layout.set(Location::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (4)"), Item::RingHekiga);
-    layout.set(Location::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (5)"), Item::RupeeGold);
+    layout.set(Location::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (2)"), Item::ItemSwordLv2);
+    layout.set(Location::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (3)"), Item::ItemSwordLv2);
+    layout.set(Location::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (4)"), Item::DashBoots);
+    layout.set(Location::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (5)"), Item::RingHekiga);
     layout.set(Location::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (6)"), Item::ClothesBlue);
-    layout.set(Location::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (7)"), Item::ItemBombLv2);
-    layout.set(Location::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (8)"), Item::ItemTornadeRodLv2);
+    layout.set(Location::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (7)"), Item::ItemTornadeRodLv2);
+    layout.set(Location::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (8)"), Item::ItemBombLv2);
     layout.set(Location::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (9)"), Item::RupeeGold);
 
 

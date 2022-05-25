@@ -9,8 +9,7 @@ crate::region! {
             "Great Rupee Fairy": ItemBottle @Event(CaveDark/Cave[0x24]),
             "Big Bomb Cave": RupeeSilver @Chest(CaveDark 2[4]),
             "Octoball Derby": HeartPiece @Event(FieldDark_2A_GameMaster[0x21]),
-            "Blacksmith": ItemSwordLv4 @Event(IndoorDark/FiledDark_22_BlackSmithUra[0x1F])
-                :- {|p| p.ore() > 3},
+            "Blacksmith": ItemSwordLv4 @Event(IndoorDark/FiledDark_22_BlackSmithUra[0x1F]) :- {|p| p.ore() >= 4},
         ],
         paths: [
             village,

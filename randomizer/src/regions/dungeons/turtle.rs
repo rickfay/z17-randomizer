@@ -10,10 +10,10 @@ crate::region! {
             "(1F) Southeast Chest": RupeePurple @Chest(1[173]),
             "(1F) Defeat Flamolas": RupeeSilver @Chest(1[220]),
             "(B1) Northeast Room": KeySmall @Key(2[53]),
-            "(B1) Grate Chest (Small)": RupeePurple @Chest(2[5]),
-            "(B1) Big Chest (Center)": HyruleShield @Chest(2[180]),
             "(B1) Platform": RupeeSilver @Chest(2[183]),
-            "(B1) Big Chest (Top)": KeyBoss @Chest(2[29]) :- {|s| s.small_keys(COURSE) >= 1},
+            "(B1) Grate Chest (Small)": RupeePurple @Chest(2[5]),
+            "(B1) Big Chest (Center)": HyruleShield @Chest(2[180]) :- {|s| s.can_hit_shielded_switch() || s.glitched()},  // Throw skull to hit switch
+            "(B1) Big Chest (Top)": KeyBoss @Chest(2[29]) :- {|s| s.small_keys(COURSE) >= 1 && (s.can_hit_shielded_switch() || s.glitched())}, // Throw skull to hit switch
         ],
         paths: [
             boss :- {|s| (s.small_keys(COURSE) >= 3 && s.has_boss_key(COURSE)) || (s.glitched() && s.can_tornado_rod() && s.nice_bombs())},

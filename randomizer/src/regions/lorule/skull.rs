@@ -7,7 +7,7 @@ crate::region! {
             "Balcony": HeartPiece @Heart(2[144]),
         ],
         paths: [
-            dungeons::skull::palace,
+            dungeons::skull::palace :- can_see_in_dark,
         ],
     },
     chest {

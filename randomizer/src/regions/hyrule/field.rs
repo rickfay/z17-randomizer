@@ -10,10 +10,9 @@ crate::region! {
             "Treasure Room": RupeeSilver @Chest(AttractionLight 5[24]) :- {|p| p.can_bomb() && p.can_merge()},
             "Behind Blacksmith": HeartPiece @Heart(17[95]) :- {|p| p.can_merge() || (p.glitched() && p.can_ledge_boost())},
             "Blacksmith Cave": HeartPiece @Heart(CaveLight 16[1]) :- {|p| p.can_lift_big() || (p.glitched() && p.can_ledge_boost())},
-            "Blacksmith": ItemSwordLv3 @Event(IndoorLight/FieldLight_22_BlackSmith[0x16])
-                :- {|p| p.lorule() && p.ore() >= 2},
+            "Blacksmith": ItemSwordLv3 @Event(IndoorLight/FieldLight_22_BlackSmith[0x16]) :- {|p| p.can_merge() && p.ore() >= 2},
             "Castle Rocks": HeartPiece @Heart(18[209]) :- can_lift,
-            "Rosso": PowerGlove @Chest(IndoorLight 10[7]) :- {|p| p.did_eastern() || p.lorule()},
+            "Rosso": PowerGlove @Chest(IndoorLight 10[7]) :- {|p| p.did_eastern() || p.can_merge()},
         ],
         paths: [
             rentals,
@@ -27,9 +26,9 @@ crate::region! {
             lake::hylia,
             post_eastern :- did_eastern,
             castle :- {|s| s.has_master_sword() || s.swordless_mode()},
-            lorule::field::main :- lorule,
-            lorule::graveyard::field :- lorule,
-            lorule::field::ledge :- lorule,
+            lorule::field::main :- {|s| s.can_merge() || s.yuga() },
+            lorule::graveyard::field :- can_merge,
+            lorule::field::ledge :- can_merge,
         ],
     },
     post_eastern {

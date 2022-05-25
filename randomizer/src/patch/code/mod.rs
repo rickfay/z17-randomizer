@@ -166,17 +166,19 @@ pub fn create(patcher: &Patcher) -> Code {
     bracelet(&mut code);
     ore_progress(&mut code);
     merchant(&mut code);
+
     // fix castle barrier?
-    let master_sword_flag = code.text().define([
-        ldr(R0, EVENT_FLAG_PTR),
-        ldr(R1, 410),
-        mov(R2, 1),
-        ldr(R0, (R0, 0)),
-        bl(0x4CDF40),
-        mov(R0, 1),
-        pop([R4, R5, R6, PC]),
-    ]);
-    code.patch(0x344E50, [b(master_sword_flag)]);
+    // let master_sword_flag = code.text().define([
+    //     ldr(R0, EVENT_FLAG_PTR),
+    //     ldr(R1, 410),
+    //     mov(R2, 1),
+    //     ldr(R0, (R0, 0)),
+    //     bl(0x4CDF40),
+    //     mov(R0, 1),
+    //     pop([R4, R5, R6, PC]),
+    // ]);
+    // code.patch(0x344E50, [b(master_sword_flag)]);
+
     // don't lose Bow of Light on defeat
     code.patch(0x502DD8, [mov(R0, R0)]);
     // blacksmith

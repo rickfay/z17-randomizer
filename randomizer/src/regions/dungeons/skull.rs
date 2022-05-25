@@ -1,13 +1,13 @@
 crate::region! {
     course: DungeonDokuro,
-    name: "Skull Palace",
+    name: "Skull Woods",
     palace {
         locations: [
             "(B1) Gibdo Room (Lower)": Compass @Chest(1[100]),
             "(B1) South Chest": KeySmall @Chest(1[101]),
         ],
         paths: [
-            outdoors :- {|p| p.small_keys(COURSE) > 0},
+            outdoors :- {|s| s.small_keys(COURSE) >= 1},
         ],
     },
     outdoors {
@@ -16,7 +16,7 @@ crate::region! {
             "(B1) Grate Room": KeySmall @Chest(1[328]),
         ],
         paths: [
-            basement2 :- {|p| p.small_keys(COURSE) > 1},
+            basement2 :- {|s| s.small_keys(COURSE) >= 2},
         ],
     },
     basement2 {
@@ -24,8 +24,8 @@ crate::region! {
             "(B2) Moving Platform Room": KeySmall @Chest(2[105]),
         ],
         paths: [
-            end :- {|p| p.small_keys(COURSE) > 2 && p.can_light()},
-            boss :- {|p| p.small_keys(COURSE) > 2 && p.has_boss_key(COURSE)},
+            end :- {|s| s.small_keys(COURSE) >= 3 && s.can_light()},
+            boss :- {|s| s.small_keys(COURSE) >= 3 && s.has_boss_key(COURSE)},
         ],
     },
     end {

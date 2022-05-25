@@ -13,7 +13,7 @@ crate::region! {
             "Ledge": RupeeSilver @Chest(33[320]) :- can_merge,
         ],
         paths: [
-            lorule::misery::mire :- lorule,
+            lorule::misery::mire :- can_merge,
         ],
     },
 }

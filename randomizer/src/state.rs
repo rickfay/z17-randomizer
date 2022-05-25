@@ -90,6 +90,17 @@ impl<'settings> State<'settings> {
             || (self.glitched() && self.has_boots())
     }
 
+    // Same as can_hit_switch(), but Ice Rod can't hit it
+    pub fn can_hit_shielded_switch(&self) -> bool {
+        self.sword()
+            || self.can_bow()
+            || self.can_boomerang()
+            || self.can_hookshot()
+            || self.can_bomb()
+            || self.can_hammer()
+            || (self.glitched() && self.has_boots())
+    }
+
     pub fn can_ice_rod(&self) -> bool {
         self.player.ice_rod
     }
@@ -316,8 +327,8 @@ impl<'settings> State<'settings> {
         self.player.boss_keys.contains(&dungeon)
     }
 
-    pub fn lorule(&self) -> bool {
-        self.can_merge()
+    pub fn yuga(&self) -> bool {
+        self.has_master_sword() && (self.can_bow() || self.can_ice_rod())
     }
 
     pub fn has_seven_portraits(&self) -> bool {

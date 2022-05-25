@@ -12,7 +12,7 @@ crate::region! {
         paths: [
             island :- {|p| p.can_swim() || (p.glitched() && (p.fake_flippers() || (p.can_ice_rod() && p.can_hookshot())))},
             hotfoot :- did_eastern,
-            lorule::lake::lorule :- lorule,
+            lorule::lake::lorule :- can_merge,
         ],
     },
     island {

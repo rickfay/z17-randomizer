@@ -397,6 +397,7 @@ fn cutscenes<'game, 'settings>(
                 600, // Hilda ??? Text
                 620, // Hilda ??? Text
                 640, // Hilda ??? Text
+                829, // Respawn in Ravio's Shop after visiting Lorule. 828 and 830 do same thing?
                 899, // Enable Quick Equip
                 902, // StreetPass Tree
                 906, // Monster Guts
@@ -405,7 +406,6 @@ fn cutscenes<'game, 'settings>(
                 920, // Link's House Weather Vane
                 940, // Vacant House Weather Vane
                 950, // Maiamai
-                //955, // Master Ore UI
                 960, // Blacksmith's Wife
                 965, // Suppress Energy Potion
             ]) {

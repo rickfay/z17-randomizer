@@ -12,7 +12,7 @@ crate::region! {
         ],
         paths: [
             upper :- {|p| p.can_merge() || p.glitched()},
-            lorule::death::west :- lorule,
+            lorule::death::west :- can_merge,
         ],
     },
     upper {
@@ -36,7 +36,7 @@ crate::region! {
                 :- {|p| p.can_hookshot() && p.can_merge()},
         ],
         paths: [
-            lorule::death::mountain :- lorule,
+            lorule::death::mountain :- can_merge,
         ],
     },
     far_island {

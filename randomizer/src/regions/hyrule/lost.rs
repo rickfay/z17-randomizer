@@ -8,7 +8,7 @@ crate::region! {
             "Chest": RupeeR @Chest(1[133]) :- {|p| p.can_lift_big() || (p.glitched() && ((p.can_boomerang() || p.can_hookshot()) && (p.can_escape())))},
         ],
         paths: [
-            lorule::skull::woods :- lorule,
+            lorule::skull::woods :- can_merge,
         ],
     },
 }

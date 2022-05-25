@@ -4,7 +4,7 @@ crate::region! {
     ruins {
         paths: [
             hill :- {|p| p.can_use_projectile() || p.can_merge() || (p.glitched() && p.can_lift())},
-            lorule::dark::ruins :- lorule,
+            lorule::dark::ruins :- can_merge,
         ],
     },
     hill {
