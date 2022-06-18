@@ -4,7 +4,7 @@ mod lsm;
 
 use std::array;
 
-pub use data::{add, cmp, mov};
+pub use self::data::{add, cmp, mov};
 pub use ls::{ldr, ldrb, str_};
 pub use lsm::{ldm, pop, push, stm, AddressingMode::*};
 pub use Register::*;

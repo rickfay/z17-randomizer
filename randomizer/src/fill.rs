@@ -5,26 +5,26 @@ use vec_drain_where::VecDrainWhereExt;
 
 use crate::{
     graph::{Graph, Node},
-    queue::Queue,
+    queue_custom::Queue,
     regions::Subregion,
     state::State,
-    Condition, ItemExt, Layout, Location, Pool, Settings,
+    Condition, ItemExt, Layout, LocationInfo, Pool, Settings,
 };
 
 #[derive(Clone)]
 struct Filler<'a> {
-    weights: &'a HashMap<Location, u32>,
+    weights: &'a HashMap<LocationInfo, u32>,
     state: State<'a>,
     layout: Layout,
     subregions: HashSet<&'static Subregion>,
-    locations: Queue<Location>,
-    excluded: Queue<Location>,
+    locations: Queue<LocationInfo>,
+    excluded: Queue<LocationInfo>,
     edges: Vec<(Condition, Node)>,
     restrict: Option<course::Id>,
 }
 
 impl<'a> Filler<'a> {
-    fn new(weights: &'a HashMap<Location, u32>, state: State<'a>, layout: Layout) -> Self {
+    fn new(weights: &'a HashMap<LocationInfo, u32>, state: State<'a>, layout: Layout) -> Self {
         Self {
             weights,
             state,
@@ -47,7 +47,7 @@ impl<'a> Filler<'a> {
     }
 
     /// Adds a location node to the graph.
-    fn add_location(&mut self, location: &Location) {
+    fn add_location(&mut self, location: &LocationInfo) {
         if self
             .restrict
             .map(|dungeon| dungeon == location.subregion.course())
@@ -91,7 +91,7 @@ impl<'a> Filler<'a> {
     }
 
     /// Sets a location's item and adds new reachable nodes.
-    fn add_item_in_location(&mut self, item: Item, location: Location) {
+    fn add_item_in_location(&mut self, item: Item, location: LocationInfo) {
         // info!(
         //     "placed {} in {}/{}",
         //     item.normalize().as_str(),
@@ -163,7 +163,7 @@ impl<'a> Filler<'a> {
             }
         }
         if self.restrict.is_none() {
-            let zelda = Location::new(&crate::regions::dungeons::castle::boss::SUBREGION, "Zelda");
+            let zelda = LocationInfo::new(&crate::regions::dungeons::castle::boss::SUBREGION, "Zelda");
             self.locations.push(
                 *self
                     .weights
@@ -220,7 +220,7 @@ impl<'a> Graph for Filler<'a> {
 
 fn fill_dungeon(
     settings: &Settings,
-    weights: &HashMap<Location, u32>,
+    weights: &HashMap<LocationInfo, u32>,
     layout: Layout,
     pool: Pool,
     start: &'static Subregion,
@@ -243,7 +243,7 @@ fn fill_dungeon(
 
 fn fill_world(
     settings: &Settings,
-    weights: &HashMap<Location, u32>,
+    weights: &HashMap<LocationInfo, u32>,
     layout: Layout,
     pool: Pool,
     start: &'static Subregion,
@@ -289,7 +289,7 @@ macro_rules! fill_dungeons {
 
 pub(crate) fn fill(
     settings: &Settings,
-    weights: HashMap<Location, u32>,
+    weights: HashMap<LocationInfo, u32>,
     layout: Layout,
     pool: Pool,
     mut dungeons: HashMap<course::Id, Pool>,

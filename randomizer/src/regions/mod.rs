@@ -81,7 +81,7 @@ macro_rules! regions {
             pub const WORLD: super::World = super::World::$variant;
 
             #[inline]
-            pub(crate) fn items() -> impl Iterator<Item = (crate::Location, albw::Item)> {
+            pub(crate) fn items() -> impl Iterator<Item = (crate::LocationInfo, albw::Item)> {
                 std::iter::empty()
                 $(
                     .chain($region::items())
@@ -92,7 +92,7 @@ macro_rules! regions {
         })+
 
         #[inline]
-        pub(crate) fn items() -> impl Iterator<Item = (crate::Location, albw::Item)> {
+        pub(crate) fn items() -> impl Iterator<Item = (crate::LocationInfo, albw::Item)> {
             std::iter::empty()
             $(
                 .chain($world::items())
@@ -153,7 +153,7 @@ macro_rules! region {
         $($id:ident $props:tt,)*
     ) => {
         #[inline]
-        pub(crate) fn items() -> impl Iterator<Item = (crate::Location, albw::Item)> {
+        pub(crate) fn items() -> impl Iterator<Item = (crate::LocationInfo, albw::Item)> {
             $start::items()
             $(
                 .chain($id::items())
@@ -196,7 +196,7 @@ macro_rules! subregion {
         pub(crate) mod $id {
             use albw::Item;
 
-            use crate::{patch::Patcher, regions::Subregion, Location};
+            use crate::{patch::Patcher, regions::Subregion, LocationInfo};
 
             pub use super::COURSE;
 
@@ -210,9 +210,9 @@ macro_rules! subregion {
             };
 
             #[inline]
-            pub(crate) fn items() -> impl Iterator<Item = (Location, Item)> {
-                static ITEMS: &[(Location, Item)] = &[$(
-                    $((Location::new(SUBREGION, $key), Item::$item),)*
+            pub(crate) fn items() -> impl Iterator<Item = (LocationInfo, Item)> {
+                static ITEMS: &[(LocationInfo, Item)] = &[$(
+                    $((LocationInfo::new(SUBREGION, $key), Item::$item),)*
                 )?];
                 ITEMS.into_iter().cloned()
             }
@@ -222,7 +222,7 @@ macro_rules! subregion {
             pub fn add(graph: &mut dyn $crate::graph::Graph) {
                 $($(if $crate::settings_check!($($settings $where)?)(graph.settings()) {
                     let edge = $crate::edge!($($condition)?);
-                    let location = $crate::Location::new(SUBREGION, $key);
+                    let location = $crate::LocationInfo::new(SUBREGION, $key);
                     if graph.check(edge) {
                         graph.add(location.into());
                     } else {
@@ -246,7 +246,7 @@ macro_rules! subregion {
                     crate::patch!($variant $props).apply(
                         patcher,
                         layout
-                            .get(&crate::Location::new(SUBREGION, $key))
+                            .get(&crate::LocationInfo::new(SUBREGION, $key))
                             .unwrap_or_else(|| unreachable!(stringify!($key))),
                     )?;
                 })*)?

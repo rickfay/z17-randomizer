@@ -180,6 +180,7 @@ pub fn apply(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
         FieldLight 18 {
 
             // TODO - What is Flag 390 ?
+            // TODO - Where are rooftop Red Spear Soldiers?
 
             [167].disable(), // Crow
             [168].disable(), // Crow

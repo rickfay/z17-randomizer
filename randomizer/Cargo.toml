@@ -11,6 +11,7 @@ crc = "1.8.1"
 fs_extra = "1.2.0"
 linked-hash-map = "0.5.4"
 log = "0.4.14"
+queue = "0.3.2-final"
 rand = { version = "0.8.3", features = ["std_rng"] }
 serde = { version = "1.0.125", features = ["derive"] }
 serde_yaml = "0.8.17"

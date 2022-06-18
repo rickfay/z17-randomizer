@@ -5,7 +5,7 @@ use std::{
 
 use serde::{Deserialize, Serialize};
 
-use crate::{regions, Location};
+use crate::{regions, LocationInfo};
 
 /// Logic and behavior settings.
 #[derive(Clone, Debug, Default, Deserialize, Hash, Serialize)]
@@ -18,7 +18,7 @@ pub struct Settings {
 }
 
 impl Settings {
-    pub fn is_excluded(&self, location: &Location) -> bool {
+    pub fn is_excluded(&self, location: &LocationInfo) -> bool {
         let world = match location.world() {
             regions::World::Hyrule => &self.exclude.hyrule,
             regions::World::Lorule => &self.exclude.lorule,

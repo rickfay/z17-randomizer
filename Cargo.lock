@@ -393,6 +393,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "queue"
+version = "0.3.2-final"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7ff41b177633cd6caf254b326ee299d462467ce8748ea6fd4de152c76a4560d1"
+
+[[package]]
 name = "quote"
 version = "1.0.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -450,6 +456,7 @@ dependencies = [
  "fs_extra",
  "linked-hash-map",
  "log",
+ "queue",
  "rand",
  "serde",
  "serde_yaml",

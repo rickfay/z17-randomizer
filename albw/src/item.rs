@@ -103,6 +103,55 @@ Item(u16) {
     Heart = 0x5E,
     ItemRentalSandRodFirst = 0x5F, // Osfala's Sand Rod
     GoldenBeeForSale = 0x60,
+
+    // Hacky stuff below here for dungeon items, these assigned values are lies
+    // TODO remove all this
+
+    HyruleSanctuaryKey = 0x100,
+    LoruleSanctuaryKey = 0x101,
+
+    EasternKeySmall = 0x102,
+    EasternKeyBig = 0x103,
+    EasternCompass = 0x104,
+
+    GalesKeySmall = 0x105,
+    GalesKeyBig = 0x106,
+    GalesCompass = 0x107,
+
+    HeraKeySmall = 0x108,
+    HeraKeyBig = 0x109,
+    HeraCompass = 0x110,
+
+    DarkKeySmall = 0x111,
+    DarkKeyBig = 0x112,
+    DarkCompass = 0x113,
+
+    SwampKeySmall = 0x114,
+    SwampKeyBig = 0x115,
+    SwampCompass = 0x116,
+
+    SkullKeySmall = 0x117,
+    SkullKeyBig = 0x118,
+    SkullCompass = 0x119,
+
+    ThievesKeySmall = 0x120,
+    ThievesKeyBig = 0x121,
+    ThievesCompass = 0x122,
+
+    IceKeySmall = 0x123,
+    IceKeyBig = 0x124,
+    IceCompass = 0x125,
+
+    DesertKeySmall = 0x126,
+    DesertKeyBig = 0x127,
+    DesertCompass = 0x128,
+
+    TurtleKeySmall = 0x129,
+    TurtleKeyBig = 0x130,
+    TurtleCompass = 0x131,
+
+    LoruleCastleKeySmall = 0x132,
+    LoruleCastleCompass = 0x133,
 }}
 
 #[derive(Clone, Debug, Deserialize)]

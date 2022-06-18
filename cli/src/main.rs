@@ -1,9 +1,10 @@
 use std::{fs, panic};
 use std::io::{stdin, stdout, Read, Write};
 use std::path::Path;
+use std::process::exit;
 use log::{error, info};
 
-use randomizer::{Seed, Generator, Settings, plando};
+use randomizer::{Seed, Generator, Settings, plando, filler_new};
 use simplelog::{LevelFilter, SimpleLogger};
 use structopt::StructOpt;
 use albw::Game;
@@ -123,7 +124,7 @@ fn main() -> randomizer::Result<()> {
 
     info!("Initializing Z17 Randomizer...");
 
-    let is_plando = false;
+    let is_plando = false; // TODO expose this eventually so people can make their own, for now it's for testing
 
     if is_plando {
         plando()
@@ -136,34 +137,41 @@ fn main() -> randomizer::Result<()> {
             preset_ui()
         };
 
+        let use_new_filler = true;
         let max_retries = 100;
         let mut result = Ok(());
 
         for x in 0..max_retries {
             let seed = opt.seed.unwrap_or_else(rand::random);
 
-            info!("Attempt:                        #{}", x + 1);
-            info!("Preset:                         {}", opt.preset.as_ref().unwrap_or(&String::from("<None>")));
-            info!("Version:                        0.0.4");
-
-            let randomizer = Generator::new(&preset, seed);
-            let spoiler = panic::catch_unwind(|| randomizer.randomize());
-
-            if spoiler.is_ok() {
-                println!();
-                info!("Seed generated. Patching...");
-                result = spoiler.unwrap().patch(
-                    system.get_or_create_paths(create_paths)?,
-                    !opt.no_patch,
-                    !opt.no_spoiler,
-                );
-
-                break;
-            } else if x >= max_retries - 1 {
-                // FIXME I hate this, but I'm struggling with Rust error handling so leaving it for now
-                panic!("Too many retry attempts have failed. Aborting...");
+            if use_new_filler {
+                filler_new(&preset, seed as u64)?;
+                pause();
+                exit(0);
             } else {
-                info!("Seed was not completable (this is normal). Retrying...\n");
+                info!("Attempt:                        #{}", x + 1);
+                info!("Preset:                         {}", opt.preset.as_ref().unwrap_or(&String::from("<None>")));
+                info!("Version:                        0.0.4");
+
+                let randomizer = Generator::new(&preset, seed);
+                let spoiler = panic::catch_unwind(|| randomizer.randomize());
+
+                if spoiler.is_ok() {
+                    println!();
+                    info!("Seed generated. Patching...");
+                    result = spoiler.unwrap().patch(
+                        system.get_or_create_paths(create_paths)?,
+                        !opt.no_patch,
+                        !opt.no_spoiler,
+                    );
+
+                    break;
+                } else if x >= max_retries - 1 {
+                    // FIXME I hate this, but I'm struggling with Rust error handling so leaving it for now
+                    panic!("Too many retry attempts have failed. Aborting...");
+                } else {
+                    info!("Seed was not completable (this is normal). Retrying...\n");
+                }
             }
         }
 

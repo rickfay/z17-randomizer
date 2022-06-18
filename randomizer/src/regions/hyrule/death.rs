@@ -17,10 +17,10 @@ crate::region! {
     },
     upper {
         locations: [
-            "Ledge Chest": RupeeR @Chest(3[303]),
+            "Death Mountain West Ledge": RupeeR @Chest(3[303]),
             "Rock Cave (Pegs)": LiverPurple @Chest(CaveLight 1[67]) :- can_hammer,
             "Rock Cave (Top)": LiverPurple @Chest(CaveLight 2[166]),
-            "Hidden Area": HeartPiece @Heart(3[302]),
+            "Spectacle Rock": HeartPiece @Heart(3[302]),
         ],
         paths: [
             dungeons::tower::hera :- can_hammer,
@@ -29,10 +29,10 @@ crate::region! {
     },
     east {
         locations: [
-            "Ore Mine Column": HeartPiece @Heart(CaveLight 25[9]) :- {|s| s.can_merge() && s.can_hammer()},
+            "Fire Cave Pillar": HeartPiece @Heart(CaveLight 25[9]) :- {|s| s.can_merge() && s.can_hammer()},
             "Bouldering Guy": ItemBottle @Event(FieldLight_05_Climber[0x06])
                 :- {|p| p.has_premium_milk() && (p.can_merge() || (p.glitched() && p.can_tornado_rod() && p.has_boots()))},
-            "Treasure Room": RupeeSilver @Chest(AttractionLight 4[89])
+            "Hookshot Treasure Dungeon": RupeeSilver @Chest(AttractionLight 4[89])
                 :- {|p| p.can_hookshot() && p.can_merge()},
         ],
         paths: [
@@ -41,7 +41,7 @@ crate::region! {
     },
     far_island {
         locations: [
-            "Distant Pillar": HeartPiece @Heart(4[25]),
+            "Floating Island": HeartPiece @Heart(4[25]),
         ],
     },
 }

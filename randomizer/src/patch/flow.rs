@@ -308,16 +308,16 @@ pub fn apply(patcher: &mut Patcher, free: Item) -> Result<()> {
     Ok(())
 }
 
-#[cfg(test)]
-mod tests {
-    use albw::Item;
-
-    use super::apply;
-    use crate::{patch::Patcher, test_game, Result};
-
-    #[test]
-    fn it_works() -> Result<()> {
-        let mut patcher = Patcher::new(test_game()?, 0)?;
-        apply(&mut patcher, Item::KeySmall)
-    }
-}
+// #[cfg(test)]
+// mod tests {
+//     use albw::Item;
+//
+//     use super::apply;
+//     use crate::{patch::Patcher, test_game, Result};
+//
+//     #[test]
+//     fn it_works() -> Result<()> {
+//         let mut patcher = Patcher::new(test_game()?, 0)?;
+//         apply(&mut patcher, Item::KeySmall)
+//     }
+// }

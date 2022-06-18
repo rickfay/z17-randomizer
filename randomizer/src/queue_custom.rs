@@ -2,6 +2,8 @@ use std::{cmp::Ordering, collections::BinaryHeap};
 
 type Weight = u32;
 
+// TODO deprecate this file
+
 #[derive(Clone, Debug)]
 pub struct Queue<T>(BinaryHeap<Item<T>>);
 

@@ -7,7 +7,7 @@ crate::region! {
             "Dampe": ItemSwordLv1 @Event(FieldLight_13_Sister[0x1D]),
             "Rosso Cave": RupeeR @Chest(CaveLight 6[6]) :- {|p| p.can_hammer() || (p.glitched() && (p.can_boomerang() || p.can_hookshot()))},
             "Sanctuary Pegs": RupeeSilver @Chest(11[89]) :- can_hammer,
-            "Treasure Room": RupeeSilver @Chest(AttractionLight 5[24]) :- {|p| p.can_bomb() && p.can_merge()},
+            "Sanctuary Treasure Dungeon": RupeeSilver @Chest(AttractionLight 5[24]) :- {|p| p.can_bomb() && p.can_merge()},
             "Behind Blacksmith": HeartPiece @Heart(17[95]) :- {|p| p.can_merge() || (p.glitched() && p.can_ledge_boost())},
             "Blacksmith Cave": HeartPiece @Heart(CaveLight 16[1]) :- {|p| p.can_lift_big() || (p.glitched() && p.can_ledge_boost())},
             "Blacksmith": ItemSwordLv3 @Event(IndoorLight/FieldLight_22_BlackSmith[0x16]) :- {|p| p.can_merge() && p.ore() >= 2},
@@ -34,12 +34,12 @@ crate::region! {
     post_eastern {
         locations: [
             "Clean Rocks": RupeePurple @Chest(IndoorLight 10[25]) :- can_lift,
-            "Irene": ItemRentalBomb @Event[
-                FieldLight_11_Maple[0x06],
-                FieldLight_12_Maple[0x08],
-                FieldLight_12_Maple[0x26],
-                FieldLight_2D_Maple[0x07],
-            ],
+            // "Irene": ItemRentalBomb @Event[
+            //     FieldLight_11_Maple[0x06],
+            //     FieldLight_12_Maple[0x08],
+            //     FieldLight_12_Maple[0x26],
+            //     FieldLight_2D_Maple[0x07],
+            // ],
             "Woods": ItemRentalTornadeRod @Event(FieldLight_2A_BlacksmithWife[0x15]),
         ],
     },

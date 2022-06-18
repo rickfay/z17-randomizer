@@ -3,9 +3,9 @@ crate::region! {
     name: "Dark Ruins",
     ruins {
         locations: [
-            "Lake Chest": RupeeSilver @Chest(35[228]),
-            "Maze Chest": RupeeR @Chest(20[79]),
-            "Maze Ledge": HeartPiece @Heart(20[172]),
+            "Dark Ruins Lakeview Chest": RupeeSilver @Chest(35[228]),
+            "Dark Maze Chest": RupeeR @Chest(20[79]),
+            "Dark Maze Ledge": HeartPiece @Heart(20[172]),
             "Hinox (1)": RupeeB @Event(CaveDark/FieldDark_17_NpcHinox [0x02]),
             "Hinox (2)": RupeeR @Event(CaveDark/FieldDark_17_NpcHinox [0x06]),
             "Hinox (3)": RupeePurple @Event(CaveDark/FieldDark_17_NpcHinox [0x4C]),
