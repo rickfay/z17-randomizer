@@ -683,7 +683,7 @@ fn verify_all_locations_accessible(loc_map: &mut HashMap<Location, LocationNode>
 }
 
 /// Find all checks reachable with the given Progress
-fn find_reachable_checks(loc_map: &mut HashMap<Location, LocationNode>, progress: &Progress, check_map: &mut HashMap<&str, Option<FillerItem>>) -> Vec<Check> {
+fn find_reachable_checks(loc_map: &mut HashMap<Location, LocationNode>, progress: &Progress) -> Vec<Check> {
     let start_node = Location::RavioShop;
     let mut loc_queue: Queue<Location> = Queue::from(vec![start_node]);
     let mut visited: HashSet<Location> = HashSet::new();
@@ -747,17 +747,6 @@ fn get_items_from_reachable_checks(reachable_checks: &Vec<Check>,
     progress
 }
 
-fn count_empty_checks(reachable_checks: &Vec<Check>, check_map: &HashMap<&str, Option<FillerItem>>) {
-    let mut count = 0;
-    for reachable_check in reachable_checks {
-        if check_map.get(&reachable_check.get_name()).unwrap().is_none() {
-            count += 1;
-        }
-    }
-
-    info!("Empty checks: {}", count);
-}
-
 fn assumed_fill(mut world_graph: &mut HashMap<Location, LocationNode>,
                 mut rng: &mut StdRng,
                 items_owned: &mut Vec<FillerItem>,
@@ -793,7 +782,7 @@ fn assumed_search(loc_map: &mut HashMap<Location, LocationNode>,
     let mut reachable_checks: Vec<Check>;
 
     loop {
-        reachable_checks = find_reachable_checks(loc_map, &current_items, &mut check_map);
+        reachable_checks = find_reachable_checks(loc_map, &current_items);
         let reachable_items = get_items_from_reachable_checks(&reachable_checks, &mut check_map, settings);
 
         let new_items = reachable_items.difference(&current_items);

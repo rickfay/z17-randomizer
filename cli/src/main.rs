@@ -1,10 +1,9 @@
 use std::{fs, panic};
 use std::io::{stdin, stdout, Read, Write};
 use std::path::Path;
-use std::process::exit;
 use log::{error, info};
 
-use randomizer::{Seed, Generator, Settings, plando, filler_new};
+use randomizer::{Seed, Settings, plando, filler_new};
 use simplelog::{LevelFilter, SimpleLogger};
 use structopt::StructOpt;
 use albw::Game;

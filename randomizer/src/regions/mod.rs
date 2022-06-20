@@ -3,17 +3,10 @@ use std::{
     hash::{Hash, Hasher},
 };
 
-use albw::course;
-
-use crate::{graph::Graph, Quest};
-
 pub struct Subregion {
     name: &'static str,
-    course: course::Id,
     world: World,
     id: &'static str,
-    add: fn(&mut dyn Graph),
-    quest: Option<Quest>,
 }
 
 impl Subregion {
@@ -21,20 +14,8 @@ impl Subregion {
         self.name
     }
 
-    pub fn course(&self) -> course::Id {
-        self.course
-    }
-
     pub fn world(&self) -> World {
         self.world
-    }
-
-    pub fn add(&self, graph: &mut dyn Graph) {
-        (self.add)(graph)
-    }
-
-    pub fn quest(&self) -> Option<Quest> {
-        self.quest
     }
 }
 
@@ -79,25 +60,8 @@ macro_rules! regions {
 
         $(pub(crate) mod $world {
             pub const WORLD: super::World = super::World::$variant;
-
-            #[inline]
-            pub(crate) fn items() -> impl Iterator<Item = (crate::LocationInfo, albw::Item)> {
-                std::iter::empty()
-                $(
-                    .chain($region::items())
-                )+
-            }
-
             $(pub(crate) mod $region;)+
         })+
-
-        #[inline]
-        pub(crate) fn items() -> impl Iterator<Item = (crate::LocationInfo, albw::Item)> {
-            std::iter::empty()
-            $(
-                .chain($world::items())
-            )+
-        }
 
         pub(crate) fn patch(patcher: &mut Patcher, layout: &crate::Layout, settings: &$crate::Settings) -> crate::Result<()> {
             $($($world::$region::patch(patcher, layout, settings)?;)+)+
@@ -152,13 +116,6 @@ macro_rules! region {
         $start:ident $start_props:tt,
         $($id:ident $props:tt,)*
     ) => {
-        #[inline]
-        pub(crate) fn items() -> impl Iterator<Item = (crate::LocationInfo, albw::Item)> {
-            $start::items()
-            $(
-                .chain($id::items())
-            )*
-        }
 
         #[inline]
         pub fn patch(patcher: &mut crate::patch::Patcher, layout: &crate::Layout, settings: &$crate::Settings) -> crate::Result<()> {
@@ -194,28 +151,16 @@ macro_rules! subregion {
         $(quest: $kind:ident$(::$qvariant:ident)?,)?
     }) => {
         pub(crate) mod $id {
-            use albw::Item;
 
-            use crate::{patch::Patcher, regions::Subregion, LocationInfo};
+            use crate::{patch::Patcher, regions::Subregion};
 
             pub use super::COURSE;
 
             pub(crate) const SUBREGION: &Subregion = &Subregion {
                 name: super::NAME,
-                course: COURSE,
                 world: super::super::WORLD,
                 id: stringify!($id),
-                add,
-                quest: crate::quest!($($kind$(::$qvariant)?)?),
             };
-
-            #[inline]
-            pub(crate) fn items() -> impl Iterator<Item = (LocationInfo, Item)> {
-                static ITEMS: &[(LocationInfo, Item)] = &[$(
-                    $((LocationInfo::new(SUBREGION, $key), Item::$item),)*
-                )?];
-                ITEMS.into_iter().cloned()
-            }
 
             #[allow(unused)]
             #[inline]

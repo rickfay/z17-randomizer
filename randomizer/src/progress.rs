@@ -192,9 +192,9 @@ impl Progress {
         self.has_amount(2, &[Sword01, Sword02, Sword03, Sword04])
     }
 
-    pub fn has_great_spin(&self) -> bool {
-        self.has(GreatSpin)
-    }
+    // pub fn has_great_spin(&self) -> bool {
+    //     self.has(GreatSpin)
+    // }
 
     pub fn can_attack(&self) -> bool {
         self.has_any(&[

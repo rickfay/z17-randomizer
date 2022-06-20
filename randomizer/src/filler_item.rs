@@ -45,7 +45,7 @@ pub enum FillerItem {
     Pouch,
     BeeBadge,
     HintGlasses,
-    GreatSpin,
+    //GreatSpin,
 
     RupeeGreen,
     RupeeBlue,
@@ -86,7 +86,7 @@ pub enum FillerItem {
     HeartPiece25,
     HeartPiece26,
     HeartPiece27,
-    HeartPiece28,
+    //HeartPiece28,
 
     // 10 Heart Containers
     HeartContainer01,
@@ -295,8 +295,7 @@ pub fn convert(fill_item: FillerItem) -> Option<Item> {
         HeartPiece24 |
         HeartPiece25 |
         HeartPiece26 |
-        HeartPiece27 |
-        HeartPiece28 => Some(HeartPiece),
+        HeartPiece27 => Some(HeartPiece),
 
         HeartContainer01 |
         HeartContainer02 |
@@ -402,7 +401,7 @@ pub fn convert(fill_item: FillerItem) -> Option<Item> {
         FillerItem::TurtleCompass |
         FillerItem::LoruleCastleCompass => Some(Compass),
 
-        GreatSpin => Some(SpecialMove),
+        //GreatSpin => Some(SpecialMove),
         RupeeGreen => Some(RupeeG),
         RupeeBlue => Some(RupeeB),
         RupeeRed => Some(RupeeR),

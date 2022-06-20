@@ -16,10 +16,6 @@ impl Path {
         self.destination
     }
 
-    pub fn get_logic(self) -> Option<fn(&Progress) -> bool> {
-        self.logic
-    }
-
     pub fn can_travel(self, progress: &Progress) -> bool {
         match self.logic {
             None => true,

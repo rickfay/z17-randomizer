@@ -117,9 +117,9 @@ impl Patcher {
             Patch::Key { course, scene, unq } => {
                 self.parse_args(course, scene, unq).1 = item as i32;
             }
-            Patch::Maiamai { course, scene, unq } => {
-                self.parse_args(course, scene, unq).2 = item as i32;
-            }
+            // Patch::Maiamai { course, scene, unq } => {
+            //     self.parse_args(course, scene, unq).2 = item as i32;
+            // }
             Patch::Event {
                 course,
                 name,
@@ -148,11 +148,11 @@ impl Patcher {
             Patch::Shop(Shop::Merchant(index)) => {
                 self.merchant[index as usize] = item;
             }
-            Patch::Multi(patches) => {
-                for patch in patches {
-                    self.apply(patch, item)?;
-                }
-            }
+            // Patch::Multi(patches) => {
+            //     for patch in patches {
+            //         self.apply(patch, item)?;
+            //     }
+            // }
             Patch::None => {}
         }
         Ok(())
@@ -258,13 +258,13 @@ pub enum Patch {
         scene: u16,
         unq: u16,
     },
-    Maiamai {
-        course: course::Id,
-        scene: u16,
-        unq: u16,
-    },
+    // Maiamai {
+    //     course: course::Id,
+    //     scene: u16,
+    //     unq: u16,
+    // },
     Shop(Shop),
-    Multi(Vec<Patch>),
+    // Multi(Vec<Patch>),
     None, // Workaround until everything is shufflable
 }
 

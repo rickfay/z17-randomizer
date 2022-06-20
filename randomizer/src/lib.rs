@@ -1,20 +1,14 @@
-use std::{array, collections::{BTreeMap, HashMap, HashSet}, error::Error as StdError, fs, fs::File, hash::Hash as _, io};
+use std::{array, collections::BTreeMap, error::Error as StdError, fs, fs::File, io};
 use std::io::{stdin, stdout, Write};
 use std::path::Path;
-
-use crc::{crc32, Hasher32};
 use linked_hash_map::LinkedHashMap;
 use log::{debug, info};
-use rand::prelude::*;
 use serde::{ser::SerializeMap, Serialize, Serializer};
-
-use albw::{course, Game, Item};
+use albw::{Game, Item};
 use albw::Item::*;
 
-mod fill;
 mod graph;
 mod patch;
-mod queue_custom;
 mod regions;
 pub mod settings;
 mod state;
@@ -30,7 +24,6 @@ mod world;
 mod filler;
 
 use patch::Patcher;
-use queue_custom::Queue;
 use regions::Subregion;
 pub use settings::Settings;
 use state::State;
@@ -118,53 +111,6 @@ pub enum ErrorKind {
 }
 
 pub type Seed = u32;
-
-/// A randomized patch generator.
-#[derive(Debug)]
-pub struct Generator<'settings> {
-    settings: &'settings Settings,
-    seed: Seed,
-}
-
-impl<'settings> Generator<'settings> {
-    /// Generate a new randomizer with the specified configuration.
-    pub fn new(settings: &'settings Settings, seed: Seed) -> Self {
-        Self { settings, seed }
-    }
-
-    /// Generate a unique hash.
-    pub fn hash(&self) -> Hash {
-        let mut hasher = crc32::Digest::new(crc32::IEEE);
-        self.settings.hash(&mut hasher);
-        self.seed.hash(&mut hasher);
-        Hash(hasher.sum32())
-    }
-
-    /// Randomize world and generate files according to settings.
-    pub fn randomize(&self) -> Spoiler {
-        info!("Seed:                           {}", self.seed);
-        info!("Hash:                           {}", self.hash().0);
-        info!("Logic:                          {}", if self.settings.logic.glitched_logic {"Glitched"} else {"Normal"});
-        info!("Swords:                         {}", if self.settings.logic.swordless_mode {"Swordless Mode - No Swords"} else {"Normal"});
-        info!("Super Items:                    {}", if self.settings.logic.super_items {"Included"} else {"Not Included"});
-        info!("Trials:                         {}", if self.settings.logic.skip_trials {"Skipped"} else {"Normal"});
-
-        let rng = StdRng::seed_from_u64(self.seed as u64);
-        let (randomized, layout) = Randomized::new(rng, exclude(&self.settings), &self.settings);
-        let layout = fill::fill(
-            &self.settings,
-            randomized.locations,
-            layout,
-            randomized.world,
-            randomized.dungeons,
-        );
-        Spoiler {
-            seed: self.seed,
-            settings: self.settings,
-            layout,
-        }
-    }
-}
 
 #[derive(Debug)]
 pub struct Hash(u32);
@@ -343,7 +289,7 @@ fn item_to_str(item: &Item) -> &'static str {
         ItemSwordLv1 => "Progressive Sword",
         ItemSwordLv2 => "Progressive Sword",
         ItemMizukaki => "Flippers",
-        RingHekiga => "Bracelet",
+        RingHekiga => "Progressive Bracelet",
         ItemBell => "Bell",
         RupeeGold => "Gold Rupee",
         RupeeSilver => "Silver Rupee",
@@ -419,32 +365,6 @@ fn item_to_str(item: &Item) -> &'static str {
         LoruleCastleCompass => "Lorule Castle Compass",
 
         _ => unreachable!("{}", item.as_str()),
-    }
-}
-
-#[derive(Debug, Default)]
-pub(crate) struct Pool {
-    progression: Queue<Item>,
-    rest: Queue<Item>,
-}
-
-impl Pool {
-    fn insert(&mut self, weight: u32, item: Item) {
-        if item.is_progression() {
-            &mut self.progression
-        } else {
-            &mut self.rest
-        }
-            .push(weight, item)
-    }
-
-    fn insert_unique(&mut self, weight: u32, item: Item) {
-        if item.is_progression() && !self.progression.contains(&item) {
-            &mut self.progression
-        } else {
-            &mut self.rest
-        }
-            .push(weight, item)
     }
 }
 
@@ -595,64 +515,6 @@ impl ItemExt for Item {
     }
 }
 
-#[derive(Debug)]
-struct Randomized {
-    world: Pool,
-    dungeons: HashMap<course::Id, Pool>,
-    locations: HashMap<LocationInfo, u32>,
-}
-
-impl Randomized {
-    fn new<R>(mut rng: R, exclude: HashSet<LocationInfo>, settings: &&Settings) -> (Self, Layout)
-        where
-            R: Rng,
-    {
-        let mut world = Pool::default();
-        let mut dungeons = HashMap::<_, Pool>::new();
-        let mut locations = HashMap::new();
-        let mut layout = Layout::default();
-        for (location, item) in regions::items() {
-            if exclude.contains(&location) {
-                // let skipped =
-                //     (item == Item::PackageSword && settings.items.captains_sword.is_skipped())
-                //         || (item == Item::RingRental && settings.items.first_bracelet.is_skipped()
-                //     );
-                // if !skipped {
-
-                layout.set(location, item);
-
-                //}
-            } else {
-                if item.is_dungeon() {
-                    dungeons
-                        .entry(location.subregion.course())
-                        .or_default()
-                        .insert(rng.next_u32(), item);
-                } else {
-                    let i = if settings.logic.swordless_mode && item.is_sword() {
-                        RupeeG
-                    } else if !settings.logic.super_items && item.is_super() {
-                        RupeePurple
-                    } else {
-                        item
-                    };
-
-                    world.insert_unique(rng.next_u32(), i);
-                }
-                locations.insert(location, rng.next_u32());
-            }
-        }
-        (
-            Self {
-                world,
-                dungeons,
-                locations,
-            },
-            layout,
-        )
-    }
-}
-
 /// A log of seed info and item placements
 #[derive(Debug, Serialize)]
 pub struct Spoiler<'settings> {
@@ -678,117 +540,6 @@ impl<'settings> Spoiler<'settings> {
         }
         Ok(())
     }
-}
-
-fn exclude(settings: &Settings) -> HashSet<LocationInfo> {
-    let mut exclude = HashSet::new();
-
-    // if !settings.items.captains_sword.is_shuffled() {
-    //     exclude.insert(Location::new(
-    //         regions::hyrule::field::main::SUBREGION,
-    //         "Delivery",
-    //     ));
-    // }
-
-    // if !settings.items.borrowed_sword.is_shuffled() {
-    //     exclude.insert(Location::new(
-    //         regions::hyrule::field::main::SUBREGION,
-    //         "Dampe",
-    //     ));
-    // }
-
-    // if !settings.items.lamp.is_shuffled() {
-    //     exclude.insert(Location::new(
-    //         regions::hyrule::sanctuary::lobby::SUBREGION,
-    //         "Entrance",
-    //     ));
-    // }
-
-    // Lock Message in a Bottle to its original spot
-    exclude.insert(LocationInfo::new(
-        regions::hyrule::lake::hylia::SUBREGION,
-        "Shore",
-    ));
-
-    // Lock Smooth Gem to its original spot
-    exclude.insert(LocationInfo::new(
-        regions::hyrule::kakariko::shady_guy::SUBREGION,
-        "Merchant (Right)",
-    ));
-
-    if settings.logic.swordless_mode {
-        exclude.insert(LocationInfo::new(
-            regions::hyrule::field::castle::SUBREGION,
-            "Castle (Indoors)",
-        ));
-
-        exclude.insert(LocationInfo::new(
-            regions::hyrule::field::castle::SUBREGION,
-            "Castle Balcony",
-        ));
-    }
-
-    if settings.logic.boots_in_shop {
-        exclude.insert(LocationInfo::new(
-            regions::hyrule::field::rentals::SUBREGION,
-            "Ravio (2)",
-        ));
-    }
-
-    if settings.logic.pouch_in_shop {
-        exclude.insert(LocationInfo::new(
-            regions::hyrule::field::rentals::SUBREGION,
-            "Ravio (3)",
-        ));
-    }
-
-    if settings.logic.bell_in_shop {
-        exclude.insert(LocationInfo::new(
-            regions::hyrule::field::rentals::SUBREGION,
-            "Ravio (4)",
-        ));
-    }
-
-    if settings.logic.start_with_bracelet {
-        exclude.insert(LocationInfo::new(
-            regions::hyrule::field::rentals::SUBREGION,
-            "Ravio (5)",
-        ));
-    }
-
-    if settings.logic.minigames_excluded {
-        exclude.insert(LocationInfo::new(
-            regions::hyrule::kakariko::post_sanc::SUBREGION,
-            "Cucco Ranch",
-        ));
-
-        exclude.insert(LocationInfo::new(
-            regions::hyrule::field::rupee_rush::SUBREGION,
-            "Rupee Rush",
-        ));
-
-        exclude.insert(LocationInfo::new(
-            regions::lorule::field::main::SUBREGION,
-            "Rupee Rush",
-        ));
-
-        exclude.insert(LocationInfo::new(
-            regions::lorule::death::tower::SUBREGION,
-            "Treacherous Tower (Intermediate)",
-        ));
-
-        exclude.insert(LocationInfo::new(
-            regions::lorule::field::main::SUBREGION,
-            "Octoball Derby",
-        ));
-
-        exclude.insert(LocationInfo::new(
-            regions::hyrule::lake::hotfoot::SUBREGION,
-            "Hyrule Hotfoot",
-        ));
-    }
-
-    exclude
 }
 
 /// Gets the system object for the platform.

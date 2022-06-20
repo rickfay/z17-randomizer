@@ -166,12 +166,6 @@ impl Hash for Exclusion {
     }
 }
 
-impl Exclusion {
-    fn is_empty(&self) -> bool {
-        self.0.is_empty()
-    }
-}
-
 #[derive(Clone, Debug, Default, Deserialize, Serialize)]
 pub struct World(HashMap<String, HashSet<String>>);
 

@@ -8,7 +8,6 @@ pub enum Location {
     EasternRuinsEastLedge,
     WitchCave,
     WitchHouse,
-    River,
     RavioShop,
     ZoraDomain,
     ZoraDomainArea,
