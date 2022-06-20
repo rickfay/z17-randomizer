@@ -348,24 +348,24 @@ fn progressive_items(code: &mut Code) {
         ])
     };*/
     let progressive_bracelet = //if settings.items.first_bracelet.is_skipped() {
+        // code.text().define([
+        //     cmp(R5, 0x2A),
+        //     cmp(R5, 0x2B).ne(),
+        //     b(progressive_sword).ne(),
+        //     mov(R5, 0x2B),
+        //     b(return_label),
+        // ]);
+    // } else {
         code.text().define([
             cmp(R5, 0x2A),
             cmp(R5, 0x2B).ne(),
             b(progressive_sword).ne(),
-            mov(R5, 0x2B),
+            ldr(R0, (R0, 0x490)),
+            cmp(R0, 0),
+            mov(R5, 0x2A).eq(),
+            mov(R5, 0x2B).ne(),
             b(return_label),
         ]);
-    // } else {
-    //     code.text().define([
-    //         cmp(R5, 0x2A),
-    //         cmp(R5, 0x2B).ne(),
-    //         b(progressive_sword).ne(),
-    //         ldr(R0, (R0, 0x490)),
-    //         cmp(R0, 0),
-    //         mov(R5, 0x2A).eq(),
-    //         mov(R5, 0x2B).ne(),
-    //         b(return_label),
-    //     ])
     // };
     let progressive_glove = code.text().define([
         cmp(R5, 0x2F),

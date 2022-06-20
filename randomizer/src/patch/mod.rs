@@ -380,6 +380,7 @@ fn cutscenes<'game, 'settings>(
                 236, // Enable Stamina bar
                 239, // Ravio Sign Trigger
                 241, // Skip Osfala intro
+                246, // Skip Irene, make Hyrule Hotfoot appear, spawns certain enemies
                 248, // Skip Yuga killing Osfala
                 315, // Shop open???
                 320, // Shady Guy Trigger
@@ -390,7 +391,7 @@ fn cutscenes<'game, 'settings>(
                 522, // Hilda Blacksmith Text + get Map Swap icon on lower screen
                 523, // Hilda Graveyard Text
                 524, // Hilda ??? Text
-                525, // Skip Sahasrahla outside Link's House
+                525, // Skip Sahasrahla outside Link's House, make Hyrule Hotfoot appear
                 542, 543, // Skip Bomb-Shop Man dialogue
                 560, // Hilda ??? Text
                 599, // Disable Sand Rod return

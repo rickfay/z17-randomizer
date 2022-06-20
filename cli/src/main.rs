@@ -80,15 +80,18 @@ fn preset_ui() -> Settings {
     info!("No preset has been specified. Seed Options UI will be used instead.\n");
     println!("--- Seed Options ---");
 
-    let start_with_bracelet = prompt_until_bool("Start with Ravio's Bracelet?");
-    let bell_in_shop = prompt_until_bool("Place Bell in Ravio's Shop?");
-    let pouch_in_shop = prompt_until_bool("Place Pouch in Ravio's Shop?");
-    let boots_in_shop = prompt_until_bool("Place Pegasus Boots in Ravio's Shop?");
+    //let start_with_bracelet = prompt_until_bool("Start with Ravio's Bracelet?");
+    let sword_in_shop = prompt_until_bool("Guarantee a Sword in Ravio's Shop?");
+    let bell_in_shop = prompt_until_bool("Guarantee Bell in Ravio's Shop?");
+    let pouch_in_shop = prompt_until_bool("Guarantee Pouch in Ravio's Shop?");
+    let boots_in_shop = prompt_until_bool("Guarantee Pegasus Boots in Ravio's Shop?");
+
     let super_items = prompt_until_bool("Include the Super Lamp and Super Net?");
     let minigames_excluded = prompt_until_bool("Exclude all minigames?");
     let skip_trials = prompt_until_bool("Skip the Lorule Castle Trials?");
-    let glitched_logic = prompt_until_bool("Use Glitched Logic? (advanced)");
-    let swordless_mode = prompt_until_bool("Play in Swordless Mode? (advanced)");
+    let bow_of_light_in_castle = prompt_until_bool("Guarantee Bow of Light in Lorule Castle?");
+    //let glitched_logic = prompt_until_bool("Use Glitched Logic? (advanced)");
+    let swordless_mode = !sword_in_shop && prompt_until_bool("Play in Swordless Mode? (advanced)");
 
     println!();
     info!("Starting seed generation...\n");
@@ -97,11 +100,12 @@ fn preset_ui() -> Settings {
         logic: Logic {
             bell_in_shop,
             pouch_in_shop,
+            sword_in_shop,
             boots_in_shop,
             super_items,
-            glitched_logic,
-            start_with_bracelet,
+            //glitched_logic,
             minigames_excluded,
+            bow_of_light_in_castle,
             swordless_mode,
             skip_trials,
             ..Default::default()
@@ -137,41 +141,35 @@ fn main() -> randomizer::Result<()> {
             preset_ui()
         };
 
-        let use_new_filler = true;
         let max_retries = 100;
         let mut result = Ok(());
 
         for x in 0..max_retries {
             let seed = opt.seed.unwrap_or_else(rand::random);
 
-            if use_new_filler {
-                filler_new(&preset, seed as u64)?;
-                pause();
-                exit(0);
+
+            info!("Attempt:                        #{}", x + 1);
+            info!("Preset:                         {}", opt.preset.as_ref().unwrap_or(&String::from("<None>")));
+            info!("Version:                        0.0.5");
+
+            //let randomizer = Generator::new(&preset, seed);
+            let spoiler = panic::catch_unwind(|| filler_new(&preset, seed));
+
+            if spoiler.is_ok() {
+                println!();
+                info!("Seed generated. Patching...");
+                result = spoiler.unwrap().patch(
+                    system.get_or_create_paths(create_paths)?,
+                    !opt.no_patch,
+                    !opt.no_spoiler,
+                );
+
+                break;
+            } else if x >= max_retries - 1 {
+                // FIXME I hate this, but I'm struggling with Rust error handling so leaving it for now
+                panic!("Too many retry attempts have failed. Aborting...");
             } else {
-                info!("Attempt:                        #{}", x + 1);
-                info!("Preset:                         {}", opt.preset.as_ref().unwrap_or(&String::from("<None>")));
-                info!("Version:                        0.0.4");
-
-                let randomizer = Generator::new(&preset, seed);
-                let spoiler = panic::catch_unwind(|| randomizer.randomize());
-
-                if spoiler.is_ok() {
-                    println!();
-                    info!("Seed generated. Patching...");
-                    result = spoiler.unwrap().patch(
-                        system.get_or_create_paths(create_paths)?,
-                        !opt.no_patch,
-                        !opt.no_spoiler,
-                    );
-
-                    break;
-                } else if x >= max_retries - 1 {
-                    // FIXME I hate this, but I'm struggling with Rust error handling so leaving it for now
-                    panic!("Too many retry attempts have failed. Aborting...");
-                } else {
-                    info!("Seed was not completable (this is normal). Retrying...\n");
-                }
+                info!("Seed was not completable (this is normal). Retrying...\n");
             }
         }
 

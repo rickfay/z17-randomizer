@@ -238,9 +238,9 @@ pub enum FillerItem {
     StylishWomansHouseOpen,
     SkullEyeRight,
     SkullEyeLeft,
+    AccessPotionShop,
+    AccessHyruleBlacksmith,
     AccessHildaBarrier,
-
-    // TODO add Hyrule Blacksmith reachable
 }
 
 pub fn convert(fill_item: FillerItem) -> Option<Item> {
@@ -417,6 +417,7 @@ pub fn convert(fill_item: FillerItem) -> Option<Item> {
         PendantOfCourage | PendantOfWisdom | PendantOfPower |
         SageGulley | SageOren | SageSeres | SageOsfala | SageRosso | SageIrene | SageImpa |
         ScootFruit | GoldBee | BigBombFlower | StylishWomansHouseOpen |
-        SkullEyeRight | SkullEyeLeft | AccessHildaBarrier => None
+        SkullEyeRight | SkullEyeLeft |
+        AccessHildaBarrier | AccessHyruleBlacksmith | AccessPotionShop => None
     }
 }

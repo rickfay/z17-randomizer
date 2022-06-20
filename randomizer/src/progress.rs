@@ -1,15 +1,17 @@
 use std::collections::HashSet;
 use crate::filler_item::FillerItem;
 use crate::filler_item::FillerItem::*;
+use crate::Settings;
 
-#[derive(Clone, Default, Eq, PartialEq)]
+#[derive(Clone)]
 pub struct Progress {
     items: HashSet<FillerItem>,
+    settings: Settings,
 }
 
 impl Progress {
-    pub fn new() -> Self {
-        Self { ..Default::default() }
+    pub fn new(settings: Settings) -> Self {
+        Self { items: HashSet::new(), settings }
     }
 
     pub fn add_item(&mut self, item: FillerItem) {
@@ -155,7 +157,7 @@ impl Progress {
     }
 
     pub fn can_merge(&self) -> bool {
-        self.has_either(RaviosBracelet01, RaviosBracelet02) // TODO change this to require both
+        self.has_both(RaviosBracelet01, RaviosBracelet02)
     }
 
     // pub fn has_maiamai(self, amount: u8) -> bool { // TODO maiamai everything

@@ -108,9 +108,12 @@ pub fn apply(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
         },
         // Outside Rosso's house
         FieldLight 2 {
+            [11].clear_enable_flag(), // Small Rock (controller for other rocks, see the System section)
             [100].disable(None), // Keep Entry_KikoriMan3 from disappearing
             [101].disable(None),
-            [135].disable(), // Disable IndoorLight4
+            [128].disable(), // Remove "Not in right now." signboard
+            [132].active(1), // Unlock Rosso's Front Door
+            [135].disable(), // Disable LZ to IndoorLight4 Cutscene
             [136].enable(Flag::Event(250)), // Replace with IndoorLight10
         },
 
@@ -554,6 +557,41 @@ pub fn apply(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
 
     // Change 'System' properties
     apply_system!(patcher,
+
+        // Outside Rosso's house
+        FieldLight 2 {
+            [11].clear_enable_flag(), // Small Rock (controller for the other rocks)
+            [12].clear_enable_flag(), // Small Rock
+            [14].clear_enable_flag(), // Small Rock
+            [15].clear_enable_flag(), // Small Rock
+            [16].clear_enable_flag(), // Small Rock
+            [18].clear_enable_flag(), // Small Rock
+            [19].clear_enable_flag(), // Small Rock
+            [20].clear_enable_flag(), // Small Rock
+            [21].clear_enable_flag(), // Small Rock
+            [93].clear_enable_flag(), // Small Rock
+            [94].clear_enable_flag(), // Small Rock
+            [102].clear_enable_flag(), // Small Rock
+            [103].clear_enable_flag(), // Small Rock
+            [104].clear_enable_flag(), // Small Rock
+            [105].clear_enable_flag(), // Small Rock
+            [106].clear_enable_flag(), // Small Rock
+            [107].clear_enable_flag(), // Small Rock
+            [108].clear_enable_flag(), // Small Rock
+            [109].clear_enable_flag(), // Small Rock
+            [110].clear_enable_flag(), // Small Rock
+            [111].clear_enable_flag(), // Small Rock
+            [112].clear_enable_flag(), // Small Rock
+            [118].clear_enable_flag(), // Small Rock
+            [119].clear_enable_flag(), // Small Rock
+            [120].clear_enable_flag(), // Small Rock
+            [121].clear_enable_flag(), // Small Rock
+            [122].clear_enable_flag(), // Small Rock
+            [123].clear_enable_flag(), // Small Rock
+            [124].clear_enable_flag(), // Small Rock
+            [125].clear_enable_flag(), // Small Rock
+            [126].clear_enable_flag(), // Small Rock
+        },
 
         // Link's House
         IndoorLight 1 {

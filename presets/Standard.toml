@@ -1,7 +1,7 @@
 ## Modifications to logic.
 [logic]
-## Ravio will give out the Bracelet at the very start of the game
-start_with_bracelet = true
+## A Sword will be placed in Ravio's Shop
+sword_in_shop = false
 ## The Bell will be placed in Ravio's Shop
 bell_in_shop = false
 ## The Pouch will be placed in Ravio's Shop
@@ -9,32 +9,25 @@ pouch_in_shop = false
 ## The Pegasus Boots will be placed in Ravio's Shop
 boots_in_shop = false
 ## Include the Super Lamp and Super Net in the shuffled item pool
-super_items = true
-## Place items using logic that potentially requires glitches to complete
-glitched_logic = false
-## Disables lamp requirement for dark areas.
-dont_require_lamp_for_darkness = false
+super_items = false
 ## Exclude all minigames (Cucco Ranch, both Rupee Rushes, Hyrule Hotfoot, Treacherous Tower, and Octoball Derby)
 minigames_excluded = false
+## Skip the Trials in Lorule Castle
+skip_trials = false
+## Guarantees the Bow of Light will be placed *somewhere* in Lorule Castle
+bow_of_light_in_castle = false
+## Place items using logic that potentially requires glitches to complete
+glitched_logic = false
 ## Swordless Mode. Removes all Swords from the game. You will need the Net to play Tennis with Yuganon.
 swordless_mode = false
-## Unsafe Key placement has been deprecated. Please remove it from your presets as it is no longer supported.
-#unsafe_key_placement = false
 
 [options]
 ## Experimental option to change Hyrule's lighting until you visit Lorule for the first time.
 ## Causes performance issues on console.
 night_mode = false
 
-## Excludes certain locations from having progression items.
-[exclude]
-## Use the names from the spoiler log.
-##[exclude.Hyrule]
-##'Lost Woods' = [
-##    'Pedestal'
-##]
-##[exclude.Lorule]
-##'Lorule Field' = [
-##    'Great Rupee Fairy',
-##    'Thief Girl'
-##]
+[exclusions]
+'exclusions' = [
+#    'Great Rupee Fairy',
+#    'Thief Girl Cave'
+]

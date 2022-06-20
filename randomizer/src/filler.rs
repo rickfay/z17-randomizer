@@ -1,12 +1,11 @@
 use std::collections::{HashMap, HashSet};
-use std::io;
 use std::process::exit;
 use log::{error, info};
 use queue::Queue;
 use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
 use albw::Item;
-use crate::{convert, Layout, LocationInfo, Settings};
+use crate::{convert, LocationInfo, Seed, Settings};
 use crate::check::Check;
 use crate::FillerItem;
 use crate::FillerItem::*;
@@ -16,45 +15,150 @@ use crate::progress::Progress;
 use crate::world::build_world_graph;
 
 /// Filler Algorithm
-pub fn fill_stuff(settings: &Settings, seed: u64) -> Vec<(LocationInfo, Item)> {
-    info!("New filler start!");
+pub fn fill_stuff(settings: &Settings, seed: Seed) -> Vec<(LocationInfo, Item)> {
 
-    let mut rng = StdRng::seed_from_u64(seed);
+
+    info!("Seed:                           {}", seed);
+    //info!("Hash:                           {}", settings.hash().0);
+    info!("Logic:                          Normal"); // if settings.logic.glitched_logic {"Glitched"} else {"Normal"});
+    info!("Swords:                         {}", if settings.logic.swordless_mode {"Swordless Mode - No Swords"} else {"Normal"});
+    info!("Super Items:                    {}", if settings.logic.super_items {"Included"} else {"Not Included"});
+    info!("Trials:                         {}\n", if settings.logic.skip_trials {"Skipped"} else {"Normal"});
+
+
+    let mut rng = StdRng::seed_from_u64(seed as u64);
 
     info!("Building World Graph...");
 
     let mut world_graph = build_world_graph();
+    let mut check_map = prefill_check_map(&mut world_graph);
+    let (mut progression_pool, mut trash_pool) = get_items(settings);
 
-    info!("Verifying all locations accessible...");
+    verify_all_locations_accessible(&mut world_graph, &progression_pool, settings);
 
-    verify_all_locations_accessible(&mut world_graph);
+    preplace_items(&mut check_map, settings, &mut rng, &mut progression_pool, &mut trash_pool);
 
-    info!("Beginning Assumed Fill Algorithm...");
+    info!("Placing Progression Items...");
 
-    let mut check_map = assumed_fill(&mut world_graph, &mut rng);
+    assumed_fill(&mut world_graph, &mut rng, &mut progression_pool, &mut check_map, settings);
 
-    for (key, val) in &check_map {
-        if !val.is_none() {
-            info!("{0: <50} {1:?}", *key, val.unwrap());
-        }
-    }
+    info!("Placing Trash Items...");
 
-    info!("Filling in trash items...");
-
-    fill_trash(&mut check_map, &mut rng);
-
-    info!("OMG we got here");
-
-    for (key, val) in check_map.clone() {
-        info!("{0: <50}: {1:?}", key, val.unwrap());
-    }
+    fill_trash(&mut check_map, &mut rng, &trash_pool);
 
     map_to_result(world_graph, check_map)
 }
 
+/// Place static items ahead of the randomly filled ones
+fn preplace_items<'a>(check_map: &mut HashMap<&'a str, Option<FillerItem>>,
+                      settings: &'a Settings,
+                      rng: &mut StdRng,
+                      progression: &mut Vec<FillerItem>,
+                      trash: &mut Vec<FillerItem>) {
+
+    handle_exclusions(check_map, settings, rng, trash);
+
+    check_map.insert("Shore", Some(LetterInABottle));
+    progression.retain(|x| *x != LetterInABottle);
+
+    check_map.insert("Merchant (Right)", Some(SmoothGem));
+    progression.retain(|x| *x != SmoothGem);
+
+    let mut shop_positions: Vec<&str> = Vec::new();
+    let mut lorule_castle_positions: Vec<&str> = Vec::new();
+
+    // Shut up your code is worse
+    let mut zelda_excluded = false;
+    let opt = settings.exclusions.0.get("exclusions");
+    if opt.is_some() {
+        zelda_excluded = opt.unwrap().contains("[LC] Zelda");
+    }
+
+    for (check_name, _) in check_map.clone() {
+        if check_name.starts_with("[LC]") &&
+            !(zelda_excluded && check_name.eq("[LC] Zelda")) { // gross
+            let _ = &lorule_castle_positions.push(check_name);
+        } else if check_name.starts_with("Ravio") && !check_name.contains("6") {
+            let _ = &shop_positions.push(check_name);
+        }
+    }
+
+    if settings.logic.bow_of_light_in_castle {
+        check_map.insert(lorule_castle_positions.remove(rng.gen_range(0..lorule_castle_positions.len())), Some(BowOfLight));
+        progression.retain(|x| *x != BowOfLight);
+    }
+
+    // Assured weapon takes away too much from progression, sticking with assured sword
+    // if settings.logic.assured_weapon {
+    //     let weapon = *Vec::from([
+    //         Sword01, Sword02, Sword03, Sword04, Bow01, Bombs01, FireRod01, IceRod01, Hammer01
+    //     ]).get(rng.gen_range(0..9)).unwrap();
+    //
+    //     check_map.insert(shop_positions.remove(rng.gen_range(0..shop_positions.len())), Some(weapon));
+    //     progression.retain(|x| *x != weapon);
+    // }
+
+    if settings.logic.sword_in_shop {
+        check_map.insert(shop_positions.remove(rng.gen_range(0..shop_positions.len())), Some(Sword01));
+        progression.retain(|x| *x != Sword01);
+    }
+
+    if settings.logic.bell_in_shop {
+        check_map.insert(shop_positions.remove(rng.gen_range(0..shop_positions.len())), Some(Bell));
+        progression.retain(|x| *x != Bell);
+    }
+
+    if settings.logic.pouch_in_shop {
+        check_map.insert(shop_positions.remove(rng.gen_range(0..shop_positions.len())), Some(Pouch));
+        progression.retain(|x| *x != Pouch);
+    }
+
+    if settings.logic.boots_in_shop {
+        check_map.insert(shop_positions.remove(rng.gen_range(0..shop_positions.len())), Some(PegasusBoots));
+        progression.retain(|x| *x != PegasusBoots);
+    }
+
+    if settings.logic.minigames_excluded {
+        exclude("Cucco Ranch", rng, check_map, trash);
+        exclude("Hyrule Hotfoot", rng, check_map, trash);
+        exclude("Rupee Rush (Hyrule)", rng, check_map, trash);
+        exclude("Rupee Rush (Lorule)", rng, check_map, trash);
+        exclude("Octoball Derby", rng, check_map, trash);
+        exclude("Treacherous Tower (Intermediate)", rng, check_map, trash);
+    }
+}
+
+fn exclude(check_name: &'static str, rng: &mut StdRng, check_map: &mut HashMap<&str, Option<FillerItem>>, trash: &mut Vec<FillerItem>) {
+    check_map.insert(check_name, Some(trash.remove(rng.gen_range(0..trash.len()))));
+}
+
+
+fn handle_exclusions<'a>(check_map: &mut HashMap<&'a str, Option<FillerItem>>,
+                         settings: &'a Settings,
+                         rng: &mut StdRng,
+                         trash_pool: &mut Vec<FillerItem>) {
+
+    let opt = settings.exclusions.0.get("exclusions");
+    if opt.is_none() {
+        return;
+    }
+
+    let exclusions = opt.unwrap();
+
+    for exclusion in exclusions {
+        if check_map.contains_key(&exclusion.as_str()) {
+            check_map.insert(&exclusion.as_str(), Some(trash_pool.remove(rng.gen_range(0..trash_pool.len()))));
+        } else {
+            error!("Cannot exclude \"{}\", no matching check found with that name.", &exclusion.as_str());
+            error!("Consult a spoiler log for a list of valid check names.");
+            exit(1);
+        }
+    }
+}
+
 /// Super dirty mapping I hate it
 fn map_to_result(world_graph: HashMap<Location, LocationNode>, check_map: HashMap<&str, Option<FillerItem>>) -> Vec<(LocationInfo, Item)> {
-    let mut result : Vec<(LocationInfo, Item)> = Vec::new();
+    let mut result: Vec<(LocationInfo, Item)> = Vec::new();
     for (_, location_node) in world_graph {
         for check in location_node.get_checks() {
             if check.get_location_info().is_some() {
@@ -67,258 +171,140 @@ fn map_to_result(world_graph: HashMap<Location, LocationNode>, check_map: HashMa
     result
 }
 
-fn get_progression_items() -> Vec<FillerItem> {
-    vec![
-        Bow01,
-        Boomerang01,
-        Hookshot01,
-        Bombs01,
-        FireRod01,
-        IceRod01,
-        Hammer01,
-        SandRod01,
-        TornadoRod01,
-        RaviosBracelet01,
-        Bell,
-        StaminaScroll,
-        BowOfLight,
-        PegasusBoots,
-        Flippers,
-        HylianShield,
-        SmoothGem,
-        LetterInABottle,
-        PremiumMilk,
+fn get_items(settings: &Settings) -> (Vec<FillerItem>, Vec<FillerItem>) {
+    let mut progression =
+        vec![
+            Bow01,
+            Boomerang01,
+            Hookshot01,
+            Bombs01,
+            FireRod01,
+            IceRod01,
+            Hammer01,
+            SandRod01,
+            TornadoRod01,
+            RaviosBracelet01,
+            RaviosBracelet02,
+            Bell,
+            StaminaScroll,
+            BowOfLight,
+            PegasusBoots,
+            Flippers,
+            HylianShield,
+            PremiumMilk,
+            SmoothGem,
+            LetterInABottle,
+            Lamp01,
+            Net01,
+            Pouch,
 
-        // Heart Pieces
-        HeartPiece01,
-        HeartPiece02,
-        HeartPiece03,
-        HeartPiece04,
-        HeartPiece05,
-        HeartPiece06,
-        HeartPiece07,
-        HeartPiece08,
-        HeartPiece09,
-        HeartPiece10,
-        HeartPiece11,
-        HeartPiece12,
-        HeartPiece13,
-        HeartPiece14,
-        HeartPiece15,
-        HeartPiece16,
-        HeartPiece17,
-        HeartPiece18,
-        HeartPiece19,
-        HeartPiece20,
-        HeartPiece21,
-        HeartPiece22,
-        HeartPiece23,
-        HeartPiece24,
-        HeartPiece25,
-        HeartPiece26,
-        HeartPiece27,
-        // HeartPiece28, // Not yet randomized, in Fortune's Choice minigame
+            // 5 Bottles
+            Bottle01,
+            Bottle02,
+            Bottle03,
+            Bottle04,
+            Bottle05,
 
-        // Heart Containers
-        HeartContainer01,
-        HeartContainer02,
-        HeartContainer03,
-        HeartContainer04,
-        HeartContainer05,
-        HeartContainer06,
-        HeartContainer07,
-        HeartContainer08,
-        HeartContainer09,
-        HeartContainer10,
+            // 2 Gloves
+            Glove01,
+            Glove02,
 
-        // 5 Bottles
-        Bottle01,
-        Bottle02,
-        Bottle03,
-        Bottle04,
-        Bottle05,
+            // 2 Mails
+            Mail01,
+            Mail02,
 
-        // 2 Lamps
-        Lamp01,
-        Lamp02,
+            // 4 Master Ore
+            OreYellow,
+            OreGreen,
+            OreBlue,
+            OreRed,
 
-        // 4 Swords (Adventures!)
-        Sword01,
-        Sword02,
-        Sword03,
-        Sword04,
+            // Sanctuary Keys
+            HyruleSanctuaryKey,
+            LoruleSanctuaryKey,
 
-        // 2 Gloves
-        Glove01,
-        Glove02,
+            // Eastern Palace Keys
+            EasternCompass,
+            EasternKeyBig,
+            EasternKeySmall01,
+            EasternKeySmall02,
 
-        // 2 Nets
-        Net01,
-        Net02,
+            // House of Gales Keys
+            GalesCompass,
+            GalesKeyBig,
+            GalesKeySmall01,
+            GalesKeySmall02,
+            GalesKeySmall03,
+            GalesKeySmall04,
 
-        // 2 Mails
-        Mail01,
-        Mail02,
+            // Tower of Hera Keys
+            HeraCompass,
+            HeraKeyBig,
+            HeraKeySmall01,
+            HeraKeySmall02,
 
-        // 4 Master Ore
-        OreYellow,
-        OreGreen,
-        OreBlue,
-        OreRed,
+            // Dark Palace Keys
+            DarkCompass,
+            DarkKeyBig,
+            DarkKeySmall01,
+            DarkKeySmall02,
+            DarkKeySmall03,
+            DarkKeySmall04,
 
-        // Sanctuary Keys
-        HyruleSanctuaryKey,
-        LoruleSanctuaryKey,
+            // Swamp Palace Keys
+            SwampCompass,
+            SwampKeyBig,
+            SwampKeySmall01,
+            SwampKeySmall02,
+            SwampKeySmall03,
+            SwampKeySmall04,
 
-        // Eastern Palace Keys
-        EasternCompass,
-        EasternKeyBig,
-        EasternKeySmall01,
-        EasternKeySmall02,
+            // Skull Woods Keys
+            SkullCompass,
+            SkullKeyBig,
+            SkullKeySmall01,
+            SkullKeySmall02,
+            SkullKeySmall03,
 
-        // House of Gales Keys
-        GalesCompass,
-        GalesKeyBig,
-        GalesKeySmall01,
-        GalesKeySmall02,
-        GalesKeySmall03,
-        GalesKeySmall04,
+            // Thieves' Hideout Keys
+            ThievesCompass,
+            ThievesKeyBig,
+            ThievesKeySmall,
 
-        // Tower of Hera Keys
-        HeraCompass,
-        HeraKeyBig,
-        HeraKeySmall01,
-        HeraKeySmall02,
+            // Ice Ruins Keys
+            IceCompass,
+            IceKeyBig,
+            IceKeySmall01,
+            IceKeySmall02,
+            IceKeySmall03,
 
-        // Dark Palace Keys
-        DarkCompass,
-        DarkKeyBig,
-        DarkKeySmall01,
-        DarkKeySmall02,
-        DarkKeySmall03,
-        DarkKeySmall04,
+            // Desert Palace Keys
+            DesertCompass,
+            DesertKeyBig,
+            DesertKeySmall01,
+            DesertKeySmall02,
+            DesertKeySmall03,
+            DesertKeySmall04,
+            DesertKeySmall05,
 
-        // Swamp Palace Keys
-        SwampCompass,
-        SwampKeyBig,
-        SwampKeySmall01,
-        SwampKeySmall02,
-        SwampKeySmall03,
-        SwampKeySmall04,
+            // Turtle Rock Keys
+            TurtleCompass,
+            TurtleKeyBig,
+            TurtleKeySmall01,
+            TurtleKeySmall02,
+            TurtleKeySmall03,
 
-        // Skull Woods Keys
-        SkullCompass,
-        SkullKeyBig,
-        SkullKeySmall01,
-        SkullKeySmall02,
-        SkullKeySmall03,
+            // Lorule Castle Keys
+            LoruleCastleCompass,
+            LoruleCastleKeySmall01,
+            LoruleCastleKeySmall02,
+            LoruleCastleKeySmall03,
+            LoruleCastleKeySmall04,
+            LoruleCastleKeySmall05,
+        ];
 
-        // Thieves' Hideout Keys
-        ThievesCompass,
-        ThievesKeyBig,
-        ThievesKeySmall,
 
-        // Ice Ruins Keys
-        IceCompass,
-        IceKeyBig,
-        IceKeySmall01,
-        IceKeySmall02,
-        IceKeySmall03,
-
-        // Desert Palace Keys
-        DesertCompass,
-        DesertKeyBig,
-        DesertKeySmall01,
-        DesertKeySmall02,
-        DesertKeySmall03,
-        DesertKeySmall04,
-        DesertKeySmall05,
-
-        // Turtle Rock Keys
-        TurtleCompass,
-        TurtleKeyBig,
-        TurtleKeySmall01,
-        TurtleKeySmall02,
-        TurtleKeySmall03,
-
-        // Lorule Castle Keys
-        LoruleCastleCompass,
-        LoruleCastleKeySmall01,
-        LoruleCastleKeySmall02,
-        LoruleCastleKeySmall03,
-        LoruleCastleKeySmall04,
-        LoruleCastleKeySmall05,
-    ]
-}
-
-fn is_dungeon_item(item: FillerItem) -> bool {
-    match item {
-        HyruleSanctuaryKey |
-        LoruleSanctuaryKey |
-        EasternCompass |
-        EasternKeyBig |
-        EasternKeySmall01 |
-        EasternKeySmall02 |
-        GalesCompass |
-        GalesKeyBig |
-        GalesKeySmall01 |
-        GalesKeySmall02 |
-        GalesKeySmall03 |
-        GalesKeySmall04 |
-        HeraCompass |
-        HeraKeyBig |
-        HeraKeySmall01 |
-        HeraKeySmall02 |
-        DarkCompass |
-        DarkKeyBig |
-        DarkKeySmall01 |
-        DarkKeySmall02 |
-        DarkKeySmall03 |
-        DarkKeySmall04 |
-        SwampCompass |
-        SwampKeyBig |
-        SwampKeySmall01 |
-        SwampKeySmall02 |
-        SwampKeySmall03 |
-        SwampKeySmall04 |
-        SkullCompass |
-        SkullKeyBig |
-        SkullKeySmall01 |
-        SkullKeySmall02 |
-        SkullKeySmall03 |
-        ThievesCompass |
-        ThievesKeyBig |
-        ThievesKeySmall |
-        IceCompass |
-        IceKeyBig |
-        IceKeySmall01 |
-        IceKeySmall02 |
-        IceKeySmall03 |
-        DesertCompass |
-        DesertKeyBig |
-        DesertKeySmall01 |
-        DesertKeySmall02 |
-        DesertKeySmall03 |
-        DesertKeySmall04 |
-        DesertKeySmall05 |
-        TurtleCompass |
-        TurtleKeyBig |
-        TurtleKeySmall01 |
-        TurtleKeySmall02 |
-        TurtleKeySmall03 |
-        LoruleCastleCompass |
-        LoruleCastleKeySmall01 |
-        LoruleCastleKeySmall02 |
-        LoruleCastleKeySmall03 |
-        LoruleCastleKeySmall04 |
-        LoruleCastleKeySmall05 => true,
-        _ => false,
-    }
-}
-
-fn get_trash_items() -> Vec<FillerItem> {
-    vec![
-        Pouch,
+    let mut trash = vec![
         BeeBadge,
         HintGlasses,
 
@@ -353,9 +339,9 @@ fn get_trash_items() -> Vec<FillerItem> {
         RupeeRed,
         RupeeRed,
         RupeeRed,
-        RupeeRed,
-        //RupeeRed, // TODO ????
-        // RupeeRed, // Irene Removed
+        //RupeeRed, // Removed for ????
+        //RupeeRed, // Removed for 2nd Bracelet
+        //RupeeRed, // Irene Removed
 
         // 18 Purple Rupees
         RupeePurple,
@@ -451,14 +437,141 @@ fn get_trash_items() -> Vec<FillerItem> {
         MonsterGuts,
         MonsterGuts,
         MonsterGuts,
-    ]
+
+        // Heart Pieces
+        HeartPiece01,
+        HeartPiece02,
+        HeartPiece03,
+        HeartPiece04,
+        HeartPiece05,
+        HeartPiece06,
+        HeartPiece07,
+        HeartPiece08,
+        HeartPiece09,
+        HeartPiece10,
+        HeartPiece11,
+        HeartPiece12,
+        HeartPiece13,
+        HeartPiece14,
+        HeartPiece15,
+        HeartPiece16,
+        HeartPiece17,
+        HeartPiece18,
+        HeartPiece19,
+        HeartPiece20,
+        HeartPiece21,
+        HeartPiece22,
+        HeartPiece23,
+        HeartPiece24,
+        HeartPiece25,
+        HeartPiece26,
+        HeartPiece27,
+        // HeartPiece28, // Not yet randomized, in Fortune's Choice minigame
+
+        // Heart Containers
+        HeartContainer01,
+        HeartContainer02,
+        HeartContainer03,
+        HeartContainer04,
+        HeartContainer05,
+        HeartContainer06,
+        HeartContainer07,
+        HeartContainer08,
+        HeartContainer09,
+        HeartContainer10,
+    ];
+
+    // Swordless Mode
+    if settings.logic.swordless_mode {
+        trash.push(RupeeRed);
+        trash.push(RupeeRed);
+        trash.push(RupeeRed);
+        trash.push(RupeeRed);
+    } else {
+        progression.push(Sword01);
+        progression.push(Sword02);
+        progression.push(Sword03);
+        progression.push(Sword04);
+    }
+
+    // Super Items
+    if settings.logic.super_items {
+        progression.push(Lamp02);
+        progression.push(Net02);
+    } else {
+        trash.push(RupeePurple);
+        trash.push(RupeePurple);
+    }
+
+    (progression, trash)
 }
 
-fn fill_trash(check_map: &mut HashMap<&str, Option<FillerItem>>, rng: &mut StdRng) {
-    let trash_items = get_trash_items();
+fn is_dungeon_item(item: FillerItem) -> bool {
+    match item {
+        HyruleSanctuaryKey |
+        LoruleSanctuaryKey |
+        EasternCompass |
+        EasternKeyBig |
+        EasternKeySmall01 |
+        EasternKeySmall02 |
+        GalesCompass |
+        GalesKeyBig |
+        GalesKeySmall01 |
+        GalesKeySmall02 |
+        GalesKeySmall03 |
+        GalesKeySmall04 |
+        HeraCompass |
+        HeraKeyBig |
+        HeraKeySmall01 |
+        HeraKeySmall02 |
+        DarkCompass |
+        DarkKeyBig |
+        DarkKeySmall01 |
+        DarkKeySmall02 |
+        DarkKeySmall03 |
+        DarkKeySmall04 |
+        SwampCompass |
+        SwampKeyBig |
+        SwampKeySmall01 |
+        SwampKeySmall02 |
+        SwampKeySmall03 |
+        SwampKeySmall04 |
+        SkullCompass |
+        SkullKeyBig |
+        SkullKeySmall01 |
+        SkullKeySmall02 |
+        SkullKeySmall03 |
+        ThievesCompass |
+        ThievesKeyBig |
+        ThievesKeySmall |
+        IceCompass |
+        IceKeyBig |
+        IceKeySmall01 |
+        IceKeySmall02 |
+        IceKeySmall03 |
+        DesertCompass |
+        DesertKeyBig |
+        DesertKeySmall01 |
+        DesertKeySmall02 |
+        DesertKeySmall03 |
+        DesertKeySmall04 |
+        DesertKeySmall05 |
+        TurtleCompass |
+        TurtleKeyBig |
+        TurtleKeySmall01 |
+        TurtleKeySmall02 |
+        TurtleKeySmall03 |
+        LoruleCastleCompass |
+        LoruleCastleKeySmall01 |
+        LoruleCastleKeySmall02 |
+        LoruleCastleKeySmall03 |
+        LoruleCastleKeySmall04 |
+        LoruleCastleKeySmall05 => true,
+        _ => false,
+    }
+}
 
-    info!("Begin the trash\n\n");
-
+fn fill_trash(check_map: &mut HashMap<&str, Option<FillerItem>>, rng: &mut StdRng, trash_items: &Vec<FillerItem>) {
     let mut empty_check_keys = Vec::new();
     for (key, val) in check_map.clone() {
         if val.is_none() {
@@ -472,7 +585,7 @@ fn fill_trash(check_map: &mut HashMap<&str, Option<FillerItem>>, rng: &mut StdRn
     }
 
     for trash in trash_items {
-        check_map.insert(empty_check_keys.remove(rng.gen_range(0..empty_check_keys.len())), Some(trash));
+        check_map.insert(empty_check_keys.remove(rng.gen_range(0..empty_check_keys.len())), Some(*trash));
     }
 }
 
@@ -539,8 +652,8 @@ fn prefill_check_map(world_graph: &mut HashMap<Location, LocationNode>) -> HashM
 }
 
 /// This translation is probably adding unnecessary overhead, oh well
-fn build_progress_from_items(items: &Vec<FillerItem>) -> Progress {
-    let mut progress = Progress::new();
+fn build_progress_from_items(items: &Vec<FillerItem>, settings: &Settings) -> Progress {
+    let mut progress = Progress::new(settings.clone());
     for item in items {
         progress.add_item(*item);
     }
@@ -548,19 +661,23 @@ fn build_progress_from_items(items: &Vec<FillerItem>) -> Progress {
     progress
 }
 
-fn verify_all_locations_accessible(loc_map: &mut HashMap<Location, LocationNode>) {
+fn verify_all_locations_accessible(loc_map: &mut HashMap<Location, LocationNode>,
+                                   progression_pool: &Vec<FillerItem>,
+                                   settings: &Settings) {
+    info!("Verifying all locations accessible...");
+
     let mut check_map = prefill_check_map(loc_map);
 
-    let reachable_checks = assumed_search(loc_map, &get_progression_items(), &mut check_map); //find_reachable_checks(loc_map, &everything, &mut check_map); //
+    let reachable_checks = assumed_search(loc_map, progression_pool, &mut check_map, settings); //find_reachable_checks(loc_map, &everything, &mut check_map); //
 
-    const TOTAL_CHECKS: usize = 267; // all checks + quest checks
-    if reachable_checks.len() != TOTAL_CHECKS {
+    let total_checks: usize = if settings.logic.swordless_mode { 267 } else { 269 }; // all checks + quest checks
+    if reachable_checks.len() != total_checks {
 
         // for rc in &reachable_checks {
         //     info!("Reachable Check: {}", rc.get_name());
         // }
 
-        error!("Only {}/{} checks were reachable in the world graph", reachable_checks.len(), TOTAL_CHECKS);
+        error!("Only {}/{} checks were reachable in the world graph", reachable_checks.len(), total_checks);
         exit(1);
     }
 }
@@ -606,8 +723,10 @@ fn find_reachable_checks(loc_map: &mut HashMap<Location, LocationNode>, progress
     reachable_checks
 }
 
-fn get_items_from_reachable_checks(reachable_checks: &Vec<Check>, check_map: &mut HashMap<&str, Option<FillerItem>>) -> Progress {
-    let mut progress = Progress::new();
+fn get_items_from_reachable_checks(reachable_checks: &Vec<Check>,
+                                   check_map: &mut HashMap<&str, Option<FillerItem>>,
+                                   settings: &Settings) -> Progress {
+    let mut progress = Progress::new(settings.clone());
 
     for check in reachable_checks {
 
@@ -639,38 +758,23 @@ fn count_empty_checks(reachable_checks: &Vec<Check>, check_map: &HashMap<&str, O
     info!("Empty checks: {}", count);
 }
 
-fn assumed_fill(mut world_graph: &mut HashMap<Location, LocationNode>, mut rng: &mut StdRng) -> HashMap<&'static str, Option<FillerItem>> {
-    let mut check_map = prefill_check_map(&mut world_graph);
+fn assumed_fill(mut world_graph: &mut HashMap<Location, LocationNode>,
+                mut rng: &mut StdRng,
+                items_owned: &mut Vec<FillerItem>,
+                mut check_map: &mut HashMap<&str, Option<FillerItem>>,
+                settings: &Settings) {
+    let mut reachable_checks = assumed_search(&mut world_graph, &items_owned, &mut check_map, settings);
 
-    let mut items_owned = get_progression_items();
-    //let mut items_not_owned: Vec<Item> = Vec::new();
-    let mut reachable_checks = assumed_search(&mut world_graph, &items_owned, &mut check_map);
-
-    //info!("Reachable checks in assumed_fill: {}", reachable_checks.len());
-
-
-    let mut placed_items = 0;
-
-    //
     while exist_empty_reachable_check(&reachable_checks, &check_map) && !items_owned.is_empty() {
         let item = items_owned.remove(rng.gen_range(0..items_owned.len()));
-        reachable_checks = assumed_search(&mut world_graph, &items_owned, &mut check_map);
+        reachable_checks = assumed_search(&mut world_graph, &items_owned, &mut check_map, settings);
 
-        //info!("1st");
-        //count_empty_checks(&reachable_checks, &check_map);
 
         let mut filtered_checks = filter_empty_checks(&mut reachable_checks, &mut check_map);
 
-        //info!("2nd");
-        //count_empty_checks(&reachable_checks, &check_map);
-
+        // Filter reachable locations for dungeons items down to just their dungeon
         if is_dungeon_item(item) {
             filtered_checks = filter_dungeon_checks(item, &mut filtered_checks);
-
-            //info!("Filtered Reachable Checks: {}", reachable_checks.len());
-            // for reachable_check in &reachable_checks {
-            //     info!("Dungeon Reachable Check: {}", reachable_check.get_name());
-            // }
         }
 
         if filtered_checks.len() == 0 {
@@ -678,23 +782,19 @@ fn assumed_fill(mut world_graph: &mut HashMap<Location, LocationNode>, mut rng: 
         }
 
         place_item_randomly(item, &filtered_checks, &mut check_map, &mut rng);
-        placed_items += 1;
     }
-
-    info!("Conditions: 1:{}, 2:{}", exist_empty_reachable_check(&reachable_checks, &check_map), !items_owned.is_empty());
-
-    info!("Placed Items: {}", placed_items);
-
-    check_map
 }
 
-fn assumed_search(loc_map: &mut HashMap<Location, LocationNode>, items_owned: &Vec<FillerItem>, mut check_map: &mut HashMap<&str, Option<FillerItem>>) -> Vec<Check> {
-    let mut current_items = build_progress_from_items(&items_owned.clone());
+fn assumed_search(loc_map: &mut HashMap<Location, LocationNode>,
+                  items_owned: &Vec<FillerItem>,
+                  mut check_map: &mut HashMap<&str, Option<FillerItem>>,
+                  settings: &Settings) -> Vec<Check> {
+    let mut current_items = build_progress_from_items(&items_owned.clone(), settings);
     let mut reachable_checks: Vec<Check>;
 
     loop {
         reachable_checks = find_reachable_checks(loc_map, &current_items, &mut check_map);
-        let reachable_items = get_items_from_reachable_checks(&reachable_checks, &mut check_map);
+        let reachable_items = get_items_from_reachable_checks(&reachable_checks, &mut check_map, settings);
 
         let new_items = reachable_items.difference(&current_items);
 

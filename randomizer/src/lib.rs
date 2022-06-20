@@ -1178,9 +1178,7 @@ pub fn plando() -> Result<(), Error> {
     )
 }
 
-pub fn filler_new(settings: &Settings, seed: u64) -> Result<()> {
-
-    // TODO integrate settings properly
+pub fn filler_new(settings: &Settings, seed: Seed) -> Spoiler {
 
     // New Filler
     let filled: Vec<(LocationInfo, Item)> = fill_stuff(settings, seed);
@@ -1191,11 +1189,9 @@ pub fn filler_new(settings: &Settings, seed: u64) -> Result<()> {
         layout.set(location_info, item);
     }
 
-    // Patch and build spoiler log
-    let system = system()?;
-    let settings = plando_settings();
-    let spoiler = Spoiler { seed: seed as Seed, settings: &settings, layout };
-    let result = spoiler.patch(system.get_or_create_paths(create_paths)?, true, true);
-
-    result
+    Spoiler {
+        seed,
+        settings,
+        layout,
+    }
 }

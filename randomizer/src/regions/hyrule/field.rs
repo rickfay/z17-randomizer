@@ -40,7 +40,7 @@ crate::region! {
             //     FieldLight_12_Maple[0x26],
             //     FieldLight_2D_Maple[0x07],
             // ],
-            "Woods": ItemRentalTornadeRod @Event(FieldLight_2A_BlacksmithWife[0x15]),
+            "Haunted Grove Tree Stump": ItemRentalTornadeRod @Event(FieldLight_2A_BlacksmithWife[0x15]),
         ],
     },
     rentals {
@@ -61,7 +61,7 @@ crate::region! {
     },
     rupee_rush {
         locations: [
-            "Rupee Rush": HeartPiece @Event(FieldLight_28_Minigame[0x26]),
+            "Rupee Rush (Hyrule)": HeartPiece @Event(FieldLight_28_Minigame[0x26]),
         ],
     },
     castle {

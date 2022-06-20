@@ -13,6 +13,7 @@ use crate::{regions, LocationInfo};
 pub struct Settings {
     pub logic: Logic,
     pub options: Options,
+    pub exclusions: Exclusion,
     #[serde(skip_serializing_if = "Exclude::is_empty")]
     pub exclude: Exclude,
 }
@@ -58,6 +59,10 @@ pub struct Logic {
     pub super_items: bool,
     /// Skip Trials Door in Lorule Castle
     pub skip_trials: bool,
+    /// Guarantees Bow of Light will be placed in Lorule Castle
+    pub bow_of_light_in_castle: bool,
+    /// Places a Sword in Ravio's Shop
+    pub sword_in_shop: bool,
 }
 
 /// Settings to change the randomizer's logic checks.
@@ -144,6 +149,26 @@ pub struct Exclude {
 impl Exclude {
     fn is_empty(&self) -> bool {
         self.hyrule.is_empty() && self.lorule.is_empty() && self.dungeons.is_empty()
+    }
+}
+
+#[derive(Clone, Debug, Default, Deserialize, Serialize)]
+pub struct Exclusion(pub(crate) HashMap<String, HashSet<String>>);
+
+impl Hash for Exclusion {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        for (key, value) in self.0.iter() {
+            key.hash(state);
+            for location in value.iter() {
+                location.hash(state);
+            }
+        }
+    }
+}
+
+impl Exclusion {
+    fn is_empty(&self) -> bool {
+        self.0.is_empty()
     }
 }
 

@@ -20,8 +20,8 @@ pub fn build_world_graph() -> HashMap<Location, LocationNode> {
             check(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Sanctuary Pegs"), |p| p.has_hammer()),
             check(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Behind Blacksmith"), |p| p.can_merge()),
             check(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Castle Rocks"), |p| p.has_power_glove()),
-            check(LocationInfo::new(regions::hyrule::field::post_eastern::SUBREGION, "Woods"), |p| p.has_pendant_of_courage()),
-            check(LocationInfo::new(regions::hyrule::southern::ruins::SUBREGION, "Ledge"), |p| p.can_merge()),
+            check(LocationInfo::new(regions::hyrule::field::post_eastern::SUBREGION, "Haunted Grove Tree Stump"), |p| p.has_pendant_of_courage()),
+            check(LocationInfo::new(regions::hyrule::southern::ruins::SUBREGION, "Southern Ruins Ledge"), |p| p.can_merge()),
 
             // Lake Hylia
             check(LocationInfo::new(regions::hyrule::lake::hylia::SUBREGION, "Lake Hylia Ledge Chest"), |p| p.can_merge()),
@@ -34,7 +34,7 @@ pub fn build_world_graph() -> HashMap<Location, LocationNode> {
             check_free(LocationInfo::new(regions::hyrule::kakariko::shady_guy::SUBREGION, "Merchant (Right)")),
             check(LocationInfo::new(regions::hyrule::kakariko::shady_guy::SUBREGION, "Shady Guy"), |p| p.can_merge() || p.has_boots()),
             check_free(LocationInfo::new(regions::hyrule::kakariko::post_sanc::SUBREGION, "Cucco Ranch")),
-            check_free(LocationInfo::new(regions::hyrule::field::rupee_rush::SUBREGION, "Rupee Rush")),
+            check_free(LocationInfo::new(regions::hyrule::field::rupee_rush::SUBREGION, "Rupee Rush (Hyrule)")),
 
             // Eastern Ruins
             check(LocationInfo::new(regions::hyrule::eastern::hill::SUBREGION, "Pegs (South)"), |p| p.has_hammer()),
@@ -64,7 +64,7 @@ pub fn build_world_graph() -> HashMap<Location, LocationNode> {
             path(IceRodCave, |p| p.has_bombs()),
             path(Sanctuary, |p| p.has_sword() || p.has_bombs() || p.has_fire_rod() || p.has_ice_rod() || p.has_lamp() || p.has_boots()),
             path(MoldormCave, |p| p.has_power_glove()),
-            path(RossoHouse, |p| p.has_pendant_of_courage()),
+            path_free(RossoHouse),
             path(RossoCave, |p| p.has_hammer()),
             path(TornadoRodDungeon, |p| p.has_bombs()),
             path(HouseOfGalesIsland, |p| p.has_flippers()),
@@ -73,6 +73,12 @@ pub fn build_world_graph() -> HashMap<Location, LocationNode> {
             path(LoruleLakeEast, |p| p.can_merge()),
             path(MiseryMire, |p| p.can_merge()),
             path(SkullWoodsOverworld, |p| p.can_merge()),
+            path_free(WitchHouse),
+        ])),
+        (WitchHouse, location("Witch's House", vec![
+            check_quest_free("Access Potion Shop", AccessPotionShop),
+        ], vec![
+            path_free(HyruleField),
         ])),
         (EasternRuinsUpper, location("Eastern Ruins Upper", vec![
             check_free(LocationInfo::new(regions::hyrule::eastern::hill::SUBREGION, "Armos Chest")),
@@ -176,6 +182,7 @@ pub fn build_world_graph() -> HashMap<Location, LocationNode> {
         ])),
         (BlacksmithHouse, location("Blacksmith's House (Hyrule)", vec![
             check(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Blacksmith"), |p| p.has_master_ore(2)),
+            check_quest_free("Access Hyrule Blacksmith", AccessHyruleBlacksmith),
         ], vec![
             path_free(HyruleField),
         ])),
@@ -221,7 +228,7 @@ pub fn build_world_graph() -> HashMap<Location, LocationNode> {
             path(MasterSwordArea, |p| p.has_all_pendants()),
         ])),
         (MasterSwordArea, location("Master Sword Area", vec![
-            check_free(LocationInfo::new(regions::hyrule::lost::woods::SUBREGION, "Pedestal")),
+            check_free(LocationInfo::new(regions::hyrule::lost::woods::SUBREGION, "Master Sword Pedestal")),
         ], vec![
             path_free(LostWoods),
         ])),
@@ -1261,7 +1268,7 @@ pub fn build_world_graph() -> HashMap<Location, LocationNode> {
             path_free(LoruleCastle1F),
             path_free(LoruleCastleCenter1F),
             path(LoruleCastle4F5F, |p| p.has_lorule_keys(3)),
-            path(HildasStudy, |p| p.has_lorule_keys(5) && p.has_bombs() && p.has_hookshot() && p.has_lamp()),
+            path(HildasStudy, |p| p.has_lorule_keys(5) && p.has_bombs() && p.has_hookshot() && p.has_fire_source()),
         ])),
 
         // require 3 small keys
@@ -1283,7 +1290,7 @@ pub fn build_world_graph() -> HashMap<Location, LocationNode> {
             path(ThroneRoom, |p| p.has_all_sages() && p.can_reach_hilda_barrier()),
         ])),
         (ThroneRoom, location("Throne Room", vec![
-            check(LocationInfo::new(regions::dungeons::castle::boss::SUBREGION, "[LC] Zelda"), |p| p.can_attack() && p.has_sword()),
+            check(LocationInfo::new(regions::dungeons::castle::boss::SUBREGION, "[LC] Zelda"), |p| p.can_attack() && (p.has_sword() || p.has_net())),
         ], vec![
             path(SacredRealm, |p| p.can_defeat_yuganon()),
         ])),
