@@ -37,14 +37,8 @@ impl Settings {
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq, Deserialize, Serialize)]
 #[serde(default, deny_unknown_fields)]
 pub struct Logic {
-    /// Disables lamp requirement for dark areas.
-    pub dont_require_lamp_for_darkness: bool,
-    /// Allows keys to be placed in such a way that the player can softlock.
-    pub unsafe_key_placement: bool,
     /// Glitched Logic
     pub glitched_logic: bool,
-    /// If true shuffles the Bracelet, else it'll be in Ravio's Shop
-    pub start_with_bracelet: bool,
     /// Places the Bell in Ravio's Shop
     pub bell_in_shop: bool,
     /// Places the Pouch in Ravio's Shop
@@ -195,7 +189,6 @@ pub fn open_default() -> Settings {
 pub fn plando_settings() -> Settings {
     Settings {
         logic: Logic {
-            start_with_bracelet: true, // False = get Bow Slot Item gift, True = don't
             ..Default::default()
         },
         ..Default::default()

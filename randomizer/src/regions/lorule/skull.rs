@@ -7,7 +7,7 @@ crate::region! {
             "Cucco Shack": HeartPiece @Heart(2[144]),
         ],
         paths: [
-            dungeons::skull::palace :- can_see_in_dark,
+            dungeons::skull::palace :- can_lamp,
         ],
     },
     chest {

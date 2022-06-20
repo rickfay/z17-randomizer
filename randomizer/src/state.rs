@@ -204,10 +204,6 @@ impl<'settings> State<'settings> {
         self.player.insect_net
     }
 
-    pub fn can_see_in_dark(&self) -> bool {
-        self.settings.logic.dont_require_lamp_for_darkness || self.player.lamp
-    }
-
     pub fn has_bottle(&self) -> bool {
         self.player.bottle
     }

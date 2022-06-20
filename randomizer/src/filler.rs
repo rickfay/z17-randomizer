@@ -21,14 +21,12 @@ pub fn fill_stuff(settings: &Settings, seed: Seed) -> Vec<(LocationInfo, Item)> 
     info!("Seed:                           {}", seed);
     //info!("Hash:                           {}", settings.hash().0);
     info!("Logic:                          Normal"); // if settings.logic.glitched_logic {"Glitched"} else {"Normal"});
-    info!("Swords:                         {}", if settings.logic.swordless_mode {"Swordless Mode - No Swords"} else {"Normal"});
+    info!("Swords:                         {}", if settings.logic.swordless_mode {"Swordless Mode - NO SWORDS"} else {"Normal"});
     info!("Super Items:                    {}", if settings.logic.super_items {"Included"} else {"Not Included"});
     info!("Trials:                         {}\n", if settings.logic.skip_trials {"Skipped"} else {"Normal"});
 
 
     let mut rng = StdRng::seed_from_u64(seed as u64);
-
-    info!("Building World Graph...");
 
     let mut world_graph = build_world_graph();
     let mut check_map = prefill_check_map(&mut world_graph);
@@ -38,11 +36,7 @@ pub fn fill_stuff(settings: &Settings, seed: Seed) -> Vec<(LocationInfo, Item)> 
 
     preplace_items(&mut check_map, settings, &mut rng, &mut progression_pool, &mut trash_pool);
 
-    info!("Placing Progression Items...");
-
     assumed_fill(&mut world_graph, &mut rng, &mut progression_pool, &mut check_map, settings);
-
-    info!("Placing Trash Items...");
 
     fill_trash(&mut check_map, &mut rng, &trash_pool);
 
@@ -572,6 +566,9 @@ fn is_dungeon_item(item: FillerItem) -> bool {
 }
 
 fn fill_trash(check_map: &mut HashMap<&str, Option<FillerItem>>, rng: &mut StdRng, trash_items: &Vec<FillerItem>) {
+
+    info!("Placing Trash Items...");
+
     let mut empty_check_keys = Vec::new();
     for (key, val) in check_map.clone() {
         if val.is_none() {
@@ -752,6 +749,9 @@ fn assumed_fill(mut world_graph: &mut HashMap<Location, LocationNode>,
                 items_owned: &mut Vec<FillerItem>,
                 mut check_map: &mut HashMap<&str, Option<FillerItem>>,
                 settings: &Settings) {
+
+    info!("Placing Progression Items...");
+
     let mut reachable_checks = assumed_search(&mut world_graph, &items_owned, &mut check_map, settings);
 
     while exist_empty_reachable_check(&reachable_checks, &check_map) && !items_owned.is_empty() {

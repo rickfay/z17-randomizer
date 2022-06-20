@@ -6,7 +6,7 @@ crate::region! {
             "[HS] Entrance": ItemKandelaar @Chest(18[19]),
         ],
         paths: [
-            inside :- {|p| (p.can_light() && p.can_see_in_dark()) || (p.glitched() && p.can_damage())},
+            inside :- {|p| (p.can_light() && p.can_lamp()) || (p.glitched() && p.can_damage())},
         ],
     },
     inside {

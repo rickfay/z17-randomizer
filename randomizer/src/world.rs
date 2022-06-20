@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use log::info;
 
 use crate::check::Check;
 use crate::{FillerItem, LocationInfo, regions};
@@ -11,6 +12,9 @@ use crate::progress::Progress;
 
 /// Build the World Graph
 pub fn build_world_graph() -> HashMap<Location, LocationNode> {
+
+    info!("Building World Graph...");
+
     HashMap::from([
 
         // --- Hyrule --- //

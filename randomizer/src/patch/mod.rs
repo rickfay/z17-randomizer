@@ -369,6 +369,7 @@ fn cutscenes<'game, 'settings>(
                 84, // Enable Dampe + Seres conversation
                 107, // Spawn enemies
                 110, // Post Sanctuary
+                131, // Suppress Ravio's Gift
                 210, // Skip Thanks item
                 222, 223, // Skip Hyrule Castle events
                 224, // Skip Zelda dialogue
@@ -411,10 +412,6 @@ fn cutscenes<'game, 'settings>(
                 965, // Suppress Energy Potion
             ]) {
                 opening.add_event_flag(flag);
-            }
-
-            if !logic.start_with_bracelet {
-                opening.add_event_flag(131); // Suppress Bow Slot Item gift
             }
 
             if options.night_mode {
