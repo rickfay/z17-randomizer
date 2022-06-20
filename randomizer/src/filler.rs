@@ -30,7 +30,7 @@ pub fn fill_stuff(settings: &Settings, seed: Seed) -> Vec<(LocationInfo, Item)> 
 
     let mut world_graph = build_world_graph();
     let mut check_map = prefill_check_map(&mut world_graph);
-    let (mut progression_pool, mut trash_pool) = get_items(settings);
+    let (mut progression_pool, mut trash_pool) = get_items(settings, &mut rng);
 
     verify_all_locations_accessible(&mut world_graph, &progression_pool, settings);
 
@@ -165,7 +165,7 @@ fn map_to_result(world_graph: HashMap<Location, LocationNode>, check_map: HashMa
     result
 }
 
-fn get_items(settings: &Settings) -> (Vec<FillerItem>, Vec<FillerItem>) {
+fn get_items(settings: &Settings, rng: &mut StdRng) -> (Vec<FillerItem>, Vec<FillerItem>) {
     let mut progression =
         vec![
             Bow01,
@@ -497,7 +497,19 @@ fn get_items(settings: &Settings) -> (Vec<FillerItem>, Vec<FillerItem>) {
         trash.push(RupeePurple);
     }
 
-    (progression, trash)
+    (shuffle_items(progression, rng), shuffle_items(trash, rng))
+}
+
+/// Shuffles item pool to eliminate placement order bias
+fn shuffle_items(mut items: Vec<FillerItem>, rng: &mut StdRng) -> Vec<FillerItem> {
+
+    let mut shuffled_items : Vec<FillerItem> = Vec::new();
+
+    while !items.is_empty() {
+        shuffled_items.push(items.remove(rng.gen_range(0..items.len())));
+    }
+
+    shuffled_items
 }
 
 fn is_dungeon_item(item: FillerItem) -> bool {

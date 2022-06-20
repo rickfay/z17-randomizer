@@ -533,9 +533,10 @@ impl<'settings> Spoiler<'settings> {
             patches.dump(paths.output())?;
         }
         if spoiler {
-            let path = paths.output().join(format!("spoiler {}.yaml", self.seed));
+            let path = paths.output().join(format!("spoiler {}.json", self.seed));
             info!("Writing spoiler to:             {}", path.display());
-            serde_yaml::to_writer(File::create(path)?, &self)
+
+            serde_json::to_writer_pretty(File::create(path)?, &self)
                 .expect("Could not write the spoiler log.");
         }
         Ok(())
