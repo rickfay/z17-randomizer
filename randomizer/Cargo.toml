@@ -23,4 +23,4 @@ try-insert-ext = "0.1.0"
 vec-drain-where = "1.0.1"
 
 [dev-dependencies]
-simplelog = "0.10.0"
+simplelog = "0.12.0"
