@@ -838,13 +838,13 @@ pub fn build_world_graph() -> HashMap<Location, LocationNode> {
             path_free(HouseOfGalesIsland),
             path(HouseOfGalesEast1F, |p| p.has_tornado_rod()),
         ])),
-        (HouseOfGalesEast1F, location("House of Gales East1F", vec![
+        (HouseOfGalesEast1F, location("House of Gales East 1F", vec![
             check(LocationInfo::new(regions::dungeons::house::floor1::SUBREGION, "[HoG] (1F) Torches"), |p| p.has_fire_source()),
             check(LocationInfo::new(regions::dungeons::house::floor1::SUBREGION, "[HoG] (1F) Switch Room"), |p| p.can_merge()),
             check(LocationInfo::new(regions::dungeons::house::floor1::SUBREGION, "[HoG] (1F) Fire Bubbles"), |p| p.can_merge() && p.can_attack()),
         ], vec![
             path_free(HouseOfGalesFoyer),
-            path(HouseOfGalesWest1F, |p| p.has_gales_keys(1)),
+            path(HouseOfGalesWest1F, |p| p.has_gales_keys(1) && p.can_merge()),
         ])),
         (HouseOfGalesWest1F, location("House of Gales West 1F", vec![
             check(LocationInfo::new(regions::dungeons::house::floor1west::SUBREGION, "[HoG] (1F) Blue Bari Room"), |p| p.can_merge()),
@@ -859,7 +859,7 @@ pub fn build_world_graph() -> HashMap<Location, LocationNode> {
             check(LocationInfo::new(regions::dungeons::house::floor2outer::SUBREGION, "[HoG] (2F) Fire Ring"), |p| p.has_gales_keys(2) && p.can_merge()),
         ], vec![
             path_free(HouseOfGalesWest1F),
-            path(HouseOfGales3F, |p| p.has_gales_keys(3) && p.can_attack() && p.can_hit_switch()),
+            path(HouseOfGales3F, |p| p.has_gales_keys(3) && p.can_attack() && p.can_hit_switch() && p.can_merge()),
         ])),
         (HouseOfGales3F, location("House of Gales 3F", vec![
             check(LocationInfo::new(regions::dungeons::house::floor3::SUBREGION, "[HoG] (3F) Fire Bubbles"), |p| p.has_fire_source()),

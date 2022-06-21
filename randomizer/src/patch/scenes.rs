@@ -538,11 +538,28 @@ pub fn apply(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
             [21].enable(Flag::Event(415)),
             [22].enable(Flag::Event(415)),
         },
+
+        // Skull Woods B2
+        DungeonDokuro 2 {
+            [363].disable(), // Remove door that can softlock player
+        },
+
         // Thieves' Hideout
         DungeonHagure 1 {
             [541].enable(), // Thief Girl - Keep her from despawning after dungeon clear
             [1371].disable(), // Spear Boy AreaEventTalk
             [1372].disable(), // Spear Boy
+        },
+
+        // Swamp Palace 1F
+        DungeonWater 1 {
+            [326].disable(), // SE Room shutter door, removed for softlock prevention
+            [385].disable(), // SW Room shutter door, removed for softlock prevention
+        },
+
+        // Swamp Palace B1
+        DungeonWater 2 {
+            [255].disable(), // Remove crystal switch, forces merge requirement to complete room to prevent softlock
         },
     );
 
