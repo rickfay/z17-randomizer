@@ -6,6 +6,7 @@ edition = "2018"
 
 [dependencies]
 directories = "3.0.1"
+json = "0.12.4"
 serde = "1.0.125"
 toml = "0.5.8"
 log = "0.4.14"

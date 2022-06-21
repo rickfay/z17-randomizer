@@ -1,6 +1,6 @@
 crate::region! {
     course: CaveLight,
-    name: "Sanctuary",
+    name: "Hyrule Sanctuary",
     lobby {
         locations: [
             "[HS] Entrance": ItemKandelaar @Chest(18[19]),

@@ -82,20 +82,27 @@ fn preplace_items<'a>(check_map: &mut HashMap<&'a str, Option<FillerItem>>,
         progression.retain(|x| *x != BowOfLight);
     }
 
-    // Assured weapon takes away too much from progression, sticking with assured sword
-    // if settings.logic.assured_weapon {
-    //     let weapon = *Vec::from([
-    //         Sword01, Sword02, Sword03, Sword04, Bow01, Bombs01, FireRod01, IceRod01, Hammer01
-    //     ]).get(rng.gen_range(0..9)).unwrap();
-    //
-    //     check_map.insert(shop_positions.remove(rng.gen_range(0..shop_positions.len())), Some(weapon));
-    //     progression.retain(|x| *x != weapon);
-    // }
+    // Assures a weapon will be available in Ravio's Shop
+    if settings.logic.assured_weapon {
 
-    if settings.logic.sword_in_shop {
-        check_map.insert(shop_positions.remove(rng.gen_range(0..shop_positions.len())), Some(Sword01));
-        progression.retain(|x| *x != Sword01);
+        let mut weapons = Vec::from([
+            Bow01, Bombs01, FireRod01, IceRod01, Hammer01
+        ]);
+
+        if !settings.logic.swordless_mode {
+            weapons.append(&mut Vec::from([Sword01, Sword02, Sword03, Sword04]));
+        }
+
+        let weapon = *weapons.get(rng.gen_range(0..weapons.len())).unwrap();
+
+        check_map.insert(shop_positions.remove(rng.gen_range(0..shop_positions.len())), Some(weapon));
+        progression.retain(|x| *x != weapon);
     }
+
+    // if settings.logic.sword_in_shop {
+    //     check_map.insert(shop_positions.remove(rng.gen_range(0..shop_positions.len())), Some(Sword01));
+    //     progression.retain(|x| *x != Sword01);
+    // }
 
     if settings.logic.bell_in_shop {
         check_map.insert(shop_positions.remove(rng.gen_range(0..shop_positions.len())), Some(Bell));
@@ -679,14 +686,14 @@ fn verify_all_locations_accessible(loc_map: &mut HashMap<Location, LocationNode>
 
     let reachable_checks = assumed_search(loc_map, progression_pool, &mut check_map, settings); //find_reachable_checks(loc_map, &everything, &mut check_map); //
 
-    let total_checks: usize = if settings.logic.swordless_mode { 267 } else { 269 }; // all checks + quest checks
-    if reachable_checks.len() != total_checks {
+    const TOTAL_CHECKS: usize = 269; // all checks + quest checks
+    if reachable_checks.len() != TOTAL_CHECKS {
 
         // for rc in &reachable_checks {
         //     info!("Reachable Check: {}", rc.get_name());
         // }
 
-        error!("Only {}/{} checks were reachable in the world graph", reachable_checks.len(), total_checks);
+        error!("Only {}/{} checks were reachable in the world graph", reachable_checks.len(), TOTAL_CHECKS);
         exit(1);
     }
 }

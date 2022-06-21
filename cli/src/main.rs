@@ -80,7 +80,7 @@ fn preset_ui() -> Settings {
     println!("--- Seed Options ---");
 
     //let start_with_bracelet = prompt_until_bool("Start with Ravio's Bracelet?");
-    let sword_in_shop = prompt_until_bool("Guarantee a Sword in Ravio's Shop?");
+    let assured_weapon = prompt_until_bool("Guarantee a Weapon is placed in Ravio's Shop?");
     let bell_in_shop = prompt_until_bool("Guarantee Bell in Ravio's Shop?");
     let pouch_in_shop = prompt_until_bool("Guarantee Pouch in Ravio's Shop?");
     let boots_in_shop = prompt_until_bool("Guarantee Pegasus Boots in Ravio's Shop?");
@@ -90,7 +90,7 @@ fn preset_ui() -> Settings {
     let skip_trials = prompt_until_bool("Skip the Lorule Castle Trials?");
     let bow_of_light_in_castle = prompt_until_bool("Guarantee Bow of Light in Lorule Castle?");
     //let glitched_logic = prompt_until_bool("Use Glitched Logic? (advanced)");
-    let swordless_mode = !sword_in_shop && prompt_until_bool("Play in Swordless Mode? (advanced)");
+    let swordless_mode = prompt_until_bool("Play in Swordless Mode? (advanced)");
 
     println!();
     info!("Starting seed generation...\n");
@@ -99,7 +99,7 @@ fn preset_ui() -> Settings {
         logic: Logic {
             bell_in_shop,
             pouch_in_shop,
-            sword_in_shop,
+            assured_weapon,
             boots_in_shop,
             super_items,
             //glitched_logic,

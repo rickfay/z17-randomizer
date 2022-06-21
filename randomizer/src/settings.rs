@@ -37,6 +37,8 @@ impl Settings {
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq, Deserialize, Serialize)]
 #[serde(default, deny_unknown_fields)]
 pub struct Logic {
+    /// Guarantees a Weapon is placed in Ravio's Shop
+    pub assured_weapon: bool,
     /// Glitched Logic
     pub glitched_logic: bool,
     /// Places the Bell in Ravio's Shop
@@ -55,8 +57,6 @@ pub struct Logic {
     pub skip_trials: bool,
     /// Guarantees Bow of Light will be placed in Lorule Castle
     pub bow_of_light_in_castle: bool,
-    /// Places a Sword in Ravio's Shop
-    pub sword_in_shop: bool,
 }
 
 /// Settings to change the randomizer's logic checks.
@@ -192,22 +192,5 @@ pub fn plando_settings() -> Settings {
             ..Default::default()
         },
         ..Default::default()
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::Settings;
-    use crate::Result;
-
-    #[test]
-    fn it_deserializes_standard_config() -> Result<()> {
-        let file = include_str!("../../presets/Standard.toml");
-        let uncommented = file
-            .split_inclusive('\n')
-            .map(|line| line.strip_prefix('#').unwrap_or(line))
-            .collect::<String>();
-        toml::from_str::<Settings>(&uncommented).expect("Could not deserialize Standard.toml");
-        Ok(())
     }
 }

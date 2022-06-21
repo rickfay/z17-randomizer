@@ -192,6 +192,10 @@ impl Progress {
         self.has_amount(2, &[Sword01, Sword02, Sword03, Sword04])
     }
 
+    pub fn swordless_mode(&self) -> bool {
+        self.settings.logic.swordless_mode
+    }
+
     // pub fn has_great_spin(&self) -> bool {
     //     self.has(GreatSpin)
     // }
@@ -292,6 +296,14 @@ impl Progress {
 
     pub fn can_defeat_moldorm(&self) -> bool {
         self.has_hammer()
+    }
+
+    pub fn can_defeat_yuga2(&self) -> bool {
+        self.has_sword()
+            || self.has_bombs()
+            || self.has_fire_rod()
+            || self.has_ice_rod()
+            || self.has_hammer()
     }
 
     pub fn has_dark_keys(&self, amount: u8) -> bool {

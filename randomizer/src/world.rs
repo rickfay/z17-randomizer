@@ -52,7 +52,7 @@ pub fn build_world_graph() -> HashMap<Location, LocationNode> {
             path_free(BlacksmithHouse),
             path(BlacksmithCave, |p| p.has_titans_mitt()),
             path_free(LostWoods),
-            path(HyruleCastleCourtyard, |p| p.has_master_sword()),
+            path(HyruleCastleCourtyard, |p| p.has_master_sword() || p.swordless_mode()),
             path_free(FortuneTeller),
             path_free(KakarikoJailCell),
             path(WellUpper, |p| p.has_power_glove()),
@@ -912,7 +912,7 @@ pub fn build_world_graph() -> HashMap<Location, LocationNode> {
         // Inside Hyrule Castle
         (HyruleCastleDungeon, location("Inside Hyrule Castle", vec![], vec![
             path_free(HyruleCastleRoof),
-            path(LoruleBlacksmith, |p| p.has_bow() || p.has_ice_rod()),
+            path(LoruleBlacksmith, |p| (p.has_bow() || p.has_ice_rod()) && p.can_defeat_yuga2()),
             // TODO add game mode check for Portalsanity
         ])),
 

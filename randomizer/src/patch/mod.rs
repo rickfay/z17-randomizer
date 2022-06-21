@@ -414,6 +414,10 @@ fn cutscenes<'game, 'settings>(
                 opening.add_event_flag(flag);
             }
 
+            if logic.swordless_mode {
+                opening.add_event_flag(410); // Tear down Barrier in Swordless Mode
+            }
+
             if options.night_mode {
                 opening.add_event_flag(964); // Night Mode
             }

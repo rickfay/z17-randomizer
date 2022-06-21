@@ -1,6 +1,6 @@
 crate::region! {
     course: AttractionDark,
-    name: "Graveyard",
+    name: "Lorule Sanctuary",
     main {
         locations: [
             "[LS] Entrance Chest": RupeeG @Chest(2[219]),

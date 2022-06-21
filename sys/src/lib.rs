@@ -63,25 +63,26 @@ impl<P> System<P> {
             I: IntoIterator<Item=(&'static str, P)>,
     {
 
-        let config = PathBuf::from("");
-        // let config = config_dir()
-        //     .ok_or_else(|| Error::new("Could not find suitable configuration directory."))?;
-        if !config.exists() {
-            let presets_dir = config.join("presets");
-            fs::create_dir_all(&presets_dir)?;
-            for (name, preset) in
-            iter::once_with(standard_preset).chain(presets.into_iter().map(|(name, preset)| {
-                (
-                    name,
-                    toml::to_string_pretty(&preset).expect("Could not create builtin presets."),
-                )
-            }))
-            {
-                fs::write(presets_dir.join(format!("{}.toml", name)), preset)?
-            }
-        }
+        // let config = PathBuf::from("");
+        // // let config = config_dir()
+        // //     .ok_or_else(|| Error::new("Could not find suitable configuration directory."))?;
+        // if !config.exists() {
+        //     let presets_dir = config.join("presets");
+        //     fs::create_dir_all(&presets_dir)?;
+        //     for (name, preset) in
+        //     iter::once_with(standard_preset).chain(presets.into_iter().map(|(name, preset)| {
+        //         (
+        //             name,
+        //             toml::to_string_pretty(&preset).expect("Could not create builtin presets."),
+        //         )
+        //     }))
+        //     {
+        //         fs::write(presets_dir.join(format!("{}.toml", name)), preset)?
+        //     }
+        // }
+
         Ok(Self {
-            config,
+            config: PathBuf::from(""),
             presets: PhantomData,
         })
     }
@@ -142,15 +143,4 @@ impl Paths {
     pub fn output(&self) -> &Path {
         &self.output
     }
-}
-
-// fn config_dir() -> Option<PathBuf> {
-//     ProjectDirs::from("", "", "z17-randomizer").map(|dirs| dirs.config_dir().into())
-// }
-
-fn standard_preset() -> (&'static str, String) {
-    (
-        "Standard",
-        include_str!("../../presets/Standard.toml").to_string(),
-    )
 }

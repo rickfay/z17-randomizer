@@ -598,169 +598,169 @@ pub fn plando() -> Result<(), Error> {
     //////////////////////
 
     // Eastern Palace
-    layout.set(LocationInfo::new(regions::dungeons::eastern::palace::SUBREGION, "(1F) Outside (East)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::eastern::palace::SUBREGION, "(1F) Near Entrance"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::eastern::floor1::SUBREGION, "(1F) Defeat Popos"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::eastern::floor1::SUBREGION, "(1F) Hidden Door"), KeySmall);
-    layout.set(LocationInfo::new(regions::dungeons::eastern::floor1::SUBREGION, "(1F) Switch Puzzle"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::eastern::floor2::SUBREGION, "(2F) Ball Room"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::eastern::floor2::SUBREGION, "(2F) Defeat Popos"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::eastern::floor2::SUBREGION, "(2F) Switch Room"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::eastern::floor2::SUBREGION, "(2F) Big Chest"), KeySmall);
-    layout.set(LocationInfo::new(regions::dungeons::eastern::boss::SUBREGION, "(3F) After Cutscene"), RingRental);
-    layout.set(LocationInfo::new(regions::dungeons::eastern::post_boss::SUBREGION, "Yuga"), ItemBell);
-    layout.set(LocationInfo::new(regions::dungeons::eastern::post_boss::SUBREGION, "(3F) Outside (North)"), KeyBoss);
-    layout.set(LocationInfo::new(regions::dungeons::eastern::post_boss::SUBREGION, "(1F) Outside (West)"), ItemInsectNetLv2);
+    layout.set(LocationInfo::new(regions::dungeons::eastern::palace::SUBREGION, "[EP] (1F) Outside (East)"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::eastern::palace::SUBREGION, "[EP] (1F) Near Entrance"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::eastern::floor1::SUBREGION, "[EP] (1F) Defeat Popos"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::eastern::floor1::SUBREGION, "[EP] (1F) Hidden Door"), KeySmall);
+    layout.set(LocationInfo::new(regions::dungeons::eastern::floor1::SUBREGION, "[EP] (1F) Switch Puzzle"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::eastern::floor2::SUBREGION, "[EP] (2F) Ball Room"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::eastern::floor2::SUBREGION, "[EP] (2F) Defeat Popos"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::eastern::floor2::SUBREGION, "[EP] (2F) Switch Room"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::eastern::floor2::SUBREGION, "[EP] (2F) Big Chest"), KeySmall);
+    layout.set(LocationInfo::new(regions::dungeons::eastern::boss::SUBREGION, "[EP] (3F) After Cutscene"), RingRental);
+    layout.set(LocationInfo::new(regions::dungeons::eastern::post_boss::SUBREGION, "[EP] Yuga"), ItemBell);
+    layout.set(LocationInfo::new(regions::dungeons::eastern::post_boss::SUBREGION, "[EP] (3F) Outside (North)"), KeyBoss);
+    layout.set(LocationInfo::new(regions::dungeons::eastern::post_boss::SUBREGION, "[EP] (1F) Outside (West)"), ItemInsectNetLv2);
 
     // House of Gales
-    layout.set(LocationInfo::new(regions::dungeons::house::floor1::SUBREGION, "(1F) Torches"), KeySmall);
-    layout.set(LocationInfo::new(regions::dungeons::house::floor1::SUBREGION, "(1F) Switch Room"), ItemBomb);
-    layout.set(LocationInfo::new(regions::dungeons::house::floor1::SUBREGION, "(1F) Fire Bubbles"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::house::floor1west::SUBREGION, "(1F) Blue Bari Room"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::house::floor1west::SUBREGION, "(1F) Blue Bari Room (Bottom Left)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::house::floor2::SUBREGION, "(2F) Big Chest"), KeyBoss);
-    layout.set(LocationInfo::new(regions::dungeons::house::floor2::SUBREGION, "(2F) Narrow Ledge"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::house::floor2outer::SUBREGION, "(2F) Fire Ring"), KeySmall);
-    layout.set(LocationInfo::new(regions::dungeons::house::floor3::SUBREGION, "(3F) Rat Room"), KeySmall);
-    layout.set(LocationInfo::new(regions::dungeons::house::floor3::SUBREGION, "(3F) Fire Bubbles"), KeySmall);
-    layout.set(LocationInfo::new(regions::dungeons::house::boss::SUBREGION, "Margomill"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::house::floor1::SUBREGION, "[HoG] (1F) Torches"), KeySmall);
+    layout.set(LocationInfo::new(regions::dungeons::house::floor1::SUBREGION, "[HoG] (1F) Switch Room"), ItemBomb);
+    layout.set(LocationInfo::new(regions::dungeons::house::floor1::SUBREGION, "[HoG] (1F) Fire Bubbles"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::house::floor1west::SUBREGION, "[HoG] (1F) Blue Bari Room"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::house::floor1west::SUBREGION, "[HoG] (1F) Blue Bari Room (Bottom Left)"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::house::floor2::SUBREGION, "[HoG] (2F) Big Chest"), KeyBoss);
+    layout.set(LocationInfo::new(regions::dungeons::house::floor2::SUBREGION, "[HoG] (2F) Narrow Ledge"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::house::floor2outer::SUBREGION, "[HoG] (2F) Fire Ring"), KeySmall);
+    layout.set(LocationInfo::new(regions::dungeons::house::floor3::SUBREGION, "[HoG] (3F) Rat Room"), KeySmall);
+    layout.set(LocationInfo::new(regions::dungeons::house::floor3::SUBREGION, "[HoG] (3F) Fire Bubbles"), KeySmall);
+    layout.set(LocationInfo::new(regions::dungeons::house::boss::SUBREGION, "[HoG] Margomill"), RupeeGold);
 
     // Tower of Hera
-    layout.set(LocationInfo::new(regions::dungeons::tower::hera::SUBREGION, "(1F) Outside"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::tower::floor2::SUBREGION, "(1F) Center"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::tower::floor2::SUBREGION, "(3F) Platform"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::tower::floor4::SUBREGION, "(5F) Red/Blue Switches"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::tower::floor4::SUBREGION, "(6F) Left Mole"), KeySmall);
-    layout.set(LocationInfo::new(regions::dungeons::tower::floor4::SUBREGION, "(6F) Right Mole"), KeySmall);
-    layout.set(LocationInfo::new(regions::dungeons::tower::floor7::SUBREGION, "(7F) Outside (Ledge)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::tower::floor7::SUBREGION, "(8F) Fairy Room"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::tower::floor7::SUBREGION, "(11F) Big Chest"), KeyBoss);
-    layout.set(LocationInfo::new(regions::dungeons::tower::boss::SUBREGION, "Moldorm"), RingHekiga);
+    layout.set(LocationInfo::new(regions::dungeons::tower::hera::SUBREGION, "[ToH] (1F) Outside"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::tower::floor2::SUBREGION, "[ToH] (1F) Center"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::tower::floor2::SUBREGION, "[ToH] (3F) Platform"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::tower::floor4::SUBREGION, "[ToH] (5F) Red/Blue Switches"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::tower::floor4::SUBREGION, "[ToH] (6F) Left Mole"), KeySmall);
+    layout.set(LocationInfo::new(regions::dungeons::tower::floor4::SUBREGION, "[ToH] (6F) Right Mole"), KeySmall);
+    layout.set(LocationInfo::new(regions::dungeons::tower::floor7::SUBREGION, "[ToH] (7F) Outside (Ledge)"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::tower::floor7::SUBREGION, "[ToH] (8F) Fairy Room"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::tower::floor7::SUBREGION, "[ToH] (11F) Big Chest"), KeyBoss);
+    layout.set(LocationInfo::new(regions::dungeons::tower::boss::SUBREGION, "[ToH] Moldorm"), RingHekiga);
 
     // Lorule Sanctuary
-    layout.set(LocationInfo::new(regions::dungeons::graveyard::main::SUBREGION, "Entrance"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::graveyard::main::SUBREGION, "Lower Chest"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::graveyard::main::SUBREGION, "Upper Chest"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::graveyard::main::SUBREGION, "Ledge"), KeySmall);
+    layout.set(LocationInfo::new(regions::dungeons::graveyard::main::SUBREGION, "[LS] Entrance Chest"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::graveyard::main::SUBREGION, "[LS] Lower Chest"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::graveyard::main::SUBREGION, "[LS] Upper Chest"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::graveyard::main::SUBREGION, "[LS] Ledge"), KeySmall);
 
     // Dark Palace
-    layout.set(LocationInfo::new(regions::dungeons::dark::palace::SUBREGION, "(1F) Near Entrance"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::dark::palace::SUBREGION, "(1F) Narrow Ledge"), KeySmall);
-    layout.set(LocationInfo::new(regions::dungeons::dark::floor1::SUBREGION, "(1F) Switch Puzzle"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::dark::floor1::SUBREGION, "(1F) Hidden Room (Upper)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::dark::floor1::SUBREGION, "(1F) Hidden Room (Lower)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::dark::floor1::SUBREGION, "(B1) Fall From 1F"), KeySmall);
-    layout.set(LocationInfo::new(regions::dungeons::dark::floor1::SUBREGION, "(B1) Maze"), KeySmall);
-    layout.set(LocationInfo::new(regions::dungeons::dark::floor1::SUBREGION, "(B1) Helmasaur Room"), KeySmall);
-    layout.set(LocationInfo::new(regions::dungeons::dark::floor1::SUBREGION, "(B1) Helmasaur Room (Fall)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::dark::floor2::SUBREGION, "(2F) Big Chest (Hidden)"), KeyBoss);
-    layout.set(LocationInfo::new(regions::dungeons::dark::floor2::SUBREGION, "(2F) Alcove"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::dark::floor2::SUBREGION, "(1F) Fall From 2F"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::dark::boss_key::SUBREGION, "(B1) Big Chest (Switches)"), OreGreen);
-    layout.set(LocationInfo::new(regions::dungeons::dark::boss::SUBREGION, "Gemesaur King"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::dark::palace::SUBREGION, "[PoD] (1F) Near Entrance"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::dark::palace::SUBREGION, "[PoD] (1F) Narrow Ledge"), KeySmall);
+    layout.set(LocationInfo::new(regions::dungeons::dark::floor1::SUBREGION, "[PoD] (1F) Switch Puzzle"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::dark::floor1::SUBREGION, "[PoD] (1F) Hidden Room (Upper)"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::dark::floor1::SUBREGION, "[PoD] (1F) Hidden Room (Lower)"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::dark::floor1::SUBREGION, "[PoD] (B1) Fall From 1F"), KeySmall);
+    layout.set(LocationInfo::new(regions::dungeons::dark::floor1::SUBREGION, "[PoD] (B1) Maze"), KeySmall);
+    layout.set(LocationInfo::new(regions::dungeons::dark::floor1::SUBREGION, "[PoD] (B1) Helmasaur Room"), KeySmall);
+    layout.set(LocationInfo::new(regions::dungeons::dark::floor1::SUBREGION, "[PoD] (B1) Helmasaur Room (Fall)"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::dark::floor2::SUBREGION, "[PoD] (2F) Big Chest (Hidden)"), KeyBoss);
+    layout.set(LocationInfo::new(regions::dungeons::dark::floor2::SUBREGION, "[PoD] (2F) Alcove"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::dark::floor2::SUBREGION, "[PoD] (1F) Fall From 2F"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::dark::boss_key::SUBREGION, "[PoD] (B1) Big Chest (Switches)"), OreGreen);
+    layout.set(LocationInfo::new(regions::dungeons::dark::boss::SUBREGION, "[PoD] Gemesaur King"), RupeeGold);
 
     // Swamp Palace
-    layout.set(LocationInfo::new(regions::dungeons::swamp::dungeon::SUBREGION, "(B1) Center"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::swamp::dungeon::SUBREGION, "(B1) Raft Room (Left)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::swamp::dungeon::SUBREGION, "(B1) Raft Room (Right)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::swamp::dungeon::SUBREGION, "(B1) Gyorm"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::swamp::dungeon::SUBREGION, "(B1) Waterfall Room"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::swamp::dungeon::SUBREGION, "(B1) Raft Room (Pillar)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::swamp::dungeon::SUBREGION, "(B1) Big Chest (Secret)"), KeySmall);
-    layout.set(LocationInfo::new(regions::dungeons::swamp::dungeon::SUBREGION, "(1F) Water Puzzle"), KeySmall);
-    layout.set(LocationInfo::new(regions::dungeons::swamp::dungeon::SUBREGION, "(1F) East Room"), KeySmall);
-    layout.set(LocationInfo::new(regions::dungeons::swamp::dungeon::SUBREGION, "(1F) West Room"), KeySmall);
-    layout.set(LocationInfo::new(regions::dungeons::swamp::dungeon::SUBREGION, "(1F) Big Chest (Fire)"), ItemSwordLv1);
-    layout.set(LocationInfo::new(regions::dungeons::swamp::boss::SUBREGION, "Arrghus"), KeyBoss);
+    layout.set(LocationInfo::new(regions::dungeons::swamp::dungeon::SUBREGION, "[SP] (B1) Center"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::swamp::dungeon::SUBREGION, "[SP] (B1) Raft Room (Left)"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::swamp::dungeon::SUBREGION, "[SP] (B1) Raft Room (Right)"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::swamp::dungeon::SUBREGION, "[SP] (B1) Gyorm"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::swamp::dungeon::SUBREGION, "[SP] (B1) Waterfall Room"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::swamp::dungeon::SUBREGION, "[SP] (B1) Raft Room (Pillar)"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::swamp::dungeon::SUBREGION, "[SP] (B1) Big Chest (Secret)"), KeySmall);
+    layout.set(LocationInfo::new(regions::dungeons::swamp::dungeon::SUBREGION, "[SP] (1F) Water Puzzle"), KeySmall);
+    layout.set(LocationInfo::new(regions::dungeons::swamp::dungeon::SUBREGION, "[SP] (1F) East Room"), KeySmall);
+    layout.set(LocationInfo::new(regions::dungeons::swamp::dungeon::SUBREGION, "[SP] (1F) West Room"), KeySmall);
+    layout.set(LocationInfo::new(regions::dungeons::swamp::dungeon::SUBREGION, "[SP] (1F) Big Chest (Fire)"), ItemSwordLv1);
+    layout.set(LocationInfo::new(regions::dungeons::swamp::boss::SUBREGION, "[SP] Arrghus"), KeyBoss);
 
     // Skull Woods
-    layout.set(LocationInfo::new(regions::dungeons::skull::palace::SUBREGION, "(B1) Gibdo Room (Lower)"), KeySmall);
-    layout.set(LocationInfo::new(regions::dungeons::skull::palace::SUBREGION, "(B1) South Chest"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::skull::outdoors::SUBREGION, "(B1) Gibdo Room (Hole)"), KeySmall);
-    layout.set(LocationInfo::new(regions::dungeons::skull::outdoors::SUBREGION, "(B1) Grate Room"), KeySmall);
-    layout.set(LocationInfo::new(regions::dungeons::skull::basement2::SUBREGION, "(B2) Moving Platform Room"), KeyBoss);
-    layout.set(LocationInfo::new(regions::dungeons::skull::end::SUBREGION, "(B1) Big Chest (Upper)"), ItemKandelaarLv2);
-    layout.set(LocationInfo::new(regions::dungeons::skull::end::SUBREGION, "(B1) Big Chest (Eyes)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::skull::boss::SUBREGION, "Knucklemaster"), OreRed);
+    layout.set(LocationInfo::new(regions::dungeons::skull::palace::SUBREGION, "[SW] (B1) Gibdo Room (Lower)"), KeySmall);
+    layout.set(LocationInfo::new(regions::dungeons::skull::palace::SUBREGION, "[SW] (B1) South Chest"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::skull::outdoors::SUBREGION, "[SW] (B1) Gibdo Room (Hole)"), KeySmall);
+    layout.set(LocationInfo::new(regions::dungeons::skull::outdoors::SUBREGION, "[SW] (B1) Grate Room"), KeySmall);
+    layout.set(LocationInfo::new(regions::dungeons::skull::basement2::SUBREGION, "[SW] (B2) Moving Platform Room"), KeyBoss);
+    layout.set(LocationInfo::new(regions::dungeons::skull::end::SUBREGION, "[SW] (B1) Big Chest (Upper)"), ItemKandelaarLv2);
+    layout.set(LocationInfo::new(regions::dungeons::skull::end::SUBREGION, "[SW] (B1) Big Chest (Eyes)"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::skull::boss::SUBREGION, "[SW] Knucklemaster"), OreRed);
 
     // Thieves' Hideout
-    layout.set(LocationInfo::new(regions::dungeons::thieves::hideout::SUBREGION, "(B1) Jail Cell"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::thieves::hideout::SUBREGION, "(B1) Grate Chest"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::thieves::hideout::SUBREGION, "(B2) Grate Chest (Fall)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::thieves::basement2::SUBREGION, "(B2) Switch Puzzle Room"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::thieves::basement2::SUBREGION, "(B2) Jail Cell"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::thieves::basement2::SUBREGION, "(B2) Eyegores"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::thieves::escape::SUBREGION, "(B1) Behind Wall"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::thieves::escape::SUBREGION, "(B1) Big Chest (Entrance)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::thieves::escape::SUBREGION, "(B3) Underwater"), KeySmall);
-    layout.set(LocationInfo::new(regions::dungeons::thieves::escape::SUBREGION, "(B3) Big Chest (Hidden)"), KeyBoss);
+    layout.set(LocationInfo::new(regions::dungeons::thieves::hideout::SUBREGION, "[TH] (B1) Jail Cell"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::thieves::hideout::SUBREGION, "[TH] (B1) Grate Chest"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::thieves::hideout::SUBREGION, "[TH] (B2) Grate Chest (Fall)"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::thieves::basement2::SUBREGION, "[TH] (B2) Switch Puzzle Room"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::thieves::basement2::SUBREGION, "[TH] (B2) Jail Cell"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::thieves::basement2::SUBREGION, "[TH] (B2) Eyegores"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::thieves::escape::SUBREGION, "[TH] (B1) Behind Wall"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::thieves::escape::SUBREGION, "[TH] (B1) Big Chest (Entrance)"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::thieves::escape::SUBREGION, "[TH] (B3) Underwater"), KeySmall);
+    layout.set(LocationInfo::new(regions::dungeons::thieves::escape::SUBREGION, "[TH] (B3) Big Chest (Hidden)"), KeyBoss);
     layout.set(LocationInfo::new(regions::dungeons::thieves::boss::SUBREGION, "Stalblind"), OreYellow);
 
     // Ice Ruins
-    layout.set(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "(1F) Hidden Chest"), KeySmall);
-    layout.set(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "(B3) Grate Chest (Left)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "(B3) Grate Chest (Right)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "(B4) Ice Pillar"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "(B5) Big Chest"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::ice::basement1::SUBREGION, "(B1) East Chest"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::ice::basement1::SUBREGION, "(B1) Narrow Ledge"), KeySmall);
-    layout.set(LocationInfo::new(regions::dungeons::ice::basement2::SUBREGION, "(B1) Upper Chest"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::ice::basement2::SUBREGION, "(B3) Big Chest (Puzzle)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::ice::basement2::SUBREGION, "(B4) Switches"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::ice::basement2::SUBREGION, "(B4) Southwest Chest (Fall)"), KeySmall);
-    layout.set(LocationInfo::new(regions::dungeons::ice::basement2::SUBREGION, "(B4) Narrow Platform"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::ice::basement2::SUBREGION, "(B2) Far North"), DashBoots);
-    layout.set(LocationInfo::new(regions::dungeons::ice::basement2::SUBREGION, "(B4) Southeast Chest (Fall)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::ice::boss::SUBREGION, "Dharkstare"), KeyBoss);
+    layout.set(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "[IR] (1F) Hidden Chest"), KeySmall);
+    layout.set(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "[IR] (B3) Grate Chest (Left)"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "[IR] (B3) Grate Chest (Right)"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "[IR] (B4) Ice Pillar"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "[IR] (B5) Big Chest"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::ice::basement1::SUBREGION, "[IR] (B1) East Chest"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::ice::basement1::SUBREGION, "[IR] (B1) Narrow Ledge"), KeySmall);
+    layout.set(LocationInfo::new(regions::dungeons::ice::basement2::SUBREGION, "[IR] (B1) Upper Chest"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::ice::basement2::SUBREGION, "[IR] (B3) Big Chest (Puzzle)"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::ice::basement2::SUBREGION, "[IR] (B4) Switches"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::ice::basement2::SUBREGION, "[IR] (B4) Southwest Chest (Fall)"), KeySmall);
+    layout.set(LocationInfo::new(regions::dungeons::ice::basement2::SUBREGION, "[IR] (B4) Narrow Platform"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::ice::basement2::SUBREGION, "[IR] (B2) Far North"), DashBoots);
+    layout.set(LocationInfo::new(regions::dungeons::ice::basement2::SUBREGION, "[IR] (B4) Southeast Chest (Fall)"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::ice::boss::SUBREGION, "[IR] Dharkstare"), KeyBoss);
 
     // Desert Palace
-    layout.set(LocationInfo::new(regions::dungeons::desert::floor1::SUBREGION, "(1F) Entrance"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::desert::post_miniboss::SUBREGION, "(1F) Sand Room (South)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::desert::post_miniboss::SUBREGION, "(1F) Sand Switch Room"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::desert::post_miniboss::SUBREGION, "(1F) Sand Room (North)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::desert::post_miniboss::SUBREGION, "(1F) Big Chest (Behind Wall)"), KeyBoss);
-    layout.set(LocationInfo::new(regions::dungeons::desert::post_miniboss::SUBREGION, "(1F) Behind Rocks"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::desert::floor2::SUBREGION, "(2F) Under Rock (Left)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::desert::floor2::SUBREGION, "(2F) Beamos Room"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::desert::floor2::SUBREGION, "(2F) Under Rock (Right)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::desert::floor2::SUBREGION, "(2F) Under Rock (Ball Room)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::desert::floor2::SUBREGION, "(2F) Big Chest (Puzzle)"), PowerfulGlove);
-    layout.set(LocationInfo::new(regions::dungeons::desert::floor2::SUBREGION, "(2F) Red/Blue Switches"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::desert::floor2west::SUBREGION, "(2F) Leever Room"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::desert::floor3::SUBREGION, "(3F) Silver Rupee"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::desert::floor3::SUBREGION, "(3F) Armos Room"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::desert::floor1::SUBREGION, "[DP] (1F) Entrance"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::desert::post_miniboss::SUBREGION, "[DP] (1F) Sand Room (South)"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::desert::post_miniboss::SUBREGION, "[DP] (1F) Sand Switch Room"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::desert::post_miniboss::SUBREGION, "[DP] (1F) Sand Room (North)"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::desert::post_miniboss::SUBREGION, "[DP] (1F) Big Chest (Behind Wall)"), KeyBoss);
+    layout.set(LocationInfo::new(regions::dungeons::desert::post_miniboss::SUBREGION, "[DP] (1F) Behind Rocks"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::desert::floor2::SUBREGION, "[DP] (2F) Under Rock (Left)"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::desert::floor2::SUBREGION, "[DP] (2F) Beamos Room"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::desert::floor2::SUBREGION, "[DP] (2F) Under Rock (Right)"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::desert::floor2::SUBREGION, "[DP] (2F) Under Rock (Ball Room)"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::desert::floor2::SUBREGION, "[DP] (2F) Big Chest (Puzzle)"), PowerfulGlove);
+    layout.set(LocationInfo::new(regions::dungeons::desert::floor2::SUBREGION, "[DP] (2F) Red/Blue Switches"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::desert::floor2west::SUBREGION, "[DP] (2F) Leever Room"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::desert::floor3::SUBREGION, "[DP] (3F) Behind Falling Sand"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::desert::floor3::SUBREGION, "[DP] (3F) Armos Room"), RupeeGold);
     layout.set(LocationInfo::new(regions::dungeons::desert::boss::SUBREGION, "Zaganaga"), RupeeGold);
 
     // Turtle Rock
-    layout.set(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "(1F) Center"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "(1F) Grate Chest"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "(1F) Portal Room (Northwest)"), KeySmall);
-    layout.set(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "(1F) Northeast Ledge"), KeySmall);
-    layout.set(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "(1F) Southeast Chest"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "(1F) Defeat Flamolas"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "(B1) Northeast Room"), KeySmall);
-    layout.set(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "(B1) Grate Chest (Small)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "(B1) Big Chest (Center)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "(B1) Platform"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "(B1) Big Chest (Top)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::turtle::boss::SUBREGION, "Grinexx"), KeyBoss);
+    layout.set(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "[TR] (1F) Center"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "[TR] (1F) Grate Chest"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "[TR] (1F) Portal Room (Northwest)"), KeySmall);
+    layout.set(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "[TR] (1F) Northeast Ledge"), KeySmall);
+    layout.set(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "[TR] (1F) Southeast Chest"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "[TR] (1F) Defeat Flamolas"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "[TR] (B1) Northeast Room"), KeySmall);
+    layout.set(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "[TR] (B1) Grate Chest (Small)"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "[TR] (B1) Big Chest (Center)"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "[TR] (B1) Platform"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "[TR] (B1) Big Chest (Top)"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::turtle::boss::SUBREGION, "[TR] Grinexx"), KeyBoss);
 
     // Lorule Castle
-    layout.set(LocationInfo::new(regions::dungeons::castle::lorule::SUBREGION, "(1F) Ledge"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::castle::lorule::SUBREGION, "(1F) Center"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::castle::lorule::SUBREGION, "(2F) Near Torches"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::castle::lorule::SUBREGION, "(2F) Hidden Path"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::castle::lorule::SUBREGION, "(2F) Ledge"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::castle::floor4::SUBREGION, "(4F) Center"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::castle::floor4::SUBREGION, "(4F) Hidden Path"), ItemBowLight);
-    layout.set(LocationInfo::new(regions::dungeons::castle::bomb_trial::SUBREGION, "(3F) Bomb Trial (Chest)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::castle::bomb_trial::SUBREGION, "(3F) Bomb Trial (Behind Rock)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::castle::ball_trial::SUBREGION, "(3F) Ball Trial (Chest)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::castle::ball_trial::SUBREGION, "(3F) Ball Trial (Puzzle)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::castle::lamp_trial::SUBREGION, "(4F) Lamp Trial"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::castle::hookshot_trial::SUBREGION, "(4F) Hookshot Trial (Chest)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::castle::hookshot_trial::SUBREGION, "(4F) Hookshot Trial (Eyes)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::castle::boss::SUBREGION, "Zelda"), ItemBow);
+    layout.set(LocationInfo::new(regions::dungeons::castle::lorule::SUBREGION, "[LC] (1F) Ledge"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::castle::lorule::SUBREGION, "[LC] (1F) Center"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::castle::lorule::SUBREGION, "[LC] (2F) Near Torches"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::castle::lorule::SUBREGION, "[LC] (2F) Hidden Path"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::castle::lorule::SUBREGION, "[LC] (2F) Ledge"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::castle::floor4::SUBREGION, "[LC] (4F) Center"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::castle::floor4::SUBREGION, "[LC] (4F) Hidden Path"), ItemBowLight);
+    layout.set(LocationInfo::new(regions::dungeons::castle::bomb_trial::SUBREGION, "[LC] (3F) Bomb Trial (Chest)"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::castle::bomb_trial::SUBREGION, "[LC] (3F) Bomb Trial (Behind Rock)"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::castle::ball_trial::SUBREGION, "[LC] (3F) Ball Trial (Chest)"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::castle::ball_trial::SUBREGION, "[LC] (3F) Ball Trial (Puzzle)"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::castle::lamp_trial::SUBREGION, "[LC] (4F) Lamp Trial"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::castle::hookshot_trial::SUBREGION, "[LC] (4F) Hookshot Trial (Chest)"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::castle::hookshot_trial::SUBREGION, "[LC] (4F) Hookshot Trial (Eyes)"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::castle::boss::SUBREGION, "[LC] Zelda"), ItemBow);
 
     ////////////////////
     // --- Hyrule --- //
@@ -771,7 +771,7 @@ pub fn plando() -> Result<(), Error> {
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Dampe"), RupeeGold);
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Rosso Cave"), ItemInsectNet);
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Sanctuary Pegs"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Treasure Room"), ItemBoomerangLv2);
+    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Sanctuary Treasure Dungeon"), ItemBoomerangLv2);
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Behind Blacksmith"), RupeeGold);
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Blacksmith Cave"), ItemSwordLv1);
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Blacksmith"), ItemSwordLv1);
@@ -780,48 +780,48 @@ pub fn plando() -> Result<(), Error> {
     layout.set(LocationInfo::new(regions::hyrule::field::post_eastern::SUBREGION, "Rosso"), RupeeGold);
     layout.set(LocationInfo::new(regions::hyrule::field::post_eastern::SUBREGION, "Clean Rocks"), RupeeGold);
     layout.set(LocationInfo::new(regions::hyrule::field::post_eastern::SUBREGION, "Irene"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::field::post_eastern::SUBREGION, "Woods"), RupeeGold);
+    layout.set(LocationInfo::new(regions::hyrule::field::post_eastern::SUBREGION, "Haunted Grove Tree Stump"), RupeeGold);
 
 
     layout.set(LocationInfo::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (1)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (2)"), ItemSwordLv2);
-    layout.set(LocationInfo::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (3)"), ItemSwordLv2);
-    layout.set(LocationInfo::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (4)"), DashBoots);
-    layout.set(LocationInfo::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (5)"), RingHekiga);
-    layout.set(LocationInfo::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (6)"), ClothesBlue);
-    layout.set(LocationInfo::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (7)"), ItemTornadeRodLv2);
-    layout.set(LocationInfo::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (8)"), ItemBombLv2);
+    layout.set(LocationInfo::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (2)"), RupeeGold);
+    layout.set(LocationInfo::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (3)"), RupeeGold);
+    layout.set(LocationInfo::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (4)"), RupeeGold);
+    layout.set(LocationInfo::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (5)"), RupeeGold);
+    layout.set(LocationInfo::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (6)"), RupeeGold);
+    layout.set(LocationInfo::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (7)"), RupeeGold);
+    layout.set(LocationInfo::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (8)"), RupeeGold);
     layout.set(LocationInfo::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (9)"), RupeeGold);
 
 
-    layout.set(LocationInfo::new(regions::hyrule::field::rupee_rush::SUBREGION, "Rupee Rush"), RupeeGold);
+    layout.set(LocationInfo::new(regions::hyrule::field::rupee_rush::SUBREGION, "Rupee Rush (Hyrule)"), RupeeGold);
     layout.set(LocationInfo::new(regions::hyrule::field::castle::SUBREGION, "Castle (Indoors)"), RupeeGold);
     layout.set(LocationInfo::new(regions::hyrule::field::castle::SUBREGION, "Castle Balcony"), RupeeGold);
     layout.set(LocationInfo::new(regions::hyrule::field::sanctuary_cave::SUBREGION, "Sanctuary Cave"), RupeeGold);
 
     // Lost Woods
-    layout.set(LocationInfo::new(regions::hyrule::lost::woods::SUBREGION, "Pedestal"), ItemBottle);
+    layout.set(LocationInfo::new(regions::hyrule::lost::woods::SUBREGION, "Master Sword Pedestal"), ItemBottle);
     layout.set(LocationInfo::new(regions::hyrule::lost::woods::SUBREGION, "Alcove"), ItemHookShot);
-    layout.set(LocationInfo::new(regions::hyrule::lost::woods::SUBREGION, "Chest"), ItemIceRod);
+    layout.set(LocationInfo::new(regions::hyrule::lost::woods::SUBREGION, "Lost Woods Big Rock Chest"), ItemIceRod);
 
     // Death Mountain
     layout.set(LocationInfo::new(regions::hyrule::death::mountain::SUBREGION, "First Cave"), PowerGlove);
     layout.set(LocationInfo::new(regions::hyrule::death::mountain::SUBREGION, "Blocked Cave"), RupeeGold);
     layout.set(LocationInfo::new(regions::hyrule::death::mountain::SUBREGION, "Fairy Cave"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::death::upper::SUBREGION, "Ledge Chest"), RupeeGold);
+    layout.set(LocationInfo::new(regions::hyrule::death::upper::SUBREGION, "Death Mountain West Ledge"), RupeeGold);
     layout.set(LocationInfo::new(regions::hyrule::death::upper::SUBREGION, "Rock Cave (Pegs)"), RupeeGold);
     layout.set(LocationInfo::new(regions::hyrule::death::upper::SUBREGION, "Rock Cave (Top)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::death::upper::SUBREGION, "Hidden Area"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::death::east::SUBREGION, "Ore Mine Column"), RupeeGold);
+    layout.set(LocationInfo::new(regions::hyrule::death::upper::SUBREGION, "Spectacle Rock"), RupeeGold);
+    layout.set(LocationInfo::new(regions::hyrule::death::east::SUBREGION, "Fire Cave Pillar"), RupeeGold);
     layout.set(LocationInfo::new(regions::hyrule::death::east::SUBREGION, "Bouldering Guy"), HyruleShield);
-    layout.set(LocationInfo::new(regions::hyrule::death::east::SUBREGION, "Treasure Room"), ItemHookShotLv2);
-    layout.set(LocationInfo::new(regions::hyrule::death::far_island::SUBREGION, "Distant Pillar"), RupeeGold);
+    layout.set(LocationInfo::new(regions::hyrule::death::east::SUBREGION, "Hookshot Treasure Dungeon"), ItemHookShotLv2);
+    layout.set(LocationInfo::new(regions::hyrule::death::far_island::SUBREGION, "Floating Island"), RupeeGold);
 
     // Sanctuary
-    layout.set(LocationInfo::new(regions::hyrule::sanctuary::lobby::SUBREGION, "Entrance"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::sanctuary::inside::SUBREGION, "Lower Chest"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::sanctuary::inside::SUBREGION, "Upper Chest"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::sanctuary::inside::SUBREGION, "Ledge"), RupeeGold);
+    layout.set(LocationInfo::new(regions::hyrule::sanctuary::lobby::SUBREGION, "[HS] Entrance"), RupeeGold);
+    layout.set(LocationInfo::new(regions::hyrule::sanctuary::inside::SUBREGION, "[HS] Lower Chest"), RupeeGold);
+    layout.set(LocationInfo::new(regions::hyrule::sanctuary::inside::SUBREGION, "[HS] Upper Chest"), RupeeGold);
+    layout.set(LocationInfo::new(regions::hyrule::sanctuary::inside::SUBREGION, "[HS] Ledge"), RupeeGold);
 
     // Kakariko
     layout.set(LocationInfo::new(regions::hyrule::kakariko::village::SUBREGION, "Well (Chest)"), ClothesBlue);
@@ -838,12 +838,12 @@ pub fn plando() -> Result<(), Error> {
     layout.set(LocationInfo::new(regions::hyrule::kakariko::closed::SUBREGION, "Stylish Woman"), RupeeGold);
 
     // Zora's Domain
-    layout.set(LocationInfo::new(regions::hyrule::zoras::domain::SUBREGION, "Chest"), RupeeGold);
+    layout.set(LocationInfo::new(regions::hyrule::zoras::domain::SUBREGION, "Zora's Domain Ledge Chest"), RupeeGold);
     layout.set(LocationInfo::new(regions::hyrule::zoras::domain::SUBREGION, "Behind Waterfall"), ItemSwordLv1);
     layout.set(LocationInfo::new(regions::hyrule::zoras::domain::SUBREGION, "Zora Queen"), RupeeGold);
 
     // Eastern Ruins
-    layout.set(LocationInfo::new(regions::hyrule::eastern::hill::SUBREGION, "Treasure Room"), ItemHammerLv2);
+    layout.set(LocationInfo::new(regions::hyrule::eastern::hill::SUBREGION, "Merge Treasure Dungeon"), ItemHammerLv2);
     layout.set(LocationInfo::new(regions::hyrule::eastern::hill::SUBREGION, "Armos Chest"), ItemTornadeRod);
     layout.set(LocationInfo::new(regions::hyrule::eastern::hill::SUBREGION, "Hookshot Chest"), ItemSandRod);
     layout.set(LocationInfo::new(regions::hyrule::eastern::hill::SUBREGION, "Merge Chest"), ItemBoomerang);
@@ -854,11 +854,11 @@ pub fn plando() -> Result<(), Error> {
     layout.set(LocationInfo::new(regions::hyrule::southern::ruins::SUBREGION, "Runaway Item Seller"), RupeeGold);
     layout.set(LocationInfo::new(regions::hyrule::southern::ruins::SUBREGION, "Behind Pillars"), RupeeGold);
     layout.set(LocationInfo::new(regions::hyrule::southern::ruins::SUBREGION, "Treasure Room"), ItemHammer);
-    layout.set(LocationInfo::new(regions::hyrule::southern::ruins::SUBREGION, "Ledge"), RupeeGold);
+    layout.set(LocationInfo::new(regions::hyrule::southern::ruins::SUBREGION, "Southern Ruins Ledge"), RupeeGold);
 
     // Lake Hylia
     layout.set(LocationInfo::new(regions::hyrule::lake::hylia::SUBREGION, "Torch Cave"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::lake::hylia::SUBREGION, "Ledge Chest"), RupeeGold);
+    layout.set(LocationInfo::new(regions::hyrule::lake::hylia::SUBREGION, "Lake Hylia Ledge Chest"), RupeeGold);
     layout.set(LocationInfo::new(regions::hyrule::lake::hylia::SUBREGION, "Bird Lover"), RupeeGold);
     layout.set(LocationInfo::new(regions::hyrule::lake::hylia::SUBREGION, "Secret Cave"), RupeeGold);
     layout.set(LocationInfo::new(regions::hyrule::lake::hylia::SUBREGION, "Shore"), MessageBottle);
@@ -869,23 +869,23 @@ pub fn plando() -> Result<(), Error> {
     ////////////////////
 
     // Lorule Field
-    layout.set(LocationInfo::new(regions::lorule::field::main::SUBREGION, "Treasure Room"), GanbariPowerUp);
+    layout.set(LocationInfo::new(regions::lorule::field::main::SUBREGION, "Boots Treasure Dungeon"), GanbariPowerUp);
     layout.set(LocationInfo::new(regions::lorule::field::main::SUBREGION, "Vacant House"), RupeeGold);
-    layout.set(LocationInfo::new(regions::lorule::field::main::SUBREGION, "Rupee Rush"), RupeeGold);
+    layout.set(LocationInfo::new(regions::lorule::field::main::SUBREGION, "Rupee Rush (Lorule)"), RupeeGold);
     layout.set(LocationInfo::new(regions::lorule::field::main::SUBREGION, "Great Rupee Fairy"), RupeeGold);
     layout.set(LocationInfo::new(regions::lorule::field::main::SUBREGION, "Big Bomb Cave"), RupeeGold);
     layout.set(LocationInfo::new(regions::lorule::field::main::SUBREGION, "Octoball Derby"), RupeeGold);
-    layout.set(LocationInfo::new(regions::lorule::field::main::SUBREGION, "Blacksmith"), ItemKandelaar);
+    layout.set(LocationInfo::new(regions::lorule::field::main::SUBREGION, "Blacksmith (Lorule)"), ItemKandelaar);
     layout.set(LocationInfo::new(regions::lorule::field::swamp::SUBREGION, "Swamp Cave (Left)"), RupeeGold);
     layout.set(LocationInfo::new(regions::lorule::field::swamp::SUBREGION, "Swamp Cave (Middle)"), RupeeGold);
     layout.set(LocationInfo::new(regions::lorule::field::swamp::SUBREGION, "Swamp Cave (Right)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::lorule::field::thief_girl::SUBREGION, "Thief Girl"), RupeeGold);
+    layout.set(LocationInfo::new(regions::lorule::field::thief_girl::SUBREGION, "Thief Girl Cave"), RupeeGold);
     layout.set(LocationInfo::new(regions::lorule::field::ledge::SUBREGION, "Hookshot Ledge"), RupeeGold);
 
     // Skull Woods (overworld)
-    layout.set(LocationInfo::new(regions::lorule::skull::woods::SUBREGION, "Alcove"), RupeeGold);
-    layout.set(LocationInfo::new(regions::lorule::skull::woods::SUBREGION, "Balcony"), RupeeGold);
-    layout.set(LocationInfo::new(regions::lorule::skull::chest::SUBREGION, "Chest"), RupeeGold);
+    layout.set(LocationInfo::new(regions::lorule::skull::woods::SUBREGION, "Canyon House"), RupeeGold);
+    layout.set(LocationInfo::new(regions::lorule::skull::woods::SUBREGION, "Cucco Shack"), RupeeGold);
+    layout.set(LocationInfo::new(regions::lorule::skull::chest::SUBREGION, "Skull Woods Outdoor Chest"), RupeeGold);
 
     // Lorule Death Mountain
     layout.set(LocationInfo::new(regions::lorule::death::mountain::SUBREGION, "Ledge (East)"), RupeeGold);
@@ -895,13 +895,13 @@ pub fn plando() -> Result<(), Error> {
     layout.set(LocationInfo::new(regions::lorule::death::tower::SUBREGION, "Treacherous Tower (Intermediate)"), RupeeGold);
 
     // Lorule Graveyard
-    layout.set(LocationInfo::new(regions::lorule::graveyard::cave::SUBREGION, "Big Chest"), OreBlue);
-    layout.set(LocationInfo::new(regions::lorule::graveyard::field::SUBREGION, "Field Chest"), RupeeGold);
+    layout.set(LocationInfo::new(regions::lorule::graveyard::cave::SUBREGION, "Philosopher's Cave Big Chest"), OreBlue);
+    layout.set(LocationInfo::new(regions::lorule::graveyard::field::SUBREGION, "Peninsula Chest"), RupeeGold);
 
     // Dark Ruins
-    layout.set(LocationInfo::new(regions::lorule::dark::ruins::SUBREGION, "Lake Chest"), RupeeGold);
-    layout.set(LocationInfo::new(regions::lorule::dark::ruins::SUBREGION, "Maze Chest"), RupeeGold);
-    layout.set(LocationInfo::new(regions::lorule::dark::ruins::SUBREGION, "Maze Ledge"), RupeeGold);
+    layout.set(LocationInfo::new(regions::lorule::dark::ruins::SUBREGION, "Dark Ruins Lakeview Chest"), RupeeGold);
+    layout.set(LocationInfo::new(regions::lorule::dark::ruins::SUBREGION, "Dark Maze Chest"), RupeeGold);
+    layout.set(LocationInfo::new(regions::lorule::dark::ruins::SUBREGION, "Dark Maze Ledge"), RupeeGold);
     layout.set(LocationInfo::new(regions::lorule::dark::ruins::SUBREGION, "Hinox (1)"), RupeeG);
     layout.set(LocationInfo::new(regions::lorule::dark::ruins::SUBREGION, "Hinox (2)"), RupeeB);
     layout.set(LocationInfo::new(regions::lorule::dark::ruins::SUBREGION, "Hinox (3)"), RupeeR);
@@ -910,12 +910,12 @@ pub fn plando() -> Result<(), Error> {
     layout.set(LocationInfo::new(regions::lorule::dark::ruins::SUBREGION, "Hinox (6)"), SpecialMove);
 
     // Misery Mire
-    layout.set(LocationInfo::new(regions::lorule::misery::mire::SUBREGION, "Ledge"), RupeeGold);
-    layout.set(LocationInfo::new(regions::lorule::misery::mire::SUBREGION, "Treasure Room"), ItemSandRodLv2);
+    layout.set(LocationInfo::new(regions::lorule::misery::mire::SUBREGION, "Misery Mire Ledge"), RupeeGold);
+    layout.set(LocationInfo::new(regions::lorule::misery::mire::SUBREGION, "Sand Rod Treasure Dungeon"), ItemSandRodLv2);
 
     // Lake Lolia
-    layout.set(LocationInfo::new(regions::lorule::lake::lorule::SUBREGION, "Chest"), RupeeGold);
-    layout.set(LocationInfo::new(regions::lorule::lake::balcony::SUBREGION, "Balcony"), ItemMizukaki);
+    layout.set(LocationInfo::new(regions::lorule::lake::lorule::SUBREGION, "Lorule Lake NW Chest"), RupeeGold);
+    layout.set(LocationInfo::new(regions::lorule::lake::balcony::SUBREGION, "Turtle Rock Left Balcony"), ItemMizukaki);
 
     let spoiler = Spoiler {
         seed: 0,
