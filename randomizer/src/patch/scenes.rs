@@ -165,6 +165,17 @@ pub fn apply(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
         },
         // Kakariko Village
         FieldLight 16 {
+            [259].disable(), // Papa
+            [416].disable(), // Papa
+
+            [260].disable(), // Girl
+            [415].disable(), // Girl
+
+            [241].disable(), // Cucco
+            [242].disable(), // Cucco
+            [413].disable(), // Cucco
+            [414].disable(), // Cucco
+
             [197].disable(), // Disable merchant's Smooth Gem text
             [265].disable(), // Disable girl/dad text
             [299].disable(), // Disable merchant's bottle text
@@ -184,6 +195,9 @@ pub fn apply(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
 
             // TODO - What is Flag 390 ?
             // TODO - Where are rooftop Red Spear Soldiers?
+
+            [263].enable(), // Red Spear Soldier
+            [536].enable(), // Red Spear Soldier
 
             [167].disable(), // Crow
             [168].disable(), // Crow
@@ -255,9 +269,7 @@ pub fn apply(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
             [36].enable(), // Arrow Solider
             [37].enable(), // Green Spear Solider
         },
-        FieldLight 21 {
-            [154].disable(), // Blacksmith's Wife
-        },
+
         // Cucco Ranch
         FieldLight 24 {
             [32].disable(), // Buzz Blob
