@@ -50,9 +50,73 @@ pub enum FillerItem {
     RupeeGreen,
     RupeeBlue,
     RupeeRed,
-    RupeePurple,
-    RupeeSilver,
-    RupeeGold,
+
+    RupeePurple01,
+    RupeePurple02,
+    RupeePurple03,
+    RupeePurple04,
+    RupeePurple05,
+    RupeePurple06,
+    RupeePurple07,
+    RupeePurple08,
+    RupeePurple09,
+    RupeePurple10,
+    RupeePurple11,
+    RupeePurple12,
+    RupeePurple13,
+    RupeePurple14,
+    RupeePurple15,
+    RupeePurple16,
+    RupeePurple17,
+    RupeePurple18,
+
+    RupeeSilver01,
+    RupeeSilver02,
+    RupeeSilver03,
+    RupeeSilver04,
+    RupeeSilver05,
+    RupeeSilver06,
+    RupeeSilver07,
+    RupeeSilver08,
+    RupeeSilver09,
+    RupeeSilver10,
+    RupeeSilver11,
+    RupeeSilver12,
+    RupeeSilver13,
+    RupeeSilver14,
+    RupeeSilver15,
+    RupeeSilver16,
+    RupeeSilver17,
+    RupeeSilver18,
+    RupeeSilver19,
+    RupeeSilver20,
+    RupeeSilver21,
+    RupeeSilver22,
+    RupeeSilver23,
+    RupeeSilver24,
+    RupeeSilver25,
+    RupeeSilver26,
+    RupeeSilver27,
+    RupeeSilver28,
+    RupeeSilver29,
+    RupeeSilver30,
+    RupeeSilver31,
+    RupeeSilver32,
+    RupeeSilver33,
+    RupeeSilver34,
+    RupeeSilver35,
+    RupeeSilver36,
+    RupeeSilver37,
+    RupeeSilver38,
+
+    RupeeGold01,
+    RupeeGold02,
+    RupeeGold03,
+    RupeeGold04,
+    RupeeGold05,
+    RupeeGold06,
+    RupeeGold07,
+    RupeeGold08,
 
     MonsterGuts,
     MonsterHorn,
@@ -405,9 +469,74 @@ pub fn convert(fill_item: FillerItem) -> Option<Item> {
         RupeeGreen => Some(RupeeG),
         RupeeBlue => Some(RupeeB),
         RupeeRed => Some(RupeeR),
-        FillerItem::RupeePurple => Some(Item::RupeePurple),
-        FillerItem::RupeeSilver => Some(Item::RupeeSilver),
-        FillerItem::RupeeGold => Some(Item::RupeeGold),
+
+        RupeePurple01 |
+        RupeePurple02 |
+        RupeePurple03 |
+        RupeePurple04 |
+        RupeePurple05 |
+        RupeePurple06 |
+        RupeePurple07 |
+        RupeePurple08 |
+        RupeePurple09 |
+        RupeePurple10 |
+        RupeePurple11 |
+        RupeePurple12 |
+        RupeePurple13 |
+        RupeePurple14 |
+        RupeePurple15 |
+        RupeePurple16 |
+        RupeePurple17 |
+        RupeePurple18 => Some(RupeePurple),
+
+        RupeeSilver01 |
+        RupeeSilver02 |
+        RupeeSilver03 |
+        RupeeSilver04 |
+        RupeeSilver05 |
+        RupeeSilver06 |
+        RupeeSilver07 |
+        RupeeSilver08 |
+        RupeeSilver09 |
+        RupeeSilver10 |
+        RupeeSilver11 |
+        RupeeSilver12 |
+        RupeeSilver13 |
+        RupeeSilver14 |
+        RupeeSilver15 |
+        RupeeSilver16 |
+        RupeeSilver17 |
+        RupeeSilver18 |
+        RupeeSilver19 |
+        RupeeSilver20 |
+        RupeeSilver21 |
+        RupeeSilver22 |
+        RupeeSilver23 |
+        RupeeSilver24 |
+        RupeeSilver25 |
+        RupeeSilver26 |
+        RupeeSilver27 |
+        RupeeSilver28 |
+        RupeeSilver29 |
+        RupeeSilver30 |
+        RupeeSilver31 |
+        RupeeSilver32 |
+        RupeeSilver33 |
+        RupeeSilver34 |
+        RupeeSilver35 |
+        RupeeSilver36 |
+        RupeeSilver37 |
+        RupeeSilver38 => Some(RupeeSilver),
+
+        RupeeGold01 |
+        RupeeGold02 |
+        RupeeGold03 |
+        RupeeGold04 |
+        RupeeGold05 |
+        RupeeGold06 |
+        RupeeGold07 |
+        RupeeGold08 => Some(RupeeGold),
+
         MonsterGuts => Some(LiverPurple),
         MonsterHorn => Some(LiverYellow),
         MonsterTail => Some(LiverBlue),

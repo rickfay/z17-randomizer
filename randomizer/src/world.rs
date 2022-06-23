@@ -12,13 +12,35 @@ use crate::progress::Progress;
 
 /// Build the World Graph
 pub fn build_world_graph() -> HashMap<Location, LocationNode> {
-
     info!("Building World Graph...");
 
+    let mut world: HashMap<Location, LocationNode> = HashMap::new();
+
+    world.extend(hyrule());
+    world.extend(lorule());
+
+    world.extend(eastern_palace());
+    world.extend(house_of_gales());
+    world.extend(tower_of_hera());
+
+    world.extend(inside_hyrule_castle());
+
+    world.extend(dark_palace());
+    world.extend(swamp_palace());
+    world.extend(skull_woods());
+    world.extend(thieves_hideout());
+    world.extend(ice_ruins());
+    world.extend(desert_palace());
+    world.extend(turtle_rock());
+
+    world.extend(lorule_castle());
+
+    world
+}
+
+/// Hyrule
+fn hyrule() -> HashMap<Location, LocationNode> {
     HashMap::from([
-
-        // --- Hyrule --- //
-
         (HyruleField, location("Hyrule Field", vec![
             check_free(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Dampe")),
             check(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Sanctuary Pegs"), |p| p.has_hammer()),
@@ -479,11 +501,12 @@ pub fn build_world_graph() -> HashMap<Location, LocationNode> {
         ], vec![
             path(FloatingIslandLorule, |p| p.can_merge()),
         ])),
+    ])
+}
 
-
-        // --- Lorule --- //
-
-
+/// Lorule
+fn lorule() -> HashMap<Location, LocationNode> {
+    HashMap::from([
         (LoruleCastleField, location("Lorule Castle Field", vec![
             check_free(LocationInfo::new(regions::lorule::field::main::SUBREGION, "Rupee Rush (Lorule)")),
             check_free(LocationInfo::new(regions::lorule::field::main::SUBREGION, "Octoball Derby")),
@@ -520,7 +543,7 @@ pub fn build_world_graph() -> HashMap<Location, LocationNode> {
             path_free(LoruleSanctuaryCaveLower),
             path(LoruleSanctuary, |p| p.has_titans_mitt()),
             path(DarkRuins, inaccessible),
-            path(GraveyardLedge, |p| p.can_merge()),
+            path(GraveyardLedge, |p| p.can_merge() && p.has_bombs()),
         ])),
         (LoruleSanctuary, location("Lorule Sanctuary", vec![
             check(LocationInfo::new(regions::dungeons::graveyard::main::SUBREGION, "[LS] Entrance Chest"), |p| p.has_lamp()),
@@ -542,7 +565,7 @@ pub fn build_world_graph() -> HashMap<Location, LocationNode> {
             path_free(LoruleSanctuaryCaveLower),
         ])),
         (GreatRupeeFairyCave, location("Great Rupee Fairy Cave", vec![
-            check_free(LocationInfo::new(regions::lorule::field::main::SUBREGION, "Great Rupee Fairy")),
+            check(LocationInfo::new(regions::lorule::field::main::SUBREGION, "Great Rupee Fairy"), |p| p.has_rupees(3000)),
         ], vec![
             path_free(LoruleCastleField),
         ])),
@@ -780,11 +803,12 @@ pub fn build_world_graph() -> HashMap<Location, LocationNode> {
             path_free(IceCaveCenter),
             path(IceRuinsFoyer, |p| p.has_fire_rod()),
         ])),
+    ])
+}
 
-
-        // --- Hyrule Dungeons --- //
-
-        // Eastern Palace
+/// Eastern Palace
+fn eastern_palace() -> HashMap<Location, LocationNode> {
+    HashMap::from([
         (EasternPalaceFoyer, location("Eastern Palace", vec![
             check(LocationInfo::new(regions::dungeons::eastern::palace::SUBREGION, "[EP] (1F) Outside (East)"), |p| p.can_merge()),
         ], vec![
@@ -831,9 +855,12 @@ pub fn build_world_graph() -> HashMap<Location, LocationNode> {
             // do not include path back to 3F
             path_free(EasternPalace1F),
         ])),
+    ])
+}
 
-
-        // House of Gales
+/// House of Gales
+fn house_of_gales() -> HashMap<Location, LocationNode> {
+    HashMap::from([
         (HouseOfGalesFoyer, location("House of Gales Entrance", vec![], vec![
             path_free(HouseOfGalesIsland),
             path(HouseOfGalesEast1F, |p| p.has_tornado_rod()),
@@ -844,17 +871,17 @@ pub fn build_world_graph() -> HashMap<Location, LocationNode> {
             check(LocationInfo::new(regions::dungeons::house::floor1::SUBREGION, "[HoG] (1F) Fire Bubbles"), |p| p.can_merge() && p.can_attack()),
         ], vec![
             path_free(HouseOfGalesFoyer),
-            path(HouseOfGalesWest1F, |p| p.has_gales_keys(1) && p.can_merge()),
+            path(HouseOfGalesWest1F, |p| p.has_gales_keys(1)),
         ])),
         (HouseOfGalesWest1F, location("House of Gales West 1F", vec![
-            check(LocationInfo::new(regions::dungeons::house::floor1west::SUBREGION, "[HoG] (1F) Blue Bari Room"), |p| p.can_merge()),
-            check(LocationInfo::new(regions::dungeons::house::floor1west::SUBREGION, "[HoG] (1F) Blue Bari Room (Bottom Left)"), |p| p.can_merge() && p.can_hit_switch()),
+            check_free(LocationInfo::new(regions::dungeons::house::floor1west::SUBREGION, "[HoG] (1F) Blue Bari Room")),
+            check(LocationInfo::new(regions::dungeons::house::floor1west::SUBREGION, "[HoG] (1F) Blue Bari Room (Bottom Left)"), |p| p.can_merge()),
         ], vec![
             path_free(HouseOfGalesEast1F),
             path(HouseOfGales2F, |p| p.can_hit_hog_1f_switch()), // oddly specific switch hitting requirements
         ])),
         (HouseOfGales2F, location("House of Gales 2F", vec![
-            check_free(LocationInfo::new(regions::dungeons::house::floor2::SUBREGION, "[HoG] (2F) Narrow Ledge")),
+            check(LocationInfo::new(regions::dungeons::house::floor2::SUBREGION, "[HoG] (2F) Narrow Ledge"), |p| p.can_merge() || p.has_boomerang() || p.has_hookshot()),
             check_free(LocationInfo::new(regions::dungeons::house::floor2::SUBREGION, "[HoG] (2F) Big Chest")),
             check(LocationInfo::new(regions::dungeons::house::floor2outer::SUBREGION, "[HoG] (2F) Fire Ring"), |p| p.has_gales_keys(2) && p.can_merge()),
         ], vec![
@@ -872,9 +899,12 @@ pub fn build_world_graph() -> HashMap<Location, LocationNode> {
             check(LocationInfo::new(regions::dungeons::house::boss::SUBREGION, "[HoG] Margomill"), |p| p.can_defeat_margomill()),
             check_quest("Pendant of Wisdom", PendantOfWisdom, |p| p.can_defeat_margomill()),
         ], vec![])),
+    ])
+}
 
-
-        // Tower of Hera
+/// Tower of Hera
+fn tower_of_hera() -> HashMap<Location, LocationNode> {
+    HashMap::from([
         (TowerOfHeraFoyer, location("Tower of Hera Entrance", vec![], vec![
             path_free(DeathMountainWestTop),
             path(TowerOfHeraBottom, |p| p.has_hammer()),
@@ -907,18 +937,23 @@ pub fn build_world_graph() -> HashMap<Location, LocationNode> {
             check(LocationInfo::new(regions::dungeons::tower::boss::SUBREGION, "[ToH] Moldorm"), |p| p.can_defeat_moldorm()),
             check_quest("Pendant of Power", PendantOfPower, |p| p.can_defeat_moldorm()),
         ], vec![])),
+    ])
+}
 
-
-        // Inside Hyrule Castle
+/// Inside Hyrule Castle
+fn inside_hyrule_castle() -> HashMap<Location, LocationNode> {
+    HashMap::from([
         (HyruleCastleDungeon, location("Inside Hyrule Castle", vec![], vec![
             path_free(HyruleCastleRoof),
             path(LoruleBlacksmith, |p| (p.has_bow() || p.has_ice_rod()) && p.can_defeat_yuga2()),
             // TODO add game mode check for Portalsanity
         ])),
+    ])
+}
 
-        // --- Lorule Dungeons --- //
-
-        // Dark Palace
+/// Dark Palace
+fn dark_palace() -> HashMap<Location, LocationNode> {
+    HashMap::from([
         (DarkPalaceFoyer, location("Dark Palace", vec![], vec![
             path_free(DarkRuins),
             path(DarkPalaceSecondRoom, |p| p.has_bombs() && p.has_lamp()),
@@ -955,8 +990,12 @@ pub fn build_world_graph() -> HashMap<Location, LocationNode> {
             check(LocationInfo::new(regions::dungeons::dark::boss::SUBREGION, "[PoD] Gemesaur King"), |p| p.can_defeat_gemasaur()),
             check_quest("Sage Gulley", SageGulley, |p| p.can_defeat_gemasaur()),
         ], vec![])),
+    ])
+}
 
-        // Swamp Palace
+/// Swamp Palace
+fn swamp_palace() -> HashMap<Location, LocationNode> {
+    HashMap::from([
         (SwampPalaceOutside, location("Swamp Palace Outside", vec![], vec![
             path(LoruleCastleField, |p| p.has_hookshot()),
             path_free(SwampPalaceAntechamber),
@@ -997,9 +1036,12 @@ pub fn build_world_graph() -> HashMap<Location, LocationNode> {
             check_free(LocationInfo::new(regions::dungeons::swamp::boss::SUBREGION, "[SP] Arrghus")),
             check_quest_free("Sage Oren", SageOren),
         ], vec![])),
+    ])
+}
 
-
-        // Skull Woods
+/// Skull Woods
+fn skull_woods() -> HashMap<Location, LocationNode> {
+    HashMap::from([
         (SkullWoodsFoyer, location("Skull Woods Foyer", vec![], vec![
             path_free(SkullWoodsOverworld),
             path(SkullWoodsMain, |p| p.has_lamp()),
@@ -1070,21 +1112,24 @@ pub fn build_world_graph() -> HashMap<Location, LocationNode> {
             path_free(SkullWoodsEastB1SouthFoyer),
             path_free(SkullWoodsEastB1SouthLedges),
         ])),
+    ])
+}
 
-
-        // Thieves' Hideout
+/// Thieves' Hideout
+fn thieves_hideout() -> HashMap<Location, LocationNode> {
+    HashMap::from([
         (ThievesHideoutB1, location("Thieves' Hideout", vec![
             check_free(LocationInfo::new(regions::dungeons::thieves::hideout::SUBREGION, "[TH] (B1) Grate Chest")),
             check(LocationInfo::new(regions::dungeons::thieves::hideout::SUBREGION, "[TH] (B1) Jail Cell"), |p| p.can_merge()),
         ], vec![
             path_free(LoruleCastleField),
-            path(ThievesHideoutB2, |p| p.can_merge() && p.can_hit_switch()),
+            path(ThievesHideoutB2, |p| p.has_ice_rod() || (p.can_merge() && p.can_hit_switch())),
         ])),
         (ThievesHideoutB2, location("Thieves' Hideout B2", vec![
             check_free(LocationInfo::new(regions::dungeons::thieves::hideout::SUBREGION, "[TH] (B2) Grate Chest (Fall)")),
             check(LocationInfo::new(regions::dungeons::thieves::basement2::SUBREGION, "[TH] (B2) Jail Cell"), |p| p.can_merge()),
             check_free(LocationInfo::new(regions::dungeons::thieves::basement2::SUBREGION, "[TH] (B2) Switch Puzzle Room")),
-            check(LocationInfo::new(regions::dungeons::thieves::basement2::SUBREGION, "[TH] (B2) Eyegores"), |p| p.can_hit_shielded_switch() && p.can_attack()),
+            check(LocationInfo::new(regions::dungeons::thieves::basement2::SUBREGION, "[TH] (B2) Eyegores"), |p| p.can_merge() && p.can_hit_shielded_switch() && p.can_attack()),
         ], vec![
             path_free(ThievesHideoutB1),
             path(ThievesHideoutEscape, |p| p.has_thieves_key() && p.can_merge() && p.has_flippers() && p.can_attack()),
@@ -1105,55 +1150,50 @@ pub fn build_world_graph() -> HashMap<Location, LocationNode> {
             check_free(LocationInfo::new(regions::dungeons::thieves::boss::SUBREGION, "Stalblind")),
             check_quest_free("Sage Osfala", SageOsfala),
         ], vec![])),
+    ])
+}
 
-        // Turtle Rock
-        (TurtleRockFoyer, location("Turtle Rock Foyer", vec![], vec![
-            path_free(TurtleRockIsland),
-            path(TurtleRockMain, |p| p.has_ice_rod()),
+/// Ice Ruins
+fn ice_ruins() -> HashMap<Location, LocationNode> {
+    HashMap::from([
+        (IceRuinsFoyer, location("Ice Ruins Entrance", vec![], vec![
+            path_free(LoruleDeathEastTop),
+            path(IceRuins, |p| p.has_fire_rod()),
         ])),
-        (TurtleRockMain, location("Turtle Rock Main", vec![
-            check_free(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "[TR] (1F) Center")),
-            check(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "[TR] (1F) Northeast Ledge"), |p| p.can_merge() || p.has_boomerang() || p.has_hookshot()),
-            check(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "[TR] (1F) Southeast Chest"), |p| p.can_merge()),
-            check(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "[TR] (1F) Defeat Flamolas"), |p| p.can_merge()),
-            check(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "[TR] (1F) Portal Room (Northwest)"), |p| p.can_merge()),
-            check(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "[TR] (1F) Grate Chest"), |p| p.can_merge()),
-            check_free(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "[TR] (B1) Northeast Room")),
-            check(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "[TR] (B1) Grate Chest (Small)"), |p| p.can_merge()),
-            check(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "[TR] (B1) Big Chest (Top)"), |p| (p.has_turtle_keys(3) || (p.has_turtle_keys(2) && p.can_defeat_grinexx())) && p.can_merge() && p.can_hit_shielded_switch()),
-            check(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "[TR] (B1) Big Chest (Center)"), |p| p.can_merge() && p.can_hit_shielded_switch()),
-            check(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "[TR] (B1) Platform"), |p| p.has_turtle_keys(2) || p.can_merge()),
+
+        // Require Fire Rod
+        (IceRuins, location("Ice Ruins", vec![
+            check_free(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "[IR] (1F) Hidden Chest")),
+            check_free(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "[IR] (B4) Ice Pillar")),
+            check_free(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "[IR] (B3) Grate Chest (Left)")),
+            check_free(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "[IR] (B3) Grate Chest (Right)")),
+            check_free(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "[IR] (B5) Big Chest")),
+            check(LocationInfo::new(regions::dungeons::ice::basement1::SUBREGION, "[IR] (B1) Narrow Ledge"), |p| p.has_ice_keys(1)),
+            check(LocationInfo::new(regions::dungeons::ice::basement1::SUBREGION, "[IR] (B1) East Chest"), |p| p.has_ice_keys(1)),
+            check(LocationInfo::new(regions::dungeons::ice::basement2::SUBREGION, "[IR] (B1) Upper Chest"), |p| p.has_ice_keys(2)),
+            check(LocationInfo::new(regions::dungeons::ice::basement2::SUBREGION, "[IR] (B2) Far North"), |p| p.has_ice_keys(2) && p.has_stamina_scroll()),
+            check(LocationInfo::new(regions::dungeons::ice::basement2::SUBREGION, "[IR] (B3) Big Chest (Puzzle)"), |p| p.has_ice_keys(2)),
+            check(LocationInfo::new(regions::dungeons::ice::basement2::SUBREGION, "[IR] (B4) Switches"), |p| p.has_ice_keys(2)),
+            check(LocationInfo::new(regions::dungeons::ice::basement2::SUBREGION, "[IR] (B4) Southwest Chest (Fall)"), |p| p.has_ice_keys(2)),
+            check(LocationInfo::new(regions::dungeons::ice::basement2::SUBREGION, "[IR] (B4) Narrow Platform"), |p| p.has_ice_keys(2)),
+            check(LocationInfo::new(regions::dungeons::ice::basement2::SUBREGION, "[IR] (B4) Southeast Chest (Fall)"), |p| p.has_ice_keys(2)),
         ], vec![
-            path(TurtleRockFoyer, |p| p.has_ice_rod()),
-            path(TurtleRockLeftBalconyPath, |p| p.can_merge()),
-            path(TurtleRockRightBalconyPath, |p| p.can_merge()),
-            path(TurtleRockBoss, |p| p.has_turtle_keys(3) && p.can_merge() && p.has_turtle_big_key()),
+            path(IceRuinsFoyer, |p| p.has_fire_rod()),
+            path(IceRuinsBoss, |p| p.has_ice_keys(3) && p.has_ice_big_key()),
         ])),
-        (TurtleRockLeftBalconyPath, location("Turtle Rock Left Balcony Path", vec![], vec![
-            path(TurtleRockMain, |p| p.has_ice_rod()),
-            path(TurtleRockLeftBalcony, |p| p.has_ice_rod()),
+        (IceRuinsBoss, location("Ice Ruins Boss", vec![], vec![
+            path(IceRuinsPostBoss, |p| p.can_defeat_dharkstare()),
         ])),
-        (TurtleRockLeftBalcony, location("Turtle Rock Left Balcony", vec![
-            check_free(LocationInfo::new(regions::lorule::lake::balcony::SUBREGION, "Turtle Rock Left Balcony")), // Do not use [TR] prefix
-        ], vec![
-            path_free(TurtleRockLeftBalconyPath),
-        ])),
-        (TurtleRockRightBalconyPath, location("Turtle Rock Right Balcony Path", vec![], vec![
-            path(TurtleRockMain, |p| p.has_ice_rod()),
-            path(TurtleRockRightBalcony, |p| p.has_ice_rod()),
-        ])),
-        (TurtleRockRightBalcony, location("Turtle Rock Right Balcony", vec![], vec![
-            path_free(TurtleRockRightBalconyPath),
-        ])),
-        (TurtleRockBoss, location("Turtle Rock Boss", vec![], vec![
-            path(TurtleRockPostBoss, |p| p.can_defeat_grinexx()),
-        ])),
-        (TurtleRockPostBoss, location("Turtle Rock Boss", vec![
-            check_free(LocationInfo::new(regions::dungeons::turtle::boss::SUBREGION, "[TR] Grinexx")),
-            check_quest_free("Sage Impa", SageImpa),
+        (IceRuinsPostBoss, location("Ice Ruins Post Boss", vec![
+            check_free(LocationInfo::new(regions::dungeons::ice::boss::SUBREGION, "[IR] Dharkstare")),
+            check_quest_free("Sage Rosso", SageRosso),
         ], vec![])),
+    ])
+}
 
-        // Desert Palace
+/// Desert Palace
+fn desert_palace() -> HashMap<Location, LocationNode> {
+    HashMap::from([
         (DesertPalaceFoyer, location("Desert Palace Entrance", vec![
             check(LocationInfo::new(regions::dungeons::desert::floor1::SUBREGION, "[DP] (1F) Entrance"), |p| p.has_sand_rod()),
         ], vec![
@@ -1207,43 +1247,63 @@ pub fn build_world_graph() -> HashMap<Location, LocationNode> {
             check_free(LocationInfo::new(regions::dungeons::desert::boss::SUBREGION, "Zaganaga")), // Do not use [DP] prefix
             check_quest_free("Sage Irene", SageIrene),
         ], vec![])),
+    ])
+}
 
-        // Ice Ruins
-        (IceRuinsFoyer, location("Ice Ruins Entrance", vec![], vec![
-            path_free(LoruleDeathEastTop),
-            path(IceRuins, |p| p.has_fire_rod()),
+/// Turtle Rock
+fn turtle_rock() -> HashMap<Location, LocationNode> {
+    HashMap::from([
+        (TurtleRockFoyer, location("Turtle Rock Foyer", vec![], vec![
+            path_free(TurtleRockIsland),
+            path(TurtleRockMain, |p| p.has_ice_rod()),
         ])),
-
-        // Require Fire Rod
-        (IceRuins, location("Ice Ruins", vec![
-            check_free(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "[IR] (1F) Hidden Chest")),
-            check_free(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "[IR] (B4) Ice Pillar")),
-            check_free(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "[IR] (B3) Grate Chest (Left)")),
-            check_free(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "[IR] (B3) Grate Chest (Right)")),
-            check_free(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "[IR] (B5) Big Chest")),
-            check(LocationInfo::new(regions::dungeons::ice::basement1::SUBREGION, "[IR] (B1) Narrow Ledge"), |p| p.has_ice_keys(1)),
-            check(LocationInfo::new(regions::dungeons::ice::basement1::SUBREGION, "[IR] (B1) East Chest"), |p| p.has_ice_keys(1)),
-            check(LocationInfo::new(regions::dungeons::ice::basement2::SUBREGION, "[IR] (B1) Upper Chest"), |p| p.has_ice_keys(2)),
-            check(LocationInfo::new(regions::dungeons::ice::basement2::SUBREGION, "[IR] (B2) Far North"), |p| p.has_ice_keys(2) && p.has_stamina_scroll()),
-            check(LocationInfo::new(regions::dungeons::ice::basement2::SUBREGION, "[IR] (B3) Big Chest (Puzzle)"), |p| p.has_ice_keys(2)),
-            check(LocationInfo::new(regions::dungeons::ice::basement2::SUBREGION, "[IR] (B4) Switches"), |p| p.has_ice_keys(2)),
-            check(LocationInfo::new(regions::dungeons::ice::basement2::SUBREGION, "[IR] (B4) Southwest Chest (Fall)"), |p| p.has_ice_keys(2)),
-            check(LocationInfo::new(regions::dungeons::ice::basement2::SUBREGION, "[IR] (B4) Narrow Platform"), |p| p.has_ice_keys(2)),
-            check(LocationInfo::new(regions::dungeons::ice::basement2::SUBREGION, "[IR] (B4) Southeast Chest (Fall)"), |p| p.has_ice_keys(2)),
+        (TurtleRockMain, location("Turtle Rock Main", vec![
+            check_free(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "[TR] (1F) Center")),
+            check(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "[TR] (1F) Northeast Ledge"), |p| p.can_merge() || p.has_boomerang() || p.has_hookshot()),
+            check(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "[TR] (1F) Southeast Chest"), |p| p.can_merge()),
+            check(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "[TR] (1F) Defeat Flamolas"), |p| p.can_merge()),
+            check(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "[TR] (1F) Portal Room (Northwest)"), |p| p.can_merge()),
+            check(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "[TR] (1F) Grate Chest"), |p| p.can_merge()),
+            check_free(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "[TR] (B1) Northeast Room")),
+            check(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "[TR] (B1) Grate Chest (Small)"), |p| p.can_merge()),
+            check(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "[TR] (B1) Big Chest (Top)"), |p| (p.has_turtle_keys(3) || (p.has_turtle_keys(2) && p.can_defeat_grinexx())) && p.can_merge() && p.can_hit_shielded_switch()),
+            check(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "[TR] (B1) Big Chest (Center)"), |p| p.can_merge() && p.can_hit_shielded_switch()),
+            check(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "[TR] (B1) Platform"), |p| p.has_turtle_keys(2) || p.can_merge()),
         ], vec![
-            path(IceRuinsFoyer, |p| p.has_fire_rod()),
-            path(IceRuinsBoss, |p| p.has_ice_keys(3) && p.has_ice_big_key()),
+            path(TurtleRockFoyer, |p| p.has_ice_rod()),
+            path(TurtleRockLeftBalconyPath, |p| p.can_merge()),
+            path(TurtleRockRightBalconyPath, |p| p.can_merge()),
+            path(TurtleRockBoss, |p| p.has_turtle_keys(3) && p.can_merge() && p.has_turtle_big_key()),
         ])),
-        (IceRuinsBoss, location("Ice Ruins Boss", vec![], vec![
-            path(IceRuinsPostBoss, |p| p.can_defeat_dharkstare()),
+        (TurtleRockLeftBalconyPath, location("Turtle Rock Left Balcony Path", vec![], vec![
+            path(TurtleRockMain, |p| p.has_ice_rod()),
+            path(TurtleRockLeftBalcony, |p| p.has_ice_rod()),
         ])),
-        (IceRuinsPostBoss, location("Ice Ruins Post Boss", vec![
-            check_free(LocationInfo::new(regions::dungeons::ice::boss::SUBREGION, "[IR] Dharkstare")),
-            check_quest_free("Sage Rosso", SageRosso),
+        (TurtleRockLeftBalcony, location("Turtle Rock Left Balcony", vec![
+            check_free(LocationInfo::new(regions::lorule::lake::balcony::SUBREGION, "Turtle Rock Left Balcony")), // Do not use [TR] prefix
+        ], vec![
+            path_free(TurtleRockLeftBalconyPath),
+        ])),
+        (TurtleRockRightBalconyPath, location("Turtle Rock Right Balcony Path", vec![], vec![
+            path(TurtleRockMain, |p| p.has_ice_rod()),
+            path(TurtleRockRightBalcony, |p| p.has_ice_rod()),
+        ])),
+        (TurtleRockRightBalcony, location("Turtle Rock Right Balcony", vec![], vec![
+            path_free(TurtleRockRightBalconyPath),
+        ])),
+        (TurtleRockBoss, location("Turtle Rock Boss", vec![], vec![
+            path(TurtleRockPostBoss, |p| p.can_defeat_grinexx()),
+        ])),
+        (TurtleRockPostBoss, location("Turtle Rock Boss", vec![
+            check_free(LocationInfo::new(regions::dungeons::turtle::boss::SUBREGION, "[TR] Grinexx")),
+            check_quest_free("Sage Impa", SageImpa),
         ], vec![])),
+    ])
+}
 
-
-        // Lorule Castle
+/// Lorule Castle
+fn lorule_castle() -> HashMap<Location, LocationNode> {
+    HashMap::from([
         (LoruleCastle1F, location("Lorule Castle 1F", vec![], vec![
             path(LoruleCastleEastLedge1F, |p| p.can_merge()),
             path(LoruleCastle2F3F, |p| p.can_attack()),

@@ -67,6 +67,34 @@ impl Progress {
         sum
     }
 
+    pub fn has_rupees(&self, amount: u16) -> bool {
+
+        let purples = self.count(&[
+            RupeePurple01, RupeePurple02, RupeePurple03, RupeePurple04, RupeePurple05,
+            RupeePurple06, RupeePurple07, RupeePurple08, RupeePurple09, RupeePurple10,
+            RupeePurple11, RupeePurple12, RupeePurple13, RupeePurple14, RupeePurple15,
+            RupeePurple16, RupeePurple17, RupeePurple18,
+        ]);
+
+        let silvers = self.count(&[
+            RupeeSilver01, RupeeSilver02, RupeeSilver03, RupeeSilver04, RupeeSilver05,
+            RupeeSilver06, RupeeSilver07, RupeeSilver08, RupeeSilver09, RupeeSilver10,
+            RupeeSilver11, RupeeSilver12, RupeeSilver13, RupeeSilver14, RupeeSilver15,
+            RupeeSilver16, RupeeSilver17, RupeeSilver18, RupeeSilver19, RupeeSilver20,
+            RupeeSilver21, RupeeSilver22, RupeeSilver23, RupeeSilver24, RupeeSilver25,
+            RupeeSilver26, RupeeSilver27, RupeeSilver28, RupeeSilver29, RupeeSilver30,
+            RupeeSilver31, RupeeSilver32, RupeeSilver33, RupeeSilver34, RupeeSilver35,
+            RupeeSilver36, RupeeSilver37, RupeeSilver38,
+        ]);
+
+        let golds = self.count(&[
+            RupeeGold01, RupeeGold02, RupeeGold03, RupeeGold04, RupeeGold05,
+            RupeeGold06, RupeeGold07, RupeeGold08,
+        ]);
+
+        amount <= (purples as u16 * 50) + (silvers as u16 * 100) + (golds as u16 * 300)
+    }
+
     pub fn has_bow(&self) -> bool {
         self.has_either(Bow01, Bow02)
     }

@@ -302,6 +302,76 @@ fn get_items(settings: &Settings, rng: &mut StdRng) -> (Vec<FillerItem>, Vec<Fil
             LoruleCastleKeySmall03,
             LoruleCastleKeySmall04,
             LoruleCastleKeySmall05,
+
+            // 18 Purple Rupees
+            RupeePurple01,
+            RupeePurple02,
+            RupeePurple03,
+            RupeePurple04,
+            RupeePurple05,
+            RupeePurple06,
+            RupeePurple07,
+            RupeePurple08,
+            RupeePurple09,
+            RupeePurple10,
+            RupeePurple11,
+            RupeePurple12,
+            RupeePurple13,
+            RupeePurple14,
+            RupeePurple15,
+            RupeePurple16,
+            RupeePurple17,
+            RupeePurple18,
+
+            // 38 Silver Rupees
+            RupeeSilver01,
+            RupeeSilver02,
+            RupeeSilver03,
+            RupeeSilver04,
+            RupeeSilver05,
+            RupeeSilver06,
+            RupeeSilver07,
+            RupeeSilver08,
+            RupeeSilver09,
+            RupeeSilver10,
+            RupeeSilver11,
+            RupeeSilver12,
+            RupeeSilver13,
+            RupeeSilver14,
+            RupeeSilver15,
+            RupeeSilver16,
+            RupeeSilver17,
+            RupeeSilver18,
+            RupeeSilver19,
+            RupeeSilver20,
+            RupeeSilver21,
+            RupeeSilver22,
+            RupeeSilver23,
+            RupeeSilver24,
+            RupeeSilver25,
+            RupeeSilver26,
+            RupeeSilver27,
+            RupeeSilver28,
+            RupeeSilver29,
+            RupeeSilver30,
+            RupeeSilver31,
+            RupeeSilver32,
+            RupeeSilver33,
+            RupeeSilver34,
+            RupeeSilver35,
+            RupeeSilver36,
+            RupeeSilver37,
+            RupeeSilver38,
+
+            // 8 Gold Rupees
+            RupeeGold01,
+            RupeeGold02,
+            RupeeGold03,
+            RupeeGold04,
+            RupeeGold05,
+            RupeeGold06,
+            RupeeGold07,
+            RupeeGold08,
         ];
 
 
@@ -340,79 +410,9 @@ fn get_items(settings: &Settings, rng: &mut StdRng) -> (Vec<FillerItem>, Vec<Fil
         RupeeRed,
         RupeeRed,
         RupeeRed,
-        //RupeeRed, // Removed for ????
-        //RupeeRed, // Removed for 2nd Bracelet
-        //RupeeRed, // Irene Removed
-
-        // 18 Purple Rupees
-        RupeePurple,
-        RupeePurple,
-        RupeePurple,
-        RupeePurple,
-        RupeePurple,
-        RupeePurple,
-        RupeePurple,
-        RupeePurple,
-        RupeePurple,
-        RupeePurple,
-        RupeePurple,
-        RupeePurple,
-        RupeePurple,
-        RupeePurple,
-        RupeePurple,
-        RupeePurple,
-        RupeePurple,
-        RupeePurple,
-
-        // 38 Silver Rupees
-        RupeeSilver,
-        RupeeSilver,
-        RupeeSilver,
-        RupeeSilver,
-        RupeeSilver,
-        RupeeSilver,
-        RupeeSilver,
-        RupeeSilver,
-        RupeeSilver,
-        RupeeSilver,
-        RupeeSilver,
-        RupeeSilver,
-        RupeeSilver,
-        RupeeSilver,
-        RupeeSilver,
-        RupeeSilver,
-        RupeeSilver,
-        RupeeSilver,
-        RupeeSilver,
-        RupeeSilver,
-        RupeeSilver,
-        RupeeSilver,
-        RupeeSilver,
-        RupeeSilver,
-        RupeeSilver,
-        RupeeSilver,
-        RupeeSilver,
-        RupeeSilver,
-        RupeeSilver,
-        RupeeSilver,
-        RupeeSilver,
-        RupeeSilver,
-        RupeeSilver,
-        RupeeSilver,
-        RupeeSilver,
-        RupeeSilver,
-        RupeeSilver,
-        RupeeSilver,
-
-        // 8 Gold Rupees
-        RupeeGold,
-        RupeeGold,
-        RupeeGold,
-        RupeeGold,
-        RupeeGold,
-        RupeeGold,
-        RupeeGold,
-        RupeeGold,
+        RupeeRed,
+        RupeeRed,
+        RupeeRed,
 
         // 4 Monster Tails
         MonsterTail,
@@ -435,9 +435,9 @@ fn get_items(settings: &Settings, rng: &mut StdRng) -> (Vec<FillerItem>, Vec<Fil
         MonsterGuts,
         MonsterGuts,
         MonsterGuts,
-        MonsterGuts,
-        MonsterGuts,
-        MonsterGuts,
+        //MonsterGuts, // Removed for Irene
+        //MonsterGuts, // Removed for Bracelet #2
+        //MonsterGuts, // Removed for idk
 
         // Heart Pieces
         HeartPiece01,
@@ -484,10 +484,10 @@ fn get_items(settings: &Settings, rng: &mut StdRng) -> (Vec<FillerItem>, Vec<Fil
 
     // Swordless Mode
     if settings.logic.swordless_mode {
-        trash.push(RupeeRed);
-        trash.push(RupeeRed);
-        trash.push(RupeeRed);
-        trash.push(RupeeRed);
+        trash.push(MonsterHorn);
+        trash.push(MonsterHorn);
+        trash.push(MonsterHorn);
+        trash.push(MonsterHorn);
     } else {
         progression.push(Sword01);
         progression.push(Sword02);
@@ -500,8 +500,8 @@ fn get_items(settings: &Settings, rng: &mut StdRng) -> (Vec<FillerItem>, Vec<Fil
         progression.push(Lamp02);
         progression.push(Net02);
     } else {
-        trash.push(RupeePurple);
-        trash.push(RupeePurple);
+        trash.push(MonsterTail);
+        trash.push(MonsterTail);
     }
 
     (shuffle_items(progression, rng), shuffle_items(trash, rng))
