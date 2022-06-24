@@ -335,6 +335,12 @@ pub fn apply(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
             [233].disable(), // Open Maiamai Cave
             [235].disable(), // Remove the Sign
         },
+
+        // Hyrule Hotfoot Area
+        FieldLight 36 {
+            [43].disable(), // Disable Letter in a Bottle text
+        },
+
         // Sacred Realm
         FieldLight 43 {
             [23].disable(), // seichi - "Sanctuary" - Initial text
