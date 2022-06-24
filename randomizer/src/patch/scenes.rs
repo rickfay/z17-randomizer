@@ -193,9 +193,6 @@ pub fn apply(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
         // Hyrule Castle
         FieldLight 18 {
 
-            // TODO - What is Flag 390 ?
-            // TODO - Where are rooftop Red Spear Soldiers?
-
             [263].enable(), // Red Spear Soldier
             [536].enable(), // Red Spear Soldier
 
@@ -491,7 +488,12 @@ pub fn apply(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
         },
         // Zora's Domain
         CaveLight 7 {
-            [0x84].enable(), // Enable Zora Queen event always
+            [116].enable(), // Thin Oren
+            [119].enable(), // Zora Attendant
+            [127].enable(), // Zora Attendant
+            [131].clear_enable_flag(), // AreaSwitchCube, fix for not being able to turn in Smooth Gem
+            [132].clear_enable_flag(), // Enable Zora Queen event always
+            [134].enable(), // Thicc Oren
         },
 
         // Thief Girl Cave

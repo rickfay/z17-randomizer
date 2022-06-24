@@ -55,9 +55,6 @@ fn preplace_items<'a>(check_map: &mut HashMap<&'a str, Option<FillerItem>>,
     check_map.insert("Shore", Some(LetterInABottle));
     progression.retain(|x| *x != LetterInABottle);
 
-    check_map.insert("Merchant (Right)", Some(SmoothGem));
-    progression.retain(|x| *x != SmoothGem);
-
     let mut shop_positions: Vec<&str> = Vec::new();
     let mut lorule_castle_positions: Vec<&str> = Vec::new();
 
