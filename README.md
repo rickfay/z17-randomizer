@@ -5,6 +5,103 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
 ## Updates
 
 <details open="open">
+<summary>Version 0.1.0</summary>
+
+- New Filler Algorithm:
+  - This has been a long time coming :)
+  - The filler has been completely rewritten using an **Assumed Fill** algorithm. The old algorithm had a tendency to front-load progression items in the Overworld (often just Hyrule's), and very rarely put anything noteworthy in dungeons. This new algorithm fixes those problems and produces interesting "logic chains" with a much higher frequency.
+  - The vanilla Bow of Light issue has been solved once and for all! The new filler has no biases towards Zelda, and excluding her prevents her from having any progression at all.
+
+
+- Hyrule Castle + "Yuga Seeds"
+  - After a lot of remodelling, Hyrule Castle is open once again!
+  - Defeating Yuga 2 awards a unique type of progression: Access to Lorule **without Ravio's Bracelet**. This makes it possible for the Bracelet or an item leading to Bracelet to spawn in the main area of Lorule, including the early portions of Thieves' Hideout and Swamp Palace.
+  - To accomplish this, the north exit from the Yuga 2 boss fight has been redirected to drop Link into the Lorule Blacksmith. This door will remain open if the player needs to use it multiple times.
+  - Note 1: Climbing Hyrule Castle logically requires the Bow or the Ice Rod to kill the Red Spear soldier mergeless on 3F. It can also be done with Nice Bombs or Nice Tornado Rod, but those are considered out of logic.
+  - Note 2: If you need to return to Hyrule after reaching Lorule in this way, you need to death warp to return to Link's House. I'm exploring more *elegant* ways to do this in the future, but this is what we have for now.
+  - Note 3: Swamp Palace was really not designed for the player to not have merge, with three rooms capable of softlocking the player if they unwittingly entered mergeless. To combat this, 2 doors that normally shut behind the player have been removed. Additionally, the crystal switch in the B1 north room that would normally divert the river has been removed, preventing a softlock that could otherwise occur (the switch was never needed, players could always bypass the river by merging).
+
+
+- New Logic Modes
+  - The logic has been expanded into six (6) different modes. Hopefully there's something for everyone.
+    - Normal: Standard Gameplay, no tricky item use or glitches. If unsure, choose this.
+    - Hard: Tricks that aren't technically glitches included, lamp + net considered as weapons. No glitches.
+    - Glitched (Basic): Includes the above plus "basic", easy-to-learn glitches.
+    - Glitched (Advanced): Includes the above plus "advanced" glitches that may be a challenge to master.
+    - Glitched (Hell): Includes every known glitch, including the insane ones. Bee Badge not included. Do not choose this. DO NOT CHOOSE THIS.
+    - No Logic: Items are placed with no logic at all. Dungeon items are in their respective dungeons. Seeds may not be completable.
+
+
+- Ravio's Bracelet Changes
+  - The second Bracelet has returned to the item pool, meaning you must find both before you can Merge.
+  - The `start_with_bracelet` option has been deprecated. The option mostly existed to cover for the old filler algorithm's shortcomings, but now that those have been addressed the option is being retired.
+
+
+- Pendant of Courage Changes
+  - Rosso's House has been unlocked from game start and the check for smashing his pet rocks is logically available anytime after you've obtained the Power Glove.
+  - The Irene check has been removed entirely. This check with its multiple invisible triggers caused a lot of confusion for players, so for now we've decided to remove it.
+    - Don't worry, you'll still be able to see Irene on her broom after you've rescued her portrait.
+  - This leaves the Haunted Grove Tree Stump as *the* Green Pendant-locked check.
+
+
+- Swordless Mode Changes
+  - The Hyrule Castle Barrier will now be removed when playing on Swordless Mode, granting access to 2 otherwise inaccessible chests and the Hyrule Castle dungeon.
+  - Yuga 2 can still be fought in Swordless Mode to access Lorule without Bracelet, but note that he cannot be harmed with the Bow alone.
+
+
+- New Option: `assured_weapon`
+  - Guarantees at least one weapon will be placed in Ravio's Shop
+    - Items include: Bow, Bombs, Fire Rod, Ice Rod, Hammer, or Sword (if not playing Swordless)
+
+
+- New Option: `bow_of_light_in_castle`
+  - Guarantees Bow of Light will spawn on one of the 15 checks inside Lorule Castle.
+    - Note: This includes Zelda, unless you manually exclude her.
+
+
+- Change to *`_in_shop` settings:
+  - When the Bell, Pouch, Boots, or an assured weapon is placed in Ravio's Shop, it will now be placed on a random slot (but never the Sand Rod Slot).
+
+
+- Letter in a Bottle pickup text has been removed
+
+
+- The randomizer will no longer generate a `Standard.toml` preset that overwrites itself. Instead, an `Example.toml` preset is provided to demonstrate the correct format, and you may modify or delete it ~~at your own peril.~~
+
+
+- **FIXED:** Vanilla Bow of Light
+  - The new filler is not biased towards giving Zelda the Bow of Light.
+  - Excluding Zelda is now *guaranteed* to prevent a vanilla Bow of Light placement.
+
+  
+- **FIXED:** Smooth Gem
+  - The issue preventing players from giving Oren the Smooth Gem has been
+    - (•\_•)
+    - ( •\_•)>⌐■-■
+    - _smoothed out_
+    - (⌐■_■)
+    - _YEAAAAHHHHHHHHHHH_
+
+
+- **FIXED:** Hyrule Castle Barrier
+  - The Barrier no longer mysteriously disappears after obtaining the Master Sword, instead you get to experience the joy tearing it down.
+ 
+
+- **FIXED:** Skull Woods Softlock
+  - It was technically possible to get softlocked in the hallway outside the Skull Woods boss if the player reached it without the Lamp, Fire Rod, Bombs, a Scoot Fruit, or the dungeon's Boss Key. There are no reports of this happening as it would require navigating Skull Woods completely in the dark while being unlucky enough to have none of those items, but it was technically possible. The fix prevents the door closing behind the player when they enter the hallway, allowing them a means of escape.
+
+
+- **FIXED:** Duplicate/Wrong Enemies in Hyrule Field
+  - The enemies present in Hyrule Field should now be those typically present in the vanilla game after beating Eastern Palace and opening the Portals to Lorule. The seemingly random duplicates in certain areas have been removed.
+
+
+- **FIXED:** Kakariko now has the correct number of NPCs and Cuccos.
+
+
+- **ALTERED:** The rock used to perform Trial's Skip in Lorule Castle will now respawn after leaving and re-entering the room. This is to keep Trial's Skip doable in the event the rock is accidentally destroyed.
+
+</details>
+<details>
 <summary>Version 0.0.4</summary>
 
   - **FIX:** Prevent players missing the Big Key Chest in Thieves' Hideout.
@@ -81,7 +178,7 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
 
 ## Setup
 
-Download: [Latest Stable Release (0.0.4)](https://github.com/rickfay/z17-randomizer/releases/download/v0.0.4/z17r-0.0.4.zip)
+Download: [Latest Stable Release (v0.1.0)](https://github.com/rickfay/z17-randomizer/releases/download/v0.1.0/z17r-0.1.0.zip)
 
 1. Unzip the download to your directory of choice.
 2. Move your A Link Between Worlds ROM into the same folder. Name it: `A Link Between Worlds (USA).3ds`
@@ -123,8 +220,13 @@ For Citra (emulator):
 
 ## Game Options
 
-`start_with_bracelet`
-- Causes Ravio to give out the Bracelet at the start of the game. More specifically, the Bracelet will be placed in the Bow Item's Slot in the shop, and Ravio will give you the item on that slot.
+`mode`
+- Determines the Logic to use when generating the seed.
+  - Options are: `Normal`, `Hard`, `GlitchBasic`, `GlitchAdvanced`, `GlitchHell`, or `NoLogic`
+
+`assured_weapon`
+- If enabled, guarantees that a weapon will be placed in Ravio's Shop
+  - Potential weapons include: Sword, Bow, Hammer, Fire Rod, Ice Rod, or Bombs
 
 `bell_in_shop`
 - If enabled, guarantees the Bell will be placed in Ravio's Shop.
@@ -138,26 +240,19 @@ For Citra (emulator):
 `super_items`
 - If enabled, includes the Super Lamp and Super Net in the shuffled item pool as progressive upgrades to the base Lamp and Net.
 
-`skip_trials`
-- If enabled, the Trials door in Lorule Castle will be removed.
-
 `minigames_excluded`
 - Excludes Cucco Rush, Hyrule Hotfoot, Treacherous Tower, Octoball Derby, and both Rupee Rush minigames from having progression.
 
-`glitched_logic`
-- Enables items to be placed in locations that may require glitches/tricks to obtain. A complete list of potentially required glitches/tricks is below.
+`skip_trials`
+- If enabled, the Trials door in Lorule Castle will be removed.
+
+`bow_of_light_in_castle`
+- If enabled, guarantees the Bow of Light will be placed *somewhere* in Lorule Castle (including possibly Zelda)
 
 `swordless_mode`
 - Generates a seed with no Swords. Things you should know about Swordless:
-  - The 2 Chests in Hyrule Castle are unobtainable, but they are excluded from containing progression.
+  - The Hyrule Castle Barrier will be torn down from game start, providing access to its checks and the Inside Hyrule Castle dungeon.
   - You will need the [Net to play Tennis with Yuganon](https://www.twitch.tv/videos/1265170513). Good luck finding it!
-
-#### The following options are only available when creating a seed using a preset:
-
-
-`dont_require_lamp_for_darkness`
-- If enabled, the logic may place required items behind completely dark rooms without giving you the Lamp first.
-
 
 ## Glitched Logic Breakdown
 
@@ -206,7 +301,7 @@ The following tricks may potentially be required in a Glitched Logic seed:
   - Lamp Trial doesn't need the Lamp
 
   
-Mergeless Tricks if `start_with_bracelet` is false:
+Mergeless Tricks:
 - Behind Blacksmith with Fire Rod or Nice Bombs
 - Death Mountain climb
 - DM Fairy Cave with Fire Rod or Nice Bombs
@@ -228,30 +323,9 @@ Some notes about Nice Bombs:
 
 ## Known Issues
 
-- Bow of Light crashes the game if used outside the final boss arena (on console)
-- After Ravio gives out the Bracelet from the Bow Item Slot in his shop, the model remains until you leave and reenter.
-- Despite Maiamais being available for collection from game start, the Maiamai cave itself is still sealed shut and thus Bombs are still required to turn in any Maiamai
-- Opening the Portals early has some side effects:
-  - The Curtain over the Hyrule Castle Portal is not torn down, so if you attempt to enter the Portal right before the final boss fight, you'll notice some... odd behavior. This is NOT a softlock, but it is confusing. If you have the Lamp you can use it to burn down the Curtain from behind it. Otherwise you'll eventually void out and return to Lorule Castle.
-  - The Yuga 2 Boss fight can be started but Yuga 2 cannot be defeated. If you do enter the boss arena, you'll find that Yuga gets stuck circling the room in his merged form, but that because the entrance door is opened he just stalls. Defeating Yuga 2 is no longer necessary as Portals are open, so you can just leave.
-
-## Future Plans
-
-Time and technical knowledge (or lack thereof) are the main barriers to future progress, but I will share my wishlist of features to eventually add:
-
-- Keysanity
-- Shuffled Pendants and Paintings
-- Portal Randomizer
-- Include Nice Items as Progressive Items
-- Randomize Maiamais
-- Randomize Maiamai Rewards for 10, 20, 30, etc.
-- Great Spin
-- Hyrule Hotfoot, preclear the first race
-- Treacherous Tower, preclear the first round
-- Fix existing Known Issues
-- Other Stuff <sup>TM</sup>
-
-![future.png](docs/future.png)
+- Bow of Light crashes the game if used outside the final boss arena (on 3DS console)
+- Some text boxes will overflow
+- After turning in the Letter in a Bottle to the Milk Bar owner, the Letter in a Bottle will be available for collection again. It can be turned in again, but doing so can lead to some unexpected behavior (and is never part of logic).
 
 ## Special Thanks
 
