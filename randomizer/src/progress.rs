@@ -1,4 +1,5 @@
 use std::collections::HashSet;
+
 use crate::filler_item::FillerItem;
 use crate::filler_item::FillerItem::*;
 use crate::Settings;
@@ -14,12 +15,16 @@ impl Progress {
         Self { items: HashSet::new(), settings }
     }
 
+    pub fn get_settings(&self) -> &Settings {
+        &self.settings
+    }
+
     pub fn add_item(&mut self, item: FillerItem) {
         self.items.insert(item);
     }
 
     pub fn difference(&self, other: &Progress) -> HashSet<FillerItem> {
-        let mut new_items : HashSet<FillerItem> = HashSet::new();
+        let mut new_items: HashSet<FillerItem> = HashSet::new();
 
         for item in &self.items {
             if !other.items.contains(&item) {
@@ -68,7 +73,6 @@ impl Progress {
     }
 
     pub fn has_rupees(&self, amount: u16) -> bool {
-
         let purples = self.count(&[
             RupeePurple01, RupeePurple02, RupeePurple03, RupeePurple04, RupeePurple05,
             RupeePurple06, RupeePurple07, RupeePurple08, RupeePurple09, RupeePurple10,
@@ -127,6 +131,9 @@ impl Progress {
         self.has_either(Hammer01, Hammer02)
     }
 
+    pub fn has_shield(&self) -> bool {
+        self.has_either(Shield, HylianShield)
+    }
 
     pub fn has_scoot_fruit(&self) -> bool {
         self.has(ScootFruit)
@@ -146,6 +153,10 @@ impl Progress {
 
     pub fn has_bell(&self) -> bool {
         self.has(Bell)
+    }
+
+    pub fn can_escape(&self) -> bool {
+        self.has_bell() || self.has_fire_rod() || self.has_bombs()
     }
 
     pub fn has_net(&self) -> bool {
@@ -192,6 +203,10 @@ impl Progress {
     //     self.maiamai >= amount
     // }
 
+    pub fn has_mail(&self) -> bool {
+        self.has_either(Mail01, Mail02)
+    }
+
     pub fn has_master_ore(&self, amount: u8) -> bool {
         self.has_amount(amount, &[OreRed, OreGreen, OreBlue, OreYellow])
     }
@@ -228,6 +243,18 @@ impl Progress {
     //     self.has(GreatSpin)
     // }
 
+    pub fn can_cut_grass(&self) -> bool {
+        self.has_any(&[
+            Sword01, Sword02, Sword03, Sword04,
+            Boomerang01, Boomerang02,
+            Bombs01, Bombs02,
+            FireRod01, FireRod02,
+            IceRod01, IceRod02,
+            Lamp01, Lamp02,
+            PegasusBoots,
+        ])
+    }
+
     pub fn can_attack(&self) -> bool {
         self.has_any(&[
             Sword01, Sword02, Sword03, Sword04,
@@ -235,7 +262,15 @@ impl Progress {
             Bombs01, Bombs02,
             FireRod01, FireRod02,
             IceRod01, IceRod02,
-            Hammer01, Hammer02
+            Hammer01, Hammer02,
+            PegasusBoots
+        ])
+    }
+
+    pub fn has_lamp_or_net(&self) -> bool {
+        self.has_any(&[
+            Lamp01, Lamp02,
+            Net01, Net02
         ])
     }
 
@@ -289,11 +324,6 @@ impl Progress {
 
     pub fn has_eastern_big_key(&self) -> bool {
         self.has(EasternKeyBig)
-    }
-
-    pub fn can_defeat_yuga(&self) -> bool {
-        self.has_bow() || self.has_bombs()
-            || ((self.has_boomerang() || self.has_hookshot()) && self.can_attack())
     }
 
     pub fn has_gales_keys(&self, amount: u8) -> bool {
@@ -369,6 +399,7 @@ impl Progress {
     pub fn can_defeat_knucklemaster(&self) -> bool {
         self.can_merge()
             && (self.has_sword()
+            // Bow does not work
             || self.has_bombs()
             || self.has_fire_rod()
             || self.has_ice_rod()
@@ -381,10 +412,6 @@ impl Progress {
 
     pub fn has_thieves_big_key(&self) -> bool {
         self.has(ThievesKeyBig)
-    }
-
-    pub fn can_defeat_stalblind(&self) -> bool {
-        self.can_merge() && self.can_attack()
     }
 
     pub fn has_ice_keys(&self, amount: u8) -> bool {
@@ -427,8 +454,8 @@ impl Progress {
         self.has_amount(amount, &[LoruleCastleKeySmall01, LoruleCastleKeySmall02, LoruleCastleKeySmall03, LoruleCastleKeySmall04, LoruleCastleKeySmall05])
     }
 
-    pub fn can_defeat_yuganon(&self) -> bool {
-        self.can_attack() && self.can_merge() && self.has(BowOfLight)
+    pub fn has_bow_of_light(&self) -> bool {
+        self.has(BowOfLight)
     }
 
     // Events ------------------------------------------------
@@ -471,7 +498,15 @@ impl Progress {
             && self.has(SageImpa)
     }
 
-    pub fn can_reach_hilda_barrier(&self) -> bool { // TODO incorporate
-        self.has(AccessHildaBarrier)
+    pub fn can_get_potion(&self) -> bool {
+        self.has_bottle() && self.has_either(AccessPotionShop, AccessMilkBar)
+    }
+
+    pub fn can_access_hyrule_blacksmith(&self) -> bool {
+        self.has(AccessHyruleBlacksmith)
+    }
+
+    pub fn can_access_lorule_castle_field(&self) -> bool {
+        self.has(AccessLoruleCastleField)
     }
 }

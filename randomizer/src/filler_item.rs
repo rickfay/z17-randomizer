@@ -297,14 +297,17 @@ pub enum FillerItem {
     SageImpa,
 
     ScootFruit,
+    FoulFruit,
+    Shield,
     GoldBee,
     BigBombFlower,
     StylishWomansHouseOpen,
     SkullEyeRight,
     SkullEyeLeft,
     AccessPotionShop,
+    AccessMilkBar,
     AccessHyruleBlacksmith,
-    AccessHildaBarrier,
+    AccessLoruleCastleField,
 }
 
 pub fn convert(fill_item: FillerItem) -> Option<Item> {
@@ -544,8 +547,9 @@ pub fn convert(fill_item: FillerItem) -> Option<Item> {
         // Quest Items don't translate
         PendantOfCourage | PendantOfWisdom | PendantOfPower |
         SageGulley | SageOren | SageSeres | SageOsfala | SageRosso | SageIrene | SageImpa |
-        ScootFruit | GoldBee | BigBombFlower | StylishWomansHouseOpen |
+        ScootFruit | FoulFruit | Shield |
+        GoldBee | BigBombFlower | StylishWomansHouseOpen |
         SkullEyeRight | SkullEyeLeft |
-        AccessHildaBarrier | AccessHyruleBlacksmith | AccessPotionShop => None
+        AccessLoruleCastleField | AccessHyruleBlacksmith | AccessPotionShop | AccessMilkBar => None
     }
 }

@@ -20,7 +20,8 @@ pub enum Location {
     RossoHouse,
     RossoCave,
     TornadoRodDungeon,
-    GraveyardLedge,
+    GraveyardLedgeHyrule,
+    GraveyardLedgeLorule,
     GraveyardLedgeCave,
     BlacksmithHouse,
     BlacksmithCave,
@@ -73,6 +74,7 @@ pub enum Location {
     SpectacleRockCaveRight,
     HookshotDungeon,
     FireCaveTop,
+    FireCaveCenter,
     FireCaveMiddle,
     FireCaveBottom,
     BoulderingLedgeLeft,
@@ -113,7 +115,6 @@ pub enum Location {
     MiseryMireLedge,
     MiseryMireBridge,
     MiseryMireOoB,
-
 
     LoruleLakeEast,
     LoruleLakeWest,
@@ -170,14 +171,12 @@ pub enum Location {
     DarkPalaceLockedDoors,
     DarkPalaceBoss,
 
-
     SwampPalaceOutside,
     SwampPalaceAntechamber,
     SwampPalaceFoyer,
     SwampPalaceMain,
     SwampPalacePostMiniboss,
     SwampPalaceBoss,
-    SwampPalacePostBoss,
 
     SkullWoodsFoyer,
     SkullWoodsMain,

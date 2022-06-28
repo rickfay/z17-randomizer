@@ -5,7 +5,8 @@ use std::{
 
 use serde::{Deserialize, Serialize};
 
-use crate::{regions, LocationInfo};
+use crate::{LocationInfo, regions};
+use crate::logic_mode::LogicMode;
 
 /// Logic and behavior settings.
 #[derive(Clone, Debug, Default, Deserialize, Hash, Serialize)]
@@ -37,6 +38,8 @@ impl Settings {
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq, Deserialize, Serialize)]
 #[serde(default, deny_unknown_fields)]
 pub struct Logic {
+    /// Logic to use for item placement (Normal, Hard, Glitched (Basic, Advanced, Bees), No Logic)
+    pub mode: LogicMode,
     /// Guarantees a Weapon is placed in Ravio's Shop
     pub assured_weapon: bool,
     /// Glitched Logic

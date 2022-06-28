@@ -1,26 +1,35 @@
 use std::collections::{HashMap, HashSet};
 use std::process::exit;
+
 use log::{error, info};
 use queue::Queue;
-use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
+use rand::rngs::StdRng;
+
 use albw::Item;
+
 use crate::{convert, LocationInfo, Seed, Settings};
 use crate::check::Check;
 use crate::FillerItem;
 use crate::FillerItem::*;
 use crate::location::Location;
 use crate::location_node::LocationNode;
+use crate::logic_mode::LogicMode::*;
 use crate::progress::Progress;
 use crate::world::build_world_graph;
 
 /// Filler Algorithm
 pub fn fill_stuff(settings: &Settings, seed: Seed) -> Vec<(LocationInfo, Item)> {
-
-
     info!("Seed:                           {}", seed);
     //info!("Hash:                           {}", settings.hash().0);
-    info!("Logic:                          Normal"); // if settings.logic.glitched_logic {"Glitched"} else {"Normal"});
+    info!("Logic:                          {}", match settings.logic.mode {
+        Normal => "Normal",
+        Hard => "Hard",
+        GlitchBasic => "Glitched - Basic",
+        GlitchAdvanced => "Glitched - Advanced",
+        GlitchBees => "Glitched - BEES",
+        NoLogic => "No Logic",
+    });
     info!("Swords:                         {}", if settings.logic.swordless_mode {"Swordless Mode - NO SWORDS"} else {"Normal"});
     info!("Super Items:                    {}", if settings.logic.super_items {"Included"} else {"Not Included"});
     info!("Trials:                         {}\n", if settings.logic.skip_trials {"Skipped"} else {"Normal"});
@@ -49,7 +58,6 @@ fn preplace_items<'a>(check_map: &mut HashMap<&'a str, Option<FillerItem>>,
                       rng: &mut StdRng,
                       progression: &mut Vec<FillerItem>,
                       trash: &mut Vec<FillerItem>) {
-
     handle_exclusions(check_map, settings, rng, trash);
 
     check_map.insert("Shore", Some(LetterInABottle));
@@ -81,7 +89,6 @@ fn preplace_items<'a>(check_map: &mut HashMap<&'a str, Option<FillerItem>>,
 
     // Assures a weapon will be available in Ravio's Shop
     if settings.logic.assured_weapon {
-
         let mut weapons = Vec::from([
             Bow01, Bombs01, FireRod01, IceRod01, Hammer01
         ]);
@@ -135,7 +142,6 @@ fn handle_exclusions<'a>(check_map: &mut HashMap<&'a str, Option<FillerItem>>,
                          settings: &'a Settings,
                          rng: &mut StdRng,
                          trash_pool: &mut Vec<FillerItem>) {
-
     let opt = settings.exclusions.0.get("exclusions");
     if opt.is_none() {
         return;
@@ -373,7 +379,6 @@ fn get_items(settings: &Settings, rng: &mut StdRng) -> (Vec<FillerItem>, Vec<Fil
 
 
     let mut trash = vec![
-        BeeBadge,
         HintGlasses,
 
         // 2 Green Rupees
@@ -479,6 +484,12 @@ fn get_items(settings: &Settings, rng: &mut StdRng) -> (Vec<FillerItem>, Vec<Fil
         HeartContainer10,
     ];
 
+    // Remove the Bee Badge from Bee Logic to keep Bee Boosting viable
+    trash.push(match settings.logic.mode {
+        GlitchBees => MonsterHorn,
+        _ => BeeBadge
+    });
+
     // Swordless Mode
     if settings.logic.swordless_mode {
         trash.push(MonsterHorn);
@@ -506,8 +517,7 @@ fn get_items(settings: &Settings, rng: &mut StdRng) -> (Vec<FillerItem>, Vec<Fil
 
 /// Shuffles item pool to eliminate placement order bias
 fn shuffle_items(mut items: Vec<FillerItem>, rng: &mut StdRng) -> Vec<FillerItem> {
-
-    let mut shuffled_items : Vec<FillerItem> = Vec::new();
+    let mut shuffled_items: Vec<FillerItem> = Vec::new();
 
     while !items.is_empty() {
         shuffled_items.push(items.remove(rng.gen_range(0..items.len())));
@@ -582,7 +592,6 @@ fn is_dungeon_item(item: FillerItem) -> bool {
 }
 
 fn fill_trash(check_map: &mut HashMap<&str, Option<FillerItem>>, rng: &mut StdRng, trash_items: &Vec<FillerItem>) {
-
     info!("Placing Trash Items...");
 
     let mut empty_check_keys = Vec::new();
@@ -683,7 +692,7 @@ fn verify_all_locations_accessible(loc_map: &mut HashMap<Location, LocationNode>
 
     let reachable_checks = assumed_search(loc_map, progression_pool, &mut check_map, settings); //find_reachable_checks(loc_map, &everything, &mut check_map); //
 
-    const TOTAL_CHECKS: usize = 269; // all checks + quest checks
+    const TOTAL_CHECKS: usize = 274; // all checks + quest checks
     if reachable_checks.len() != TOTAL_CHECKS {
 
         // for rc in &reachable_checks {
@@ -726,7 +735,7 @@ fn find_reachable_checks(loc_map: &mut HashMap<Location, LocationNode>, progress
         // Queue new paths reachable from this location
         for path in location_node.clone().get_paths() {
             let destination = path.get_destination();
-            if !visited.contains(&destination) && path.can_travel(progress) {
+            if !visited.contains(&destination) && path.can_access(progress) {
                 loc_queue.queue(destination).expect("TODO: panic message");
                 visited.insert(destination);
             }
@@ -765,7 +774,6 @@ fn assumed_fill(mut world_graph: &mut HashMap<Location, LocationNode>,
                 items_owned: &mut Vec<FillerItem>,
                 mut check_map: &mut HashMap<&str, Option<FillerItem>>,
                 settings: &Settings) {
-
     info!("Placing Progression Items...");
 
     let mut reachable_checks = assumed_search(&mut world_graph, &items_owned, &mut check_map, settings);

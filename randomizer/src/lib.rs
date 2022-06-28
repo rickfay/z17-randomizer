@@ -1,11 +1,22 @@
 use std::{array, collections::BTreeMap, error::Error as StdError, fs, fs::File, io};
 use std::io::{stdin, stdout, Write};
 use std::path::Path;
+
 use linked_hash_map::LinkedHashMap;
 use log::{debug, info};
 use serde::{ser::SerializeMap, Serialize, Serializer};
+
 use albw::{Game, Item};
 use albw::Item::*;
+use patch::Patcher;
+use regions::Subregion;
+pub use settings::Settings;
+use state::State;
+use sys::{Paths, System};
+
+use crate::filler::fill_stuff;
+use crate::filler_item::{convert, FillerItem};
+use crate::settings::plando_settings;
 
 mod graph;
 mod patch;
@@ -22,15 +33,8 @@ mod path;
 mod progress;
 mod world;
 mod filler;
-
-use patch::Patcher;
-use regions::Subregion;
-pub use settings::Settings;
-use state::State;
-use sys::{Paths, System};
-use crate::filler::fill_stuff;
-use crate::filler_item::{convert, FillerItem};
-use crate::settings::plando_settings;
+mod logic;
+pub mod logic_mode;
 
 pub type Result<T, E = Error> = core::result::Result<T, E>;
 
@@ -784,13 +788,13 @@ pub fn plando() -> Result<(), Error> {
 
 
     layout.set(LocationInfo::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (1)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (2)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (3)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (4)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (5)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (6)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (7)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (8)"), RupeeGold);
+    layout.set(LocationInfo::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (2)"), ItemSwordLv4);
+    layout.set(LocationInfo::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (3)"), DashBoots);
+    layout.set(LocationInfo::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (4)"), ItemBell);
+    layout.set(LocationInfo::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (5)"), MessageBottle);
+    layout.set(LocationInfo::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (6)"), LiverBlue);
+    layout.set(LocationInfo::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (7)"), ItemStoneBeauty);
+    layout.set(LocationInfo::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (8)"), ItemMizukaki);
     layout.set(LocationInfo::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (9)"), RupeeGold);
 
 
@@ -889,9 +893,9 @@ pub fn plando() -> Result<(), Error> {
 
     // Lorule Death Mountain
     layout.set(LocationInfo::new(regions::lorule::death::mountain::SUBREGION, "Ledge (East)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::lorule::death::mountain::SUBREGION, "Behind Ice Gimos"), ItemFireRodLv2);
+    layout.set(LocationInfo::new(regions::lorule::death::mountain::SUBREGION, "Behind Ice Gimos (East)"), ItemFireRodLv2);
     layout.set(LocationInfo::new(regions::lorule::death::west::SUBREGION, "Ledge (West)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::lorule::death::west::SUBREGION, "Ice Gimos (West)"), RupeeGold);
+    layout.set(LocationInfo::new(regions::lorule::death::west::SUBREGION, "Defeat Ice Gimos (West)"), RupeeGold);
     layout.set(LocationInfo::new(regions::lorule::death::tower::SUBREGION, "Treacherous Tower (Intermediate)"), RupeeGold);
 
     // Lorule Graveyard

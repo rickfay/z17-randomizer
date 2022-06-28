@@ -1,16 +1,17 @@
 use crate::{FillerItem, LocationInfo};
+use crate::logic::Logic;
 use crate::progress::Progress;
 
 #[derive(Copy, Clone)]
 pub struct Check {
     name: &'static str,
-    logic: Option<fn(&Progress) -> bool>,
+    logic: Logic,
     quest: Option<FillerItem>,
     location_info: Option<LocationInfo>,
 }
 
 impl Check {
-    pub fn new(name: &'static str, logic: Option<fn(&Progress) -> bool>, quest: Option<FillerItem>, location_info: Option<LocationInfo>,) -> Self {
+    pub fn new(name: &'static str, logic: Logic, quest: Option<FillerItem>, location_info: Option<LocationInfo>) -> Self {
         Self { name, logic, quest, location_info }
     }
 
@@ -27,9 +28,6 @@ impl Check {
     }
 
     pub fn can_access(self, progress: &Progress) -> bool {
-        match self.logic {
-            None => true,
-            Some(_) => (self.logic.unwrap())(progress)
-        }
+        self.logic.can_access(progress)
     }
 }

@@ -1,14 +1,15 @@
 use crate::location::Location;
+use crate::logic::Logic;
 use crate::progress::Progress;
 
 #[derive(Copy, Clone)]
 pub struct Path {
     destination: Location,
-    logic: Option<fn(&Progress) -> bool>,
+    logic: Logic,
 }
 
 impl Path {
-    pub fn new(destination: Location, logic: Option<fn(&Progress) -> bool>) -> Self {
+    pub fn new(destination: Location, logic: Logic) -> Self {
         Self { destination, logic }
     }
 
@@ -16,10 +17,7 @@ impl Path {
         self.destination
     }
 
-    pub fn can_travel(self, progress: &Progress) -> bool {
-        match self.logic {
-            None => true,
-            Some(_) => (self.logic.unwrap())(progress)
-        }
+    pub fn can_access(self, progress: &Progress) -> bool {
+        self.logic.can_access(progress)
     }
 }
