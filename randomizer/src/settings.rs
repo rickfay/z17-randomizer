@@ -38,12 +38,10 @@ impl Settings {
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq, Deserialize, Serialize)]
 #[serde(default, deny_unknown_fields)]
 pub struct Logic {
-    /// Logic to use for item placement (Normal, Hard, Glitched (Basic, Advanced, Bees), No Logic)
+    /// Logic to use for item placement (Normal, Hard, Glitched (Basic, Advanced, Hell), No Logic)
     pub mode: LogicMode,
     /// Guarantees a Weapon is placed in Ravio's Shop
     pub assured_weapon: bool,
-    /// Glitched Logic
-    pub glitched_logic: bool,
     /// Places the Bell in Ravio's Shop
     pub bell_in_shop: bool,
     /// Places the Pouch in Ravio's Shop

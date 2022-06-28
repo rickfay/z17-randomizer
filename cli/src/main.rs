@@ -7,6 +7,7 @@ use randomizer::{Seed, Settings, plando, filler_new};
 use simplelog::{LevelFilter, SimpleLogger};
 use structopt::StructOpt;
 use albw::Game;
+use randomizer::logic_mode::LogicMode;
 use randomizer::settings::Logic;
 use sys::Paths;
 
@@ -20,6 +21,39 @@ struct Opt {
     no_patch: bool,
     #[structopt(long)]
     no_spoiler: bool,
+}
+
+fn prompt_logic_mode() -> LogicMode
+{
+    print!("\nChoose Logic Mode:\n");
+    print!("[1] Normal              - Standard gameplay, no tricky item use or glitches. If unsure, choose this.\n");
+    print!("[2] Hard                - Tricks that aren't technically glitches included, lamp + net considered as weapons. No glitches.\n");
+    print!("[3] Glitched (Basic)    - Includes the above plus \"basic\", easy-to-learn glitches.\n");
+    print!("[4] Glitched (Advanced) - Includes the above plus \"advanced\" glitches that may be a challenge to master.\n");
+    print!("[5] Glitched (Hell)     - Includes every known glitch, including the insane ones. Bee Badge not included. Do not choose this. DO NOT CHOOSE THIS.\n");
+    print!("[6] No Logic            - Items are placed with no logic at all. Dungeon items are in their respective dungeons. Seeds may not be completable.\n");
+
+    loop {
+        print!("\nEnter a number 1-6: ");
+
+        stdout().flush().unwrap();
+        let mut input = String::new();
+        stdin().read_line(&mut input).unwrap();
+        input = input.trim().to_string();
+
+        return match input.as_str() {
+            "1" => LogicMode::Normal,
+            "2" => LogicMode::Hard,
+            "3" => LogicMode::GlitchBasic,
+            "4" => LogicMode::GlitchAdvanced,
+            "5" => LogicMode::GlitchHell,
+            "6" => LogicMode::NoLogic,
+            _ => {
+                eprintln!("\nPlease enter either 1, 2, 3, 4, 5, or 6");
+                continue;
+            }
+        }
+    }
 }
 
 fn prompt_until_bool(prompt: &str) -> bool
@@ -79,6 +113,8 @@ fn preset_ui() -> Settings {
     info!("No preset has been specified. Seed Options UI will be used instead.\n");
     println!("--- Seed Options ---");
 
+    let mode = prompt_logic_mode();
+
     //let start_with_bracelet = prompt_until_bool("Start with Ravio's Bracelet?");
     let assured_weapon = prompt_until_bool("Guarantee a Weapon is placed in Ravio's Shop?");
     let bell_in_shop = prompt_until_bool("Guarantee Bell in Ravio's Shop?");
@@ -97,6 +133,7 @@ fn preset_ui() -> Settings {
 
     Settings {
         logic: Logic {
+            mode,
             bell_in_shop,
             pouch_in_shop,
             assured_weapon,
@@ -149,7 +186,7 @@ fn main() -> randomizer::Result<()> {
 
             info!("Attempt:                        #{}", x + 1);
             info!("Preset:                         {}", opt.preset.as_ref().unwrap_or(&String::from("<None>")));
-            info!("Version:                        0.0.5");
+            info!("Version:                        0.1.0");
 
             //let randomizer = Generator::new(&preset, seed);
             let spoiler = panic::catch_unwind(|| filler_new(&preset, seed));

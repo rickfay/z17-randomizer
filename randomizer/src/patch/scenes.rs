@@ -374,8 +374,8 @@ pub fn apply(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
 
             // Debug redirection
             // [24].call {|obj: &mut Obj| {
-            //     obj.redirect(2, 3, 3);
-            //     obj.arg_mut().1 = 1;
+            //     obj.redirect(39, 20, 0);
+            //     //obj.arg_mut().1 = 1;
             // }},
 
             // Convert standing Ravio into shopkeeper Ravio
@@ -580,6 +580,14 @@ pub fn apply(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
         // Swamp Palace B1
         DungeonWater 2 {
             [255].disable(), // Remove crystal switch, forces merge requirement to complete room to prevent softlock
+        },
+
+        // Lorule Castle
+        DungeonGanon 1 {
+            [1193].call {|obj: &mut Obj| { // Respawn Trial's Skip big rock upon leaving the room
+                obj.arg_mut().4 = 0;
+                obj.arg_mut().6 = 0;
+            }},
         },
     );
 

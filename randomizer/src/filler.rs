@@ -25,9 +25,9 @@ pub fn fill_stuff(settings: &Settings, seed: Seed) -> Vec<(LocationInfo, Item)> 
     info!("Logic:                          {}", match settings.logic.mode {
         Normal => "Normal",
         Hard => "Hard",
-        GlitchBasic => "Glitched - Basic",
-        GlitchAdvanced => "Glitched - Advanced",
-        GlitchBees => "Glitched - BEES",
+        GlitchBasic => "Glitched (Basic)",
+        GlitchAdvanced => "Glitched (Advanced)",
+        GlitchHell => "Glitched (Hell) - Did you really mean to choose this?",
         NoLogic => "No Logic",
     });
     info!("Swords:                         {}", if settings.logic.swordless_mode {"Swordless Mode - NO SWORDS"} else {"Normal"});
@@ -484,9 +484,9 @@ fn get_items(settings: &Settings, rng: &mut StdRng) -> (Vec<FillerItem>, Vec<Fil
         HeartContainer10,
     ];
 
-    // Remove the Bee Badge from Bee Logic to keep Bee Boosting viable
+    // Remove the Bee Badge from Hell Logic to keep Bee Boosting viable
     trash.push(match settings.logic.mode {
-        GlitchBees => MonsterHorn,
+        GlitchHell => MonsterHorn,
         _ => BeeBadge
     });
 
@@ -592,7 +592,7 @@ fn is_dungeon_item(item: FillerItem) -> bool {
 }
 
 fn fill_trash(check_map: &mut HashMap<&str, Option<FillerItem>>, rng: &mut StdRng, trash_items: &Vec<FillerItem>) {
-    info!("Placing Trash Items...");
+    info!("Placing Junk Items...");
 
     let mut empty_check_keys = Vec::new();
     for (key, val) in check_map.clone() {

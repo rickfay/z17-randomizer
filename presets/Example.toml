@@ -1,5 +1,7 @@
 ## Modifications to logic.
 [logic]
+## Logic Mode. Choose one of: "Normal", "Hard", "GlitchBasic", "GlitchAdvanced", "GlitchHell", or "NoLogic"
+mode = "Normal"
 ## A Sword will be placed in Ravio's Shop
 sword_in_shop = false
 ## The Bell will be placed in Ravio's Shop
@@ -14,10 +16,8 @@ super_items = false
 minigames_excluded = false
 ## Skip the Trials in Lorule Castle
 skip_trials = false
-## Guarantees the Bow of Light will be placed *somewhere* in Lorule Castle
+## Guarantees the Bow of Light will be placed *somewhere* in Lorule Castle (including possibly Zelda)
 bow_of_light_in_castle = false
-## Place items using logic that potentially requires glitches to complete
-glitched_logic = false
 ## Swordless Mode. Removes all Swords from the game. You will need the Net to play Tennis with Yuganon.
 swordless_mode = false
 
@@ -26,8 +26,13 @@ swordless_mode = false
 ## Causes performance issues on console.
 night_mode = false
 
+## Exclude a specific check from having progression items. A random junk item will be placed there instead.
+## Every check in the game has a *unique* name that can be placed here, consult a spoiler log for a complete list.
+## Remove the "#" before a check to uncomment it and make sure it's excluded, or place a "#" in front to include it
 [exclusions]
-'exclusions' = [
-#    'Great Rupee Fairy',
-#    'Thief Girl Cave'
+"exclusions" = [
+#   "Great Rupee Fairy",
+#   "Thief Girl Cave"
+#   "Master Sword Pedestal",
+#   "[LC] Zelda"
 ]

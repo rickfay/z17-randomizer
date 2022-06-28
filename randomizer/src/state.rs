@@ -16,7 +16,7 @@ impl<'settings> State<'settings> {
 
 
     pub fn glitched(&self) -> bool {
-        self.settings.logic.glitched_logic
+        false // todo remove this
     }
 
 

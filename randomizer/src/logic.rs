@@ -9,7 +9,7 @@ pub struct Logic {
     pub hard: Option<fn(&Progress) -> bool>,
     pub glitch_basic: Option<fn(&Progress) -> bool>,
     pub glitch_advanced: Option<fn(&Progress) -> bool>,
-    pub glitch_bees: Option<fn(&Progress) -> bool>,
+    pub glitch_hell: Option<fn(&Progress) -> bool>,
 }
 
 impl Logic {
@@ -17,13 +17,13 @@ impl Logic {
                hard: Option<fn(&Progress) -> bool>,
                glitch_basic: Option<fn(&Progress) -> bool>,
                glitch_advanced: Option<fn(&Progress) -> bool>,
-               glitch_bees: Option<fn(&Progress) -> bool>) -> Self {
+               glitch_hell: Option<fn(&Progress) -> bool>) -> Self {
         Self {
             normal,
             hard,
             glitch_basic,
             glitch_advanced,
-            glitch_bees,
+            glitch_hell,
         }
     }
 
@@ -35,7 +35,7 @@ impl Logic {
             Hard => Vec::from([self.normal, self.hard]),
             GlitchBasic => Vec::from([self.normal, self.hard, self.glitch_basic]),
             GlitchAdvanced => Vec::from([self.normal, self.hard, self.glitch_basic, self.glitch_advanced]),
-            GlitchBees => Vec::from([self.normal, self.hard, self.glitch_basic, self.glitch_advanced, self.glitch_bees]),
+            GlitchHell => Vec::from([self.normal, self.hard, self.glitch_basic, self.glitch_advanced, self.glitch_hell]),
             NoLogic => { return true; }
         } {
             if logic.is_some() && (logic.unwrap())(progress) {
@@ -52,7 +52,7 @@ impl Logic {
             hard: accessible(),
             glitch_basic: accessible(),
             glitch_advanced: accessible(),
-            glitch_bees: accessible(),
+            glitch_hell: accessible(),
         }
     }
 }

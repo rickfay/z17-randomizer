@@ -3332,13 +3332,13 @@ fn logic(normal: Option<fn(&Progress) -> bool>,
          hard: Option<fn(&Progress) -> bool>,
          glitch_basic: Option<fn(&Progress) -> bool>,
          glitch_advanced: Option<fn(&Progress) -> bool>,
-         glitch_bees: Option<fn(&Progress) -> bool>) -> Logic {
+         glitch_hell: Option<fn(&Progress) -> bool>) -> Logic {
     Logic {
         normal,
         hard,
         glitch_basic,
         glitch_advanced,
-        glitch_bees,
+        glitch_hell,
     }
 }
 
@@ -3347,10 +3347,10 @@ fn check(location_info: LocationInfo,
          hard: Option<fn(&Progress) -> bool>,
          glitch_basic: Option<fn(&Progress) -> bool>,
          glitch_advanced: Option<fn(&Progress) -> bool>,
-         glitch_bees: Option<fn(&Progress) -> bool>) -> Check {
+         glitch_hell: Option<fn(&Progress) -> bool>) -> Check {
     Check::new(
         location_info.name,
-        Logic::new(normal, hard, glitch_basic, glitch_advanced, glitch_bees),
+        Logic::new(normal, hard, glitch_basic, glitch_advanced, glitch_hell),
         None,
         Some(location_info),
     )
@@ -3366,8 +3366,8 @@ fn check_quest(name: &'static str,
                hard: Option<fn(&Progress) -> bool>,
                glitch_basic: Option<fn(&Progress) -> bool>,
                glitch_advanced: Option<fn(&Progress) -> bool>,
-               glitch_bees: Option<fn(&Progress) -> bool>) -> Check {
-    Check::new(name, Logic::new(normal, hard, glitch_basic, glitch_advanced, glitch_bees), Some(quest), None)
+               glitch_hell: Option<fn(&Progress) -> bool>) -> Check {
+    Check::new(name, Logic::new(normal, hard, glitch_basic, glitch_advanced, glitch_hell), Some(quest), None)
 }
 
 fn check_quest_free(name: &'static str, quest: FillerItem) -> Check {
@@ -3383,8 +3383,8 @@ fn path(default: Location, normal: Option<fn(&Progress) -> bool>,
         hard: Option<fn(&Progress) -> bool>,
         glitch_basic: Option<fn(&Progress) -> bool>,
         glitch_advanced: Option<fn(&Progress) -> bool>,
-        glitch_bees: Option<fn(&Progress) -> bool>) -> Path {
-    Path::new(default, Logic::new(normal, hard, glitch_basic, glitch_advanced, glitch_bees))
+        glitch_hell: Option<fn(&Progress) -> bool>) -> Path {
+    Path::new(default, Logic::new(normal, hard, glitch_basic, glitch_advanced, glitch_hell))
 }
 
 // TODO read destination from portal map

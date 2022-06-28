@@ -6,7 +6,7 @@ pub enum LogicMode {
     Hard,
     GlitchBasic,
     GlitchAdvanced,
-    GlitchBees,
+    GlitchHell,
     NoLogic,
 }
 
