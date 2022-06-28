@@ -2,8 +2,8 @@
 [logic]
 ## Logic Mode. Choose one of: "Normal", "Hard", "GlitchBasic", "GlitchAdvanced", "GlitchHell", or "NoLogic"
 mode = "Normal"
-## A Sword will be placed in Ravio's Shop
-sword_in_shop = false
+## Guarantees one of the following weapons will be placed in Ravio's Shop: Sword, Bow, Hammer, Fire Rod, Ice Rod, or Bombs
+assured_weapon = false
 ## The Bell will be placed in Ravio's Shop
 bell_in_shop = false
 ## The Pouch will be placed in Ravio's Shop
