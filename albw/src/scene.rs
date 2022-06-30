@@ -97,6 +97,10 @@ impl Obj {
         &mut self.arg
     }
 
+    pub fn set_clp(&mut self, clp: i16) {
+        self.clp = clp;
+    }
+
     pub fn srt_mut(&mut self) -> &mut Transform {
         &mut self.srt
     }

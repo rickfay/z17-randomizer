@@ -498,6 +498,10 @@ impl Progress {
             && self.has(SageImpa)
     }
 
+    pub fn has_opened_sanctuary_doors(&self) -> bool {
+        self.has(OpenSanctuaryDoors)
+    }
+
     pub fn can_get_potion(&self) -> bool {
         self.has_bottle() && self.has_either(AccessPotionShop, AccessMilkBar)
     }

@@ -790,8 +790,8 @@ pub fn plando() -> Result<(), Error> {
     layout.set(LocationInfo::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (1)"), RupeeGold);
     layout.set(LocationInfo::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (2)"), ItemSwordLv4);
     layout.set(LocationInfo::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (3)"), DashBoots);
-    layout.set(LocationInfo::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (4)"), ItemIceRodLv2);
-    layout.set(LocationInfo::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (5)"), ItemBombLv2);
+    layout.set(LocationInfo::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (4)"), ItemSwordLv4);
+    layout.set(LocationInfo::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (5)"), ItemKandelaar);
     layout.set(LocationInfo::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (6)"), LiverBlue);
     layout.set(LocationInfo::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (7)"), ItemBow);
     layout.set(LocationInfo::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (8)"), ItemMizukaki);
@@ -822,7 +822,7 @@ pub fn plando() -> Result<(), Error> {
     layout.set(LocationInfo::new(regions::hyrule::death::far_island::SUBREGION, "Floating Island"), RupeeGold);
 
     // Sanctuary
-    layout.set(LocationInfo::new(regions::hyrule::sanctuary::lobby::SUBREGION, "[HS] Entrance"), RupeeGold);
+    layout.set(LocationInfo::new(regions::hyrule::sanctuary::lobby::SUBREGION, "[HS] Entrance"), KeySmall);
     layout.set(LocationInfo::new(regions::hyrule::sanctuary::inside::SUBREGION, "[HS] Lower Chest"), RupeeGold);
     layout.set(LocationInfo::new(regions::hyrule::sanctuary::inside::SUBREGION, "[HS] Upper Chest"), RupeeGold);
     layout.set(LocationInfo::new(regions::hyrule::sanctuary::inside::SUBREGION, "[HS] Ledge"), RupeeGold);

@@ -141,12 +141,32 @@ pub fn apply(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
             [85].enable(), // Green Spear Soldier
             [86].enable(), // Green Spear Soldier
             [87].enable(), // Green Spear Soldier
+
+            [101].disable(), // Dampe
+            [102].disable(), // Seres
+            [133].active(1), // Close Church Door by default
+            [133].disable(Flag::Event(828)), // Church Door rigged to open when Sanc left switch pulled
+
             [144].disable(), // Buzz Blob
             [145].enable(), // Buzz Blob
             [146].enable(), // Buzz Blob
             [147].enable(), // Buzz Blob
+        },
 
-            [102].disable(), // Bye Seres
+        // Sanctuary Dungeon
+        CaveLight 18 {
+            [35].active(828), // Pull Switch
+            [37].inactive(828), // Door
+            [107].active(828), // TagCameraFocus
+            [107].disable(Flag::Event(828)), // TagCameraFocus
+        },
+
+        // Sanctuary Church
+        IndoorLight 11 {
+            [14].clear_enable_flag(), // Church Door
+            [14].disable(Flag::Event(828)), // Church Door
+            [16].disable(), // Early game Priest
+            [20].active(828),
         },
 
         // Graveyard

@@ -399,7 +399,8 @@ fn cutscenes<'game, 'settings>(
                 600, // Hilda ??? Text
                 620, // Hilda ??? Text
                 640, // Hilda ??? Text
-                829, // Respawn in Ravio's Shop after visiting Lorule. 828 and 830 do same thing?
+                // 828 // Seems (?) identical to 829/830. This flag is being repurposed to control the Sanctuary doors.
+                829, // Respawn in Ravio's Shop after visiting Lorule.
                 899, // Enable Quick Equip
                 902, // StreetPass Tree
                 906, // Monster Guts
