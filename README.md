@@ -32,6 +32,11 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
     - No Logic: Items are placed with no logic at all. Dungeon items are in their respective dungeons. Seeds may not be completable.
 
 
+- Sanctuary, Rewired
+  - The doors to the Sanctuary church are now closed at game start. They will open upon completing the Sanctuary dungeon, specifically when the left-side switch is pulled at the dungeon's end.
+  - This change effectively locks the Lorule Graveyard behind completing the Sanctuary, meaning players have a reason to collect the key, fight the miniboss, and actually finish the dungeon now.
+
+  
 - Ravio's Bracelet Changes
   - The second Bracelet has returned to the item pool, meaning you must find both before you can Merge.
   - The `start_with_bracelet` option has been deprecated. The option mostly existed to cover for the old filler algorithm's shortcomings, but now that those have been addressed the option is being retired.
