@@ -2,6 +2,8 @@
 
 A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [original ALBW Randomizer](https://gitlab.com/marsolk/albw-randomizer).
 
+<img src="cli/icon.ico" alt="icon" />
+
 ## Updates
 
 <details open="open">
