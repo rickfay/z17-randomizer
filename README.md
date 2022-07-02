@@ -17,19 +17,19 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
   - After a lot of remodelling, Hyrule Castle is open once again!
   - Defeating Yuga 2 awards a unique type of progression: Access to Lorule **without Ravio's Bracelet**. This makes it possible for the Bracelet or an item leading to Bracelet to spawn in the main area of Lorule, including the early portions of Thieves' Hideout and Swamp Palace.
   - To accomplish this, the north exit from the Yuga 2 boss fight has been redirected to drop Link into the Lorule Blacksmith. This door will remain open if the player needs to use it multiple times.
-  - Note 1: Climbing Hyrule Castle logically requires the Bow or the Ice Rod to kill the Red Spear soldier mergeless on 3F. It can also be done with Nice Bombs or Nice Tornado Rod, but those are considered out of logic.
-  - Note 2: If you need to return to Hyrule after reaching Lorule in this way, you need to death warp to return to Link's House. I'm exploring more *elegant* ways to do this in the future, but this is what we have for now.
+  - Note 1: Climbing Hyrule Castle logically requires the Bow or the Ice Rod to kill the Red Spear soldier mergeless on 3F. It can also be done with Nice Bombs (Hard Logic, see below), or the Nice Tornado Rod (not in any logic).
+  - Note 2: If you need to return to Hyrule after reaching Lorule in this way, you need to death warp to return to Link's House. We're exploring more *elegant* ways to do this in the future, but this is what we have for now.
   - Note 3: Swamp Palace was really not designed for the player to not have merge, with three rooms capable of softlocking the player if they unwittingly entered mergeless. To combat this, 2 doors that normally shut behind the player have been removed. Additionally, the crystal switch in the B1 north room that would normally divert the river has been removed, preventing a softlock that could otherwise occur (the switch was never needed, players could always bypass the river by merging).
 
 
 - New Logic Modes
   - The logic has been expanded into six (6) different modes. Hopefully there's something for everyone.
-    - Normal: Standard Gameplay, no tricky item use or glitches. If unsure, choose this.
-    - Hard: Tricks that aren't technically glitches included, lamp + net considered as weapons. No glitches.
-    - Glitched (Basic): Includes the above plus "basic", easy-to-learn glitches.
-    - Glitched (Advanced): Includes the above plus "advanced" glitches that may be a challenge to master.
-    - Glitched (Hell): Includes every known glitch, including the insane ones. Bee Badge not included. Do not choose this. DO NOT CHOOSE THIS.
-    - No Logic: Items are placed with no logic at all. Dungeon items are in their respective dungeons. Seeds may not be completable.
+    - <u>Normal</u>: Standard gameplay, no tricky item use or glitches. If unsure, choose this.
+    - <u>Hard</u>: Adds tricks that aren't technically glitches, lamp + net considered as weapons. No glitches.
+    - <u>Glitched (Basic)</u>: Includes the above plus "basic", easy-to-learn glitches.
+    - <u>Glitched (Advanced)</u>: Includes the above plus "advanced" glitches that may be a challenge to master.
+    - <u>Glitched (Hell)</u>: Includes every known RTA-viable glitch, including the insane ones. DO NOT CHOOSE THIS.
+    - <u>No Logic</u>: Items are placed with no logic at all. Seeds may not be completable.
 
 
 - Sanctuary, Rewired
@@ -56,7 +56,7 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
 
 - New Option: `assured_weapon`
   - Guarantees at least one weapon will be placed in Ravio's Shop
-    - Items include: Bow, Bombs, Fire Rod, Ice Rod, Hammer, or Sword (if not playing Swordless)
+    - Items include: Bow, Bombs, Fire Rod, Ice Rod, Hammer, Sword (if not playing Swordless), or Lamp/Net (if playing on Hard Logic or higher)
 
 
 - New Option: `bow_of_light_in_castle`
@@ -86,10 +86,6 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
     - _smoothed out_
     - (⌐■_■)
     - _YEAAAAHHHHHHHHHHH_
-
-
-- **FIXED:** Hyrule Castle Barrier
-  - The Barrier no longer mysteriously disappears after obtaining the Master Sword, instead you get to experience the joy tearing it down.
  
 
 - **FIXED:** Skull Woods Softlock

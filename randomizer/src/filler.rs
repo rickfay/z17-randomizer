@@ -97,6 +97,13 @@ fn preplace_items<'a>(check_map: &mut HashMap<&'a str, Option<FillerItem>>,
             weapons.append(&mut Vec::from([Sword01, Sword02, Sword03, Sword04]));
         }
 
+        match settings.logic.mode {
+            Normal => {}
+            _ => {
+                weapons.append(&mut Vec::from([Lamp01, Net01]));
+            }
+        }
+
         let weapon = *weapons.get(rng.gen_range(0..weapons.len())).unwrap();
 
         check_map.insert(shop_positions.remove(rng.gen_range(0..shop_positions.len())), Some(weapon));
