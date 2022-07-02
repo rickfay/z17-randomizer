@@ -3355,19 +3355,19 @@ fn location(name: &'static str, checks: Vec<Check>, paths: Vec<Path>) -> Locatio
     LocationNode::new(name, checks, paths)
 }
 
-fn logic(normal: Option<fn(&Progress) -> bool>,
-         hard: Option<fn(&Progress) -> bool>,
-         glitch_basic: Option<fn(&Progress) -> bool>,
-         glitch_advanced: Option<fn(&Progress) -> bool>,
-         glitch_hell: Option<fn(&Progress) -> bool>) -> Logic {
-    Logic {
-        normal,
-        hard,
-        glitch_basic,
-        glitch_advanced,
-        glitch_hell,
-    }
-}
+// fn logic(normal: Option<fn(&Progress) -> bool>,
+//          hard: Option<fn(&Progress) -> bool>,
+//          glitch_basic: Option<fn(&Progress) -> bool>,
+//          glitch_advanced: Option<fn(&Progress) -> bool>,
+//          glitch_hell: Option<fn(&Progress) -> bool>) -> Logic {
+//     Logic {
+//         normal,
+//         hard,
+//         glitch_basic,
+//         glitch_advanced,
+//         glitch_hell,
+//     }
+// }
 
 fn check(location_info: LocationInfo,
          normal: Option<fn(&Progress) -> bool>,

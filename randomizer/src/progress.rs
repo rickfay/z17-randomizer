@@ -307,17 +307,17 @@ impl Progress {
     //     self.has(GreatSpin)
     // }
 
-    pub fn can_cut_grass(&self) -> bool {
-        self.has_any(&[
-            Sword01, Sword02, Sword03, Sword04,
-            Boomerang01, Boomerang02,
-            Bombs01, Bombs02,
-            FireRod01, FireRod02,
-            IceRod01, IceRod02,
-            Lamp01, Lamp02,
-            PegasusBoots,
-        ])
-    }
+    // pub fn can_cut_grass(&self) -> bool {
+    //     self.has_any(&[
+    //         Sword01, Sword02, Sword03, Sword04,
+    //         Boomerang01, Boomerang02,
+    //         Bombs01, Bombs02,
+    //         FireRod01, FireRod02,
+    //         IceRod01, IceRod02,
+    //         Lamp01, Lamp02,
+    //         PegasusBoots,
+    //     ])
+    // }
 
     pub fn can_attack(&self) -> bool {
         self.has_any(&[
@@ -524,9 +524,9 @@ impl Progress {
 
     // Events ------------------------------------------------
 
-    pub fn has_opened_stylish_womans_house(&self) -> bool {
-        self.has(StylishWomansHouseOpen)
-    }
+    // pub fn has_opened_stylish_womans_house(&self) -> bool {
+    //     self.has(StylishWomansHouseOpen)
+    // }
 
     pub fn has_skull_eye_right(&self) -> bool {
         self.has(SkullEyeRight)

@@ -1,7 +1,7 @@
 use std::{
     error::Error as StdError,
     fmt::{self, Display, Formatter},
-    fs, io, iter,
+    fs, io,
     marker::PhantomData,
     path::{Path, PathBuf},
 };
@@ -57,10 +57,9 @@ pub struct System<P> {
 }
 
 impl<P> System<P> {
-    pub fn new<I>(presets: I) -> Result<Self>
+    pub fn new() -> Result<Self>
         where
             P: Serialize,
-            I: IntoIterator<Item=(&'static str, P)>,
     {
 
         // let config = PathBuf::from("");

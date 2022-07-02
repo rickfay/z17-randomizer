@@ -1,4 +1,4 @@
-use std::{array, collections::BTreeMap, error::Error as StdError, fs, fs::File, io};
+use std::{collections::BTreeMap, error::Error as StdError, fs, fs::File, io};
 use std::io::{stdin, stdout, Write};
 use std::path::Path;
 
@@ -549,7 +549,7 @@ impl<'settings> Spoiler<'settings> {
 
 /// Gets the system object for the platform.
 pub fn system() -> sys::Result<System<Settings>> {
-    System::new(array::IntoIter::new([]))
+    System::new()
 }
 
 #[cfg(test)]

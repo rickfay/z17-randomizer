@@ -8,7 +8,7 @@ pub struct LocationNode {
 }
 
 impl LocationNode {
-    pub fn new(name: &'static str, checks: Vec<Check>, paths: Vec<Path>) -> Self {
+    pub fn new(_name: &'static str, checks: Vec<Check>, paths: Vec<Path>) -> Self {
         Self { checks, paths }
     }
 
