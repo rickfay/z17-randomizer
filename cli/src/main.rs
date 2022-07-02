@@ -27,11 +27,11 @@ fn prompt_logic_mode() -> LogicMode
 {
     print!("\nChoose Logic Mode:\n");
     print!("[1] Normal              - Standard gameplay, no tricky item use or glitches. If unsure, choose this.\n");
-    print!("[2] Hard                - Tricks that aren't technically glitches included, lamp + net considered as weapons. No glitches.\n");
+    print!("[2] Hard                - Adds tricks that aren't technically glitches, lamp + net considered as weapons. No glitches.\n");
     print!("[3] Glitched (Basic)    - Includes the above plus \"basic\", easy-to-learn glitches.\n");
     print!("[4] Glitched (Advanced) - Includes the above plus \"advanced\" glitches that may be a challenge to master.\n");
-    print!("[5] Glitched (Hell)     - Includes every known glitch, including the insane ones. Bee Badge not included. Do not choose this. DO NOT CHOOSE THIS.\n");
-    print!("[6] No Logic            - Items are placed with no logic at all. Dungeon items are in their respective dungeons. Seeds may not be completable.\n");
+    print!("[5] Glitched (Hell)     - Includes every known RTA-viable glitch, including the insane ones. DO NOT CHOOSE THIS.\n");
+    print!("[6] No Logic            - Items are placed with no logic at all. Seeds may not be completable.\n");
 
     loop {
         print!("\nEnter a number 1-6: ");

@@ -2,6 +2,7 @@ use std::collections::HashSet;
 
 use crate::filler_item::FillerItem;
 use crate::filler_item::FillerItem::*;
+use crate::logic_mode::LogicMode;
 use crate::Settings;
 
 #[derive(Clone)]
@@ -116,7 +117,70 @@ impl Progress {
     }
 
     pub fn has_nice_bombs(&self) -> bool {
-        self.has_both(Bombs01, Bombs02) // TODO need to incorporate Maiamai checks
+        self.has_either(Bombs01, Bombs02) && self.can_get_10_maiamai()
+    }
+
+    // Dirty function to determine if 10 maiamai are available
+    // TODO put Maiamai into the world graph and calculate this dynamically
+    fn can_get_10_maiamai(&self) -> bool {
+
+        // Merge or Boots enable more than 10, easy logic if we have them
+        if self.can_merge() || self.has_boots() {
+            true
+        } else {
+
+            // 2 Maiamai initially available under bushes in Kakariko and Lost Woods
+            let mut maiamai = 2;
+
+            // Power Glove
+            if self.has_power_glove() {
+                maiamai += 3; // LW, DM West, Kak Rooftop. DM East needs Merge or Boots.
+
+                // Kakariko path to Lost Woods Maiamai
+                if self.has_hammer() || self.has_titans_mitt()
+                    || ((self.settings.logic.mode == LogicMode::GlitchBasic ||
+                    self.settings.logic.mode == LogicMode::GlitchAdvanced ||
+                    self.settings.logic.mode == LogicMode::GlitchHell)
+                    && (self.has_hookshot() || self.has_boomerang() && self.can_escape())) {
+                    maiamai += 1;
+                }
+            }
+
+            // Titan's Mitt
+            if self.has_titans_mitt() {
+                maiamai += 2; // Southern Ruins and Moldorm Cave Big Rocks. Others require Merge
+            }
+
+            // Sand Rod
+            if self.has_sand_rod() {
+                maiamai += 1;
+            }
+
+            // Tornado Rod
+            if self.has_tornado_rod() {
+                maiamai += 2;
+
+                // House of Gales Wind Tile
+                if self.has_flippers() || ((
+                    self.settings.logic.mode == LogicMode::GlitchAdvanced ||
+                        self.settings.logic.mode == LogicMode::GlitchHell) &&
+                    (self.has_hookshot() && self.has_ice_rod())) {
+                    maiamai += 1;
+                }
+            }
+
+            // Flippers - Not including Zora's Domain as that needs Merge or Bee Boost
+            if self.has_flippers() {
+                maiamai += 6;
+
+                // Southern Ruins bomb cave
+                if self.has_bombs() {
+                    maiamai += 1;
+                }
+            }
+
+            maiamai >= 10
+        }
     }
 
     pub fn has_fire_rod(&self) -> bool {
