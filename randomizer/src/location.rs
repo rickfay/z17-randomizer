@@ -175,8 +175,6 @@ pub enum Location {
     SwampPalaceAntechamber,
     SwampPalaceFoyer,
     SwampPalaceMain,
-    SwampPalacePostMiniboss,
-    SwampPalaceBoss,
 
     SkullWoodsFoyer,
     SkullWoodsMain,
