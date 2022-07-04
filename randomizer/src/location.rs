@@ -210,6 +210,7 @@ pub enum Location {
     DesertPalace1F,
     DesertPalace2F,
     DesertPalace3F,
+    DesertPalaceExit3F,
     ZaganagasArena,
     MiseryMireRewardBasket,
 

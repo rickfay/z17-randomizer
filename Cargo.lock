@@ -13,7 +13,7 @@ dependencies = [
 
 [[package]]
 name = "albw"
-version = "0.2.0"
+version = "0.1.0"
 dependencies = [
  "bytey",
  "csv",
@@ -141,7 +141,7 @@ dependencies = [
 
 [[package]]
 name = "cli"
-version = "0.2.0-nightly"
+version = "0.1.0"
 dependencies = [
  "albw",
  "crc",
@@ -439,7 +439,7 @@ dependencies = [
 
 [[package]]
 name = "randomizer"
-version = "0.2.0"
+version = "0.1.0"
 dependencies = [
  "albw",
  "crc",

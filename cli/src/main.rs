@@ -34,7 +34,7 @@ fn prompt_logic_mode() -> LogicMode
     print!("[6] No Logic            - Items are placed with no logic at all. Seeds may not be completable.\n");
 
     loop {
-        print!("\nEnter a number 1-6: ");
+        print!("\nEnter a number (1-6): ");
 
         stdout().flush().unwrap();
         let mut input = String::new();

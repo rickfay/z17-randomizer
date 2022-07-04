@@ -141,7 +141,7 @@ impl Progress {
                     || ((self.settings.logic.mode == LogicMode::GlitchBasic ||
                     self.settings.logic.mode == LogicMode::GlitchAdvanced ||
                     self.settings.logic.mode == LogicMode::GlitchHell)
-                    && (self.has_hookshot() || self.has_boomerang() && self.can_escape())) {
+                    && (self.has_hookshot() || (self.has_boomerang() && self.can_escape()))) {
                     maiamai += 1;
                 }
             }

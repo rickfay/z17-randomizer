@@ -33,6 +33,8 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
     - <u>Glitched (Hell)</u>: Includes every known RTA-viable glitch, including the insane ones. DO NOT CHOOSE THIS.
     - <u>No Logic</u>: Items are placed with no logic at all. Seeds may not be completable.
 
+  - A full breakdown of the new logic modes is located further down this page.
+
 
 - Sanctuary, Rewired
   - The doors to the Sanctuary church are now closed at game start. They will open upon completing the Sanctuary dungeon, specifically when the left-side switch is pulled at the dungeon's end.
@@ -71,6 +73,9 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
 
 
 - Letter in a Bottle pickup text has been removed
+
+
+- Great Rupee Fairy will now logically guarantee (at least) 3000 Rupees are available between placed Purples, Silvers, and Golds.
 
 
 - The randomizer will no longer generate a `Standard.toml` preset that overwrites itself. Instead, an `Example.toml` preset is provided to demonstrate the correct format, and you may modify or delete it ~~at your own peril.~~
@@ -181,7 +186,9 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
 
 ## Setup
 
-Download: [Latest Stable Release (v0.1.0)](https://github.com/rickfay/z17-randomizer/releases/download/v0.1.0/z17r-0.1.0.zip)
+- Download: [Latest \[BETA\] Release (v0.1.0)](https://github.com/rickfay/z17-randomizer/releases/download/v0.1.0/z17r-0.1.0.zip)
+
+- Download: [Latest \[STABLE\] Release (v0.0.4)](https://github.com/rickfay/z17-randomizer/releases/download/v0.0.4/z17r-0.0.4.zip)
 
 1. Unzip the download to your directory of choice.
 2. Move your A Link Between Worlds ROM into the same folder. Name it: `A Link Between Worlds (USA).3ds`
@@ -257,72 +264,132 @@ For Citra (emulator):
   - The Hyrule Castle Barrier will be torn down from game start, providing access to its checks and the Inside Hyrule Castle dungeon.
   - You will need the [Net to play Tennis with Yuganon](https://www.twitch.tv/videos/1265170513). Good luck finding it!
 
-## Glitched Logic Breakdown
+## Logic Breakdown
 
-The following tricks may potentially be required in a Glitched Logic seed:
+### Normal Logic
 
-- Lamp, Net, and Pegasus Boots are considered damage sources
-- Rosso Cave with Boomerang or Hookshot (not TRod + Shield)
-- Blacksmith Cave with Fire Rod or Nice Bombs
-- Reach Death Mountain with Power Glove Skip
-- Eastern Ruins Pegs with Boomerang or Hookshot or Tornado Rod (no Sand Rod)
-- Flipperless Message in a Bottle with Fire Rod or Nice Bombs
-- Access HoG with Fake Flippers or Ice Rod + Hookshot
-- Lost Woods Chest with Boomerang or Hookshot and a means of escape (FRod, Bombs, or Bell. No Crow)
-- Reverse Sanctuary (door is open after opening Gravestone, just need damage source to defeat Poes)
-- Flippers Treasure Dungeon tricks. Need either Titan's Mitt or Ice Rod to enter. Then either just Hookshot + Flippers OR simply the Nice Bombs. Nice Ice Rod and Great Spin not considered.
-- Zora's Waterfall Cave with the Crow Boost (FRod not needed)
-- Pegasus Boots Dungeon with just Master Sword, Bombs, or Boomerang (Nice Bow and Nice Ice Rod not considered)
-- Access Turtle Rock with Fake Flippers
-- Misery Mire HP without Sand Rod. With just Bombs (regular works with Vulture boosting) or FRod + Boots
-- Eastern Palace
-  - Left entrance chest with a thrown Pot
-  - 4 Switches Room with thrown Pots
-  - Bombs or Ice Rod to activate switch opening path to Boss Door early
-  - TRod Armos Boost to get to Boss Key or Boss room without the appropriate key
-- House of Gales
-  - 2F Fire Ring Key using HoG Skip Skip to do 2F backwards if key missing (incredibly specific, unlikely)
-  - Skip Skip Skip to reach 3F without keys
-- Tower of Hera
-  - Bomb Rods can be used to climb the tower without any keys
-- Swamp Palace
-  - Early access to 1F SW/SE rooms with Ice Rod to raise water level
-  - Miniboss Skips with Ice Rod/Tornado Rod or Boots
-  - Early Big Chest with Ice Rod or Boots
-  - Big Key Skip with Ice Rod and Tornado Rod
-- Thieves' Hideout
-  - Flipperless Thieves using TRod + a way to hit the switch (IRod or Bombs, no sword beams)
-    - Softlock chest behind wall NOT in logic unless you can also get Bombs or Fire Rod (but really, bring a Scoot Fruit)
-    - Big Key chest accessible, Boots made available
-- Ice Ruins
-  - All dungeon checks accessible without keys if you have Boots. The ones behind B1 locked doors also require Tornado Rod.
-- Desert Palace
-  - Reverse DP means keys can show up anywhere in the dungeon if you have Fire Rod or Nice Bombs
-- Turtle Rock
-  - Big Key Skip using a Bomb Rod
-- Lorule Castle
-  - Lamp Trial doesn't need the Lamp
+This is the standard logic mode and is recommended for new and casual players.
 
-  
-Mergeless Tricks:
-- Behind Blacksmith with Fire Rod or Nice Bombs
-- Death Mountain climb
-- DM Fairy Cave with Fire Rod or Nice Bombs
-- Bouldering Guy with TRod + Boots
-- Access Eastern Ruins with just Power Glove
-- Eastern Ruins Merge Chest with TRod, FRod, or Nice Bombs
-- Lost Woods Alcove with Boomerang or Hookshot and a means of escape (FRod, Bombs, or Bell. No Crow)
-- House of Gales TRod onto moving block in 1F East Room (if key logic allows access)
-- Mergeless Hera with Bombs and Sword to bypass lobby. TRod needed for floors higher than 3F
+- Includes:
+  - Standard gameplay
+  - No glitches
+  - No obscure tricks
 
+### Hard Logic
 
-Fake Flippers requires Pegasus Boots and either Fire Rod or Nice Bombs
+This mode is recommended for players who have played the game before and are familiar with its mechanics. This is still a glitch-free mode, but the logic may require players to perform actions or use items in obscure, non-obvious ways to reach checks.
 
+- Includes:
+  - Using the Lamp or Net as weapons (they deal 1/2 the damage of the Forgotten Sword)
+  - Completing the Boots Dungeon with either Bombs, Boomerang, or Sword Beams
+  - Entering Eastern Ruins with Power Glove
+  - Entering the Vacant House rear with the Bomb Flower
+  - Hyrule Hotfoot with Merge + Bell
+  - Jumping into the Kakariko Well with a Cucco
+  - Reaching the Misery Mire Ledge with Stamina Scroll + Bombs
+  - Southern Ruins Treasure Dungeon
+    - Flippers, Hookshot, and either Bombs or Master Sword to hit the Boomerang switch
+  - Eastern Palace:
+    - Using Sword Beams or thrown Pots to activate switches
+    - Skipping a Small Key with either bombs or the Ice Rod
+  - House of Gales:
+    - Using the Tornado Rod to jump on moving blocks to reach 2F without merge
+    - Deathwarping from NE room on 1F without merge
+  - Swamp Palace:
+    - Precise Bow Shot to bypass River Room without merge
+    - Access 1F Big Chest without extinguishing flames
+  - Desert Palace:
+    - Run past Armos on 3F
+  - Turtle Rock
+    - Hit the B1 crystal Switch with a thrown skull
+  - Lorule Castle
+    - Play Tennis with Yuganon using the Net
 
-Some notes about Nice Bombs:
-  - Glitched logic *DOES* guarantee at least 10 Maiamai will be available for any checks requiring Nice Bombs
-  - The logic guarantees Nice Bombs are obtainable for any Bomb Rods or Lemon Boosts
-  - If you spend your Maiamai on anything other than Nice Bombs, you may potentially doom your seed. Regular Bomb boosts may save you, but if progression is on Southern Ruins Treasure Dungeon with Nice Bombs there's no salvaging it. YOU HAVE BEEN WARNED.
+### Glitched (Basic) Logic
+
+This mode is intended for players who want to use some of the game's many glitches, but not the hard ones.
+
+<u>Note</u>: You are expected to spend your first 10 Maiamai on Nice Bombs for all Glitched Logic seeds due to the many glitches they enable. Failure to do so could make your seed much harder or potentially even impossible to complete.
+
+- Includes:
+  - Armos Boost to reach:
+    - Eastern Ruins merge chest
+  - Bird Boost to reach Waterfall Cave
+  - Fire Rod or Lemon Boosts to get onto small ledges
+  - Enemy Clips
+  - Reaching the Misery Mire Ledge with Nice Bombs or Fire Rod with either Boots or regular Bombs
+  - Southern Ruins Treasure Dungeon Flipperless w/ Nice Bombs
+  - House of Gales:
+    - Skip Skip to do 2F in reverse
+    - Skip Skip Skip to reach 3F
+  - Swamp Palace:
+    - Miniboss Skip with Pegasus Boots
+  - Thieves' Hideout:
+    - Jailbreak to activate switches and reach B2 without merge
+  - Desert Palace
+    - Defeat Zaganaga with just Bow or just Sword Beams
+
+### Glitched (Advanced) Logic
+
+This mode is for experienced players who are comfortable with this game's harder, more involved glitches. 
+
+<u>Note</u>: You are expected to spend your first 10 Maiamai on Nice Bombs for all Glitched Logic seeds due to the many glitches they enable. Failure to do so could make your seed much harder or potentially even impossible to complete.
+
+- Includes:
+  - Entering Southern Ruins Treasure Dungeon with just Ice Rod
+  - Desert Palace Skip
+    - Skip Desert with Ice Rod + Tornado Rod
+    - OoB with Fire Rod or Nice Bombs
+    - Zaganaga Skip with Pegasus Boots
+    - Reverse Desert Palace
+  - Fake Flipper Tricks
+  - Flipperless House of Gales with Hookshot/Ice Rod
+  - Enemy clips to reach Lost Woods checks without escape items (must use Crows instead)
+  - Reaching the Misery Mire Ledge with Regular Bombs + Vulture Boost
+  - Shield Rod Clips
+  - Tornado Rod Enemy Clip to reach Eastern Ruins Peg Circle
+  - Eastern Palace
+    - Armos Boost to skip the Boss Key and a Small Key
+  - Tower of Hera
+    - Bombrods
+    - Mergeless strategy
+  - Swamp Palace
+    - Ice Rod Clipping to skip merge requirements and raise/lower water levels
+    - Ice Rod + Tornado Rod to skip dungeon entirely
+  - Thieves' Hideout
+    - Flipperless Thieves strategies with Tornado Rod + either Bombs or Ice Rod
+      - Note: B1 Behind the Wall chest and the B1 Big Chest are reachable but excluded from this, due to the repetitive nature of the trick
+    - Reach miniboss and/or B2 jail cell without merge
+  - Ice Ruins
+    - Get Out of Bounds with Pegasus Boots to:
+      - Skip entire dungeon
+      - Scroll Skip
+      - Small Key skip with Tornado Rod
+    - Desert Palace
+      - Reverse Desert Palace with Fire Rod or Nice Bombs
+      - Armos Boost to skip West 2F
+
+### Glitched (Hell) Logic
+
+This mode logically includes every known RTA-viable glitch, including those that are wildly inconsistent and inconsiderate of a player's time. It is not recommended for anyone, other than those seeking a challenge.
+
+<u>Note</u>: You are expected to spend your first 10 Maiamai on Nice Bombs for all Glitched Logic seeds due to the many glitches they enable. Failure to do so could make your seed potentially impossible to complete.
+
+- Includes:
+  - Bee Boost Tricks
+  - Defeating Yuga 1 with just Sword Beams or just Ice Rod
+  - Fake Flippers via Bee Boosting
+  - Catching a natural Golden Bee before Lorule with Bottle + Net
+  - Regular Bomb Boost to reach:
+    - Eastern Ruins merge chest
+  - Sand Rod Enemy Clip to reach:
+    - Eastern Ruins Peg Circle
+    - Rosso Cave
+  - Desert Palace Skip via Portal Clipping with Hookshot/Boomerang + Tornado Rod
+
+### No Logic
+
+It's all in the name: no logic is used to place items at all. Dungeon items are in their respective dungeons due to technical limitations, but otherwise any item could show up anywhere. Seeds are not guaranteed to be completable.
 
 ## Known Issues
 
