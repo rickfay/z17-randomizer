@@ -348,6 +348,8 @@ This mode is for experienced players who are comfortable with this game's harder
   - Reaching the Misery Mire Ledge with Regular Bombs + Vulture Boost
   - Shield Rod Clips
   - Tornado Rod Enemy Clip to reach Eastern Ruins Peg Circle
+  - Mergeless Death Mountain Climb
+    - Logic will guarantee either Blue Mail or a Bottle (for potions) is available
   - Eastern Palace
     - Armos Boost to skip the Boss Key and a Small Key
   - Tower of Hera
