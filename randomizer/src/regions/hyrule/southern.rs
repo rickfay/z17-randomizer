@@ -10,10 +10,10 @@ crate::region! {
                 (p.can_lift_big() && p.can_swim() && p.can_hookshot() && p.can_boomerang())
                 || (p.glitched() && ((p.can_lift_big() || p.can_ice_rod()) && ((p.can_hookshot() && p.can_swim()) || p.nice_bombs())))
                 },
-            "Ledge": RupeeSilver @Chest(33[320]) :- can_merge,
+            "Southern Ruins Ledge": RupeeSilver @Chest(33[320]) :- can_merge,
         ],
         paths: [
-            lorule::misery::mire :- lorule,
+            lorule::misery::mire :- can_merge,
         ],
     },
 }

@@ -166,6 +166,7 @@ pub fn create(patcher: &Patcher) -> Code {
     bracelet(&mut code);
     ore_progress(&mut code);
     merchant(&mut code);
+
     // fix castle barrier?
     let master_sword_flag = code.text().define([
         ldr(R0, EVENT_FLAG_PTR),
@@ -177,6 +178,7 @@ pub fn create(patcher: &Patcher) -> Code {
         pop([R4, R5, R6, PC]),
     ]);
     code.patch(0x344E50, [b(master_sword_flag)]);
+
     // don't lose Bow of Light on defeat
     code.patch(0x502DD8, [mov(R0, R0)]);
     // blacksmith
@@ -346,24 +348,24 @@ fn progressive_items(code: &mut Code) {
         ])
     };*/
     let progressive_bracelet = //if settings.items.first_bracelet.is_skipped() {
+        // code.text().define([
+        //     cmp(R5, 0x2A),
+        //     cmp(R5, 0x2B).ne(),
+        //     b(progressive_sword).ne(),
+        //     mov(R5, 0x2B),
+        //     b(return_label),
+        // ]);
+    // } else {
         code.text().define([
             cmp(R5, 0x2A),
             cmp(R5, 0x2B).ne(),
             b(progressive_sword).ne(),
-            mov(R5, 0x2B),
+            ldr(R0, (R0, 0x490)),
+            cmp(R0, 0),
+            mov(R5, 0x2A).eq(),
+            mov(R5, 0x2B).ne(),
             b(return_label),
         ]);
-    // } else {
-    //     code.text().define([
-    //         cmp(R5, 0x2A),
-    //         cmp(R5, 0x2B).ne(),
-    //         b(progressive_sword).ne(),
-    //         ldr(R0, (R0, 0x490)),
-    //         cmp(R0, 0),
-    //         mov(R5, 0x2A).eq(),
-    //         mov(R5, 0x2B).ne(),
-    //         b(return_label),
-    //     ])
     // };
     let progressive_glove = code.text().define([
         cmp(R5, 0x2F),

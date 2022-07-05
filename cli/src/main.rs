@@ -3,10 +3,11 @@ use std::io::{stdin, stdout, Read, Write};
 use std::path::Path;
 use log::{error, info};
 
-use randomizer::{Seed, Generator, Settings, plando};
+use randomizer::{Seed, Settings, plando, filler_new};
 use simplelog::{LevelFilter, SimpleLogger};
 use structopt::StructOpt;
 use albw::Game;
+use randomizer::logic_mode::LogicMode;
 use randomizer::settings::Logic;
 use sys::Paths;
 
@@ -20,6 +21,39 @@ struct Opt {
     no_patch: bool,
     #[structopt(long)]
     no_spoiler: bool,
+}
+
+fn prompt_logic_mode() -> LogicMode
+{
+    print!("\nChoose Logic Mode:\n");
+    print!("[1] Normal              - Standard gameplay, no tricky item use or glitches. If unsure, choose this.\n");
+    print!("[2] Hard                - Adds tricks that aren't technically glitches, lamp + net considered as weapons. No glitches.\n");
+    print!("[3] Glitched (Basic)    - Includes the above plus \"basic\", easy-to-learn glitches.\n");
+    print!("[4] Glitched (Advanced) - Includes the above plus \"advanced\" glitches that may be a challenge to master.\n");
+    print!("[5] Glitched (Hell)     - Includes every known RTA-viable glitch, including the insane ones. DO NOT CHOOSE THIS.\n");
+    print!("[6] No Logic            - Items are placed with no logic at all. Seeds may not be completable.\n");
+
+    loop {
+        print!("\nEnter a number (1-6): ");
+
+        stdout().flush().unwrap();
+        let mut input = String::new();
+        stdin().read_line(&mut input).unwrap();
+        input = input.trim().to_string();
+
+        return match input.as_str() {
+            "1" => LogicMode::Normal,
+            "2" => LogicMode::Hard,
+            "3" => LogicMode::GlitchBasic,
+            "4" => LogicMode::GlitchAdvanced,
+            "5" => LogicMode::GlitchHell,
+            "6" => LogicMode::NoLogic,
+            _ => {
+                eprintln!("\nPlease enter either 1, 2, 3, 4, 5, or 6");
+                continue;
+            }
+        }
+    }
 }
 
 fn prompt_until_bool(prompt: &str) -> bool
@@ -79,14 +113,19 @@ fn preset_ui() -> Settings {
     info!("No preset has been specified. Seed Options UI will be used instead.\n");
     println!("--- Seed Options ---");
 
-    let start_with_bracelet = prompt_until_bool("Start with Ravio's Bracelet?");
-    let bell_in_shop = prompt_until_bool("Place Bell in Ravio's Shop?");
-    let pouch_in_shop = prompt_until_bool("Place Pouch in Ravio's Shop?");
-    let boots_in_shop = prompt_until_bool("Place Pegasus Boots in Ravio's Shop?");
+    let mode = prompt_logic_mode();
+
+    //let start_with_bracelet = prompt_until_bool("Start with Ravio's Bracelet?");
+    let assured_weapon = prompt_until_bool("Guarantee a Weapon is placed in Ravio's Shop?");
+    let bell_in_shop = prompt_until_bool("Guarantee Bell in Ravio's Shop?");
+    let pouch_in_shop = prompt_until_bool("Guarantee Pouch in Ravio's Shop?");
+    let boots_in_shop = prompt_until_bool("Guarantee Pegasus Boots in Ravio's Shop?");
+
     let super_items = prompt_until_bool("Include the Super Lamp and Super Net?");
     let minigames_excluded = prompt_until_bool("Exclude all minigames?");
     let skip_trials = prompt_until_bool("Skip the Lorule Castle Trials?");
-    let glitched_logic = prompt_until_bool("Use Glitched Logic? (advanced)");
+    let bow_of_light_in_castle = prompt_until_bool("Guarantee Bow of Light in Lorule Castle?");
+    //let glitched_logic = prompt_until_bool("Use Glitched Logic? (advanced)");
     let swordless_mode = prompt_until_bool("Play in Swordless Mode? (advanced)");
 
     println!();
@@ -94,13 +133,15 @@ fn preset_ui() -> Settings {
 
     Settings {
         logic: Logic {
+            mode,
             bell_in_shop,
             pouch_in_shop,
+            assured_weapon,
             boots_in_shop,
             super_items,
-            glitched_logic,
-            start_with_bracelet,
+            //glitched_logic,
             minigames_excluded,
+            bow_of_light_in_castle,
             swordless_mode,
             skip_trials,
             ..Default::default()
@@ -123,7 +164,7 @@ fn main() -> randomizer::Result<()> {
 
     info!("Initializing Z17 Randomizer...");
 
-    let is_plando = false;
+    let is_plando = false; // TODO expose this eventually so people can make their own, for now it's for testing
 
     if is_plando {
         plando()
@@ -142,12 +183,13 @@ fn main() -> randomizer::Result<()> {
         for x in 0..max_retries {
             let seed = opt.seed.unwrap_or_else(rand::random);
 
+
             info!("Attempt:                        #{}", x + 1);
             info!("Preset:                         {}", opt.preset.as_ref().unwrap_or(&String::from("<None>")));
-            info!("Version:                        0.0.4");
+            info!("Version:                        0.1.0");
 
-            let randomizer = Generator::new(&preset, seed);
-            let spoiler = panic::catch_unwind(|| randomizer.randomize());
+            //let randomizer = Generator::new(&preset, seed);
+            let spoiler = panic::catch_unwind(|| filler_new(&preset, seed));
 
             if spoiler.is_ok() {
                 println!();

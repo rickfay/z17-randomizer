@@ -1,9 +1,13 @@
 [package]
 name = "cli"
-version = "0.2.0-nightly"
-authors = ["Kevin Marsolais <kevin@kevinmarsolais.co>"]
-edition = "2018"
+version = "0.1.0"
+authors = ["Kevin Marsolais <kevin@kevinmarsolais.co>", "Rich Fay <therichfay@gmail.com>"]
+edition = "2021"
 license = "GPL-2.0-or-later"
+build = "build.rs"
+
+[build-dependencies]
+winres = "0.1"
 
 [dependencies]
 albw = { path = "../albw" }
@@ -11,7 +15,7 @@ crc = "1.8.1"
 log = "0.4.14"
 rand = "0.8.3"
 randomizer = { path = "../randomizer" }
-simplelog = "0.10.0"
+simplelog = "0.12.0"
 structopt = "0.3.21"
 sys = { path = "../sys" }
 

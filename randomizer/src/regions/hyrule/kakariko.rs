@@ -15,7 +15,7 @@ crate::region! {
         locations: [
             "Merchant (Left)": ItemBottle @Shop(Merchant(0)),
             "Bee Guy": ItemInsectNet @Event(IndoorLight/FieldLight_18_InsectNet[0xB]) :- has_bottle,
-            "Bee Guy (Golden Bee)": BadgeBee @Event(IndoorLight/FieldLight_18_InsectNet[0x1F]) :- {|s| s.has_bottle() && s.lorule()}, // Always require Golden Bee dude, don't care
+            "Bee Guy (Golden Bee)": BadgeBee @Event(IndoorLight/FieldLight_18_InsectNet[0x1F]) :- {|s| s.has_bottle() && s.can_merge()}, // Always require Golden Bee dude, don't care
             "Fortune Teller": HintGlasses @Event(IndoorLight/FieldLight_11_FortuneGirl[4]),
             "Milk Bar Owner": MilkMatured @Event(IndoorLight/FieldLight_18_MilkbarMaster[5]) :- has_message,
             "Cucco Ranch": HeartPiece @Event(FieldLight_29_Kokko[0x67]),

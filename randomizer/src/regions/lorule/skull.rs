@@ -3,16 +3,16 @@ crate::region! {
     name: "Skull Woods",
     woods {
         locations: [
-            "Alcove": HeartPiece @Heart(16[124]) :- can_merge,
-            "Balcony": HeartPiece @Heart(2[144]),
+            "Canyon House": HeartPiece @Heart(16[124]) :- can_merge,
+            "Cucco Shack": HeartPiece @Heart(2[144]),
         ],
         paths: [
-            dungeons::skull::palace,
+            dungeons::skull::palace :- can_lamp,
         ],
     },
     chest {
         locations: [
-            "Chest": ItemKandelaarLv2 @Chest(1[515]),
+            "Skull Woods Outdoor Chest": ItemKandelaarLv2 @Chest(1[515]),
         ],
     },
 }

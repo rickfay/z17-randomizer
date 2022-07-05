@@ -4,12 +4,12 @@ crate::region! {
     ruins {
         paths: [
             hill :- {|p| p.can_use_projectile() || p.can_merge() || (p.glitched() && p.can_lift())},
-            lorule::dark::ruins :- lorule,
+            lorule::dark::ruins :- can_merge,
         ],
     },
     hill {
         locations: [
-            "Treasure Room": RupeeSilver @Chest(AttractionLight 1[4]) :- can_merge,
+            "Merge Treasure Dungeon": RupeeSilver @Chest(AttractionLight 1[4]) :- can_merge,
             "Armos Chest": RupeeR @Chest(20[106]),
             "Hookshot Chest": RupeeR @Chest(20[111]) :- can_hookshot,
             "Merge Chest": RupeeSilver @Chest(20[107]) :- {|p| p.can_merge() || (p.glitched() && (p.can_tornado_rod() || p.can_ledge_boost()))},

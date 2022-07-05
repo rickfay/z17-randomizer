@@ -1,0 +1,38 @@
+## Modifications to logic.
+[logic]
+## Logic Mode. Choose one of: "Normal", "Hard", "GlitchBasic", "GlitchAdvanced", "GlitchHell", or "NoLogic"
+mode = "Normal"
+## Guarantees one of the following weapons will be placed in Ravio's Shop: Sword, Bow, Hammer, Fire Rod, Ice Rod, or Bombs
+assured_weapon = false
+## The Bell will be placed in Ravio's Shop
+bell_in_shop = false
+## The Pouch will be placed in Ravio's Shop
+pouch_in_shop = false
+## The Pegasus Boots will be placed in Ravio's Shop
+boots_in_shop = false
+## Include the Super Lamp and Super Net in the shuffled item pool
+super_items = false
+## Exclude all minigames (Cucco Ranch, both Rupee Rushes, Hyrule Hotfoot, Treacherous Tower, and Octoball Derby)
+minigames_excluded = false
+## Skip the Trials in Lorule Castle
+skip_trials = false
+## Guarantees the Bow of Light will be placed *somewhere* in Lorule Castle (including possibly Zelda)
+bow_of_light_in_castle = false
+## Swordless Mode. Removes all Swords from the game. You will need the Net to play Tennis with Yuganon.
+swordless_mode = false
+
+[options]
+## Experimental option to change Hyrule's lighting until you visit Lorule for the first time.
+## Causes performance issues on console.
+night_mode = false
+
+## Exclude a specific check from having progression items. A random junk item will be placed there instead.
+## Every check in the game has a *unique* name that can be placed here, consult a spoiler log for a complete list.
+## Remove the "#" before a check to uncomment it and make sure it's excluded, or place a "#" in front to include it
+[exclusions]
+"exclusions" = [
+#   "Great Rupee Fairy",
+#   "Thief Girl Cave"
+#   "Master Sword Pedestal",
+#   "[LC] Zelda"
+]

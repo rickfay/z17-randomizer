@@ -97,6 +97,10 @@ impl Obj {
         &mut self.arg
     }
 
+    pub fn set_clp(&mut self, clp: i16) {
+        self.clp = clp;
+    }
+
     pub fn srt_mut(&mut self) -> &mut Transform {
         &mut self.srt
     }
@@ -129,8 +133,14 @@ impl Obj {
         &mut self.flg
     }
 
-    pub fn set_enable_flag(&mut self, flag: Flag) {
-        let (kind, flag) = flag.into_pair();
+    pub fn set_enable_flag<F>(&mut self, flag: F)
+        where
+            F: Into<Option<Flag>>,
+    {
+        let (kind, flag) = match flag.into() {
+            Some(flag) => flag.into_pair(),
+            None => (0, 0),
+        };
         self.flg.0 = kind;
         self.flg.2 = flag;
     }
@@ -159,6 +169,16 @@ impl Obj {
         self.flg.3 = 1;
     }
 
+    pub fn clear_enable_flag(&mut self) {
+        self.flg.0 = 0;
+        self.flg.2 = 0;
+    }
+
+    pub fn clear_disable_flag(&mut self) {
+        self.flg.1 = 0;
+        self.flg.3 = 0;
+    }
+
     pub fn set_id(&mut self, id: i16) {
         self.id = id;
     }
@@ -167,6 +187,12 @@ impl Obj {
         self.srt.translate.x = x;
         self.srt.translate.y = y;
         self.srt.translate.z = z;
+    }
+
+    pub fn redirect(&mut self, spawn_point: i32, scene: i32, scene_index: i32) {
+        self.arg.0 = spawn_point;
+        self.arg.10 = scene;
+        self.arg.11 = scene_index;
     }
 }
 

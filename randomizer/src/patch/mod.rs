@@ -117,9 +117,9 @@ impl Patcher {
             Patch::Key { course, scene, unq } => {
                 self.parse_args(course, scene, unq).1 = item as i32;
             }
-            Patch::Maiamai { course, scene, unq } => {
-                self.parse_args(course, scene, unq).2 = item as i32;
-            }
+            // Patch::Maiamai { course, scene, unq } => {
+            //     self.parse_args(course, scene, unq).2 = item as i32;
+            // }
             Patch::Event {
                 course,
                 name,
@@ -148,11 +148,11 @@ impl Patcher {
             Patch::Shop(Shop::Merchant(index)) => {
                 self.merchant[index as usize] = item;
             }
-            Patch::Multi(patches) => {
-                for patch in patches {
-                    self.apply(patch, item)?;
-                }
-            }
+            // Patch::Multi(patches) => {
+            //     for patch in patches {
+            //         self.apply(patch, item)?;
+            //     }
+            // }
             Patch::None => {}
         }
         Ok(())
@@ -258,13 +258,13 @@ pub enum Patch {
         scene: u16,
         unq: u16,
     },
-    Maiamai {
-        course: course::Id,
-        scene: u16,
-        unq: u16,
-    },
+    // Maiamai {
+    //     course: course::Id,
+    //     scene: u16,
+    //     unq: u16,
+    // },
     Shop(Shop),
-    Multi(Vec<Patch>),
+    // Multi(Vec<Patch>),
     None, // Workaround until everything is shufflable
 }
 
@@ -369,6 +369,7 @@ fn cutscenes<'game, 'settings>(
                 84, // Enable Dampe + Seres conversation
                 107, // Spawn enemies
                 110, // Post Sanctuary
+                131, // Suppress Ravio's Gift
                 210, // Skip Thanks item
                 222, 223, // Skip Hyrule Castle events
                 224, // Skip Zelda dialogue
@@ -380,6 +381,7 @@ fn cutscenes<'game, 'settings>(
                 236, // Enable Stamina bar
                 239, // Ravio Sign Trigger
                 241, // Skip Osfala intro
+                246, // Skip Irene, make Hyrule Hotfoot appear, spawns certain enemies
                 248, // Skip Yuga killing Osfala
                 315, // Shop open???
                 320, // Shady Guy Trigger
@@ -390,13 +392,15 @@ fn cutscenes<'game, 'settings>(
                 522, // Hilda Blacksmith Text + get Map Swap icon on lower screen
                 523, // Hilda Graveyard Text
                 524, // Hilda ??? Text
-                525, // Skip Sahasrahla outside Link's House
+                525, // Skip Sahasrahla outside Link's House, make Hyrule Hotfoot appear
                 542, 543, // Skip Bomb-Shop Man dialogue
                 560, // Hilda ??? Text
                 599, // Disable Sand Rod return
                 600, // Hilda ??? Text
                 620, // Hilda ??? Text
                 640, // Hilda ??? Text
+                // 828 // Seems (?) identical to 829/830. This flag is being repurposed to control the Sanctuary doors.
+                829, // Respawn in Ravio's Shop after visiting Lorule.
                 899, // Enable Quick Equip
                 902, // StreetPass Tree
                 906, // Monster Guts
@@ -405,15 +409,14 @@ fn cutscenes<'game, 'settings>(
                 920, // Link's House Weather Vane
                 940, // Vacant House Weather Vane
                 950, // Maiamai
-                //955, // Master Ore UI
                 960, // Blacksmith's Wife
                 965, // Suppress Energy Potion
             ]) {
                 opening.add_event_flag(flag);
             }
 
-            if !logic.start_with_bracelet {
-                opening.add_event_flag(131); // Suppress Bow Slot Item gift
+            if logic.swordless_mode {
+                opening.add_event_flag(410); // Tear down Barrier in Swordless Mode
             }
 
             if options.night_mode {

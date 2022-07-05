@@ -3,7 +3,7 @@ crate::region! {
     name: "Lorule Lake",
     lorule {
         locations: [
-            "Chest": RupeeSilver @Chest(28[53]),
+            "Lorule Lake NW Chest": RupeeSilver @Chest(28[53]),
         ],
         paths: [
             dungeons::turtle::rock :- {|p| p.can_ice_rod() && (p.can_swim() || (p.glitched() && p.fake_flippers()))},
@@ -11,7 +11,7 @@ crate::region! {
     },
     balcony {
         locations: [
-            "Balcony": HeartPiece @Heart(35[54]),
+            "Turtle Rock Left Balcony": HeartPiece @Heart(35[54]),
         ],
     },
 }

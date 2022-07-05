@@ -2,9 +2,114 @@
 
 A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [original ALBW Randomizer](https://gitlab.com/marsolk/albw-randomizer).
 
+<img src="cli/icon.ico" alt="icon" />
+
 ## Updates
 
 <details open="open">
+<summary>Version 0.1.0</summary>
+
+- New Filler Algorithm:
+  - This has been a long time coming :)
+  - The filler has been completely rewritten using an **Assumed Fill** algorithm. The old algorithm had a tendency to front-load progression items in the Overworld (often just Hyrule's), and very rarely put anything noteworthy in dungeons. This new algorithm fixes those problems and produces interesting "logic chains" with a much higher frequency.
+  - The vanilla Bow of Light issue has been solved once and for all! The new filler has no biases towards Zelda, and excluding her prevents her from having any progression at all.
+
+
+- Hyrule Castle + "Yuga Seeds"
+  - After a lot of remodelling, Hyrule Castle is open once again!
+  - Defeating Yuga 2 awards a unique type of progression: Access to Lorule **without Ravio's Bracelet**. This makes it possible for the Bracelet or an item leading to Bracelet to spawn in the main area of Lorule, including the early portions of Thieves' Hideout and Swamp Palace.
+  - To accomplish this, the north exit from the Yuga 2 boss fight has been redirected to drop Link into the Lorule Blacksmith. This door will remain open if the player needs to use it multiple times.
+  - Note 1: Climbing Hyrule Castle logically requires the Bow or the Ice Rod to kill the Red Spear soldier mergeless on 3F. It can also be done with Nice Bombs (Hard Logic, see below), or the Nice Tornado Rod (not in any logic).
+  - Note 2: If you need to return to Hyrule after reaching Lorule in this way, you need to death warp to return to Link's House. We're exploring more *elegant* ways to do this in the future, but this is what we have for now.
+  - Note 3: Swamp Palace was really not designed for the player to not have merge, with three rooms capable of softlocking the player if they unwittingly entered mergeless. To combat this, 2 doors that normally shut behind the player have been removed. Additionally, the crystal switch in the B1 north room that would normally divert the river has been removed, preventing a softlock that could otherwise occur (the switch was never needed, players could always bypass the river by merging).
+
+
+- New Logic Modes
+  - The logic has been expanded into six (6) different modes. Hopefully there's something for everyone.
+    - <u>Normal</u>: Standard gameplay, no tricky item use or glitches. If unsure, choose this.
+    - <u>Hard</u>: Adds tricks that aren't technically glitches, lamp + net considered as weapons. No glitches.
+    - <u>Glitched (Basic)</u>: Includes the above plus "basic", easy-to-learn glitches.
+    - <u>Glitched (Advanced)</u>: Includes the above plus "advanced" glitches that may be a challenge to master.
+    - <u>Glitched (Hell)</u>: Includes every known RTA-viable glitch, including the insane ones. DO NOT CHOOSE THIS.
+    - <u>No Logic</u>: Items are placed with no logic at all. Seeds may not be completable.
+
+  - A full breakdown of the new logic modes is located further down this page.
+
+
+- Sanctuary, Rewired
+  - The doors to the Sanctuary church are now closed at game start. They will open upon completing the Sanctuary dungeon, specifically when the left-side switch is pulled at the dungeon's end.
+  - This change effectively locks the Lorule Graveyard behind completing the Sanctuary, meaning players have a reason to collect the key, fight the miniboss, and actually finish the dungeon now.
+
+  
+- Ravio's Bracelet Changes
+  - The second Bracelet has returned to the item pool, meaning you must find both before you can Merge.
+  - The `start_with_bracelet` option has been deprecated. The option mostly existed to cover for the old filler algorithm's shortcomings, but now that those have been addressed the option is being retired.
+
+
+- Pendant of Courage Changes
+  - Rosso's House has been unlocked from game start and the check for smashing his pet rocks is logically available anytime after you've obtained the Power Glove.
+  - The Irene check has been removed entirely. This check with its multiple invisible triggers caused a lot of confusion for players, so for now we've decided to remove it.
+    - Don't worry, you'll still be able to see Irene on her broom after you've rescued her portrait.
+  - This leaves the Haunted Grove Tree Stump as *the* Green Pendant-locked check.
+
+
+- Swordless Mode Changes
+  - The Hyrule Castle Barrier will now be removed when playing on Swordless Mode, granting access to 2 otherwise inaccessible chests and the Hyrule Castle dungeon.
+  - Yuga 2 can still be fought in Swordless Mode to access Lorule without Bracelet, but note that he cannot be harmed with the Bow alone.
+
+
+- New Option: `assured_weapon`
+  - Guarantees at least one weapon will be placed in Ravio's Shop
+    - Items include: Bow, Bombs, Fire Rod, Ice Rod, Hammer, Sword (if not playing Swordless), or Lamp/Net (if playing on Hard Logic or higher)
+
+
+- New Option: `bow_of_light_in_castle`
+  - Guarantees Bow of Light will spawn on one of the 15 checks inside Lorule Castle.
+    - Note: This includes Zelda, unless you manually exclude her.
+
+
+- Change to *`_in_shop` settings:
+  - When the Bell, Pouch, Boots, or an assured weapon is placed in Ravio's Shop, it will now be placed on a random slot (but never the Sand Rod Slot).
+
+
+- Letter in a Bottle pickup text has been removed
+
+
+- Great Rupee Fairy will now logically guarantee (at least) 3000 Rupees are available between placed Purples, Silvers, and Golds.
+
+
+- The randomizer will no longer generate a `Standard.toml` preset that overwrites itself. Instead, an `Example.toml` preset is provided to demonstrate the correct format, and you may modify or delete it ~~at your own peril.~~
+
+
+- **FIXED:** Vanilla Bow of Light
+  - The new filler is not biased towards giving Zelda the Bow of Light.
+  - Excluding Zelda is now *guaranteed* to prevent a vanilla Bow of Light placement.
+
+  
+- **FIXED:** Smooth Gem
+  - The issue preventing players from giving Oren the Smooth Gem has been
+    - (•\_•)
+    - ( •\_•)>⌐■-■
+    - _smoothed out_
+    - (⌐■_■)
+    - _YEAAAAHHHHHHHHHHH_
+ 
+
+- **FIXED:** Skull Woods Softlock
+  - It was technically possible to get softlocked in the hallway outside the Skull Woods boss if the player reached it without the Lamp, Fire Rod, Bombs, a Scoot Fruit, or the dungeon's Boss Key. There are no reports of this happening as it would require navigating Skull Woods completely in the dark while being unlucky enough to have none of those items, but it was technically possible. The fix prevents the door closing behind the player when they enter the hallway, allowing them a means of escape.
+
+
+- **FIXED:** Duplicate/Wrong Enemies in Hyrule Field
+  - The enemies present in Hyrule Field should now be those typically present in the vanilla game after beating Eastern Palace and opening the Portals to Lorule. The seemingly random duplicates in certain areas have been removed.
+
+
+- **FIXED:** Kakariko now has the correct number of NPCs and Cuccos.
+
+
+- **ALTERED:** The rock used to perform Trial's Skip in Lorule Castle will now respawn after leaving and re-entering the room. This is to keep Trial's Skip doable in the event the rock is accidentally destroyed.
+
+</details>
+<details>
 <summary>Version 0.0.4</summary>
 
   - **FIX:** Prevent players missing the Big Key Chest in Thieves' Hideout.
@@ -81,7 +186,9 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
 
 ## Setup
 
-Download: [Latest Stable Release (0.0.4)](https://github.com/rickfay/z17-randomizer/releases/download/v0.0.4/z17r-0.0.4.zip)
+- Download: [Latest \[BETA\] Release (v0.1.0)](https://github.com/rickfay/z17-randomizer/releases/download/v0.1.0/z17r-0.1.0.zip)
+
+- Download: [Latest \[STABLE\] Release (v0.0.4)](https://github.com/rickfay/z17-randomizer/releases/download/v0.0.4/z17r-0.0.4.zip)
 
 1. Unzip the download to your directory of choice.
 2. Move your A Link Between Worlds ROM into the same folder. Name it: `A Link Between Worlds (USA).3ds`
@@ -123,8 +230,13 @@ For Citra (emulator):
 
 ## Game Options
 
-`start_with_bracelet`
-- Causes Ravio to give out the Bracelet at the start of the game. More specifically, the Bracelet will be placed in the Bow Item's Slot in the shop, and Ravio will give you the item on that slot.
+`mode`
+- Determines the Logic to use when generating the seed.
+  - Options are: `Normal`, `Hard`, `GlitchBasic`, `GlitchAdvanced`, `GlitchHell`, or `NoLogic`
+
+`assured_weapon`
+- If enabled, guarantees that a weapon will be placed in Ravio's Shop
+  - Potential weapons include: Sword, Bow, Hammer, Fire Rod, Ice Rod, or Bombs
 
 `bell_in_shop`
 - If enabled, guarantees the Bell will be placed in Ravio's Shop.
@@ -138,120 +250,154 @@ For Citra (emulator):
 `super_items`
 - If enabled, includes the Super Lamp and Super Net in the shuffled item pool as progressive upgrades to the base Lamp and Net.
 
-`skip_trials`
-- If enabled, the Trials door in Lorule Castle will be removed.
-
 `minigames_excluded`
 - Excludes Cucco Rush, Hyrule Hotfoot, Treacherous Tower, Octoball Derby, and both Rupee Rush minigames from having progression.
 
-`glitched_logic`
-- Enables items to be placed in locations that may require glitches/tricks to obtain. A complete list of potentially required glitches/tricks is below.
+`skip_trials`
+- If enabled, the Trials door in Lorule Castle will be removed.
+
+`bow_of_light_in_castle`
+- If enabled, guarantees the Bow of Light will be placed *somewhere* in Lorule Castle (including possibly Zelda)
 
 `swordless_mode`
 - Generates a seed with no Swords. Things you should know about Swordless:
-  - The 2 Chests in Hyrule Castle are unobtainable, but they are excluded from containing progression.
+  - The Hyrule Castle Barrier will be torn down from game start, providing access to its checks and the Inside Hyrule Castle dungeon.
   - You will need the [Net to play Tennis with Yuganon](https://www.twitch.tv/videos/1265170513). Good luck finding it!
 
-#### The following options are only available when creating a seed using a preset:
+## Logic Breakdown
 
+### Normal Logic
 
-`dont_require_lamp_for_darkness`
-- If enabled, the logic may place required items behind completely dark rooms without giving you the Lamp first.
+This is the standard logic mode and is recommended for new and casual players.
 
+- Includes:
+  - Standard gameplay
+  - No glitches
+  - No obscure tricks
 
-## Glitched Logic Breakdown
+### Hard Logic
 
-The following tricks may potentially be required in a Glitched Logic seed:
+This mode is recommended for players who have played the game before and are familiar with its mechanics. This is still a glitch-free mode, but the logic may require players to perform actions or use items in obscure, non-obvious ways to reach checks.
 
-- Lamp, Net, and Pegasus Boots are considered damage sources
-- Rosso Cave with Boomerang or Hookshot (not TRod + Shield)
-- Blacksmith Cave with Fire Rod or Nice Bombs
-- Reach Death Mountain with Power Glove Skip
-- Eastern Ruins Pegs with Boomerang or Hookshot or Tornado Rod (no Sand Rod)
-- Flipperless Message in a Bottle with Fire Rod or Nice Bombs
-- Access HoG with Fake Flippers or Ice Rod + Hookshot
-- Lost Woods Chest with Boomerang or Hookshot and a means of escape (FRod, Bombs, or Bell. No Crow)
-- Reverse Sanctuary (door is open after opening Gravestone, just need damage source to defeat Poes)
-- Flippers Treasure Dungeon tricks. Need either Titan's Mitt or Ice Rod to enter. Then either just Hookshot + Flippers OR simply the Nice Bombs. Nice Ice Rod and Great Spin not considered.
-- Zora's Waterfall Cave with the Crow Boost (FRod not needed)
-- Pegasus Boots Dungeon with just Master Sword, Bombs, or Boomerang (Nice Bow and Nice Ice Rod not considered)
-- Access Turtle Rock with Fake Flippers
-- Misery Mire HP without Sand Rod. With just Bombs (regular works with Vulture boosting) or FRod + Boots
-- Eastern Palace
-  - Left entrance chest with a thrown Pot
-  - 4 Switches Room with thrown Pots
-  - Bombs or Ice Rod to activate switch opening path to Boss Door early
-  - TRod Armos Boost to get to Boss Key or Boss room without the appropriate key
-- House of Gales
-  - 2F Fire Ring Key using HoG Skip Skip to do 2F backwards if key missing (incredibly specific, unlikely)
-  - Skip Skip Skip to reach 3F without keys
-- Tower of Hera
-  - Bomb Rods can be used to climb the tower without any keys
-- Swamp Palace
-  - Early access to 1F SW/SE rooms with Ice Rod to raise water level
-  - Miniboss Skips with Ice Rod/Tornado Rod or Boots
-  - Early Big Chest with Ice Rod or Boots
-  - Big Key Skip with Ice Rod and Tornado Rod
-- Thieves' Hideout
-  - Flipperless Thieves using TRod + a way to hit the switch (IRod or Bombs, no sword beams)
-    - Softlock chest behind wall NOT in logic unless you can also get Bombs or Fire Rod (but really, bring a Scoot Fruit)
-    - Big Key chest accessible, Boots made available
-- Ice Ruins
-  - All dungeon checks accessible without keys if you have Boots. The ones behind B1 locked doors also require Tornado Rod.
-- Desert Palace
-  - Reverse DP means keys can show up anywhere in the dungeon if you have Fire Rod or Nice Bombs
-- Turtle Rock
-  - Big Key Skip using a Bomb Rod
-- Lorule Castle
-  - Lamp Trial doesn't need the Lamp
+- Includes:
+  - Using the Lamp or Net as weapons (they deal 1/2 the damage of the Forgotten Sword)
+  - Completing the Boots Dungeon with either Bombs, Boomerang, or Sword Beams
+  - Entering Eastern Ruins with Power Glove
+  - Entering the Vacant House rear with the Bomb Flower
+  - Hyrule Hotfoot with Merge + Bell
+  - Jumping into the Kakariko Well with a Cucco
+  - Reaching the Misery Mire Ledge with Stamina Scroll + Bombs
+  - Southern Ruins Treasure Dungeon
+    - Flippers, Hookshot, and either Bombs or Master Sword to hit the Boomerang switch
+  - Eastern Palace:
+    - Using Sword Beams or thrown Pots to activate switches
+    - Skipping a Small Key with either bombs or the Ice Rod
+  - House of Gales:
+    - Using the Tornado Rod to jump on moving blocks to reach 2F without merge
+    - Deathwarping from NE room on 1F without merge
+  - Swamp Palace:
+    - Precise Bow Shot to bypass River Room without merge
+    - Access 1F Big Chest without extinguishing flames
+  - Desert Palace:
+    - Run past Armos on 3F
+  - Turtle Rock
+    - Hit the B1 crystal Switch with a thrown skull
+  - Lorule Castle
+    - Play Tennis with Yuganon using the Net
 
-  
-Mergeless Tricks if `start_with_bracelet` is false:
-- Behind Blacksmith with Fire Rod or Nice Bombs
-- Death Mountain climb
-- DM Fairy Cave with Fire Rod or Nice Bombs
-- Bouldering Guy with TRod + Boots
-- Access Eastern Ruins with just Power Glove
-- Eastern Ruins Merge Chest with TRod, FRod, or Nice Bombs
-- Lost Woods Alcove with Boomerang or Hookshot and a means of escape (FRod, Bombs, or Bell. No Crow)
-- House of Gales TRod onto moving block in 1F East Room (if key logic allows access)
-- Mergeless Hera with Bombs and Sword to bypass lobby. TRod needed for floors higher than 3F
+### Glitched (Basic) Logic
 
+This mode is intended for players who want to use some of the game's many glitches, but not the hard ones.
 
-Fake Flippers requires Pegasus Boots and either Fire Rod or Nice Bombs
+<u>Note</u>: You are expected to spend your first 10 Maiamai on Nice Bombs for all Glitched Logic seeds due to the many glitches they enable. Failure to do so could make your seed much harder or potentially even impossible to complete.
 
+- Includes:
+  - Armos Boost to reach:
+    - Eastern Ruins merge chest
+  - Bird Boost to reach Waterfall Cave
+  - Fire Rod or Lemon Boosts to get onto small ledges
+  - Enemy Clips
+  - Reaching the Misery Mire Ledge with Nice Bombs or Fire Rod with either Boots or regular Bombs
+  - Southern Ruins Treasure Dungeon Flipperless w/ Nice Bombs
+  - House of Gales:
+    - Skip Skip to do 2F in reverse
+    - Skip Skip Skip to reach 3F
+  - Swamp Palace:
+    - Miniboss Skip with Pegasus Boots
+  - Thieves' Hideout:
+    - Jailbreak to activate switches and reach B2 without merge
+  - Desert Palace
+    - Defeat Zaganaga with just Bow or just Sword Beams
 
-Some notes about Nice Bombs:
-  - Glitched logic *DOES* guarantee at least 10 Maiamai will be available for any checks requiring Nice Bombs
-  - The logic guarantees Nice Bombs are obtainable for any Bomb Rods or Lemon Boosts
-  - If you spend your Maiamai on anything other than Nice Bombs, you may potentially doom your seed. Regular Bomb boosts may save you, but if progression is on Southern Ruins Treasure Dungeon with Nice Bombs there's no salvaging it. YOU HAVE BEEN WARNED.
+### Glitched (Advanced) Logic
+
+This mode is for experienced players who are comfortable with this game's harder, more involved glitches. 
+
+<u>Note</u>: You are expected to spend your first 10 Maiamai on Nice Bombs for all Glitched Logic seeds due to the many glitches they enable. Failure to do so could make your seed much harder or potentially even impossible to complete.
+
+- Includes:
+  - Entering Southern Ruins Treasure Dungeon with just Ice Rod
+  - Desert Palace Skip
+    - Skip Desert with Ice Rod + Tornado Rod
+    - OoB with Fire Rod or Nice Bombs
+    - Zaganaga Skip with Pegasus Boots
+    - Reverse Desert Palace
+  - Fake Flipper Tricks
+  - Flipperless House of Gales with Hookshot/Ice Rod
+  - Enemy clips to reach Lost Woods checks without escape items (must use Crows instead)
+  - Reaching the Misery Mire Ledge with Regular Bombs + Vulture Boost
+  - Shield Rod Clips
+  - Tornado Rod Enemy Clip to reach Eastern Ruins Peg Circle
+  - Mergeless Death Mountain Climb
+    - Logic will guarantee either Blue Mail or a Bottle (for potions) is available
+  - Eastern Palace
+    - Armos Boost to skip the Boss Key and a Small Key
+  - Tower of Hera
+    - Bombrods
+    - Mergeless strategy
+  - Swamp Palace
+    - Ice Rod Clipping to skip merge requirements and raise/lower water levels
+    - Ice Rod + Tornado Rod to skip dungeon entirely
+  - Thieves' Hideout
+    - Flipperless Thieves strategies with Tornado Rod + either Bombs or Ice Rod
+      - Note: B1 Behind the Wall chest and the B1 Big Chest are reachable but excluded from this, due to the repetitive nature of the trick
+    - Reach miniboss and/or B2 jail cell without merge
+  - Ice Ruins
+    - Get Out of Bounds with Pegasus Boots to:
+      - Skip entire dungeon
+      - Scroll Skip
+      - Small Key skip with Tornado Rod
+    - Desert Palace
+      - Reverse Desert Palace with Fire Rod or Nice Bombs
+      - Armos Boost to skip West 2F
+
+### Glitched (Hell) Logic
+
+This mode logically includes every known RTA-viable glitch, including those that are wildly inconsistent and inconsiderate of a player's time. It is not recommended for anyone, other than those seeking a challenge.
+
+<u>Note</u>: You are expected to spend your first 10 Maiamai on Nice Bombs for all Glitched Logic seeds due to the many glitches they enable. Failure to do so could make your seed potentially impossible to complete.
+
+- Includes:
+  - Bee Boost Tricks
+  - Defeating Yuga 1 with just Sword Beams or just Ice Rod
+  - Fake Flippers via Bee Boosting
+  - Catching a natural Golden Bee before Lorule with Bottle + Net
+  - Regular Bomb Boost to reach:
+    - Eastern Ruins merge chest
+  - Sand Rod Enemy Clip to reach:
+    - Eastern Ruins Peg Circle
+    - Rosso Cave
+  - Desert Palace Skip via Portal Clipping with Hookshot/Boomerang + Tornado Rod
+
+### No Logic
+
+It's all in the name: no logic is used to place items at all. Dungeon items are in their respective dungeons due to technical limitations, but otherwise any item could show up anywhere. Seeds are not guaranteed to be completable.
 
 ## Known Issues
 
-- Bow of Light crashes the game if used outside the final boss arena (on console)
-- After Ravio gives out the Bracelet from the Bow Item Slot in his shop, the model remains until you leave and reenter.
-- Despite Maiamais being available for collection from game start, the Maiamai cave itself is still sealed shut and thus Bombs are still required to turn in any Maiamai
-- Opening the Portals early has some side effects:
-  - The Curtain over the Hyrule Castle Portal is not torn down, so if you attempt to enter the Portal right before the final boss fight, you'll notice some... odd behavior. This is NOT a softlock, but it is confusing. If you have the Lamp you can use it to burn down the Curtain from behind it. Otherwise you'll eventually void out and return to Lorule Castle.
-  - The Yuga 2 Boss fight can be started but Yuga 2 cannot be defeated. If you do enter the boss arena, you'll find that Yuga gets stuck circling the room in his merged form, but that because the entrance door is opened he just stalls. Defeating Yuga 2 is no longer necessary as Portals are open, so you can just leave.
-
-## Future Plans
-
-Time and technical knowledge (or lack thereof) are the main barriers to future progress, but I will share my wishlist of features to eventually add:
-
-- Keysanity
-- Shuffled Pendants and Paintings
-- Portal Randomizer
-- Include Nice Items as Progressive Items
-- Randomize Maiamais
-- Randomize Maiamai Rewards for 10, 20, 30, etc.
-- Great Spin
-- Hyrule Hotfoot, preclear the first race
-- Treacherous Tower, preclear the first round
-- Fix existing Known Issues
-- Other Stuff <sup>TM</sup>
-
-![future.png](docs/future.png)
+- Bow of Light crashes the game if used outside the final boss arena (on 3DS console)
+- Some text boxes will overflow
+- After turning in the Letter in a Bottle to the Milk Bar owner, the Letter in a Bottle will be available for collection again. It can be turned in again, but doing so can lead to some unexpected behavior (and is never part of logic).
 
 ## Special Thanks
 

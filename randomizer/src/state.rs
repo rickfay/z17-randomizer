@@ -1,11 +1,10 @@
 use std::{
     collections::{HashMap, HashSet},
-    ops::AddAssign,
 };
 
-use albw::{course, Item};
+use albw::course;
 
-use crate::{Pendant, Portrait, Quest, Settings};
+use crate::Settings;
 
 #[derive(Clone, Debug)]
 pub struct State<'settings> {
@@ -14,48 +13,14 @@ pub struct State<'settings> {
 }
 
 impl<'settings> State<'settings> {
-    pub fn new(settings: &'settings Settings) -> Self {
 
-        let sword = 1; /*if settings.items.captains_sword.is_skipped() {
-            1
-        } else {
-            0
-        };*/
-
-        let bracelet = 1; /*if settings.items.first_bracelet.is_skipped() {
-            1
-        } else {
-            0
-        };*/
-
-        Self {
-            settings,
-            player: Player {
-                sword,
-                bracelet,
-                ..Default::default()
-            },
-        }
-    }
-
-    pub fn settings(&self) -> &Settings {
-        &self.settings
-    }
 
     pub fn glitched(&self) -> bool {
-        self.settings.logic.glitched_logic
+        false // todo remove this
     }
 
-    pub fn with_all_overworld_items(settings: &'settings Settings) -> Self {
-        Self {
-            settings,
-            player: Player::with_all_overworld_items(),
-        }
-    }
 
-    pub fn is_different(&self, other: &Self) -> bool {
-        self.player != other.player
-    }
+
 
     // pub fn is_barrier_up(&self) -> bool {
     //     self.settings.behavior.barrier.is_start() || self.did_eastern()
@@ -86,6 +51,17 @@ impl<'settings> State<'settings> {
             || self.can_hookshot()
             || self.can_bomb()
             || self.can_ice_rod()
+            || self.can_hammer()
+            || (self.glitched() && self.has_boots())
+    }
+
+    // Same as can_hit_switch(), but Ice Rod can't hit it
+    pub fn can_hit_shielded_switch(&self) -> bool {
+        self.sword()
+            || self.can_bow()
+            || self.can_boomerang()
+            || self.can_hookshot()
+            || self.can_bomb()
             || self.can_hammer()
             || (self.glitched() && self.has_boots())
     }
@@ -228,10 +204,6 @@ impl<'settings> State<'settings> {
         self.player.insect_net
     }
 
-    pub fn can_see_in_dark(&self) -> bool {
-        self.settings.logic.dont_require_lamp_for_darkness || self.player.lamp
-    }
-
     pub fn has_bottle(&self) -> bool {
         self.player.bottle
     }
@@ -316,8 +288,8 @@ impl<'settings> State<'settings> {
         self.player.boss_keys.contains(&dungeon)
     }
 
-    pub fn lorule(&self) -> bool {
-        self.can_merge()
+    pub fn yuga(&self) -> bool {
+        self.has_master_sword() && (self.can_bow() || self.can_ice_rod())
     }
 
     pub fn has_seven_portraits(&self) -> bool {
@@ -326,40 +298,6 @@ impl<'settings> State<'settings> {
 
     pub fn osfala(&self) -> bool {
         self.player.osfala
-    }
-
-    pub fn add_item(&mut self, item: Item) {
-        self.player.add_item(item)
-    }
-
-    pub fn add_item_with_location(&mut self, item: Item, dungeon: course::Id) {
-        match item {
-            Item::KeySmall => self
-                .player
-                .small_keys
-                .entry(dungeon)
-                .or_default()
-                .add_assign(1),
-            Item::KeyBoss => {
-                self.player.boss_keys.insert(dungeon);
-            }
-            _ => {
-                self.add_item(item);
-            }
-        }
-    }
-
-    pub(crate) fn add_quest_item(&mut self, quest: Quest) {
-        if quest == Quest::Portrait(Portrait::Osfala) {
-            self.player.osfala = true;
-        }
-        match quest {
-            Quest::Sanctuary => self.player.sanctuary = true,
-            Quest::Pendant(Pendant::Courage) => self.player.courage = true,
-            Quest::Pendant(Pendant::Wisdom) => self.player.wisdom = true,
-            Quest::Pendant(Pendant::Power) => self.player.power = true,
-            Quest::Portrait(_) => self.player.portraits += 1,
-        }
     }
 }
 
@@ -397,57 +335,4 @@ pub struct Player {
     osfala: bool,
     small_keys: HashMap<course::Id, u8>,
     boss_keys: HashSet<course::Id>,
-}
-
-impl Player {
-    fn with_all_overworld_items() -> Self {
-        Self {
-            ice_rod: true,
-            sand_rod: true,
-            tornado_rod: true,
-            bomb: true,
-            fire_rod: true,
-            hookshot: true,
-            boomerang: true,
-            hammer: true,
-            bow: true,
-            bottle: true,
-            lamp: true,
-            sword: 5,
-            flippers: true,
-            bracelet: 2,
-            glove: 2,
-            scroll: true,
-            ..Default::default()
-        }
-    }
-
-    fn add_item(&mut self, item: Item) {
-        match item {
-            Item::ItemRentalIceRod => self.ice_rod = true,
-            Item::ItemRentalSandRod => self.sand_rod = true,
-            Item::ItemRentalTornadeRod => self.tornado_rod = true,
-            Item::ItemRentalBomb => self.bomb = true,
-            Item::ItemRentalFireRod => self.fire_rod = true,
-            Item::ItemRentalHookShot => self.hookshot = true,
-            Item::ItemRentalBoomerang => self.boomerang = true,
-            Item::ItemRentalHammer => self.hammer = true,
-            Item::ItemRentalBow => self.bow = true,
-            Item::ItemBottle => self.bottle = true,
-            Item::ItemStoneBeauty => self.smooth_gem = true,
-            Item::ItemKandelaar => self.lamp = true,
-            Item::ItemSwordLv1 | Item::ItemSwordLv2 | Item::PackageSword => self.sword += 1,
-            Item::ItemMizukaki => self.flippers = true,
-            Item::RingRental | Item::RingHekiga => self.bracelet += 1,
-            Item::PowerGlove | Item::PowerfulGlove => self.glove += 1,
-            Item::ItemInsectNet => self.insect_net = true,
-            Item::OreYellow | Item::OreGreen | Item::OreBlue | Item::OreRed => self.ore += 1,
-            Item::DashBoots => self.boots = true,
-            Item::MessageBottle => self.message = true,
-            Item::MilkMatured => self.premium_milk = true,
-            Item::GanbariPowerUp => self.scroll = true,
-            Item::ItemBell => self.bell = true,
-            _ => {}
-        }
-    }
 }

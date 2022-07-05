@@ -1,4 +1,4 @@
-use crate::{regions::Subregion, state::State, Condition, Location, Settings};
+use crate::{regions::Subregion, state::State, Condition, LocationInfo, Settings};
 
 pub trait Graph {
     fn settings(&self) -> &Settings;
@@ -9,12 +9,12 @@ pub trait Graph {
 
 #[derive(Clone, Debug)]
 pub enum Node {
-    Location(Location),
+    Location(LocationInfo),
     Path(&'static Subregion),
 }
 
-impl From<Location> for Node {
-    fn from(location: Location) -> Self {
+impl From<LocationInfo> for Node {
+    fn from(location: LocationInfo) -> Self {
         Self::Location(location)
     }
 }

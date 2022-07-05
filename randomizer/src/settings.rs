@@ -5,7 +5,8 @@ use std::{
 
 use serde::{Deserialize, Serialize};
 
-use crate::{regions, Location};
+use crate::{LocationInfo, regions};
+use crate::logic_mode::LogicMode;
 
 /// Logic and behavior settings.
 #[derive(Clone, Debug, Default, Deserialize, Hash, Serialize)]
@@ -13,12 +14,13 @@ use crate::{regions, Location};
 pub struct Settings {
     pub logic: Logic,
     pub options: Options,
+    pub exclusions: Exclusion,
     #[serde(skip_serializing_if = "Exclude::is_empty")]
     pub exclude: Exclude,
 }
 
 impl Settings {
-    pub fn is_excluded(&self, location: &Location) -> bool {
+    pub fn is_excluded(&self, location: &LocationInfo) -> bool {
         let world = match location.world() {
             regions::World::Hyrule => &self.exclude.hyrule,
             regions::World::Lorule => &self.exclude.lorule,
@@ -36,14 +38,10 @@ impl Settings {
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq, Deserialize, Serialize)]
 #[serde(default, deny_unknown_fields)]
 pub struct Logic {
-    /// Disables lamp requirement for dark areas.
-    pub dont_require_lamp_for_darkness: bool,
-    /// Allows keys to be placed in such a way that the player can softlock.
-    pub unsafe_key_placement: bool,
-    /// Glitched Logic
-    pub glitched_logic: bool,
-    /// If true shuffles the Bracelet, else it'll be in Ravio's Shop
-    pub start_with_bracelet: bool,
+    /// Logic to use for item placement (Normal, Hard, Glitched (Basic, Advanced, Hell), No Logic)
+    pub mode: LogicMode,
+    /// Guarantees a Weapon is placed in Ravio's Shop
+    pub assured_weapon: bool,
     /// Places the Bell in Ravio's Shop
     pub bell_in_shop: bool,
     /// Places the Pouch in Ravio's Shop
@@ -58,6 +56,8 @@ pub struct Logic {
     pub super_items: bool,
     /// Skip Trials Door in Lorule Castle
     pub skip_trials: bool,
+    /// Guarantees Bow of Light will be placed in Lorule Castle
+    pub bow_of_light_in_castle: bool,
 }
 
 /// Settings to change the randomizer's logic checks.
@@ -148,6 +148,20 @@ impl Exclude {
 }
 
 #[derive(Clone, Debug, Default, Deserialize, Serialize)]
+pub struct Exclusion(pub(crate) HashMap<String, HashSet<String>>);
+
+impl Hash for Exclusion {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        for (key, value) in self.0.iter() {
+            key.hash(state);
+            for location in value.iter() {
+                location.hash(state);
+            }
+        }
+    }
+}
+
+#[derive(Clone, Debug, Default, Deserialize, Serialize)]
 pub struct World(HashMap<String, HashSet<String>>);
 
 impl World {
@@ -176,26 +190,8 @@ pub fn open_default() -> Settings {
 pub fn plando_settings() -> Settings {
     Settings {
         logic: Logic {
-            start_with_bracelet: true, // False = get Bow Slot Item gift, True = don't
             ..Default::default()
         },
         ..Default::default()
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::Settings;
-    use crate::Result;
-
-    #[test]
-    fn it_deserializes_standard_config() -> Result<()> {
-        let file = include_str!("../../presets/Standard.toml");
-        let uncommented = file
-            .split_inclusive('\n')
-            .map(|line| line.strip_prefix('#').unwrap_or(line))
-            .collect::<String>();
-        toml::from_str::<Settings>(&uncommented).expect("Could not deserialize Standard.toml");
-        Ok(())
     }
 }
