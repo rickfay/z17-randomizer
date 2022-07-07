@@ -699,7 +699,7 @@ fn verify_all_locations_accessible(loc_map: &mut HashMap<Location, LocationNode>
 
     let reachable_checks = assumed_search(loc_map, progression_pool, &mut check_map, settings); //find_reachable_checks(loc_map, &everything, &mut check_map); //
 
-    const TOTAL_CHECKS: usize = 275; // all checks + quest checks
+    const TOTAL_CHECKS: usize = 276; // all checks + quest checks
     if reachable_checks.len() != TOTAL_CHECKS {
 
         // for rc in &reachable_checks {
