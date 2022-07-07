@@ -7,6 +7,14 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
 ## Updates
 
 <details open="open">
+<summary>Version 0.1.1</summary>
+
+- **FIXED:** Desert Palace Key Logic
+- **FIXED:** Normal Logic Swordless Mode bug
+
+</details>
+
+<details open="open">
 <summary>Version 0.1.0</summary>
 
 - New Filler Algorithm:
@@ -279,6 +287,8 @@ This is the standard logic mode and is recommended for new and casual players.
 
 This mode is recommended for players who have played the game before and are familiar with its mechanics. This is still a glitch-free mode, but the logic may require players to perform actions or use items in obscure, non-obvious ways to reach checks.
 
+<u>Note</u>: On Hard Logic and higher you are expected to spend your first 10 Maiamai on Nice Bombs. Failure to do so could make your seed much harder or potentially even impossible to complete.
+
 - Includes:
   - Using the Lamp or Net as weapons (they deal 1/2 the damage of the Forgotten Sword)
   - Completing the Boots Dungeon with either Bombs, Boomerang, or Sword Beams
@@ -309,7 +319,7 @@ This mode is recommended for players who have played the game before and are fam
 
 This mode is intended for players who want to use some of the game's many glitches, but not the hard ones.
 
-<u>Note</u>: You are expected to spend your first 10 Maiamai on Nice Bombs for all Glitched Logic seeds due to the many glitches they enable. Failure to do so could make your seed much harder or potentially even impossible to complete.
+<u>Note</u>: You are expected to spend your first 10 Maiamai on Nice Bombs due to the many glitches they enable. Failure to do so could make your seed much harder or potentially even impossible to complete.
 
 - Includes:
   - Armos Boost to reach:
@@ -333,7 +343,7 @@ This mode is intended for players who want to use some of the game's many glitch
 
 This mode is for experienced players who are comfortable with this game's harder, more involved glitches. 
 
-<u>Note</u>: You are expected to spend your first 10 Maiamai on Nice Bombs for all Glitched Logic seeds due to the many glitches they enable. Failure to do so could make your seed much harder or potentially even impossible to complete.
+<u>Note</u>: You are expected to spend your first 10 Maiamai on Nice Bombs due to the many glitches they enable. Failure to do so could make your seed much harder or potentially even impossible to complete.
 
 - Includes:
   - Entering Southern Ruins Treasure Dungeon with just Ice Rod
@@ -375,7 +385,7 @@ This mode is for experienced players who are comfortable with this game's harder
 
 This mode logically includes every known RTA-viable glitch, including those that are wildly inconsistent and inconsiderate of a player's time. It is not recommended for anyone, other than those seeking a challenge.
 
-<u>Note</u>: You are expected to spend your first 10 Maiamai on Nice Bombs for all Glitched Logic seeds due to the many glitches they enable. Failure to do so could make your seed potentially impossible to complete.
+<u>Note</u>: You are expected to spend your first 10 Maiamai on Nice Bombs due to the many glitches they enable. Failure to do so could make your seed potentially impossible to complete.
 
 - Includes:
   - Bee Boost Tricks

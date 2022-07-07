@@ -309,6 +309,7 @@ pub enum FillerItem {
     AccessMilkBar,
     AccessHyruleBlacksmith,
     AccessLoruleCastleField,
+    Triforce,
 }
 
 pub fn convert(fill_item: FillerItem) -> Option<Item> {
@@ -551,6 +552,7 @@ pub fn convert(fill_item: FillerItem) -> Option<Item> {
         ScootFruit | FoulFruit | Shield |
         OpenSanctuaryDoors | GoldBee | BigBombFlower | StylishWomansHouseOpen |
         SkullEyeRight | SkullEyeLeft |
-        AccessLoruleCastleField | AccessHyruleBlacksmith | AccessPotionShop | AccessMilkBar => None
+        AccessLoruleCastleField | AccessHyruleBlacksmith | AccessPotionShop | AccessMilkBar |
+        Triforce => None
     }
 }

@@ -75,7 +75,7 @@ fn prompt_until_bool(prompt: &str) -> bool
     }
 }
 
-fn prompt_until<F>(prompt: &str, until: F, error: &str) -> ::sys::Result<String>
+fn prompt_until<F>(prompt: &str, until: F, error: &str) -> sys::Result<String>
     where
         F: Fn(&str) -> bool,
 {
@@ -93,7 +93,7 @@ fn prompt_until<F>(prompt: &str, until: F, error: &str) -> ::sys::Result<String>
     }
 }
 
-fn create_paths() -> ::sys::Result<Paths> {
+fn create_paths() -> sys::Result<Paths> {
     let rom = prompt_until(
         "Path to ROM",
         |rom| Game::load(&rom).is_ok(),
@@ -186,7 +186,7 @@ fn main() -> randomizer::Result<()> {
 
             info!("Attempt:                        #{}", x + 1);
             info!("Preset:                         {}", opt.preset.as_ref().unwrap_or(&String::from("<None>")));
-            info!("Version:                        0.1.0");
+            info!("Version:                        0.1.1");
 
             //let randomizer = Generator::new(&preset, seed);
             let spoiler = panic::catch_unwind(|| filler_new(&preset, seed));

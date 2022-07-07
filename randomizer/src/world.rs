@@ -2885,7 +2885,7 @@ fn desert_palace() -> HashMap<Location, LocationNode> {
                   None,
             ),
             check(LocationInfo::new(regions::dungeons::desert::post_miniboss::SUBREGION, "[DP] (1F) Big Chest (Behind Wall)"),
-                  Some(|p| p.has_desert_keys(4)),
+                  Some(|p| p.has_desert_keys(1)),
                   None,
                   None,
                   None,
@@ -2900,7 +2900,7 @@ fn desert_palace() -> HashMap<Location, LocationNode> {
                  None,
             ),
             path(DesertPalaceMidwayLedge,
-                 Some(|p| p.has_titans_mitt()),
+                 Some(|p| p.has_desert_keys(2) && p.has_titans_mitt()),
                  None,
                  None,
                  None,
@@ -3338,7 +3338,7 @@ fn lorule_castle() -> HashMap<Location, LocationNode> {
         ])),
         (ThroneRoom, location("Throne Room", vec![
             check(LocationInfo::new(regions::dungeons::castle::boss::SUBREGION, "[LC] Zelda"),
-                  Some(|p| p.has_sword()),
+                  Some(|p| p.has_sword() || (p.swordless_mode() && p.has_net())),
                   Some(|p| p.has_net()),
                   None,
                   None,
@@ -3346,14 +3346,16 @@ fn lorule_castle() -> HashMap<Location, LocationNode> {
             ),
         ], vec![
             path(SacredRealm,
-                 Some(|p| p.has_sword() && p.can_merge() && p.has_bow_of_light()),
+                 Some(|p| (p.has_sword() || (p.swordless_mode() && p.has_net())) && p.can_merge() && p.has_bow_of_light()),
                  Some(|p| p.has_net() && p.can_merge() && p.has_bow_of_light()),
                  None,
                  None,
                  None,
             ),
         ])),
-        (SacredRealm, location("Sacred Realm", vec![], vec![])),
+        (SacredRealm, location("Sacred Realm", vec![
+            check_quest_free("Triforce", Triforce),
+        ], vec![])),
     ])
 }
 
