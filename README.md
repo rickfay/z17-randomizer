@@ -194,7 +194,7 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
 
 ## Setup
 
-- Download: [Latest \[BETA\] Release (v0.1.0)](https://github.com/rickfay/z17-randomizer/releases/download/v0.1.0/z17r-0.1.0.zip)
+- Download: [Latest \[BETA\] Release (v0.1.1)](https://github.com/rickfay/z17-randomizer/releases/download/z17r-v0.1.1/z17r-0.1.1.zip)
 
 - Download: [Latest \[STABLE\] Release (v0.0.4)](https://github.com/rickfay/z17-randomizer/releases/download/v0.0.4/z17r-0.0.4.zip)
 
