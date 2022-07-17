@@ -84,6 +84,7 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
 
 
 - Great Rupee Fairy will now logically guarantee (at least) 3000 Rupees are available between placed Purples, Silvers, and Golds.
+  - This change is intended to prevent players from having to grind large amounts of rupees in the early game.
 
 
 - The randomizer will no longer generate a `Standard.toml` preset that overwrites itself. Instead, an `Example.toml` preset is provided to demonstrate the correct format, and you may modify or delete it ~~at your own peril.~~
@@ -215,7 +216,7 @@ There are two ways you can run Z17R:
 
 2. Use a command line interface. If you take this approach you may also specify a preset and/or seed to use for seed generation.
    - Using a preset will give you some additional options and allow you to manually configure excluded checks.
-     - See the example `presets/Standard.toml` for more information.
+     - See the example `presets/Example.toml` for more information.
    - Note that the randomizer looks in the local `presets` directory now, and does NOT check `AppData`
    - Examples:
      - `$ ./z17-randomizer.exe --preset racerman`
@@ -244,7 +245,14 @@ For Citra (emulator):
 
 `assured_weapon`
 - If enabled, guarantees that a weapon will be placed in Ravio's Shop
-  - Potential weapons include: Sword, Bow, Hammer, Fire Rod, Ice Rod, or Bombs
+  - Potential weapons include:
+    - Sword (if not playing Swordless)
+    - Bow
+    - Hammer
+    - Fire Rod
+    - Ice Rod
+    - Bombs
+    - Lamp/Net (if playing Hard Logic or higher)
 
 `bell_in_shop`
 - If enabled, guarantees the Bell will be placed in Ravio's Shop.
@@ -305,6 +313,8 @@ This mode is recommended for players who have played the game before and are fam
   - House of Gales:
     - Using the Tornado Rod to jump on moving blocks to reach 2F without merge
     - Deathwarping from NE room on 1F without merge
+  - Hyrule Castle:
+    - Using Nice Bombs to kill the Red Spear Soldier on 3F
   - Swamp Palace:
     - Precise Bow Shot to bypass River Room without merge
     - Access 1F Big Chest without extinguishing flames
@@ -377,9 +387,9 @@ This mode is for experienced players who are comfortable with this game's harder
       - Skip entire dungeon
       - Scroll Skip
       - Small Key skip with Tornado Rod
-    - Desert Palace
-      - Reverse Desert Palace with Fire Rod or Nice Bombs
-      - Armos Boost to skip West 2F
+  - Desert Palace
+    - Reverse Desert Palace with Fire Rod or Nice Bombs
+    - Armos Boost to skip West 2F
 
 ### Glitched (Hell) Logic
 
@@ -392,11 +402,8 @@ This mode logically includes every known RTA-viable glitch, including those that
   - Defeating Yuga 1 with just Sword Beams or just Ice Rod
   - Fake Flippers via Bee Boosting
   - Catching a natural Golden Bee before Lorule with Bottle + Net
-  - Regular Bomb Boost to reach:
-    - Eastern Ruins merge chest
-  - Sand Rod Enemy Clip to reach:
-    - Eastern Ruins Peg Circle
-    - Rosso Cave
+  - Bomb Boosts with Regular Bombs
+  - Enemy Clips with the Sand Rod
   - Desert Palace Skip via Portal Clipping with Hookshot/Boomerang + Tornado Rod
 
 ### No Logic
@@ -407,7 +414,9 @@ It's all in the name: no logic is used to place items at all. Dungeon items are 
 
 - Bow of Light crashes the game if used outside the final boss arena (on 3DS console)
 - Some text boxes will overflow
-- After turning in the Letter in a Bottle to the Milk Bar owner, the Letter in a Bottle will be available for collection again. It can be turned in again, but doing so can lead to some unexpected behavior (and is never part of logic).
+- Mother Maiamai item text is wrong, the text reflects the slots in Ravio's Shop. The pictures are correct, use those when selecting which item to upgrade.
+- After turning in the Letter in a Bottle to the Milk Bar owner, the Letter in a Bottle will be available for collection again. It can be turned in again, but doing so can lead to some unexpected behavior. You may get some "surprise" items this way depending on what the Milk Bar owner had, but these are never part of logic.
+- Bouldering Guy will disappear while the Letter in a Bottle is in your inventory. Just turn in the bottle to the Milk Bar owner and he'll reappear. If you collected the Letter in a Bottle a second time (don't do that), just turn it in again and he'll reappear.
 
 ## Special Thanks
 
