@@ -2647,8 +2647,8 @@ fn thieves_hideout() -> HashMap<Location, LocationNode> {
                   Some(|p| p.can_merge()),
                   None,
                   Some(|p| p.has_boots()), // jailbreak
-                  Some(|p| p.has_tornado_rod() && (p.has_bombs() || (p.has_ice_rod() && (p.has_fire_rod() || p.has_scoot_fruit())))),
                   None,
+                  Some(|p| p.has_tornado_rod() && (p.has_bombs() || (p.has_ice_rod() && (p.has_fire_rod() || p.has_scoot_fruit())))),
             ),
         ], vec![
             path_free(LoruleCastleField),
@@ -2666,8 +2666,8 @@ fn thieves_hideout() -> HashMap<Location, LocationNode> {
                   Some(|p| p.can_merge()),
                   None,
                   None,
-                  Some(|p| (p.has_bombs() || p.has_ice_rod()) && p.has_tornado_rod()), // reach from B3 Out of Bounds
                   None,
+                  Some(|p| (p.has_bombs() || p.has_ice_rod()) && p.has_tornado_rod()), // reach from B3 Out of Bounds
             ),
             check_free(LocationInfo::new(regions::dungeons::thieves::basement2::SUBREGION, "[TH] (B2) Switch Puzzle Room")),
             check(LocationInfo::new(regions::dungeons::thieves::basement2::SUBREGION, "[TH] (B2) Eyegores"),
