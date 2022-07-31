@@ -62,6 +62,12 @@ macro_rules! action {
     ($unq:tt.clear_disable_flag()) => {
         $unq.clear_disable_flag();
     };
+    ($unq:tt.clear_active_args()) => {
+        $unq.clear_active_args();
+    };
+    ($unq:tt.clear_inactive_args()) => {
+        $unq.clear_inactive_args();
+    };
     ($unq:tt.enable()) => {
         $unq.enable();
     };
@@ -115,6 +121,13 @@ pub fn apply(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
             [132].active(1), // Unlock Rosso's Front Door
             [135].disable(), // Disable LZ to IndoorLight4 Cutscene
             [136].enable(Flag::Event(250)), // Replace with IndoorLight10
+        },
+
+        // East Death Mountain
+        FieldLight 4 {
+            [36].disable(), // Remove Bouldering Guy (pre-Letter in a Bottle)
+            [157].clear_active_args(), // Not 100% sure what this does, but removing the association to the 916 flag
+            [157].enable(), // Keep Bouldering Guy around
         },
 
         // Outside Fortune-Teller
@@ -392,11 +405,8 @@ pub fn apply(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
         // Link's House
         IndoorLight 1 {
 
-            // Debug redirection
-            // [24].call {|obj: &mut Obj| {
-            //     obj.redirect(39, 20, 0);
-            //     //obj.arg_mut().1 = 1;
-            // }},
+            // For quick testing/debugging
+            // [24].redirect(15, 0, 35), // Ice Rod Cave Right Entrance
 
             // Convert standing Ravio into shopkeeper Ravio
             [56].call {|obj: &mut Obj| {
@@ -497,16 +507,16 @@ pub fn apply(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
                 obj.arg_mut().5 = 3;
             }},
         },
-        // Bar
+
+        // Milk Bar
         IndoorLight 15 {
+            [12].disable(), // Bouldering Guy stays on the mountain, so remove him from here
             [15].disable(), // Disable post Climber dialogue?
         },
         // Blacksmith's House
         IndoorLight 19 {
             [0x10].disable(), // Remove captain
         },
-
-
 
         // Donkey Cave
         CaveLight 1 {

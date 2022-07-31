@@ -18,6 +18,8 @@ minigames_excluded = false
 skip_trials = false
 ## Guarantees the Bow of Light will be placed *somewhere* in Lorule Castle (including possibly Zelda)
 bow_of_light_in_castle = false
+## Don't require Lamp. If 'true', the player may have to cross dark rooms without a light source. If you're not sure, select 'false'.
+lampless = false
 ## Swordless Mode. Removes all Swords from the game. You will need the Net to play Tennis with Yuganon.
 swordless_mode = false
 

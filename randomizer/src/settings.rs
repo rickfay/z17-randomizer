@@ -58,6 +58,8 @@ pub struct Logic {
     pub skip_trials: bool,
     /// Guarantees Bow of Light will be placed in Lorule Castle
     pub bow_of_light_in_castle: bool,
+    /// Lamp Requirement. If enabled, the player may have to cross dark rooms without Lamp
+    pub lampless: bool,
 }
 
 /// Settings to change the randomizer's logic checks.

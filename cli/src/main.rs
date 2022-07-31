@@ -27,7 +27,7 @@ fn prompt_logic_mode() -> LogicMode
 {
     print!("\nChoose Logic Mode:\n");
     print!("[1] Normal              - Standard gameplay, no tricky item use or glitches. If unsure, choose this.\n");
-    print!("[2] Hard                - Adds tricks that aren't technically glitches, lamp + net considered as weapons. No glitches.\n");
+    print!("[2] Hard                - Adds tricks that aren't technically glitches. Lamp + Net considered as weapons. No glitches.\n");
     print!("[3] Glitched (Basic)    - Includes the above plus \"basic\", easy-to-learn glitches.\n");
     print!("[4] Glitched (Advanced) - Includes the above plus \"advanced\" glitches that may be a challenge to master.\n");
     print!("[5] Glitched (Hell)     - Includes every known RTA-viable glitch, including the insane ones. DO NOT CHOOSE THIS.\n");
@@ -49,7 +49,7 @@ fn prompt_logic_mode() -> LogicMode
             "5" => LogicMode::GlitchHell,
             "6" => LogicMode::NoLogic,
             _ => {
-                eprintln!("\nPlease enter either 1, 2, 3, 4, 5, or 6");
+                eprintln!("\nPlease enter 1, 2, 3, 4, 5, or 6");
                 continue;
             }
         }
@@ -126,6 +126,7 @@ fn preset_ui() -> Settings {
     let skip_trials = prompt_until_bool("Skip the Lorule Castle Trials?");
     let bow_of_light_in_castle = prompt_until_bool("Guarantee Bow of Light in Lorule Castle?");
     //let glitched_logic = prompt_until_bool("Use Glitched Logic? (advanced)");
+    let lampless = prompt_until_bool("Don't require Lamp? (advanced)\nIf \"y\", the player may have to cross dark rooms without a light source.\nIf you're not sure, select \"n\".");
     let swordless_mode = prompt_until_bool("Play in Swordless Mode? (advanced)");
 
     println!();
@@ -134,16 +135,17 @@ fn preset_ui() -> Settings {
     Settings {
         logic: Logic {
             mode,
+            assured_weapon,
             bell_in_shop,
             pouch_in_shop,
-            assured_weapon,
             boots_in_shop,
             super_items,
             //glitched_logic,
             minigames_excluded,
-            bow_of_light_in_castle,
-            swordless_mode,
             skip_trials,
+            bow_of_light_in_castle,
+            lampless,
+            swordless_mode,
             ..Default::default()
         },
         ..Default::default()
@@ -186,7 +188,7 @@ fn main() -> randomizer::Result<()> {
 
             info!("Attempt:                        #{}", x + 1);
             info!("Preset:                         {}", opt.preset.as_ref().unwrap_or(&String::from("<None>")));
-            info!("Version:                        0.1.1");
+            info!("Version:                        0.1.2");
 
             //let randomizer = Generator::new(&preset, seed);
             let spoiler = panic::catch_unwind(|| filler_new(&preset, seed));

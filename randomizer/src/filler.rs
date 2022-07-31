@@ -30,10 +30,10 @@ pub fn fill_stuff(settings: &Settings, seed: Seed) -> Vec<(LocationInfo, Item)> 
         GlitchHell => "Glitched (Hell) - Did you really mean to choose this?",
         NoLogic => "No Logic",
     });
-    info!("Swords:                         {}", if settings.logic.swordless_mode {"Swordless Mode - NO SWORDS"} else {"Normal"});
     info!("Super Items:                    {}", if settings.logic.super_items {"Included"} else {"Not Included"});
-    info!("Trials:                         {}\n", if settings.logic.skip_trials {"Skipped"} else {"Normal"});
-
+    info!("Trials:                         {}", if settings.logic.skip_trials {"Skipped"} else {"Normal"});
+    info!("Dark Rooms:                     {}", if settings.logic.lampless {"Lamp Not Required"} else {"Lamp Required"});
+    info!("Swords:                         {}\n", if settings.logic.swordless_mode {"Swordless Mode - NO SWORDS"} else {"Normal"});
 
     let mut rng = StdRng::seed_from_u64(seed as u64);
 
@@ -66,16 +66,8 @@ fn preplace_items<'a>(check_map: &mut HashMap<&'a str, Option<FillerItem>>,
     let mut shop_positions: Vec<&str> = Vec::new();
     let mut lorule_castle_positions: Vec<&str> = Vec::new();
 
-    // Shut up your code is worse
-    let mut zelda_excluded = false;
-    let opt = settings.exclusions.0.get("exclusions");
-    if opt.is_some() {
-        zelda_excluded = opt.unwrap().contains("[LC] Zelda");
-    }
-
-    for (check_name, _) in check_map.clone() {
-        if check_name.starts_with("[LC]") &&
-            !(zelda_excluded && check_name.eq("[LC] Zelda")) { // gross
+    for (check_name, item) in check_map.clone() {
+        if check_name.starts_with("[LC]") && item.is_none() {
             let _ = &lorule_castle_positions.push(check_name);
         } else if check_name.starts_with("Ravio") && !check_name.contains("6") {
             let _ = &shop_positions.push(check_name);

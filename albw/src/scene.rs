@@ -179,6 +179,16 @@ impl Obj {
         self.flg.3 = 0;
     }
 
+    pub fn clear_active_args(&mut self) {
+        self.arg.4 = 0;
+        self.arg.6 = 0;
+    }
+
+    pub fn clear_inactive_args(&mut self) {
+        self.arg.5 = 0;
+        self.arg.7 = 0;
+    }
+
     pub fn set_id(&mut self, id: i16) {
         self.id = id;
     }

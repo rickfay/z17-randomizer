@@ -7,6 +7,23 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
 ## Updates
 
 <details open="open">
+<summary>Version 0.1.2</summary>
+
+- Added back the non-required Lamp option: `lampless`. If enabled during seed generation, the logic may require the player to cross dark rooms without a light source.
+  - A slightly more verbose description was added this time to hopefully prevent new players from enabling this by mistake.
+- **LOGIC FIXES**:
+  - House of Gales miniboss can't be defeated by a fire weapon (all logic)
+  - Lamp and Net weren't being considered as weapons in a few places (Hard Logic)
+  - Hookshot Treasure Dungeon can be reached without merge, but not completed without merge (Glitched Advanced)
+  - Thieves' Hideout mergeless glitched logic was... who wrote this? Me? Oh. Well it's fixed now. (Glitched Basic/Advanced)
+- **FIXED:** Bouldering Guy
+  - The Bouldering Guy will now stay on his ledge on Death Mountain if you have collected the Letter in a Bottle but not yet turned it in.
+- **FIXED:** The `bow_of_light_in_castle` option now fully respects the exclusion list.
+  - There was previously special handling to make sure Bow of Light wouldn't land on Zelda if she was manually excluded, but it failed to consider any other check in Lorule Castle players might have excluded. This has been corrected, so if you exclude e.g. the Eyeball Chest while using this setting it's now guaranteed to not have Bow of Light (or any progression).
+
+</details>
+
+<details open="open">
 <summary>Version 0.1.1</summary>
 
 - **FIXED:** Desert Palace Key Logic
@@ -195,9 +212,7 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
 
 ## Setup
 
-- Download: [Latest \[BETA\] Release (v0.1.1)](https://github.com/rickfay/z17-randomizer/releases/download/z17r-v0.1.1/z17r-0.1.1.zip)
-
-- Download: [Latest \[STABLE\] Release (v0.0.4)](https://github.com/rickfay/z17-randomizer/releases/download/v0.0.4/z17r-0.0.4.zip)
+- Download: [Latest Release (v0.1.2)](https://github.com/rickfay/z17-randomizer/releases/download/z17r-v0.1.2/z17r-0.1.2.zip)
 
 1. Unzip the download to your directory of choice.
 2. Move your A Link Between Worlds ROM into the same folder. Name it: `A Link Between Worlds (USA).3ds`
@@ -229,13 +244,26 @@ After you've generated your seed in the above section, you'll need to install it
 The randomizer will generate a folder called `00040000000EC300`. This folder is the patch you need to install to play your seed.
 
 For 3DS hardware:
-- Copy `00040000000EC300` to `/luma/titles` on your SD card.
+- Copy `00040000000EC300` to `/luma/titles/` on your SD card.
 - Ensure that `Enable game patching` is selected in Luma's config (this can be opened by holding `Select` when powering on the console).
 
 For Citra (emulator):
 - Copy `00040000000EC300` to `<Citra folder>/load/mods/`. You may need to create these folders.
-- You can find the Citra folder by selecting `File > Open Citra folder...` in Citra.
+  - You can find the Citra folder by selecting `File > Open Citra folder...` in Citra.
 
+## Uninstalling Seeds
+
+Uninstalling seeds is almost literally just the reverse of the installation process.
+
+For 3DS hardware:
+
+- Either:
+  - Hold `Select` when powering on the console and deselect `Enable game patching`, OR
+  - Remove the patch from `/luma/titles/` on your SD card.
+
+For Citra (emulator):
+  - Remove the patch from `<Citra folder>/load/mods/`.
+    - You can find the Citra folder by selecting `File > Open Citra folder...` in Citra.
 
 ## Game Options
 
@@ -274,6 +302,9 @@ For Citra (emulator):
 
 `bow_of_light_in_castle`
 - If enabled, guarantees the Bow of Light will be placed *somewhere* in Lorule Castle (including possibly Zelda)
+
+`lampless`
+- If enabled, the player may have to cross dark rooms without a light source. If you're not sure, select 'false'.
 
 `swordless_mode`
 - Generates a seed with no Swords. Things you should know about Swordless:
@@ -416,7 +447,6 @@ It's all in the name: no logic is used to place items at all. Dungeon items are 
 - Some text boxes will overflow
 - Mother Maiamai item text is wrong, the text reflects the slots in Ravio's Shop. The pictures are correct, use those when selecting which item to upgrade.
 - After turning in the Letter in a Bottle to the Milk Bar owner, the Letter in a Bottle will be available for collection again. It can be turned in again, but doing so can lead to some unexpected behavior. You may get some "surprise" items this way depending on what the Milk Bar owner had, but these are never part of logic.
-- Bouldering Guy will disappear while the Letter in a Bottle is in your inventory. Just turn in the bottle to the Milk Bar owner and he'll reappear. If you collected the Letter in a Bottle a second time (don't do that), just turn it in again and he'll reappear.
 
 ## Special Thanks
 
