@@ -141,7 +141,7 @@ dependencies = [
 
 [[package]]
 name = "cli"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "albw",
  "crc",
@@ -439,7 +439,7 @@ dependencies = [
 
 [[package]]
 name = "randomizer"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "albw",
  "crc",

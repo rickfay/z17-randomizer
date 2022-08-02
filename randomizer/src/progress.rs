@@ -303,6 +303,10 @@ impl Progress {
         self.settings.logic.swordless_mode
     }
 
+    pub fn lampless(&self) -> bool {
+        self.settings.logic.lampless
+    }
+
     // pub fn has_great_spin(&self) -> bool {
     //     self.has(GreatSpin)
     // }
@@ -325,6 +329,17 @@ impl Progress {
             Bow01, Bow02,
             Bombs01, Bombs02,
             FireRod01, FireRod02,
+            IceRod01, IceRod02,
+            Hammer01, Hammer02,
+            PegasusBoots
+        ])
+    }
+
+    pub fn can_attack_fireproof(&self) -> bool {
+        self.has_any(&[
+            Sword01, Sword02, Sword03, Sword04,
+            Bow01, Bow02,
+            Bombs01, Bombs02,
             IceRod01, IceRod02,
             Hammer01, Hammer02,
             PegasusBoots
@@ -436,8 +451,8 @@ impl Progress {
         self.has(DarkKeyBig)
     }
 
-    pub fn can_defeat_gemasaur(&self) -> bool {
-        self.has_bombs() && self.has_fire_source()
+    pub fn can_defeat_gemesaur(&self) -> bool {
+        self.has_bombs() && (self.has_lamp() || (self.has_fire_rod() && self.lampless()))
     }
 
     pub fn has_swamp_keys(&self, amount: u8) -> bool {
