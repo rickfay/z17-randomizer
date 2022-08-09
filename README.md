@@ -7,6 +7,13 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
 ## Updates
 
 <details open="open">
+<summary>Version 0.1.3</summary>
+
+- The Filler Algorithm has been adjusted to help un-bias early game locations. Big Keys, Small Keys, and Compasses are now placed before all other forms of progression. As a bonus, seed generation is now much more likely to be successful on the first try.
+
+</details>
+
+<details>
 <summary>Version 0.1.2</summary>
 
 - Added back the non-required Lamp option: `lampless`. If enabled during seed generation, the logic may require the player to cross dark rooms without a light source.
@@ -23,7 +30,7 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
 
 </details>
 
-<details open="open">
+<details>
 <summary>Version 0.1.1</summary>
 
 - **FIXED:** Desert Palace Key Logic
@@ -31,7 +38,7 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
 
 </details>
 
-<details open="open">
+<details>
 <summary>Version 0.1.0</summary>
 
 - New Filler Algorithm:
@@ -212,7 +219,7 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
 
 ## Setup
 
-- Download: [Latest Release (v0.1.2)](https://github.com/rickfay/z17-randomizer/releases/download/z17r-v0.1.2/z17r-0.1.2.zip)
+- Download: [Latest Release (v0.1.3)](https://github.com/rickfay/z17-randomizer/releases/download/z17r-v0.1.3/z17r-0.1.3.zip)
 
 1. Unzip the download to your directory of choice.
 2. Move your A Link Between Worlds ROM into the same folder. Name it: `A Link Between Worlds (USA).3ds`

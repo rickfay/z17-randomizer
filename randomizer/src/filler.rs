@@ -818,10 +818,10 @@ fn assumed_fill(mut world_graph: &mut HashMap<Location, LocationNode>,
             if is_dungeon_item(item) {
                 filtered_checks = filter_dungeon_checks(item, &mut filtered_checks);
             }
+        }
 
-            if filtered_checks.len() == 0 {
-                info!("No reachable checks found to place: {:?}", item);
-            }
+        if filtered_checks.len() == 0 {
+            info!("No reachable checks found to place: {:?}", item);
         }
 
         place_item_randomly(item, &filtered_checks, &mut check_map, &mut rng);
