@@ -188,7 +188,7 @@ fn main() -> randomizer::Result<()> {
 
             info!("Attempt:                        #{}", x + 1);
             info!("Preset:                         {}", opt.preset.as_ref().unwrap_or(&String::from("<None>")));
-            info!("Version:                        0.1.2");
+            info!("Version:                        0.1.3");
 
             //let randomizer = Generator::new(&preset, seed);
             let spoiler = panic::catch_unwind(|| filler_new(&preset, seed));

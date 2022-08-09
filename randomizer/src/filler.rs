@@ -39,9 +39,14 @@ pub fn fill_stuff(settings: &Settings, seed: Seed) -> Vec<(LocationInfo, Item)> 
 
     let mut world_graph = build_world_graph();
     let mut check_map = prefill_check_map(&mut world_graph);
-    let (mut progression_pool, mut trash_pool) = get_items(settings, &mut rng);
+    let (
+        mut progression_pool,
+        mut trash_pool
+    ) = get_item_pools(settings, &mut rng);
 
     verify_all_locations_accessible(&mut world_graph, &progression_pool, settings);
+
+    handle_exclusions(&mut check_map, settings, &mut rng, &mut trash_pool);
 
     preplace_items(&mut check_map, settings, &mut rng, &mut progression_pool, &mut trash_pool);
 
@@ -58,8 +63,6 @@ fn preplace_items<'a>(check_map: &mut HashMap<&'a str, Option<FillerItem>>,
                       rng: &mut StdRng,
                       progression: &mut Vec<FillerItem>,
                       trash: &mut Vec<FillerItem>) {
-    handle_exclusions(check_map, settings, rng, trash);
-
     check_map.insert("Shore", Some(LetterInABottle));
     progression.retain(|x| *x != LetterInABottle);
 
@@ -174,210 +177,194 @@ fn map_to_result(world_graph: HashMap<Location, LocationNode>, check_map: HashMa
     result
 }
 
-fn get_items(settings: &Settings, rng: &mut StdRng) -> (Vec<FillerItem>, Vec<FillerItem>) {
-    let mut progression =
-        vec![
-            Bow01,
-            Boomerang01,
-            Hookshot01,
-            Bombs01,
-            FireRod01,
-            IceRod01,
-            Hammer01,
-            SandRod01,
-            TornadoRod01,
-            RaviosBracelet01,
-            RaviosBracelet02,
-            Bell,
-            StaminaScroll,
-            BowOfLight,
-            PegasusBoots,
-            Flippers,
-            HylianShield,
-            PremiumMilk,
-            SmoothGem,
-            LetterInABottle,
-            Lamp01,
-            Net01,
-            Pouch,
+fn get_item_pools(settings: &Settings, rng: &mut StdRng) -> (Vec<FillerItem>, Vec<FillerItem>) {
+    let big_keys = vec![
+        EasternKeyBig,
+        GalesKeyBig,
+        HeraKeyBig,
+        DarkKeyBig,
+        SwampKeyBig,
+        SkullKeyBig,
+        ThievesKeyBig,
+        IceKeyBig,
+        DesertKeyBig,
+        TurtleKeyBig,
+    ];
 
-            // 5 Bottles
-            Bottle01,
-            Bottle02,
-            Bottle03,
-            Bottle04,
-            Bottle05,
+    let small_keys = vec![
+        HyruleSanctuaryKey,
+        LoruleSanctuaryKey,
+        EasternKeySmall01,
+        EasternKeySmall02,
+        GalesKeySmall01,
+        GalesKeySmall02,
+        GalesKeySmall03,
+        GalesKeySmall04,
+        HeraKeySmall01,
+        HeraKeySmall02,
+        DarkKeySmall01,
+        DarkKeySmall02,
+        DarkKeySmall03,
+        DarkKeySmall04,
+        SwampKeySmall01,
+        SwampKeySmall02,
+        SwampKeySmall03,
+        SwampKeySmall04,
+        SkullKeySmall01,
+        SkullKeySmall02,
+        SkullKeySmall03,
+        ThievesKeySmall,
+        IceKeySmall01,
+        IceKeySmall02,
+        IceKeySmall03,
+        DesertKeySmall01,
+        DesertKeySmall02,
+        DesertKeySmall03,
+        DesertKeySmall04,
+        DesertKeySmall05,
+        TurtleKeySmall01,
+        TurtleKeySmall02,
+        TurtleKeySmall03,
+        LoruleCastleKeySmall01,
+        LoruleCastleKeySmall02,
+        LoruleCastleKeySmall03,
+        LoruleCastleKeySmall04,
+        LoruleCastleKeySmall05,
+    ];
 
-            // 2 Gloves
-            Glove01,
-            Glove02,
+    let compasses = vec![
+        EasternCompass,
+        GalesCompass,
+        HeraCompass,
+        DarkCompass,
+        SwampCompass,
+        SkullCompass,
+        ThievesCompass,
+        IceCompass,
+        DesertCompass,
+        TurtleCompass,
+        LoruleCastleCompass,
+    ];
 
-            // 2 Mails
-            Mail01,
-            Mail02,
+    let mut progression_items = vec![
+        Bow01,
+        Boomerang01,
+        Hookshot01,
+        Bombs01,
+        FireRod01,
+        IceRod01,
+        Hammer01,
+        SandRod01,
+        TornadoRod01,
+        RaviosBracelet01,
+        RaviosBracelet02,
+        Bell,
+        StaminaScroll,
+        BowOfLight,
+        PegasusBoots,
+        Flippers,
+        HylianShield,
+        PremiumMilk,
+        SmoothGem,
+        LetterInABottle,
+        Lamp01,
+        Net01,
+        Pouch,
 
-            // 4 Master Ore
-            OreYellow,
-            OreGreen,
-            OreBlue,
-            OreRed,
+        // 5 Bottles
+        Bottle01,
+        Bottle02,
+        Bottle03,
+        Bottle04,
+        Bottle05,
 
-            // Sanctuary Keys
-            HyruleSanctuaryKey,
-            LoruleSanctuaryKey,
+        // 2 Gloves
+        Glove01,
+        Glove02,
 
-            // Eastern Palace Keys
-            EasternCompass,
-            EasternKeyBig,
-            EasternKeySmall01,
-            EasternKeySmall02,
+        // 2 Mails
+        Mail01,
+        Mail02,
 
-            // House of Gales Keys
-            GalesCompass,
-            GalesKeyBig,
-            GalesKeySmall01,
-            GalesKeySmall02,
-            GalesKeySmall03,
-            GalesKeySmall04,
+        // 4 Master Ore
+        OreYellow,
+        OreGreen,
+        OreBlue,
+        OreRed,
 
-            // Tower of Hera Keys
-            HeraCompass,
-            HeraKeyBig,
-            HeraKeySmall01,
-            HeraKeySmall02,
+        // 18 Purple Rupees
+        RupeePurple01,
+        RupeePurple02,
+        RupeePurple03,
+        RupeePurple04,
+        RupeePurple05,
+        RupeePurple06,
+        RupeePurple07,
+        RupeePurple08,
+        RupeePurple09,
+        RupeePurple10,
+        RupeePurple11,
+        RupeePurple12,
+        RupeePurple13,
+        RupeePurple14,
+        RupeePurple15,
+        RupeePurple16,
+        RupeePurple17,
+        RupeePurple18,
 
-            // Dark Palace Keys
-            DarkCompass,
-            DarkKeyBig,
-            DarkKeySmall01,
-            DarkKeySmall02,
-            DarkKeySmall03,
-            DarkKeySmall04,
+        // 38 Silver Rupees
+        RupeeSilver01,
+        RupeeSilver02,
+        RupeeSilver03,
+        RupeeSilver04,
+        RupeeSilver05,
+        RupeeSilver06,
+        RupeeSilver07,
+        RupeeSilver08,
+        RupeeSilver09,
+        RupeeSilver10,
+        RupeeSilver11,
+        RupeeSilver12,
+        RupeeSilver13,
+        RupeeSilver14,
+        RupeeSilver15,
+        RupeeSilver16,
+        RupeeSilver17,
+        RupeeSilver18,
+        RupeeSilver19,
+        RupeeSilver20,
+        RupeeSilver21,
+        RupeeSilver22,
+        RupeeSilver23,
+        RupeeSilver24,
+        RupeeSilver25,
+        RupeeSilver26,
+        RupeeSilver27,
+        RupeeSilver28,
+        RupeeSilver29,
+        RupeeSilver30,
+        RupeeSilver31,
+        RupeeSilver32,
+        RupeeSilver33,
+        RupeeSilver34,
+        RupeeSilver35,
+        RupeeSilver36,
+        RupeeSilver37,
+        RupeeSilver38,
 
-            // Swamp Palace Keys
-            SwampCompass,
-            SwampKeyBig,
-            SwampKeySmall01,
-            SwampKeySmall02,
-            SwampKeySmall03,
-            SwampKeySmall04,
-
-            // Skull Woods Keys
-            SkullCompass,
-            SkullKeyBig,
-            SkullKeySmall01,
-            SkullKeySmall02,
-            SkullKeySmall03,
-
-            // Thieves' Hideout Keys
-            ThievesCompass,
-            ThievesKeyBig,
-            ThievesKeySmall,
-
-            // Ice Ruins Keys
-            IceCompass,
-            IceKeyBig,
-            IceKeySmall01,
-            IceKeySmall02,
-            IceKeySmall03,
-
-            // Desert Palace Keys
-            DesertCompass,
-            DesertKeyBig,
-            DesertKeySmall01,
-            DesertKeySmall02,
-            DesertKeySmall03,
-            DesertKeySmall04,
-            DesertKeySmall05,
-
-            // Turtle Rock Keys
-            TurtleCompass,
-            TurtleKeyBig,
-            TurtleKeySmall01,
-            TurtleKeySmall02,
-            TurtleKeySmall03,
-
-            // Lorule Castle Keys
-            LoruleCastleCompass,
-            LoruleCastleKeySmall01,
-            LoruleCastleKeySmall02,
-            LoruleCastleKeySmall03,
-            LoruleCastleKeySmall04,
-            LoruleCastleKeySmall05,
-
-            // 18 Purple Rupees
-            RupeePurple01,
-            RupeePurple02,
-            RupeePurple03,
-            RupeePurple04,
-            RupeePurple05,
-            RupeePurple06,
-            RupeePurple07,
-            RupeePurple08,
-            RupeePurple09,
-            RupeePurple10,
-            RupeePurple11,
-            RupeePurple12,
-            RupeePurple13,
-            RupeePurple14,
-            RupeePurple15,
-            RupeePurple16,
-            RupeePurple17,
-            RupeePurple18,
-
-            // 38 Silver Rupees
-            RupeeSilver01,
-            RupeeSilver02,
-            RupeeSilver03,
-            RupeeSilver04,
-            RupeeSilver05,
-            RupeeSilver06,
-            RupeeSilver07,
-            RupeeSilver08,
-            RupeeSilver09,
-            RupeeSilver10,
-            RupeeSilver11,
-            RupeeSilver12,
-            RupeeSilver13,
-            RupeeSilver14,
-            RupeeSilver15,
-            RupeeSilver16,
-            RupeeSilver17,
-            RupeeSilver18,
-            RupeeSilver19,
-            RupeeSilver20,
-            RupeeSilver21,
-            RupeeSilver22,
-            RupeeSilver23,
-            RupeeSilver24,
-            RupeeSilver25,
-            RupeeSilver26,
-            RupeeSilver27,
-            RupeeSilver28,
-            RupeeSilver29,
-            RupeeSilver30,
-            RupeeSilver31,
-            RupeeSilver32,
-            RupeeSilver33,
-            RupeeSilver34,
-            RupeeSilver35,
-            RupeeSilver36,
-            RupeeSilver37,
-            RupeeSilver38,
-
-            // 8 Gold Rupees
-            RupeeGold01,
-            RupeeGold02,
-            RupeeGold03,
-            RupeeGold04,
-            RupeeGold05,
-            RupeeGold06,
-            RupeeGold07,
-            RupeeGold08,
-        ];
+        // 8 Gold Rupees
+        RupeeGold01,
+        RupeeGold02,
+        RupeeGold03,
+        RupeeGold04,
+        RupeeGold05,
+        RupeeGold06,
+        RupeeGold07,
+        RupeeGold08,
+    ];
 
 
-    let mut trash = vec![
+    let mut trash_pool = vec![
         HintGlasses,
 
         // 2 Green Rupees
@@ -484,34 +471,76 @@ fn get_items(settings: &Settings, rng: &mut StdRng) -> (Vec<FillerItem>, Vec<Fil
     ];
 
     // Remove the Bee Badge from Hell Logic to keep Bee Boosting viable
-    trash.push(match settings.logic.mode {
+    trash_pool.push(match settings.logic.mode {
         GlitchHell => MonsterHorn,
         _ => BeeBadge
     });
 
     // Swordless Mode
     if settings.logic.swordless_mode {
-        trash.push(MonsterHorn);
-        trash.push(MonsterHorn);
-        trash.push(MonsterHorn);
-        trash.push(MonsterHorn);
+        trash_pool.push(MonsterHorn);
+        trash_pool.push(MonsterHorn);
+        trash_pool.push(MonsterHorn);
+        trash_pool.push(MonsterHorn);
     } else {
-        progression.push(Sword01);
-        progression.push(Sword02);
-        progression.push(Sword03);
-        progression.push(Sword04);
+        progression_items.push(Sword01);
+        progression_items.push(Sword02);
+        progression_items.push(Sword03);
+        progression_items.push(Sword04);
     }
 
     // Super Items
     if settings.logic.super_items {
-        progression.push(Lamp02);
-        progression.push(Net02);
+        progression_items.push(Lamp02);
+        progression_items.push(Net02);
     } else {
-        trash.push(MonsterTail);
-        trash.push(MonsterTail);
+        trash_pool.push(MonsterTail);
+        trash_pool.push(MonsterTail);
     }
 
-    (shuffle_items(progression, rng), shuffle_items(trash, rng))
+    (
+        order_progression_pools(settings, rng, big_keys, small_keys, compasses, progression_items),
+        shuffle_items(trash_pool, rng)
+    )
+}
+
+
+/**
+ * Order the progression items for placement.
+ *
+ * For Keysanity seeds, just combine everything and shuffle.
+ *
+ * For non-Keysanity seeds this means shuffling categories of items amongst themselves, then ordering them:
+ * - Big Keys
+ * - Small Keys
+ * - Compasses
+ * - All other progression
+ */
+fn order_progression_pools(_settings: &Settings,
+                           rng: &mut StdRng,
+                           big_keys: Vec<FillerItem>,
+                           small_keys: Vec<FillerItem>,
+                           compasses: Vec<FillerItem>,
+                           progression: Vec<FillerItem>) -> Vec<FillerItem> {
+    let mut progression_pool;
+
+    let is_keysanity = false; // No Keysanity yet, hardcode this to false
+    if is_keysanity {
+        // Combine all category pools and shuffle
+        progression_pool = big_keys;
+        progression_pool.extend(small_keys);
+        progression_pool.extend(compasses);
+        progression_pool.extend(progression);
+        progression_pool = shuffle_items(progression_pool, rng);
+    } else {
+        // Shuffle respective category pools and order by category
+        progression_pool = shuffle_items(big_keys, rng);
+        progression_pool.extend(shuffle_items(small_keys, rng));
+        progression_pool.extend(shuffle_items(compasses, rng));
+        progression_pool.extend(shuffle_items(progression, rng));
+    }
+
+    progression_pool
 }
 
 /// Shuffles item pool to eliminate placement order bias
@@ -778,19 +807,21 @@ fn assumed_fill(mut world_graph: &mut HashMap<Location, LocationNode>,
     let mut reachable_checks = assumed_search(&mut world_graph, &items_owned, &mut check_map, settings);
 
     while exist_empty_reachable_check(&reachable_checks, &check_map) && !items_owned.is_empty() {
-        let item = items_owned.remove(rng.gen_range(0..items_owned.len()));
+        let item = items_owned.remove(0);
         reachable_checks = assumed_search(&mut world_graph, &items_owned, &mut check_map, settings);
-
 
         let mut filtered_checks = filter_empty_checks(&mut reachable_checks, &mut check_map);
 
-        // Filter reachable locations for dungeons items down to just their dungeon
-        if is_dungeon_item(item) {
-            filtered_checks = filter_dungeon_checks(item, &mut filtered_checks);
-        }
+        // Filter reachable locations for dungeons items down to just their dungeon for non-Keysanity
+        let is_keysanity = false; // No keysanity yet, hardcode to false
+        if !is_keysanity {
+            if is_dungeon_item(item) {
+                filtered_checks = filter_dungeon_checks(item, &mut filtered_checks);
+            }
 
-        if filtered_checks.len() == 0 {
-            info!("No reachable checks found to place: {:?}", item);
+            if filtered_checks.len() == 0 {
+                info!("No reachable checks found to place: {:?}", item);
+            }
         }
 
         place_item_randomly(item, &filtered_checks, &mut check_map, &mut rng);
