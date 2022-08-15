@@ -439,7 +439,7 @@ fn get_item_pools(settings: &Settings, rng: &mut StdRng) -> (Vec<FillerItem>, Ve
         RupeePurple17,
         RupeePurple18,
 
-        // 40 Silver Rupees
+        // 38 Silver Rupees
         RupeeSilver01,
         RupeeSilver02,
         RupeeSilver03,
@@ -478,11 +478,11 @@ fn get_item_pools(settings: &Settings, rng: &mut StdRng) -> (Vec<FillerItem>, Ve
         RupeeSilver36,
         RupeeSilver37,
         RupeeSilver38,
-        RupeeSilver39,
-        RupeeSilver40,
+        //RupeeSilver39, // Cucco Dungeon
+        //RupeeSilver40, // Turtle Rock 1F
         //RupeeSilver41, // FIXME Ku's Domain Silver
 
-        // 10 Gold Rupees
+        // 8 Gold Rupees
         RupeeGold01,
         RupeeGold02,
         RupeeGold03,
@@ -491,8 +491,8 @@ fn get_item_pools(settings: &Settings, rng: &mut StdRng) -> (Vec<FillerItem>, Ve
         RupeeGold06,
         RupeeGold07,
         RupeeGold08,
-        RupeeGold09,
-        RupeeGold10,
+        //RupeeGold09, // Dark Palace 2F
+        //RupeeGold10, // Turtle Rock B1
     ];
 
     progression_items.extend(maiamai_pool());
@@ -853,7 +853,7 @@ fn verify_all_locations_accessible(loc_map: &mut HashMap<Location, LocationNode>
 
     let reachable_checks = assumed_search(loc_map, progression_pool, &mut check_map, settings); //find_reachable_checks(loc_map, &everything, &mut check_map); //
 
-    const TOTAL_CHECKS: usize = 380; // all checks + maiamai + quest checks
+    const TOTAL_CHECKS: usize = 376; // all checks + maiamai + quest checks
     if reachable_checks.len() != TOTAL_CHECKS {
 
         // for rc in &reachable_checks {

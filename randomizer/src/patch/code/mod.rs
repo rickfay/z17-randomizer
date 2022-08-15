@@ -256,7 +256,7 @@ pub fn create(patcher: &Patcher) -> Code {
     // Maiamai
     code.patch(0x514254, [ldr(R1, (R4, 0x30))]);
     // Silver and Gold Rupees
-    code.patch(0x1D6DBC, [ldr(R1, (R4, 0x2E)), mov(R0, R0)]);
+    //code.patch(0x1D6DBC, [ldr(R1, (R4, 0x2E)), mov(R0, R0)]);
     // Premium milk
     let premium_milk = code.text().define([
         ldr(R0, EVENT_FLAG_PTR),

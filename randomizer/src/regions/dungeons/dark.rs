@@ -30,7 +30,7 @@ crate::region! {
             "[PoD] (2F) Big Chest (Hidden)": OreYellow @Chest(3[41]),
             "[PoD] (2F) Alcove": LiverPurple @Chest(3[269]),
             "[PoD] (1F) Fall From 2F": RupeePurple @Chest(2[127]),
-            "[PoD] (2F) South Hidden Room": RupeeGold @GoldRupee(3[166]),
+            //"[PoD] (2F) South Hidden Room": RupeeGold @GoldRupee(3[166]),
         ],
         paths: [
             boss :- {|p| p.has_boss_key(COURSE) && p.can_light()},
