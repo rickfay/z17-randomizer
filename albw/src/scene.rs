@@ -97,6 +97,10 @@ impl Obj {
         &mut self.arg
     }
 
+    pub fn lnk_mut(&mut self) -> &mut Vec<Lnk> {
+        &mut self.lnk
+    }
+
     pub fn set_clp(&mut self, clp: i16) {
         self.clp = clp;
     }

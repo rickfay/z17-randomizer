@@ -114,12 +114,14 @@ impl Patcher {
                 self.parse_args(course, stage, unq).0 = item as i32;
             }
             Patch::Heart { course, scene, unq } |
-            Patch::Key { course, scene, unq } => {
+            Patch::Key { course, scene, unq } |
+            Patch::SilverRupee { course, scene, unq } |
+            Patch::GoldRupee { course, scene, unq } => {
                 self.parse_args(course, scene, unq).1 = item as i32;
             }
-            // Patch::Maiamai { course, scene, unq } => {
-            //     self.parse_args(course, scene, unq).2 = item as i32;
-            // }
+            Patch::Maiamai { course, scene, unq } => {
+                self.parse_args(course, scene, unq).2 = item as i32;
+            }
             Patch::Event {
                 course,
                 name,
@@ -258,11 +260,21 @@ pub enum Patch {
         scene: u16,
         unq: u16,
     },
-    // Maiamai {
-    //     course: course::Id,
-    //     scene: u16,
-    //     unq: u16,
-    // },
+    Maiamai {
+        course: course::Id,
+        scene: u16,
+        unq: u16,
+    },
+    SilverRupee {
+        course: course::Id,
+        scene: u16,
+        unq: u16,
+    },
+    GoldRupee {
+        course: course::Id,
+        scene: u16,
+        unq: u16,
+    },
     Shop(Shop),
     // Multi(Vec<Patch>),
     None, // Workaround until everything is shufflable

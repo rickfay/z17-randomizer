@@ -108,6 +108,9 @@ pub enum FillerItem {
     RupeeSilver36,
     RupeeSilver37,
     RupeeSilver38,
+    RupeeSilver39,
+    RupeeSilver40,
+    //RupeeSilver41,
 
     RupeeGold01,
     RupeeGold02,
@@ -117,6 +120,109 @@ pub enum FillerItem {
     RupeeGold06,
     RupeeGold07,
     RupeeGold08,
+    RupeeGold09,
+    RupeeGold10,
+
+    Maiamai001,
+    Maiamai002,
+    Maiamai003,
+    Maiamai004,
+    Maiamai005,
+    Maiamai006,
+    Maiamai007,
+    Maiamai008,
+    Maiamai009,
+    Maiamai010,
+    Maiamai011,
+    Maiamai012,
+    Maiamai013,
+    Maiamai014,
+    Maiamai015,
+    Maiamai016,
+    Maiamai017,
+    Maiamai018,
+    Maiamai019,
+    Maiamai020,
+    Maiamai021,
+    Maiamai022,
+    Maiamai023,
+    Maiamai024,
+    Maiamai025,
+    Maiamai026,
+    Maiamai027,
+    Maiamai028,
+    Maiamai029,
+    Maiamai030,
+    Maiamai031,
+    Maiamai032,
+    Maiamai033,
+    Maiamai034,
+    Maiamai035,
+    Maiamai036,
+    Maiamai037,
+    Maiamai038,
+    Maiamai039,
+    Maiamai040,
+    Maiamai041,
+    Maiamai042,
+    Maiamai043,
+    Maiamai044,
+    Maiamai045,
+    Maiamai046,
+    Maiamai047,
+    Maiamai048,
+    Maiamai049,
+    Maiamai050,
+    Maiamai051,
+    Maiamai052,
+    Maiamai053,
+    Maiamai054,
+    Maiamai055,
+    Maiamai056,
+    Maiamai057,
+    Maiamai058,
+    Maiamai059,
+    Maiamai060,
+    Maiamai061,
+    Maiamai062,
+    Maiamai063,
+    Maiamai064,
+    Maiamai065,
+    Maiamai066,
+    Maiamai067,
+    Maiamai068,
+    Maiamai069,
+    Maiamai070,
+    Maiamai071,
+    Maiamai072,
+    Maiamai073,
+    Maiamai074,
+    Maiamai075,
+    Maiamai076,
+    Maiamai077,
+    Maiamai078,
+    Maiamai079,
+    Maiamai080,
+    Maiamai081,
+    Maiamai082,
+    Maiamai083,
+    Maiamai084,
+    Maiamai085,
+    Maiamai086,
+    Maiamai087,
+    Maiamai088,
+    Maiamai089,
+    Maiamai090,
+    Maiamai091,
+    Maiamai092,
+    Maiamai093,
+    Maiamai094,
+    Maiamai095,
+    Maiamai096,
+    Maiamai097,
+    Maiamai098,
+    Maiamai099,
+    Maiamai100,
 
     MonsterGuts,
     MonsterHorn,
@@ -475,72 +581,39 @@ pub fn convert(fill_item: FillerItem) -> Option<Item> {
         RupeeBlue => Some(RupeeB),
         RupeeRed => Some(RupeeR),
 
-        RupeePurple01 |
-        RupeePurple02 |
-        RupeePurple03 |
-        RupeePurple04 |
-        RupeePurple05 |
-        RupeePurple06 |
-        RupeePurple07 |
-        RupeePurple08 |
-        RupeePurple09 |
-        RupeePurple10 |
-        RupeePurple11 |
-        RupeePurple12 |
-        RupeePurple13 |
-        RupeePurple14 |
-        RupeePurple15 |
-        RupeePurple16 |
-        RupeePurple17 |
-        RupeePurple18 => Some(RupeePurple),
+        RupeePurple01 | RupeePurple02 | RupeePurple03 | RupeePurple04 | RupeePurple05 |
+        RupeePurple06 | RupeePurple07 | RupeePurple08 | RupeePurple09 | RupeePurple10 |
+        RupeePurple11 | RupeePurple12 | RupeePurple13 | RupeePurple14 | RupeePurple15 |
+        RupeePurple16 | RupeePurple17 | RupeePurple18 => Some(RupeePurple),
 
-        RupeeSilver01 |
-        RupeeSilver02 |
-        RupeeSilver03 |
-        RupeeSilver04 |
-        RupeeSilver05 |
-        RupeeSilver06 |
-        RupeeSilver07 |
-        RupeeSilver08 |
-        RupeeSilver09 |
-        RupeeSilver10 |
-        RupeeSilver11 |
-        RupeeSilver12 |
-        RupeeSilver13 |
-        RupeeSilver14 |
-        RupeeSilver15 |
-        RupeeSilver16 |
-        RupeeSilver17 |
-        RupeeSilver18 |
-        RupeeSilver19 |
-        RupeeSilver20 |
-        RupeeSilver21 |
-        RupeeSilver22 |
-        RupeeSilver23 |
-        RupeeSilver24 |
-        RupeeSilver25 |
-        RupeeSilver26 |
-        RupeeSilver27 |
-        RupeeSilver28 |
-        RupeeSilver29 |
-        RupeeSilver30 |
-        RupeeSilver31 |
-        RupeeSilver32 |
-        RupeeSilver33 |
-        RupeeSilver34 |
-        RupeeSilver35 |
-        RupeeSilver36 |
-        RupeeSilver37 |
-        RupeeSilver38 => Some(RupeeSilver),
+        RupeeSilver01 | RupeeSilver02 | RupeeSilver03 | RupeeSilver04 | RupeeSilver05 |
+        RupeeSilver06 | RupeeSilver07 | RupeeSilver08 | RupeeSilver09 | RupeeSilver10 |
+        RupeeSilver11 | RupeeSilver12 | RupeeSilver13 | RupeeSilver14 | RupeeSilver15 |
+        RupeeSilver16 | RupeeSilver17 | RupeeSilver18 | RupeeSilver19 | RupeeSilver20 |
+        RupeeSilver21 | RupeeSilver22 | RupeeSilver23 | RupeeSilver24 | RupeeSilver25 |
+        RupeeSilver26 | RupeeSilver27 | RupeeSilver28 | RupeeSilver29 | RupeeSilver30 |
+        RupeeSilver31 | RupeeSilver32 | RupeeSilver33 | RupeeSilver34 | RupeeSilver35 |
+        RupeeSilver36 | RupeeSilver37 | RupeeSilver38 | RupeeSilver39 |
+        RupeeSilver40 => Some(RupeeSilver),
 
-        RupeeGold01 |
-        RupeeGold02 |
-        RupeeGold03 |
-        RupeeGold04 |
-        RupeeGold05 |
-        RupeeGold06 |
-        RupeeGold07 |
-        RupeeGold08 => Some(RupeeGold),
+        RupeeGold01 | RupeeGold02 | RupeeGold03 | RupeeGold04 | RupeeGold05 | RupeeGold06 |
+        RupeeGold07 | RupeeGold08 | RupeeGold09 | RupeeGold10 => Some(RupeeGold),
+
+        Maiamai001 | Maiamai002 | Maiamai003 | Maiamai004 | Maiamai005 | Maiamai006 | Maiamai007 |
+        Maiamai008 | Maiamai009 | Maiamai010 | Maiamai011 | Maiamai012 | Maiamai013 | Maiamai014 |
+        Maiamai015 | Maiamai016 | Maiamai017 | Maiamai018 | Maiamai019 | Maiamai020 | Maiamai021 |
+        Maiamai022 | Maiamai023 | Maiamai024 | Maiamai025 | Maiamai026 | Maiamai027 | Maiamai028 |
+        Maiamai029 | Maiamai030 | Maiamai031 | Maiamai032 | Maiamai033 | Maiamai034 | Maiamai035 |
+        Maiamai036 | Maiamai037 | Maiamai038 | Maiamai039 | Maiamai040 | Maiamai041 | Maiamai042 |
+        Maiamai043 | Maiamai044 | Maiamai045 | Maiamai046 | Maiamai047 | Maiamai048 | Maiamai049 |
+        Maiamai050 | Maiamai051 | Maiamai052 | Maiamai053 | Maiamai054 | Maiamai055 | Maiamai056 |
+        Maiamai057 | Maiamai058 | Maiamai059 | Maiamai060 | Maiamai061 | Maiamai062 | Maiamai063 |
+        Maiamai064 | Maiamai065 | Maiamai066 | Maiamai067 | Maiamai068 | Maiamai069 | Maiamai070 |
+        Maiamai071 | Maiamai072 | Maiamai073 | Maiamai074 | Maiamai075 | Maiamai076 | Maiamai077 |
+        Maiamai078 | Maiamai079 | Maiamai080 | Maiamai081 | Maiamai082 | Maiamai083 | Maiamai084 |
+        Maiamai085 | Maiamai086 | Maiamai087 | Maiamai088 | Maiamai089 | Maiamai090 | Maiamai091 |
+        Maiamai092 | Maiamai093 | Maiamai094 | Maiamai095 | Maiamai096 | Maiamai097 | Maiamai098 |
+        Maiamai099 | Maiamai100 => Some(Kinsta),
 
         MonsterGuts => Some(LiverPurple),
         MonsterHorn => Some(LiverYellow),

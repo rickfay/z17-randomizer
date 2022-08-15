@@ -95,6 +95,7 @@ regions! {
         eastern;
         southern;
         lake;
+        maiamai;
     }
     lorule(Lorule) {
         field;
@@ -104,6 +105,7 @@ regions! {
         dark;
         misery;
         lake;
+        maiamai;
     }
 }
 
@@ -296,6 +298,18 @@ macro_rules! patch {
     };
     (Maiamai($scene:literal[$unq:literal])) => {
         Patch::Maiamai { course: COURSE, scene: $scene - 1, unq: $unq }
+    };
+    (SilverRupee($course:ident $scene:literal[$unq:literal])) => {
+        Patch::SilverRupee { course: albw::course::Id::$course, scene: $scene - 1, unq: $unq }
+    };
+    (SilverRupee($scene:literal[$unq:literal])) => {
+        Patch::SilverRupee { course: COURSE, scene: $scene - 1, unq: $unq }
+    };
+    (GoldRupee($course:ident $scene:literal[$unq:literal])) => {
+        Patch::GoldRupee { course: albw::course::Id::$course, scene: $scene - 1, unq: $unq }
+    };
+    (GoldRupee($scene:literal[$unq:literal])) => {
+        Patch::GoldRupee { course: COURSE, scene: $scene - 1, unq: $unq }
     };
     (Shop($variant:ident$($args:tt)?)) => {
         Patch::Shop(crate::patch::Shop::$variant $($args)?)

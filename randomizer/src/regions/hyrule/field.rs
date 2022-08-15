@@ -13,6 +13,7 @@ crate::region! {
             "Blacksmith": ItemSwordLv3 @Event(IndoorLight/FieldLight_22_BlackSmith[0x16]) :- {|p| p.can_merge() && p.ore() >= 2},
             "Castle Rocks": HeartPiece @Heart(18[209]) :- can_lift,
             "Rosso": PowerGlove @Chest(IndoorLight 10[7]) :- {|p| p.did_eastern() || p.can_merge()},
+            "Cucco Dungeon": RupeeSilver @SilverRupee(AttractionLight 3[9]),
         ],
         paths: [
             rentals,

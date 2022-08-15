@@ -406,7 +406,7 @@ pub fn apply(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
         IndoorLight 1 {
 
             // For quick testing/debugging
-            // [24].redirect(15, 0, 35), // Ice Rod Cave Right Entrance
+            //[24].redirect(0, 1, 6),
 
             // Convert standing Ravio into shopkeeper Ravio
             [56].call {|obj: &mut Obj| {

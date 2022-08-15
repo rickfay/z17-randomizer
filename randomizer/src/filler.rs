@@ -30,6 +30,7 @@ pub fn fill_stuff(settings: &Settings, seed: Seed) -> Vec<(LocationInfo, Item)> 
         GlitchHell => "Glitched (Hell) - Did you really mean to choose this?",
         NoLogic => "No Logic",
     });
+    info!("Maiamai:                        {}", if settings.logic.maiamai_madness {"Shuffled"} else {"Not Shuffled"});
     info!("Super Items:                    {}", if settings.logic.super_items {"Included"} else {"Not Included"});
     info!("Trials:                         {}", if settings.logic.skip_trials {"Skipped"} else {"Normal"});
     info!("Dark Rooms:                     {}", if settings.logic.lampless {"Lamp Not Required"} else {"Lamp Required"});
@@ -39,6 +40,7 @@ pub fn fill_stuff(settings: &Settings, seed: Seed) -> Vec<(LocationInfo, Item)> 
 
     let mut world_graph = build_world_graph();
     let mut check_map = prefill_check_map(&mut world_graph);
+
     let (
         mut progression_pool,
         mut trash_pool
@@ -63,17 +65,20 @@ fn preplace_items<'a>(check_map: &mut HashMap<&'a str, Option<FillerItem>>,
                       rng: &mut StdRng,
                       progression: &mut Vec<FillerItem>,
                       trash: &mut Vec<FillerItem>) {
-    check_map.insert("Shore", Some(LetterInABottle));
-    progression.retain(|x| *x != LetterInABottle);
+
+    place_static(check_map, progression, LetterInABottle, "Shore");
 
     let mut shop_positions: Vec<&str> = Vec::new();
     let mut lorule_castle_positions: Vec<&str> = Vec::new();
+    let mut maiamai_positions: Vec<&str> = Vec::new();
 
     for (check_name, item) in check_map.clone() {
         if check_name.starts_with("[LC]") && item.is_none() {
             let _ = &lorule_castle_positions.push(check_name);
         } else if check_name.starts_with("Ravio") && !check_name.contains("6") {
             let _ = &shop_positions.push(check_name);
+        } else if check_name.starts_with("[Mai]") {
+            let _ = &maiamai_positions.push(check_name);
         }
     }
 
@@ -105,11 +110,6 @@ fn preplace_items<'a>(check_map: &mut HashMap<&'a str, Option<FillerItem>>,
         progression.retain(|x| *x != weapon);
     }
 
-    // if settings.logic.sword_in_shop {
-    //     check_map.insert(shop_positions.remove(rng.gen_range(0..shop_positions.len())), Some(Sword01));
-    //     progression.retain(|x| *x != Sword01);
-    // }
-
     if settings.logic.bell_in_shop {
         check_map.insert(shop_positions.remove(rng.gen_range(0..shop_positions.len())), Some(Bell));
         progression.retain(|x| *x != Bell);
@@ -125,6 +125,7 @@ fn preplace_items<'a>(check_map: &mut HashMap<&'a str, Option<FillerItem>>,
         progression.retain(|x| *x != PegasusBoots);
     }
 
+    // Exclude Minigames
     if settings.logic.minigames_excluded {
         exclude("Cucco Ranch", rng, check_map, trash);
         exclude("Hyrule Hotfoot", rng, check_map, trash);
@@ -132,13 +133,34 @@ fn preplace_items<'a>(check_map: &mut HashMap<&'a str, Option<FillerItem>>,
         exclude("Rupee Rush (Lorule)", rng, check_map, trash);
         exclude("Octoball Derby", rng, check_map, trash);
         exclude("Treacherous Tower (Intermediate)", rng, check_map, trash);
+
+        // For Maiamai Madness, also turn the rupee rush maiamai into random trash
+        if settings.logic.maiamai_madness {
+            exclude("[Mai] Hyrule Rupee Rush Wall", rng, check_map, trash);
+            exclude("[Mai] Lorule Rupee Rush Wall", rng, check_map, trash);
+        }
+    }
+
+    // For non-Maiamai Madness seeds, default them to Maiamai
+    if !settings.logic.maiamai_madness {
+        let mut maiamai_items = maiamai_pool();
+        for check_name in maiamai_positions {
+            // FIXME Inefficient to add Maiamai to progression pool, shuffle, then remove them
+            place_static(check_map, progression, maiamai_items.remove(0), check_name);
+        }
     }
 }
 
+// Statically place an item in a give location, then remove it from the item pool provided
+fn place_static<'a>(check_map: &mut HashMap<&'a str, Option<FillerItem>>, pool: &mut Vec<FillerItem>, item: FillerItem, check_name: &'a str) {
+    check_map.insert(check_name, Some(item));
+    pool.retain(|x| *x != item);
+}
+
+// Exclude a location by placing a random trash item there
 fn exclude(check_name: &'static str, rng: &mut StdRng, check_map: &mut HashMap<&str, Option<FillerItem>>, trash: &mut Vec<FillerItem>) {
     check_map.insert(check_name, Some(trash.remove(rng.gen_range(0..trash.len()))));
 }
-
 
 fn handle_exclusions<'a>(check_map: &mut HashMap<&'a str, Option<FillerItem>>,
                          settings: &'a Settings,
@@ -175,6 +197,111 @@ fn map_to_result(world_graph: HashMap<Location, LocationNode>, check_map: HashMa
         }
     }
     result
+}
+
+fn maiamai_pool() -> Vec<FillerItem> {
+    vec![
+        Maiamai001,
+        Maiamai002,
+        Maiamai003,
+        Maiamai004,
+        Maiamai005,
+        Maiamai006,
+        Maiamai007,
+        Maiamai008,
+        Maiamai009,
+        Maiamai010,
+        Maiamai011,
+        Maiamai012,
+        Maiamai013,
+        Maiamai014,
+        Maiamai015,
+        Maiamai016,
+        Maiamai017,
+        Maiamai018,
+        Maiamai019,
+        Maiamai020,
+        Maiamai021,
+        Maiamai022,
+        Maiamai023,
+        Maiamai024,
+        Maiamai025,
+        Maiamai026,
+        Maiamai027,
+        Maiamai028,
+        Maiamai029,
+        Maiamai030,
+        Maiamai031,
+        Maiamai032,
+        Maiamai033,
+        Maiamai034,
+        Maiamai035,
+        Maiamai036,
+        Maiamai037,
+        Maiamai038,
+        Maiamai039,
+        Maiamai040,
+        Maiamai041,
+        Maiamai042,
+        Maiamai043,
+        Maiamai044,
+        Maiamai045,
+        Maiamai046,
+        Maiamai047,
+        Maiamai048,
+        Maiamai049,
+        Maiamai050,
+        Maiamai051,
+        Maiamai052,
+        Maiamai053,
+        Maiamai054,
+        Maiamai055,
+        Maiamai056,
+        Maiamai057,
+        Maiamai058,
+        Maiamai059,
+        Maiamai060,
+        Maiamai061,
+        Maiamai062,
+        Maiamai063,
+        Maiamai064,
+        Maiamai065,
+        Maiamai066,
+        Maiamai067,
+        Maiamai068,
+        Maiamai069,
+        Maiamai070,
+        Maiamai071,
+        Maiamai072,
+        Maiamai073,
+        Maiamai074,
+        Maiamai075,
+        Maiamai076,
+        Maiamai077,
+        Maiamai078,
+        Maiamai079,
+        Maiamai080,
+        Maiamai081,
+        Maiamai082,
+        Maiamai083,
+        Maiamai084,
+        Maiamai085,
+        Maiamai086,
+        Maiamai087,
+        Maiamai088,
+        Maiamai089,
+        Maiamai090,
+        Maiamai091,
+        Maiamai092,
+        Maiamai093,
+        Maiamai094,
+        Maiamai095,
+        Maiamai096,
+        Maiamai097,
+        Maiamai098,
+        Maiamai099,
+        Maiamai100
+    ]
 }
 
 fn get_item_pools(settings: &Settings, rng: &mut StdRng) -> (Vec<FillerItem>, Vec<FillerItem>) {
@@ -312,7 +439,7 @@ fn get_item_pools(settings: &Settings, rng: &mut StdRng) -> (Vec<FillerItem>, Ve
         RupeePurple17,
         RupeePurple18,
 
-        // 38 Silver Rupees
+        // 40 Silver Rupees
         RupeeSilver01,
         RupeeSilver02,
         RupeeSilver03,
@@ -351,8 +478,11 @@ fn get_item_pools(settings: &Settings, rng: &mut StdRng) -> (Vec<FillerItem>, Ve
         RupeeSilver36,
         RupeeSilver37,
         RupeeSilver38,
+        RupeeSilver39,
+        RupeeSilver40,
+        //RupeeSilver41, // FIXME Ku's Domain Silver
 
-        // 8 Gold Rupees
+        // 10 Gold Rupees
         RupeeGold01,
         RupeeGold02,
         RupeeGold03,
@@ -361,8 +491,11 @@ fn get_item_pools(settings: &Settings, rng: &mut StdRng) -> (Vec<FillerItem>, Ve
         RupeeGold06,
         RupeeGold07,
         RupeeGold08,
+        RupeeGold09,
+        RupeeGold10,
     ];
 
+    progression_items.extend(maiamai_pool());
 
     let mut trash_pool = vec![
         HintGlasses,
@@ -720,7 +853,7 @@ fn verify_all_locations_accessible(loc_map: &mut HashMap<Location, LocationNode>
 
     let reachable_checks = assumed_search(loc_map, progression_pool, &mut check_map, settings); //find_reachable_checks(loc_map, &everything, &mut check_map); //
 
-    const TOTAL_CHECKS: usize = 276; // all checks + quest checks
+    const TOTAL_CHECKS: usize = 380; // all checks + maiamai + quest checks
     if reachable_checks.len() != TOTAL_CHECKS {
 
         // for rc in &reachable_checks {

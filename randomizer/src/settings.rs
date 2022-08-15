@@ -60,6 +60,8 @@ pub struct Logic {
     pub bow_of_light_in_castle: bool,
     /// Lamp Requirement. If enabled, the player may have to cross dark rooms without Lamp
     pub lampless: bool,
+    /// Maiamai Madness
+    pub maiamai_madness: bool,
 }
 
 /// Settings to change the randomizer's logic checks.

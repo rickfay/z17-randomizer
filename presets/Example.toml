@@ -10,6 +10,8 @@ bell_in_shop = false
 pouch_in_shop = false
 ## The Pegasus Boots will be placed in Ravio's Shop
 boots_in_shop = false
+## Maiamai Madness. Shuffles Maiamai into the pool, adding 100 more locations
+maiamai_madness = true
 ## Include the Super Lamp and Super Net in the shuffled item pool
 super_items = false
 ## Exclude all minigames (Cucco Ranch, both Rupee Rushes, Hyrule Hotfoot, Treacherous Tower, and Octoball Derby)

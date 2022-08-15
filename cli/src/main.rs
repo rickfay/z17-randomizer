@@ -121,6 +121,7 @@ fn preset_ui() -> Settings {
     let pouch_in_shop = prompt_until_bool("Guarantee Pouch in Ravio's Shop?");
     let boots_in_shop = prompt_until_bool("Guarantee Pegasus Boots in Ravio's Shop?");
 
+    let maiamai_madness = prompt_until_bool("Enable Maiamai Madness? This shuffles Maiamai into the pool, adding 100 more locations.");
     let super_items = prompt_until_bool("Include the Super Lamp and Super Net?");
     let minigames_excluded = prompt_until_bool("Exclude all minigames?");
     let skip_trials = prompt_until_bool("Skip the Lorule Castle Trials?");
@@ -139,6 +140,7 @@ fn preset_ui() -> Settings {
             bell_in_shop,
             pouch_in_shop,
             boots_in_shop,
+            maiamai_madness,
             super_items,
             //glitched_logic,
             minigames_excluded,

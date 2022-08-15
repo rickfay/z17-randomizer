@@ -253,6 +253,10 @@ pub fn create(patcher: &Patcher) -> Code {
     code.patch(0x33497C, [ldr(R1, (R4, 0x2E)), mov(R0, R0)]);
     // Keys
     code.patch(0x192E58, [ldr(R1, (R4, 0x2E))]);
+    // Maiamai
+    code.patch(0x514254, [ldr(R1, (R4, 0x30))]);
+    // Silver and Gold Rupees
+    code.patch(0x1D6DBC, [ldr(R1, (R4, 0x2E)), mov(R0, R0)]);
     // Premium milk
     let premium_milk = code.text().define([
         ldr(R0, EVENT_FLAG_PTR),
@@ -506,7 +510,7 @@ const ACTOR_NAME_OFFSETS: [(Item, u32); 29] = [
     (Item::HeartPiece, 0x5D7B94),
 ];
 
-const ACTOR_NAMES: [(Item, &str); 29] = [
+const ACTOR_NAMES: [(Item, &str); 30] = [
     (Item::KeyBoss, "KeyBoss"),
     (Item::Compass, "Compass"),
     (Item::ItemKandelaar, "GtEvKandelaar"),
@@ -536,6 +540,7 @@ const ACTOR_NAMES: [(Item, &str); 29] = [
     (Item::ItemHammerLv2, "GtEvHammerB"),
     (Item::ItemBowLv2, "GtEvBowB"),
     (Item::MilkMatured, "GtEvBottleMedicine"), // Red Milk lol
+    (Item::Kinsta, "KinSta"),
 ];
 
 const ITEM_NAME_OFFSETS: [(Item, u32); 23] = [
@@ -564,7 +569,7 @@ const ITEM_NAME_OFFSETS: [(Item, u32); 23] = [
     (Item::ItemStoneBeauty, 0x6F9D56),
 ];
 
-const ITEM_NAMES: [(Item, &str); 25] = [
+const ITEM_NAMES: [(Item, &str); 26] = [
     (Item::HeartContainer, "heartcontioner"),
     (Item::HeartPiece, "heartpiece"),
     (Item::ItemBell, "bell"),
@@ -590,6 +595,7 @@ const ITEM_NAMES: [(Item, &str); 25] = [
     (Item::OreGreen, "ore"),
     (Item::OreBlue, "ore"),
     (Item::OreRed, "ore"),
+    (Item::Kinsta, "kinsta"),
 ];
 
 const SET_EVENT_FLAG_FN: u32 = 0x4CDF40;
