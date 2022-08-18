@@ -593,8 +593,8 @@ pub fn convert(fill_item: FillerItem) -> Option<Item> {
         RupeeSilver21 | RupeeSilver22 | RupeeSilver23 | RupeeSilver24 | RupeeSilver25 |
         RupeeSilver26 | RupeeSilver27 | RupeeSilver28 | RupeeSilver29 | RupeeSilver30 |
         RupeeSilver31 | RupeeSilver32 | RupeeSilver33 | RupeeSilver34 | RupeeSilver35 |
-        RupeeSilver36 | RupeeSilver37 | RupeeSilver38 | RupeeSilver39 |
-        RupeeSilver40 => Some(RupeeSilver),
+        RupeeSilver36 | RupeeSilver37 | RupeeSilver38 | RupeeSilver39 | RupeeSilver40
+        => Some(RupeeSilver),
 
         RupeeGold01 | RupeeGold02 | RupeeGold03 | RupeeGold04 | RupeeGold05 | RupeeGold06 |
         RupeeGold07 | RupeeGold08 | RupeeGold09 | RupeeGold10 => Some(RupeeGold),

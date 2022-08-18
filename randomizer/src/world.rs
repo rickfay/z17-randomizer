@@ -583,7 +583,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             portal(LoruleCastleField),
         ])),
         (CuccoDungeon, location("Cucco Dungeon", vec![
-            //check_free(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Cucco Dungeon")),
+            check_free(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Cucco Dungeon")),
         ], vec![
             path_free(CuccoDungeonLedge),
         ])),
@@ -3087,7 +3087,7 @@ fn dark_palace() -> HashMap<Location, LocationNode> {
         (DarkPalaceLockedDoors, location("Dark Palace Locked Doors", vec![
             check_free(LocationInfo::new(regions::dungeons::dark::floor2::SUBREGION, "[PoD] (1F) Fall From 2F")),
             check_free(LocationInfo::new(regions::dungeons::dark::floor2::SUBREGION, "[PoD] (2F) Big Chest (Hidden)")),
-            //check_free(LocationInfo::new(regions::dungeons::dark::floor2::SUBREGION, "[PoD] (2F) South Hidden Room")),
+            check_free(LocationInfo::new(regions::dungeons::dark::floor2::SUBREGION, "[PoD] (2F) South Hidden Room")),
             check(LocationInfo::new(regions::dungeons::dark::floor2::SUBREGION, "[PoD] (2F) Alcove"),
                   Some(|p| p.can_merge()),
                   None,
@@ -3878,8 +3878,8 @@ fn turtle_rock() -> HashMap<Location, LocationNode> {
                   None,
                   None,
             ),
-            //check_free(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "[TR] (1F) Under Center")),
-            //check_free(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "[TR] (B1) Under Center")),
+            check_free(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "[TR] (1F) Under Center")),
+            check_free(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "[TR] (B1) Under Center")),
         ], vec![
             path(TurtleRockFoyer,
                  Some(|p| p.has_ice_rod()),

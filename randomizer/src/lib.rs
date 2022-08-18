@@ -791,7 +791,7 @@ pub fn plando() -> Result<(), Error> {
     layout.set(LocationInfo::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (2)"), Kinsta);
     layout.set(LocationInfo::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (3)"), Kinsta);
     layout.set(LocationInfo::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (4)"), Kinsta);
-    layout.set(LocationInfo::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (5)"), ItemIceRod);
+    layout.set(LocationInfo::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (5)"), ItemMizukaki);
     layout.set(LocationInfo::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (6)"), Kinsta);
     layout.set(LocationInfo::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (7)"), Kinsta);
     layout.set(LocationInfo::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (8)"), Kinsta);
@@ -828,7 +828,6 @@ pub fn plando() -> Result<(), Error> {
     layout.set(LocationInfo::new(regions::hyrule::sanctuary::inside::SUBREGION, "[HS] Ledge"), RupeeGold);
 
     // Kakariko
-    layout.set(LocationInfo::new(regions::hyrule::kakariko::village::SUBREGION, "Bush Maiamai"), SpecialMove);
     layout.set(LocationInfo::new(regions::hyrule::kakariko::village::SUBREGION, "Well (Chest)"), Kinsta);
     layout.set(LocationInfo::new(regions::hyrule::kakariko::village::SUBREGION, "Well (Upper)"), Kinsta);
     layout.set(LocationInfo::new(regions::hyrule::kakariko::village::SUBREGION, "Jail"), RupeeGold);
@@ -844,7 +843,7 @@ pub fn plando() -> Result<(), Error> {
 
     // Zora's Domain
     layout.set(LocationInfo::new(regions::hyrule::zoras::domain::SUBREGION, "Zora's Domain Ledge Chest"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::zoras::domain::SUBREGION, "Behind Waterfall"), ItemSwordLv1);
+    layout.set(LocationInfo::new(regions::hyrule::zoras::domain::SUBREGION, "Behind Waterfall"), Kinsta);
     layout.set(LocationInfo::new(regions::hyrule::zoras::domain::SUBREGION, "Zora Queen"), RupeeGold);
 
     // Eastern Ruins
@@ -945,7 +944,7 @@ pub fn plando() -> Result<(), Error> {
     layout.set(LocationInfo::new(regions::hyrule::maiamai::maiamai::SUBREGION, "[Mai] Inside Witch's House"), RupeeGold);
     layout.set(LocationInfo::new(regions::hyrule::maiamai::maiamai::SUBREGION, "[Mai] Kakariko Bush"), RupeeGold);
     layout.set(LocationInfo::new(regions::hyrule::maiamai::maiamai::SUBREGION, "[Mai] Woman's Roof Rock"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::maiamai::maiamai::SUBREGION, "[Mai] Kakariko Sand"), RupeeGold);
+    layout.set(LocationInfo::new(regions::hyrule::maiamai::maiamai::SUBREGION, "[Mai] Kakariko Sand"), ItemBowLight);
     layout.set(LocationInfo::new(regions::hyrule::maiamai::maiamai::SUBREGION, "[Mai] Hyrule Rupee Rush Wall"), RupeeGold);
     layout.set(LocationInfo::new(regions::hyrule::maiamai::maiamai::SUBREGION, "[Mai] Cucco Ranch Tree"), RupeeGold);
     layout.set(LocationInfo::new(regions::hyrule::maiamai::maiamai::SUBREGION, "[Mai] Cucco Dungeon Big Rock"), RupeeGold);

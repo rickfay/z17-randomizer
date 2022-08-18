@@ -196,6 +196,9 @@ pub fn plando_settings() -> Settings {
         logic: Logic {
             ..Default::default()
         },
+        options: Options {
+            night_mode: false
+        },
         ..Default::default()
     }
 }

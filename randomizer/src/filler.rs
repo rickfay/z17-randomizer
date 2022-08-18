@@ -67,6 +67,10 @@ fn preplace_items<'a>(check_map: &mut HashMap<&'a str, Option<FillerItem>>,
                       trash: &mut Vec<FillerItem>) {
 
     place_static(check_map, progression, LetterInABottle, "Shore");
+    place_static(check_map, progression, RupeeSilver39, "Cucco Dungeon");
+    place_static(check_map, progression, RupeeSilver40, "[TR] (1F) Under Center");
+    place_static(check_map, progression, RupeeGold09, "[TR] (B1) Under Center");
+    place_static(check_map, progression, RupeeGold10, "[PoD] (2F) South Hidden Room");
 
     let mut shop_positions: Vec<&str> = Vec::new();
     let mut lorule_castle_positions: Vec<&str> = Vec::new();
@@ -478,8 +482,8 @@ fn get_item_pools(settings: &Settings, rng: &mut StdRng) -> (Vec<FillerItem>, Ve
         RupeeSilver36,
         RupeeSilver37,
         RupeeSilver38,
-        //RupeeSilver39, // Cucco Dungeon
-        //RupeeSilver40, // Turtle Rock 1F
+        RupeeSilver39, // Cucco Dungeon
+        RupeeSilver40, // Turtle Rock 1F
         //RupeeSilver41, // FIXME Ku's Domain Silver
 
         // 8 Gold Rupees
@@ -491,8 +495,8 @@ fn get_item_pools(settings: &Settings, rng: &mut StdRng) -> (Vec<FillerItem>, Ve
         RupeeGold06,
         RupeeGold07,
         RupeeGold08,
-        //RupeeGold09, // Dark Palace 2F
-        //RupeeGold10, // Turtle Rock B1
+        RupeeGold09, // Dark Palace 2F
+        RupeeGold10, // Turtle Rock B1
     ];
 
     progression_items.extend(maiamai_pool());
@@ -853,7 +857,7 @@ fn verify_all_locations_accessible(loc_map: &mut HashMap<Location, LocationNode>
 
     let reachable_checks = assumed_search(loc_map, progression_pool, &mut check_map, settings); //find_reachable_checks(loc_map, &everything, &mut check_map); //
 
-    const TOTAL_CHECKS: usize = 376; // all checks + maiamai + quest checks
+    const TOTAL_CHECKS: usize = 380; // all checks + maiamai + quest checks
     if reachable_checks.len() != TOTAL_CHECKS {
 
         // for rc in &reachable_checks {
