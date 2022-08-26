@@ -377,8 +377,6 @@ This mode is intended for players who want to use some of the game's many glitch
     - Miniboss Skip with Pegasus Boots
   - Thieves' Hideout:
     - Jailbreak to activate switches and reach B2 without merge
-  - Desert Palace
-    - Defeat Zaganaga with just Bow or just Sword Beams
 
 ### Glitched (Advanced) Logic
 
@@ -435,7 +433,9 @@ This mode logically includes every known RTA-viable glitch, including those that
   - Catching a natural Golden Bee before Lorule with Bottle + Net
   - Bomb Boosts with Regular Bombs
   - Enemy Clips with the Sand Rod
-  - Desert Palace Skip via Portal Clipping with Hookshot/Boomerang + Tornado Rod
+  - Desert Palace
+    - Skip via Portal Clipping with Hookshot/Boomerang + Tornado Rod
+    - Defeat Zaganaga with just Bow or just Sword Beams
 
 ### No Logic
 
