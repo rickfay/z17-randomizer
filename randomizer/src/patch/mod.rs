@@ -366,7 +366,6 @@ fn cutscenes<'game, 'settings>(
     game: &'game Game,
     settings: &'settings Settings,
 ) -> impl Iterator<Item=Result<File<Demo>>> + 'game {
-
     let Settings { logic, options, .. } = settings.clone();
     let early = iter::once_with(move || {
         let mut opening = game.demo(0)?.map(truncate_cutscene);
@@ -433,6 +432,36 @@ fn cutscenes<'game, 'settings>(
 
             if options.night_mode {
                 opening.add_event_flag(964); // Night Mode
+            }
+
+            if logic.vanes_activated {
+                for flag in array::IntoIter::new([
+                    920, //	Your House Weather Vane
+                    921, //	Kakariko Village Weather Vane
+                    922, //	Eastern Palace Weather Vane
+                    923, //	House of Gales Weather Vane
+                    924, //	Tower of Hera Weather Vane
+                    925, //	Witch's House Weather Vane
+                    926, //	Death Mountain (Hyrule) Weather Vane
+                    927, //	Desert Palace Weather Vane
+                    928, //	Sanctuary Weather Vane
+
+                    932, //	Skull Woods Weather Vane
+                    933, //	Treacherous Tower Weather Vane
+                    934, //	Ice Ruins Weather Vane
+                    935, //	Lorule Castle Weather Vane
+                    936, //	Graveyard Weather Vane
+                    937, //	Thieves' Town Weather Vane
+                    938, //	Dark Palace Weather Vane
+                    939, //	Blacksmith Weather Vane
+                    940, //	Vacant House Weather Vane
+                    941, //	Misery Mire Weather Vane
+                    942, //	Swamp Palace Weather Vane
+                    943, //	Turtle Rock Weather Vane
+                    944, //	Death Mountain (Lorule) Weather Vane
+                ]) {
+                    opening.add_event_flag(flag);
+                }
             }
         }
 

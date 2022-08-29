@@ -2,7 +2,6 @@ use std::collections::HashSet;
 
 use crate::filler_item::FillerItem;
 use crate::filler_item::FillerItem::*;
-use crate::logic_mode::LogicMode;
 use crate::Settings;
 
 #[derive(Clone)]
@@ -117,70 +116,7 @@ impl Progress {
     }
 
     pub fn has_nice_bombs(&self) -> bool {
-        self.has_either(Bombs01, Bombs02) && self.can_get_10_maiamai()
-    }
-
-    // Dirty function to determine if 10 maiamai are available
-    // TODO put Maiamai into the world graph and calculate this dynamically
-    fn can_get_10_maiamai(&self) -> bool {
-
-        // Merge or Boots enable more than 10, easy logic if we have them
-        if self.can_merge() || self.has_boots() {
-            true
-        } else {
-
-            // 2 Maiamai initially available under bushes in Kakariko and Lost Woods
-            let mut maiamai = 2;
-
-            // Power Glove
-            if self.has_power_glove() {
-                maiamai += 3; // LW, DM West, Kak Rooftop. DM East needs Merge or Boots.
-
-                // Kakariko path to Lost Woods Maiamai
-                if self.has_hammer() || self.has_titans_mitt()
-                    || ((self.settings.logic.mode == LogicMode::GlitchBasic ||
-                    self.settings.logic.mode == LogicMode::GlitchAdvanced ||
-                    self.settings.logic.mode == LogicMode::GlitchHell)
-                    && (self.has_hookshot() || (self.has_boomerang() && self.can_escape()))) {
-                    maiamai += 1;
-                }
-            }
-
-            // Titan's Mitt
-            if self.has_titans_mitt() {
-                maiamai += 2; // Southern Ruins and Moldorm Cave Big Rocks. Others require Merge
-            }
-
-            // Sand Rod
-            if self.has_sand_rod() {
-                maiamai += 1;
-            }
-
-            // Tornado Rod
-            if self.has_tornado_rod() {
-                maiamai += 2;
-
-                // House of Gales Wind Tile
-                if self.has_flippers() || ((
-                    self.settings.logic.mode == LogicMode::GlitchAdvanced ||
-                        self.settings.logic.mode == LogicMode::GlitchHell) &&
-                    (self.has_hookshot() && self.has_ice_rod())) {
-                    maiamai += 1;
-                }
-            }
-
-            // Flippers - Not including Zora's Domain as that needs Merge or Bee Boost
-            if self.has_flippers() {
-                maiamai += 6;
-
-                // Southern Ruins bomb cave
-                if self.has_bombs() {
-                    maiamai += 1;
-                }
-            }
-
-            maiamai >= 10
-        }
+        self.has_either(Bombs01, Bombs02) && self.has_maiamai(10)
     }
 
     pub fn has_fire_rod(&self) -> bool {
@@ -217,6 +153,10 @@ impl Progress {
 
     pub fn has_bell(&self) -> bool {
         self.has(Bell)
+    }
+
+    pub fn are_vanes_activated(&self) -> bool {
+        self.settings.logic.vanes_activated
     }
 
     pub fn can_escape(&self) -> bool {
@@ -263,16 +203,32 @@ impl Progress {
         self.has_both(RaviosBracelet01, RaviosBracelet02)
     }
 
-    // pub fn has_maiamai(self, amount: u8) -> bool { // TODO maiamai everything
-    //     self.maiamai >= amount
-    // }
-
     pub fn has_mail(&self) -> bool {
         self.has_either(Mail01, Mail02)
     }
 
     pub fn has_master_ore(&self, amount: u8) -> bool {
         self.has_amount(amount, &[OreRed, OreGreen, OreBlue, OreYellow])
+    }
+
+    pub fn has_maiamai(&self, amount: u8) -> bool {
+        self.has_amount(amount, &[
+            Maiamai001, Maiamai002, Maiamai003, Maiamai004, Maiamai005, Maiamai006, Maiamai007,
+            Maiamai008, Maiamai009, Maiamai010, Maiamai011, Maiamai012, Maiamai013, Maiamai014,
+            Maiamai015, Maiamai016, Maiamai017, Maiamai018, Maiamai019, Maiamai020, Maiamai021,
+            Maiamai022, Maiamai023, Maiamai024, Maiamai025, Maiamai026, Maiamai027, Maiamai028,
+            Maiamai029, Maiamai030, Maiamai031, Maiamai032, Maiamai033, Maiamai034, Maiamai035,
+            Maiamai036, Maiamai037, Maiamai038, Maiamai039, Maiamai040, Maiamai041, Maiamai042,
+            Maiamai043, Maiamai044, Maiamai045, Maiamai046, Maiamai047, Maiamai048, Maiamai049,
+            Maiamai050, Maiamai051, Maiamai052, Maiamai053, Maiamai054, Maiamai055, Maiamai056,
+            Maiamai057, Maiamai058, Maiamai059, Maiamai060, Maiamai061, Maiamai062, Maiamai063,
+            Maiamai064, Maiamai065, Maiamai066, Maiamai067, Maiamai068, Maiamai069, Maiamai070,
+            Maiamai071, Maiamai072, Maiamai073, Maiamai074, Maiamai075, Maiamai076, Maiamai077,
+            Maiamai078, Maiamai079, Maiamai080, Maiamai081, Maiamai082, Maiamai083, Maiamai084,
+            Maiamai085, Maiamai086, Maiamai087, Maiamai088, Maiamai089, Maiamai090, Maiamai091,
+            Maiamai092, Maiamai093, Maiamai094, Maiamai095, Maiamai096, Maiamai097, Maiamai098,
+            Maiamai099, Maiamai100,
+        ])
     }
 
     pub fn has_smooth_gem(&self) -> bool {
@@ -565,6 +521,10 @@ impl Progress {
 
     pub fn has_skull_eyes(&self) -> bool {
         self.has_both(SkullEyeLeft, SkullEyeRight)
+    }
+
+    pub fn can_rescue_turtles(&self) -> bool {
+        self.has(TurtleFlipped) && self.has(TurtleAttacked) && self.has(TurtleWall)
     }
 
     pub fn has_bomb_flower(&self) -> bool {

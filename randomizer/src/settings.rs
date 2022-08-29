@@ -62,6 +62,8 @@ pub struct Logic {
     pub lampless: bool,
     /// Maiamai Madness
     pub maiamai_madness: bool,
+    /// Pre-activates Weather Vanes, allowing the Bell to travel anywhere from game start
+    pub vanes_activated: bool,
 }
 
 /// Settings to change the randomizer's logic checks.

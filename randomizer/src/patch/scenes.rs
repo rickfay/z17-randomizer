@@ -5,6 +5,7 @@ use albw::{
 
 use super::Patcher;
 use crate::{Result, Settings};
+use crate::logic_mode::LogicMode;
 
 macro_rules! apply {
     ($patcher:expr, $($course:ident $stage:literal {
@@ -363,11 +364,6 @@ pub fn apply(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
                 id(0x23), // replace with chest
             ],
         },
-        // Lake Hylia
-        FieldLight 35 {
-            [233].disable(), // Open Maiamai Cave
-            [235].disable(), // Remove the Sign
-        },
 
         // Hyrule Hotfoot Area
         FieldLight 36 {
@@ -620,6 +616,20 @@ pub fn apply(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
             }},
         },
     );
+
+    // Open Maiamai Cave only on non-glitch logics
+    match settings.logic.mode {
+        LogicMode::Normal | LogicMode::Hard | LogicMode::NoLogic => {
+            apply!(patcher,
+                // Lake Hylia
+                FieldLight 35 {
+                    [233].disable(), // Open Maiamai Cave
+                    [235].disable(), // Remove the Sign
+                },
+            );
+        }
+        _ => {}
+    }
 
     // Skip Trials Option
     if settings.logic.skip_trials {

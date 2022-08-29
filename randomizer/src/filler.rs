@@ -31,6 +31,7 @@ pub fn fill_stuff(settings: &Settings, seed: Seed) -> Vec<(LocationInfo, Item)> 
         NoLogic => "No Logic",
     });
     info!("Maiamai:                        {}", if settings.logic.maiamai_madness {"Shuffled"} else {"Not Shuffled"});
+    info!("Weather Vanes:                  {}", if settings.logic.vanes_activated {"All Activated"} else {"Normal"});
     info!("Super Items:                    {}", if settings.logic.super_items {"Included"} else {"Not Included"});
     info!("Trials:                         {}", if settings.logic.skip_trials {"Skipped"} else {"Normal"});
     info!("Dark Rooms:                     {}", if settings.logic.lampless {"Lamp Not Required"} else {"Lamp Required"});
@@ -857,7 +858,7 @@ fn verify_all_locations_accessible(loc_map: &mut HashMap<Location, LocationNode>
 
     let reachable_checks = assumed_search(loc_map, progression_pool, &mut check_map, settings); //find_reachable_checks(loc_map, &everything, &mut check_map); //
 
-    const TOTAL_CHECKS: usize = 380; // all checks + maiamai + quest checks
+    const TOTAL_CHECKS: usize = 383; // all checks + maiamai + quest checks
     if reachable_checks.len() != TOTAL_CHECKS {
 
         // for rc in &reachable_checks {

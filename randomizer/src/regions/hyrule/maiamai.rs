@@ -6,8 +6,8 @@ crate::region! {
             // Lost Woods - 8
             "[Mai] Rosso Wall": Maiamai @Maiamai(2[98]),
             "[Mai] Lost Woods Path Rock": Maiamai @Maiamai(8[29]),
-            "[Mai] Lost Woods Bush": Maiamai @Maiamai(1[47]),
-            "[Mai] Lost Woods Rock": Maiamai @Maiamai(1[239]),
+            "[Mai] Lost Woods Bush": Maiamai @Maiamai(1[239]),
+            "[Mai] Lost Woods Rock": Maiamai @Maiamai(1[47]),
             "[Mai] Fortune-Teller Tent": Maiamai @Maiamai(9[90]),
             "[Mai] Moldorm Ledge": Maiamai @Maiamai(6[132]),
             "[Mai] Small Pond": Maiamai @Maiamai(10[62]),

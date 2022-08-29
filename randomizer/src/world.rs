@@ -43,6 +43,14 @@ pub fn build_world_graph() -> HashMap<Location, LocationNode> {
 /// Hyrule
 fn hyrule() -> HashMap<Location, LocationNode> {
     HashMap::from([
+        (HyruleBellTravel, location("Hyrule Bell Travel", vec![], vec![
+            path_free(HyruleField),
+            path_free(DesertPalaceWeatherVane),
+            path_free(EasternRuinsUpper),
+            path_free(HouseOfGalesIsland),
+            path_free(DeathMountainBase),
+            path_free(DeathMountainWestTop),
+        ])),
         (HyruleField, location("Hyrule Field", vec![
             check_free(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Dampe")),
             check(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Sanctuary Pegs"),
@@ -346,6 +354,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                   None,
             ),
         ], vec![
+            fast_travel_hyrule(),
             path_free(RavioShop),
             path(EasternRuinsUpper,
                  Some(|p| p.can_hit_far_switch() || p.has_ice_rod() || p.can_merge()),
@@ -549,6 +558,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                   None,
             ),
         ], vec![
+            fast_travel_hyrule(),
             path_free(CuccoHouseRear),
         ])),
         (WaterfallLedge, location("Waterfall Ledge", vec![
@@ -560,6 +570,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                   None,
             ),
         ], vec![
+            fast_travel_hyrule(),
             //portal(DarkRuins), // need to make left/right system for portals, just ignore this for now
             path(HyruleField,
                  Some(|p| p.has_flippers()),
@@ -578,6 +589,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                   None,
             ),
         ], vec![
+            fast_travel_hyrule(),
             path_free(HyruleField),
             path_free(CuccoDungeon),
             portal(LoruleCastleField),
@@ -616,6 +628,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                   Some(|p| p.has_bombs()),
             ),
         ], vec![
+            fast_travel_hyrule(),
             path_free(HyruleField),
             path(EasternRuinsEastLedge,
                  Some(|p| p.can_merge()),
@@ -635,6 +648,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             ),
         ])),
         (EasternRuinsEastLedge, location("Eastern Ruins East Ledge", vec![], vec![
+            fast_travel_hyrule(),
             path(EastRuinsBombCaveUpper,
                  Some(|p| p.has_bombs()),
                  None,
@@ -708,6 +722,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                   None,
             ),
         ], vec![
+            fast_travel_hyrule(),
             path_free(HyruleField),
             path_free(ZoraDomain),
             path(KusDomainSouth,
@@ -726,6 +741,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             ),
         ])),
         (WaterfallCaveShallowWater, location("Waterfall Cave Shallow Water", vec![], vec![
+            fast_travel_hyrule(),
             path_free(WaterfallCave),
             path(HyruleField,
                  Some(|p| p.has_flippers()),
@@ -781,6 +797,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                   None,
             ),
         ], vec![
+            fast_travel_hyrule(),
             path(HyruleField,
                  Some(|p| p.has_flippers()),
                  None,
@@ -840,6 +857,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                   None,
             ),
         ], vec![
+            fast_travel_hyrule(),
             path_free(HyruleField),
             path_free(GraveyardLedgeCave),
             portal(GraveyardLedgeLorule),
@@ -870,6 +888,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
 
         // Hyrule Castle
         (HyruleCastleCourtyard, location("Hyrule Castle Courtyard", vec![], vec![
+            fast_travel_hyrule(),
             path_free(HyruleCastleLeftRoom),
             path_free(HyruleCastleRightRoom),
             path_free(HyruleCastleInterior),
@@ -896,6 +915,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
         (HyruleCastleRoof, location("Hyrule Castle Roof", vec![
             check_free(LocationInfo::new(regions::hyrule::field::castle::SUBREGION, "Castle Balcony")),
         ], vec![
+            fast_travel_hyrule(),
             path_free(HyruleField),
             path_free(HyruleCastleCourtyard),
             path_free(HyruleCastleInterior),
@@ -906,15 +926,15 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                   Some(|p| p.can_merge()),
                   None,
                   Some(|p| p.can_escape() && (p.has_boomerang() || p.has_hookshot())),
-                  Some(|p| p.has_boomerang() || p.has_hookshot()), // Use Crow to escape
                   None,
+                  Some(|p| p.has_boomerang() || p.has_hookshot()), // Use Crow to escape
             ),
             check(LocationInfo::new(regions::hyrule::lost::woods::SUBREGION, "Lost Woods Big Rock Chest"),
                   Some(|p| p.has_titans_mitt()),
                   None,
-                  Some(|p| p.can_escape() && (p.has_boomerang() || p.has_hookshot())),
-                  Some(|p| p.has_boomerang() || p.has_hookshot()), // Use Crow to escape
                   None,
+                  None,
+                  Some(|p| p.has_boomerang() || p.has_hookshot()), // Use Crow to escape
             ),
             check_free(LocationInfo::new(regions::hyrule::maiamai::maiamai::SUBREGION, "[Mai] Lost Woods Bush")),
             check(LocationInfo::new(regions::hyrule::maiamai::maiamai::SUBREGION, "[Mai] Lost Woods Rock"),
@@ -925,6 +945,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                   None,
             ),
         ], vec![
+            fast_travel_hyrule(),
             path_free(HyruleField),
             path(MasterSwordArea,
                  Some(|p| p.has_all_pendants()),
@@ -937,6 +958,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
         (MasterSwordArea, location("Master Sword Area", vec![
             check_free(LocationInfo::new(regions::hyrule::lost::woods::SUBREGION, "Master Sword Pedestal")),
         ], vec![
+            fast_travel_hyrule(),
             path_free(LostWoods),
         ])),
         (FortuneTeller, location("Fortune-Teller (Hyrule)", vec![
@@ -1053,6 +1075,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
         (SouthernRuinsPillars, location("Southern Ruins Pillars", vec![
             check_free(LocationInfo::new(regions::hyrule::southern::ruins::SUBREGION, "Behind Pillars")),
         ], vec![
+            fast_travel_hyrule(),
             path_free(SouthernRuinsBombCave),
         ])),
         (LakeDarkCave, location("Lake Hylia Dark Cave", vec![
@@ -1151,6 +1174,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                   None,
             ),
         ], vec![
+            fast_travel_hyrule(),
             path_free(MoldormCaveTop),
             path_free(HyruleField),
         ])),
@@ -1163,6 +1187,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                   None,
             ),
         ], vec![
+            fast_travel_hyrule(),
             path_free(MoldormCave),
             path(DeathBombCave,
                  Some(|p| p.can_merge() && p.has_bombs()),
@@ -1241,10 +1266,12 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                   None,
             ),
         ], vec![
+            fast_travel_hyrule(),
             path_free(DonkeyCaveUpper),
             path_free(DeathSecondFloor),
         ])),
         (DeathSecondFloor, location("Death Mountain Second Floor", vec![], vec![
+            fast_travel_hyrule(),
             path_free(DonkeyCaveUpper),
             path_free(AmidaCaveLower),
             path_free(DeathMountainBase),
@@ -1268,6 +1295,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             ),
         ])),
         (DeathThirdFloor, location("Death Mountain Third Floor", vec![], vec![
+            fast_travel_hyrule(),
             path_free(AmidaCaveLower),
             path_free(AmidaCaveUpper),
             path_free(DeathSecondFloor),
@@ -1287,6 +1315,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             path_free(DeathTopLeftLedge),
         ])),
         (DeathTopLeftLedge, location("Death Mountain West Top Left Ledge", vec![], vec![
+            fast_travel_hyrule(),
             path_free(AmidaCaveUpper),
             path_free(DeathThirdFloor),
             path(SpectacleRock,
@@ -1307,6 +1336,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
         (SpectacleRock, location("Spectacle Rock", vec![
             check_free(LocationInfo::new(regions::hyrule::death::upper::SUBREGION, "Spectacle Rock")),
         ], vec![
+            fast_travel_hyrule(),
             path_free(DeathThirdFloor),
             path_free(SpectacleRockCaveLeft),
         ])),
@@ -1318,6 +1348,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             path_free(DeathMountainWestTop),
         ])),
         (DeathMountainWestTop, location("Death Mountain West Top", vec![], vec![
+            fast_travel_hyrule(),
             path_free(SpectacleRockCaveRight),
             path(TowerOfHeraFoyer,
                  Some(|p| p.has_hammer()),
@@ -1358,6 +1389,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                   None,
             ),
         ], vec![
+            fast_travel_hyrule(),
             path(DeathMountainWestTop,
                  Some(|p| p.has_hookshot()),
                  None,
@@ -1437,6 +1469,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             path_free(FireCaveTop),
         ])),
         (BoulderingLedgeLeft, location("Bouldering Guy Left Ledge", vec![], vec![
+            fast_travel_hyrule(),
             path_free(FireCaveMiddle),
             path(BoulderingLedgeRight,
                  Some(|p| p.can_merge()),
@@ -1463,6 +1496,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                   None,
             ),
         ], vec![
+            fast_travel_hyrule(),
             path_free(FireCaveMiddle),
         ])),
         (BoulderingLedgeRight, location("Bouldering Guy Right Ledge", vec![
@@ -1474,6 +1508,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                   None,
             ),
         ], vec![
+            fast_travel_hyrule(),
             path_free(BoulderingLedgeBottom),
             path(BoulderingLedgeLeft,
                  Some(|p| p.can_merge()),
@@ -1499,12 +1534,14 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                   None,
             ),
         ], vec![
+            fast_travel_hyrule(),
             path_free(FireCaveBottom),
             portal(RossosOreMineLorule),
         ])),
         (FloatingIslandHyrule, location("Hyrule Floating Island", vec![
             check_free(LocationInfo::new(regions::hyrule::death::far_island::SUBREGION, "Floating Island")),
         ], vec![
+            fast_travel_hyrule(),
             portal(FloatingIslandLorule),
         ])),
     ])
@@ -1513,6 +1550,18 @@ fn hyrule() -> HashMap<Location, LocationNode> {
 /// Lorule
 fn lorule() -> HashMap<Location, LocationNode> {
     HashMap::from([
+        (LoruleBellTravel, location("Lorule Bell Travel", vec![], vec![
+            path_free(LoruleCastleField),
+            path_free(SkullWoodsOverworld),
+            path_free(MiseryMire),
+            path_free(SwampPalaceOutside),
+            path_free(LoruleDeathWest),
+            path_free(LoruleGraveyard),
+            path_free(RossosOreMineLorule),
+            path_free(TurtleRockWeatherVane),
+            path_free(LoruleDeathEastTop),
+            path_free(DarkRuins),
+        ])),
         (LoruleCastleField, location("Lorule Castle Field", vec![
             check_free(LocationInfo::new(regions::lorule::field::main::SUBREGION, "Rupee Rush (Lorule)")),
             check_free(LocationInfo::new(regions::lorule::field::main::SUBREGION, "Octoball Derby")),
@@ -1609,6 +1658,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                   None,
             ),
         ], vec![
+            fast_travel_lorule(),
             path(GreatRupeeFairyCave,
                  Some(|p| p.has_bomb_flower()),
                  None,
@@ -1675,6 +1725,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
             check_quest_free("Obtain Big Bomb Flower", BigBombFlower),
             check_free(LocationInfo::new(regions::lorule::maiamai::maiamai::SUBREGION, "[Mai] Big Bomb Flower Field Grass")),
         ], vec![
+            fast_travel_lorule(),
             path_free(BigBombFlowerShop),
             path(LoruleCastleField,
                  Some(|p| p.has_bomb_flower()),
@@ -1708,6 +1759,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                   None,
             ),
         ], vec![
+            fast_travel_lorule(),
             path_free(LoruleSanctuaryCaveLower),
             path(LoruleSanctuary,
                  Some(|p| p.has_titans_mitt()),
@@ -1732,6 +1784,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
             ),
         ])),
         (GraveyardLedgeLorule, location("Graveyard Ledge Lorule", vec![], vec![
+            fast_travel_lorule(),
             portal(GraveyardLedgeHyrule),
             path_free(LoruleGraveyard),
         ])),
@@ -1876,6 +1929,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                   None,
             ),
         ], vec![
+            fast_travel_lorule(),
             path_free(LoruleCastleField),
             portal(HyruleField),
         ])),
@@ -1891,6 +1945,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                   None,
             ),
         ], vec![
+            fast_travel_hyrule(),
             portal(MiseryMire),
             path(MiseryMireLedge, // todo portal-ify
                  Some(|p| p.can_merge() && p.has_bombs() && p.has_sand_rod()),
@@ -1922,6 +1977,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
             ),
         ])),
         (DesertSouthWestLedge, location("Desert South West Ledge", vec![], vec![
+            fast_travel_hyrule(),
             path_free(Desert),
             portal(MiseryMireBridge),
             path(DesertPalaceWeatherVane,
@@ -1941,6 +1997,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                   None,
             ),
         ], vec![
+            fast_travel_hyrule(),
             path_free(Desert),
             path(DesertPalaceFoyer,
                  Some(|p| p.has_sand_rod()),
@@ -1973,6 +2030,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                   None,
             ),
         ], vec![
+            fast_travel_lorule(),
             path_free(SandRodDungeon),
             portal(Desert),
             path(MiseryMireOoB,
@@ -1998,6 +2056,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
             ),
         ])),
         (MiseryMireBridge, location("Misery Mire Bridge", vec![], vec![
+            fast_travel_lorule(),
             path_free(MiseryMire),
             portal(Desert),
             portal(DesertSouthWestLedge),
@@ -2010,6 +2069,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
             ),
         ])),
         (MiseryMireOoB, location("Misery Mire Out of Bounds", vec![], vec![
+            fast_travel_lorule(),
             path_free(MiseryMire),
             path_free(MiseryMireBridge),
             portal(DesertZaganagaLedge),
@@ -2035,6 +2095,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
         (MiseryMireLedge, location("Misery Mire Ledge", vec![
             check_free(LocationInfo::new(regions::lorule::misery::mire::SUBREGION, "Misery Mire Ledge")),
         ], vec![
+            fast_travel_lorule(),
             path_free(MiseryMire),
         ])),
 
@@ -2056,6 +2117,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                   None,
             ),
         ], vec![
+            fast_travel_lorule(),
             portal(HyruleField),
             path(LoruleLakeWater,
                  Some(|p| p.has_flippers()),
@@ -2072,7 +2134,14 @@ fn lorule() -> HashMap<Location, LocationNode> {
                  Some(|p| p.has_stamina_scroll()), // bee boost
             ),
         ])),
-        (LoruleLakeNorthWest, location("Lake Lolia North West", vec![
+        (LoruleLakeNorthWest, location("Lorule Lake North West", vec![
+            check_quest("Turtle (wall)", TurtleWall,
+                        Some(|p| p.can_merge()),
+                        None,
+                        None,
+                        None,
+                        None,
+            ),
             check_free(LocationInfo::new(regions::lorule::lake::lorule::SUBREGION, "Lorule Lake NW Chest")),
             check(LocationInfo::new(regions::lorule::maiamai::maiamai::SUBREGION, "[Mai] Lorule Lake West Wall"),
                   Some(|p| p.can_merge()),
@@ -2082,6 +2151,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                   None,
             ),
         ], vec![
+            fast_travel_lorule(),
             portal(HyruleField),
             path_free(LakesideItemShopLorule),
             path(LoruleLakeSouthWest,
@@ -2100,6 +2170,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
             ),
         ])),
         (LoruleLakeSouthWest, location("Lorule Lake South West", vec![
+            check_quest_free("Turtle (flipped)", TurtleFlipped),
             check(LocationInfo::new(regions::lorule::maiamai::maiamai::SUBREGION, "[Mai] Lorule Lake Big Rock"),
                   Some(|p| p.has_titans_mitt()),
                   None,
@@ -2108,6 +2179,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                   None,
             ),
         ], vec![
+            fast_travel_lorule(),
             path(LoruleLakeWater,
                  Some(|p| p.has_flippers()),
                  None,
@@ -2116,26 +2188,66 @@ fn lorule() -> HashMap<Location, LocationNode> {
                  None,
             ),
         ])),
+        (LakesideItemShopLorule, location("Lorule Lakeside Item Shop", vec![], vec![
+            path_free(LoruleLakeNorthWest),
+        ])),
+        // This location assumes the player is already swimming, real or fake
         (LoruleLakeWater, location("Lorule Lake Water", vec![
-            // This location assumes the player is already swimming, real or fake
+            check_quest("Turtle (under attack)", TurtleAttacked,
+                        Some(|p| p.can_attack()),
+                        Some(|p| p.has_lamp_or_net()),
+                        None,
+                        None,
+                        None,
+            ),
             check_free(LocationInfo::new(regions::lorule::maiamai::maiamai::SUBREGION, "[Mai] Lorule Lake Water")),
         ], vec![
+            fast_travel_lorule(),
             path_free(LoruleLakeNorthWest),
             path_free(LoruleLakeSouthWest),
             path_free(LoruleLakeEast),
-            path(TurtleRockIsland,
-                 Some(|p| p.has_ice_rod() && p.can_merge()),
+            path(TurtleRockWeatherVane,
+                 Some(|p| p.can_rescue_turtles()),
+                 None,
+                 Some(|p| p.has_tornado_rod()),
+                 None,
+                 None,
+            ),
+            path(TurtleRockFrontDoor,
+                 None,
                  None,
                  Some(|p| p.has_tornado_rod()),
                  None,
                  None,
             ),
         ])),
-        (LakesideItemShopLorule, location("Lorule Lakeside Item Shop", vec![], vec![
-            path_free(LoruleLakeNorthWest),
+        (TurtleRockWeatherVane, location("Turtle Rock Weather Vane", vec![], vec![
+            fast_travel_lorule(),
+            path(TurtleRockFrontDoor,
+                 Some(|p| p.has_ice_rod() && p.can_merge()),
+                 None,
+                 None,
+                 None,
+                 None,
+            ),
+            path(LoruleLakeWater,
+                 Some(|p| p.has_flippers()),
+                 None,
+                 None,
+                 None,
+                 None,
+            ),
         ])),
-        (TurtleRockIsland, location("Turtle Rock Island", vec![], vec![
+        (TurtleRockFrontDoor, location("Turtle Rock Front Door", vec![], vec![
+            fast_travel_lorule(),
             path_free(TurtleRockFoyer),
+            path(TurtleRockWeatherVane,
+                 Some(|p| p.has_ice_rod() && p.can_merge()),
+                 None,
+                 None,
+                 None,
+                 None,
+            ),
             path(LoruleLakeWater,
                  Some(|p| p.has_flippers()),
                  None,
@@ -2202,6 +2314,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                   None,
             ),
         ], vec![
+            fast_travel_lorule(),
             portal(HyruleField),
             path(KusDomainSouth, Some(|p| p.can_merge()),
                  None,
@@ -2217,29 +2330,23 @@ fn lorule() -> HashMap<Location, LocationNode> {
                  None,
                  None,
             ),
-            path(LoruleLakeNorthWest,
+            path(LoruleLakeWater,
                  None,
                  None,
                  Some(|p| p.has_flippers() && (p.has_fire_rod() || p.has_nice_bombs())),
                  Some(|p| p.has_boots() && (p.has_fire_rod() || p.has_nice_bombs())), // fake flipper
                  Some(|p| p.has_boots()), // Bee boost
             ),
-            path(TurtleRockIsland,
-                 None,
-                 None,
-                 Some(|p| (p.has_flippers() && (p.has_fire_rod() || p.has_nice_bombs())) && ((p.can_merge() && p.has_ice_rod()) || p.has_tornado_rod())),
-                 Some(|p| (p.has_boots() && (p.has_fire_rod() || p.has_nice_bombs())) && ((p.can_merge() && p.has_ice_rod()) || p.has_tornado_rod())), // fake flipper
-                 Some(|p| p.has_boots() && ((p.can_merge() && p.has_ice_rod()) || p.has_tornado_rod())), // Bee boost
-            ),
             path(LoruleLakeEast,
                  None,
                  None,
-                 Some(|p| (p.has_flippers() || p.has_stamina_scroll()) && (p.has_fire_rod() || p.has_nice_bombs())), // normal or stamina scroll method
-                 Some(|p| p.has_boots() && (p.has_fire_rod() || p.has_nice_bombs())), // fake flipper
-                 Some(|p| p.has_boots()), // Bee boost
+                 Some(|p| p.has_stamina_scroll() && (p.has_fire_rod() || p.has_nice_bombs())), // long merge
+                 None,
+                 Some(|p| p.has_stamina_scroll()), // Bee Boost
             ),
         ])),
         (DarkRuinsShallowWater, location("Dark Ruins Shallow Water", vec![], vec![
+            fast_travel_lorule(),
             // todo figure out waterfall portal
             path(HinoxCaveWater,
                  Some(|p| p.can_merge() && p.has_flippers()),
@@ -2272,6 +2379,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                   None,
             ),
         ], vec![
+            fast_travel_lorule(),
             portal(ZoraDomainArea),
             path(HinoxCaveWater,
                  Some(|p| p.has_flippers()),
@@ -2311,6 +2419,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                   None,
             ),
         ], vec![
+            fast_travel_lorule(),
             path_free(KusDomainSouth),
         ])),
         (HinoxCaveWater, location("Hinox Cave Water", vec![
@@ -2320,6 +2429,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
             path_free(HinoxCaveShallowWater),
         ])),
         (HinoxCaveShallowWater, location("Hinox Cave Shallow Water", vec![], vec![
+            fast_travel_lorule(),
             path_free(HinoxCave),
             path(HinoxCaveWater,
                  Some(|p| p.has_flippers()),
@@ -2410,6 +2520,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                   None,
             ),
         ], vec![
+            fast_travel_lorule(),
             portal(RossoHouse),
             path_free(MysteriousManCave),
             portal(HyruleField),
@@ -2473,6 +2584,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                   None,
             ),
         ], vec![
+            fast_travel_lorule(),
             portal(DeathMountainBase),
             path(RossosOreMineLorule,
                  None,
@@ -2491,6 +2603,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                   None,
             ),
         ], vec![
+            fast_travel_lorule(),
             portal(RossosOreMine),
             path(LoruleDeathWest,
                  Some(|p| p.has_hookshot()),
@@ -2573,6 +2686,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
             ),
         ])),
         (FloatingIslandLorule, location("Floating Island Lorule", vec![], vec![
+            fast_travel_lorule(),
             path_free(IceCaveNorthWest),
             portal(FloatingIslandHyrule),
         ])),
@@ -2589,6 +2703,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                   None,
             ),
         ], vec![
+            fast_travel_lorule(),
             path_free(IceCaveWest),
             path_free(LoruleDeathEastLedgeLower),
         ])),
@@ -2601,6 +2716,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                   None,
             ),
         ], vec![
+            fast_travel_lorule(),
             path_free(IceCaveSouth),
         ])),
         (LoruleDeathEastTop, location("Lorule Death Mountain East Top", vec![
@@ -2619,6 +2735,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                   None,
             ),
         ], vec![
+            fast_travel_lorule(),
             path_free(IceCaveCenter),
             path(IceRuinsFoyer,
                  Some(|p| p.has_fire_rod()),
@@ -3018,8 +3135,8 @@ fn inside_hyrule_castle() -> HashMap<Location, LocationNode> {
             path_free(HyruleCastleRoof),
             path(LoruleBlacksmith,
                  Some(|p| (p.has_bow() || p.has_ice_rod()) && p.can_defeat_yuga2()),
-                 Some(|p| p.has_nice_bombs()), // not counting Nice TRod yet
                  None,
+                 Some(|p| p.has_nice_bombs()), // not counting Nice TRod yet
                  None,
                  None,
             ),
@@ -3414,6 +3531,7 @@ fn skull_woods() -> HashMap<Location, LocationNode> {
         (SkullWoodsOutdoor3, location("Skull Woods Outdoor Area 3", vec![
             check_free(LocationInfo::new(regions::lorule::skull::chest::SUBREGION, "Skull Woods Outdoor Chest")), // Do not use [SW] prefix
         ], vec![
+            fast_travel_lorule(),
             path_free(SkullWoodsEastB1SouthFoyer),
             path_free(SkullWoodsEastB1SouthLedges),
         ])),
@@ -3437,9 +3555,9 @@ fn thieves_hideout() -> HashMap<Location, LocationNode> {
             path(ThievesHideoutB2,
                  Some(|p| p.can_merge() && p.can_hit_switch()),
                  None,
-                 Some(|p| p.has_boots() && p.has_ice_rod()),
-                 Some(|p| p.has_bombs() || p.has_ice_rod()),
-                 None,
+                 Some(|p| p.has_boots() && (p.has_boomerang() || p.has_ice_rod())),
+                 Some(|p| p.has_boomerang() || p.has_ice_rod()),
+                 Some(|p| p.has_bombs()),
             ),
         ])),
         (ThievesHideoutB2, location("Thieves' Hideout B2", vec![
@@ -3690,6 +3808,7 @@ fn desert_palace() -> HashMap<Location, LocationNode> {
             ),
         ])),
         (DesertPalaceMidwayLedge, location("Desert Palace Midway Ledge", vec![], vec![
+            fast_travel_hyrule(),
             path_free(DesertPalaceWeatherVane),
             path_free(DesertPalace1F),
             path_free(DesertPalace2F),
@@ -3779,10 +3898,12 @@ fn desert_palace() -> HashMap<Location, LocationNode> {
             path_free(DesertZaganagaLedge),
         ])),
         (DesertZaganagaLedge, location("Desert Zaganaga Ledge", vec![], vec![
+            fast_travel_hyrule(),
             path_free(DesertPalaceExit3F),
             portal(ZaganagasArena),
         ])),
         (ZaganagasArena, location("Zaganaga's Arena", vec![], vec![
+            fast_travel_lorule(),
             portal(DesertZaganagaLedge),
             path(MiseryMireRewardBasket,
                  Some(|p| p.can_defeat_zaganaga()),
@@ -3795,7 +3916,9 @@ fn desert_palace() -> HashMap<Location, LocationNode> {
         (MiseryMireRewardBasket, location("Misery Mire Reward Basket", vec![
             check_free(LocationInfo::new(regions::dungeons::desert::boss::SUBREGION, "Zaganaga")), // Do not use [DP] prefix
             check_quest_free("Sage Irene", SageIrene),
-        ], vec![])),
+        ], vec![
+            fast_travel_lorule(),
+        ])),
     ])
 }
 
@@ -3803,7 +3926,7 @@ fn desert_palace() -> HashMap<Location, LocationNode> {
 fn turtle_rock() -> HashMap<Location, LocationNode> {
     HashMap::from([
         (TurtleRockFoyer, location("Turtle Rock Foyer", vec![], vec![
-            path_free(TurtleRockIsland),
+            path_free(TurtleRockFrontDoor),
             path(TurtleRockMain,
                  Some(|p| p.has_ice_rod()),
                  None,
@@ -3929,6 +4052,7 @@ fn turtle_rock() -> HashMap<Location, LocationNode> {
         (TurtleRockLeftBalcony, location("Turtle Rock Left Balcony", vec![
             check_free(LocationInfo::new(regions::lorule::lake::balcony::SUBREGION, "Turtle Rock Left Balcony")), // Do not use [TR] prefix
         ], vec![
+            fast_travel_lorule(),
             path_free(TurtleRockLeftBalconyPath),
         ])),
         (TurtleRockRightBalconyPath, location("Turtle Rock Right Balcony Path", vec![], vec![
@@ -3948,6 +4072,7 @@ fn turtle_rock() -> HashMap<Location, LocationNode> {
             ),
         ])),
         (TurtleRockRightBalcony, location("Turtle Rock Right Balcony", vec![], vec![
+            fast_travel_lorule(),
             path_free(TurtleRockRightBalconyPath),
         ])),
         (TurtleRockBoss, location("Turtle Rock Boss", vec![], vec![
@@ -4209,4 +4334,24 @@ fn path(default: Location, normal: Option<fn(&Progress) -> bool>,
 // TODO read destination from portal map
 fn portal(default: Location) -> Path {
     Path::new(default, Logic::new(Some(|p| p.can_merge()), None, None, None, None))
+}
+
+fn fast_travel_hyrule() -> Path {
+    Path::new(HyruleBellTravel, Logic::new(
+        Some(|p| p.are_vanes_activated() && p.has_bell()),
+        None,
+        None,
+        None,
+        None,
+    ))
+}
+
+fn fast_travel_lorule() -> Path {
+    Path::new(LoruleBellTravel, Logic::new(
+        Some(|p| p.are_vanes_activated() && p.has_bell()),
+        None,
+        None,
+        None,
+        None,
+    ))
 }

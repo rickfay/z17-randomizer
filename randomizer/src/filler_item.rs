@@ -393,7 +393,6 @@ pub enum FillerItem {
     PendantOfCourage,
     PendantOfWisdom,
     PendantOfPower,
-
     SageGulley,
     SageOren,
     SageSeres,
@@ -401,7 +400,6 @@ pub enum FillerItem {
     SageRosso,
     SageIrene,
     SageImpa,
-
     ScootFruit,
     FoulFruit,
     Shield,
@@ -411,6 +409,9 @@ pub enum FillerItem {
     StylishWomansHouseOpen,
     SkullEyeRight,
     SkullEyeLeft,
+    TurtleFlipped,
+    TurtleAttacked,
+    TurtleWall,
     AccessPotionShop,
     AccessMilkBar,
     AccessHyruleBlacksmith,
@@ -625,6 +626,7 @@ pub fn convert(fill_item: FillerItem) -> Option<Item> {
         ScootFruit | FoulFruit | Shield |
         OpenSanctuaryDoors | GoldBee | BigBombFlower | StylishWomansHouseOpen |
         SkullEyeRight | SkullEyeLeft |
+        TurtleFlipped | TurtleAttacked | TurtleWall |
         AccessLoruleCastleField | AccessHyruleBlacksmith | AccessPotionShop | AccessMilkBar |
         Triforce => None
     }

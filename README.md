@@ -9,7 +9,23 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
 <details open="open">
 <summary>Version 0.1.3</summary>
 
-- The Filler Algorithm has been adjusted to help un-bias early game locations. Big Keys, Small Keys, and Compasses are now placed before all other forms of progression. As a bonus, seed generation is now much more likely to be successful on the first try.
+- Maiamai Madness
+  - This shuffles all Maiamai locations into the pool, adding 100 new checks.
+  - Thank you to Gamestabled for the ASM contributions that made this possible!
+- Pre-activated Weather Vanes Option (Experimental)
+  - This allows skipping many overworld item requirements and also for all regions of Lorule to be explored without Merge.
+- The Filler Algorithm has been adjusted to help un-bias early game locations.
+  - Big Keys, Small Keys, and Compasses are now placed before all other forms of progression.
+  - As a bonus, seed generation is now much more likely to be successful on the first try and is therefore faster.
+- Glitched Logic modes will no longer pre-open the Maiamai Cave
+  - This is to hopefully prevent players from getting a Nice item that's not Nice Bombs first
+- Logic Adjustments:
+  - Hard Logic no longer requires players to get Nice Bombs.
+    - This was potentially needed to climb Hyrule Castle, but going forward only Glitched logics will require players to get Nice Bombs.
+  - Lost Woods clip to get Big Rock Chest has been moved to Glitched Hell Logic.
+  - Thieves' Hideout B1 with just Bombs has been moved to Glitched Hell logic.
+  - Thieves' Hideout B1 with Boomerang + Boots added to Glitched Basic, or just Boomerang to Glitched Advanced.
+
 
 </details>
 
@@ -333,8 +349,6 @@ This is the standard logic mode and is recommended for new and casual players.
 
 This mode is recommended for players who have played the game before and are familiar with its mechanics. This is still a glitch-free mode, but the logic may require players to perform actions or use items in obscure, non-obvious ways to reach checks.
 
-<u>Note</u>: On Hard Logic and higher you are expected to spend your first 10 Maiamai on Nice Bombs. Failure to do so could make your seed much harder or potentially even impossible to complete.
-
 - Includes:
   - Using the Lamp or Net as weapons (they deal 1/2 the damage of the Forgotten Sword)
   - Completing the Boots Dungeon with either Bombs, Boomerang, or Sword Beams
@@ -351,8 +365,6 @@ This mode is recommended for players who have played the game before and are fam
   - House of Gales:
     - Using the Tornado Rod to jump on moving blocks to reach 2F without merge
     - Deathwarping from NE room on 1F without merge
-  - Hyrule Castle:
-    - Using Nice Bombs to kill the Red Spear Soldier on 3F
   - Swamp Palace:
     - Precise Bow Shot to bypass River Room without merge
     - Access 1F Big Chest without extinguishing flames
@@ -367,7 +379,7 @@ This mode is recommended for players who have played the game before and are fam
 
 This mode is intended for players who want to use some of the game's many glitches, but not the hard ones.
 
-<u>Note</u>: You are expected to spend your first 10 Maiamai on Nice Bombs due to the many glitches they enable. Failure to do so could make your seed much harder or potentially even impossible to complete.
+<u>Note</u>: Glitched Logic EXPECTS you to spend your first 10 Maiamai on Nice Bombs due to the many glitches they enable. Failure to do so could make your seed much harder or potentially even impossible to complete.
 
 - Includes:
   - Armos Boost to reach:
@@ -380,10 +392,12 @@ This mode is intended for players who want to use some of the game's many glitch
   - House of Gales:
     - Skip Skip to do 2F in reverse
     - Skip Skip Skip to reach 3F
+  - Hyrule Castle:
+    - Using Nice Bombs to kill the Red Spear Soldier on 3F
   - Swamp Palace:
     - Miniboss Skip with Pegasus Boots
   - Thieves' Hideout:
-    - Jailbreak to activate switches and reach B2 without merge
+    - Jailbreak to activate switches and reach B2 without merge (Boots + either Boomerang or Ice Rod)
   - Desert Palace
     - Defeat Zaganaga with just Bow or just Sword Beams
 
@@ -391,7 +405,7 @@ This mode is intended for players who want to use some of the game's many glitch
 
 This mode is for experienced players who are comfortable with this game's harder, more involved glitches. 
 
-<u>Note</u>: You are expected to spend your first 10 Maiamai on Nice Bombs due to the many glitches they enable. Failure to do so could make your seed much harder or potentially even impossible to complete.
+<u>Note</u>: Glitched Logic EXPECTS you to spend your first 10 Maiamai on Nice Bombs due to the many glitches they enable. Failure to do so could make your seed much harder or potentially even impossible to complete.
 
 - Includes:
   - Entering Southern Ruins Treasure Dungeon with just Ice Rod
@@ -402,7 +416,6 @@ This mode is for experienced players who are comfortable with this game's harder
     - Reverse Desert Palace
   - Fake Flipper Tricks
   - Flipperless House of Gales with Hookshot/Ice Rod
-  - Enemy clips to reach Lost Woods checks without escape items (must use Crows instead)
   - Reaching the Misery Mire Ledge with Regular Bombs + Vulture Boost
   - Shield Rod Clips
   - Tornado Rod Enemy Clip to reach Eastern Ruins Peg Circle
@@ -419,7 +432,7 @@ This mode is for experienced players who are comfortable with this game's harder
   - Thieves' Hideout
     - Flipperless Thieves strategies with Tornado Rod + either Bombs or Ice Rod
       - Note: B1 Behind the Wall chest and the B1 Big Chest are reachable but excluded from this, due to the repetitive nature of the trick
-    - Reach miniboss and/or B2 jail cell without merge
+    - Reach miniboss and/or B2 jail cell without merge (just Ice Rod or just Boomerang)
   - Ice Ruins
     - Get Out of Bounds with Pegasus Boots to:
       - Skip entire dungeon
@@ -433,15 +446,18 @@ This mode is for experienced players who are comfortable with this game's harder
 
 This mode logically includes every known RTA-viable glitch, including those that are wildly inconsistent and inconsiderate of a player's time. It is not recommended for anyone, other than those seeking a challenge.
 
-<u>Note</u>: You are expected to spend your first 10 Maiamai on Nice Bombs due to the many glitches they enable. Failure to do so could make your seed potentially impossible to complete.
+<u>Note</u>: Glitched Logic EXPECTS you to spend your first 10 Maiamai on Nice Bombs due to the many glitches they enable. Failure to do so could make your seed much harder or potentially even impossible to complete.
 
 - Includes:
   - Bee Boost Tricks
   - Defeating Yuga 1 with just Sword Beams or just Ice Rod
   - Fake Flippers via Bee Boosting
   - Catching a natural Golden Bee before Lorule with Bottle + Net
+  - Lost Woods Alcove enemy clip with no means of escape (lure Crow to kill Link)
+  - Lost Woods Big Rock Chest enemy clip, also with no means of escape
   - Bomb Boosts with Regular Bombs
   - Enemy Clips with the Sand Rod
+  - Thieves' Hideout B1 with just Bombs
   - Desert Palace Skip via Portal Clipping with Hookshot/Boomerang + Tornado Rod
 
 ### No Logic
@@ -457,8 +473,16 @@ It's all in the name: no logic is used to place items at all. Dungeon items are 
 
 ## Special Thanks
 
-- Tocapa for building the original ALBWR foundation this hack is built from
-- My Beta Testers: Br00ty, j_im, flora, and Herreteman
+- Tocapa for building the original ALBW Randomizer used as the basis for this mod
+- Gamestabled for his ASM contributions to development
+- All the Beta Testers, notably:
+  - Br00ty
+  - flora
+  - Herreteman
+  - j_im
+- The ALBW Modding community for their work creating tools that made this possible, notably:
+  - KillzXGaming
+  - Steven Tyler Sean Herr
 
 ## License
 

@@ -3,6 +3,7 @@ pub enum Location {
 
     // Hyrule -------------------
 
+    HyruleBellTravel,
     HyruleField,
     EasternRuinsUpper,
     EasternRuinsEastLedge,
@@ -91,6 +92,7 @@ pub enum Location {
 
     // Lorule -------------------
 
+    LoruleBellTravel,
     LoruleCastleField,
     BigBombFlowerShop,
     BigBombFlowerField,
@@ -205,7 +207,8 @@ pub enum Location {
     ThievesBoss,
     ThievesPostBoss,
 
-    TurtleRockIsland,
+    TurtleRockWeatherVane,
+    TurtleRockFrontDoor,
     TurtleRockFoyer,
     TurtleRockMain,
     TurtleRockLeftBalcony,
