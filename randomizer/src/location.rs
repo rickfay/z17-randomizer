@@ -131,6 +131,7 @@ pub enum Location {
     LakesideItemShopLorule,
 
     DarkRuins,
+    DarkRuinsWeatherVane,
     DarkRuinsShallowWater,
     HinoxCaveWater,
     HinoxCaveShallowWater,

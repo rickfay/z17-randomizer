@@ -539,6 +539,10 @@ impl Progress {
         self.has(PendantOfCourage) && self.has(PendantOfWisdom) && self.has(PendantOfPower)
     }
 
+    pub fn has_sage_gulley(&self) -> bool {
+        self.has(SageGulley)
+    }
+
     pub fn has_sage_osfala(&self) -> bool {
         self.has(SageOsfala)
     }

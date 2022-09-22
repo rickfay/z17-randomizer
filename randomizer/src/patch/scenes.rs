@@ -78,6 +78,9 @@ macro_rules! action {
     ($unq:tt.call $fn:block) => {
         ($fn)($unq);
     };
+    ($unq:tt.set_translate($x:literal, $y:literal, $z:literal)) => {
+        $unq.set_translate($x, $y, $z);
+    };
     ($unq:tt.redirect($spawn_point:literal, $scene:literal, $scene_index:literal)) => {
         $unq.redirect($spawn_point, $scene, $scene_index);
     };
@@ -365,6 +368,15 @@ pub fn apply(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
             ],
         },
 
+        // // Lake Hylia - Special stuff for Flora REMOVE ME
+        // FieldLight 35 {
+        //     [39].disable(), // Remove EnemyZora
+        //     [40].disable(), // Remove EnemyZora
+        //     [41].disable(), // Remove EnemyZora
+        //
+        //     [45].set_translate(25.0, 0.0, -24.0), // Move Weather Vane for Flora (5.5, 0.0, -3.0)
+        // },
+
         // Hyrule Hotfoot Area
         FieldLight 36 {
             [43].disable(), // Disable Letter in a Bottle text
@@ -374,6 +386,7 @@ pub fn apply(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
         FieldLight 43 {
             [23].disable(), // seichi - "Sanctuary" - Initial text
             [26].disable(), // zelda_talk - Chat after standing up
+            [32].disable(), // Remove Clouds
             [33].disable(), // zelda_talk_b - Wait for Zelda
             [34].disable(), // zelda_talk_c - Last chat before triangles
         },
@@ -402,7 +415,7 @@ pub fn apply(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
         IndoorLight 1 {
 
             // For quick testing/debugging
-            //[24].redirect(0, 1, 6),
+            //[24].redirect(0, 0, 42), // Sacred Realm
 
             // Convert standing Ravio into shopkeeper Ravio
             [56].call {|obj: &mut Obj| {
@@ -676,6 +689,12 @@ pub fn apply(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
             [124].clear_enable_flag(), // Small Rock
             [125].clear_enable_flag(), // Small Rock
             [126].clear_enable_flag(), // Small Rock
+        },
+
+        // Dark Maze
+        FieldDark 20 {
+            [215].set_translate(1.0, 3.0, 23.0),    // Raise cage spawn point. Original: (  1.0, 0.5,  23.0)
+            [217].set_translate(-17.0, 3.0, -17.0), // Raise cage spawn point. Original: (-17.0, 0.5, -17.0)
         },
 
         // Link's House

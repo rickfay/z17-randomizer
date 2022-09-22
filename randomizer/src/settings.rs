@@ -196,6 +196,7 @@ pub fn open_default() -> Settings {
 pub fn plando_settings() -> Settings {
     Settings {
         logic: Logic {
+            vanes_activated: true,
             ..Default::default()
         },
         options: Options {
