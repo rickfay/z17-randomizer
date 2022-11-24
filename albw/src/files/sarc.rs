@@ -5,7 +5,7 @@ use std::{
 };
 
 use bytey::*;
-use log::debug;
+use log::{debug, info};
 
 use super::{align, File, FromFile, IntoBytes};
 use crate::{Error, Result};
@@ -31,8 +31,8 @@ impl Sarc {
     }
 
     pub fn contains<P>(&self, path: P) -> Result<bool>
-    where
-        P: Into<String>,
+        where
+            P: Into<String>,
     {
         let path = path.into();
         let archive = self.decompress()?;
@@ -40,8 +40,8 @@ impl Sarc {
     }
 
     pub fn read<P>(&self, path: P) -> Result<File<Ref<[u8]>>>
-    where
-        P: Into<String>,
+        where
+            P: Into<String>,
     {
         let path = path.into();
         debug!("Reading {} from archive", &path);
@@ -56,8 +56,8 @@ impl Sarc {
     }
 
     pub fn read_from_file<'a, T>(&'a self, args: &T::PathArgs) -> Result<File<T>>
-    where
-        T: FromFile<Input = Ref<'a, [u8]>>,
+        where
+            T: FromFile<Input=Ref<'a, [u8]>>,
     {
         let path = T::path(args);
         debug!("Reading {} from archive", &path);
@@ -72,8 +72,8 @@ impl Sarc {
     }
 
     pub fn extract<P>(&self, path: P) -> Result<File<Box<[u8]>>>
-    where
-        P: Into<String>,
+        where
+            P: Into<String>,
     {
         let path = path.into();
         debug!("Extracting {} from archive", &path);
@@ -83,8 +83,8 @@ impl Sarc {
     }
 
     pub fn open<P>(&mut self, path: P) -> Result<File<&mut [u8]>>
-    where
-        P: Into<String>,
+        where
+            P: Into<String>,
     {
         let path = path.into();
         debug!("Opening {} from archive", &path);
@@ -93,8 +93,8 @@ impl Sarc {
     }
 
     pub fn open_from_file<'s, T>(&'s mut self, args: &T::PathArgs) -> Result<File<T>>
-    where
-        T: FromFile<Input = &'s mut [u8]>,
+        where
+            T: FromFile<Input=&'s mut [u8]>,
     {
         let path = T::path(args);
         let archive = self.decompress_mut()?;
@@ -220,9 +220,115 @@ impl Archive {
 
     fn add(&mut self, file: File<Box<[u8]>>) {
         debug!("Add {}", file.path);
-        match self.find(&file.path) {
-            Ok(_) => {
-                // TODO
+        match self.search(self.hash(&file.path), 0, self.count - 1) {
+            Ok((start, end, node_index)) => {
+
+                if !"World/Byaml/FlowChart.byaml".eq(file.path()) {
+                    info!("Not adding: {}", file.path);
+                    return;
+                }
+
+
+                // info!("File already exists: {}", file.path);
+                // info!("Start: {}, End: {}", start, end);
+                // info!("self.files.len(): {}", self.files.len());
+                // info!("self.nodes.len(): {}", self.nodes.len());
+
+                let File { path, inner } = file;
+                let hash = self.hash(&path);
+                let mut buf: Vec<_> = inner.into();
+
+
+                // let old_len = self.files.len();
+                // let old_size = end as usize - start as usize;
+                // let new_size = buf.len();
+
+
+
+                // let start = align::<0x80>(self.files.len() as u32);
+                // self.files.resize(start as usize, 0);
+
+                buf.resize(align::<0x80>(buf.len() as u32) as usize, 0);
+                let new_end = start + buf.len() as u32;
+
+                //self.files.append(&mut buf);
+
+
+                let mut node = vec![];
+                node.extend_from_slice(&hash.to_le_bytes());
+                node.extend_from_slice(&[0, 0, 0, 0]);
+                node.extend_from_slice(&start.to_le_bytes());
+                node.extend_from_slice(&new_end.to_le_bytes());
+                self.nodes.splice((node_index * 0x10)..(node_index * 0x10) + 0x10, node.clone());
+
+                typedef! { struct Node: FromBytes<'_> [0x10] {
+                    [0] hash: u32,
+                    [8] start: u32,
+                    [0xC] end: u32,
+                }}
+
+                let mut display : Node = unsafe { Node::from_slice_unchecked(&node[..]) };
+
+                info!("node_index is: {}", node_index);
+                info!("OG          Node - {},{},{}", &start, &end, &hash);
+                info!("Replacement Node - {},{},{}\n", &display.start, &display.end, &display.hash);
+
+                // Adjust other files start/end
+                // for i in node_index + 1..(self.nodes.len() / 0x10) {
+                //
+                //     let index = i * 0x10;
+                //     let n = unsafe { Node::from_slice_unchecked(&self.nodes[index..index + 0x10]) };
+                //     info!("Before - {},{},{} - {}", n.start, n.end, n.hash, i);
+                //
+                //     let size = n.end - n.start;
+                //     let new_start: u32 = align::<0x80>(prev.end as u32);
+                //     let new_end: u32 = new_start + size;
+                //
+                //     self.nodes.splice((index + 8)..(index + 0xC), new_start.to_le_bytes());
+                //     self.nodes.splice((index + 0xC)..(index + 0x10), new_end.to_le_bytes());
+                //
+                //     display = unsafe { Node::from_slice_unchecked(&self.nodes[index..index + 0x10]) };
+                //     info!("After  - {},{},{}\n", display.start, display.end, display.hash);
+                //
+                //     prev = Node { hash: n.hash, start: new_start, end: new_end };
+                //
+                //
+                //     //self.nodes.splice(index..index + 0x10, n);
+                //
+                //     // let index = i * 0x10;
+                //     // let n = unsafe { Node::from_slice_unchecked(&self.nodes[index..index + 0x10]) };
+                //     //
+                //     // info!("node {}: {{ start: {}, end: {}, hash: {} }} {}", i, n.start, n.end, n.hash, n.end % 4 == 0);
+                //     // if !found && n.start == start {
+                //     //     info!("index found: {}", i);
+                //     //     found = true;
+                //     //     //let m = unsafe { Node::from_slice_unchecked(&node[0..0x10]) };
+                //     //     //info!("replacement node: {{ start: {}, end: {}, hash: {} }} {}", m.start, m.end, m.hash, n.end % 4 == 0);
+                //     //     self.nodes.splice(index..index + 0x10, node.clone());
+                //     // } else if found {
+                //     //
+                //     // }
+                // }
+
+
+                //self.files.resize(prev.start as usize, 0);
+
+
+                // info!("Old File Length: {}", old_len);
+                // info!("New File Length: {}", ((old_len - old_size + new_size) as u32) as usize);
+                //
+                // if new_size > old_size {
+                //     self.files.resize(((old_len - old_size + new_size) as u32) as usize, 0);
+                    self.files.splice(start as usize..new_end as usize, buf);
+                // } else if new_size < old_size {
+                //     self.files.splice(start as usize..new_end as usize, buf);
+                //     self.files.resize(((old_len - old_size + new_size) as u32) as usize, 0);
+                // }
+
+
+
+                //info!("Do we get here...");
+                //panic!();
             }
             Err(i) => {
                 let i = i as usize * 0x10;
@@ -246,10 +352,18 @@ impl Archive {
     }
 
     fn find(&self, path: &str) -> Result<(u32, u32), u16> {
-        self.search(self.hash(path), 0, self.count - 1)
+        match self.search(self.hash(path), 0, self.count - 1) {
+            Ok(v) => {
+                let (start, end, _) = v;
+                Ok((start, end))
+            }
+            Err(v) => {
+                Err(v)
+            }
+        }
     }
 
-    fn search(&self, hash: u32, start: u16, end: u16) -> Result<(u32, u32), u16> {
+    fn search(&self, hash: u32, start: u16, end: u16) -> Result<(u32, u32, usize), u16> {
         if start <= end {
             let mid = (start + end) / 2;
             let index = (mid as usize) * 0x10;
@@ -267,7 +381,7 @@ impl Archive {
                         self.search(hash, start, mid - 1)
                     }
                 }
-                Ordering::Equal => Ok((node.start, node.end)),
+                Ordering::Equal => Ok((node.start, node.end, index / 0x10)),
                 Ordering::Greater => self.search(hash, mid + 1, end),
             }
         } else {

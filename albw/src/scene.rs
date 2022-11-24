@@ -39,8 +39,8 @@ impl Scene {
     }
 
     pub fn dump<P>(self, path: P) -> Result<()>
-    where
-        P: AsRef<Path>,
+        where
+            P: AsRef<Path>,
     {
         let path = path.as_ref();
         self.actors.dump(path)?;
@@ -57,7 +57,11 @@ pub struct Stage {
 }
 
 impl Stage {
-    pub fn get_mut(&mut self, unq: u16) -> Option<&mut Obj> {
+    pub fn add_obj(&mut self, obj: Obj) {
+        self.objs.push(obj);
+    }
+
+    pub fn get_obj_mut(&mut self, unq: u16) -> Option<&mut Obj> {
         if let Some(i) = self.objs.iter().position(|obj| obj.unq == unq) {
             self.objs.get_mut(i)
         } else {
@@ -65,7 +69,7 @@ impl Stage {
         }
     }
 
-    pub fn get_mut_system(&mut self, unq: u16) -> Option<&mut Obj> {
+    pub fn get_system_mut(&mut self, unq: u16) -> Option<&mut Obj> {
         if let Some(i) = self.system.iter().position(|sys| sys.unq == unq) {
             self.system.get_mut(i)
         } else {
@@ -77,22 +81,81 @@ impl Stage {
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(deny_unknown_fields, rename_all = "UPPERCASE")]
 pub struct Obj {
-    arg: Arg,
-    clp: i16,
-    flg: Flg,
-    id: i16,
-    lnk: Vec<Lnk>,
+    pub arg: Arg,
+    pub clp: i16,
+    pub flg: Flg,
+    pub id: i16,
+    pub lnk: Vec<Lnk>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    nme: Option<String>,
-    ril: Vec<(i32, i32)>,
+    pub nme: Option<String>,
+    pub ril: Vec<(i32, i32)>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    ser: Option<u16>,
-    srt: Transform,
-    typ: i32,
-    unq: u16,
+    pub ser: Option<u16>,
+    pub srt: Transform,
+    pub typ: i32,
+    pub unq: u16,
 }
 
 impl Obj {
+
+    /// Generate a new Warp object
+    pub fn warp(activation_flag: u16, clp: i16, ser: u16, translate: Vec3, unq: u16, spawn: i32, scene: i32, scene_index: i32) -> Self {
+        Self {
+            arg: Arg {
+                0: spawn,
+                1: 0,
+                2: 0,
+                3: 0,
+                4: 4,
+                5: 0,
+                6: activation_flag,
+                7: 0,
+                8: 0,
+                9: 0,
+                10: scene,
+                11: scene_index,
+                12: 0,
+                13: 0.0
+            },
+            clp,
+            flg: (0, 0, 0, 0),
+            id: 469,
+            lnk: vec![],
+            nme: None,
+            ril: vec![],
+            ser: Some(ser),
+            srt: Transform {
+                scale: Vec3 { x: 1.0, y: 1.0, z: 1.0 },
+                rotate: Vec3 { x: 0.0, y: 0.0, z: 0.0 },
+                translate,
+            },
+            typ: 6,
+            unq,
+        }
+    }
+
+
+    /// Generate a new Obj to act as a Dungeon Reward trigger
+    pub fn dungeon_reward(reward_flag: u16, clp: i16, ser: u16, translate: Vec3, typ: i32, unq: u16) -> Self {
+        Self {
+            arg: Arg(0, 0, 0, 0, 4, 0, reward_flag, 0, 0, 0, 0, 0, 0, 0.0),
+            clp,
+            flg: (0, 0, 0, 0),
+            id: 16, // AreaSwitchCylinder
+            lnk: vec![],
+            nme: None,
+            ril: vec![],
+            ser: Some(ser),
+            srt: Transform {
+                scale: Vec3 { x: 1.0, y: 2.0, z: 1.0 },
+                rotate: Vec3 { x: 0.0, y: 0.0, z: 0.0 },
+                translate,
+            },
+            typ,
+            unq,
+        }
+    }
+
     pub fn arg_mut(&mut self) -> &mut Arg {
         &mut self.arg
     }
@@ -110,8 +173,8 @@ impl Obj {
     }
 
     pub fn set_active_flag<F>(&mut self, flag: F)
-    where
-        F: Into<Option<Flag>>,
+        where
+            F: Into<Option<Flag>>,
     {
         let (kind, flag) = match flag.into() {
             Some(flag) => flag.into_pair(),
@@ -122,8 +185,8 @@ impl Obj {
     }
 
     pub fn set_inactive_flag<F>(&mut self, flag: F)
-    where
-        F: Into<Option<Flag>>,
+        where
+            F: Into<Option<Flag>>,
     {
         let (kind, flag) = match flag.into() {
             Some(flag) => flag.into_pair(),
@@ -150,8 +213,8 @@ impl Obj {
     }
 
     pub fn set_disable_flag<F>(&mut self, flag: F)
-    where
-        F: Into<Option<Flag>>,
+        where
+            F: Into<Option<Flag>>,
     {
         let (kind, flag) = match flag.into() {
             Some(flag) => flag.into_pair(),
@@ -195,6 +258,22 @@ impl Obj {
 
     pub fn set_id(&mut self, id: i16) {
         self.id = id;
+    }
+
+    pub fn set_typ(&mut self, typ: i32) {
+        self.typ = typ;
+    }
+
+    pub fn set_scale(&mut self, x: f32, y: f32, z: f32) {
+        self.srt.scale.x = x;
+        self.srt.scale.y = y;
+        self.srt.scale.z = z;
+    }
+
+    pub fn add_to_translate(&mut self, x: f32, y: f32, z: f32) {
+        self.srt.translate.x += x;
+        self.srt.translate.y += y;
+        self.srt.translate.z += z;
     }
 
     pub fn set_translate(&mut self, x: f32, y: f32, z: f32) {
@@ -242,8 +321,8 @@ pub struct Transform {
 
 impl<'de> Deserialize<'de> for Transform {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: Deserializer<'de>,
+        where
+            D: Deserializer<'de>,
     {
         struct TransformVisitor;
 
@@ -255,8 +334,8 @@ impl<'de> Deserialize<'de> for Transform {
             }
 
             fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
-            where
-                A: de::SeqAccess<'de>,
+                where
+                    A: de::SeqAccess<'de>,
             {
                 Ok(Transform {
                     scale: Vec3 {
@@ -302,8 +381,8 @@ impl<'de> Deserialize<'de> for Transform {
 
 impl Serialize for Transform {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
+        where
+            S: Serializer,
     {
         let mut s = serializer.serialize_tuple(9)?;
         s.serialize_element(&self.scale.x)?;

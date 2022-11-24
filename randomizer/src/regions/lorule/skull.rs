@@ -1,17 +1,10 @@
 crate::region! {
     course: FieldDark,
     name: "Skull Woods",
-    woods {
+    overworld {
         locations: [
-            "Canyon House": HeartPiece @Heart(16[124]) :- can_merge,
+            "Canyon House": HeartPiece @Heart(16[124]),
             "Cucco Shack": HeartPiece @Heart(2[144]),
-        ],
-        paths: [
-            dungeons::skull::palace :- can_lamp,
-        ],
-    },
-    chest {
-        locations: [
             "Skull Woods Outdoor Chest": ItemKandelaarLv2 @Chest(1[515]),
         ],
     },

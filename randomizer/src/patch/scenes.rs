@@ -2,6 +2,8 @@ use albw::{
     course,
     scene::{Flag, Obj},
 };
+use albw::course::Id::*;
+use albw::scene::{Arg, Transform, Vec3};
 
 use super::Patcher;
 use crate::{Result, Settings};
@@ -14,7 +16,7 @@ macro_rules! apply {
         $({
             let stage = $patcher.scene(course::Id::$course, $stage - 1)?.stage_mut().get_mut();
             $(action!((stage
-                .get_mut($unq)
+                .get_obj_mut($unq)
                 .ok_or_else(|| $crate::Error::game("Could not find scene."))?
             ).$action $value);)+
         })+
@@ -28,7 +30,7 @@ macro_rules! apply_system {
         $({
             let stage = $patcher.scene(course::Id::$course, $stage - 1)?.stage_mut().get_mut();
             $(action!((stage
-                .get_mut_system($unq)
+                .get_system_mut($unq)
                 .ok_or_else(|| $crate::Error::game("Could not find scene."))?
             ).$action $value);)+
         })+
@@ -86,7 +88,526 @@ macro_rules! action {
     };
 }
 
+fn call<F>(unq: u16, action: F) -> (u16, Box<dyn Fn(&mut Obj)>)
+    where
+        F: Fn(&mut Obj) + 'static
+{
+    (unq, Box::new(action))
+}
+
+
+fn enable(unq: u16) -> (u16, Box<dyn Fn(&mut Obj)>) {
+    (unq, Box::new(|obj: &mut Obj| { obj.enable() }))
+}
+
+fn disable(unq: u16) -> (u16, Box<dyn Fn(&mut Obj)>) {
+    (unq, Box::new(|obj: &mut Obj| { obj.disable() }))
+}
+
+
+fn patch_eastern(patcher: &mut Patcher, settings: &Settings) {
+    let eastern_flag = 536; // Gulley TODO
+
+    // Eastern Ruins
+    patcher.modify_objs(FieldLight, 20, &[
+
+        // Remove Post-Eastern cutscene
+        disable(83), // Sahasrahla
+        // call(84, |obj| {
+        //     obj.set_active_flag(Flag::Event(250));
+        // }),
+        disable(84), // Text box
+        disable(85), // Loading Zone to FL18
+
+        // Enable painted hearts always
+        enable(214), // Paint Heart
+        enable(215), // Paint Heart
+    ]);
+
+    // Eastern Ruins (system)
+    // patcher.modify_system(FieldLight, 20, &[
+    //     call(135, |obj| {
+    //         obj.set_disable_flag(Flag::Event(310)); // Probably not needed but...
+    //     }),
+    // ]);
+
+
+    // Eastern Palace 1F - Add Dungeon Reward
+    patcher.add_obj(DungeonEast, 1, Obj {
+        arg: Arg(0, 0, 0, 0, 4, 0, 1, 0, 0, 1, 180, 0, 0 /*60*/, 0.0),
+        clp: 0,
+        flg: (0, 4, 0, eastern_flag),
+        id: 418,
+        lnk: vec![],
+        nme: None,
+        ril: vec![],
+        ser: Some(129),
+        srt: Transform {
+            scale: Vec3 { x: 1.0, y: 1.0, z: 1.0 },
+            rotate: Vec3 { x: 0.0, y: 0.0, z: 0.0 },
+            translate: Vec3 { x: 0.0, y: 2.5, z: -5.75 },
+        },
+        typ: 4,
+        unq: 301,
+    });
+
+    // Reroute Chamber of Sages warp
+    patcher.modify_objs(CaveDark, 10, &[
+        call(73, |obj| {
+            obj.redirect(5, 0, 17); // EP drop off at HC
+        })
+    ]);
+
+
+    // Eastern Palace 1F - Add sneaky loading zone over regular exit to go straight to dungeon reward
+    // patcher.add_obj(DungeonEast, 1, Obj {
+    //     arg: Arg(5, 6, 1, 0, 0, 0, 0, 0, 0, 0, 0, 17, 0, 0.0),
+    //     clp: 0,
+    //     flg: (4, 4, 250, 310), // Appears after Yuga 1 defeated, disappears after reward claimed
+    //     id: 8, // Loading Zone
+    //     lnk: vec![],
+    //     nme: None,
+    //     ril: vec![],
+    //     ser: Some(129),
+    //     srt: Transform {
+    //         scale: Vec3 { x: 1.0, y: 1.0, z: 1.0 },
+    //         rotate: Vec3 { x: 0.0, y: 0.0, z: 0.0 },
+    //         translate: Vec3 { x: 0.0, y: 2.5, z: -2.0 }, // 1 unit higher than normal exit
+    //     },
+    //     typ: 6,
+    //     unq: 301,
+    // });
+
+    // Outside Hyrule Castle - Enable reward cutscene after Yuga 1 defeated (flag 250)
+    patcher.modify_objs(FieldLight, 18, &[
+
+        // Sahasrahla
+        disable(200),
+        // call(200, move |obj| {
+        //     obj.set_enable_flag(Flag::Event(250));
+        // }),
+
+        // Textbox trigger
+        disable(208),
+        // call(208, |obj| {
+        //     obj.set_active_flag(Flag::Event(250));
+        //     obj.set_enable_flag(Flag::Event(250));
+        // }),
+
+        disable(264), // lgt_NpcSoldier_Field1B_04_broke - idk what this is, but now it's nothing
+    ]);
+
+    // Add trigger at cutscene spawn to give dungeon reward flag
+    /*patcher.add_obj(FieldLight, 18, Obj {
+        arg: Arg(0, 0, 0, 0, 4, 0, eastern_flag, 0, 0, 0, 0, 0, 0, 0.0),
+        clp: 0,
+        flg: (4, 0, 250, 0), // Appear only after Yuga 1 defeated
+        id: 14,
+        lnk: vec![],
+        nme: None,
+        ril: vec![],
+        ser: Some(164),
+        srt: Transform {
+            scale: Vec3 { x: 1.0, y: 1.0, z: 1.0 },
+            rotate: Vec3 { x: 0.0, y: 0.0, z: 0.0 },
+            translate: Vec3 { x: 1.0, y: 0.0, z: 18.0 },
+        },
+        typ: 6,
+        unq: 537,
+    });*/
+}
+
+fn patch_gales(patcher: &mut Patcher, settings: &Settings) {
+    let gales_flag = 537;
+
+    patcher.modify_objs(DungeonWind, 3, &[
+
+        // Change Pendant of Wisdom into chest
+        call(459, move |obj| {
+            obj.set_id(418);
+            obj.arg.1 = 0;
+            obj.arg.9 = 1;
+            obj.arg.10 = 180;
+            obj.arg.12 = 60;
+            obj.set_inactive_flag(Flag::Event(gales_flag));
+        })
+    ]);
+
+    // Reroute Chamber of Sages warp
+    patcher.modify_objs(CaveDark, 10, &[
+        call(73, |obj| {
+            obj.redirect(0, 0, 34); // HoG Entrance
+        })
+    ]);
+}
+
+fn patch_hera(patcher: &mut Patcher, settings: &Settings) {
+    patcher.modify_objs(DungeonHera, 1, &[
+
+        // Change Pendant of Power into chest
+        call(829, |obj| {
+            obj.set_id(34);
+            obj.arg.0 = 93;
+            obj.set_inactive_flag(Flag::Event(597));
+            obj.clear_disable_flag();
+        })
+    ]);
+    patcher.add_obj(DungeonHera, 1,
+                    Obj::warp(597, 20, 313,
+                              Vec3 { x: 0.0, y: 101.5, z: -4.0 },
+                              920,
+                              3, 0, 2));
+}
+
+fn patch_dark(patcher: &mut Patcher, settings: &Settings) {
+    let dark_flag = 597;
+
+    patcher.modify_objs(DungeonDark, 1, &[
+        disable(262),
+    ]);
+
+    // Add reward chest
+    patcher.add_obj(DungeonDark, 1, Obj {
+        arg: Arg(0, 0, 0, 0, 3, 4, 21, dark_flag, 0, 0, 0, 0, 0, 0.0),
+        clp: 4,
+        flg: (0, 0, 0, 0),
+        id: 34,
+        lnk: vec![],
+        nme: None,
+        ril: vec![],
+        ser: Some(155),
+        srt: Transform {
+            scale: Vec3 { x: 1.0, y: 1.0, z: 1.0 },
+            rotate: Vec3 { x: 0.0, y: 0.0, z: 0.0 },
+            translate: Vec3 { x: 0.0, y: 0.0, z: -47.5 },
+        },
+        typ: 1,
+        unq: 300,
+    });
+    patcher.add_obj(DungeonDark, 1,
+                    Obj::warp(dark_flag, 4, 156,
+                              Vec3 { x: 0.0, y: 0.0, z: -46.0 },
+                              301,
+                              5, 1, 19));
+}
+
+// Swamp Palace
+fn patch_swamp(patcher: &mut Patcher, settings: &Settings) {
+    let swamp_flag = 342;
+
+    //patcher.add_obj(DungeonWater, 3, Obj::dungeon_reward(616, 0, 14, Vec3 { x: 0.0, y: 2.5, z: -40.15 }, 6, 25));
+    patcher.modify_objs(DungeonWater, 3, &[
+
+        // Change Oren Portrait into chest
+        call(13, move |obj| {
+            obj.set_id(173);
+            obj.redirect(0, 1, 32);
+            obj.arg_mut().1 = 0; // 0 = Power, 1 = Wisdom, 2 = Courage
+            obj.set_active_flag(Flag::Event(1));
+            obj.set_inactive_flag(Flag::Event(swamp_flag));
+            obj.arg_mut().12 = 0;
+            //obj.set_typ(1);
+            //obj.set_disable_flag(Flag::Event(swamp_flag));
+            obj.clear_disable_flag();
+        })
+    ]);
+    // patcher.add_obj(DungeonWater, 3,
+    //                 Obj::warp(swamp_flag, 0, 14,
+    //                           Vec3 { x: 0.0, y: 2.5, z: 1.5 + -40.15 }, // TODO try raising y to fix z-fighting
+    //                           25,
+    //                           0, 1, 32));
+}
+
+fn patch_skull(patcher: &mut Patcher, settings: &Settings) {
+    let skull_flag = 617;
+
+    // Skull Woods Overworld
+    patcher.modify_objs(FieldDark, 1, &[
+        call(273, move |obj| {
+            obj.set_id(422);
+            obj.set_disable_flag(Flag::Event(skull_flag));
+            //obj.arg_mut().1 = 1;
+            //obj.set_active_flag(Flag::Event(1));
+            //obj.set_inactive_flag(Flag::Event(skull_flag));
+            //obj.arg_mut().12 = 0;
+            //obj.set_scale(0.0, 0.0, 0.0);
+        })
+    ]);
+
+    /*patcher.add_obj(FieldDark, 1, Obj {
+        arg: Arg(PendantCourage as i32, 0, 0, 0, 0, 4, 0, skull_flag, 0, 0, 0, 0, 0, 0.0),
+        clp: 0,
+        flg: (0, 0, 0, 0),
+        id: 35,
+        lnk: vec![],
+        nme: None,
+        ril: vec![],
+        ser: Some(76),
+        srt: Transform {
+            scale: Vec3 { x: 1.0, y: 1.0, z: 1.0 },
+            rotate: Vec3 { x: 0.0, y: 0.0, z: 0.0 },
+            translate: Vec3 { x: -6.0, y: 0.0, z: -16.5 },
+        },
+        typ: 1,
+        unq: 533,
+    });*/
+    /*patcher.add_obj(FieldDark, 1,
+                    Obj::warp(skull_flag, 0, 77,
+                              Vec3 { x: -6.0, y: 0.0, z: 1.5 + -16.5 },
+                              534,
+                              10, 1, 0));*/
+    //patcher.add_obj(FieldDark, 1, Obj::dungeon_reward(577, 0, 76, Vec3 { x: -6.0, y: 0.0, z: -16.5 }, 6, 533));
+}
+
+fn patch_thieves(patcher: &mut Patcher, settings: &Settings) {}
+
+fn patch_ice(patcher: &mut Patcher, settings: &Settings) {}
+
+fn patch_desert(patcher: &mut Patcher, settings: &Settings) {}
+
+fn patch_turtle(patcher: &mut Patcher, settings: &Settings) {}
+
+
+fn exhibition(patcher: &mut Patcher, settings: &Settings) {
+    patcher.modify_objs(FieldLight, 25, &[
+        disable(122), // Pouch
+        disable(123), // Gulley
+    ]);
+
+    let shift = 2.0;
+
+    // Gulley
+    patcher.add_obj(FieldLight, 25, Obj {
+        arg: Arg(0, 0, 0, 0, 4, 0, 1, 0, 0, 1, 0, 0, 60, 0.0),
+        clp: 0,
+        flg: (0, 0, 0, 0),
+        id: 418,
+        lnk: vec![],
+        nme: None,
+        ril: vec![],
+        ser: Some(75),
+        srt: Transform {
+            scale: Vec3 { x: 1.0, y: 1.0, z: 1.0 },
+            rotate: Vec3 { x: 0.0, y: 0.0, z: 0.0 },
+            translate: Vec3 { x: (shift * -3.0) + -1.0, y: 0.0, z: -shift + -1.0 },
+        },
+        typ: 4,
+        unq: 208,
+    });
+
+    // Oren
+    patcher.add_obj(FieldLight, 25, Obj {
+        arg: Arg(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 30, 0.0),
+        clp: 0,
+        flg: (0, 0, 0, 0),
+        id: 423,
+        lnk: vec![],
+        nme: None,
+        ril: vec![],
+        ser: Some(76),
+        srt: Transform {
+            scale: Vec3 { x: 1.0, y: 1.0, z: 1.0 },
+            rotate: Vec3 { x: 330.0, y: 0.0, z: 0.0 },
+            translate: Vec3 { x: (shift * -2.0) + -1.0, y: 0.0, z: -shift + -1.0 },
+        },
+        typ: 4,
+        unq: 209,
+    });
+
+    // Seres
+    patcher.add_obj(FieldLight, 25, Obj {
+        arg: Arg(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 30, 0.0),
+        clp: 0,
+        flg: (0, 0, 0, 0),
+        id: 420,
+        lnk: vec![],
+        nme: None,
+        ril: vec![],
+        ser: Some(77),
+        srt: Transform {
+            scale: Vec3 { x: 1.0, y: 1.0, z: 1.0 },
+            rotate: Vec3 { x: 330.0, y: 0.0, z: 0.0 },
+            translate: Vec3 { x: -shift + -1.0, y: 0.0, z: -shift + -1.0 },
+        },
+        typ: 4,
+        unq: 210,
+    });
+
+    // Osfala
+    patcher.add_obj(FieldLight, 25, Obj {
+        arg: Arg(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 30, 0.0),
+        clp: 0,
+        flg: (0, 0, 0, 0),
+        id: 419,
+        lnk: vec![],
+        nme: None,
+        ril: vec![],
+        ser: Some(78),
+        srt: Transform {
+            scale: Vec3 { x: 1.0, y: 1.0, z: 1.0 },
+            rotate: Vec3 { x: 330.0, y: 0.0, z: 0.0 },
+            translate: Vec3 { x: -1.0, y: 0.0, z: -shift + -1.0 },
+        },
+        typ: 4,
+        unq: 211,
+    });
+
+    // Impa
+    patcher.add_obj(FieldLight, 25, Obj {
+        arg: Arg(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 30, 0.0),
+        clp: 0,
+        flg: (0, 0, 0, 0),
+        id: 421,
+        lnk: vec![],
+        nme: None,
+        ril: vec![],
+        ser: Some(79),
+        srt: Transform {
+            scale: Vec3 { x: 1.0, y: 1.0, z: 1.0 },
+            rotate: Vec3 { x: 330.0, y: 0.0, z: 0.0 },
+            translate: Vec3 { x: shift + -1.0, y: 0.0, z: -shift + -1.0 },
+        },
+        typ: 4,
+        unq: 212,
+    });
+
+    // Irene
+    patcher.add_obj(FieldLight, 25, Obj {
+        arg: Arg(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 30, 0.0),
+        clp: 0,
+        flg: (0, 0, 0, 0),
+        id: 417,
+        lnk: vec![],
+        nme: None,
+        ril: vec![],
+        ser: Some(80),
+        srt: Transform {
+            scale: Vec3 { x: 1.0, y: 1.0, z: 1.0 },
+            rotate: Vec3 { x: 330.0, y: 0.0, z: 0.0 },
+            translate: Vec3 { x: (shift * 2.0) + -1.0, y: 0.0, z: -shift + -1.0 },
+        },
+        typ: 4,
+        unq: 213,
+    });
+
+    // Rosso
+    patcher.add_obj(FieldLight, 25, Obj {
+        arg: Arg(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 30, 0.0),
+        clp: 0,
+        flg: (0, 0, 0, 0),
+        id: 422,
+        lnk: vec![],
+        nme: None,
+        ril: vec![],
+        ser: Some(81),
+        srt: Transform {
+            scale: Vec3 { x: 1.0, y: 1.0, z: 1.0 },
+            rotate: Vec3 { x: 330.0, y: 0.0, z: 0.0 },
+            translate: Vec3 { x: (shift * 3.0) + -1.0, y: 0.0, z: -shift + -1.0 },
+        },
+        typ: 4,
+        unq: 214,
+    });
+
+    // Power
+    patcher.add_obj(FieldLight, 25, Obj {
+        arg: Arg(0, 0, 0, 0, 4, 0, 1, 0, 0, 0, 0, 0, 0, 0.0),
+        clp: 0,
+        flg: (0, 0, 0, 0),
+        id: 173,
+        lnk: vec![],
+        nme: None,
+        ril: vec![],
+        ser: Some(82),
+        srt: Transform {
+            scale: Vec3 { x: 1.0, y: 1.0, z: 1.0 },
+            rotate: Vec3 { x: 330.0, y: 0.0, z: 0.0 },
+            translate: Vec3 { x: (shift * -1.5) + -1.0, y: 0.0, z: -1.0 },
+        },
+        typ: 4,
+        unq: 215,
+    });
+
+    // Wisdom
+    patcher.add_obj(FieldLight, 25, Obj {
+        arg: Arg(0, 1, 0, 0, 4, 0, 1, 0, 0, 0, 0, 0, 0, 0.0),
+        clp: 0,
+        flg: (0, 0, 0, 0),
+        id: 173,
+        lnk: vec![],
+        nme: None,
+        ril: vec![],
+        ser: Some(83),
+        srt: Transform {
+            scale: Vec3 { x: 1.0, y: 1.0, z: 1.0 },
+            rotate: Vec3 { x: 330.0, y: 0.0, z: 0.0 },
+            translate: Vec3 { x: (shift * 1.5) + -1.0, y: 0.0, z: -1.0 },
+        },
+        typ: 4,
+        unq: 216,
+    });
+
+    // Courage
+    patcher.add_obj(FieldLight, 25, Obj {
+        arg: Arg(0, 2, 0, 0, 4, 0, 1, 0, 0, 0, 0, 0, 0, 0.0),
+        clp: 0,
+        flg: (0, 0, 0, 0),
+        id: 173,
+        lnk: vec![],
+        nme: None,
+        ril: vec![],
+        ser: Some(84),
+        srt: Transform {
+            scale: Vec3 { x: 1.0, y: 1.0, z: 1.0 },
+            rotate: Vec3 { x: 330.0, y: 0.0, z: 0.0 },
+            translate: Vec3 { x: -1.0, y: 0.5, z: -1.0 },
+        },
+        typ: 4,
+        unq: 217,
+    });
+}
+
+
 pub fn apply(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
+    patch_eastern(patcher, settings);
+    patch_gales(patcher, settings);
+    patch_hera(patcher, settings);
+
+    patch_dark(patcher, settings);
+    //patch_swamp(patcher, settings);
+    patch_skull(patcher, settings);
+    patch_thieves(patcher, settings);
+    patch_ice(patcher, settings);
+    patch_desert(patcher, settings);
+    patch_turtle(patcher, settings);
+
+    //exhibition(patcher, settings);
+
+    // Ravio's Shop
+    patcher.modify_objs(IndoorLight, 1, &[
+        call(24, |obj| {
+            obj.redirect(
+                // 5, 0, 26, // No Redirect
+                // 0, 5, 9, // Chamber of Sages
+                // 0, 0, 19, // Eastern Ruins Cutscene
+                // 5, 0, 17, // Pendant of Courage cutscene
+                // 0, 0, 24,    // Haunted Grove
+                // 12, 13, 0,   // Dark Palace Boss
+                // 0, 65535, 65535,    // File Select Screen? lol
+                // 6, 10, 2,    // Gales Boss
+                0, 9, 0,     // Eastern Palace Entrance
+                // 5, 0, 19     // Eastern Ruins WV
+                // 0, 9, 0      // Eastern Palace Lobby
+                // 20, 1, 0,     // Seres Portrait
+                // 0, 4, 3      // Kak Well Lower
+                // 10, 11, 0    // Tower of Hera Top
+                // 0, 14, 2     // Swamp Palace 2F
+            );
+        }),
+    ]);
+
+
+    // Old way:
     apply!(patcher,
 
         // Eastern Ruins Treasure Dungeon
@@ -278,6 +799,7 @@ pub fn apply(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
             [491].enable(), // Paint Soldier
             [492].enable(), // Paint Soldier
             [493].enable(), // Paint Soldier
+            [495].enable(), // Paint Soldier
             [496].enable(), // Paint Soldier
             [497].enable(), // Paint Soldier
             [498].enable(), // Paint Soldier
@@ -287,7 +809,7 @@ pub fn apply(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
             [534].disable(), // AreaSimpleTalk - Hekiga_Blue_Soldier
             [535].disable(), // AreaSimpleTalk - Hekiga_Blue_Soldier
 
-            [155].enable(), // AreaChangeScene
+            [155].enable(), // HC dungeon loading zone
             [165].active(1), // MojBarrier
             [393].disable(), // Open door to Inside Hyrule Castle
             [505].disable(), // Barrier "would you like to save?" text
@@ -414,30 +936,30 @@ pub fn apply(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
         // Link's House
         IndoorLight 1 {
 
-            // For quick testing/debugging
-            //[24].redirect(0, 0, 42), // Sacred Realm
-
             // Convert standing Ravio into shopkeeper Ravio
-            [56].call {|obj: &mut Obj| {
-                obj.arg_mut().3 = 0;
-
-                obj.set_active_flag(Flag::Event(233));
-                obj.set_inactive_flag(Flag::Event(597));
-
-                obj.set_enable_flag(Flag::Event(233));
-                obj.set_disable_flag(None);
-
-                obj.set_translate(-1.0, 0.0, -5.5);
-            }},
+            // [56].call {|obj: &mut Obj| {
+            //     obj.arg_mut().3 = 0;
+            //
+            //     obj.set_active_flag(Flag::Event(233));
+            //     obj.set_inactive_flag(Flag::Event(597));
+            //
+            //     obj.set_enable_flag(Flag::Event(233));
+            //     obj.set_disable_flag(None);
+            //
+            //     obj.set_translate(-1.0, 0.0, -5.5);
+            // }},
 
             // Double Sheerow
-            [57].call {|obj: &mut Obj| {
-                obj.set_active_flag(None);
-                obj.set_enable_flag(Flag::Event(233));
+            // [57].call {|obj: &mut Obj| {
+            //     obj.set_active_flag(None);
+            //     obj.set_enable_flag(Flag::Event(233));
+            //
+            //     obj.set_disable_flag(None);
+            //     obj.set_translate(-2.0, 0.0, -6.0)
+            // }},
 
-                obj.set_disable_flag(None);
-                obj.set_translate(-2.0, 0.0, -6.0)
-            }},
+            [56].disable(), // Disable second Ravio
+            [57].disable(), // Disable second Sheerow
 
             [46].disable(), // Disable Ravio's bye-bye
             [54].disable(), // Disable Ravio's welcome

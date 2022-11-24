@@ -3,12 +3,9 @@ crate::region! {
     name: "Lost Woods",
     woods {
         locations: [
-            "Master Sword Pedestal": ItemSwordLv2 @Chest(34[71]) :- has_three_pendants,
-            "Alcove": HeartPiece @Heart(1[46]) :- {|p| p.can_merge() || (p.glitched() && ((p.can_boomerang() || p.can_hookshot()) && (p.can_escape())))},
-            "Lost Woods Big Rock Chest": RupeeR @Chest(1[133]) :- {|p| p.can_lift_big() || (p.glitched() && ((p.can_boomerang() || p.can_hookshot()) && (p.can_escape())))},
-        ],
-        paths: [
-            lorule::skull::woods :- can_merge,
+            "Master Sword Pedestal": ItemSwordLv2 @Chest(34[71]),
+            "Alcove": HeartPiece @Heart(1[46]),
+            "Lost Woods Big Rock Chest": RupeeR @Chest(1[133]),
         ],
     },
 }

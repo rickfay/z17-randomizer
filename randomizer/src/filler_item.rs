@@ -4,6 +4,9 @@ use FillerItem::*;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum FillerItem {
+
+    Empty,
+
     Bow01,
     Bow02,
 
@@ -421,6 +424,7 @@ pub enum FillerItem {
 
 pub fn convert(fill_item: FillerItem) -> Option<Item> {
     match fill_item {
+        FillerItem::Empty => Some(Item::None),
         Bow01 | Bow02 => Some(ItemBow),
         Boomerang01 | Boomerang02 => Some(ItemBoomerang),
         Hookshot01 | Hookshot02 => Some(ItemHookShot),
@@ -620,14 +624,25 @@ pub fn convert(fill_item: FillerItem) -> Option<Item> {
         MonsterHorn => Some(LiverYellow),
         MonsterTail => Some(LiverBlue),
 
+        // Dungeon Items
+        PendantOfCourage => Some(PendantCourage),
+        PendantOfWisdom => Some(PendantWisdom),
+        PendantOfPower => Some(PendantPower),
+        FillerItem::SageGulley => Some(Item::SageGulley),
+        FillerItem::SageOren => Some(Item::SageOren),
+        FillerItem::SageSeres => Some(Item::SageSeres),
+        FillerItem::SageOsfala => Some(Item::SageOsfala),
+        FillerItem::SageImpa => Some(Item::SageImpa),
+        FillerItem::SageIrene => Some(Item::SageIrene),
+        FillerItem::SageRosso => Some(Item::SageRosso),
+
+
         // Quest Items don't translate
-        PendantOfCourage | PendantOfWisdom | PendantOfPower |
-        SageGulley | SageOren | SageSeres | SageOsfala | SageRosso | SageIrene | SageImpa |
         ScootFruit | FoulFruit | Shield |
         OpenSanctuaryDoors | GoldBee | BigBombFlower | StylishWomansHouseOpen |
         SkullEyeRight | SkullEyeLeft |
         TurtleFlipped | TurtleAttacked | TurtleWall |
         AccessLoruleCastleField | AccessHyruleBlacksmith | AccessPotionShop | AccessMilkBar |
-        Triforce => None
+        Triforce => Option::None
     }
 }

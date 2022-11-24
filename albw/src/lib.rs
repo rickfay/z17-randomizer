@@ -10,22 +10,22 @@ use std::{
 
 use log::info;
 
-mod actors;
+pub mod actors;
 pub mod course;
 pub mod demo;
 mod files;
 pub mod flow;
-mod item;
+pub mod item;
 pub mod language;
 pub mod scene;
 
-use actors::{Actor, Actors};
+pub use actors::{Actor, Actors};
 pub use course::Course;
 pub use demo::Demo;
 pub use files::exheader::ExHeader;
-use files::{byaml, romfs::RomFs, sarc::Sarc, Cxi};
+pub use files::{byaml, romfs::RomFs, sarc::Sarc, Cxi};
 pub use files::{File, IntoBytes};
-use item::GetItem;
+pub use item::GetItem;
 pub use item::Item;
 pub use language::Language;
 use language::{FlowChart};
@@ -43,8 +43,8 @@ pub struct Error {
 
 impl Error {
     fn new<T>(err: T) -> Self
-    where
-        T: Into<Box<dyn StdError + Send + Sync + 'static>>,
+        where
+            T: Into<Box<dyn StdError + Send + Sync + 'static>>,
     {
         Self {
             kind: ErrorKind::Rom,
@@ -113,8 +113,8 @@ impl Game {
     /// Fails if the ROM is invalid for any reason, including general
     /// corruption, mismatched IDs, invalid region, etc.
     pub fn load<P>(path: P) -> Result<Self>
-    where
-        P: AsRef<Path>,
+        where
+            P: AsRef<Path>,
     {
         let path = path.as_ref().to_path_buf();
         info!("Loading ROM from:               {}", path.display());
@@ -159,8 +159,12 @@ impl Game {
         &self.exheader
     }
 
-    pub fn get_item(&self) -> impl Iterator<Item = (Item, GetItem)> + '_ {
-        Item::iter().zip(self.get_item.get()[1..].iter().cloned())
+    pub fn get_items(self) -> File<Vec<GetItem>> {
+        self.get_item
+    }
+
+    pub fn match_items_to_get_items(&self) -> impl Iterator<Item=(Item, GetItem)> + '_ {
+        Item::iter().zip(self.get_item.get()[0..].iter().cloned())
     }
 
     fn get_item_actor(&self, name: &str) -> Result<Actor> {
@@ -199,7 +203,7 @@ impl Game {
             .try_map(Demo::try_read)
     }
 
-    pub(crate) fn language(&self, course: course::Id) -> Result<Language> {
+    pub fn language(&self, course: course::Id) -> Result<Language> {
         let flow = self
             .flow_chart
             .get()
@@ -241,6 +245,24 @@ impl Game {
 }
 
 const US_ID: u64 = 0x00040000000EC300;
+
+#[macro_export]
+macro_rules! string_struct {
+    (
+        $(#[$attr:meta])*
+        $type:ident {
+            $($variant:ident,)+
+        }
+    ) => {
+        $(#[$attr])*
+        pub struct $type;
+
+        $(#[$attr])*
+        impl $type {
+            $(pub const $variant: &'static str = stringify!($variant);)+
+        }
+    }
+}
 
 #[doc(hidden)]
 #[macro_export]

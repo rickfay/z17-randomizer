@@ -14,18 +14,10 @@ crate::region! {
             "[TR] (B1) Northeast Room": KeySmall @Key(2[53]),
             "[TR] (B1) Platform": RupeeSilver @Chest(2[183]),
             "[TR] (B1) Grate Chest (Small)": RupeePurple @Chest(2[5]),
-            "[TR] (B1) Big Chest (Center)": HyruleShield @Chest(2[180]) :- {|s| s.can_hit_shielded_switch() || s.glitched()},  // Throw skull to hit switch
-            "[TR] (B1) Big Chest (Top)": KeyBoss @Chest(2[29]) :- {|s| s.small_keys(COURSE) >= 1 && (s.can_hit_shielded_switch() || s.glitched())}, // Throw skull to hit switch
-        ],
-        paths: [
-            boss :- {|s| (s.small_keys(COURSE) >= 3 && s.has_boss_key(COURSE)) || (s.glitched() && s.can_tornado_rod() && s.nice_bombs())},
-            lorule::lake::balcony,
-        ],
-    },
-    boss {
-        locations: [
+            "[TR] (B1) Big Chest (Center)": HyruleShield @Chest(2[180]),
+            "[TR] (B1) Big Chest (Top)": KeyBoss @Chest(2[29]),
             "[TR] Grinexx": HeartContainer @Heart(3[6]),
+            "Turtle Rock Prize": None @None(),
         ],
-        quest: Portrait::Impa,
     },
 }

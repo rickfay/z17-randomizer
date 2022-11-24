@@ -75,6 +75,112 @@ macro_rules! action {
 }
 
 pub fn apply(patcher: &mut Patcher, free: Item) -> Result<()> {
+
+    // Debugging TODO Comment out
+    // let mut flow = patcher.flow(FieldDark)?;
+    // let flow = flow.get_mut(stringify!(FieldDark_1B_Hilda)).ok_or_else(|| Error::game("File not found."))??;
+    // {
+    //     flow.get().debug();
+    // }
+
+
+    apply!(patcher,
+
+        // FieldDark/FieldDark_1B_Hilda {
+        //     // FieldDark_1B_Hilda_ACT7_00
+        //
+        // },
+
+        DungeonDark/Dark {
+            //[0 into_start] => 5, // Goes to CoS, Gulley dialog but not model or warp to leave??
+            // [0 into_start] => 7, // Crash
+            // [6 into_start] => 5, // Nothing
+
+
+            // [2 into_branch] each [
+            //     value(6), // set ToC cutscene to require only 6 sages
+            // ],
+
+            [4] => 5, // skip Triforce of Courage cutscene! If Gulley is last
+        },
+
+        // CaveDark/CaveDark10 {
+        //     [187] => 38, // skip 185
+        //     [188] => 38, // skip 186
+        //     //[] => 45, // skip 192 - none
+        //     //[] => 46, // skip 196 - none
+        //     //[] => 47, // skip 200 - none
+        //     //[] => 48, // skip 213 - none
+        //     //[] => 49, // skip 219 - none
+        //     //[] => 50, // skip 223 - none
+        //     [258] => 53, // skip 17
+        //     [39] => 62, // skip 1
+        //     [19] => 68, // skip 10
+        //     [270] => 72, // skip 13
+        //     //[] => 75, // skip 330 - too big ?
+        //     //[] => 78, // skip 333 - too big ?
+        //     [41] => 82, // skip 5
+        //     //[] => 87, // skip 22 - none
+        //     //[] => 92, // skip 26 - none
+        //     [310] => 173, // skip 174
+        //     //[] => 187, // skip 97 - none
+        //     //[] => 188, // skip 99 - none
+        //     //[] => 205, // skip 204 - none
+        //     //[] => 241, // skip 308,225,245 - too big ?
+        // },
+
+        // Irene (bridge)
+        FieldLight/FieldLight_2D_Maple {
+            // NpcMaple_BellGet_2D
+            [35] => 16,
+            [21] => 7,
+            [31] => 17,
+            [28] => 18,
+        },
+
+        // Eastern Ruins
+        FieldLight/FieldLight_1E_Sahasrahla {
+            // lgt_NpcSahasrahla_Field1E_03
+            //[0 into_start] => 0x6A,
+
+            // 0,127,128,105,126,21,2,114,70,75,112,113
+            [107] => 23, // skip 1
+            // 23,24,29,26,68,
+            [68] => 129, // skip 25,124
+            // 130,131,132
+            [103] => 104, // skip 102
+            // 14,27,65,66,3,16,17,15,67,18
+            [28] => 8, // skip 4
+            // 22,69,5,9,13,6,
+            //[13] => 106, // skip 6 - Leaving in so Link doesn't bumrush Sahas
+            // 12,19,11,33,32,10,20,7 - END
+        },
+
+        // Hyrule Castle
+        FieldLight/FieldLight_1B_Sahasrahla {
+            // lgt_NpcSahasrahla_Field1B_00
+            // 0,24,26,
+            [35] =>  5, // skip 1
+            [43] => 57, // skip 7
+            [49] => 65, // skip 44
+            [64] => 66, // skip 63
+            [66] => 51, // skip 9
+            [68] => 85, // skip 50
+            // 81,82,83,86,84,20,54,53
+
+            [67] => 55, // skip 10, 52
+            //[55] => 23, // skip 22
+
+            // 23 gives out item
+            // FIXME Gift given too early b/c Sahasrahla moves during 10,52,22
+            // 12,13,69,62,111
+            [113] => 56, // skip 103, 91(goto), 105
+            [56] => 73, // skip 11
+            // 77,76,114,72 - FIN
+        },
+    );
+
+
     apply!(patcher,
         // Runaway Item Seller
         Boot/FieldLight_33_Douguya {
@@ -162,17 +268,8 @@ pub fn apply(patcher: &mut Patcher, free: Item) -> Result<()> {
             ],
             [0x1C] => None, // Set event flag then end
         },
-        // Hyrule Castle
-        FieldLight/FieldLight_1B_Sahasrahla {
-            // lgt_NpcSahasrahla_Field1B_00
-            [0 into_start] => 0x17,
-            [0x17] => 0x71,
-        },
-        // Eastern Ruins
-        FieldLight/FieldLight_1E_Sahasrahla {
-            // lgt_NpcSahasrahla_Field1E_03
-            [0 into_start] => 0x6A,
-        },
+
+
         // Cucco Ranch
         FieldLight/FieldLight_29_Kokko {
             // kokko_game
@@ -183,12 +280,6 @@ pub fn apply(patcher: &mut Patcher, free: Item) -> Result<()> {
             // BlacksmithWife_Pouch
             [0 into_start] => 0x15, // Skip to item get
             [0x15] => 0x0F, // Skip to event flag
-        },
-        // Irene (bridge)
-        FieldLight/FieldLight_2D_Maple {
-            // NpcMaple_BellGet_2D
-            [0 into_start] => 7, // Skip to item get
-            [7] => None,
         },
         // Under bridge
         FieldLight/FieldLight_2D_UnderBridgeStranger {
@@ -290,9 +381,9 @@ pub fn apply(patcher: &mut Patcher, free: Item) -> Result<()> {
         // IndoorDark/FiledDark_22_BlackSmithUra {
         // },
         // Chamber of the Sages
-        CaveDark/CaveDark10 {
-            [0xF2] => 0xF3, // Skip Osfala giving Sand Rod
-        },
+        // CaveDark/CaveDark10 {
+        //     [0xF2] => 0xF3, // Skip Osfala giving Sand Rod
+        // },
         // Hinox
         CaveDark/FieldDark_17_NpcHinox {
             // NpcHinox_event

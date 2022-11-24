@@ -256,7 +256,7 @@ pub fn create(patcher: &Patcher) -> Code {
     // Maiamai
     code.patch(0x514254, [ldr(R1, (R4, 0x30))]);
     // Silver and Gold Rupees
-    //code.patch(0x1D6DBC, [ldr(R1, (R4, 0x2E)), mov(R0, R0)]);
+    code.patch(0x1D6DBC, [ldr(R1, (R4, 0x2E)), mov(R0, R0)]);
     // Premium milk
     let premium_milk = code.text().define([
         ldr(R0, EVENT_FLAG_PTR),
@@ -478,7 +478,7 @@ fn item_names(code: &mut Code) -> HashMap<Item, u32> {
     map
 }
 
-const ACTOR_NAME_OFFSETS: [(Item, u32); 29] = [
+const ACTOR_NAME_OFFSETS: [(Item, u32); 30] = [
     (Item::ItemStoneBeauty, 0x5D2060),
     (Item::RupeeR, 0x5D639C),
     (Item::RupeeG, 0x5D639C),
@@ -500,6 +500,7 @@ const ACTOR_NAME_OFFSETS: [(Item, u32); 29] = [
     (Item::HintGlasses, 0x5D70AC),
     (Item::RupeeGold, 0x5D7144),
     (Item::ItemSwordLv2, 0x5D7178),
+    (Item::None, 0x5D7178),
     (Item::LiverPurple, 0x5D762C),
     (Item::LiverYellow, 0x5D7640),
     (Item::LiverBlue, 0x5D7654),
@@ -510,7 +511,7 @@ const ACTOR_NAME_OFFSETS: [(Item, u32); 29] = [
     (Item::HeartPiece, 0x5D7B94),
 ];
 
-const ACTOR_NAMES: [(Item, &str); 30] = [
+const ACTOR_NAMES: [(Item, &str); 33] = [
     (Item::KeyBoss, "KeyBoss"),
     (Item::Compass, "Compass"),
     (Item::ItemKandelaar, "GtEvKandelaar"),
@@ -541,6 +542,9 @@ const ACTOR_NAMES: [(Item, &str); 30] = [
     (Item::ItemBowLv2, "GtEvBowB"),
     (Item::MilkMatured, "GtEvBottleMedicine"), // Red Milk lol
     (Item::Kinsta, "KinSta"),
+    (Item::PendantPower, "Pendant"),
+    (Item::PendantWisdom, "Pendant"),
+    (Item::PendantCourage, "Pendant"),
 ];
 
 const ITEM_NAME_OFFSETS: [(Item, u32); 23] = [
@@ -569,7 +573,7 @@ const ITEM_NAME_OFFSETS: [(Item, u32); 23] = [
     (Item::ItemStoneBeauty, 0x6F9D56),
 ];
 
-const ITEM_NAMES: [(Item, &str); 26] = [
+const ITEM_NAMES: [(Item, &str); 30] = [
     (Item::HeartContainer, "heartcontioner"),
     (Item::HeartPiece, "heartpiece"),
     (Item::ItemBell, "bell"),
@@ -580,6 +584,7 @@ const ITEM_NAMES: [(Item, &str); 26] = [
     (Item::ItemKandelaar, "lantern"),
     (Item::ItemKandelaarLv2, "lantern"),
     (Item::ItemSwordLv2, "mastersword"),
+    (Item::None, "none"),
     (Item::MessageBottle, "messagebottle"),
     (Item::MilkMatured, "milk_matured"),
     (Item::ItemInsectNet, "net"),
@@ -596,6 +601,9 @@ const ITEM_NAMES: [(Item, &str); 26] = [
     (Item::OreBlue, "ore"),
     (Item::OreRed, "ore"),
     (Item::Kinsta, "kinsta"),
+    (Item::PendantPower, "power"),
+    (Item::PendantWisdom, "wisdom"),
+    (Item::PendantCourage, "courage"),
 ];
 
 const SET_EVENT_FLAG_FN: u32 = 0x4CDF40;

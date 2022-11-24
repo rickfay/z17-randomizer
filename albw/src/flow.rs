@@ -32,8 +32,8 @@ impl<'input> FromFile for Flow<'input> {
     }
 
     fn from_file(input: Self::Input) -> Result<Self>
-    where
-        Self: Sized,
+        where
+            Self: Sized,
     {
         let msgbn = MsgBn::<Ref<'input>, 2>::try_read(input, MSGFLWBN)?;
         let flw = msgbn.get(FLW3).ok_or_else(|| Error::new("No FLW3"))?;
@@ -60,7 +60,7 @@ impl<'flow, 'input> Steps<'flow, 'input> {
             .map(|bytes| Step::from_bytes(&bytes, &self.0.branches))
     }
 
-    pub fn iter(&self) -> impl Iterator<Item = Result<Step>> + '_ {
+    pub fn iter(&self) -> impl Iterator<Item=Result<Step>> + '_ {
         self.0
             .steps
             .iter()
@@ -160,7 +160,7 @@ impl Action {
 struct Branches<'input>(List<Ref<'input>, BRANCH_LEN>);
 
 impl<'input> Branches<'input> {
-    pub fn iter(&self) -> impl Iterator<Item = u16> + '_ {
+    pub fn iter(&self) -> impl Iterator<Item=u16> + '_ {
         self.0.iter().map(|bytes| u16::from_bytes(&*bytes))
     }
 }
@@ -179,6 +179,26 @@ impl<'input> FlowMut<'input> {
             None
         }
     }
+
+    pub fn debug(&self) {
+        typedef! {
+            struct Inner: FromBytes<'_> [STEP_LEN] {
+            [0] kind: u8,
+            [4] value: u32,
+            [8] next: u16,
+            [0xA] command: u16,
+            [0xC] count: u16,
+            [0xE] branch: u16,}
+        }
+
+        println!("index,kind,value,next,command,count,branch");
+        let mut step: Inner;
+        for i in 0..(&self.steps.inner.len() / 16) {
+            step = unsafe { Inner::from_slice_unchecked(&self.steps.inner[(i * 0x10)..(i * 0x11)]) };
+            println!("[{}],{},{},{},{},{},{}",
+                     i, step.kind, step.value, step.next, step.command, step.count, step.branch);
+        }
+    }
 }
 
 impl<'input> FromFile for FlowMut<'input> {
@@ -190,8 +210,8 @@ impl<'input> FromFile for FlowMut<'input> {
     }
 
     fn from_file(input: Self::Input) -> Result<Self>
-    where
-        Self: Sized,
+        where
+            Self: Sized,
     {
         let msgbn = MsgBn::<RefMut<'input>, 2>::try_read(input, MSGFLWBN)?;
         let flw = msgbn
@@ -281,8 +301,8 @@ impl<'flow, 'input> StepMut<'flow, 'input> {
     }
 
     fn set_next<N>(&mut self, next: N)
-    where
-        N: Into<Next>,
+        where
+            N: Into<Next>,
     {
         let next = next.into().unwrap_or(0xFFFF);
         unsafe {
@@ -308,15 +328,15 @@ impl<'flow, 'input> BranchMut<'flow, 'input> {
         self.0.set_value(value);
     }
 
-    pub fn set_branch<N>(&mut self, index: u16, to: N) -> Result<()>
-    where
-        N: Into<Next>,
+    pub fn set_branch<N>(&mut self, index: u16, to: N) -> Result<()> // index:4, to:6
+        where
+            N: Into<Next>,
     {
         bytey::typedef! { struct Inner: FromBytes<'_> [STEP_LEN] {
             [0xC] count: u16,
             [0xE] branch: u16,
         }}
-        let inner = Inner::from_bytes(self.0.flow.steps.get_mut(self.0.index).unwrap());
+        let inner: Inner = Inner::from_bytes(self.0.flow.steps.get_mut(self.0.index).unwrap());
         if index < inner.count {
             let index = inner.branch + index;
             let branch = self
@@ -346,8 +366,8 @@ impl<'flow, 'input> ActionMut<'flow, 'input> {
     }
 
     pub fn set_next<N>(&mut self, next: N)
-    where
-        N: Into<Next>,
+        where
+            N: Into<Next>,
     {
         self.0.set_next(next);
     }
@@ -358,8 +378,8 @@ pub struct StartMut<'flow, 'input>(StepMut<'flow, 'input>);
 
 impl<'flow, 'input> StartMut<'flow, 'input> {
     pub fn set_next<N>(&mut self, next: N)
-    where
-        N: Into<Next>,
+        where
+            N: Into<Next>,
     {
         self.0.set_next(next);
     }
@@ -370,8 +390,8 @@ pub struct GotoMut<'flow, 'input>(StepMut<'flow, 'input>);
 
 impl<'flow, 'input> GotoMut<'flow, 'input> {
     pub fn set_next<N>(&mut self, next: N)
-    where
-        N: Into<Next>,
+        where
+            N: Into<Next>,
     {
         self.0.set_next(next);
     }
@@ -411,7 +431,7 @@ impl<'input, const SIZE: usize> List<Ref<'input>, SIZE> {
         })
     }
 
-    fn iter<'s>(&'s self) -> impl Iterator<Item = RefSized<'input, SIZE>> + 's {
+    fn iter<'s>(&'s self) -> impl Iterator<Item=RefSized<'input, SIZE>> + 's {
         (0..self.count).map(move |index| {
             let index = index as usize;
             Ref::map(Ref::clone(&self.inner), |inner| unsafe {

@@ -7,28 +7,29 @@ use std::{
 
 use serde::{Deserialize, Serialize};
 
-use crate::{
-    course,
-    files::{sarc::Sarc, FromFile},
-    flow::{Flow, FlowMut},
-    Error, File, Result,
-};
+use crate::{course, files::{sarc::Sarc, FromFile}, flow::{Flow, FlowMut}, Error, File, Result, byaml};
 
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(rename_all = "PascalCase")]
 pub struct FlowChart {
-    load: Load,
-    table: Table,
+    pub load: Load,
+    pub table: Table,
 }
 
 impl FlowChart {
     pub fn load(&self) -> &Load {
         &self.load
     }
+
+    pub fn load_mut(&mut self) -> &mut Load {
+        &mut self.load
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct Load(BTreeMap<String, Vec<String>>);
+pub struct Load(
+    pub BTreeMap<String, Vec<String>>
+);
 
 impl Load {
     pub fn boot(&self) -> Result<&[String]> {
@@ -41,6 +42,22 @@ impl Load {
     pub fn course(&self, id: course::Id) -> Option<&[String]> {
         self.0.get(id.as_str()).map(AsRef::as_ref)
     }
+
+    pub fn add_entry(&mut self, id: &str, entry: &str) {
+        let load_entry = self.0.entry(String::from(id)).or_insert_with(|| Vec::new());
+
+        // Manually check for dupe - Choosing not to switch to a HashSet to minimize file changes
+        if !load_entry.contains(&String::from(entry)) {
+            load_entry.push(String::from(entry));
+        }
+    }
+
+    pub fn remove_entry(&mut self, id: &str, entry: &str) {
+        let thing = self.0.get_mut(id);
+        if thing.is_some() {
+            thing.unwrap().retain(|x| *x != String::from(entry));
+        }
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -52,14 +69,14 @@ pub struct Table {
 
 #[derive(Debug)]
 pub struct Language {
-    flow: HashSet<String>,
-    archive: File<Sarc>,
+    pub flow: HashSet<String>,
+    pub archive: File<Sarc>,
 }
 
 impl Language {
     pub(crate) fn new<F>(flow: F, archive: File<Sarc>) -> Self
-    where
-        F: IntoIterator<Item = String>,
+        where
+            F: IntoIterator<Item=String>,
     {
         Self {
             flow: flow.into_iter().collect(),
@@ -72,7 +89,12 @@ impl Language {
     }
 
     pub fn flow_mut(&mut self) -> LoadedMut<FlowMut> {
-        LoadedMut::new(&self.flow, &mut self.archive)
+        LoadedMut::new(&mut self.flow, &mut self.archive)
+    }
+
+    pub fn flow_inject(&mut self, name: &str, file: File<Box<[u8]>>) -> Result<()> {
+        self.flow.insert(String::from(name));
+        self.archive.get_mut().add(file)
     }
 
     pub fn into_archive(self) -> File<Sarc> {
@@ -80,8 +102,8 @@ impl Language {
     }
 
     pub fn dump<P>(self, path: P) -> Result<()>
-    where
-        P: AsRef<Path>,
+        where
+            P: AsRef<Path>,
     {
         self.archive.map(Sarc::compress).dump(path)
     }
@@ -105,10 +127,10 @@ impl<'a, T> Loaded<'a, T> {
 }
 
 impl<'a, T> Loaded<'a, T>
-where
-    T: FromFile<PathArgs = str, Input = Ref<'a, [u8]>> + 'a,
+    where
+        T: FromFile<PathArgs=str, Input=Ref<'a, [u8]>> + 'a,
 {
-    pub fn iter<'b: 'a>(&'b self) -> impl Iterator<Item = Result<File<T>>> + 'b {
+    pub fn iter<'b: 'a>(&'b self) -> impl Iterator<Item=Result<File<T>>> + 'b {
         self.set
             .iter()
             .map(move |name| self.archive.get().read_from_file(name.as_str()))
@@ -119,17 +141,21 @@ where
             .contains(name)
             .then(|| self.archive.get().read_from_file(name))
     }
+
+    pub fn extract(&self, name: &str) -> Option<File<Box<[u8]>>> {
+        self.archive.get().extract(name).ok()
+    }
 }
 
 #[derive(Debug)]
 pub struct LoadedMut<'a, T> {
-    set: &'a HashSet<String>,
+    set: &'a mut HashSet<String>,
     archive: &'a mut File<Sarc>,
     phantom: PhantomData<T>,
 }
 
 impl<'a, T> LoadedMut<'a, T> {
-    pub fn new(set: &'a HashSet<String>, archive: &'a mut File<Sarc>) -> Self {
+    pub fn new(set: &'a mut HashSet<String>, archive: &'a mut File<Sarc>) -> Self {
         Self {
             set,
             archive,
@@ -138,8 +164,8 @@ impl<'a, T> LoadedMut<'a, T> {
     }
 
     pub fn get_mut<'s>(&'s mut self, name: &str) -> Option<Result<File<T>>>
-    where
-        T: FromFile<PathArgs = str, Input = &'s mut [u8]> + 's,
+        where
+            T: FromFile<PathArgs=str, Input=&'s mut [u8]> + 's,
     {
         self.set
             .contains(name)

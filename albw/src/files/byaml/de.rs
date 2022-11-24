@@ -38,6 +38,10 @@ impl<'de> Deserializer<'de> {
         Self { source }
     }
 
+    pub fn from_bytes_mut(source: &'de mut [u8]) -> Self {
+        Self { source }
+    }
+
     fn invalid_root<V>(kind: &'static str) -> Result<V::Value>
     where
         V: Visitor<'de>,
@@ -888,6 +892,13 @@ where
     T: de::Deserialize<'de>,
 {
     T::deserialize(Deserializer::from_bytes(source))
+}
+
+pub fn from_bytes_mut<'de, T>(source: &'de mut [u8]) -> Result<T>
+    where
+        T: de::Deserialize<'de>,
+{
+    T::deserialize(Deserializer::from_bytes_mut(source))
 }
 
 const FALSE: [u8; 4] = [0, 0, 0, 0];

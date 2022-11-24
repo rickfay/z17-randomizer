@@ -67,11 +67,12 @@ fn preplace_items<'a>(check_map: &mut HashMap<&'a str, Option<FillerItem>>,
                       progression: &mut Vec<FillerItem>,
                       trash: &mut Vec<FillerItem>) {
 
+    // Place un-randomized items
     place_static(check_map, progression, LetterInABottle, "Shore");
     place_static(check_map, progression, RupeeSilver39, "Cucco Dungeon");
     place_static(check_map, progression, RupeeSilver40, "[TR] (1F) Under Center");
     place_static(check_map, progression, RupeeGold09, "[TR] (B1) Under Center");
-    place_static(check_map, progression, RupeeGold10, "[PoD] (2F) South Hidden Room");
+    place_static(check_map, progression, RupeeGold10, "[PD] (2F) South Hidden Room");
 
     let mut shop_positions: Vec<&str> = Vec::new();
     let mut lorule_castle_positions: Vec<&str> = Vec::new();
@@ -305,11 +306,24 @@ fn maiamai_pool() -> Vec<FillerItem> {
         Maiamai097,
         Maiamai098,
         Maiamai099,
-        Maiamai100
+        Maiamai100,
     ]
 }
 
 fn get_item_pools(settings: &Settings, rng: &mut StdRng) -> (Vec<FillerItem>, Vec<FillerItem>) {
+    let dungeon_prizes = vec![
+        PendantOfCourage,
+        PendantOfWisdom,
+        PendantOfPower,
+        SageGulley,
+        SageOren,
+        SageSeres,
+        SageOsfala,
+        SageImpa,
+        SageIrene,
+        SageRosso,
+    ];
+
     let big_keys = vec![
         EasternKeyBig,
         GalesKeyBig,
@@ -561,9 +575,9 @@ fn get_item_pools(settings: &Settings, rng: &mut StdRng) -> (Vec<FillerItem>, Ve
         MonsterGuts,
         MonsterGuts,
         MonsterGuts,
-        //MonsterGuts, // Removed for Irene
+        MonsterGuts,
+        // MonsterGuts, // Removed for idk
         //MonsterGuts, // Removed for Bracelet #2
-        //MonsterGuts, // Removed for idk
 
         // Heart Pieces
         HeartPiece01,
@@ -616,10 +630,10 @@ fn get_item_pools(settings: &Settings, rng: &mut StdRng) -> (Vec<FillerItem>, Ve
 
     // Swordless Mode
     if settings.logic.swordless_mode {
-        trash_pool.push(MonsterHorn);
-        trash_pool.push(MonsterHorn);
-        trash_pool.push(MonsterHorn);
-        trash_pool.push(MonsterHorn);
+        trash_pool.push(Empty);
+        trash_pool.push(Empty);
+        trash_pool.push(Empty);
+        trash_pool.push(Empty);
     } else {
         progression_items.push(Sword01);
         progression_items.push(Sword02);
@@ -637,7 +651,7 @@ fn get_item_pools(settings: &Settings, rng: &mut StdRng) -> (Vec<FillerItem>, Ve
     }
 
     (
-        order_progression_pools(settings, rng, big_keys, small_keys, compasses, progression_items),
+        order_progression_pools(settings, rng, dungeon_prizes, big_keys, small_keys, compasses, progression_items),
         shuffle_items(trash_pool, rng)
     )
 }
@@ -649,6 +663,7 @@ fn get_item_pools(settings: &Settings, rng: &mut StdRng) -> (Vec<FillerItem>, Ve
  * For Keysanity seeds, just combine everything and shuffle.
  *
  * For non-Keysanity seeds this means shuffling categories of items amongst themselves, then ordering them:
+ * - Dungeon Prizes
  * - Big Keys
  * - Small Keys
  * - Compasses
@@ -656,6 +671,7 @@ fn get_item_pools(settings: &Settings, rng: &mut StdRng) -> (Vec<FillerItem>, Ve
  */
 fn order_progression_pools(_settings: &Settings,
                            rng: &mut StdRng,
+                           dungeon_prizes: Vec<FillerItem>,
                            big_keys: Vec<FillerItem>,
                            small_keys: Vec<FillerItem>,
                            compasses: Vec<FillerItem>,
@@ -665,14 +681,16 @@ fn order_progression_pools(_settings: &Settings,
     let is_keysanity = false; // No Keysanity yet, hardcode this to false
     if is_keysanity {
         // Combine all category pools and shuffle
-        progression_pool = big_keys;
+        progression_pool = dungeon_prizes;
+        progression_pool.extend(big_keys);
         progression_pool.extend(small_keys);
         progression_pool.extend(compasses);
         progression_pool.extend(progression);
         progression_pool = shuffle_items(progression_pool, rng);
     } else {
         // Shuffle respective category pools and order by category
-        progression_pool = shuffle_items(big_keys, rng);
+        progression_pool = shuffle_items(dungeon_prizes, rng);
+        progression_pool.extend(shuffle_items(big_keys, rng));
         progression_pool.extend(shuffle_items(small_keys, rng));
         progression_pool.extend(shuffle_items(compasses, rng));
         progression_pool.extend(shuffle_items(progression, rng));
@@ -690,6 +708,22 @@ fn shuffle_items(mut items: Vec<FillerItem>, rng: &mut StdRng) -> Vec<FillerItem
     }
 
     shuffled_items
+}
+
+fn is_dungeon_prize(item: FillerItem) -> bool {
+    match item {
+        PendantOfPower |
+        PendantOfWisdom |
+        PendantOfCourage |
+        SageGulley |
+        SageOren |
+        SageSeres |
+        SageOsfala |
+        SageImpa |
+        SageIrene |
+        SageRosso => true,
+        _ => false
+    }
 }
 
 fn is_dungeon_item(item: FillerItem) -> bool {
@@ -768,7 +802,7 @@ fn fill_trash(check_map: &mut HashMap<&str, Option<FillerItem>>, rng: &mut StdRn
     }
 
     if empty_check_keys.len() != trash_items.len() {
-        error!("There are {} empty checks and {} trash items", empty_check_keys.len(), trash_items.len());
+        error!("Number of empty checks: {} does not match available trash items: {}", empty_check_keys.len(), trash_items.len());
         exit(1);
     }
 
@@ -782,8 +816,27 @@ fn place_item_randomly(item: FillerItem, checks: &Vec<Check>, check_map: &mut Ha
     check_map.insert(checks.get(index).unwrap().get_name(), Some(item));
 }
 
-fn filter_empty_checks(checks: &mut Vec<Check>, check_map: &mut HashMap<&str, Option<FillerItem>>) -> Vec<Check> {
-    checks.iter().filter(|&x| check_map.get(x.get_name()).unwrap().is_none()).cloned().collect()
+fn filter_checks(item: FillerItem, checks: &mut Vec<Check>, check_map: &mut HashMap<&str, Option<FillerItem>>) -> Vec<Check> {
+
+    // Filter out non-empty checks
+    let mut filtered_checks = checks.iter().filter(|&x| check_map.get(x.get_name()).unwrap().is_none()).cloned().collect();
+
+    // Filter checks by item type
+    if is_dungeon_prize(item) {
+        filtered_checks = filter_dungeon_prize_checks(&mut filtered_checks);
+    } else if is_dungeon_item(item) {
+
+        let is_keysanity = false; // No keysanity yet, hardcode to false
+        if !is_keysanity {
+            filtered_checks = filter_dungeon_checks(item, &mut filtered_checks);
+        }
+    }
+
+    filtered_checks
+}
+
+fn filter_dungeon_prize_checks(eligible_checks: &mut Vec<Check>) -> Vec<Check> {
+    eligible_checks.iter().filter(|&x| x.get_name().contains("Prize")).cloned().collect()
 }
 
 fn filter_dungeon_checks(item: FillerItem, eligible_checks: &mut Vec<Check>) -> Vec<Check> {
@@ -792,13 +845,13 @@ fn filter_dungeon_checks(item: FillerItem, eligible_checks: &mut Vec<Check>) -> 
         LoruleSanctuaryKey => "[LS]",
 
         EasternCompass | EasternKeyBig | EasternKeySmall01 | EasternKeySmall02 => "[EP]",
-        GalesCompass | GalesKeyBig | GalesKeySmall01 | GalesKeySmall02 | GalesKeySmall03 | GalesKeySmall04 => "[HoG]",
-        HeraCompass | HeraKeyBig | HeraKeySmall01 | HeraKeySmall02 => "[ToH]",
+        GalesCompass | GalesKeyBig | GalesKeySmall01 | GalesKeySmall02 | GalesKeySmall03 | GalesKeySmall04 => "[HG]",
+        HeraCompass | HeraKeyBig | HeraKeySmall01 | HeraKeySmall02 => "[TH]",
 
-        DarkCompass | DarkKeyBig | DarkKeySmall01 | DarkKeySmall02 | DarkKeySmall03 | DarkKeySmall04 => "[PoD]",
+        DarkCompass | DarkKeyBig | DarkKeySmall01 | DarkKeySmall02 | DarkKeySmall03 | DarkKeySmall04 => "[PD]",
         SwampCompass | SwampKeyBig | SwampKeySmall01 | SwampKeySmall02 | SwampKeySmall03 | SwampKeySmall04 => "[SP]",
         SkullCompass | SkullKeyBig | SkullKeySmall01 | SkullKeySmall02 | SkullKeySmall03 => "[SW]",
-        ThievesCompass | ThievesKeyBig | ThievesKeySmall => "[TH]",
+        ThievesCompass | ThievesKeyBig | ThievesKeySmall => "[T'H]",
         IceCompass | IceKeyBig | IceKeySmall01 | IceKeySmall02 | IceKeySmall03 => "[IR]",
         DesertCompass | DesertKeyBig | DesertKeySmall01 | DesertKeySmall02 | DesertKeySmall03 | DesertKeySmall04 | DesertKeySmall05 => "[DP]",
         TurtleCompass | TurtleKeyBig | TurtleKeySmall01 | TurtleKeySmall02 | TurtleKeySmall03 => "[TR]",
@@ -858,7 +911,12 @@ fn verify_all_locations_accessible(loc_map: &mut HashMap<Location, LocationNode>
 
     let reachable_checks = assumed_search(loc_map, progression_pool, &mut check_map, settings); //find_reachable_checks(loc_map, &everything, &mut check_map); //
 
-    const TOTAL_CHECKS: usize = 383; // all checks + maiamai + quest checks
+    const TOTAL_CHECKS: usize =
+        254 // Standard
+            + 10 // Dungeon Prizes
+            + 100 // Maiamai
+            + 20; // Quest;
+
     if reachable_checks.len() != TOTAL_CHECKS {
 
         // for rc in &reachable_checks {
@@ -935,6 +993,22 @@ fn get_items_from_reachable_checks(reachable_checks: &Vec<Check>,
     progress
 }
 
+/// The Assumed Fill algorithm
+///
+/// Randomly places `items_owned` into the `check_map` in a completable manner as informed by the
+/// logic defined in the `world_graph` and `settings`.
+///
+/// Items are placed "backwards", *assuming* that all items that have yet to be placed are
+/// available without the item currently being placed.
+///
+/// An assumed search algorithm is used to identify all locations reachable without the item
+/// currently being placed.
+///
+/// * `world_graph` - A graph representing the comprehensive structure of the game world
+/// * `rng` - The RNG seed
+/// * `items_owned` - The pool of all progression-granting items
+/// * `check_map` - A map representing all checks and items assigned to them
+/// * `settings` - Game settings
 fn assumed_fill(mut world_graph: &mut HashMap<Location, LocationNode>,
                 mut rng: &mut StdRng,
                 items_owned: &mut Vec<FillerItem>,
@@ -945,18 +1019,14 @@ fn assumed_fill(mut world_graph: &mut HashMap<Location, LocationNode>,
     let mut reachable_checks = assumed_search(&mut world_graph, &items_owned, &mut check_map, settings);
 
     while exist_empty_reachable_check(&reachable_checks, &check_map) && !items_owned.is_empty() {
+
+
         let item = items_owned.remove(0);
+
+        //
         reachable_checks = assumed_search(&mut world_graph, &items_owned, &mut check_map, settings);
 
-        let mut filtered_checks = filter_empty_checks(&mut reachable_checks, &mut check_map);
-
-        // Filter reachable locations for dungeons items down to just their dungeon for non-Keysanity
-        let is_keysanity = false; // No keysanity yet, hardcode to false
-        if !is_keysanity {
-            if is_dungeon_item(item) {
-                filtered_checks = filter_dungeon_checks(item, &mut filtered_checks);
-            }
-        }
+        let filtered_checks = filter_checks(item, &mut reachable_checks, &mut check_map);
 
         if filtered_checks.len() == 0 {
             info!("No reachable checks found to place: {:?}", item);
@@ -966,26 +1036,34 @@ fn assumed_fill(mut world_graph: &mut HashMap<Location, LocationNode>,
     }
 }
 
+/// The Assumed Search algorithm.
+///
+/// Gets all reachable checks available with the `items_owned`, assuming all items yet to be
+/// placed will be available.
+///
+/// A loop is performed to expand the considered items to include not just the `items_owned` but
+/// also all items already placed that are reachable with the currently considered items, until
+/// all such items have been exhausted.
+///
 fn assumed_search(loc_map: &mut HashMap<Location, LocationNode>,
                   items_owned: &Vec<FillerItem>,
                   mut check_map: &mut HashMap<&str, Option<FillerItem>>,
                   settings: &Settings) -> Vec<Check> {
-    let mut current_items = build_progress_from_items(&items_owned.clone(), settings);
+    let mut considered_items = build_progress_from_items(&items_owned.clone(), settings);
     let mut reachable_checks: Vec<Check>;
 
     loop {
-        reachable_checks = find_reachable_checks(loc_map, &current_items);
+        reachable_checks = find_reachable_checks(loc_map, &considered_items);
         let reachable_items = get_items_from_reachable_checks(&reachable_checks, &mut check_map, settings);
 
-        let new_items = reachable_items.difference(&current_items);
+        let new_items = reachable_items.difference(&considered_items);
 
         if new_items.is_empty() {
             break;
         }
 
         for new_item in new_items {
-            //info!("New item from search: {:?}", new_item);
-            current_items.add_item(new_item);
+            considered_items.add_item(new_item);
         }
     }
 
