@@ -915,7 +915,7 @@ fn verify_all_locations_accessible(loc_map: &mut HashMap<Location, LocationNode>
         254 // Standard
             + 10 // Dungeon Prizes
             + 100 // Maiamai
-            + 20; // Quest;
+            + 24; // Quest;
 
     if reachable_checks.len() != TOTAL_CHECKS {
 

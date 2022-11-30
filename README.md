@@ -1,10 +1,26 @@
-# Z17 Randomizer
+# ALBW Randomizer
 
-A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [original ALBW Randomizer](https://gitlab.com/marsolk/albw-randomizer).
+A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [original](https://gitlab.com/marsolk/albw-randomizer).
 
-<img src="cli/icon.ico" alt="icon" />
+<img src="cli/icon.ico" style="width: 64px;" alt="icon" />
 
 ## Updates
+
+<details open="open">
+<summary>Version 0.3.0</summary>
+
+- Dungeon Rewards Shuffled
+  - Pendants & Portraits are now randomly placed between the Hyrule and Lorule dungeons.
+- Players can now return to Hyrule from Lorule via a Warp that appears in the Blacksmith after completing Hyrule Castle.
+- Great Rupee Fairy improvements
+  - Automatically throw 3000 rupees as one (long) action. More work to be done.
+- Triforce of Courage cutscene is now skipped.
+- Logic Adjustments:
+  - Irene + Shady Guy return, with improved cutscenes
+
+
+*All changes from the unofficially released v0.1.3 have been folded into this update.*
+</details>
 
 <details open="open">
 <summary>Version 0.1.3</summary>
@@ -12,13 +28,13 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
 - Maiamai Madness
   - This shuffles all Maiamai locations into the pool, adding 100 new checks.
   - Thank you to Gamestabled for the ASM contributions that made this possible!
-- Pre-activated Weather Vanes Option (Experimental)
-  - This allows skipping many overworld item requirements and also for all regions of Lorule to be explored without Merge.
 - The Filler Algorithm has been adjusted to help un-bias early game locations.
   - Big Keys, Small Keys, and Compasses are now placed before all other forms of progression.
   - As a bonus, seed generation is now much more likely to be successful on the first try and is therefore faster.
 - Glitched Logic modes will no longer pre-open the Maiamai Cave
   - This is to hopefully prevent players from getting a Nice item that's not Nice Bombs first
+- Pre-activated Weather Vanes Option (Experimental)
+  - This allows skipping many overworld item requirements and also for all regions of Lorule to be explored without Merge.
 - Logic Adjustments:
   - Hard Logic no longer requires players to get Nice Bombs.
     - This was potentially needed to climb Hyrule Castle, but going forward only Glitched logics will require players to get Nice Bombs.
@@ -235,7 +251,7 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
 
 ## Setup
 
-- Download: [Latest Release (v0.1.3)](https://github.com/rickfay/z17-randomizer/releases/download/z17r-v0.1.3/z17r-0.1.3.zip)
+- Download: [Latest Release (v0.3.0)](https://github.com/rickfay/z17-randomizer/releases/download/albwr-v0.3.0/albwr-0.3.0.zip)
 
 1. Unzip the download to your directory of choice.
 2. Move your A Link Between Worlds ROM into the same folder. Name it: `A Link Between Worlds (USA).3ds`
@@ -245,9 +261,9 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
 
 ## Running the Randomizer
 
-There are two ways you can run Z17R:
+There are two ways you can run ALBWR:
 
-1. Double click `z17-randomizer.exe` to start the randomizer with basic settings. The randomizer will provide a simple interface for setting game options, after which it will attempt to generate a completable seed.
+1. Double click `albw-randomizer.exe` to start the randomizer with basic settings. The randomizer will provide a simple interface for setting game options, after which it will attempt to generate a completable seed.
    - The randomizer may make multiple attempts to generate a completable seed. This is normal, and will happen automatically.
 
 ![cli-example.png](docs/cli-example.png)
@@ -257,8 +273,8 @@ There are two ways you can run Z17R:
      - See the example `presets/Example.toml` for more information.
    - Note that the randomizer looks in the local `presets` directory now, and does NOT check `AppData`
    - Examples:
-     - `$ ./z17-randomizer.exe --preset racerman`
-     - `$ ./z17-randomizer.exe --seed 4057320268`
+     - `$ ./albw-randomizer.exe --preset racerman`
+     - `$ ./albw-randomizer.exe --seed 4057320268`
 
 ## Installing Seeds
 

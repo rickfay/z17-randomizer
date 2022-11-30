@@ -1,6 +1,6 @@
 [package]
 name = "cli"
-version = "0.1.3"
+version = "0.3.0"
 authors = ["Kevin Marsolais <kevin@kevinmarsolais.co>", "Rich Fay <therichfay@gmail.com>"]
 edition = "2021"
 license = "GPL-2.0-or-later"
@@ -20,5 +20,5 @@ structopt = "0.3.21"
 sys = { path = "../sys" }
 
 [[bin]]
-name = "z17-randomizer"
+name = "albw-randomizer"
 path = "src/main.rs"

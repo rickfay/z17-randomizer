@@ -324,7 +324,7 @@ fn item_to_str(item: &Item) -> &'static str {
         ItemBowLight => "Bow of Light",
         Heart => "Heart",
 
-        None => "Empty",
+        Empty => "Empty",
 
         PendantPower => "Pendant of Power",
         PendantWisdom => "Pendant of Wisdom",
@@ -543,6 +543,35 @@ pub fn plando() -> Result<(), Error> {
     let settings = plando_settings();
     let mut layout = Layout::default();
 
+    //////////////////////////
+    // --- Ravio's Shop --- //
+    //////////////////////////
+
+    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (1)"), HintGlasses);
+    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (2)"), HintGlasses);
+    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (3)"), HintGlasses);
+    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (4)"), PowerGlove);
+    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (5)"), ItemBell);
+    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (6)"), HintGlasses); // Sand Rod Slot
+    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (7)"), HintGlasses);
+    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (8)"), HintGlasses);
+    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (9)"), HintGlasses);
+
+    /////////////////////////////
+    // --- Dungeons Prizes --- //
+    /////////////////////////////
+
+    layout.set(LocationInfo::new(regions::dungeons::eastern::palace::SUBREGION, "Eastern Palace Prize"), PendantCourage);
+    layout.set(LocationInfo::new(regions::dungeons::house::gales::SUBREGION, "House of Gales Prize"), PendantCourage);
+    layout.set(LocationInfo::new(regions::dungeons::tower::hera::SUBREGION, "Tower of Hera Prize"), PendantCourage);
+    layout.set(LocationInfo::new(regions::dungeons::dark::palace::SUBREGION, "Dark Palace Prize"), PendantCourage);
+    layout.set(LocationInfo::new(regions::dungeons::swamp::palace::SUBREGION, "Swamp Palace Prize"), SageSeres);
+    layout.set(LocationInfo::new(regions::dungeons::skull::woods::SUBREGION, "Skull Woods Prize"), PendantPower);
+    layout.set(LocationInfo::new(regions::dungeons::thieves::hideout::SUBREGION, "Thieves' Hideout Prize"), PendantPower);
+    layout.set(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "Ice Ruins Prize"), SageGulley);
+    layout.set(LocationInfo::new(regions::dungeons::desert::palace::SUBREGION, "Desert Palace Prize"), PendantPower);
+    layout.set(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "Turtle Rock Prize"), PendantCourage);
+
     //////////////////////
     // --- Dungeons --- //
     //////////////////////
@@ -561,7 +590,7 @@ pub fn plando() -> Result<(), Error> {
     layout.set(LocationInfo::new(regions::dungeons::eastern::palace::SUBREGION, "[EP] Yuga"), RupeeGold);
     layout.set(LocationInfo::new(regions::dungeons::eastern::palace::SUBREGION, "[EP] (3F) Outside (North)"), RupeeGold);
     layout.set(LocationInfo::new(regions::dungeons::eastern::palace::SUBREGION, "[EP] (1F) Outside (West)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::eastern::palace::SUBREGION, "Eastern Palace Prize"), PendantCourage);
+
 
     // House of Gales
     layout.set(LocationInfo::new(regions::dungeons::house::gales::SUBREGION, "[HG] (1F) Torches"), KeySmall);
@@ -574,8 +603,7 @@ pub fn plando() -> Result<(), Error> {
     layout.set(LocationInfo::new(regions::dungeons::house::gales::SUBREGION, "[HG] (2F) Fire Ring"), KeySmall);
     layout.set(LocationInfo::new(regions::dungeons::house::gales::SUBREGION, "[HG] (3F) Rat Room"), KeySmall);
     layout.set(LocationInfo::new(regions::dungeons::house::gales::SUBREGION, "[HG] (3F) Fire Bubbles"), KeySmall);
-    layout.set(LocationInfo::new(regions::dungeons::house::gales::SUBREGION, "[HG] Margomill"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::house::gales::SUBREGION, "House of Gales Prize"), PendantWisdom);
+    layout.set(LocationInfo::new(regions::dungeons::house::gales::SUBREGION, "[HG] Margomill"), HintGlasses);
 
     // Tower of Hera
     layout.set(LocationInfo::new(regions::dungeons::tower::hera::SUBREGION, "[TH] (1F) Outside"), RupeeGold);
@@ -685,7 +713,6 @@ pub fn plando() -> Result<(), Error> {
     layout.set(LocationInfo::new(regions::dungeons::desert::palace::SUBREGION, "Zaganaga"), RupeeGold);
 
     // Turtle Rock
-
     layout.set(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "[TR] (1F) Center"), RupeeGold);
     layout.set(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "[TR] (1F) Grate Chest"), RupeeGold);
     layout.set(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "[TR] (1F) Portal Room (Northwest)"), KeySmall);
@@ -732,29 +759,17 @@ pub fn plando() -> Result<(), Error> {
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Blacksmith Cave"), ItemSwordLv1);
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Blacksmith"), ItemSwordLv1);
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Castle Rocks"), RupeeGold);
-    //layout.set(Location::new(regions::hyrule::field::post_sanc::SUBREGION, "Thanks"), Item::BadgeBee);
-    layout.set(LocationInfo::new(regions::hyrule::field::post_eastern::SUBREGION, "Rosso"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::field::post_eastern::SUBREGION, "Clean Rocks"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::field::post_eastern::SUBREGION, "Irene"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::field::post_eastern::SUBREGION, "Haunted Grove Tree Stump"), RupeeGold);
+    //layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Thanks"), Item::RingHekiga);
+    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Rosso"), RupeeGold);
+    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Clean Rocks"), RupeeGold);
+    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Irene"), RupeeGold);
+    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Haunted Grove Tree Stump"), RupeeGold);
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Cucco Dungeon"), RupeeSilver);
 
-
-    layout.set(LocationInfo::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (1)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (2)"), ItemTornadeRod);
-    layout.set(LocationInfo::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (3)"), ItemSwordLv1);
-    layout.set(LocationInfo::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (4)"), ItemBowLight);
-    layout.set(LocationInfo::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (5)"), ItemBombLv2);
-    layout.set(LocationInfo::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (6)"), RupeeR); // Sand Rod Slot
-    layout.set(LocationInfo::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (7)"), ClothesBlue);
-    layout.set(LocationInfo::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (8)"), ClothesBlue);
-    layout.set(LocationInfo::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (9)"), RupeeGold);
-
-
-    layout.set(LocationInfo::new(regions::hyrule::field::rupee_rush::SUBREGION, "Rupee Rush (Hyrule)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::field::castle::SUBREGION, "Castle (Indoors)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::field::castle::SUBREGION, "Castle Balcony"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::field::sanctuary_cave::SUBREGION, "Sanctuary Cave"), RupeeGold);
+    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Rupee Rush (Hyrule)"), RupeeGold);
+    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Castle (Indoors)"), RupeeGold);
+    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Castle Balcony"), RupeeGold);
+    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Sanctuary Cave"), RupeeGold);
 
     // Lost Woods
     layout.set(LocationInfo::new(regions::hyrule::lost::woods::SUBREGION, "Master Sword Pedestal"), ItemBottle);
@@ -781,7 +796,7 @@ pub fn plando() -> Result<(), Error> {
     layout.set(LocationInfo::new(regions::hyrule::sanctuary::inside::SUBREGION, "[HS] Ledge"), RupeeGold);
 
     // Kakariko
-    layout.set(LocationInfo::new(regions::hyrule::kakariko::village::SUBREGION, "Well (Chest)"), Heart); // TODO ---------------
+    layout.set(LocationInfo::new(regions::hyrule::kakariko::village::SUBREGION, "Well (Chest)"), RupeeGold); // TODO ---------------
     layout.set(LocationInfo::new(regions::hyrule::kakariko::village::SUBREGION, "Well (Upper)"), RupeeGold);
     layout.set(LocationInfo::new(regions::hyrule::kakariko::village::SUBREGION, "Jail"), RupeeGold);
     layout.set(LocationInfo::new(regions::hyrule::kakariko::post_sanc::SUBREGION, "Merchant (Left)"), RupeeGold);
@@ -829,7 +844,7 @@ pub fn plando() -> Result<(), Error> {
     layout.set(LocationInfo::new(regions::lorule::field::main::SUBREGION, "Boots Treasure Dungeon"), GanbariPowerUp);
     layout.set(LocationInfo::new(regions::lorule::field::main::SUBREGION, "Vacant House"), RupeeGold);
     layout.set(LocationInfo::new(regions::lorule::field::main::SUBREGION, "Rupee Rush (Lorule)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::lorule::field::main::SUBREGION, "Great Rupee Fairy"), RupeeGold);
+    layout.set(LocationInfo::new(regions::lorule::field::main::SUBREGION, "Great Rupee Fairy"), ItemIceRod);
     layout.set(LocationInfo::new(regions::lorule::field::main::SUBREGION, "Big Bomb Cave"), RupeeGold);
     layout.set(LocationInfo::new(regions::lorule::field::main::SUBREGION, "Octoball Derby"), RupeeGold);
     layout.set(LocationInfo::new(regions::lorule::field::main::SUBREGION, "Blacksmith (Lorule)"), ItemKandelaar);

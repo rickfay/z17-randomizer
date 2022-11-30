@@ -9,12 +9,13 @@ use tempfile::tempdir;
 use try_insert_ext::*;
 use albw::course::Id;
 use albw::course::Id::*;
-use albw::scene::{Arg, Obj, Vec3};
+use albw::scene::{Arg, Obj, Rail};
 use albw::Item::*;
 use albw::language::FlowChart;
 
 use crate::{Error, ItemExt, Layout, LocationInfo, MsbfKey, regions, Result, Settings};
 use crate::patch::r#ref::MsbfInfo;
+use crate::patch::scenes::is_pendant;
 
 use self::code::Code;
 
@@ -24,7 +25,7 @@ mod scenes;
 pub mod r#ref;
 
 #[non_exhaustive]
-struct DungeonPrizes {
+pub struct DungeonPrizes {
     ep_prize: Item,
     hg_prize: Item,
     th_prize: Item,
@@ -62,12 +63,30 @@ impl Patcher {
         self.scene(id, stage_index - 1).unwrap().stage_mut().get_mut().add_obj(obj);
     }
 
+    fn add_rail(&mut self, id: Id, stage_index: u16, rail: Rail) {
+        self.scene(id, stage_index - 1).unwrap().stage_mut().get_mut().add_rail(rail);
+    }
+
+    fn add_system(&mut self, id: Id, stage_index: u16, obj: Obj) {
+        self.scene(id, stage_index - 1).unwrap().stage_mut().get_mut().add_system(obj);
+    }
+
     fn modify_objs(&mut self, id: Id, stage_index: u16, actions: &[(u16, Box<dyn Fn(&mut Obj)>)])
     {
         let stage = self.scene(id, stage_index - 1).unwrap().stage_mut().get_mut();
         for (unq, action) in actions {
             action(stage.get_obj_mut(*unq)
-                .ok_or_else(|| Error::game(format!("Could not find UNQ {} in {}{}", unq, id.as_str(), stage_index)))
+                .ok_or_else(|| Error::game(format!("Could not find [Objs] UNQ {} in {}{}", unq, id.as_str(), stage_index)))
+                .unwrap());
+        }
+    }
+
+    fn modify_rails(&mut self, id: Id, stage_index: u16, actions: &[(u16, Box<dyn Fn(&mut Rail)>)])
+    {
+        let stage = self.scene(id, stage_index - 1).unwrap().stage_mut().get_mut();
+        for (unq, action) in actions {
+            action(stage.get_rails_mut(*unq)
+                .ok_or_else(|| Error::game(format!("Could not find [Rails] UNQ {} in {}{}", unq, id.as_str(), stage_index)))
                 .unwrap());
         }
     }
@@ -77,7 +96,7 @@ impl Patcher {
         let stage = self.scene(id, stage_index - 1).unwrap().stage_mut().get_mut();
         for (unq, action) in actions {
             action(stage.get_system_mut(*unq)
-                .ok_or_else(|| Error::game(format!("Could not find UNQ {} in {}{}", unq, id.as_str(), stage_index)))
+                .ok_or_else(|| Error::game(format!("Could not find [System] UNQ {} in {}{}", unq, id.as_str(), stage_index)))
                 .unwrap());
         }
     }
@@ -218,7 +237,7 @@ impl Patcher {
     }
 
 
-    fn patch_dungeon_prizes(&mut self, layout: &Layout) -> Result<()> {
+    fn patch_dungeon_prizes(&mut self, layout: &Layout, settings: &Settings) -> Result<()> {
 
         // Fetch the placed Dungeon Rewards
         // TODO really need to clean up the Layout data structure...
@@ -238,6 +257,7 @@ impl Patcher {
         self.patch_flowchart(&prizes)?;
         self.patch_msbf_files(&prizes)?;
         self.patch_dungeon_prize_actors(&prizes)?;
+        scenes::patch_prize_byaml(self, &prizes, settings);
 
         Ok(())
     }
@@ -297,6 +317,27 @@ impl Patcher {
         self.scene(FieldDark, 30)?.actors_mut().add(actor_map.get(&prizes.dp_prize).unwrap().clone())?;
         self.scene(DungeonIce, 0)?.actors_mut().add(actor_map.get(&prizes.ir_prize).unwrap().clone())?;
 
+        // Inject Small Chests into scenes that don't have them for Pendants
+        // TODO Remove after Pendants can be redirected
+        let chest_small = self.scene(DungeonHera, 0)?.actors().get("TreasureBoxS")?;
+        if is_pendant(prizes.sp_prize) {
+            let warp_tile = self.scene(DungeonHera, 0)?.actors().get("WarpTile")?;
+            self.scene(DungeonWater, 2)?.actors_mut().add(warp_tile)?;
+            self.scene(DungeonWater, 2)?.actors_mut().add(chest_small.clone())?;
+        }
+        if is_pendant(prizes.sw_prize) {
+            self.scene(FieldDark, 0)?.actors_mut().add(chest_small.clone())?;
+        }
+        if is_pendant(prizes.tt_prize) {
+            self.scene(IndoorDark, 14)?.actors_mut().add(chest_small.clone())?;
+        }
+        if is_pendant(prizes.dp_prize) {
+            self.scene(FieldDark, 30)?.actors_mut().add(chest_small.clone())?;
+        }
+        if is_pendant(prizes.tr_prize) {
+            self.scene(DungeonKame, 2)?.actors_mut().add(chest_small)?;
+        }
+
         Ok(())
     }
 
@@ -340,13 +381,52 @@ impl Patcher {
 
         // Serialize the FlowChart and update the boot archive
         let serialized = flow_chart.serialize();
-        self.boot.archive.get_mut().add(serialized)?;
+        self.boot.archive.get_mut().update(serialized)?;
+
+        Ok(())
+    }
+
+    fn patch_actor_profile(&mut self, _layout: &Layout, _settings: &Settings) -> Result<()> {
+
+        // let tr_prize = layout.get(&LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "Turtle Rock Prize")).unwrap();
+        //
+        // let smol_byaml = match tr_prize {
+        //     SageGulley => "ObjPictureBlacksmithBoy.byaml",
+        //     SageOren => "ObjPictureZoraQueen.byaml",
+        //     SageSeres => "ObjPicturePriestGirl.byaml",
+        //     SageOsfala => "ObjPictureSahasPupil.byaml",
+        //     SageIrene => "ObjPictureMaple.byaml",
+        //     SageRosso => "ObjPictureMountaineer.byaml",
+        //     SageImpa | PendantPower | PendantWisdom | PendantCourage => { return Ok(()); },
+        //     _ => panic!()
+        // };
+        //
+        // // Read and deserialize the FlowChart from RegionBoot
+        // let mut szs = self.game.actor_profile();
+        //
+        // // Make the collision of the TR Portrait larger so Link can 'Touch' it
+        // // let smol_raw = szs.get_mut().read(smol_byaml)?;
+        // // let mut smol_profile: File<ActorProfile> = smol_raw.try_map(|data| byaml::from_bytes(&data))?;
+        // // info!("read smol file");
+        // // smol_profile.get_mut().collision.get_mut(0).unwrap().scale = String::from("{X: 3.00000, Y: 3.00000, Z: 3.00000}");
+        //
+        // // Reduce the collision of Impa to match normal sages when not in TR
+        // let impa_raw = szs.get_mut().read("ObjPictureInpa.byaml")?;
+        // let mut impa_profile: File<ActorProfile> = impa_raw.try_map(|data| byaml::from_bytes(&data))?;
+        //
+        // info!("Being ActorProfile Serializing...");
+        //
+        // // Serialize and update the archive
+        // //self.boot.archive.get_mut().add(smol_profile.serialize())?;
+        // self.boot.archive.get_mut().add(impa_profile.serialize())?;
 
         Ok(())
     }
 
     pub fn prepare(mut self, layout: &Layout, settings: &Settings) -> Result<Patches> {
-        self.patch_dungeon_prizes(layout)?;
+
+        self.patch_dungeon_prizes(layout, settings)?;
+        self.patch_actor_profile(layout, settings)?;
 
         let mut item_actors = HashMap::new();
 
@@ -358,29 +438,21 @@ impl Patcher {
                 item_actors.insert(item, actor);
             }
         }
+
         // Add chest to pedestal scene
         let chest_small = self.scene(DungeonHera, 0)?.actors().get("TreasureBoxS")?;
-        let chest_large = self.scene(DungeonHera, 0)?.actors().get("TreasureBoxL")?;
-        let fresco_arrow = self.scene(DungeonBoss, 0)?.actors().get("FrescoArrow")?;
-
-
-        // Exhibition TODO remove when done
-        // self.scene(Id::FieldLight, 24)?.actors_mut().add(gulley.clone())?;
-        // self.scene(Id::FieldLight, 24)?.actors_mut().add(oren.clone())?;
-        // self.scene(Id::FieldLight, 24)?.actors_mut().add(seres.clone())?;
-        // self.scene(Id::FieldLight, 24)?.actors_mut().add(osfala.clone())?;
-        // self.scene(Id::FieldLight, 24)?.actors_mut().add(impa.clone())?;
-        // self.scene(Id::FieldLight, 24)?.actors_mut().add(irene.clone())?;
-        // self.scene(Id::FieldLight, 24)?.actors_mut().add(rosso.clone())?;
-        //
-        // self.scene(Id::FieldLight, 24)?.actors_mut().add(pendant.clone())?;
-
-
         self.scene(FieldLight, 33)?.actors_mut().add(chest_small.clone())?; // Master Sword Pedestal
-        //self.scene(Id::FieldDark, 0)?.actors_mut().add(rosso.clone())?;
-        //self.scene(Id::FieldDark, 0)?.actors_mut().add(chest_small.clone())?;
-        // self.scene(Id::DungeonWater, 2)?.actors_mut().add(chest.clone())?;
 
+        // Add Warp Tiles to scenes for softlock prevention
+        let warp_tile = self.scene(DungeonHera, 0)?.actors().get("WarpTile")?;
+        self.scene(FieldDark, 19)?.actors_mut().add(warp_tile.clone())?; // Dark Maze
+
+        // Debug stuff
+        // let step_switch = self.scene(DungeonDark, 0)?.actors().get("SwitchStep")?;
+        // self.scene(DungeonKame, 2)?.actors_mut().add(step_switch.clone())?; // Turtle Rock Boss
+        // self.scene(DungeonWind, 2)?.actors_mut().add(step_switch.clone())?; // Gales Boss
+        // self.scene(DungeonHera, 0)?.actors_mut().add(step_switch.clone())?; // Hera Boss
+        // self.scene(FieldDark, 30)?.actors_mut().add(step_switch.clone())?; // Desert Boss
 
         // TODO Bow of Light Fix
         //self.scene(course::Id::DungeonWater, 2)?.actors_mut().add(fresco_arrow.clone())?;
@@ -419,8 +491,8 @@ impl Patcher {
         }
         let code = code::create(&self);
         let Self {
-            mut game,
-            mut boot,
+            game,
+            boot,
             courses,
             ..
         } = self;
@@ -610,9 +682,21 @@ fn cutscenes<'game, 'settings>(
                 236, // Enable Stamina bar
                 239, // Ravio Sign Trigger
                 241, // Skip Osfala intro
-                //246, // Skip Irene, make Hyrule Hotfoot appear, spawns certain enemies FIXME
+                //246, // Skip Irene, make Hyrule Hotfoot appear, spawns certain enemies
                 248, // Skip Yuga killing Osfala
-                //250, 251, 310, // Eastern Palace Flags
+                //250, // Yuga 1 Defeated
+                //251, // Set in Post-EP FieldLight20 cutscene / Effectively Green Pendant
+                //310, // Watched HC Post-EP cutscene
+                315, // Shop open???
+                // 320, // Shady Guy Trigger
+                321, 322, // Skip first Oren cutscenes
+                415, // Skip Yuga capturing Zelda
+                430, // Fix Chamber of Sages Softlock
+                510, // Open Portals, Activate Hyrule Castle Midway
+                522, // Hilda Blacksmith Text + get Map Swap icon on lower screen
+                523, // Hilda Graveyard Text
+                524, // Hilda ??? Text
+                525, // Skip Sahasrahla outside Link's House, make Hyrule Hotfoot appear
 
                 // 536, 537, // Gulley
                 // 556, 557, // Oren Flags
@@ -622,24 +706,12 @@ fn cutscenes<'game, 'settings>(
                 // 636, 637, // Irene Flags
                 // 656, 657, // Impa Flags
 
-                315, // Shop open???
-                320, // Shady Guy Trigger
-                321, 322, // Skip first Oren cutscenes
-                415, // Skip Yuga capturing Zelda
-                430, // Fix Chamber of Sages Softlock
-                510, // Open Portals, Activate Hyrule Castle Midway
-                522, // Hilda Blacksmith Text + get Map Swap icon on lower screen
-                523, // Hilda Graveyard Text
-                524, // Hilda ??? Text
-                525, // Skip Sahasrahla outside Link's House, make Hyrule Hotfoot appear
                 542, 543, // Skip Bomb-Shop Man dialogue
                 560, // Hilda ??? Text
                 599, // Disable Sand Rod return
                 600, // Hilda ??? Text
                 620, // Hilda ??? Text
                 640, // Hilda ??? Text
-                // 828 // Seems (?) identical to 829/830. This flag is being repurposed to control the Sanctuary doors.
-                829, // Respawn in Ravio's Shop after visiting Lorule.
                 899, // Enable Quick Equip
                 902, // StreetPass Tree
                 906, // Monster Guts

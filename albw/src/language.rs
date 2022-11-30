@@ -7,7 +7,7 @@ use std::{
 
 use serde::{Deserialize, Serialize};
 
-use crate::{course, files::{sarc::Sarc, FromFile}, flow::{Flow, FlowMut}, Error, File, Result, byaml};
+use crate::{course, files::{sarc::Sarc, FromFile}, flow::{Flow, FlowMut}, Error, File, Result};
 
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(rename_all = "PascalCase")]

@@ -403,11 +403,15 @@ pub enum FillerItem {
     SageRosso,
     SageIrene,
     SageImpa,
+    EasternComplete,
+    DarkComplete,
+    ThievesComplete,
     ScootFruit,
     FoulFruit,
     Shield,
     GoldBee,
     OpenSanctuaryDoors,
+    ShadyGuyTrigger,
     BigBombFlower,
     StylishWomansHouseOpen,
     SkullEyeRight,
@@ -424,7 +428,7 @@ pub enum FillerItem {
 
 pub fn convert(fill_item: FillerItem) -> Option<Item> {
     match fill_item {
-        FillerItem::Empty => Some(Item::None),
+        FillerItem::Empty => Some(Item::Empty),
         Bow01 | Bow02 => Some(ItemBow),
         Boomerang01 | Boomerang02 => Some(ItemBoomerang),
         Hookshot01 | Hookshot02 => Some(ItemHookShot),
@@ -638,11 +642,13 @@ pub fn convert(fill_item: FillerItem) -> Option<Item> {
 
 
         // Quest Items don't translate
+        EasternComplete | DarkComplete | ThievesComplete |
         ScootFruit | FoulFruit | Shield |
-        OpenSanctuaryDoors | GoldBee | BigBombFlower | StylishWomansHouseOpen |
+        ShadyGuyTrigger | OpenSanctuaryDoors |
+        GoldBee | BigBombFlower | StylishWomansHouseOpen |
         SkullEyeRight | SkullEyeLeft |
         TurtleFlipped | TurtleAttacked | TurtleWall |
         AccessLoruleCastleField | AccessHyruleBlacksmith | AccessPotionShop | AccessMilkBar |
-        Triforce => Option::None
+        Triforce => None
     }
 }

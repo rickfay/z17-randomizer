@@ -182,6 +182,7 @@ pub enum Location {
     DarkPalaceMain,
     DarkPalaceLockedDoors,
     DarkPalaceBoss,
+    DarkPalaceAfterBoss,
 
     SwampPalaceOutside,
     SwampPalaceAntechamber,

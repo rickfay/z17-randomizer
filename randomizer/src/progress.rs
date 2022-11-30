@@ -531,16 +531,28 @@ impl Progress {
         self.has(BigBombFlower)
     }
 
-    pub fn has_pendant_of_courage(&self) -> bool {
-        self.has(PendantOfCourage)
+    pub fn has_shady_guy_trigger(&self) -> bool {
+        self.has(ShadyGuyTrigger)
+    }
+
+    pub fn has_completed_eastern(&self) -> bool {
+        self.has(EasternComplete)
+    }
+
+    pub fn has_completed_dark(&self) -> bool {
+        self.has(DarkComplete)
+    }
+
+    pub fn has_completed_thieves(&self) -> bool {
+        self.has(ThievesComplete)
     }
 
     pub fn has_all_pendants(&self) -> bool {
         self.has(PendantOfCourage) && self.has(PendantOfWisdom) && self.has(PendantOfPower)
     }
 
-    pub fn has_sage_gulley(&self) -> bool {
-        self.has(SageGulley)
+    pub fn has_pendant_of_courage(&self) -> bool {
+        self.has(PendantOfCourage)
     }
 
     pub fn has_sage_osfala(&self) -> bool {

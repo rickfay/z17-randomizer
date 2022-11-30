@@ -7,7 +7,7 @@ use crate::{actors::Actor, int_map, Error, Game, Result};
 int_map! {
 /// An in-game item.
 Item(u16) {
-    None = 0x00, // TODO rename this to Empty so it's not confused with Option::None
+    Empty = 0x00, // Actually called "None", but renamed to avoid problems with Rust's Option::None
     KeySmall = 0x01,
     KeyBoss = 0x02,
     Compass = 0x03,

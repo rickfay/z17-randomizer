@@ -168,7 +168,7 @@ fn main() -> randomizer::Result<()> {
 
     SimpleLogger::init(LevelFilter::Info, Default::default()).expect("Could not initialize logger.");
 
-    info!("Initializing Z17 Randomizer...");
+    info!("Initializing ALBW Randomizer...");
 
     let is_plando = false; // TODO expose this eventually so people can make their own, for now it's for testing
 
@@ -192,7 +192,7 @@ fn main() -> randomizer::Result<()> {
 
             info!("Attempt:                        #{}", x + 1);
             info!("Preset:                         {}", opt.preset.as_ref().unwrap_or(&String::from("<None>")));
-            info!("Version:                        0.1.3");
+            info!("Version:                        0.3.0");
 
             //let randomizer = Generator::new(&preset, seed);
             let spoiler = panic::catch_unwind(|| filler_new(&preset, seed));
@@ -216,8 +216,8 @@ fn main() -> randomizer::Result<()> {
         }
 
         match result {
-            Ok(_) => info!("Successfully generated Z17R seed :D"),
-            Err(_) => error!("Failed to generate Z17R seed D:"),
+            Ok(_) => info!("Successfully generated ALBWR seed :D"),
+            Err(_) => error!("Failed to generate ALBWR seed D:"),
         }
 
         pause();

@@ -5,7 +5,7 @@ use std::{
 };
 
 use bytey::*;
-use log::{debug, info};
+use log::debug;
 
 use super::{align, File, FromFile, IntoBytes};
 use crate::{Error, Result};
@@ -107,6 +107,11 @@ impl Sarc {
 
     pub fn add(&mut self, file: File<Box<[u8]>>) -> Result<()> {
         self.decompress_mut()?.add(file);
+        Ok(())
+    }
+
+    pub fn update(&mut self, file: File<Box<[u8]>>) -> Result<()> {
+        self.decompress_mut()?.update(file);
         Ok(())
     }
 
@@ -218,16 +223,10 @@ impl Archive {
         }
     }
 
-    fn add(&mut self, file: File<Box<[u8]>>) {
-        debug!("Add {}", file.path);
+    fn update(&mut self, file: File<Box<[u8]>>) {
+        debug!("Updating: {}", file.path);
         match self.search(self.hash(&file.path), 0, self.count - 1) {
-            Ok((start, end, node_index)) => {
-
-                if !"World/Byaml/FlowChart.byaml".eq(file.path()) {
-                    info!("Not adding: {}", file.path);
-                    return;
-                }
-
+            Ok((start, _end, node_index)) => {
 
                 // info!("File already exists: {}", file.path);
                 // info!("Start: {}, End: {}", start, end);
@@ -243,8 +242,6 @@ impl Archive {
                 // let old_size = end as usize - start as usize;
                 // let new_size = buf.len();
 
-
-
                 // let start = align::<0x80>(self.files.len() as u32);
                 // self.files.resize(start as usize, 0);
 
@@ -252,7 +249,6 @@ impl Archive {
                 let new_end = start + buf.len() as u32;
 
                 //self.files.append(&mut buf);
-
 
                 let mut node = vec![];
                 node.extend_from_slice(&hash.to_le_bytes());
@@ -267,11 +263,13 @@ impl Archive {
                     [0xC] end: u32,
                 }}
 
-                let mut display : Node = unsafe { Node::from_slice_unchecked(&node[..]) };
+                let _display: Node = unsafe { Node::from_slice_unchecked(&node[..]) };
 
-                info!("node_index is: {}", node_index);
-                info!("OG          Node - {},{},{}", &start, &end, &hash);
-                info!("Replacement Node - {},{},{}\n", &display.start, &display.end, &display.hash);
+                // TODO go back and resize this properly
+
+                // info!("node_index is: {}", node_index);
+                // info!("OG          Node - {},{},{}", &start, &end, &hash);
+                // info!("Replacement Node - {},{},{}\n", &display.start, &display.end, &display.hash);
 
                 // Adjust other files start/end
                 // for i in node_index + 1..(self.nodes.len() / 0x10) {
@@ -319,16 +317,27 @@ impl Archive {
                 //
                 // if new_size > old_size {
                 //     self.files.resize(((old_len - old_size + new_size) as u32) as usize, 0);
-                    self.files.splice(start as usize..new_end as usize, buf);
+                self.files.splice(start as usize..new_end as usize, buf);
                 // } else if new_size < old_size {
                 //     self.files.splice(start as usize..new_end as usize, buf);
                 //     self.files.resize(((old_len - old_size + new_size) as u32) as usize, 0);
                 // }
 
 
-
                 //info!("Do we get here...");
                 //panic!();
+            }
+            Err(_) => {
+                panic!("Can't update non-existent file: {}", file.path);
+            }
+        }
+    }
+
+    fn add(&mut self, file: File<Box<[u8]>>) {
+        debug!("Add {}", file.path);
+        match self.search(self.hash(&file.path), 0, self.count - 1) {
+            Ok(_) => {
+                debug!("Not adding duplicate file: {}", file.path);
             }
             Err(i) => {
                 let i = i as usize * 0x10;

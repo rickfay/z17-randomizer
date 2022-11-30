@@ -11,6 +11,7 @@ use std::{
 use log::info;
 
 pub mod actors;
+pub mod actor_profile;
 pub mod course;
 pub mod demo;
 mod files;
@@ -190,6 +191,10 @@ impl Game {
                 .read("Archive/ActorCommon.szs")?
                 .map(Sarc::from),
         ))
+    }
+
+    pub fn actor_profile(&mut self) -> File<Sarc> {
+        self.romfs.borrow_mut().read("Archive/ActorProfile.szs").unwrap().map(Sarc::from)
     }
 
     pub fn course(&self, id: course::Id) -> Course {

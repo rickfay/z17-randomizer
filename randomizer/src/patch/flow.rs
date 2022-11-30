@@ -61,6 +61,9 @@ macro_rules! action {
     ($command:tt value($value:expr)) => {
         $command.set_value($value);
     };
+    ($command:tt command($new_command:expr)) => {
+        $command.set_command($new_command);
+    };
     ($command:tt => $next:expr) => {
         $command.set_next($next);
     };
@@ -76,58 +79,88 @@ macro_rules! action {
 
 pub fn apply(patcher: &mut Patcher, free: Item) -> Result<()> {
 
-    // Debugging TODO Comment out
-    // let mut flow = patcher.flow(FieldDark)?;
-    // let flow = flow.get_mut(stringify!(FieldDark_1B_Hilda)).ok_or_else(|| Error::game("File not found."))??;
+    // apply!(patcher,
+    //
+    //
+    // );
+    //
+    // // Debugging
+    // let mut flow = patcher.flow(IndoorLight)?;
+    // let flow = flow.get_mut(stringify!(FieldLight_02_KikoriMan)).ok_or_else(|| Error::game("File not found."))??;
     // {
     //     flow.get().debug();
     // }
 
-
     apply!(patcher,
 
-        // FieldDark/FieldDark_1B_Hilda {
-        //     // FieldDark_1B_Hilda_ACT7_00
-        //
-        // },
-
-        DungeonDark/Dark {
-            //[0 into_start] => 5, // Goes to CoS, Gulley dialog but not model or warp to leave??
-            // [0 into_start] => 7, // Crash
-            // [6 into_start] => 5, // Nothing
-
-
-            // [2 into_branch] each [
-            //     value(6), // set ToC cutscene to require only 6 sages
-            // ],
-
-            [4] => 5, // skip Triforce of Courage cutscene! If Gulley is last
+        // Shady Guy (Zora's Domain)
+        FieldLight/FieldLight_0F_Zora {
+            [229] => 244, // skip 225 Youch!
+            [227] => 238, // skip 261(branch),226
+            [236] => 234, // skip 237
+            [200] => 101, // skip 93
+            [101] => 103, // skip 100
+            [103] => 104, // skip 102
+            [104] => 294, // skip 105
+            [108] => 126, // skip 109
+            // 173 END
+            [125] => None, // Skip extra textbox
         },
 
-        // CaveDark/CaveDark10 {
-        //     [187] => 38, // skip 185
-        //     [188] => 38, // skip 186
-        //     //[] => 45, // skip 192 - none
-        //     //[] => 46, // skip 196 - none
-        //     //[] => 47, // skip 200 - none
-        //     //[] => 48, // skip 213 - none
-        //     //[] => 49, // skip 219 - none
-        //     //[] => 50, // skip 223 - none
-        //     [258] => 53, // skip 17
-        //     [39] => 62, // skip 1
-        //     [19] => 68, // skip 10
-        //     [270] => 72, // skip 13
-        //     //[] => 75, // skip 330 - too big ?
-        //     //[] => 78, // skip 333 - too big ?
-        //     [41] => 82, // skip 5
-        //     //[] => 87, // skip 22 - none
-        //     //[] => 92, // skip 26 - none
-        //     [310] => 173, // skip 174
-        //     //[] => 187, // skip 97 - none
-        //     //[] => 188, // skip 99 - none
-        //     //[] => 205, // skip 204 - none
-        //     //[] => 241, // skip 308,225,245 - too big ?
-        // },
+        // Shady Guy (Kakariko)
+        FieldLight/FieldLight_18_Touzoku {
+            // Entry_TownTouzoku
+            [0 into_start] => 2, // Skip to flag check
+            [3 into_branch] switch [
+                [1] => 0x12, // Skip to item get
+            ],
+            [0x1C] => None, // Set event flag then end
+        },
+
+        // Great Rupee Fairy
+        CaveDark/Cave {
+            // CaveDark29_LuckyFairy_00
+            // 5 start
+            // 46
+            // 35 checks 948 Flag to see if we've already gotten reward
+            // 45
+            [45] => 47, // Skip Would you like to throw text
+            [47 into_branch] each [ // 47 checks that we have enough rupees
+                value(3000),
+            ],
+            // 44 deposits 200 rupees as 10x Red Rupees
+            [44] => 43,
+            // 43 deposits 50 rupees as 10x Blue Rupees
+            [43] => 25,
+            // 25 Checks if 3000 have been deposited
+            [27 convert_into_action] each [
+                => 44, // create loop, depositing 200 then 50 until we hit 3000
+            ],
+            [32 convert_into_action] each [ // remove dialog
+                command(0), // clear command
+                => 36, // skip to item get
+            ],
+        },
+
+        // Skip Triforce of Courage cutscene
+        CaveDark/CaveDark10 {
+
+            // Skip Flag 629 checks
+            [266] => 1, // Skip 191
+            [263] => 10, // Skip 195
+            [260] => 13, // Skip 199
+            [254] => 5, // Skip 212
+            [253] => 22, // Skip 218
+            [251] => 26, // Skip 222
+
+            // [151] => 63, // Skip 227
+            // [152] => 64, // Skip 229
+            // [153] => 65, // Skip 231
+            // [154] => 66, // Skip 233
+            // [155] => 67, // Skip 235
+            // [156] => 68, // Skip 237
+            // [157] => 69, // Skip 239
+        },
 
         // Irene (bridge)
         FieldLight/FieldLight_2D_Maple {
@@ -138,49 +171,75 @@ pub fn apply(patcher: &mut Patcher, free: Item) -> Result<()> {
             [28] => 18,
         },
 
-        // Eastern Ruins
-        FieldLight/FieldLight_1E_Sahasrahla {
-            // lgt_NpcSahasrahla_Field1E_03
-            //[0 into_start] => 0x6A,
-
-            // 0,127,128,105,126,21,2,114,70,75,112,113
-            [107] => 23, // skip 1
-            // 23,24,29,26,68,
-            [68] => 129, // skip 25,124
-            // 130,131,132
-            [103] => 104, // skip 102
-            // 14,27,65,66,3,16,17,15,67,18
-            [28] => 8, // skip 4
-            // 22,69,5,9,13,6,
-            //[13] => 106, // skip 6 - Leaving in so Link doesn't bumrush Sahas
-            // 12,19,11,33,32,10,20,7 - END
+        // Irene (outside Fortune Teller)
+        FieldLight/FieldLight_11_Maple {
+            // NpcMaple_BellGet_11
+            [39] => 15, // skip 18
+            [20] => 6, // skip 1
+            [30] => 16, // skip 2,3,4
+            [27] => 17, // skip 32,34,35,33 (including pan to Fortune-Teller)
         },
+
+        // Irene (outside pond)
+        FieldLight/FieldLight_12_Maple {
+            // NpcMaple_BellGet_12_00
+            [62] => 18, // skip 2,3,4
+            [22] => 8, // skip 1
+            [70] => 17, // skip 20
+            [29] => 19, // skip 5
+
+            // NpcMaple_BellGet_12_01
+            [66] => 48, // skip 32,33,34
+            [52] => 38, // skip 31
+            [71] => 47, // skip 50
+            [59] => 49, // skip 35
+        },
+
+
+
+        // Eastern Ruins
+        // FieldLight/FieldLight_1E_Sahasrahla {
+        //     // lgt_NpcSahasrahla_Field1E_03
+        //     //[0 into_start] => 0x6A,
+        //
+        //     // 0,127,128,105,126,21,2,114,70,75,112,113
+        //     [107] => 23, // skip 1
+        //     // 23,24,29,26,68
+        //     [68] => 129, // skip 25,124
+        //     // 130,131,132
+        //     [103] => 104, // skip 102
+        //     // 14,27,65,66,3,16,17,15,67,18
+        //     [28] => 8, // skip 4
+        //     // 22,69,5,9,13,6
+        //     //[13] => 106, // skip 6 - Leaving in so Link doesn't bumrush Sahas
+        //     // 12,19,11,33,32,10,20,7 - END
+        // },
 
         // Hyrule Castle
-        FieldLight/FieldLight_1B_Sahasrahla {
-            // lgt_NpcSahasrahla_Field1B_00
-            // 0,24,26,
-            [35] =>  5, // skip 1
-            [43] => 57, // skip 7
-            [49] => 65, // skip 44
-            [64] => 66, // skip 63
-            [66] => 51, // skip 9
-            [68] => 85, // skip 50
-            // 81,82,83,86,84,20,54,53
-
-            [67] => 55, // skip 10, 52
-            //[55] => 23, // skip 22
-
-            // 23 gives out item
-            // FIXME Gift given too early b/c Sahasrahla moves during 10,52,22
-            // 12,13,69,62,111
-            [113] => 56, // skip 103, 91(goto), 105
-            [56] => 73, // skip 11
-            // 77,76,114,72 - FIN
-        },
+        // FieldLight/FieldLight_1B_Sahasrahla {
+        //     // lgt_NpcSahasrahla_Field1B_00
+        //     // 0,24,26,
+        //     [35] =>  5, // skip 1
+        //     [43] => 57, // skip 7
+        //     [49] => 65, // skip 44
+        //     [64] => 66, // skip 63
+        //     [66] => 51, // skip 9
+        //     [68] => 85, // skip 50
+        //     // 81,82,83,86,84,20,54,53
+        //
+        //     [67] => 55, // skip 10, 52
+        //     //[55] => 23, // skip 22
+        //
+        //     // 23 gives out item
+        //     // fix - Gift given too early b/c Sahasrahla moves during 10,52,22
+        //     // 12,13,69,62,111
+        //     [113] => 56, // skip 103, 91(goto), 105
+        //     [56] => 73, // skip 11
+        //     // 77,76,114,72 - FIN
+        // },
     );
 
-
+    // untouched
     apply!(patcher,
         // Runaway Item Seller
         Boot/FieldLight_33_Douguya {
@@ -212,28 +271,7 @@ pub fn apply(patcher: &mut Patcher, free: Item) -> Result<()> {
                 ],
             ],
         },
-        // Shady Guy (Zora's Domain)
-        FieldLight/FieldLight_0F_Zora {
-            // Entry_ZoraEVT_TZK
-            [2 into_start] => 0x102, // Skip to next event
-            [0x102 into_start] => 0x7D,
-            [0x7D] => 0xB3, // Set flag, then display text
-        },
-        // Irene (outside Fortune Teller)
-        FieldLight/FieldLight_11_Maple {
-            // NpcMaple_BellGet_11
-            [0 into_start] => 6, // Skip to item get
-            [6] => None,
-        },
-        // Irene (outside pond)
-        FieldLight/FieldLight_12_Maple {
-            // NpcMaple_BellGet_12_00
-            [0 into_start] => 8, // Skip to item get
-            [8] => None,
-            // NpcMaple_BellGet_12_01
-            [0x1E into_start] => 0x26, // Skip to item get
-            [0x26] => None,
-        },
+
         // Prologue (Seres and Dampe)
         FieldLight/FieldLight_13_Sister {
             // FieldLight_13_Sister_ACT2_heisicho
@@ -259,15 +297,7 @@ pub fn apply(patcher: &mut Patcher, free: Item) -> Result<()> {
                 value(0xD1),
             ],
         },
-        // Shady Guy (Kakariko)
-        FieldLight/FieldLight_18_Touzoku {
-            // Entry_TownTouzoku
-            [0 into_start] => 2, // Skip to flag check
-            [3 into_branch] switch [
-                [1] => 0x12, // Skip to item get
-            ],
-            [0x1C] => None, // Set event flag then end
-        },
+
 
 
         // Cucco Ranch

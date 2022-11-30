@@ -14,26 +14,7 @@ crate::region! {
             "Castle Rocks": HeartPiece @Heart(18[209]) :- can_lift,
             "Rosso": PowerGlove @Chest(IndoorLight 10[7]) :- {|p| p.did_eastern() || p.can_merge()},
             "Cucco Dungeon": RupeeSilver @SilverRupee(AttractionLight 3[9]),
-        ],
-        paths: [
-            rentals,
-            sanctuary::lobby :- {|p| p.sword() || p.can_lift() || p.can_fire_rod() || p.can_ice_rod() || p.can_bomb() || p.can_lamp() || p.has_boots()},
-            lost::woods,
-            death::mountain :- {|p| p.can_lift() || p.glitched()},
-            zoras::domain,
-            kakariko::village,
-            eastern::ruins,
-            southern::ruins,
-            lake::hylia,
-            post_eastern :- did_eastern,
-            castle :- {|s| s.has_master_sword() || s.swordless_mode()},
-            lorule::field::main :- {|s| s.can_merge() || s.yuga() },
-            lorule::graveyard::field :- can_merge,
-            lorule::field::ledge :- can_merge,
-        ],
-    },
-    post_eastern {
-        locations: [
+            // "Thanks": RingHekiga @Event(IndoorLight/FieldLight_2C_Rental[0xED]),
             "Clean Rocks": RupeePurple @Chest(IndoorLight 10[25]) :- can_lift,
             "Irene": ItemBell @Event[
                 FieldLight_11_Maple[0x06],
@@ -42,10 +23,6 @@ crate::region! {
                 FieldLight_2D_Maple[0x07],
             ],
             "Haunted Grove Tree Stump": ItemRentalTornadeRod @Event(FieldLight_2A_BlacksmithWife[0x15]),
-        ],
-    },
-    rentals {
-        locations: [
             "Ravio (1)": ItemRentalIceRod @Shop(Ravio(0)),
             "Ravio (2)": DashBoots @Shop(Ravio(5)),
             "Ravio (3)": Pouch @Shop(Ravio(2)),
@@ -55,24 +32,9 @@ crate::region! {
             "Ravio (7)": ItemRentalHammer @Shop(Ravio(7)),
             "Ravio (8)": ItemRentalBoomerang @Shop(Ravio(6)),
             "Ravio (9)": ItemRentalFireRod @Shop(Ravio(4)),
-        ],
-        paths: [
-            rupee_rush,
-        ],
-    },
-    rupee_rush {
-        locations: [
             "Rupee Rush (Hyrule)": HeartPiece @Event(FieldLight_28_Minigame[0x26]),
-        ],
-    },
-    castle {
-        locations: [
             "Castle (Indoors)": RupeeB @Chest(IndoorLight 12[48]),
             "Castle Balcony": RupeePurple @Chest(18[224]),
-        ],
-    },
-    sanctuary_cave {
-        locations: [
             "Sanctuary Cave": HeartPiece @Heart(CaveLight 5[2]),
         ],
     },

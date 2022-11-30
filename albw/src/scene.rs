@@ -2,7 +2,7 @@ use std::{fmt, path::Path};
 
 use serde::{de, ser::SerializeTuple, Deserialize, Deserializer, Serialize, Serializer};
 
-use crate::{actors::Actors, files::sarc::Sarc, File, Result};
+use crate::{actors::Actors, files::sarc::Sarc, File, Result, Item};
 
 #[derive(Debug)]
 pub struct Scene {
@@ -61,9 +61,25 @@ impl Stage {
         self.objs.push(obj);
     }
 
+    pub fn add_rail(&mut self, rail: Rail) {
+        self.rails.push(rail);
+    }
+
+    pub fn add_system(&mut self, obj: Obj) {
+        self.system.push(obj);
+    }
+
     pub fn get_obj_mut(&mut self, unq: u16) -> Option<&mut Obj> {
         if let Some(i) = self.objs.iter().position(|obj| obj.unq == unq) {
             self.objs.get_mut(i)
+        } else {
+            None
+        }
+    }
+
+    pub fn get_rails_mut(&mut self, unq: u16) -> Option<&mut Rail> {
+        if let Some(i) = self.rails.iter().position(|rail| rail.unq == unq) {
+            self.rails.get_mut(i)
         } else {
             None
         }
@@ -97,29 +113,88 @@ pub struct Obj {
 }
 
 impl Obj {
+    /// Generates a new Spawn Point system object
+    pub fn spawn_point(id: i32, clp: i16, ser: u16, unq: u16, translate: Vec3) -> Obj {
+        Self {
+            arg: Arg(id, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.0),
+            clp,
+            flg: (0, 0, 0, 0),
+            id: 7,
+            lnk: vec![],
+            nme: None,
+            ril: vec![],
+            ser: Some(ser),
+            srt: Transform {
+                scale: Vec3 { x: 1.0, y: 1.0, z: 1.0 },
+                rotate: Vec3 { x: 0.0, y: 0.0, z: 0.0 },
+                translate,
+            },
+            typ: 0,
+            unq,
+        }
+    }
 
-    /// Generate a new Warp object
-    pub fn warp(activation_flag: u16, clp: i16, ser: u16, translate: Vec3, unq: u16, spawn: i32, scene: i32, scene_index: i32) -> Self {
+    /// Generates a new Step Switch object <br />
+    /// Remember to import the actor: `StepSwitch`
+    pub fn step_switch(flag: Flag, clp: i16, ser: u16, unq: u16, translate: Vec3) -> Self {
+        let (arg4, arg6) = flag.into_pair();
+        Self {
+            arg: Arg(0, 0, 0, 0, arg4, 0, arg6, 0, 0, 0, 0, 0, 0, 0.0),
+            clp,
+            flg: (0, 0, 0, 0),
+            id: 109,
+            lnk: vec![],
+            nme: None,
+            ril: vec![],
+            ser: Some(ser),
+            srt: Transform {
+                scale: Vec3 { x: 1.0, y: 1.0, z: 1.0 },
+                rotate: Vec3 { x: 0.0, y: 0.0, z: 0.0 },
+                translate,
+            },
+            typ: 1,
+            unq,
+        }
+    }
+
+    /// Generate a new Warp Tile object
+    /// Remember to import the actor: `WarpTile`
+    pub fn warp_tile(activation_flag: Flag, clp: i16, ser: u16, unq: u16, spawn: i32, scene: i32, scene_index: i32, translate: Vec3) -> Self {
+        Self::warp(208, 1, activation_flag, clp, ser, unq, spawn, scene, scene_index, translate)
+    }
+
+    /// Generate a new Blue Warp object
+    pub fn blue_warp(activation_flag: Flag, clp: i16, ser: u16, unq: u16, spawn: i32, scene: i32, scene_index: i32, translate: Vec3) -> Self {
+        Self::warp(469, 0, activation_flag, clp, ser, unq, spawn, scene, scene_index, translate)
+    }
+
+    /// Generate a new Green Warp object
+    pub fn green_warp(activation_flag: Flag, clp: i16, ser: u16, unq: u16, spawn: i32, scene: i32, scene_index: i32, translate: Vec3) -> Self {
+        Self::warp(19, 0, activation_flag, clp, ser, unq, spawn, scene, scene_index, translate)
+    }
+
+    fn warp(id: i16, arg1: i32, activation_flag: Flag, clp: i16, ser: u16, unq: u16, spawn: i32, scene: i32, scene_index: i32, translate: Vec3) -> Self {
+        let (arg4, arg6) = activation_flag.into_pair();
         Self {
             arg: Arg {
                 0: spawn,
-                1: 0,
+                1: arg1,
                 2: 0,
                 3: 0,
-                4: 4,
+                4: arg4,
                 5: 0,
-                6: activation_flag,
+                6: arg6,
                 7: 0,
                 8: 0,
                 9: 0,
                 10: scene,
                 11: scene_index,
                 12: 0,
-                13: 0.0
+                13: 0.0,
             },
             clp,
             flg: (0, 0, 0, 0),
-            id: 469,
+            id,
             lnk: vec![],
             nme: None,
             ril: vec![],
@@ -135,23 +210,26 @@ impl Obj {
     }
 
 
-    /// Generate a new Obj to act as a Dungeon Reward trigger
-    pub fn dungeon_reward(reward_flag: u16, clp: i16, ser: u16, translate: Vec3, typ: i32, unq: u16) -> Self {
+    /// Generate a new Obj to act as a Dungeon Reward trigger <br />
+    /// Remember to import the actor: `TreasureBoxS`
+    pub fn pendant_chest(prize: Item, active_flag: Flag, pendant_flag: Flag, clp: i16, ser: u16, unq: u16, translate: Vec3) -> Self {
+        let (arg4, arg6) = Flag::into_pair(active_flag);
+        let (arg5, arg7) = Flag::into_pair(pendant_flag);
         Self {
-            arg: Arg(0, 0, 0, 0, 4, 0, reward_flag, 0, 0, 0, 0, 0, 0, 0.0),
+            arg: Arg(prize as i32, 0, 0, 0, arg4, arg5, arg6, arg7, 0, 0, 0, 0, 0, 0.0),
             clp,
             flg: (0, 0, 0, 0),
-            id: 16, // AreaSwitchCylinder
+            id: 35,
             lnk: vec![],
             nme: None,
             ril: vec![],
             ser: Some(ser),
             srt: Transform {
-                scale: Vec3 { x: 1.0, y: 2.0, z: 1.0 },
+                scale: Vec3 { x: 1.0, y: 1.0, z: 1.0 },
                 rotate: Vec3 { x: 0.0, y: 0.0, z: 0.0 },
                 translate,
             },
-            typ,
+            typ: 1,
             unq,
         }
     }
@@ -264,6 +342,12 @@ impl Obj {
         self.typ = typ;
     }
 
+    pub fn set_rotate(&mut self, x: f32, y: f32, z: f32) {
+        self.srt.rotate.x = x;
+        self.srt.rotate.y = y;
+        self.srt.rotate.z = z;
+    }
+
     pub fn set_scale(&mut self, x: f32, y: f32, z: f32) {
         self.srt.scale.x = x;
         self.srt.scale.y = y;
@@ -312,7 +396,7 @@ pub type Flg = (u8, u8, u16, u16);
 
 pub type Lnk = (u16, i16, i16);
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub struct Transform {
     pub scale: Vec3,
     pub rotate: Vec3,
@@ -398,20 +482,25 @@ impl Serialize for Transform {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub struct Vec3 {
     pub x: f32,
     pub y: f32,
     pub z: f32,
 }
 
+impl Vec3 {
+    pub const UNIT: Self = Self { x: 1.0, y: 1.0, z: 1.0 };
+    pub const ZERO: Self = Self { x: 0.0, y: 0.0, z: 0.0 };
+}
+
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(deny_unknown_fields, rename_all = "UPPERCASE")]
 pub struct Rail {
-    arg: RailArg,
-    pnt: Vec<Point>,
-    rng: bool,
-    unq: u16,
+    pub arg: RailArg,
+    pub pnt: Vec<Point>,
+    pub rng: bool,
+    pub unq: u16,
 }
 
 type RailArg = (i32, i32, i32, i32, f32, f32);
@@ -419,13 +508,24 @@ type RailArg = (i32, i32, i32, i32, f32, f32);
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(deny_unknown_fields, rename_all = "UPPERCASE")]
 pub struct Point {
-    arg: RailArg,
-    ctl: [f32; 6],
-    lnk: Vec<Lnk>,
-    srt: Transform,
+    pub arg: RailArg,
+    pub ctl: [f32; 6],
+    pub lnk: Vec<Lnk>,
+    pub srt: Transform,
 }
 
-#[derive(Debug)]
+impl Clone for Point {
+    fn clone(&self) -> Self {
+        Self {
+            arg: self.arg.clone(),
+            ctl: self.ctl.clone(),
+            lnk: self.lnk.clone(),
+            srt: self.srt.clone(),
+        }
+    }
+}
+
+#[derive(Debug, Copy, Clone)]
 pub enum Flag {
     Course(u16),
     Event(u16),

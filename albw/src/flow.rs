@@ -184,19 +184,38 @@ impl<'input> FlowMut<'input> {
         typedef! {
             struct Inner: FromBytes<'_> [STEP_LEN] {
             [0] kind: u8,
+            [1] arg1: u8,
+            [2] arg2: u8,
+            [3] arg3: u8,
             [4] value: u32,
             [8] next: u16,
             [0xA] command: u16,
             [0xC] count: u16,
-            [0xE] branch: u16,}
+            [0xE] branch: u16,
+            }
         }
+
+        typedef! {
+            struct InnerBranch: FromBytes<'_> [STEP_LEN] {
+            [0] arg0: u8,
+            [1] arg1: u8,
+            }
+        }
+
+
 
         println!("index,kind,value,next,command,count,branch");
         let mut step: Inner;
-        for i in 0..(&self.steps.inner.len() / 16) {
-            step = unsafe { Inner::from_slice_unchecked(&self.steps.inner[(i * 0x10)..(i * 0x11)]) };
-            println!("[{}],{},{},{},{},{},{}",
-                     i, step.kind, step.value, step.next, step.command, step.count, step.branch);
+        for i in 0..(&self.steps.inner.len() / STEP_LEN) {
+            step = unsafe { Inner::from_slice_unchecked(&self.steps.inner[(i * STEP_LEN)..((i * STEP_LEN) + STEP_LEN)]) };
+            println!("[{: >3}],{},{},{},{},{},{},{},{},{}",
+                     i, step.kind, step.arg1, step.arg2, step.arg3, step.value, step.next, step.command, step.count, step.branch);
+        }
+        println!("branches");
+        let mut branch: InnerBranch;
+        for i in 0..(&self.branches.inner.len() / 2) {
+            branch = unsafe { InnerBranch::from_slice_unchecked(&self.branches.inner[(i * 2)..((i * 2) + 2)]) };
+            println!("[{}],{},{}", i, branch.arg0, branch.arg1);
         }
     }
 }
@@ -314,6 +333,17 @@ impl<'flow, 'input> StepMut<'flow, 'input> {
                 .copy_from_slice(&next.to_le_bytes());
         }
     }
+
+    fn set_command(&mut self, command: u16) {
+        unsafe {
+            self.flow
+                .steps
+                .get_mut(self.index)
+                .unwrap()
+                .get_unchecked_mut(0xA..0xC)
+                .copy_from_slice(&command.to_le_bytes());
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -370,6 +400,10 @@ impl<'flow, 'input> ActionMut<'flow, 'input> {
             N: Into<Next>,
     {
         self.0.set_next(next);
+    }
+
+    pub fn set_command(&mut self, command: u16) {
+        self.0.set_command(command);
     }
 }
 
