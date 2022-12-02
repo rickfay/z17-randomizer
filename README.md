@@ -1,8 +1,10 @@
-# ALBW Randomizer
+# A Link Between Worlds Randomizer
+A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [original](https://gitlab.com/marsolk/albw-randomizer)
 
-A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [original](https://gitlab.com/marsolk/albw-randomizer).
-
-<img src="cli/icon.ico" style="width: 64px;" alt="icon" />
+<br /><br />
+<div style="text-align:center;">
+  <img src="cli/icon.ico" alt="icon" />
+</div>
 
 ## Updates
 
@@ -11,6 +13,8 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
 
 - Dungeon Rewards Shuffled
   - Pendants & Portraits are now randomly placed between the Hyrule and Lorule dungeons.
+- Chest Size Matches Contents option
+  - Turns all chests containing Progression into large chests, and all others into small chests.
 - Players can now return to Hyrule from Lorule via a Warp that appears in the Blacksmith after completing Hyrule Castle.
 - Great Rupee Fairy improvements
   - Automatically throw 3000 rupees as one (long) action. More work to be done.
