@@ -1,10 +1,10 @@
 # A Link Between Worlds Randomizer
-A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [original](https://gitlab.com/marsolk/albw-randomizer)
+A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [original](https://gitlab.com/marsolk/albw-randomizer).
 
-<br /><br />
-<div style="text-align:center;">
+<br />
+<p align="center">
   <img src="cli/icon.ico" alt="icon" />
-</div>
+</p>
 
 ## Updates
 
