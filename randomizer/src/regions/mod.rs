@@ -195,6 +195,7 @@ macro_rules! subregion {
                         layout
                             .get(&crate::LocationInfo::new(SUBREGION, $key))
                             .unwrap_or_else(|| unreachable!(stringify!($key))),
+                        settings,
                     )?;
                 })*)?
                 Ok(())

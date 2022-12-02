@@ -365,38 +365,54 @@ impl ItemExt for Item {
     }
 
     fn is_progression(&self) -> bool {
-        matches!(
-            self,
-            Item::KeySmall
-                | Item::KeyBoss
-                | Item::ItemStoneBeauty
-                | Item::ItemKandelaar
-                | Item::ItemSwordLv1
-                | Item::ItemSwordLv2
-                | Item::ItemMizukaki
-                | Item::ItemRentalIceRod
-                | Item::ItemRentalSandRod
-                | Item::ItemRentalTornadeRod
-                | Item::ItemRentalBomb
-                | Item::ItemRentalFireRod
-                | Item::ItemRentalHookShot
-                | Item::ItemRentalBoomerang
-                | Item::ItemRentalHammer
-                | Item::ItemRentalBow
-                | Item::ItemBottle
-                | Item::RingHekiga
-                | Item::PowerGlove
-                | Item::ItemInsectNet
-                | Item::PowerfulGlove
-                | Item::OreYellow
-                | Item::OreGreen
-                | Item::OreBlue
-                | Item::DashBoots
-                | Item::OreRed
-                | Item::MessageBottle
-                | Item::MilkMatured
-                | Item::GanbariPowerUp
-                | Item::PackageSword
+        matches!(self,
+            // Empty |
+            KeySmall | KeyBoss |
+            // Compass |
+            // HeartContainer | HeartPiece |
+            // RupeeR | RupeeG | RupeeB | RupeeGold | RupeeSilver | RupeePurple |
+            ItemIceRod | ItemRentalIceRod | ItemIceRodLv2 |
+            ItemSandRod | ItemRentalSandRod | ItemSandRodLv2 | ItemRentalSandRodFirst |
+            ItemTornadeRod | ItemRentalTornadeRod | ItemTornadeRodLv2 |
+            ItemBomb | ItemRentalBomb | ItemBombLv2 |
+            ItemFireRod | ItemRentalFireRod | ItemFireRodLv2 |
+            ItemHookShot | ItemRentalHookShot | ItemHookShotLv2 |
+            ItemBoomerang | ItemRentalBoomerang | ItemBoomerangLv2 |
+            ItemHammer | ItemRentalHammer | ItemHammerLv2 |
+            ItemBow | ItemRentalBow | ItemBowLv2 |
+            ItemShield | ItemRentalShield | HyruleShield |
+            ItemBottle |
+            // ItemPotShopRed | ItemPotShopBlue | ItemPotShopPurple | ItemPotShopYellow | Milk |
+            ItemStoneBeauty |
+            PendantPower | PendantWisdom | PendantCourage |
+            // ZeldaAmulet |
+            ItemKandelaar | ItemKandelaarLv2 |
+            ItemSwordLv1 | ItemSwordLv2 | ItemSwordLv3 | ItemSwordLv4 | PackageSword |
+            ItemMizukaki |
+            RingRental | RingHekiga |
+            ItemBell |
+            PowerGlove | PowerfulGlove |
+            ItemInsectNet | ItemInsectNetLv2 |
+            Kinsta |
+            // BadgeBee |
+            // GoldenBee | Bee | Fairy |
+            GoldenBeeForSale |
+            // HintGlasses |
+            EscapeFruit |
+            // StopFruit |
+            // LiverBlue | LiverPurple | LiverYellow |
+            ClothesBlue | ClothesRed |
+            OreYellow | OreGreen | OreBlue | OreRed |
+            GanbariPowerUp |
+            // GanbariTubo |
+            // Pouch |
+            DashBoots |
+            MessageBottle | MilkMatured |
+            SpecialMove |
+            ItemBowLight |
+            // TriforceCourage |
+            // Heart |
+            SageGulley | SageOren | SageSeres | SageOsfala | SageImpa | SageIrene | SageRosso
         )
     }
 
@@ -547,28 +563,28 @@ pub fn plando() -> Result<(), Error> {
     // --- Ravio's Shop --- //
     //////////////////////////
 
-    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (1)"), HintGlasses);
-    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (2)"), HintGlasses);
-    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (3)"), HintGlasses);
-    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (4)"), PowerGlove);
-    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (5)"), ItemBell);
+    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (1)"), MilkMatured);
+    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (2)"), ItemMizukaki);
+    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (3)"), ItemKandelaar);
+    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (4)"), DashBoots);
+    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (5)"), ItemBowLight);
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (6)"), HintGlasses); // Sand Rod Slot
-    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (7)"), HintGlasses);
-    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (8)"), HintGlasses);
-    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (9)"), HintGlasses);
+    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (7)"), ItemSwordLv2);
+    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (8)"), ItemRentalHookShot);
+    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (9)"), ItemFireRod);
 
     /////////////////////////////
     // --- Dungeons Prizes --- //
     /////////////////////////////
 
     layout.set(LocationInfo::new(regions::dungeons::eastern::palace::SUBREGION, "Eastern Palace Prize"), PendantCourage);
-    layout.set(LocationInfo::new(regions::dungeons::house::gales::SUBREGION, "House of Gales Prize"), PendantCourage);
+    layout.set(LocationInfo::new(regions::dungeons::house::gales::SUBREGION, "House of Gales Prize"), SageOren);
     layout.set(LocationInfo::new(regions::dungeons::tower::hera::SUBREGION, "Tower of Hera Prize"), PendantCourage);
-    layout.set(LocationInfo::new(regions::dungeons::dark::palace::SUBREGION, "Dark Palace Prize"), PendantCourage);
-    layout.set(LocationInfo::new(regions::dungeons::swamp::palace::SUBREGION, "Swamp Palace Prize"), SageSeres);
-    layout.set(LocationInfo::new(regions::dungeons::skull::woods::SUBREGION, "Skull Woods Prize"), PendantPower);
+    layout.set(LocationInfo::new(regions::dungeons::dark::palace::SUBREGION, "Dark Palace Prize"), SageIrene);
+    layout.set(LocationInfo::new(regions::dungeons::swamp::palace::SUBREGION, "Swamp Palace Prize"), SageOsfala);
+    layout.set(LocationInfo::new(regions::dungeons::skull::woods::SUBREGION, "Skull Woods Prize"), SageRosso);
     layout.set(LocationInfo::new(regions::dungeons::thieves::hideout::SUBREGION, "Thieves' Hideout Prize"), PendantPower);
-    layout.set(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "Ice Ruins Prize"), SageGulley);
+    layout.set(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "Ice Ruins Prize"), PendantCourage);
     layout.set(LocationInfo::new(regions::dungeons::desert::palace::SUBREGION, "Desert Palace Prize"), PendantPower);
     layout.set(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "Turtle Rock Prize"), PendantCourage);
 
@@ -848,11 +864,12 @@ pub fn plando() -> Result<(), Error> {
     layout.set(LocationInfo::new(regions::lorule::field::main::SUBREGION, "Big Bomb Cave"), RupeeGold);
     layout.set(LocationInfo::new(regions::lorule::field::main::SUBREGION, "Octoball Derby"), RupeeGold);
     layout.set(LocationInfo::new(regions::lorule::field::main::SUBREGION, "Blacksmith (Lorule)"), ItemKandelaar);
-    layout.set(LocationInfo::new(regions::lorule::field::swamp::SUBREGION, "Swamp Cave (Left)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::lorule::field::swamp::SUBREGION, "Swamp Cave (Middle)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::lorule::field::swamp::SUBREGION, "Swamp Cave (Right)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::lorule::field::thief_girl::SUBREGION, "Thief Girl Cave"), RupeeGold);
-    layout.set(LocationInfo::new(regions::lorule::field::ledge::SUBREGION, "Hookshot Ledge"), RupeeGold);
+    layout.set(LocationInfo::new(regions::lorule::field::main::SUBREGION, "Swamp Cave (Left)"), ItemBowLight);
+    layout.set(LocationInfo::new(regions::lorule::field::main::SUBREGION, "Swamp Cave (Middle)"), RupeeGold);
+    layout.set(LocationInfo::new(regions::lorule::field::main::SUBREGION, "Swamp Cave (Right)"), LiverBlue);
+    layout.set(LocationInfo::new(regions::lorule::field::main::SUBREGION, "Thief Girl Cave"), RupeeGold);
+    layout.set(LocationInfo::new(regions::lorule::field::main::SUBREGION, "Hookshot Ledge"), RupeeGold);
+    layout.set(LocationInfo::new(regions::lorule::field::main::SUBREGION, "Chamber of Sages - Osfala"), DashBoots);
 
     // Skull Woods (overworld)
     layout.set(LocationInfo::new(regions::lorule::skull::overworld::SUBREGION, "Canyon House"), RupeeGold);

@@ -576,7 +576,7 @@ fn get_item_pools(settings: &Settings, rng: &mut StdRng) -> (Vec<FillerItem>, Ve
         MonsterGuts,
         MonsterGuts,
         MonsterGuts,
-        // MonsterGuts, // Removed for idk
+        MonsterGuts,
         //MonsterGuts, // Removed for Bracelet #2
 
         // Heart Pieces
@@ -912,7 +912,7 @@ fn verify_all_locations_accessible(loc_map: &mut HashMap<Location, LocationNode>
     let reachable_checks = assumed_search(loc_map, progression_pool, &mut check_map, settings); //find_reachable_checks(loc_map, &everything, &mut check_map); //
 
     const TOTAL_CHECKS: usize =
-        254 // Standard
+        255 // Standard
             + 10 // Dungeon Prizes
             + 100 // Maiamai
             + 24; // Quest;

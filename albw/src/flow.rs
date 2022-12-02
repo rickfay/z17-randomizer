@@ -204,7 +204,7 @@ impl<'input> FlowMut<'input> {
 
 
 
-        println!("index,kind,value,next,command,count,branch");
+        println!("index,kind,arg1,arg2,arg3,value,next,command,count,branch");
         let mut step: Inner;
         for i in 0..(&self.steps.inner.len() / STEP_LEN) {
             step = unsafe { Inner::from_slice_unchecked(&self.steps.inner[(i * STEP_LEN)..((i * STEP_LEN) + STEP_LEN)]) };
@@ -253,6 +253,14 @@ pub struct StepMut<'flow, 'input> {
 }
 
 impl<'flow, 'input> StepMut<'flow, 'input> {
+    pub fn into_text(self) -> Option<TextMut<'flow, 'input>> {
+        if self.flow.steps.get_mut(self.index).unwrap()[0] == 1 {
+            Some(TextMut(self))
+        } else {
+            None
+        }
+    }
+
     pub fn into_branch(self) -> Option<BranchMut<'flow, 'input>> {
         if self.flow.steps.get_mut(self.index).unwrap()[0] == 2 {
             Some(BranchMut(self))
@@ -404,6 +412,18 @@ impl<'flow, 'input> ActionMut<'flow, 'input> {
 
     pub fn set_command(&mut self, command: u16) {
         self.0.set_command(command);
+    }
+}
+
+#[derive(Debug)]
+pub struct TextMut<'flow, 'input>(StepMut<'flow, 'input>);
+
+impl<'flow, 'input> TextMut<'flow, 'input> {
+    pub fn set_next<N>(&mut self, next: N)
+        where
+            N: Into<Next>,
+    {
+        self.0.set_next(next);
     }
 }
 

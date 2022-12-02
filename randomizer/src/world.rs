@@ -43,6 +43,37 @@ pub fn build_world_graph() -> HashMap<Location, LocationNode> {
 /// Hyrule
 fn hyrule() -> HashMap<Location, LocationNode> {
     HashMap::from([
+
+        // Starting Node
+        (RavioShop, location("Ravio's Shop", vec![
+            check_free(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (1)")),
+            check_free(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (2)")),
+            check_free(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (3)")),
+            check_free(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (4)")),
+            check_free(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (5)")),
+            check(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (6)"),
+                  Some(|p| p.has_sage_osfala()),
+                  None,
+                  None,
+                  None,
+                  None,
+            ),
+            check_free(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (7)")),
+            check_free(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (8)")),
+            check_free(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (9)")),
+        ], vec![
+            path_free(HyruleField),
+            path_free(ChamberOfSages), // not technically true but gives us what we need
+        ])),
+        (ChamberOfSages, location("Chamber of Sages", vec![
+            check(LocationInfo::new(regions::lorule::field::main::SUBREGION, "Chamber of Sages - Osfala"),
+                  Some(|p| p.has_sage_osfala()),
+                  None,
+                  None,
+                  None,
+                  None,
+            ),
+        ], vec![])),
         (HyruleBellTravel, location("Hyrule Bell Travel", vec![], vec![
             path_free(HyruleField),
             path_free(DesertPalaceWeatherVane),
@@ -680,25 +711,6 @@ fn hyrule() -> HashMap<Location, LocationNode> {
         ])),
         (WitchCave, location("Witch Cave", vec![], vec![
             path_free(EasternRuinsUpper),
-            path_free(HyruleField),
-        ])),
-        (RavioShop, location("Ravio's Shop", vec![
-            check_free(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (1)")),
-            check_free(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (2)")),
-            check_free(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (3)")),
-            check_free(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (4)")),
-            check_free(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (5)")),
-            check(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (6)"),
-                  Some(|p| p.has_sage_osfala()),
-                  None,
-                  None,
-                  None,
-                  None,
-            ),
-            check_free(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (7)")),
-            check_free(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (8)")),
-            check_free(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (9)")),
-        ], vec![
             path_free(HyruleField),
         ])),
         (ZoraDomain, location("Zora's Domain", vec![
@@ -1911,7 +1923,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
             ),
         ])),
         (ThiefGirlCave, location("Thief Girl Cave", vec![
-            check(LocationInfo::new(regions::lorule::field::thief_girl::SUBREGION, "Thief Girl Cave"),
+            check(LocationInfo::new(regions::lorule::field::main::SUBREGION, "Thief Girl Cave"),
                   Some(|p| p.has_completed_thieves()),
                   None,
                   None,
@@ -1922,9 +1934,9 @@ fn lorule() -> HashMap<Location, LocationNode> {
             path_free(LoruleCastleField),
         ])),
         (SwampCave, location("Swamp Cave", vec![
-            check_free(LocationInfo::new(regions::lorule::field::swamp::SUBREGION, "Swamp Cave (Left)")),
-            check_free(LocationInfo::new(regions::lorule::field::swamp::SUBREGION, "Swamp Cave (Middle)")),
-            check_free(LocationInfo::new(regions::lorule::field::swamp::SUBREGION, "Swamp Cave (Right)")),
+            check_free(LocationInfo::new(regions::lorule::field::main::SUBREGION, "Swamp Cave (Left)")),
+            check_free(LocationInfo::new(regions::lorule::field::main::SUBREGION, "Swamp Cave (Middle)")),
+            check_free(LocationInfo::new(regions::lorule::field::main::SUBREGION, "Swamp Cave (Right)")),
         ], vec![
             path_free(LoruleCastleField),
         ])),
@@ -1934,7 +1946,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
             path_free(LoruleCastleField),
         ])),
         (HauntedGroveLedge, location("Haunted Grove Upper Ledge", vec![
-            check(LocationInfo::new(regions::lorule::field::ledge::SUBREGION, "Hookshot Ledge"),
+            check(LocationInfo::new(regions::lorule::field::main::SUBREGION, "Hookshot Ledge"),
                   Some(|p| p.has_hookshot()),
                   None,
                   None,
@@ -2283,14 +2295,14 @@ fn lorule() -> HashMap<Location, LocationNode> {
         (DarkRuins, location("Dark Ruins", vec![
             check_free(LocationInfo::new(regions::lorule::dark::ruins::SUBREGION, "Dark Ruins Lakeview Chest")),
             check(LocationInfo::new(regions::lorule::dark::ruins::SUBREGION, "Dark Maze Chest"),
-                  Some(|p| p.can_merge() || p.has_completed_dark()),
+                  Some(|p| p.can_merge() || p.has_sage_gulley()),
                   None,
                   None,
                   None,
                   None,
             ),
             check(LocationInfo::new(regions::lorule::dark::ruins::SUBREGION, "Dark Maze Ledge"),
-                  Some(|p| p.can_merge() || p.has_completed_dark()),
+                  Some(|p| p.can_merge() || p.has_sage_gulley()),
                   None,
                   None,
                   None,
@@ -2349,7 +2361,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
             fast_travel_lorule(),
             portal(HyruleField),
             path(DarkRuinsWeatherVane,
-                 Some(|p| (p.can_merge() && p.can_destroy_skull()) || p.has_completed_dark()),
+                 Some(|p| (p.can_merge() && p.can_destroy_skull()) || p.has_sage_gulley()),
                  None,
                  None, // Dark Maze Skip implies skulls can be broken, no logical benefit
                  None,
@@ -2380,7 +2392,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
         ])),
         (DarkRuinsWeatherVane, location("Dark Ruins Weather Vane", vec![], vec![
             path(DarkRuins,
-                 Some(|p| p.can_merge() || p.has_completed_dark()),
+                 Some(|p| p.can_merge() || p.has_sage_gulley()),
                  None,
                  None,
                  None,

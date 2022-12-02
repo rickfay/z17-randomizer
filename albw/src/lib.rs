@@ -160,12 +160,16 @@ impl Game {
         &self.exheader
     }
 
+    pub fn get_get_item(&mut self, item: Item) -> GetItem {
+        self.get_item.get()[item as usize].clone()
+    }
+
     pub fn get_items(self) -> File<Vec<GetItem>> {
         self.get_item
     }
 
     pub fn match_items_to_get_items(&self) -> impl Iterator<Item=(Item, GetItem)> + '_ {
-        Item::iter().zip(self.get_item.get()[0..].iter().cloned())
+        Item::iter().zip(self.get_item.get().iter().cloned())
     }
 
     fn get_item_actor(&self, name: &str) -> Result<Actor> {

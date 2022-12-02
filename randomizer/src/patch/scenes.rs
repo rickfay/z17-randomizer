@@ -1,4 +1,5 @@
-use albw::{course, Item, scene::{Flag, Obj}};
+use std::collections::HashMap;
+use albw::{course, Game, Item, scene::{Flag, Obj}};
 use albw::Item::*;
 use albw::course::Id::*;
 use albw::scene::{Arg, Point, Rail, Transform, Vec3};
@@ -556,21 +557,21 @@ fn patch_dark(patcher: &mut Patcher, prize: Item, _: &Settings) {
         disable(235), // Hilda Text
 
         // Remove Maze Guards after Dark Palace
-        set_disable_flag(73, prize_flag),
-        set_disable_flag(82, prize_flag),
-        set_disable_flag(83, prize_flag),
-        set_disable_flag(84, prize_flag),
-        set_disable_flag(113, prize_flag),
-        set_disable_flag(123, prize_flag),
-        set_disable_flag(135, prize_flag),
-        set_disable_flag(136, prize_flag),
-        set_disable_flag(143, prize_flag),
-        set_disable_flag(171, prize_flag),
-        set_disable_flag(176, prize_flag),
-        set_disable_flag(177, prize_flag),
-        set_disable_flag(178, prize_flag),
-        set_disable_flag(179, prize_flag),
-        set_disable_flag(197, prize_flag),
+        // set_disable_flag(73, prize_flag),
+        // set_disable_flag(82, prize_flag),
+        // set_disable_flag(83, prize_flag),
+        // set_disable_flag(84, prize_flag),
+        // set_disable_flag(113, prize_flag),
+        // set_disable_flag(123, prize_flag),
+        // set_disable_flag(135, prize_flag),
+        // set_disable_flag(136, prize_flag),
+        // set_disable_flag(143, prize_flag),
+        // set_disable_flag(171, prize_flag),
+        // set_disable_flag(176, prize_flag),
+        // set_disable_flag(177, prize_flag),
+        // set_disable_flag(178, prize_flag),
+        // set_disable_flag(179, prize_flag),
+        // set_disable_flag(197, prize_flag),
     ]);
 
     // 1st Prison Cell softlock prevention
@@ -668,15 +669,15 @@ fn patch_thieves(patcher: &mut Patcher, prize: Item, _: &Settings) {
         reroute_sage_warp(patcher, prize, 14, 1, 15);
     }
 
-    // Rewire Thief Girl Cave
+    // Thief Girl Cave
     patcher.modify_objs(CaveDark, 15, &[
 
         // Thief Girl w/ Mask
         call(8, move |obj| {
-            obj.set_enable_flag(prize_flag);
+            //obj.set_enable_flag(prize_flag);
             obj.srt.rotate.y = 0.0;
         }),
-        set_enable_flag(9, prize_flag), // Chest
+        //set_enable_flag(9, prize_flag), // Chest
         disable(10), // Entrance text
         disable(11), // AreaSwitchCube
         disable(13), // It's a secret to everybody
@@ -796,11 +797,11 @@ fn patch_desert(patcher: &mut Patcher, prize: Item, _: &Settings) {
 fn patch_ice(patcher: &mut Patcher, prize: Item, _: &Settings) {
 
     // Debug stuff
-    patcher.modify_system(DungeonIce, 1, &[
-        call(68, |obj| {
-            obj.srt.translate.z = -31.6 + 3.0;
-        }),
-    ]);
+    // patcher.modify_system(DungeonIce, 1, &[
+    //     call(68, |obj| {
+    //         obj.srt.translate.z = -31.6 + 3.0;
+    //     }),
+    // ]);
 
     if prize == SageRosso {
         return;
@@ -900,47 +901,52 @@ fn patch_hyrule_castle_dungeon(patcher: &mut Patcher, _: &Settings) {
     ]);
 }
 
+// TODO figure out how to reduce coupling with patcher
 pub fn apply(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
 
     // Ravio's Shop
-    // patcher.modify_objs(IndoorLight, 1, &[
-    //     call(24, |obj| {
-    //         obj.redirect(
-    //             5, 0, 26, // No Redirect
-    //             // 0, 0, 1, // FieldLight 2
-    //             // 0, 0, 6, // Outside Zora's Domain
-    //             // 4, 0, 8, // Outside Fortune-Teller
-    //             // 0, 12, 5, // Yuga 2 Boss
-    //             // 1, 3, 3, // Lorule Blacksmith
-    //             // 0, 12, 0, // Hyrule Castle Dungeon
-    //             // 2, 1, 30, // Zaganaga Portal
-    //             // 0, 1, 30, // Misery Mire
-    //             // 0, 3, 14, // Osfala Portrait
-    //             // 0, 5, 2, // Swamp Cave
-    //             // 0, 5, 13, // Great Rupee Fairy Cave
-    //             // 1, 17, 0, // Ice Ruins Boss
-    //             // 0, 17, 0, // Ice Ruins Boss
-    //             // 0, 19, 2, // Turtle Rock Boss
-    //             // 0, 5, 9, // Chamber of Sages
-    //             // 0, 5, 14, // Thief Girl Cave
-    //             // 0, 0, 19, // Eastern Ruins Cutscene
-    //             // 5, 0, 17, // Pendant of Courage cutscene
-    //             // 0, 0, 24,    // Haunted Grove
-    //             // 12, 13, 0,   // Dark Palace Boss
-    //             // 5, 1, 19,   // Outside Dark Palace
-    //             // 0, 65535, 65535,    // File Select Screen? lol
-    //             // 6, 10, 2,    // Gales Boss
-    //             // 0, 9, 0,     // Eastern Palace Entrance
-    //             // 5, 0, 19     // Eastern Ruins WV
-    //             // 0, 9, 0      // Eastern Palace Lobby
-    //             // 20, 1, 0,     // Seres Portrait
-    //             // 0, 4, 3      // Kak Well Lower
-    //             // 1, 4, 3      // Kak Well Upper
-    //             // 10, 11, 0    // Tower of Hera Boss
-    //             // 0, 14, 2     // Swamp Palace 2F
-    //         );
-    //     }),
-    // ]);
+    patcher.modify_objs(IndoorLight, 1, &[
+        call(17, |obj| {
+            obj.srt.translate.y += 0.1266;
+        }),
+
+        call(24, |obj| {
+            obj.redirect(
+                5, 0, 26, // No Redirect
+                // 0, 14, 2,     // Swamp Palace 2F
+                // 0, 0, 1, // FieldLight 2
+                // 0, 0, 6, // Outside Zora's Domain
+                // 4, 0, 8, // Outside Fortune-Teller
+                // 0, 12, 5, // Yuga 2 Boss
+                // 1, 3, 3, // Lorule Blacksmith
+                // 0, 12, 0, // Hyrule Castle Dungeon
+                // 2, 1, 30, // Zaganaga Portal
+                // 0, 1, 30, // Misery Mire
+                // 0, 3, 14, // Osfala Portrait
+                // 0, 5, 2, // Swamp Cave
+                // 0, 5, 13, // Great Rupee Fairy Cave
+                // 1, 17, 0, // Ice Ruins Boss
+                // 0, 17, 0, // Ice Ruins Boss
+                // 0, 19, 2, // Turtle Rock Boss
+                // 0, 5, 9, // Chamber of Sages
+                // 0, 5, 14, // Thief Girl Cave
+                // 0, 0, 19, // Eastern Ruins Cutscene
+                // 5, 0, 17, // Pendant of Courage cutscene
+                // 0, 0, 24,    // Haunted Grove
+                // 12, 13, 0,   // Dark Palace Boss
+                // 5, 1, 19,   // Outside Dark Palace
+                // 0, 65535, 65535,    // File Select Screen? lol
+                // 6, 10, 2,    // Gales Boss
+                // 0, 9, 0,     // Eastern Palace Entrance
+                // 5, 0, 19     // Eastern Ruins WV
+                // 0, 9, 0      // Eastern Palace Lobby
+                // 20, 1, 0,     // Seres Portrait
+                // 0, 4, 3      // Kak Well Lower
+                // 1, 4, 3      // Kak Well Upper
+                // 10, 11, 0    // Tower of Hera Boss
+            );
+        }),
+    ]);
 
     patch_hyrule_castle_dungeon(patcher, settings);
 

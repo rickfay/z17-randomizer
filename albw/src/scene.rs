@@ -403,6 +403,15 @@ pub struct Transform {
     pub translate: Vec3,
 }
 
+impl Transform {
+    /// Adds the values of another Transform to this one
+    pub fn add(&mut self, other: Transform) {
+        self.scale.add(other.scale);
+        self.rotate.add(other.rotate);
+        self.translate.add(other.translate);
+    }
+}
+
 impl<'de> Deserialize<'de> for Transform {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
         where
@@ -492,6 +501,13 @@ pub struct Vec3 {
 impl Vec3 {
     pub const UNIT: Self = Self { x: 1.0, y: 1.0, z: 1.0 };
     pub const ZERO: Self = Self { x: 0.0, y: 0.0, z: 0.0 };
+
+    /// Adds the values of `other` to this Vec3
+    pub fn add(&mut self, other: Vec3) {
+        self.x += other.x;
+        self.y += other.y;
+        self.z += other.z;
+    }
 }
 
 #[derive(Debug, Deserialize, Serialize)]

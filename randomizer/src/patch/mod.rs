@@ -1,7 +1,7 @@
 use std::{array, collections::HashMap, fs, iter, path::Path};
 use std::io::{Read, stdin, stdout, Write};
 
-use albw::{demo::Timed, flow::FlowMut, Demo, File, Game, IntoBytes, Item, Language, Scene, byaml, Actor};
+use albw::{demo::Timed, flow::FlowMut, Demo, File, Game, IntoBytes, Item, Language, Scene, byaml, Actor, GetItem};
 use fs_extra::dir::CopyOptions;
 use log::{error, info};
 use serde::Serialize;
@@ -179,15 +179,27 @@ impl Patcher {
             }).unwrap().arg_mut()
     }
 
-    fn apply(&mut self, patch: Patch, item: Item) -> Result<()> {
+    fn apply(&mut self, patch: Patch, item: Item, settings: &Settings) -> Result<()> {
         match patch {
             Patch::Chest { course, stage, unq } => {
                 self.modify_objs(course, stage + 1, &[
                     (unq, Box::new(move |obj| {
                         obj.arg_mut().0 = item as i32;
-                        //obj.set_id(if item.is_progression() { 34 } else { 35 }); // chest size correlates to progression
                     })),
                 ]);
+
+                // Alter chests actors to match their contents
+                if settings.options.chest_size_matches_contents {
+                    let chest_data = if item.is_progression() {
+                        (34, self.scene(DungeonHera, 0)?.actors().get("TreasureBoxL")?)
+                    } else {
+                        (35, self.scene(DungeonHera, 0)?.actors().get("TreasureBoxS")?)
+                    };
+
+                    let scene = self.scene(course, stage).unwrap();
+                    scene.actors_mut().add(chest_data.1)?;
+                    scene.stage_mut().get_mut().get_obj_mut(unq).unwrap().set_id(chest_data.0);
+                }
             }
             Patch::Heart { course, scene, unq } |
             Patch::Key { course, scene, unq } |
@@ -228,7 +240,7 @@ impl Patcher {
             }
             Patch::Multi(patches) => {
                 for patch in patches {
-                    self.apply(patch, item)?;
+                    self.apply(patch, item, settings)?;
                 }
             }
             Patch::None => {}
@@ -424,7 +436,6 @@ impl Patcher {
     }
 
     pub fn prepare(mut self, layout: &Layout, settings: &Settings) -> Result<Patches> {
-
         self.patch_dungeon_prizes(layout, settings)?;
         self.patch_actor_profile(layout, settings)?;
 
@@ -439,18 +450,25 @@ impl Patcher {
             }
         }
 
+        // let mut heart_container = self.scene(IndoorDark, 14)?.actors().get("HeartContainer")?;
+        // heart_container.rename(String::from("World/Actor/HeartPiece.bch"));
+        // self.scene(FieldLight, 16)?.actors_mut().update(heart_container.clone())?;
+
         // Add chest to pedestal scene
         let chest_small = self.scene(DungeonHera, 0)?.actors().get("TreasureBoxS")?;
         self.scene(FieldLight, 33)?.actors_mut().add(chest_small.clone())?; // Master Sword Pedestal
 
         // Add Warp Tiles to scenes for softlock prevention
         let warp_tile = self.scene(DungeonHera, 0)?.actors().get("WarpTile")?;
+        self.scene(DungeonWind, 0)?.actors_mut().add(warp_tile.clone())?; // Gales 1F
         self.scene(FieldDark, 19)?.actors_mut().add(warp_tile.clone())?; // Dark Maze
+        self.scene(DungeonWater, 1)?.actors_mut().add(warp_tile.clone())?; // Swamp Palace B1
+        self.scene(DungeonDokuro, 1)?.actors_mut().add(warp_tile.clone())?; // Skull Woods B2
 
         // Debug stuff
-        // let step_switch = self.scene(DungeonDark, 0)?.actors().get("SwitchStep")?;
+        //let step_switch = self.scene(DungeonDark, 0)?.actors().get("SwitchStep")?;
         // self.scene(DungeonKame, 2)?.actors_mut().add(step_switch.clone())?; // Turtle Rock Boss
-        // self.scene(DungeonWind, 2)?.actors_mut().add(step_switch.clone())?; // Gales Boss
+        //self.scene(DungeonWind, 2)?.actors_mut().add(step_switch.clone())?; // Gales Boss
         // self.scene(DungeonHera, 0)?.actors_mut().add(step_switch.clone())?; // Hera Boss
         // self.scene(FieldDark, 30)?.actors_mut().add(step_switch.clone())?; // Desert Boss
 
@@ -571,8 +589,8 @@ pub enum Patch {
 }
 
 impl Patch {
-    pub fn apply(self, patcher: &mut Patcher, item: Item) -> Result<()> {
-        patcher.apply(self, item)
+    pub fn apply(self, patcher: &mut Patcher, item: Item, settings: &Settings) -> Result<()> {
+        patcher.apply(self, item, settings)
     }
 }
 

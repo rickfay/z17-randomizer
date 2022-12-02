@@ -70,6 +70,8 @@ pub struct Logic {
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq, Deserialize, Serialize)]
 #[serde(default, deny_unknown_fields)]
 pub struct Options {
+    /// Alters treasure chest sizes depending on their contents: Large for Progression items, Small for everything else.
+    pub chest_size_matches_contents: bool,
     /// Experimental: Change Hyrule to the nighttime color scheme (until visiting Lorule)
     pub night_mode: bool,
 }
@@ -200,6 +202,7 @@ pub fn plando_settings() -> Settings {
             ..Default::default()
         },
         options: Options {
+            chest_size_matches_contents: true,
             night_mode: false
         },
         ..Default::default()

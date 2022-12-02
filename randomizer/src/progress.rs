@@ -64,7 +64,7 @@ impl Progress {
     fn count(&self, items: &[FillerItem]) -> u8 {
         let mut sum: u8 = 0;
         for item in items {
-            if self.clone().has(*item) {
+            if self.clone().has(*item) { // fixme expensive clone
                 sum += 1;
             }
         }
@@ -557,6 +557,10 @@ impl Progress {
 
     pub fn has_sage_osfala(&self) -> bool {
         self.has(SageOsfala)
+    }
+
+    pub fn has_sage_gulley(&self) -> bool {
+        self.has(SageGulley)
     }
 
     pub fn has_all_sages(&self) -> bool {

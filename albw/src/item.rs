@@ -3,6 +3,7 @@ use regex::Regex;
 use serde::Deserialize;
 
 use crate::{actors::Actor, int_map, Error, Game, Result};
+use crate::scene::{Transform, Vec3};
 
 int_map! {
 /// An in-game item.
@@ -156,6 +157,14 @@ impl GetItem {
             .and_then(|captures| captures.get(1))
             .map(|match_| match_.as_str())
             .ok_or_else(|| Error::new(format!("Invalid actor name: '{}'", &self.1)))
+    }
+
+    pub fn get_scale_factor(&self) -> f32 {
+        self.2
+    }
+
+    pub fn get_rotate(&self) -> Vec3 {
+        Vec3 { x: self.9, y: self.10, z: self.11 }
     }
 }
 

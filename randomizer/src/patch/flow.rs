@@ -79,14 +79,61 @@ macro_rules! action {
 
 pub fn apply(patcher: &mut Patcher, free: Item) -> Result<()> {
 
-    // apply!(patcher,
-    //
-    //
-    // );
-    //
-    // // Debugging
-    // let mut flow = patcher.flow(IndoorLight)?;
-    // let flow = flow.get_mut(stringify!(FieldLight_02_KikoriMan)).ok_or_else(|| Error::game("File not found."))??;
+    apply!(patcher,
+
+        // Chamber of Sages
+        CaveDark/CaveDark10 {
+
+            // Skip Hilda checks for having 2/4/6 Sages
+            // Skip flag 629 check to skip Triforce of Courage
+
+            // Gulley?
+            // 189(start),33,265,32,121,175,19
+            [266] => 18, // Skip 191,  1,  62, 63, 206 - Gulley?
+
+            // Oren?
+            // 194(start),36,262,37,122,161,9,263
+            [263] => 69, // Skip 195, 10,  68, 67, 207
+
+            // Seres?
+            [260] => 71, // Skip 199, 13,  72, 73, 208
+
+
+
+            // Osfala?
+            //201(start),39,257,38,129,177,258
+            [258] => 309, // skip 17
+            //308(text), 225(text), 245(text), 241,242,226 (item get),243,244,297,298,246,2
+            [309] => 241, // skip 308, 225, 245
+            [2]   => 76, // Skip  77, 78, 209
+
+
+            // Rosso?
+            [254] => 81, // Skip 212,  5,  82, 83, 214
+
+            // Irene?
+            [253] => 86, // Skip 218, 22,  87, 88, 216
+
+            // Impa?
+            [251] => 91, // Skip 222, 26,  92, 93, 221
+
+            // Presumably Sage dialog after all seven sages collected?
+            // [151] => 63, // Skip 227
+            // [152] => 64, // Skip 229
+            // [153] => 65, // Skip 231
+            // [154] => 66, // Skip 233
+            // [155] => 67, // Skip 235
+            // [156] => 68, // Skip 237
+            // [157] => 69, // Skip 239
+
+            // Skip Hilda text branches for 2/4/6 Sages
+            //[184          ] => 205, // skip 98, 203, 204 (text) (we never want to be on this path)
+        },
+    );
+
+    // Debugging
+    // let mut flow = patcher.flow(albw::course::Id::CaveDark)?;
+    // let flow = flow.get_mut(stringify!(CaveDark10)).ok_or_else(|| Error::game("File not found."))??;
     // {
     //     flow.get().debug();
     // }
@@ -142,25 +189,7 @@ pub fn apply(patcher: &mut Patcher, free: Item) -> Result<()> {
             ],
         },
 
-        // Skip Triforce of Courage cutscene
-        CaveDark/CaveDark10 {
 
-            // Skip Flag 629 checks
-            [266] => 1, // Skip 191
-            [263] => 10, // Skip 195
-            [260] => 13, // Skip 199
-            [254] => 5, // Skip 212
-            [253] => 22, // Skip 218
-            [251] => 26, // Skip 222
-
-            // [151] => 63, // Skip 227
-            // [152] => 64, // Skip 229
-            // [153] => 65, // Skip 231
-            // [154] => 66, // Skip 233
-            // [155] => 67, // Skip 235
-            // [156] => 68, // Skip 237
-            // [157] => 69, // Skip 239
-        },
 
         // Irene (bridge)
         FieldLight/FieldLight_2D_Maple {

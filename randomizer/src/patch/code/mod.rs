@@ -54,15 +54,15 @@ impl Code {
     }
 
     pub fn overwrite<T>(&mut self, addr: u32, data: T)
-    where
-        T: Into<Box<[u8]>>,
+        where
+            T: Into<Box<[u8]>>,
     {
         self.ips.append(addr, data.into());
     }
 
     pub fn dump<P>(self, path: P, exheader: &ExHeader) -> Result<()>
-    where
-        P: AsRef<Path>,
+        where
+            P: AsRef<Path>,
     {
         let path = path.as_ref();
         let mut exheader = exheader.clone();
@@ -82,8 +82,8 @@ pub struct Segment<'a> {
 
 impl<'a> Segment<'a> {
     pub fn declare<T>(&mut self, data: T) -> u32
-    where
-        T: Into<Vec<u8>>,
+        where
+            T: Into<Vec<u8>>,
     {
         let mut data = data.into();
         let addr = *self.address;
@@ -110,8 +110,8 @@ impl<'a> Segment<'a> {
     }
 
     pub fn write<T>(&mut self, addr: u32, data: T)
-    where
-        T: Into<Box<[u8]>>,
+        where
+            T: Into<Box<[u8]>>,
     {
         self.ips.append(addr, data.into());
     }
@@ -132,8 +132,8 @@ impl Ips {
     }
 
     pub fn append<T>(&mut self, offset: u32, data: T)
-    where
-        T: AsRef<[u8]>,
+        where
+            T: AsRef<[u8]>,
     {
         let offset = offset - self.offset;
         let data = data.as_ref();
@@ -143,8 +143,8 @@ impl Ips {
     }
 
     pub fn write<W>(self, mut writer: W) -> Result<()>
-    where
-        W: Write,
+        where
+            W: Write,
     {
         writer.write_all(b"PATCH")?;
         writer.write_all(&self.buf)?;
@@ -359,7 +359,7 @@ fn progressive_items(code: &mut Code) {
         //     mov(R5, 0x2B),
         //     b(return_label),
         // ]);
-    // } else {
+        // } else {
         code.text().define([
             cmp(R5, 0x2A),
             cmp(R5, 0x2B).ne(),
@@ -478,7 +478,7 @@ fn item_names(code: &mut Code) -> HashMap<Item, u32> {
     map
 }
 
-const ACTOR_NAME_OFFSETS: [(Item, u32); 30] = [
+const ACTOR_NAME_OFFSETS: [(Item, u32); 29] = [
     (Item::ItemStoneBeauty, 0x5D2060),
     (Item::RupeeR, 0x5D639C),
     (Item::RupeeG, 0x5D639C),
@@ -500,7 +500,6 @@ const ACTOR_NAME_OFFSETS: [(Item, u32); 30] = [
     (Item::HintGlasses, 0x5D70AC),
     (Item::RupeeGold, 0x5D7144),
     (Item::ItemSwordLv2, 0x5D7178),
-    (Item::Empty, 0x5D7178),
     (Item::LiverPurple, 0x5D762C),
     (Item::LiverYellow, 0x5D7640),
     (Item::LiverBlue, 0x5D7654),
@@ -511,7 +510,7 @@ const ACTOR_NAME_OFFSETS: [(Item, u32); 30] = [
     (Item::HeartPiece, 0x5D7B94),
 ];
 
-const ACTOR_NAMES: [(Item, &str); 33] = [
+const ACTOR_NAMES: [(Item, &str); 34] = [
     (Item::KeyBoss, "KeyBoss"),
     (Item::Compass, "Compass"),
     (Item::ItemKandelaar, "GtEvKandelaar"),
@@ -545,65 +544,79 @@ const ACTOR_NAMES: [(Item, &str); 33] = [
     (Item::PendantPower, "Pendant"),
     (Item::PendantWisdom, "Pendant"),
     (Item::PendantCourage, "Pendant"),
+    (Item::Empty, "DeliverSwordBroken"),
 ];
 
-const ITEM_NAME_OFFSETS: [(Item, u32); 23] = [
+const ITEM_NAME_OFFSETS: [(Item, u32); 14] = [
     (Item::ItemBomb, 0x6F9A9A),
-    (Item::ItemBombLv2, 0x6F9A9A),
     (Item::ItemSandRod, 0x6F9AD0),
-    (Item::ItemSandRodLv2, 0x6F9AD0),
     (Item::ItemIceRod, 0x6F9AE2),
-    (Item::ItemIceRodLv2, 0x6F9AE2),
     (Item::ItemTornadeRod, 0x6F9AF3),
-    (Item::ItemTornadeRodLv2, 0x6F9AF3),
     (Item::ItemFireRod, 0x6F9B08),
-    (Item::ItemFireRodLv2, 0x6F9B08),
     (Item::LiverPurple, 0x6F9B55),
     (Item::ItemBottle, 0x6F9B6C),
     (Item::LiverBlue, 0x6F9B94),
     (Item::ItemBoomerang, 0x6F9BA9),
-    (Item::ItemBoomerangLv2, 0x6F9BA9),
     (Item::ItemHammer, 0x6F9CCC),
-    (Item::ItemHammerLv2, 0x6F9CCC),
     (Item::ItemHookShot, 0x6F9CDD),
-    (Item::ItemHookShotLv2, 0x6F9CDD),
     (Item::ItemBow, 0x6F9D08),
-    (Item::ItemBowLv2, 0x6F9D08),
     (Item::LiverYellow, 0x6F9D2F),
     (Item::ItemStoneBeauty, 0x6F9D56),
 ];
 
-const ITEM_NAMES: [(Item, &str); 30] = [
-    (Item::HeartContainer, "heartcontioner"),
-    (Item::HeartPiece, "heartpiece"),
+const ITEM_NAMES: [(Item, &str); 52] = [
+    (Item::BadgeBee, "beebadge"),
     (Item::ItemBell, "bell"),
     (Item::ItemBowLight, "bow_light"),
     (Item::RingHekiga, "bracelet"),
     (Item::ClothesBlue, "clothes_blue"),
+    (Item::PendantCourage, "courage"),
+    (Item::EscapeFruit, "doron"),
+    (Item::StopFruit, "durian"),
+    (Item::RupeeR, "gamecoin"),
+    (Item::RupeeG, "gamecoin"),
+    (Item::RupeeB, "gamecoin"),
+    (Item::RupeePurple, "gamecoin"),
+    (Item::RupeeSilver, "gamecoin"),
+    (Item::RupeeGold, "gamecoin"),
     (Item::GanbariPowerUp, "ganbari_power_up"),
+    (Item::HeartContainer, "heartcontioner"),
+    (Item::HeartPiece, "heartpiece"),
+    (Item::HyruleShield, "hyrule_shield"),
+    (Item::KeyBoss, "keyboss"),
+    (Item::KeySmall, "keysmall"),
+    (Item::Kinsta, "kinsta"),
     (Item::ItemKandelaar, "lantern"),
     (Item::ItemKandelaarLv2, "lantern"),
     (Item::ItemSwordLv2, "mastersword"),
-    (Item::Empty, "none"),
+    (Item::Empty, "mastersword"),
     (Item::MessageBottle, "messagebottle"),
+    (Item::Milk, "milk"),
     (Item::MilkMatured, "milk_matured"),
     (Item::ItemInsectNet, "net"),
     (Item::ItemInsectNetLv2, "net"),
-    (Item::DashBoots, "pegasus"),
-    (Item::Pouch, "pouch"),
-    (Item::PowerGlove, "powergloves"),
-    (Item::SpecialMove, "special_move"),
-    (Item::BadgeBee, "beebadge"),
-    (Item::ItemMizukaki, "web"),
-    (Item::HyruleShield, "hyrule_shield"),
     (Item::OreYellow, "ore"),
     (Item::OreGreen, "ore"),
     (Item::OreBlue, "ore"),
     (Item::OreRed, "ore"),
-    (Item::Kinsta, "kinsta"),
+    (Item::DashBoots, "pegasus"),
+    (Item::Heart, "potshop_heart"),
+    (Item::Pouch, "pouch"),
     (Item::PendantPower, "power"),
+    (Item::PowerGlove, "powergloves"),
+    (Item::ItemShield, "shield"),
+    (Item::SpecialMove, "special_move"),
+    (Item::ItemBombLv2, "upper_bomb_LV2"),
+    (Item::ItemBoomerangLv2, "upper_boomerang_LV2"),
+    (Item::ItemBowLv2, "upper_bow_LV2"),
+    (Item::ItemFireRodLv2, "upper_firerod_LV2"),
+    (Item::ItemHammerLv2, "upper_hammer_LV2"),
+    (Item::ItemHookShotLv2, "upper_hookshot_LV2"),
+    (Item::ItemIceRodLv2, "upper_icerod_LV2"),
+    (Item::ItemSandRodLv2, "upper_sandrod_LV2"),
+    (Item::ItemTornadeRodLv2, "upper_tornaderod_LV2"),
+    (Item::ItemMizukaki, "web"),
     (Item::PendantWisdom, "wisdom"),
-    (Item::PendantCourage, "courage"),
 ];
 
 const SET_EVENT_FLAG_FN: u32 = 0x4CDF40;

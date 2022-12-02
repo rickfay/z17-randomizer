@@ -34,6 +34,11 @@ impl Actors {
         self.archive.get_mut().add(actor)
     }
 
+    pub fn update(&mut self, actor: Actor) -> Result<()> {
+        self.dirty = true;
+        self.archive.get_mut().update(actor)
+    }
+
     pub fn into_archive(self) -> Option<File<Sarc>> {
         self.dirty.then(|| self.archive.map(Sarc::compress))
     }
