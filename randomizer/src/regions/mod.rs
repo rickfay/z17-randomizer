@@ -266,6 +266,12 @@ macro_rules! patch {
     (Chest($stage:literal[$unq:literal])) => {
         Patch::Chest { course: COURSE, stage: $stage - 1, unq: $unq }
     };
+    (BigChest($course:ident $stage:literal[$unq:literal])) => {
+        Patch::BigChest { course: albw::course::Id::$course, stage: $stage - 1, unq: $unq }
+    };
+    (BigChest($stage:literal[$unq:literal])) => {
+        Patch::BigChest { course: COURSE, stage: $stage - 1, unq: $unq }
+    };
     (Event($name:ident[$index:literal])) => {
         Patch::Event { course: Some(COURSE), name: stringify!($name), index: $index }
     };

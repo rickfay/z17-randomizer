@@ -11,7 +11,7 @@ crate::region! {
             "[EP] (2F) Ball Room": LiverPurple @Chest(2[147]),
             "[EP] (2F) Defeat Popos": LiverPurple @Chest(2[115]),
             "[EP] (2F) Switch Room": KeySmall @Chest(2[52]),
-            "[EP] (2F) Big Chest": KeyBoss @Chest(2[44]),
+            "[EP] (2F) Big Chest": KeyBoss @BigChest(2[44]),
             "[EP] (3F) After Cutscene": ItemRentalBow @Event(East[0x1C]),
             "[EP] Yuga": HeartContainer @Heart(3[94]),
             "[EP] (3F) Outside (North)": RupeeSilver @Chest(3[25]),

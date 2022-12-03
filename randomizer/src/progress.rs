@@ -505,6 +505,15 @@ impl Progress {
         self.has_amount(amount, &[LoruleCastleKeySmall01, LoruleCastleKeySmall02, LoruleCastleKeySmall03, LoruleCastleKeySmall04, LoruleCastleKeySmall05])
     }
 
+    pub fn has_completed_trials(&self) -> bool {
+        self.settings.logic.skip_trials || (
+            self.has(LcBombTrial)
+                && self.has(LcBallTrial)
+                && self.has(LcLampTrial)
+                && self.has(LcHookTrial)
+        )
+    }
+
     pub fn has_bow_of_light(&self) -> bool {
         self.has(BowOfLight)
     }
@@ -533,18 +542,6 @@ impl Progress {
 
     pub fn has_shady_guy_trigger(&self) -> bool {
         self.has(ShadyGuyTrigger)
-    }
-
-    pub fn has_completed_eastern(&self) -> bool {
-        self.has(EasternComplete)
-    }
-
-    pub fn has_completed_dark(&self) -> bool {
-        self.has(DarkComplete)
-    }
-
-    pub fn has_completed_thieves(&self) -> bool {
-        self.has(ThievesComplete)
     }
 
     pub fn has_all_pendants(&self) -> bool {

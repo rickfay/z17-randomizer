@@ -3,12 +3,14 @@ use albw::course::Id::*;
 use albw::string_struct;
 
 
-#[allow(non_camel_case_types)]
+#[allow(non_camel_case_types, unused)]
 pub struct MsbfInfo {
     course: Id,
     msbf: Option<&'static str>,
 }
 
+// TODO reevaluate usefulness
+#[allow(unused)]
 impl MsbfInfo {
     pub const EP: Self = Self { msbf: None, course: DungeonEast };
     pub const HG: Self = Self { msbf: None, course: DungeonWind };

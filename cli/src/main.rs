@@ -8,7 +8,7 @@ use simplelog::{LevelFilter, SimpleLogger};
 use structopt::StructOpt;
 use albw::Game;
 use randomizer::logic_mode::LogicMode;
-use randomizer::settings::Logic;
+use randomizer::settings::{Logic, Options};
 use sys::Paths;
 
 #[derive(Debug, StructOpt)]
@@ -114,22 +114,21 @@ fn preset_ui() -> Settings {
     println!("--- Seed Options ---");
 
     let mode = prompt_logic_mode();
-
+    let randomize_dungeon_prizes = prompt_until_bool("Randomize Dungeon Prizes?");
     //let start_with_bracelet = prompt_until_bool("Start with Ravio's Bracelet?");
     let assured_weapon = prompt_until_bool("Guarantee a Weapon is placed in Ravio's Shop?");
     let bell_in_shop = prompt_until_bool("Guarantee Bell in Ravio's Shop?");
     let pouch_in_shop = prompt_until_bool("Guarantee Pouch in Ravio's Shop?");
     let boots_in_shop = prompt_until_bool("Guarantee Pegasus Boots in Ravio's Shop?");
-
     let maiamai_madness = prompt_until_bool("Enable Maiamai Madness? This shuffles Maiamai into the pool, adding 100 more locations.");
-    let vanes_activated = prompt_until_bool("Pre-activate all Weather Vanes? (EXPERIMENTAL)\nThis may cause Ravio's Bracelet(s) to be placed in any region of Lorule.");
     let super_items = prompt_until_bool("Include the Super Lamp and Super Net?");
     let minigames_excluded = prompt_until_bool("Exclude all minigames?");
     let skip_trials = prompt_until_bool("Skip the Lorule Castle Trials?");
     let bow_of_light_in_castle = prompt_until_bool("Guarantee Bow of Light in Lorule Castle?");
-    //let glitched_logic = prompt_until_bool("Use Glitched Logic? (advanced)");
     let lampless = prompt_until_bool("Don't require Lamp? (advanced)\nIf \"y\", the player may have to cross dark rooms without a light source.\nIf you're not sure, select \"n\".");
+    let vanes_activated = prompt_until_bool("Pre-activate all Weather Vanes? (EXPERIMENTAL)\nThis may cause Ravio's Bracelet(s) to be placed in any region of Lorule.");
     let swordless_mode = prompt_until_bool("Play in Swordless Mode? (advanced)");
+    let chest_size_matches_contents = prompt_until_bool("Make chest sizes match their contents?");
 
     println!();
     info!("Starting seed generation...\n");
@@ -137,6 +136,7 @@ fn preset_ui() -> Settings {
     Settings {
         logic: Logic {
             mode,
+            randomize_dungeon_prizes,
             assured_weapon,
             bell_in_shop,
             pouch_in_shop,
@@ -144,12 +144,15 @@ fn preset_ui() -> Settings {
             maiamai_madness,
             vanes_activated,
             super_items,
-            //glitched_logic,
             minigames_excluded,
             skip_trials,
             bow_of_light_in_castle,
             lampless,
             swordless_mode,
+            ..Default::default()
+        },
+        options: Options {
+            chest_size_matches_contents,
             ..Default::default()
         },
         ..Default::default()

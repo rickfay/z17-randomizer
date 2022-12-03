@@ -4,7 +4,6 @@ use FillerItem::*;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum FillerItem {
-
     Empty,
 
     Bow01,
@@ -423,6 +422,10 @@ pub enum FillerItem {
     AccessMilkBar,
     AccessHyruleBlacksmith,
     AccessLoruleCastleField,
+    LcBombTrial,
+    LcBallTrial,
+    LcLampTrial,
+    LcHookTrial,
     Triforce,
 }
 
@@ -649,6 +652,7 @@ pub fn convert(fill_item: FillerItem) -> Option<Item> {
         SkullEyeRight | SkullEyeLeft |
         TurtleFlipped | TurtleAttacked | TurtleWall |
         AccessLoruleCastleField | AccessHyruleBlacksmith | AccessPotionShop | AccessMilkBar |
+        LcBombTrial | LcBallTrial | LcLampTrial | LcHookTrial |
         Triforce => None
     }
 }

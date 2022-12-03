@@ -3,7 +3,7 @@ use regex::Regex;
 use serde::Deserialize;
 
 use crate::{actors::Actor, int_map, Error, Game, Result};
-use crate::scene::{Transform, Vec3};
+use crate::scene::Vec3;
 
 int_map! {
 /// An in-game item.

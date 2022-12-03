@@ -40,6 +40,8 @@ impl Settings {
 pub struct Logic {
     /// Logic to use for item placement (Normal, Hard, Glitched (Basic, Advanced, Hell), No Logic)
     pub mode: LogicMode,
+    /// Randomizes the Pendants and Portraits between Hyrule and Lorule dungeons
+    pub randomize_dungeon_prizes: bool,
     /// Guarantees a Weapon is placed in Ravio's Shop
     pub assured_weapon: bool,
     /// Places the Bell in Ravio's Shop
@@ -202,7 +204,7 @@ pub fn plando_settings() -> Settings {
             ..Default::default()
         },
         options: Options {
-            chest_size_matches_contents: true,
+            chest_size_matches_contents: false,
             night_mode: false
         },
         ..Default::default()

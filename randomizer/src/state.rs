@@ -12,6 +12,7 @@ pub struct State<'settings> {
     player: Player,
 }
 
+#[allow(unused)]
 impl<'settings> State<'settings> {
 
 

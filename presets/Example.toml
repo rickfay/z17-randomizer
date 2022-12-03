@@ -2,6 +2,8 @@
 [logic]
 ## Logic Mode. Choose one of: "Normal", "Hard", "GlitchBasic", "GlitchAdvanced", "GlitchHell", or "NoLogic"
 mode = "Normal"
+## Randomizes the Pendants and Portraits between Hyrule and Lorule dungeons
+randomize_dungeon_prizes = true
 ## Guarantees one of the following weapons will be placed in Ravio's Shop: Sword, Bow, Hammer, Fire Rod, Ice Rod, or Bombs
 assured_weapon = false
 ## The Bell will be placed in Ravio's Shop
@@ -28,6 +30,8 @@ lampless = false
 swordless_mode = false
 
 [options]
+## Alters treasure chest sizes depending on their contents: Large for Progression items, Small for everything else.
+chest_size_matches_contents = false
 ## Experimental option to change Hyrule's lighting until you visit Lorule for the first time.
 ## Causes performance issues on console.
 night_mode = false

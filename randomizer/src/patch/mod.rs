@@ -1,9 +1,9 @@
 use std::{array, collections::HashMap, fs, iter, path::Path};
 use std::io::{Read, stdin, stdout, Write};
 
-use albw::{demo::Timed, flow::FlowMut, Demo, File, Game, IntoBytes, Item, Language, Scene, byaml, Actor, GetItem};
+use albw::{demo::Timed, flow::FlowMut, Demo, File, Game, IntoBytes, Item, Language, Scene, byaml, Actor};
 use fs_extra::dir::CopyOptions;
-use log::{error, info};
+use log::{debug, error, info};
 use serde::Serialize;
 use tempfile::tempdir;
 use try_insert_ext::*;
@@ -179,27 +179,43 @@ impl Patcher {
             }).unwrap().arg_mut()
     }
 
+    fn prep_chest(&mut self, item: Item, course: Id, stage: u16, unq: u16, (id, actor_name): (i16, &str)) -> Result<()> {
+
+        // Set contents
+        self.parse_args(course, stage, unq).0 = item as i32;
+
+        // Forcibly set ID
+        self.scene(course, stage).unwrap().stage_mut().get_mut().get_obj_mut(unq).unwrap().set_id(id);
+
+        // Add Actor if scene doesn't already have it
+        if !self.scene(course, stage).unwrap().actors().contains(actor_name) {
+            debug!("Adding {} to {}{}", actor_name, course.as_str(), stage + 1);
+            let actor = self.scene(DungeonHera, 0)?.actors().get(actor_name)?;
+            self.scene(course, stage).unwrap().actors_mut().add(actor)?;
+        }
+
+        Ok(())
+    }
+
     fn apply(&mut self, patch: Patch, item: Item, settings: &Settings) -> Result<()> {
         match patch {
             Patch::Chest { course, stage, unq } => {
-                self.modify_objs(course, stage + 1, &[
-                    (unq, Box::new(move |obj| {
-                        obj.arg_mut().0 = item as i32;
-                    })),
-                ]);
-
-                // Alter chests actors to match their contents
-                if settings.options.chest_size_matches_contents {
-                    let chest_data = if item.is_progression() {
-                        (34, self.scene(DungeonHera, 0)?.actors().get("TreasureBoxL")?)
-                    } else {
-                        (35, self.scene(DungeonHera, 0)?.actors().get("TreasureBoxS")?)
-                    };
-
-                    let scene = self.scene(course, stage).unwrap();
-                    scene.actors_mut().add(chest_data.1)?;
-                    scene.stage_mut().get_mut().get_obj_mut(unq).unwrap().set_id(chest_data.0);
-                }
+                self.prep_chest(item, course, stage, unq,
+                                if settings.options.chest_size_matches_contents && item.is_progression() {
+                                    (34, "TreasureBoxL")
+                                } else {
+                                    (35, "TreasureBoxS")
+                                },
+                )?;
+            }
+            Patch::BigChest { course, stage, unq } => {
+                self.prep_chest(item, course, stage, unq,
+                                if settings.options.chest_size_matches_contents && !item.is_progression() {
+                                    (35, "TreasureBoxS")
+                                } else {
+                                    (34, "TreasureBoxL")
+                                },
+                )?;
             }
             Patch::Heart { course, scene, unq } |
             Patch::Key { course, scene, unq } |
@@ -454,10 +470,6 @@ impl Patcher {
         // heart_container.rename(String::from("World/Actor/HeartPiece.bch"));
         // self.scene(FieldLight, 16)?.actors_mut().update(heart_container.clone())?;
 
-        // Add chest to pedestal scene
-        let chest_small = self.scene(DungeonHera, 0)?.actors().get("TreasureBoxS")?;
-        self.scene(FieldLight, 33)?.actors_mut().add(chest_small.clone())?; // Master Sword Pedestal
-
         // Add Warp Tiles to scenes for softlock prevention
         let warp_tile = self.scene(DungeonHera, 0)?.actors().get("WarpTile")?;
         self.scene(DungeonWind, 0)?.actors_mut().add(warp_tile.clone())?; // Gales 1F
@@ -549,6 +561,11 @@ pub struct Course {
 #[derive(Clone, Debug)]
 pub enum Patch {
     Chest {
+        course: Id,
+        stage: u16,
+        unq: u16,
+    },
+    BigChest {
         course: Id,
         stage: u16,
         unq: u16,
@@ -703,8 +720,8 @@ fn cutscenes<'game, 'settings>(
                 //246, // Skip Irene, make Hyrule Hotfoot appear, spawns certain enemies
                 248, // Skip Yuga killing Osfala
                 //250, // Yuga 1 Defeated
-                //251, // Set in Post-EP FieldLight20 cutscene / Effectively Green Pendant
-                //310, // Watched HC Post-EP cutscene
+                //251, // Set in Post-EP FieldLight20 cutscene
+                //310, // Watched HC Post-EP cutscene. Use this to record Pendant of Courage (for now, sound bug)
                 315, // Shop open???
                 // 320, // Shady Guy Trigger
                 321, 322, // Skip first Oren cutscenes

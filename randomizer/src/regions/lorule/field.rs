@@ -3,7 +3,7 @@ crate::region! {
     name: "Lorule Field",
     main {
         locations: [
-            "Boots Treasure Dungeon": RupeeGold @Chest(AttractionDark 1[12]),
+            "Boots Treasure Dungeon": RupeeGold @BigChest(AttractionDark 1[12]),
             "Vacant House": ItemBottle @Chest(IndoorDark 11[31]),
             "Rupee Rush (Lorule)": HeartPiece @Event(FieldDark_28_Minigame[0x26]),
             "Great Rupee Fairy": ItemBottle @Event(CaveDark/Cave[0x24]),

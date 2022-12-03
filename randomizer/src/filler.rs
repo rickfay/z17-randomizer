@@ -30,6 +30,7 @@ pub fn fill_stuff(settings: &Settings, seed: Seed) -> Vec<(LocationInfo, Item)> 
         GlitchHell => "Glitched (Hell) - Did you really mean to choose this?",
         NoLogic => "No Logic",
     });
+    info!("Dungeon Prizes:                 {}", if settings.logic.randomize_dungeon_prizes {"Randomized"} else {"Not Randomized"});
     info!("Maiamai:                        {}", if settings.logic.maiamai_madness {"Shuffled"} else {"Not Shuffled"});
     info!("Weather Vanes:                  {}", if settings.logic.vanes_activated {"All Activated"} else {"Normal"});
     info!("Super Items:                    {}", if settings.logic.super_items {"Included"} else {"Not Included"});
@@ -74,13 +75,27 @@ fn preplace_items<'a>(check_map: &mut HashMap<&'a str, Option<FillerItem>>,
     place_static(check_map, progression, RupeeGold09, "[TR] (B1) Under Center");
     place_static(check_map, progression, RupeeGold10, "[PD] (2F) South Hidden Room");
 
+    // Vanilla Dungeon Prizes
+    if !settings.logic.randomize_dungeon_prizes {
+        place_static(check_map, progression, PendantOfCourage, "Eastern Palace Prize");
+        place_static(check_map, progression, PendantOfWisdom, "House of Gales Prize");
+        place_static(check_map, progression, PendantOfPower, "Tower of Hera Prize");
+        place_static(check_map, progression, SageGulley, "Dark Palace Prize");
+        place_static(check_map, progression, SageOren, "Swamp Palace Prize");
+        place_static(check_map, progression, SageSeres, "Skull Woods Prize");
+        place_static(check_map, progression, SageOsfala, "Thieves' Hideout Prize");
+        place_static(check_map, progression, SageImpa, "Turtle Rock Prize");
+        place_static(check_map, progression, SageIrene, "Desert Palace Prize");
+        place_static(check_map, progression, SageRosso, "Ice Ruins Prize");
+    }
+
     let mut shop_positions: Vec<&str> = Vec::new();
-    let mut lorule_castle_positions: Vec<&str> = Vec::new();
+    let mut bow_light_positions: Vec<&str> = Vec::from(["Zelda"]);
     let mut maiamai_positions: Vec<&str> = Vec::new();
 
     for (check_name, item) in check_map.clone() {
         if check_name.starts_with("[LC]") && item.is_none() {
-            let _ = &lorule_castle_positions.push(check_name);
+            let _ = &bow_light_positions.push(check_name);
         } else if check_name.starts_with("Ravio") && !check_name.contains("6") {
             let _ = &shop_positions.push(check_name);
         } else if check_name.starts_with("[Mai]") {
@@ -89,7 +104,7 @@ fn preplace_items<'a>(check_map: &mut HashMap<&'a str, Option<FillerItem>>,
     }
 
     if settings.logic.bow_of_light_in_castle {
-        check_map.insert(lorule_castle_positions.remove(rng.gen_range(0..lorule_castle_positions.len())), Some(BowOfLight));
+        check_map.insert(bow_light_positions.remove(rng.gen_range(0..bow_light_positions.len())), Some(BowOfLight));
         progression.retain(|x| *x != BowOfLight);
     }
 
@@ -825,7 +840,6 @@ fn filter_checks(item: FillerItem, checks: &mut Vec<Check>, check_map: &mut Hash
     if is_dungeon_prize(item) {
         filtered_checks = filter_dungeon_prize_checks(&mut filtered_checks);
     } else if is_dungeon_item(item) {
-
         let is_keysanity = false; // No keysanity yet, hardcode to false
         if !is_keysanity {
             filtered_checks = filter_dungeon_checks(item, &mut filtered_checks);
@@ -915,7 +929,7 @@ fn verify_all_locations_accessible(loc_map: &mut HashMap<Location, LocationNode>
         255 // Standard
             + 10 // Dungeon Prizes
             + 100 // Maiamai
-            + 24; // Quest;
+            + 28; // Quest;
 
     if reachable_checks.len() != TOTAL_CHECKS {
 
@@ -1019,8 +1033,6 @@ fn assumed_fill(mut world_graph: &mut HashMap<Location, LocationNode>,
     let mut reachable_checks = assumed_search(&mut world_graph, &items_owned, &mut check_map, settings);
 
     while exist_empty_reachable_check(&reachable_checks, &check_map) && !items_owned.is_empty() {
-
-
         let item = items_owned.remove(0);
 
         //

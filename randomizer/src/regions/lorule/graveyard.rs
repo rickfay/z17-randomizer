@@ -3,7 +3,7 @@ crate::region! {
     name: "Graveyard",
     cave {
         locations: [
-            "Philosopher's Cave Big Chest": OreRed @Chest(CaveDark 5[18]),
+            "Philosopher's Cave Big Chest": OreRed @BigChest(CaveDark 5[18]),
         ],
     },
     field {

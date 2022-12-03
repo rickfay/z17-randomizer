@@ -563,15 +563,15 @@ pub fn plando() -> Result<(), Error> {
     // --- Ravio's Shop --- //
     //////////////////////////
 
-    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (1)"), MilkMatured);
-    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (2)"), ItemMizukaki);
+    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (1)"), RupeeGold);
+    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (2)"), ItemSwordLv2);
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (3)"), ItemKandelaar);
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (4)"), DashBoots);
-    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (5)"), ItemBowLight);
+    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (5)"), ItemBowLv2);
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (6)"), HintGlasses); // Sand Rod Slot
-    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (7)"), ItemSwordLv2);
-    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (8)"), ItemRentalHookShot);
-    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (9)"), ItemFireRod);
+    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (7)"), RingHekiga);
+    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (8)"), RingHekiga);
+    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (9)"), RupeeGold);
 
     /////////////////////////////
     // --- Dungeons Prizes --- //
@@ -759,7 +759,7 @@ pub fn plando() -> Result<(), Error> {
     layout.set(LocationInfo::new(regions::dungeons::castle::lorule::SUBREGION, "[LC] (4F) Lamp Trial"), RupeeGold);
     layout.set(LocationInfo::new(regions::dungeons::castle::lorule::SUBREGION, "[LC] (4F) Hookshot Trial (Chest)"), RupeeGold);
     layout.set(LocationInfo::new(regions::dungeons::castle::lorule::SUBREGION, "[LC] (4F) Hookshot Trial (Eyes)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::castle::lorule::SUBREGION, "[LC] Zelda"), ItemBow);
+    layout.set(LocationInfo::new(regions::dungeons::castle::lorule::SUBREGION, "Zelda"), ItemBow);
 
     ////////////////////
     // --- Hyrule --- //
@@ -776,7 +776,7 @@ pub fn plando() -> Result<(), Error> {
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Blacksmith"), ItemSwordLv1);
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Castle Rocks"), RupeeGold);
     //layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Thanks"), Item::RingHekiga);
-    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Rosso"), RupeeGold);
+    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Rosso"), ItemIceRod);
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Clean Rocks"), RupeeGold);
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Irene"), RupeeGold);
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Haunted Grove Tree Stump"), RupeeGold);
@@ -788,7 +788,7 @@ pub fn plando() -> Result<(), Error> {
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Sanctuary Cave"), RupeeGold);
 
     // Lost Woods
-    layout.set(LocationInfo::new(regions::hyrule::lost::woods::SUBREGION, "Master Sword Pedestal"), ItemBottle);
+    layout.set(LocationInfo::new(regions::hyrule::lost::woods::SUBREGION, "Master Sword Pedestal"), ItemIceRod);
     layout.set(LocationInfo::new(regions::hyrule::lost::woods::SUBREGION, "Alcove"), ItemHookShot);
     layout.set(LocationInfo::new(regions::hyrule::lost::woods::SUBREGION, "Lost Woods Big Rock Chest"), ItemIceRod);
 

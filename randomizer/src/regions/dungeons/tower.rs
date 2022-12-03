@@ -11,7 +11,7 @@ crate::region! {
             "[TH] (6F) Right Mole": LiverPurple @Chest(1[694]),
             "[TH] (7F) Outside (Ledge)": RupeeSilver @Chest(1[793]),
             "[TH] (8F) Fairy Room": RupeePurple @Chest(1[838]),
-            "[TH] (11F) Big Chest": KeyBoss @Chest(1[741]),
+            "[TH] (11F) Big Chest": KeyBoss @BigChest(1[741]),
             "[TH] Moldorm": HeartContainer @Heart(1[772]),
             "Tower of Hera Prize": PendantPower @None(),
         ],

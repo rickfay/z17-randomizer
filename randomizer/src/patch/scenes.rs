@@ -1,5 +1,5 @@
-use std::collections::HashMap;
-use albw::{course, Game, Item, scene::{Flag, Obj}};
+
+use albw::{course, Item, scene::{Flag, Obj}};
 use albw::Item::*;
 use albw::course::Id::*;
 use albw::scene::{Arg, Point, Rail, Transform, Vec3};
@@ -127,6 +127,15 @@ fn set_disable_flag(unq: u16, flag: Flag) -> (u16, Box<dyn Fn(&mut Obj)>) {
     (unq, Box::new(move |obj: &mut Obj| { obj.set_disable_flag(flag) }))
 }
 
+#[allow(unused)]
+fn clear_enable_flag(unq: u16) -> (u16, Box<dyn Fn(&mut Obj)>) {
+    (unq, Box::new(move |obj: &mut Obj| { obj.set_enable_flag(None) }))
+}
+
+fn clear_disable_flag(unq: u16) -> (u16, Box<dyn Fn(&mut Obj)>) {
+    (unq, Box::new(move |obj: &mut Obj| { obj.set_disable_flag(None) }))
+}
+
 fn redirect(unq: u16, spawn_point: i32, scene: i32, scene_index: i32) -> (u16, Box<dyn Fn(&mut Obj)>) {
     (unq, Box::new(move |obj: &mut Obj| { obj.redirect(spawn_point, scene, scene_index) }))
 }
@@ -179,7 +188,7 @@ impl PrizePatchData {
             SageImpa => Self::new(421, 656, 330.0, 0, 0, 0, 120),
             PendantPower => Self::new(173, 372, 0.0, 0, 0, 0, 0),
             PendantWisdom => Self::new(173, 342, 0.0, 1, 0, 0, 0),
-            PendantCourage => Self::new(173, 251, 0.0, 2, 0, 0, 0),
+            PendantCourage => Self::new(173, 310, 0.0, 2, 0, 0, 0),
             _ => panic!("\"{}\" is not a dungeon prize.", prize.as_str())
         }
     }
@@ -189,7 +198,7 @@ fn prize_flag(pendant: Item) -> Flag {
     match pendant {
         PendantPower => Flag::Event(372),
         PendantWisdom => Flag::Event(342),
-        PendantCourage => Flag::Event(251),
+        PendantCourage => Flag::Event(310),
         SageGulley => Flag::Event(536),
         SageOren => Flag::Event(556),
         SageSeres => Flag::Event(576),
@@ -291,6 +300,113 @@ fn patch_eastern(patcher: &mut Patcher, prize: Item, _: &Settings) {
                                        5, 0, 17,
                                        Vec3 { x: -3.5, y: 2.5, z: -3.0 }));
     }
+
+    // Eastern Ruins - Disable Post-EP cutscene
+    patcher.modify_objs(FieldLight, 20, &[
+        enable(214), // Paint Heart
+        enable(215), // Paint Heart
+
+        disable(83), // Sahasrahla
+        disable(84), // Text box
+        disable(85), // Loading Zone to FL18
+    ]);
+
+    // Outside Hyrule Castle
+    patcher.modify_objs(FieldLight, 18, &[
+        disable(200), // Sahasrahla
+        disable(208), // Textbox trigger
+        disable(264), // lgt_NpcSoldier_Field1B_04_broke - idk what this is, but now it's nothing
+        disable(529), // AreaSwitchCube
+        // enable(502), // Sahasrahla
+    ]);
+    patcher.modify_system(FieldLight, 18, &[
+        call(199, |obj| {
+            obj.srt.translate.z = 12.75; // move to where cutscene normally ends
+        }),
+    ]);
+
+    // Rewire Post-EP checks to require PoC
+    let green_pendant_flag = prize_flag(PendantCourage);
+
+    // Haunted Grove
+    patcher.modify_objs(FieldLight, 25, &[
+        set_enable_flag(122, green_pendant_flag), // Pouch
+        set_disable_flag(123, green_pendant_flag), // Gulley
+    ]);
+
+    // Irene (bridge)
+    patcher.modify_objs(FieldLight, 28, &[
+        set_46_args(55, green_pendant_flag), // Trigger - NpcMaple_BellGet_2D
+        set_enable_flag(56, green_pendant_flag), // Irene
+    ]);
+
+    // Irene (Fortune-Teller)
+    patcher.modify_objs(FieldLight, 9, &[
+        set_46_args(83, green_pendant_flag), // Trigger - NpcMaple_BellGet_11
+        set_enable_flag(85, green_pendant_flag), // Irene
+    ]);
+
+    // Irene (small pond)
+    patcher.modify_objs(FieldLight, 10, &[
+        set_46_args(65, green_pendant_flag), // Trigger - NpcMaple_BellGet_12_00
+        set_enable_flag(67, green_pendant_flag), // Irene
+        set_46_args(68, green_pendant_flag), // Trigger - NpcMaple_BellGet_12_01
+    ]);
+
+    // Outside Rosso's House
+    patcher.modify_objs(FieldLight, 2, &[
+        set_enable_flag(11, green_pendant_flag), // Small Rock (controller, see below)
+        disable(88), // early game LZ to Rosso's House
+        clear_disable_flag(100), // Keep Entry_KikoriMan3 from disappearing
+        clear_disable_flag(100), // NpcMountaineer
+        set_disable_flag(128, green_pendant_flag), // "Not in right now." signboard
+        set_46_args(132, green_pendant_flag), // Door
+        disable(135), // Disable LZ to IndoorLight4 cutscene
+        set_enable_flag(136, green_pendant_flag), // LZ to Rosso's House
+    ]);
+
+    // Rosso's House
+    patcher.modify_objs(IndoorLight, 10, &[
+        call(7, |obj| {
+            obj.set_inactive_flag(Flag::Event(282));
+            obj.enable();
+        }),
+    ]);
+
+    // Small Rocks
+    patcher.modify_system(FieldLight, 2, &[
+        set_enable_flag(11, green_pendant_flag), // controller
+        set_enable_flag(12, green_pendant_flag),
+        set_enable_flag(14, green_pendant_flag),
+        set_enable_flag(15, green_pendant_flag),
+        set_enable_flag(16, green_pendant_flag),
+        set_enable_flag(18, green_pendant_flag),
+        set_enable_flag(19, green_pendant_flag),
+        set_enable_flag(20, green_pendant_flag),
+        set_enable_flag(21, green_pendant_flag),
+        set_enable_flag(93, green_pendant_flag),
+        set_enable_flag(94, green_pendant_flag),
+        set_enable_flag(102, green_pendant_flag),
+        set_enable_flag(103, green_pendant_flag),
+        set_enable_flag(104, green_pendant_flag),
+        set_enable_flag(105, green_pendant_flag),
+        set_enable_flag(106, green_pendant_flag),
+        set_enable_flag(107, green_pendant_flag),
+        set_enable_flag(108, green_pendant_flag),
+        set_enable_flag(109, green_pendant_flag),
+        set_enable_flag(110, green_pendant_flag),
+        set_enable_flag(111, green_pendant_flag),
+        set_enable_flag(112, green_pendant_flag),
+        set_enable_flag(118, green_pendant_flag),
+        set_enable_flag(119, green_pendant_flag),
+        set_enable_flag(120, green_pendant_flag),
+        set_enable_flag(121, green_pendant_flag),
+        set_enable_flag(122, green_pendant_flag),
+        set_enable_flag(123, green_pendant_flag),
+        set_enable_flag(124, green_pendant_flag),
+        set_enable_flag(125, green_pendant_flag),
+        set_enable_flag(126, green_pendant_flag),
+    ]);
 }
 
 fn patch_gales(patcher: &mut Patcher, prize: Item, _: &Settings) {
@@ -308,8 +424,11 @@ fn patch_gales(patcher: &mut Patcher, prize: Item, _: &Settings) {
         return;
     }
 
+    let prize_flag = prize_flag(prize);
     patcher.modify_objs(DungeonWind, 3, &[
         modify_reward(459, prize, false),
+        set_enable_flag(490, prize_flag), // Warp to leave boss room
+        set_enable_flag(543, prize_flag), // Destination Warp
     ]);
 
     if is_pendant(prize) {
@@ -320,13 +439,12 @@ fn patch_gales(patcher: &mut Patcher, prize: Item, _: &Settings) {
             }),
         ]);
 
-        let pendant_flag = prize_flag(prize);
         patcher.add_obj(DungeonWind, 3,
-                        Obj::pendant_chest(prize, Flag::Event(340), pendant_flag,
+                        Obj::pendant_chest(prize, Flag::Event(340), prize_flag,
                                            0, 100, 562,
                                            Vec3 { x: 0.0, y: 0.0, z: -46.5 }));
         patcher.add_obj(DungeonWind, 3,
-                        Obj::blue_warp(pendant_flag,
+                        Obj::blue_warp(prize_flag,
                                        0, 101, 563,
                                        0, 0, 34,
                                        Vec3 { x: 0.0, y: 0.0, z: -44.75 }));
@@ -542,49 +660,24 @@ fn patch_dark(patcher: &mut Patcher, prize: Item, _: &Settings) {
         });
     }
 
-    patcher.modify_objs(FieldDark, 20, &[
-
-        // Remove dialog
-        disable(63), // AreaEventTalk
-        disable(115), // AreaEventTalk
-        disable(116), // AreaEventTalk
-        disable(119), // AreaEventTalk
-        disable(122), // AreaEventTalk
-        disable(188), // AreaEventTalk
-        disable(195), // NpcGuardMan
-        disable(196), // NpcGuardMan
-        disable(231), // AreaEventTalk
-        disable(235), // Hilda Text
-
-        // Remove Maze Guards after Dark Palace
-        // set_disable_flag(73, prize_flag),
-        // set_disable_flag(82, prize_flag),
-        // set_disable_flag(83, prize_flag),
-        // set_disable_flag(84, prize_flag),
-        // set_disable_flag(113, prize_flag),
-        // set_disable_flag(123, prize_flag),
-        // set_disable_flag(135, prize_flag),
-        // set_disable_flag(136, prize_flag),
-        // set_disable_flag(143, prize_flag),
-        // set_disable_flag(171, prize_flag),
-        // set_disable_flag(176, prize_flag),
-        // set_disable_flag(177, prize_flag),
-        // set_disable_flag(178, prize_flag),
-        // set_disable_flag(179, prize_flag),
-        // set_disable_flag(197, prize_flag),
-    ]);
-
-    // 1st Prison Cell softlock prevention
-    patcher.add_obj(FieldDark, 20, Obj::warp_tile(Flag::Event(1),
-                                                  0, 66, 245,
-                                                  0, 1, 19,
-                                                  Vec3 { x: 1.0 + 2.0, y: 0.5, z: 23.0 }));
-
-    // 2nd Prison Cell softlock prevention
-    patcher.add_obj(FieldDark, 20, Obj::warp_tile(Flag::Event(1),
-                                                  0, 67, 246,
-                                                  0, 1, 19,
-                                                  Vec3 { x: -17.0 + 2.5, y: 0.5, z: -17.0 }));
+    // // Remove Maze Guards after Dark Palace
+    // patcher.modify_objs(FieldDark, 20, &[
+    //     set_disable_flag(73, prize_flag),
+    //     set_disable_flag(82, prize_flag),
+    //     set_disable_flag(83, prize_flag),
+    //     set_disable_flag(84, prize_flag),
+    //     set_disable_flag(113, prize_flag),
+    //     set_disable_flag(123, prize_flag),
+    //     set_disable_flag(135, prize_flag),
+    //     set_disable_flag(136, prize_flag),
+    //     set_disable_flag(143, prize_flag),
+    //     set_disable_flag(171, prize_flag),
+    //     set_disable_flag(176, prize_flag),
+    //     set_disable_flag(177, prize_flag),
+    //     set_disable_flag(178, prize_flag),
+    //     set_disable_flag(179, prize_flag),
+    //     set_disable_flag(197, prize_flag),
+    // ]);
 }
 
 fn patch_swamp(patcher: &mut Patcher, prize: Item, _: &Settings) {
@@ -668,20 +761,6 @@ fn patch_thieves(patcher: &mut Patcher, prize: Item, _: &Settings) {
     } else {
         reroute_sage_warp(patcher, prize, 14, 1, 15);
     }
-
-    // Thief Girl Cave
-    patcher.modify_objs(CaveDark, 15, &[
-
-        // Thief Girl w/ Mask
-        call(8, move |obj| {
-            //obj.set_enable_flag(prize_flag);
-            obj.srt.rotate.y = 0.0;
-        }),
-        //set_enable_flag(9, prize_flag), // Chest
-        disable(10), // Entrance text
-        disable(11), // AreaSwitchCube
-        disable(13), // It's a secret to everybody
-    ]);
 }
 
 fn patch_turtle(patcher: &mut Patcher, prize: Item, _: &Settings) {
@@ -770,8 +849,11 @@ fn patch_desert(patcher: &mut Patcher, prize: Item, _: &Settings) {
         return;
     }
 
+    let prize_flag = prize_flag(prize);
     patcher.modify_objs(FieldDark, 31, &[
         modify_reward(76, prize, true),
+        set_enable_flag(132, prize_flag), // Warp to leave boss area
+        set_enable_flag(133, prize_flag), // Destination Warp
     ]);
 
     if is_sage(prize) {
@@ -781,13 +863,13 @@ fn patch_desert(patcher: &mut Patcher, prize: Item, _: &Settings) {
             remove_collision(76),
         ]);
 
-        let pendant_flag = prize_flag(prize);
+
         patcher.add_obj(FieldDark, 31,
-                        Obj::pendant_chest(prize, Flag::Event(1), pendant_flag,
+                        Obj::pendant_chest(prize, Flag::Event(1), prize_flag,
                                            0, 56, 135,
                                            Vec3 { x: -13.0, y: 0.0, z: -24.0 }));
         patcher.add_obj(FieldDark, 31,
-                        Obj::blue_warp(pendant_flag,
+                        Obj::blue_warp(prize_flag,
                                        0, 57, 136,
                                        30, 1, 30,
                                        Vec3 { x: -10.5, y: 0.0, z: -21.25 }));
@@ -901,78 +983,112 @@ fn patch_hyrule_castle_dungeon(patcher: &mut Patcher, _: &Settings) {
     ]);
 }
 
+fn patch_master_sword(patcher: &mut Patcher, _: &Settings) {
+    patcher.modify_objs(FieldLight, 34, &[
+        call(71, |obj| {
+            obj.clear_active_args();
+            obj.set_inactive_flag(Flag::Course(150));
+            obj.enable();
+        }),
+    ]);
+}
+
+fn patch_dark_maze(patcher: &mut Patcher, settings: &Settings) {
+
+    // Remove dialog
+    patcher.modify_objs(FieldDark, 20, &[
+        disable(63), // AreaEventTalk
+        disable(115), // AreaEventTalk
+        disable(116), // AreaEventTalk
+        disable(119), // AreaEventTalk
+        disable(122), // AreaEventTalk
+        disable(188), // AreaEventTalk
+        disable(195), // NpcGuardMan
+        disable(196), // NpcGuardMan
+        disable(231), // AreaEventTalk
+        disable(235), // Hilda Text
+    ]);
+
+    // Softlock Prevention for modes where Dark Maze can be reached without Merge
+    if settings.logic.vanes_activated {
+        // 1st Prison Cell softlock prevention
+        patcher.add_obj(FieldDark, 20, Obj::warp_tile(Flag::Event(1),
+                                                      0, 66, 245,
+                                                      0, 1, 19,
+                                                      Vec3 { x: 1.0 + 2.0, y: 0.5, z: 23.0 }));
+
+        // 2nd Prison Cell softlock prevention
+        patcher.add_obj(FieldDark, 20, Obj::warp_tile(Flag::Event(1),
+                                                      0, 67, 246,
+                                                      0, 1, 19,
+                                                      Vec3 { x: -17.0 + 2.5, y: 0.5, z: -17.0 }));
+    }
+}
+
+fn patch_thief_girl_cave(patcher: &mut Patcher, _: &Settings) {
+    patcher.modify_objs(CaveDark, 15, &[
+
+        // Thief Girl w/ Mask
+        call(8, move |obj| {
+            //obj.set_enable_flag(prize_flag);
+            obj.srt.rotate.y = 0.0;
+        }),
+        //set_enable_flag(9, prize_flag), // Chest
+        disable(10), // Entrance text
+        disable(11), // AreaSwitchCube
+        disable(13), // It's a secret to everybody
+    ]);
+}
+
 // TODO figure out how to reduce coupling with patcher
 pub fn apply(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
 
     // Ravio's Shop
     patcher.modify_objs(IndoorLight, 1, &[
-        call(17, |obj| {
-            obj.srt.translate.y += 0.1266;
-        }),
-
         call(24, |obj| {
             obj.redirect(
-                5, 0, 26, // No Redirect
-                // 0, 14, 2,     // Swamp Palace 2F
-                // 0, 0, 1, // FieldLight 2
-                // 0, 0, 6, // Outside Zora's Domain
-                // 4, 0, 8, // Outside Fortune-Teller
-                // 0, 12, 5, // Yuga 2 Boss
-                // 1, 3, 3, // Lorule Blacksmith
-                // 0, 12, 0, // Hyrule Castle Dungeon
-                // 2, 1, 30, // Zaganaga Portal
-                // 0, 1, 30, // Misery Mire
-                // 0, 3, 14, // Osfala Portrait
-                // 0, 5, 2, // Swamp Cave
-                // 0, 5, 13, // Great Rupee Fairy Cave
-                // 1, 17, 0, // Ice Ruins Boss
-                // 0, 17, 0, // Ice Ruins Boss
-                // 0, 19, 2, // Turtle Rock Boss
-                // 0, 5, 9, // Chamber of Sages
-                // 0, 5, 14, // Thief Girl Cave
-                // 0, 0, 19, // Eastern Ruins Cutscene
-                // 5, 0, 17, // Pendant of Courage cutscene
-                // 0, 0, 24,    // Haunted Grove
-                // 12, 13, 0,   // Dark Palace Boss
+                5, 0, 26,   // No Redirect
+                // 0, 0, 33,   // Master Sword Pedestal
+                // 0, 2, 9,    // Rosso House
+                // 0, 14, 2,   // Swamp Palace 2F
+                // 0, 0, 1,    // FieldLight 2
+                // 0, 0, 6,    // Outside Zora's Domain
+                // 4, 0, 8,    // Outside Fortune-Teller
+                // 0, 12, 5,   // Yuga 2 Boss
+                // 1, 3, 3,    // Lorule Blacksmith
+                // 0, 12, 0,   // Hyrule Castle Dungeon
+                // 2, 1, 30,   // Zaganaga Portal
+                // 0, 1, 30,   // Misery Mire
+                // 0, 3, 14,   // Osfala Portrait
+                // 0, 5, 2,    // Swamp Cave
+                // 0, 5, 13,   // Great Rupee Fairy Cave
+                // 1, 17, 0,   // Ice Ruins Boss
+                // 0, 17, 0,   // Ice Ruins Boss
+                // 0, 19, 2,   // Turtle Rock Boss
+                // 0, 5, 9,    // Chamber of Sages
+                // 0, 5, 14,   // Thief Girl Cave
+                // 0, 0, 19,   // Eastern Ruins Cutscene
+                // 5, 0, 17,   // Pendant of Courage cutscene
+                // 0, 0, 24,   // Haunted Grove
+                // 12, 13, 0,  // Dark Palace Boss
                 // 5, 1, 19,   // Outside Dark Palace
-                // 0, 65535, 65535,    // File Select Screen? lol
-                // 6, 10, 2,    // Gales Boss
-                // 0, 9, 0,     // Eastern Palace Entrance
-                // 5, 0, 19     // Eastern Ruins WV
-                // 0, 9, 0      // Eastern Palace Lobby
-                // 20, 1, 0,     // Seres Portrait
-                // 0, 4, 3      // Kak Well Lower
-                // 1, 4, 3      // Kak Well Upper
-                // 10, 11, 0    // Tower of Hera Boss
+                // 6, 10, 2,   // Gales Boss
+                // 0, 9, 2,    // Eastern Palace Boss
+                // 0, 9, 0,    // Eastern Palace Entrance
+                // 5, 0, 19    // Eastern Ruins WV
+                // 0, 9, 0     // Eastern Palace Lobby
+                // 20, 1, 0,   // Seres Portrait
+                // 0, 4, 3     // Kak Well Lower
+                // 1, 4, 3     // Kak Well Upper
+                // 10, 11, 0   // Tower of Hera Boss
             );
         }),
     ]);
 
+    patch_master_sword(patcher, settings);
     patch_hyrule_castle_dungeon(patcher, settings);
-
-    // Eastern Ruins - Disable Post-EP cutscene
-    patcher.modify_objs(FieldLight, 20, &[
-        enable(214), // Paint Heart
-        enable(215), // Paint Heart
-
-        disable(83), // Sahasrahla
-        disable(84), // Text box
-        disable(85), // Loading Zone to FL18
-    ]);
-
-    // Outside Hyrule Castle
-    patcher.modify_objs(FieldLight, 18, &[
-        disable(200), // Sahasrahla
-        disable(208), // Textbox trigger
-        disable(264), // lgt_NpcSoldier_Field1B_04_broke - idk what this is, but now it's nothing
-        // enable(502), // Sahasrahla
-    ]);
-
-    patcher.modify_system(FieldLight, 18, &[
-        call(199, |obj| {
-            obj.srt.translate.z = 12.75; // move to where cutscene normally ends
-        }),
-    ]);
+    patch_dark_maze(patcher, settings);
+    patch_thief_girl_cave(patcher, settings);
 
     // Chamber of Sages
     patcher.modify_objs(CaveDark, 10, &[
@@ -1008,16 +1124,6 @@ pub fn apply(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
         // Lost Woods
         FieldLight 1 {
             [34].active(375), // Skip Poes
-        },
-        // Outside Rosso's house
-        FieldLight 2 {
-            // [11].clear_enable_flag(), // Small Rock (controller for other rocks, see the System section)
-            [100].disable(None), // Keep Entry_KikoriMan3 from disappearing
-            [101].disable(None), // NpcMountaineer
-            // [128].disable(), // Remove "Not in right now." signboard
-            // [132].active(1), // Unlock Rosso's Front Door
-            [135].disable(), // Disable LZ to IndoorLight4 Cutscene
-            [136].enable(Flag::Event(250)), // Replace with IndoorLight10
         },
 
         // East Death Mountain
@@ -1249,19 +1355,6 @@ pub fn apply(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
             [345].disable(), // Buzz Blob
             [346].disable(), // Buzz Blob
         },
-        // Master Sword
-        FieldLight 34 {
-            [71].each [
-                active(0),
-                call {|obj: &mut Obj| {
-                    let arg = obj.arg_mut();
-                    arg.5 = 3;
-                    arg.7 = 150;
-                }},
-                enable(),
-                id(0x23), // replace with chest
-            ],
-        },
 
         // // Lake Hylia - Special stuff for Flora REMOVE ME
         // FieldLight 35 {
@@ -1321,14 +1414,6 @@ pub fn apply(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
             [59].disable(), // Disable Ravio's welcome
         },
 
-        // Rosso's house
-        IndoorLight 10 {
-            [7].each [
-                id(35),
-                inactive(282),
-                enable(),
-            ],
-        },
         // Hyrule Castle
         IndoorLight 12 {
             [23].disable(), // Zelda
@@ -1475,42 +1560,6 @@ pub fn apply(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
 
     // Change 'System' properties
     apply_system!(patcher,
-
-        // Outside Rosso's house
-        // FieldLight 2 {
-        //     [11].clear_enable_flag(), // Small Rock (controller for the other rocks)
-        //     [12].clear_enable_flag(), // Small Rock
-        //     [14].clear_enable_flag(), // Small Rock
-        //     [15].clear_enable_flag(), // Small Rock
-        //     [16].clear_enable_flag(), // Small Rock
-        //     [18].clear_enable_flag(), // Small Rock
-        //     [19].clear_enable_flag(), // Small Rock
-        //     [20].clear_enable_flag(), // Small Rock
-        //     [21].clear_enable_flag(), // Small Rock
-        //     [93].clear_enable_flag(), // Small Rock
-        //     [94].clear_enable_flag(), // Small Rock
-        //     [102].clear_enable_flag(), // Small Rock
-        //     [103].clear_enable_flag(), // Small Rock
-        //     [104].clear_enable_flag(), // Small Rock
-        //     [105].clear_enable_flag(), // Small Rock
-        //     [106].clear_enable_flag(), // Small Rock
-        //     [107].clear_enable_flag(), // Small Rock
-        //     [108].clear_enable_flag(), // Small Rock
-        //     [109].clear_enable_flag(), // Small Rock
-        //     [110].clear_enable_flag(), // Small Rock
-        //     [111].clear_enable_flag(), // Small Rock
-        //     [112].clear_enable_flag(), // Small Rock
-        //     [118].clear_enable_flag(), // Small Rock
-        //     [119].clear_enable_flag(), // Small Rock
-        //     [120].clear_enable_flag(), // Small Rock
-        //     [121].clear_enable_flag(), // Small Rock
-        //     [122].clear_enable_flag(), // Small Rock
-        //     [123].clear_enable_flag(), // Small Rock
-        //     [124].clear_enable_flag(), // Small Rock
-        //     [125].clear_enable_flag(), // Small Rock
-        //     [126].clear_enable_flag(), // Small Rock
-        // },
-
         // Link's House
         IndoorLight 1 {
             // Default Spawn Point
