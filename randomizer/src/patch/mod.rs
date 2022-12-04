@@ -725,7 +725,7 @@ fn cutscenes<'game, 'settings>(
                 315, // Shop open???
                 // 320, // Shady Guy Trigger
                 321, 322, // Skip first Oren cutscenes
-                415, // Skip Yuga capturing Zelda
+                //415, // Skip Yuga capturing Zelda
                 430, // Fix Chamber of Sages Softlock
                 510, // Open Portals, Activate Hyrule Castle Midway
                 522, // Hilda Blacksmith Text + get Map Swap icon on lower screen

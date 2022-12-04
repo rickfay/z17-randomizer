@@ -79,25 +79,60 @@ macro_rules! action {
 
 pub fn apply(patcher: &mut Patcher, free: Item) -> Result<()> {
 
-    // Master Sword Pedestal
     apply!(patcher,
-        FieldLight/FieldLight_00_Mayoinomori {
-            //[89 into_start] // don't skip Sahas noise or weird bottom screen bug happens
-            [130] => 100, // skip Sahasrahla text
+
+        // Hyrule Castle Dungeon
+        DungeonCastle/Castle {
+            [276] => 62,  // [274]
+            [315] => 70,  // [ 19]
+            [236] => 74,  // [ 37]
+            [290] => 75,  // [284]
+            [234] => 79,  // [ 18]
+            [311] => 97,  // [255]
+            [184] => 107, // [106]
+            [107] => 110, // [109]
+            [312] => 175, // [ 87]
+            [313] => 176, // [ 88]
+            [227] => 177, // [ 89]
+            [281] => 178, // [ 16]
+            [228] => 179, // [ 14]
+            [229] => 180, // [ 17]
+            [314] => 181, // [ 15]
+            [237] => 183, // [104] // "what?"
+            [171] => 184, // [ 29]
+            [172] => 185, // [ 39]
+            [131] => 222, // [127]
+            [206] => 223, // [128]
+            [135] => 224, // [129]
+            [137] => 225, // [130]
+            [282] => 269, // [270]
+            [138] => 275, // [  1]
+            [303] => 286, // [ 76] "I wish only to possess..."
+
+            // After fight
+            [5]   => 247, // skip 149
+            [155] => 249, // skip 40
         },
     );
 
     // Debugging
-    // patcher.flow(albw::course::Id::FieldLight)?
-    //     .get_mut(stringify!(FieldLight_00_Mayoinomori))
+    // patcher.flow(albw::course::Id::DungeonCastle)?
+    //     .get_mut(stringify!(Castle))
     //     .ok_or_else(|| crate::Error::game("File not found."))??.get()
     //     .debug();
 
-    // Chamber of Sages
     apply!(patcher,
+
+        // Master Sword Pedestal
+        FieldLight/FieldLight_00_Mayoinomori {
+            // [89 into_start] => 100, // don't skip Sahas noise or weird bottom screen bug happens
+            [130] => 100, // skip Sahasrahla text
+        },
+
+        // Chamber of Sages
         CaveDark/CaveDark10 {
 
-            // Skip Hilda checks for having 2/4/6 Sages
+            // Skip Hilda intercepts for having 2/4/6 Sages
             // Skip flag 629 check to skip Triforce of Courage
 
             [266] => 18, // Skip 191,  1,  62, 63, 206 - Gulley?
@@ -113,9 +148,6 @@ pub fn apply(patcher: &mut Patcher, free: Item) -> Result<()> {
             [253] => 86, // Skip 218, 22,  87, 88, 216 - Irene?
             [251] => 91, // Skip 222, 26,  92, 93, 221 - Impa?
         },
-    );
-
-    apply!(patcher,
 
         // Shady Guy (Zora's Domain)
         FieldLight/FieldLight_0F_Zora {

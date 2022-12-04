@@ -925,12 +925,25 @@ fn patch_hyrule_castle_dungeon(patcher: &mut Patcher, _: &Settings) {
         }),
     ]);
 
+    let made_up_course_flag = Flag::Course(32); // 1,5,12,20,30,31 are taken
+
     // 4F (sic)
     patcher.modify_objs(DungeonCastle, 7, &[
-        set_enable_flag(19, Flag::Event(415)),
-        set_enable_flag(20, Flag::Event(415)),
-        set_enable_flag(21, Flag::Event(415)),
-        set_enable_flag(22, Flag::Event(415)),
+        // set_enable_flag(19, Flag::Event(415)),
+        // set_enable_flag(20, Flag::Event(415)),
+        // set_enable_flag(21, Flag::Event(415)),
+        // set_enable_flag(22, Flag::Event(415)),
+
+        // Cutscene Trigger
+        call(9, move |obj| {
+            obj.set_active_flag(Flag::Event(1));
+            obj.set_inactive_flag(made_up_course_flag);
+            obj.set_disable_flag(made_up_course_flag);
+
+        }),
+        set_disable_flag(10, made_up_course_flag), // Yuga
+        set_disable_flag(12, made_up_course_flag), // Zelda
+        set_disable_flag(13, made_up_course_flag), // Zelda Portrait
     ]);
 
     // 7F
@@ -955,7 +968,7 @@ fn patch_hyrule_castle_dungeon(patcher: &mut Patcher, _: &Settings) {
 
     // Blacksmith (Hyrule)
     patcher.add_obj(IndoorLight, 19,
-                    Obj::green_warp(Flag::Event(1),
+                    Obj::green_warp(Flag::Event(1), // FIXME attach to Yuga 2
                                     0, 15, 23,
                                     3, 3, 3,
                                     Vec3 { x: 3.25, y: 0.0, z: -3.5 }));
@@ -965,7 +978,7 @@ fn patch_hyrule_castle_dungeon(patcher: &mut Patcher, _: &Settings) {
 
     // Blacksmith (Lorule)
     patcher.add_obj(IndoorDark, 4,
-                    Obj::green_warp(Flag::Event(1),
+                    Obj::green_warp(Flag::Event(1), // FIXME attach to Yuga 2
                                     0, 13, 22,
                                     1, 2, 18,
                                     Vec3 { x: 3.25, y: 0.0, z: -3.5 }));
@@ -1044,46 +1057,48 @@ fn patch_thief_girl_cave(patcher: &mut Patcher, _: &Settings) {
 pub fn apply(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
 
     // Ravio's Shop
-    patcher.modify_objs(IndoorLight, 1, &[
-        call(24, |obj| {
-            obj.redirect(
-                5, 0, 26,   // No Redirect
-                // 0, 0, 33,   // Master Sword Pedestal
-                // 0, 2, 9,    // Rosso House
-                // 0, 14, 2,   // Swamp Palace 2F
-                // 0, 0, 1,    // FieldLight 2
-                // 0, 0, 6,    // Outside Zora's Domain
-                // 4, 0, 8,    // Outside Fortune-Teller
-                // 0, 12, 5,   // Yuga 2 Boss
-                // 1, 3, 3,    // Lorule Blacksmith
-                // 0, 12, 0,   // Hyrule Castle Dungeon
-                // 2, 1, 30,   // Zaganaga Portal
-                // 0, 1, 30,   // Misery Mire
-                // 0, 3, 14,   // Osfala Portrait
-                // 0, 5, 2,    // Swamp Cave
-                // 0, 5, 13,   // Great Rupee Fairy Cave
-                // 1, 17, 0,   // Ice Ruins Boss
-                // 0, 17, 0,   // Ice Ruins Boss
-                // 0, 19, 2,   // Turtle Rock Boss
-                // 0, 5, 9,    // Chamber of Sages
-                // 0, 5, 14,   // Thief Girl Cave
-                // 0, 0, 19,   // Eastern Ruins Cutscene
-                // 5, 0, 17,   // Pendant of Courage cutscene
-                // 0, 0, 24,   // Haunted Grove
-                // 12, 13, 0,  // Dark Palace Boss
-                // 5, 1, 19,   // Outside Dark Palace
-                // 6, 10, 2,   // Gales Boss
-                // 0, 9, 2,    // Eastern Palace Boss
-                // 0, 9, 0,    // Eastern Palace Entrance
-                // 5, 0, 19    // Eastern Ruins WV
-                // 0, 9, 0     // Eastern Palace Lobby
-                // 20, 1, 0,   // Seres Portrait
-                // 0, 4, 3     // Kak Well Lower
-                // 1, 4, 3     // Kak Well Upper
-                // 10, 11, 0   // Tower of Hera Boss
-            );
-        }),
-    ]);
+    // patcher.modify_objs(IndoorLight, 1, &[
+    //     call(24, |obj| {
+    //         obj.redirect(
+    //             5, 0, 26,   // No Redirect
+    //             // 7, 4, 17, // Sanctuary Dungeon End
+    //             // 0, 0, 33,   // Master Sword Pedestal
+    //             // 0, 2, 9,    // Rosso House
+    //             // 0, 14, 2,   // Swamp Palace 2F
+    //             // 0, 0, 1,    // FieldLight 2
+    //             // 0, 0, 6,    // Outside Zora's Domain
+    //             // 4, 0, 8,    // Outside Fortune-Teller
+    //             // 0, 12, 5,   // Yuga 2 Boss
+    //             // 0, 12, 6,   // HC 4th Floor
+    //             // 1, 3, 3,    // Lorule Blacksmith
+    //             // 0, 12, 0,   // Hyrule Castle Dungeon
+    //             // 2, 1, 30,   // Zaganaga Portal
+    //             // 0, 1, 30,   // Misery Mire
+    //             // 0, 3, 14,   // Osfala Portrait
+    //             // 0, 5, 2,    // Swamp Cave
+    //             // 0, 5, 13,   // Great Rupee Fairy Cave
+    //             // 1, 17, 0,   // Ice Ruins Boss
+    //             // 0, 17, 0,   // Ice Ruins Boss
+    //             // 0, 19, 2,   // Turtle Rock Boss
+    //             // 0, 5, 9,    // Chamber of Sages
+    //             // 0, 5, 14,   // Thief Girl Cave
+    //             // 0, 0, 19,   // Eastern Ruins Cutscene
+    //             // 5, 0, 17,   // Pendant of Courage cutscene
+    //             // 0, 0, 24,   // Haunted Grove
+    //             // 12, 13, 0,  // Dark Palace Boss
+    //             // 5, 1, 19,   // Outside Dark Palace
+    //             // 6, 10, 2,   // Gales Boss
+    //             // 0, 9, 2,    // Eastern Palace Boss
+    //             // 0, 9, 0,    // Eastern Palace Entrance
+    //             // 5, 0, 19    // Eastern Ruins WV
+    //             // 0, 9, 0     // Eastern Palace Lobby
+    //             // 20, 1, 0,   // Seres Portrait
+    //             // 0, 4, 3     // Kak Well Lower
+    //             // 1, 4, 3     // Kak Well Upper
+    //             // 10, 11, 0   // Tower of Hera Boss
+    //         );
+    //     }),
+    // ]);
 
     patch_master_sword(patcher, settings);
     patch_hyrule_castle_dungeon(patcher, settings);
@@ -1161,7 +1176,7 @@ pub fn apply(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
             [101].disable(), // Dampe
             [102].disable(), // Seres
             [133].active(1), // Close Church Door by default
-            [133].disable(Flag::Event(1200)), // Church Door rigged to open when Sanc left switch pulled
+            [133].disable(Flag::Event(415)), // Church Door rigged to open when Sanc left switch pulled
 
             [144].disable(), // Buzz Blob
             [145].enable(), // Buzz Blob
@@ -1171,19 +1186,19 @@ pub fn apply(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
 
         // Sanctuary Dungeon
         CaveLight 18 {
-            // 1200 is a newly created Flag to control this
-            [35].active(1200), // Pull Switch
-            [37].inactive(1200), // Door
-            [107].active(1200), // TagCameraFocus
-            [107].disable(Flag::Event(1200)), // TagCameraFocus
+            // 415 is a repurposed flag to control this
+            [35].active(415), // Pull Switch
+            [37].inactive(415), // Door
+            [107].active(415), // TagCameraFocus
+            [107].disable(Flag::Event(415)), // TagCameraFocus
         },
 
         // Sanctuary Church
         IndoorLight 11 {
             [14].clear_enable_flag(), // Church Door
-            [14].disable(Flag::Event(1200)), // Church Door
+            [14].disable(Flag::Event(415)), // Church Door
             [16].disable(), // Early game Priest
-            [20].active(1200),
+            [20].active(415),
         },
 
         // Graveyard

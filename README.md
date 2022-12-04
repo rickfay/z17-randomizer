@@ -18,10 +18,11 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
 - Players can now return to Hyrule from Lorule via a Warp that appears in the Blacksmith after completing Hyrule Castle.
 - Great Rupee Fairy improvements
   - Automatically throw 3000 rupees as one (long) action. More work to be done.
-- Triforce of Courage cutscene is now skipped.
+- Several cutscenes shortened/reworked.
+  - Triforce of Courage cutscene is notably skipped.
 - Logic Adjustments:
   - Irene + Shady Guy return, with improved cutscenes
-
+  - Rosso's House starts locked again, needs Green Pendant to unlock
 
 *All changes from the unofficially released v0.1.3 have been folded into this update.*
 </details>
@@ -314,6 +315,9 @@ For Citra (emulator):
 - Determines the Logic to use when generating the seed.
   - Options are: `Normal`, `Hard`, `GlitchBasic`, `GlitchAdvanced`, `GlitchHell`, or `NoLogic`
 
+`randomize_dungeon_prizes`
+- Randomizes the Pendants and Portraits between Hyrule and Lorule dungeons
+
 `assured_weapon`
 - If enabled, guarantees that a weapon will be placed in Ravio's Shop
   - Potential weapons include:
@@ -353,6 +357,9 @@ For Citra (emulator):
 - Generates a seed with no Swords. Things you should know about Swordless:
   - The Hyrule Castle Barrier will be torn down from game start, providing access to its checks and the Inside Hyrule Castle dungeon.
   - You will need the [Net to play Tennis with Yuganon](https://www.twitch.tv/videos/1265170513). Good luck finding it!
+
+`chest_size_matches_contents`
+- Alters treasure chest sizes depending on their contents: Large for Progression items, Small for everything else.
 
 ## Logic Breakdown
 

@@ -186,10 +186,10 @@ fn main() -> randomizer::Result<()> {
             preset_ui()
         };
 
-        let max_retries = 100;
+        const MAX_RETRIES: u16 = 100;
         let mut result = Ok(());
 
-        for x in 0..max_retries {
+        for x in 0..MAX_RETRIES {
             let seed = opt.seed.unwrap_or_else(rand::random);
 
 
@@ -210,7 +210,7 @@ fn main() -> randomizer::Result<()> {
                 );
 
                 break;
-            } else if x >= max_retries - 1 {
+            } else if x >= MAX_RETRIES - 1 {
                 // FIXME I hate this, but I'm struggling with Rust error handling so leaving it for now
                 panic!("Too many retry attempts have failed. Aborting...");
             } else {
