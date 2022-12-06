@@ -1,7 +1,7 @@
 use std::{array, collections::HashMap, fs, iter, path::Path};
 use std::io::{Read, stdin, stdout, Write};
 
-use albw::{demo::Timed, flow::FlowMut, Demo, File, Game, IntoBytes, Item, Language, Scene, byaml, Actor};
+use albw::{demo::Timed, flow::FlowMut, Demo, File, Game, IntoBytes, Item, Language, Scene};
 use fs_extra::dir::CopyOptions;
 use log::{debug, error, info};
 use serde::Serialize;
@@ -10,18 +10,14 @@ use try_insert_ext::*;
 use albw::course::Id;
 use albw::course::Id::*;
 use albw::scene::{Arg, Obj, Rail};
-use albw::Item::*;
-use albw::language::FlowChart;
-
-use crate::{Error, ItemExt, Layout, LocationInfo, MsbfKey, regions, Result, Settings};
-use crate::patch::r#ref::MsbfInfo;
-use crate::patch::scenes::is_pendant;
-
+use crate::{Error, ItemExt, Layout, Result, Settings};
 use self::code::Code;
 
 mod code;
 mod flow;
 mod scenes;
+mod prizes;
+mod util;
 pub mod r#ref;
 
 #[non_exhaustive]
@@ -265,195 +261,19 @@ impl Patcher {
     }
 
 
-    fn patch_dungeon_prizes(&mut self, layout: &Layout, settings: &Settings) -> Result<()> {
-
-        // Fetch the placed Dungeon Rewards
-        // TODO really need to clean up the Layout data structure...
-        let prizes = DungeonPrizes {
-            ep_prize: layout.get(&LocationInfo::new(regions::dungeons::eastern::palace::SUBREGION, "Eastern Palace Prize")).unwrap(),
-            hg_prize: layout.get(&LocationInfo::new(regions::dungeons::house::gales::SUBREGION, "House of Gales Prize")).unwrap(),
-            th_prize: layout.get(&LocationInfo::new(regions::dungeons::tower::hera::SUBREGION, "Tower of Hera Prize")).unwrap(),
-            pd_prize: layout.get(&LocationInfo::new(regions::dungeons::dark::palace::SUBREGION, "Dark Palace Prize")).unwrap(),
-            sp_prize: layout.get(&LocationInfo::new(regions::dungeons::swamp::palace::SUBREGION, "Swamp Palace Prize")).unwrap(),
-            sw_prize: layout.get(&LocationInfo::new(regions::dungeons::skull::woods::SUBREGION, "Skull Woods Prize")).unwrap(),
-            tt_prize: layout.get(&LocationInfo::new(regions::dungeons::thieves::hideout::SUBREGION, "Thieves' Hideout Prize")).unwrap(),
-            tr_prize: layout.get(&LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "Turtle Rock Prize")).unwrap(),
-            dp_prize: layout.get(&LocationInfo::new(regions::dungeons::desert::palace::SUBREGION, "Desert Palace Prize")).unwrap(),
-            ir_prize: layout.get(&LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "Ice Ruins Prize")).unwrap(),
-        };
-
-        self.patch_flowchart(&prizes)?;
-        self.patch_msbf_files(&prizes)?;
-        self.patch_dungeon_prize_actors(&prizes)?;
-        scenes::patch_prize_byaml(self, &prizes, settings);
-
-        Ok(())
-    }
-
-    /// Get msbf event files and inject them into scenes
-    fn patch_msbf_files(&mut self, prizes: &DungeonPrizes) -> Result<()> {
-        let prize_msbf_map: HashMap<Item, (&str, File<Box<[u8]>>)> = HashMap::from([
-            (SageGulley, (MsbfKey::Dark, self.language(DungeonDark)?.flow().extract("World/Flow/Dark.msbf").unwrap())),
-            (SageOren, (MsbfKey::Water, self.language(DungeonWater)?.flow().extract("World/Flow/Water.msbf").unwrap())),
-            (SageSeres, (MsbfKey::Dokuro, self.language(FieldDark)?.flow().extract("World/Flow/Dokuro.msbf").unwrap())),
-            (SageOsfala, (MsbfKey::Hagure, self.language(IndoorDark)?.flow().extract("World/Flow/Hagure.msbf").unwrap())),
-            /* No Impa */
-            (SageIrene, (MsbfKey::Sand, self.language(FieldDark)?.flow().extract("World/Flow/Sand.msbf").unwrap())),
-            (SageRosso, (MsbfKey::Ice, self.language(DungeonIce)?.flow().extract("World/Flow/Ice.msbf").unwrap())),
-        ]);
-
-        self.inject_msbf(DungeonEast, prize_msbf_map.get(&prizes.ep_prize))?;
-        self.inject_msbf(DungeonWind, prize_msbf_map.get(&prizes.hg_prize))?;
-        self.inject_msbf(DungeonHera, prize_msbf_map.get(&prizes.th_prize))?;
-        self.inject_msbf(DungeonDark, prize_msbf_map.get(&prizes.pd_prize))?;
-        self.inject_msbf(DungeonWater, prize_msbf_map.get(&prizes.sp_prize))?;
-        self.inject_msbf(FieldDark, prize_msbf_map.get(&prizes.sw_prize))?;
-        self.inject_msbf(IndoorDark, prize_msbf_map.get(&prizes.tt_prize))?;
-        self.inject_msbf(DungeonKame, prize_msbf_map.get(&prizes.tr_prize))?;
-        self.inject_msbf(FieldDark, prize_msbf_map.get(&prizes.dp_prize))?;
-        self.inject_msbf(DungeonIce, prize_msbf_map.get(&prizes.ir_prize))?;
-
-        Ok(())
-    }
-
-    fn patch_dungeon_prize_actors(&mut self, prizes: &DungeonPrizes) -> Result<()> {
-
-        // Fetch and map Actors to their dungeon prizes
-        let pendant = self.scene(DungeonWind, 2)?.actors().get("Pendant")?;
-        let actor_map: HashMap<Item, Actor> = HashMap::from([
-            (PendantCourage, pendant.clone()),
-            (PendantWisdom, pendant.clone()),
-            (PendantPower, pendant),
-            (SageGulley, self.scene(DungeonDark, 0)?.actors().get("PictureBlacksmithBoy")?),
-            (SageOren, self.scene(DungeonWater, 2)?.actors().get("PictureZoraQueen")?),
-            (SageSeres, self.scene(FieldDark, 0)?.actors().get("PicturePriestGirl")?),
-            (SageOsfala, self.scene(IndoorDark, 14)?.actors().get("PictureSahasPupil")?),
-            (SageImpa, self.scene(DungeonKame, 2)?.actors().get("PictureInpa")?),
-            (SageIrene, self.scene(FieldDark, 30)?.actors().get("PictureMaple")?),
-            (SageRosso, self.scene(DungeonIce, 0)?.actors().get("PictureMountaineer")?),
-        ]);
-
-        // Add Actors to relevant scenes
-        self.scene(DungeonEast, 0)?.actors_mut().add(actor_map.get(&prizes.ep_prize).unwrap().clone())?;
-        self.scene(DungeonWind, 2)?.actors_mut().add(actor_map.get(&prizes.hg_prize).unwrap().clone())?;
-        self.scene(DungeonHera, 0)?.actors_mut().add(actor_map.get(&prizes.th_prize).unwrap().clone())?;
-        self.scene(DungeonDark, 0)?.actors_mut().add(actor_map.get(&prizes.pd_prize).unwrap().clone())?;
-        self.scene(DungeonWater, 2)?.actors_mut().add(actor_map.get(&prizes.sp_prize).unwrap().clone())?;
-        self.scene(FieldDark, 0)?.actors_mut().add(actor_map.get(&prizes.sw_prize).unwrap().clone())?;
-        self.scene(IndoorDark, 14)?.actors_mut().add(actor_map.get(&prizes.tt_prize).unwrap().clone())?;
-        self.scene(DungeonKame, 2)?.actors_mut().add(actor_map.get(&prizes.tr_prize).unwrap().clone())?;
-        self.scene(FieldDark, 30)?.actors_mut().add(actor_map.get(&prizes.dp_prize).unwrap().clone())?;
-        self.scene(DungeonIce, 0)?.actors_mut().add(actor_map.get(&prizes.ir_prize).unwrap().clone())?;
-
-        // Inject Small Chests into scenes that don't have them for Pendants
-        // TODO Remove after Pendants can be redirected
-        let chest_small = self.scene(DungeonHera, 0)?.actors().get("TreasureBoxS")?;
-        if is_pendant(prizes.sp_prize) {
-            let warp_tile = self.scene(DungeonHera, 0)?.actors().get("WarpTile")?;
-            self.scene(DungeonWater, 2)?.actors_mut().add(warp_tile)?;
-            self.scene(DungeonWater, 2)?.actors_mut().add(chest_small.clone())?;
-        }
-        if is_pendant(prizes.sw_prize) {
-            self.scene(FieldDark, 0)?.actors_mut().add(chest_small.clone())?;
-        }
-        if is_pendant(prizes.tt_prize) {
-            self.scene(IndoorDark, 14)?.actors_mut().add(chest_small.clone())?;
-        }
-        if is_pendant(prizes.dp_prize) {
-            self.scene(FieldDark, 30)?.actors_mut().add(chest_small.clone())?;
-        }
-        if is_pendant(prizes.tr_prize) {
-            self.scene(DungeonKame, 2)?.actors_mut().add(chest_small)?;
-        }
-
-        Ok(())
-    }
-
-    fn patch_flowchart(&mut self, prizes: &DungeonPrizes) -> Result<()> {
-
-        // Map dungeon MsbfInfo to the randomized prizes
-        let dungeon_msbf_mapping: Vec<(MsbfInfo, Option<&'static str>)> = Vec::from([
-            (MsbfInfo::EP, prizes.ep_prize.msbf_key()),
-            (MsbfInfo::HG, prizes.hg_prize.msbf_key()),
-            (MsbfInfo::TH, prizes.th_prize.msbf_key()),
-            (MsbfInfo::PD, prizes.pd_prize.msbf_key()),
-            (MsbfInfo::SP, prizes.sp_prize.msbf_key()),
-            (MsbfInfo::SW, prizes.sw_prize.msbf_key()),
-            (MsbfInfo::TT, prizes.tt_prize.msbf_key()),
-            (MsbfInfo::TR, prizes.tr_prize.msbf_key()),
-            (MsbfInfo::DP, prizes.dp_prize.msbf_key()),
-            (MsbfInfo::IR, prizes.ir_prize.msbf_key()),
-        ]);
-
-        // Read and deserialize the FlowChart from RegionBoot
-        let raw = self.boot.archive.get_mut().read("World/Byaml/FlowChart.byaml")?;
-        let mut flow_chart: File<FlowChart> = raw.try_map(|data| byaml::from_bytes(&data))?;
 
 
-        // Remove vanilla msbf entries
-        // NOTE: Skull + Desert share FieldDark, so this must be done separately from adding
-        // for (dungeon_info, _) in &dungeon_msbf_mapping {
-        //     if dungeon_info.has_msbf() {
-        //         flow_chart.get_mut().load_mut().remove_entry(
-        //             dungeon_info.get_course().as_str(), dungeon_info.get_vanilla_msbf().unwrap());
-        //     }
-        // }
 
-        // Add msbf for dungeon prize
-        for (dungeon_info, new_msbf) in &dungeon_msbf_mapping {
-            if new_msbf.is_some() {
-                flow_chart.get_mut().load_mut().add_entry(
-                    dungeon_info.get_course().as_str(), new_msbf.unwrap());
-            }
-        }
 
-        // Serialize the FlowChart and update the boot archive
-        let serialized = flow_chart.serialize();
-        self.boot.archive.get_mut().update(serialized)?;
 
-        Ok(())
-    }
 
-    fn patch_actor_profile(&mut self, _layout: &Layout, _settings: &Settings) -> Result<()> {
 
-        // let tr_prize = layout.get(&LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "Turtle Rock Prize")).unwrap();
-        //
-        // let smol_byaml = match tr_prize {
-        //     SageGulley => "ObjPictureBlacksmithBoy.byaml",
-        //     SageOren => "ObjPictureZoraQueen.byaml",
-        //     SageSeres => "ObjPicturePriestGirl.byaml",
-        //     SageOsfala => "ObjPictureSahasPupil.byaml",
-        //     SageIrene => "ObjPictureMaple.byaml",
-        //     SageRosso => "ObjPictureMountaineer.byaml",
-        //     SageImpa | PendantPower | PendantWisdom | PendantCourage => { return Ok(()); },
-        //     _ => panic!()
-        // };
-        //
-        // // Read and deserialize the FlowChart from RegionBoot
-        // let mut szs = self.game.actor_profile();
-        //
-        // // Make the collision of the TR Portrait larger so Link can 'Touch' it
-        // // let smol_raw = szs.get_mut().read(smol_byaml)?;
-        // // let mut smol_profile: File<ActorProfile> = smol_raw.try_map(|data| byaml::from_bytes(&data))?;
-        // // info!("read smol file");
-        // // smol_profile.get_mut().collision.get_mut(0).unwrap().scale = String::from("{X: 3.00000, Y: 3.00000, Z: 3.00000}");
-        //
-        // // Reduce the collision of Impa to match normal sages when not in TR
-        // let impa_raw = szs.get_mut().read("ObjPictureInpa.byaml")?;
-        // let mut impa_profile: File<ActorProfile> = impa_raw.try_map(|data| byaml::from_bytes(&data))?;
-        //
-        // info!("Being ActorProfile Serializing...");
-        //
-        // // Serialize and update the archive
-        // //self.boot.archive.get_mut().add(smol_profile.serialize())?;
-        // self.boot.archive.get_mut().add(impa_profile.serialize())?;
 
-        Ok(())
-    }
+
 
     pub fn prepare(mut self, layout: &Layout, settings: &Settings) -> Result<Patches> {
-        self.patch_dungeon_prizes(layout, settings)?;
-        self.patch_actor_profile(layout, settings)?;
+
+
 
         let mut item_actors = HashMap::new();
 
@@ -488,8 +308,9 @@ impl Patcher {
         //self.scene(course::Id::DungeonWater, 2)?.actors_mut().add(fresco_arrow.clone())?;
         //self.scene(course::Id::IndoorLight, 0)?.actors_mut().add(fresco_arrow.clone())?;
 
-
+        prizes::patch_dungeon_prizes(&mut self, layout, settings);
         scenes::apply(&mut self, settings)?;
+
         let free = self.rentals[8];
         flow::apply(&mut self, free)?;
         {

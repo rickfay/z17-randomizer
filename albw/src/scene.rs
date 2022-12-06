@@ -157,10 +157,64 @@ impl Obj {
         }
     }
 
+    /// Generate a new AreaSwitchCube trigger object
+    pub fn trigger_cube(trigger_flag: Flag, clp: i16, ser: u16, unq: u16, translate: Vec3) -> Self {
+        let (arg4, arg6) = trigger_flag.into_pair();
+        Self {
+            arg: Arg(0, 0, 0, 0, arg4, 0, arg6, 0, 0, 0, 0, 0, 0, 0.0),
+            clp,
+            flg: (0, 0, 0, 0),
+            id: 14,
+            lnk: vec![],
+            nme: Some(String::from("Invalid")),
+            ril: vec![],
+            ser: Some(ser),
+            srt: Transform { scale: Vec3::UNIT, rotate: Vec3::ZERO, translate },
+            typ: 6,
+            unq
+        }
+    }
+
     /// Generate a new Warp Tile object
     /// Remember to import the actor: `WarpTile`
     pub fn warp_tile(activation_flag: Flag, clp: i16, ser: u16, unq: u16, spawn: i32, scene: i32, scene_index: i32, translate: Vec3) -> Self {
         Self::warp(208, 1, activation_flag, clp, ser, unq, spawn, scene, scene_index, translate)
+    }
+
+    /// Generate a new Hookshot Pole object
+    /// Remember to import the actor: `StatueWood`
+    pub fn hookshot_pole(clp: i16, ser: u16, unq: u16, translate: Vec3) -> Self {
+        Self {
+            arg: Arg(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.0),
+            clp,
+            flg: (0, 0, 0, 0),
+            id: 209,
+            lnk: vec![],
+            nme: None,
+            ril: vec![],
+            ser: Some(ser),
+            srt: Transform { scale: Vec3::UNIT, rotate: Vec3::ZERO, translate },
+            typ: 1,
+            unq
+        }
+    }
+
+    /// Generate a new Raft object
+    /// Remember to import the actor: `Raft`
+    pub fn raft(clp: i16, ser: u16, unq: u16, translate: Vec3) -> Self {
+        Self {
+            arg: Arg(1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.0),
+            clp,
+            flg: (0, 0, 0, 0),
+            id: 247,
+            lnk: vec![],
+            nme: None,
+            ril: vec![],
+            ser: Some(ser),
+            srt: Transform { scale: Vec3::UNIT, rotate: Vec3::ZERO, translate },
+            typ: 1,
+            unq
+        }
     }
 
     /// Generate a new Blue Warp object
