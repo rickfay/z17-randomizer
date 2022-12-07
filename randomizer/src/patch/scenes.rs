@@ -89,52 +89,52 @@ macro_rules! action {
 pub fn apply(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
 
     // Ravio's Shop
-    patcher.modify_objs(IndoorLight, 1, &[
-        call(24, |obj| {
-            obj.redirect(
-                // 5, 0, 26,   // No Redirect
-                // 7, 4, 17, // Sanctuary Dungeon End
-                // 0, 0, 33,   // Master Sword Pedestal
-                // 0, 2, 9,    // Rosso House
-                // 0, 14, 2,   // Swamp Palace 2F
-                24, 14, 1,   // Swamp Palace River Room
-                // 0, 0, 1,    // FieldLight 2
-                // 0, 0, 6,    // Outside Zora's Domain
-                // 4, 0, 8,    // Outside Fortune-Teller
-                // 0, 12, 5,   // Yuga 2 Boss
-                // 0, 12, 6,   // HC 4th Floor
-                // 1, 3, 3,    // Lorule Blacksmith
-                // 0, 12, 0,   // Hyrule Castle Dungeon
-                // 2, 1, 30,   // Zaganaga Portal
-                // 0, 1, 30,   // Misery Mire
-                // 0, 3, 14,   // Osfala Portrait
-                // 0, 5, 2,    // Swamp Cave
-                // 0, 5, 13,   // Great Rupee Fairy Cave
-                // 1, 17, 0,   // Ice Ruins Boss
-                // 0, 17, 0,   // Ice Ruins Boss
-                // 0, 19, 2,   // Turtle Rock Boss
-                // 0, 5, 9,    // Chamber of Sages
-                // 0, 5, 14,   // Thief Girl Cave
-                // 0, 0, 19,   // Eastern Ruins Cutscene
-                // 5, 0, 17,   // Pendant of Courage cutscene
-                // 0, 0, 24,   // Haunted Grove
-                // 12, 13, 0,  // Dark Palace Boss
-                // 5, 1, 19,   // Outside Dark Palace
-                // 6, 10, 2,   // Gales Boss
-                // 0, 10, 0,   // Gales Entrance
-                // 0, 9, 2,    // Eastern Palace Boss
-                // 0, 9, 0,    // Eastern Palace Entrance
-                // 5, 0, 19    // Eastern Ruins WV
-                // 0, 9, 0     // Eastern Palace Lobby
-                // 20, 1, 0,   // Seres Portrait
-                // 0, 4, 3     // Kak Well Lower
-                // 1, 4, 3     // Kak Well Upper
-                // 10, 11, 0   // Tower of Hera Boss
-            );
-        }),
-    ]);
+    // patcher.modify_objs(IndoorLight, 1, &[
+    //     call(24, |obj| {
+    //         obj.redirect(
+    //             5, 0, 26,   // No Redirect
+    //             // 7, 4, 17, // Sanctuary Dungeon End
+    //             // 0, 0, 33,   // Master Sword Pedestal
+    //             // 0, 2, 9,    // Rosso House
+    //             // 0, 14, 2,   // Swamp Palace 2F
+    //             // 24, 14, 1,   // Swamp Palace River Room
+    //             // 0, 0, 1,    // FieldLight 2
+    //             // 0, 0, 6,    // Outside Zora's Domain
+    //             // 4, 0, 8,    // Outside Fortune-Teller
+    //             // 0, 12, 5,   // Yuga 2 Boss
+    //             // 0, 12, 6,   // HC 4th Floor
+    //             // 1, 3, 3,    // Lorule Blacksmith
+    //             // 0, 12, 0,   // Hyrule Castle Dungeon
+    //             // 2, 1, 30,   // Zaganaga Portal
+    //             // 0, 1, 30,   // Misery Mire
+    //             // 0, 3, 14,   // Osfala Portrait
+    //             // 0, 5, 2,    // Swamp Cave
+    //             // 0, 5, 13,   // Great Rupee Fairy Cave
+    //             // 1, 17, 0,   // Ice Ruins Boss
+    //             // 0, 17, 0,   // Ice Ruins Boss
+    //             // 0, 19, 2,   // Turtle Rock Boss
+    //             // 0, 5, 9,    // Chamber of Sages
+    //             // 0, 5, 14,   // Thief Girl Cave
+    //             // 0, 0, 19,   // Eastern Ruins Cutscene
+    //             // 5, 0, 17,   // Pendant of Courage cutscene
+    //             // 0, 0, 24,   // Haunted Grove
+    //             // 12, 13, 0,  // Dark Palace Boss
+    //             // 5, 1, 19,   // Outside Dark Palace
+    //             // 6, 10, 2,   // Gales Boss
+    //             // 0, 10, 0,   // Gales Entrance
+    //             // 0, 9, 2,    // Eastern Palace Boss
+    //             // 0, 9, 0,    // Eastern Palace Entrance
+    //             // 5, 0, 19    // Eastern Ruins WV
+    //             // 0, 9, 0     // Eastern Palace Lobby
+    //             // 20, 1, 0,   // Seres Portrait
+    //             // 0, 4, 3     // Kak Well Lower
+    //             // 1, 4, 3     // Kak Well Upper
+    //             // 10, 11, 0   // Tower of Hera Boss
+    //         );
+    //     }),
+    // ]);
 
-    patch_softlock_prevention(patcher, settings);
+
 
     // patcher.modify_objs(FieldLight, 27, &[
     //
@@ -172,6 +172,7 @@ pub fn apply(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
     //     // }),
     // ]);
 
+    patch_softlock_prevention(patcher, settings);
     patch_master_sword(patcher, settings);
     patch_hyrule_castle_dungeon(patcher, settings);
     patch_dark_maze(patcher, settings);
@@ -464,6 +465,11 @@ pub fn apply(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
             [32].disable(), // Remove Clouds
             [33].disable(), // zelda_talk_b - Wait for Zelda
             [34].disable(), // zelda_talk_c - Last chat before triangles
+        },
+
+        // Lorule Blacksmith (outside)
+        FieldDark 21 {
+            [19].disable(), // Hilda Text
         },
 
         // Link's House

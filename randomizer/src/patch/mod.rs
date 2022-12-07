@@ -1,4 +1,5 @@
 use std::{array, collections::HashMap, fs, iter, path::Path};
+
 use std::io::{Read, stdin, stdout, Write};
 
 use albw::{demo::Timed, flow::FlowMut, Demo, File, Game, IntoBytes, Item, Language, Scene};
@@ -9,8 +10,9 @@ use tempfile::tempdir;
 use try_insert_ext::*;
 use albw::course::Id;
 use albw::course::Id::*;
-use albw::scene::{Arg, Obj, Rail};
+use albw::scene::{Arg, Obj, Rail, SceneMeta};
 use crate::{Error, ItemExt, Layout, Result, Settings};
+use crate::patch::util::*;
 use self::code::Code;
 
 mod code;
@@ -18,6 +20,7 @@ mod flow;
 mod scenes;
 mod prizes;
 mod util;
+mod maps;
 pub mod r#ref;
 
 #[non_exhaustive]
@@ -97,41 +100,34 @@ impl Patcher {
         }
     }
 
+    fn load_course(game: &mut Game, course: Id) -> Course
+    {
+        game.course(course).language().map(|load| Course {
+            language: load,
+            scenes: Default::default(),
+            scene_meta: game.course(course).scene_meta().unwrap(),
+        }).unwrap()
+    }
+
     fn course(&mut self, course: Id) -> Result<&mut Course> {
-        let Self {
-            game,
-            ref mut courses,
-            ..
-        } = self;
-        courses
-            .entry(course)
-            .or_try_insert_with(|| {
-                game.course(course).language().map(|load| Course {
-                    language: load,
-                    scenes: Default::default(),
-                })
-            })
-            .map_err(Into::into)
+        let Self { game, ref mut courses, .. } = self;
+        Ok(courses.entry(course).or_insert(Self::load_course(game, course)))
     }
 
     fn scene(&mut self, course: Id, stage: u16) -> Result<&mut Scene> {
-        let Self {
-            game,
-            ref mut courses,
-            ..
-        } = self;
-        courses
-            .entry(course)
-            .or_try_insert_with(|| {
-                game.course(course).language().map(|load| Course {
-                    language: load,
-                    scenes: Default::default(),
-                })
-            })?
+        let Self { game, ref mut courses, .. } = self;
+        courses.entry(course).or_insert(Self::load_course(game, course))
             .scenes
             .entry(stage)
             .or_try_insert_with(|| game.course(course).scene(stage))
             .map_err(Into::into)
+    }
+
+    fn scene_meta(&mut self, course: Id) -> &mut SceneMeta {
+        let Self { game, ref mut courses, .. } = self;
+        let Course { ref mut scene_meta, .. } =
+            courses.entry(course).or_insert(Self::load_course(game, course));
+        scene_meta
     }
 
     fn inject_msbf(&mut self, course: Id, msbf: Option<&(&str, File<Box<[u8]>>)>) -> Result<()> {
@@ -260,21 +256,7 @@ impl Patcher {
         Ok(())
     }
 
-
-
-
-
-
-
-
-
-
-
-
     pub fn prepare(mut self, layout: &Layout, settings: &Settings) -> Result<Patches> {
-
-
-
         let mut item_actors = HashMap::new();
 
         for (item, get_item) in self.game.match_items_to_get_items() {
@@ -308,7 +290,9 @@ impl Patcher {
         //self.scene(course::Id::DungeonWater, 2)?.actors_mut().add(fresco_arrow.clone())?;
         //self.scene(course::Id::IndoorLight, 0)?.actors_mut().add(fresco_arrow.clone())?;
 
-        prizes::patch_dungeon_prizes(&mut self, layout, settings);
+        let prizes = get_dungeon_prizes(layout);
+        prizes::patch_dungeon_prizes(&mut self, &prizes, settings);
+        maps::patch_maps(&mut self, &prizes, settings);
         scenes::apply(&mut self, settings)?;
 
         let free = self.rentals[8];
@@ -356,8 +340,9 @@ impl Patcher {
         //romfs.add(common.into_archive().unwrap());
 
         romfs.add(boot.into_archive());
-        for (_, Course { language, scenes }) in courses {
+        for (_, Course { language, scenes, scene_meta }) in courses {
             romfs.add(language.into_archive());
+            romfs.add_serialize(scene_meta.into_file());
             for (_, scene) in scenes {
                 let (actors, stage) = scene.into_files();
                 if let Some(archive) = actors {
@@ -377,6 +362,7 @@ impl Patcher {
 pub struct Course {
     language: Language,
     scenes: HashMap<u16, Scene>,
+    scene_meta: SceneMeta,
 }
 
 #[derive(Clone, Debug)]
@@ -549,7 +535,7 @@ fn cutscenes<'game, 'settings>(
                 //415, // Skip Yuga capturing Zelda
                 430, // Fix Chamber of Sages Softlock
                 510, // Open Portals, Activate Hyrule Castle Midway
-                522, // Hilda Blacksmith Text + get Map Swap icon on lower screen
+                //522, // Hilda Blacksmith Text + get Map Swap icon on lower screen
                 523, // Hilda Graveyard Text
                 524, // Hilda ??? Text
                 525, // Skip Sahasrahla outside Link's House, make Hyrule Hotfoot appear

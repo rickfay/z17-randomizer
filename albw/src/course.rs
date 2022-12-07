@@ -1,8 +1,4 @@
-use crate::{
-    language::Language,
-    scene::{Scene, Stage},
-    Game, Result,
-};
+use crate::{language::Language, scene::{Scene, Stage}, Game, Result, SceneMeta};
 
 #[derive(Debug)]
 pub struct Course<'a> {
@@ -21,6 +17,10 @@ impl<'a> Course<'a> {
 
     pub fn scene(&self, index: u16) -> Result<Scene> {
         self.game.scene(self.id, index)
+    }
+
+    pub fn scene_meta(&self) -> Result<SceneMeta> {
+        self.game.scene_meta(self.id)
     }
 
     pub fn stage(&self, index: u16) -> Result<Stage> {

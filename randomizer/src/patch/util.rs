@@ -1,6 +1,8 @@
 use albw::Item;
 use albw::Item::*;
 use albw::scene::{Flag, Obj, Rail, Vec3};
+use crate::{Layout, LocationInfo, regions};
+use crate::patch::DungeonPrizes;
 
 pub(crate) fn call<F>(unq: u16, action: F) -> (u16, Box<dyn Fn(&mut Obj)>)
     where
@@ -73,5 +75,38 @@ pub(crate) fn is_pendant(item: Item) -> bool {
     match item {
         PendantPower | PendantWisdom | PendantCourage => true,
         _ => false
+    }
+}
+
+pub(crate) fn prize_flag(pendant: Item) -> Flag {
+    match pendant {
+        PendantPower => Flag::Event(372),
+        PendantWisdom => Flag::Event(342),
+        PendantCourage => Flag::Event(310),
+        SageGulley => Flag::Event(536),
+        SageOren => Flag::Event(556),
+        SageSeres => Flag::Event(576),
+        SageOsfala => Flag::Event(596),
+        SageRosso => Flag::Event(616),
+        SageIrene => Flag::Event(636),
+        SageImpa => Flag::Event(656),
+        _ => panic!("{} is not a Dungeon Prize", pendant.as_str())
+    }
+}
+
+/// Fetch the placed Dungeon Rewards<br />
+/// TODO really need to clean up the Layout data structure...
+pub(crate) fn get_dungeon_prizes(layout: &Layout) -> DungeonPrizes {
+    DungeonPrizes {
+        ep_prize: layout.get(&LocationInfo::new(regions::dungeons::eastern::palace::SUBREGION, "Eastern Palace Prize")).unwrap(),
+        hg_prize: layout.get(&LocationInfo::new(regions::dungeons::house::gales::SUBREGION, "House of Gales Prize")).unwrap(),
+        th_prize: layout.get(&LocationInfo::new(regions::dungeons::tower::hera::SUBREGION, "Tower of Hera Prize")).unwrap(),
+        pd_prize: layout.get(&LocationInfo::new(regions::dungeons::dark::palace::SUBREGION, "Dark Palace Prize")).unwrap(),
+        sp_prize: layout.get(&LocationInfo::new(regions::dungeons::swamp::palace::SUBREGION, "Swamp Palace Prize")).unwrap(),
+        sw_prize: layout.get(&LocationInfo::new(regions::dungeons::skull::woods::SUBREGION, "Skull Woods Prize")).unwrap(),
+        tt_prize: layout.get(&LocationInfo::new(regions::dungeons::thieves::hideout::SUBREGION, "Thieves' Hideout Prize")).unwrap(),
+        tr_prize: layout.get(&LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "Turtle Rock Prize")).unwrap(),
+        dp_prize: layout.get(&LocationInfo::new(regions::dungeons::desert::palace::SUBREGION, "Desert Palace Prize")).unwrap(),
+        ir_prize: layout.get(&LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "Ice Ruins Prize")).unwrap(),
     }
 }

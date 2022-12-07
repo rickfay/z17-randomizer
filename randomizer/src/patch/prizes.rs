@@ -5,12 +5,11 @@ use albw::Item::*;
 use albw::language::FlowChart;
 use albw::scene::{Arg, Flag, Obj, Point, Rail, Transform, Vec3};
 use crate::patch::DungeonPrizes;
-use crate::{ItemExt, Layout, LocationInfo, MsbfKey, Patcher, regions, Settings};
+use crate::{ItemExt, MsbfKey, Patcher, Settings};
 use crate::patch::r#ref::MsbfInfo;
 use crate::patch::util::*;
 
-pub(crate) fn patch_dungeon_prizes(patcher: &mut Patcher, layout: &Layout, settings: &Settings) {
-    let prizes = get_dungeon_prizes(layout);
+pub(crate) fn patch_dungeon_prizes(patcher: &mut Patcher, prizes: &DungeonPrizes, settings: &Settings) {
     patch_flowchart(patcher, &prizes);
     patch_msbf_files(patcher, &prizes);
     patch_dungeon_prize_actors(patcher, &prizes);
@@ -18,23 +17,7 @@ pub(crate) fn patch_dungeon_prizes(patcher: &mut Patcher, layout: &Layout, setti
     patch_prize_byaml(patcher, &prizes, settings);
 }
 
-/// Fetch the placed Dungeon Rewards<br />
-/// TODO really need to clean up the Layout data structure...
-fn get_dungeon_prizes(layout: &Layout) -> DungeonPrizes {
-    DungeonPrizes {
-        ep_prize: layout.get(&LocationInfo::new(regions::dungeons::eastern::palace::SUBREGION, "Eastern Palace Prize")).unwrap(),
-        hg_prize: layout.get(&LocationInfo::new(regions::dungeons::house::gales::SUBREGION, "House of Gales Prize")).unwrap(),
-        th_prize: layout.get(&LocationInfo::new(regions::dungeons::tower::hera::SUBREGION, "Tower of Hera Prize")).unwrap(),
-        pd_prize: layout.get(&LocationInfo::new(regions::dungeons::dark::palace::SUBREGION, "Dark Palace Prize")).unwrap(),
-        sp_prize: layout.get(&LocationInfo::new(regions::dungeons::swamp::palace::SUBREGION, "Swamp Palace Prize")).unwrap(),
-        sw_prize: layout.get(&LocationInfo::new(regions::dungeons::skull::woods::SUBREGION, "Skull Woods Prize")).unwrap(),
-        tt_prize: layout.get(&LocationInfo::new(regions::dungeons::thieves::hideout::SUBREGION, "Thieves' Hideout Prize")).unwrap(),
-        tr_prize: layout.get(&LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "Turtle Rock Prize")).unwrap(),
-        dp_prize: layout.get(&LocationInfo::new(regions::dungeons::desert::palace::SUBREGION, "Desert Palace Prize")).unwrap(),
-        ir_prize: layout.get(&LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "Ice Ruins Prize")).unwrap(),
-    }
-}
-
+/// Adds entries to the FlowChart for the MSBF files related to each Portrait
 fn patch_flowchart(patcher: &mut Patcher, prizes: &DungeonPrizes) {
 
     // Map dungeon MsbfInfo to the randomized prizes
@@ -54,7 +37,6 @@ fn patch_flowchart(patcher: &mut Patcher, prizes: &DungeonPrizes) {
     // Read and deserialize the FlowChart from RegionBoot
     let raw = patcher.boot.archive.get_mut().read("World/Byaml/FlowChart.byaml").unwrap();
     let mut flow_chart: File<FlowChart> = raw.try_map(|data| byaml::from_bytes(&data)).unwrap();
-
 
     // Remove vanilla msbf entries
     // NOTE: Skull + Desert share FieldDark, so this must be done separately from adding
@@ -102,6 +84,7 @@ fn patch_msbf_files(patcher: &mut Patcher, prizes: &DungeonPrizes) {
     patcher.inject_msbf(DungeonIce, prize_msbf_map.get(&prizes.ir_prize)).unwrap();
 }
 
+/// Inject the prize actors into the relevant scenes
 fn patch_dungeon_prize_actors(patcher: &mut Patcher, prizes: &DungeonPrizes) {
 
     // Fetch and map Actors to their dungeon prizes
@@ -894,23 +877,6 @@ impl PrizePatchData {
             PendantCourage => Self::new(173, 310, 0.0, 2, 0, 0, 0),
             _ => panic!("\"{}\" is not a dungeon prize.", prize.as_str())
         }
-    }
-}
-
-
-fn prize_flag(pendant: Item) -> Flag {
-    match pendant {
-        PendantPower => Flag::Event(372),
-        PendantWisdom => Flag::Event(342),
-        PendantCourage => Flag::Event(310),
-        SageGulley => Flag::Event(536),
-        SageOren => Flag::Event(556),
-        SageSeres => Flag::Event(576),
-        SageOsfala => Flag::Event(596),
-        SageRosso => Flag::Event(616),
-        SageIrene => Flag::Event(636),
-        SageImpa => Flag::Event(656),
-        _ => panic!("{} is not a Dungeon Prize", pendant.as_str())
     }
 }
 

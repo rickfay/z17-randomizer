@@ -48,6 +48,89 @@ impl Scene {
     }
 }
 
+#[derive(Debug)]
+pub struct SceneMeta {
+    pub stage_meta: File<StageMeta>,
+}
+
+impl SceneMeta {
+    pub(crate) fn new(stage_meta: File<StageMeta>) -> Self {
+        Self { stage_meta }
+    }
+
+    pub fn stage_meta(&self) -> &File<StageMeta> {
+        &self.stage_meta
+    }
+
+    pub fn stage_meta_mut(&mut self) -> &mut File<StageMeta> {
+        &mut self.stage_meta
+    }
+
+    pub fn into_file(self) -> File<StageMeta> {
+        self.stage_meta
+    }
+
+    pub fn dump<P>(self, path: P) -> Result<()>
+        where
+            P: AsRef<Path>,
+    {
+        self.stage_meta.serialize().dump(path.as_ref())
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields, rename_all = "UPPERCASE")]
+pub struct StageMeta {
+    pub clp: Option<Vec<Vec<i32>>>,
+    pub flr: Vec<i32>,
+    pub icn: Vec<Icn>,
+    pub kst: Option<Vec<Vec<i32>>>,
+    pub retry: Option<Vec<i32>>,
+    pub set: Vec<Set>,
+}
+
+impl StageMeta {}
+
+#[derive(Debug, Deserialize, Serialize)]
+#[serde(deny_unknown_fields, rename_all = "UPPERCASE")]
+pub struct Icn {
+    pub arg: IcnArgs,
+    pub pos: Vec<f32>,
+    pub scr: Vec<f32>,
+    pub msg: Option<String>,
+}
+
+impl Icn {
+    pub fn enable(&mut self) {
+        self.arg.4 = 0;
+        self.arg.6 = 0;
+    }
+
+    pub fn enable_on(&mut self, flag: Flag) {
+        let (arg4, arg6) = flag.into_pair();
+        self.arg.4 = arg4;
+        self.arg.6 = arg6;
+    }
+
+    pub fn disable(&mut self) {
+        self.arg.5 = 4;
+        self.arg.7 = 1;
+    }
+
+    pub fn disable_on(&mut self, flag: Flag) {
+        let (arg5, arg7) = flag.into_pair();
+        self.arg.5 = arg5;
+        self.arg.7 = arg7;
+    }
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+#[serde(deny_unknown_fields, rename_all = "UPPERCASE")]
+pub struct Set {
+    pub nme: Option<String>,
+    pub pos: Vec<f32>,
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields, rename_all = "PascalCase")]
 pub struct Stage {
@@ -171,7 +254,7 @@ impl Obj {
             ser: Some(ser),
             srt: Transform { scale: Vec3::UNIT, rotate: Vec3::ZERO, translate },
             typ: 6,
-            unq
+            unq,
         }
     }
 
@@ -195,7 +278,7 @@ impl Obj {
             ser: Some(ser),
             srt: Transform { scale: Vec3::UNIT, rotate: Vec3::ZERO, translate },
             typ: 1,
-            unq
+            unq,
         }
     }
 
@@ -213,7 +296,7 @@ impl Obj {
             ser: Some(ser),
             srt: Transform { scale: Vec3::UNIT, rotate: Vec3::ZERO, translate },
             typ: 1,
-            unq
+            unq,
         }
     }
 
@@ -426,6 +509,19 @@ impl Obj {
         self.arg.11 = scene_index;
     }
 }
+
+#[derive(Debug, Serialize, Deserialize, Copy, Clone)]
+#[serde(deny_unknown_fields)]
+pub struct IcnArgs(
+    pub i32,
+    pub i32,
+    pub i32,
+    pub i32,
+    pub u8,
+    pub u8,
+    pub u16,
+    pub u16,
+);
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]

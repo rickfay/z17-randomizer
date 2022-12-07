@@ -32,6 +32,7 @@ pub use language::Language;
 use language::{FlowChart};
 pub use scene::{Scene, Stage};
 use crate::language::Load;
+use crate::scene::SceneMeta;
 
 pub type Result<T, E = Error> = ::std::result::Result<T, E>;
 
@@ -237,6 +238,14 @@ impl Game {
             .try_map(|data| byaml::from_bytes(&data))?;
         let actors = romfs.read(format!("Archive/{}.szs", name))?.map(Sarc::from);
         Ok(Scene::new(stage, actors))
+    }
+
+    pub(crate) fn scene_meta(&self, course: course::Id) -> Result<SceneMeta> {
+        let mut romfs = self.romfs.borrow_mut();
+        let stage_meta = romfs
+            .read(format!("World/Byaml/{}_course.byaml", course.as_str()))?
+            .try_map(|data| byaml::from_bytes(&data))?;
+        Ok(SceneMeta::new(stage_meta))
     }
 
     pub(crate) fn stage(&self, course: course::Id, stage: u16) -> Result<Stage> {
