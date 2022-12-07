@@ -1,7 +1,7 @@
 use albw::course::Id;
 use albw::course::Id::*;
 use albw::Item;
-use albw::scene::StageMeta;
+use albw::scene::{Icn, IcnArgs, StageMeta};
 use crate::{Patcher, Settings};
 use crate::patch::DungeonPrizes;
 use crate::patch::util::*;
@@ -39,6 +39,7 @@ impl Icon {
 pub fn patch_maps(patcher: &mut Patcher, prizes: &DungeonPrizes, settings: &Settings) {
     patch_hyrule_maps(patcher, prizes, settings);
     patch_lorule_maps(patcher, prizes, settings);
+    add_compass_chests(patcher);
 }
 
 fn patch_hyrule_maps(patcher: &mut Patcher, prizes: &DungeonPrizes, _: &Settings) {
@@ -88,4 +89,96 @@ fn mark_by_prize(stage_meta: &mut StageMeta, prize: Item, icn_index: usize) {
 
 fn disable_icn(stage_meta: &mut StageMeta, icn_index: usize) {
     stage_meta.icn.get_mut(icn_index).unwrap().disable();
+}
+
+/// Add icons for dungeon chests that contained the compass in vanilla
+fn add_compass_chests(patcher: &mut Patcher) {
+
+    // Eastern
+    patcher.scene_meta(DungeonEast).stage_meta_mut().get_mut().icn.push(Icn {
+        arg: IcnArgs(Icon::CHEST, 1, 0, 0, 0, 3, 0, 2),
+        pos: vec![-22.0, 2.5, -47.0],
+        scr: vec![0.0, 0.0],
+        msg: None,
+    });
+
+    // Gales
+    patcher.scene_meta(DungeonWind).stage_meta_mut().get_mut().icn.push(Icn {
+        arg: IcnArgs(Icon::CHEST, 1, 0, 0, 0, 3, 0, 3),
+        pos: vec![-19.0, 2.5, -23.5],
+        scr: vec![0.0, 0.0],
+        msg: None,
+    });
+
+    // Hera
+    patcher.scene_meta(DungeonHera).stage_meta_mut().get_mut().icn.push(Icn {
+        arg: IcnArgs(Icon::CHEST, 1, 0, 0, 0, 3, 0, 1),
+        pos: vec![0.0, 5.0, -1.9],
+        scr: vec![0.0, 0.0],
+        msg: None,
+    });
+
+    // Dark
+    patcher.scene_meta(DungeonDark).stage_meta_mut().get_mut().icn.push(Icn {
+        arg: IcnArgs(Icon::CHEST, 1, 1, 0, 0, 3, 0, 43),
+        pos: vec![-24.5, 2.5, -47.5],
+        scr: vec![0.0, 0.0],
+        msg: None,
+    });
+
+    // Swamp
+    patcher.scene_meta(DungeonWater).stage_meta_mut().get_mut().icn.push(Icn {
+        arg: IcnArgs(Icon::CHEST, -1, 1, 0, 0, 3, 0, 64),
+        pos: vec![0.0, 0.0, -48.5],
+        scr: vec![0.0, 0.0],
+        msg: None,
+    });
+
+    // Skull
+    patcher.scene_meta(DungeonDokuro).stage_meta_mut().get_mut().icn.push(Icn {
+        arg: IcnArgs(Icon::CHEST, -1, 0, 0, 0, 3, 0, 3),
+        pos: vec![18.0, 0.0, -58.5],
+        scr: vec![0.0, 0.0],
+        msg: None,
+    });
+
+    // Thieves'
+    patcher.scene_meta(DungeonHagure).stage_meta_mut().get_mut().icn.push(Icn {
+        arg: IcnArgs(Icon::CHEST, -2, 0, 0, 0, 3, 0, 106),
+        pos: vec![6.5, 0.0, -31.25],
+        scr: vec![0.0, 0.0],
+        msg: None,
+    });
+
+    // Turtle
+    patcher.scene_meta(DungeonKame).stage_meta_mut().get_mut().icn.push(Icn {
+        arg: IcnArgs(Icon::CHEST, 1, 0, 0, 0, 3, 0, 5),
+        pos: vec![0.0, 5.0, -33.5],
+        scr: vec![0.0, 0.0],
+        msg: None,
+    });
+
+    // Desert
+    patcher.scene_meta(DungeonSand).stage_meta_mut().get_mut().icn.push(Icn {
+        arg: IcnArgs(Icon::CHEST, 1, 0, 0, 0, 3, 0, 1),
+        pos: vec![-22.0, 5.0, -67.0],
+        scr: vec![0.0, 0.0],
+        msg: None,
+    });
+
+    // Ice
+    patcher.scene_meta(DungeonIce).stage_meta_mut().get_mut().icn.push(Icn {
+        arg: IcnArgs(Icon::CHEST, -1, 0, 0, 0, 3, 0, 17),
+        pos: vec![23.0, 75.0, -2.5],
+        scr: vec![0.0, 0.0],
+        msg: None,
+    });
+
+    // Lorule Castle
+    patcher.scene_meta(DungeonGanon).stage_meta_mut().get_mut().icn.push(Icn {
+        arg: IcnArgs(Icon::CHEST, 4, 0, 0, 0, 3, 0, 215),
+        pos: vec![0.0, 40.0, -2.77344],
+        scr: vec![0.0, 0.0],
+        msg: None,
+    });
 }

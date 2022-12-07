@@ -92,12 +92,12 @@ pub fn apply(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
     // patcher.modify_objs(IndoorLight, 1, &[
     //     call(24, |obj| {
     //         obj.redirect(
-    //             5, 0, 26,   // No Redirect
+    //             // 5, 0, 26,   // No Redirect
     //             // 7, 4, 17, // Sanctuary Dungeon End
     //             // 0, 0, 33,   // Master Sword Pedestal
     //             // 0, 2, 9,    // Rosso House
     //             // 0, 14, 2,   // Swamp Palace 2F
-    //             // 24, 14, 1,   // Swamp Palace River Room
+    //             24, 14, 1,   // Swamp Palace River Room
     //             // 0, 0, 1,    // FieldLight 2
     //             // 0, 0, 6,    // Outside Zora's Domain
     //             // 4, 0, 8,    // Outside Fortune-Teller
@@ -130,6 +130,8 @@ pub fn apply(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
     //             // 0, 4, 3     // Kak Well Lower
     //             // 1, 4, 3     // Kak Well Upper
     //             // 10, 11, 0   // Tower of Hera Boss
+    //             // 0, 11, 0   // Tower of Hera Entrance
+    //             // 0, 13, 0   // Dark Entrance
     //         );
     //     }),
     // ]);

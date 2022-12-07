@@ -566,8 +566,8 @@ pub fn plando() -> Result<(), Error> {
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (1)"), RupeeGold);
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (2)"), ItemMizukaki);
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (3)"), ItemHookShot);
-    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (4)"), DashBoots);
-    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (5)"), ItemSwordLv2);
+    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (4)"), ItemKandelaarLv2);
+    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (5)"), ItemBombLv2);
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (6)"), HintGlasses); // Sand Rod Slot
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (7)"), RingHekiga);
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (8)"), RingHekiga);
@@ -594,7 +594,7 @@ pub fn plando() -> Result<(), Error> {
 
     // Eastern Palace
     layout.set(LocationInfo::new(regions::dungeons::eastern::palace::SUBREGION, "[EP] (1F) Outside (East)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::eastern::palace::SUBREGION, "[EP] (1F) Near Entrance"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::eastern::palace::SUBREGION, "[EP] (1F) Near Entrance"), Compass);
     layout.set(LocationInfo::new(regions::dungeons::eastern::palace::SUBREGION, "[EP] (1F) Defeat Popos"), KeySmall);
     layout.set(LocationInfo::new(regions::dungeons::eastern::palace::SUBREGION, "[EP] (1F) Hidden Door"), KeySmall);
     layout.set(LocationInfo::new(regions::dungeons::eastern::palace::SUBREGION, "[EP] (1F) Switch Puzzle"), KeyBoss);
@@ -609,8 +609,8 @@ pub fn plando() -> Result<(), Error> {
 
 
     // House of Gales
-    layout.set(LocationInfo::new(regions::dungeons::house::gales::SUBREGION, "[HG] (1F) Torches"), KeySmall);
-    layout.set(LocationInfo::new(regions::dungeons::house::gales::SUBREGION, "[HG] (1F) Switch Room"), ItemBomb);
+    layout.set(LocationInfo::new(regions::dungeons::house::gales::SUBREGION, "[HG] (1F) Torches"), Compass);
+    layout.set(LocationInfo::new(regions::dungeons::house::gales::SUBREGION, "[HG] (1F) Switch Room"), KeySmall);
     layout.set(LocationInfo::new(regions::dungeons::house::gales::SUBREGION, "[HG] (1F) Fire Bubbles"), RupeeGold);
     layout.set(LocationInfo::new(regions::dungeons::house::gales::SUBREGION, "[HG] (1F) Blue Bari Room"), RupeeGold);
     layout.set(LocationInfo::new(regions::dungeons::house::gales::SUBREGION, "[HG] (1F) Blue Bari Room (Bottom Left)"), RupeeGold);
@@ -622,7 +622,7 @@ pub fn plando() -> Result<(), Error> {
     layout.set(LocationInfo::new(regions::dungeons::house::gales::SUBREGION, "[HG] Margomill"), HintGlasses);
 
     // Tower of Hera
-    layout.set(LocationInfo::new(regions::dungeons::tower::hera::SUBREGION, "[TH] (1F) Outside"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::tower::hera::SUBREGION, "[TH] (1F) Outside"), Compass);
     layout.set(LocationInfo::new(regions::dungeons::tower::hera::SUBREGION, "[TH] (1F) Center"), RupeeGold);
     layout.set(LocationInfo::new(regions::dungeons::tower::hera::SUBREGION, "[TH] (3F) Platform"), RupeeGold);
     layout.set(LocationInfo::new(regions::dungeons::tower::hera::SUBREGION, "[TH] (5F) Red/Blue Switches"), RupeeGold);
@@ -640,7 +640,7 @@ pub fn plando() -> Result<(), Error> {
     layout.set(LocationInfo::new(regions::dungeons::graveyard::main::SUBREGION, "[LS] Ledge"), KeySmall);
 
     // Dark Palace
-    layout.set(LocationInfo::new(regions::dungeons::dark::palace::SUBREGION, "[PD] (1F) Near Entrance"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::dark::palace::SUBREGION, "[PD] (1F) Near Entrance"), Compass);
     layout.set(LocationInfo::new(regions::dungeons::dark::palace::SUBREGION, "[PD] (1F) Narrow Ledge"), KeySmall);
     layout.set(LocationInfo::new(regions::dungeons::dark::palace::SUBREGION, "[PD] (1F) Switch Puzzle"), RupeeGold);
     layout.set(LocationInfo::new(regions::dungeons::dark::palace::SUBREGION, "[PD] (1F) Hidden Room (Upper)"), RupeeGold);
@@ -658,11 +658,11 @@ pub fn plando() -> Result<(), Error> {
 
     // Swamp Palace
     layout.set(LocationInfo::new(regions::dungeons::swamp::palace::SUBREGION, "[SP] (B1) Center"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::swamp::palace::SUBREGION, "[SP] (B1) Raft Room (Left)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::swamp::palace::SUBREGION, "[SP] (B1) Raft Room (Right)"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::swamp::palace::SUBREGION, "[SP] (B1) Raft Room (Left)"), Compass);
+    layout.set(LocationInfo::new(regions::dungeons::swamp::palace::SUBREGION, "[SP] (B1) Raft Room (Right)"), Compass);
     layout.set(LocationInfo::new(regions::dungeons::swamp::palace::SUBREGION, "[SP] (B1) Gyorm"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::swamp::palace::SUBREGION, "[SP] (B1) Waterfall Room"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::swamp::palace::SUBREGION, "[SP] (B1) Raft Room (Pillar)"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::swamp::palace::SUBREGION, "[SP] (B1) Waterfall Room"), Compass);
+    layout.set(LocationInfo::new(regions::dungeons::swamp::palace::SUBREGION, "[SP] (B1) Raft Room (Pillar)"), Compass);
     layout.set(LocationInfo::new(regions::dungeons::swamp::palace::SUBREGION, "[SP] (B1) Big Chest (Secret)"), KeySmall);
     layout.set(LocationInfo::new(regions::dungeons::swamp::palace::SUBREGION, "[SP] (1F) Water Puzzle"), KeySmall);
     layout.set(LocationInfo::new(regions::dungeons::swamp::palace::SUBREGION, "[SP] (1F) East Room"), KeySmall);
@@ -672,7 +672,7 @@ pub fn plando() -> Result<(), Error> {
 
     // Skull Woods
     layout.set(LocationInfo::new(regions::dungeons::skull::woods::SUBREGION, "[SW] (B1) Gibdo Room (Lower)"), KeySmall);
-    layout.set(LocationInfo::new(regions::dungeons::skull::woods::SUBREGION, "[SW] (B1) South Chest"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::skull::woods::SUBREGION, "[SW] (B1) South Chest"), Compass);
     layout.set(LocationInfo::new(regions::dungeons::skull::woods::SUBREGION, "[SW] (B1) Gibdo Room (Hole)"), KeySmall);
     layout.set(LocationInfo::new(regions::dungeons::skull::woods::SUBREGION, "[SW] (B1) Grate Room"), KeySmall);
     layout.set(LocationInfo::new(regions::dungeons::skull::woods::SUBREGION, "[SW] (B2) Moving Platform Room"), KeyBoss);
@@ -682,7 +682,7 @@ pub fn plando() -> Result<(), Error> {
 
     // Thieves' Hideout
     layout.set(LocationInfo::new(regions::dungeons::thieves::hideout::SUBREGION, "[T'H] (B1) Jail Cell"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::thieves::hideout::SUBREGION, "[T'H] (B1) Grate Chest"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::thieves::hideout::SUBREGION, "[T'H] (B1) Grate Chest"), Compass);
     layout.set(LocationInfo::new(regions::dungeons::thieves::hideout::SUBREGION, "[T'H] (B2) Grate Chest (Fall)"), RupeeGold);
     layout.set(LocationInfo::new(regions::dungeons::thieves::hideout::SUBREGION, "[T'H] (B2) Switch Puzzle Room"), RupeeGold);
     layout.set(LocationInfo::new(regions::dungeons::thieves::hideout::SUBREGION, "[T'H] (B2) Jail Cell"), RupeeGold);
@@ -694,7 +694,7 @@ pub fn plando() -> Result<(), Error> {
     layout.set(LocationInfo::new(regions::dungeons::thieves::hideout::SUBREGION, "Stalblind"), OreYellow);
 
     // Ice Ruins
-    layout.set(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "[IR] (1F) Hidden Chest"), KeySmall);
+    layout.set(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "[IR] (1F) Hidden Chest"), Compass);
     layout.set(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "[IR] (B3) Grate Chest (Left)"), RupeeGold);
     layout.set(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "[IR] (B3) Grate Chest (Right)"), RupeeGold);
     layout.set(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "[IR] (B4) Ice Pillar"), RupeeGold);
@@ -711,7 +711,7 @@ pub fn plando() -> Result<(), Error> {
     layout.set(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "[IR] Dharkstare"), KeyBoss);
 
     // Desert Palace
-    layout.set(LocationInfo::new(regions::dungeons::desert::palace::SUBREGION, "[DP] (1F) Entrance"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::desert::palace::SUBREGION, "[DP] (1F) Entrance"), Compass);
     layout.set(LocationInfo::new(regions::dungeons::desert::palace::SUBREGION, "[DP] (1F) Sand Room (South)"), RupeeGold);
     layout.set(LocationInfo::new(regions::dungeons::desert::palace::SUBREGION, "[DP] (1F) Sand Switch Room"), RupeeGold);
     layout.set(LocationInfo::new(regions::dungeons::desert::palace::SUBREGION, "[DP] (1F) Sand Room (North)"), RupeeGold);
@@ -740,15 +740,15 @@ pub fn plando() -> Result<(), Error> {
     layout.set(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "[TR] (B1) Big Chest (Center)"), RupeeGold);
     layout.set(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "[TR] (B1) Platform"), RupeeGold);
     layout.set(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "[TR] (B1) Big Chest (Top)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "[TR] (1F) Under Center"), RupeeSilver);
+    layout.set(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "[TR] (1F) Under Center"), Compass);
     layout.set(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "[TR] (B1) Under Center"), RupeeGold);
     layout.set(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "[TR] Grinexx"), KeyBoss);
 
     // Lorule Castle
     layout.set(LocationInfo::new(regions::dungeons::castle::lorule::SUBREGION, "[LC] (1F) Ledge"), RupeeGold);
     layout.set(LocationInfo::new(regions::dungeons::castle::lorule::SUBREGION, "[LC] (1F) Center"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::castle::lorule::SUBREGION, "[LC] (2F) Near Torches"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::castle::lorule::SUBREGION, "[LC] (2F) Hidden Path"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::castle::lorule::SUBREGION, "[LC] (2F) Near Torches"), Compass);
+    layout.set(LocationInfo::new(regions::dungeons::castle::lorule::SUBREGION, "[LC] (2F) Hidden Path"), KeySmall);
     layout.set(LocationInfo::new(regions::dungeons::castle::lorule::SUBREGION, "[LC] (2F) Ledge"), RupeeGold);
     layout.set(LocationInfo::new(regions::dungeons::castle::lorule::SUBREGION, "[LC] (4F) Center"), RupeeGold);
     layout.set(LocationInfo::new(regions::dungeons::castle::lorule::SUBREGION, "[LC] (4F) Hidden Path"), ItemBowLight);

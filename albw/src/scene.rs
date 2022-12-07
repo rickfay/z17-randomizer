@@ -698,7 +698,7 @@ pub enum Flag {
 }
 
 impl Flag {
-    fn into_pair(self) -> (u8, u16) {
+    pub fn into_pair(self) -> (u8, u16) {
         match self {
             Flag::Course(flag) => (3, flag),
             Flag::Event(flag) => (4, flag),
