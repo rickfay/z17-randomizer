@@ -148,7 +148,13 @@ impl Progress {
     }
 
     pub fn can_extinguish_torches(&self) -> bool {
-        self.has_any(&[Sword01, Sword02, Sword03, Sword04, Bombs01, Bombs02, IceRod01, IceRod02, TornadoRod01, TornadoRod02])
+        self.has_any(&[
+            Sword01, Sword02, Sword03, Sword04,
+            Bombs01, Bombs02,
+            IceRod01, IceRod02,
+            TornadoRod01, TornadoRod02,
+            Net01, Net02
+        ])
     }
 
     pub fn has_bell(&self) -> bool {
@@ -560,14 +566,14 @@ impl Progress {
         self.has(SageGulley)
     }
 
-    pub fn has_all_sages(&self) -> bool {
-        self.has(SageGulley)
-            && self.has(SageOren)
-            && self.has(SageSeres)
-            && self.has(SageOsfala)
-            && self.has(SageRosso)
-            && self.has(SageIrene)
-            && self.has(SageImpa)
+    pub fn has_lc_requirement(&self) -> bool {
+        self.has_amount(self.settings.logic.lc_requirement, &[
+            SageGulley, SageOren, SageSeres, SageOsfala, SageImpa, SageIrene, SageRosso])
+    }
+
+    pub fn has_yuganon_requirement(&self) -> bool {
+        self.has_amount(self.settings.logic.yuganon_requirement, &[
+            SageGulley, SageOren, SageSeres, SageOsfala, SageImpa, SageIrene, SageRosso])
     }
 
     pub fn has_opened_sanctuary_doors(&self) -> bool {

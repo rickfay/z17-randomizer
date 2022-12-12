@@ -1,5 +1,7 @@
 use albw::{course, scene::{Flag, Obj}};
+use albw::course::Id;
 use albw::course::Id::*;
+use albw::Item::PendantCourage;
 use albw::scene::Vec3;
 use super::Patcher;
 use crate::{Result, Settings};
@@ -85,96 +87,11 @@ macro_rules! action {
     };
 }
 
-// TODO figure out how to reduce coupling with patcher
 pub fn apply(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
-
-    // Ravio's Shop
-    // patcher.modify_objs(IndoorLight, 1, &[
-    //     call(24, |obj| {
-    //         obj.redirect(
-    //             // 5, 0, 26,   // No Redirect
-    //             // 7, 4, 17, // Sanctuary Dungeon End
-    //             // 0, 0, 33,   // Master Sword Pedestal
-    //             // 0, 2, 9,    // Rosso House
-    //             // 0, 14, 2,   // Swamp Palace 2F
-    //             24, 14, 1,   // Swamp Palace River Room
-    //             // 0, 0, 1,    // FieldLight 2
-    //             // 0, 0, 6,    // Outside Zora's Domain
-    //             // 4, 0, 8,    // Outside Fortune-Teller
-    //             // 0, 12, 5,   // Yuga 2 Boss
-    //             // 0, 12, 6,   // HC 4th Floor
-    //             // 1, 3, 3,    // Lorule Blacksmith
-    //             // 0, 12, 0,   // Hyrule Castle Dungeon
-    //             // 2, 1, 30,   // Zaganaga Portal
-    //             // 0, 1, 30,   // Misery Mire
-    //             // 0, 3, 14,   // Osfala Portrait
-    //             // 0, 5, 2,    // Swamp Cave
-    //             // 0, 5, 13,   // Great Rupee Fairy Cave
-    //             // 1, 17, 0,   // Ice Ruins Boss
-    //             // 0, 17, 0,   // Ice Ruins Boss
-    //             // 0, 19, 2,   // Turtle Rock Boss
-    //             // 0, 5, 9,    // Chamber of Sages
-    //             // 0, 5, 14,   // Thief Girl Cave
-    //             // 0, 0, 19,   // Eastern Ruins Cutscene
-    //             // 5, 0, 17,   // Pendant of Courage cutscene
-    //             // 0, 0, 24,   // Haunted Grove
-    //             // 12, 13, 0,  // Dark Palace Boss
-    //             // 5, 1, 19,   // Outside Dark Palace
-    //             // 6, 10, 2,   // Gales Boss
-    //             // 0, 10, 0,   // Gales Entrance
-    //             // 0, 9, 2,    // Eastern Palace Boss
-    //             // 0, 9, 0,    // Eastern Palace Entrance
-    //             // 5, 0, 19    // Eastern Ruins WV
-    //             // 0, 9, 0     // Eastern Palace Lobby
-    //             // 20, 1, 0,   // Seres Portrait
-    //             // 0, 4, 3     // Kak Well Lower
-    //             // 1, 4, 3     // Kak Well Upper
-    //             // 10, 11, 0   // Tower of Hera Boss
-    //             // 0, 11, 0   // Tower of Hera Entrance
-    //             // 0, 13, 0   // Dark Entrance
-    //         );
-    //     }),
-    // ]);
-
-
-
-    // patcher.modify_objs(FieldLight, 27, &[
-    //
-    //     // Flippers Roller 1
-    //     call(154, |obj| {
-    //         obj.set_id(94);
-    //         obj.arg.0 = 14;
-    //         obj.arg.1 = 2;
-    //     }),
-    //
-    //     // Flippers Roller 2
-    //     call(155, |obj| {
-    //         obj.set_id(94);
-    //         obj.arg.0 = 14;
-    //         obj.arg.1 = 2;
-    //     }),
-    //
-    //     // Gales Roller
-    //     call(156, |obj| {
-    //         obj.set_id(94);
-    //         obj.arg.0 = 13;
-    //         obj.arg.1 = 0;
-    //         obj.arg.2 = 1;
-    //         obj.arg.3 = 45;
-    //         obj.arg.4 = 0;
-    //         obj.arg.5 = 0;
-    //         obj.arg.6 = 10;
-    //     }),
-    //
-    //     // // Swamp Roller
-    //     // call(0, |obj| {
-    //     //     obj.set_id(94);
-    //     //     obj.arg.0 = 16;
-    //     //     obj.arg.1 = 2;
-    //     // }),
-    // ]);
+    // debug_stuff(patcher, settings); // FIX ME don't leave on
 
     patch_softlock_prevention(patcher, settings);
+    patch_big_problem_chests(patcher, settings);
     patch_master_sword(patcher, settings);
     patch_hyrule_castle_dungeon(patcher, settings);
     patch_dark_maze(patcher, settings);
@@ -185,8 +102,7 @@ pub fn apply(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
         set_46_args(74, Flag::Event(0)), // Staircase
     ]);
 
-    // Old way:
-    apply!(patcher,
+    apply!(patcher, // TODO convert to new approach
 
         // Eastern Ruins Treasure Dungeon
         AttractionLight 1 {
@@ -377,11 +293,6 @@ pub fn apply(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
             [533].disable(), // AreaSimpleTalk - Hekiga_fueta_Green
             [534].disable(), // AreaSimpleTalk - Hekiga_Blue_Soldier
             [535].disable(), // AreaSimpleTalk - Hekiga_Blue_Soldier
-
-            [155].enable(), // HC dungeon loading zone
-            [165].active(1), // MojBarrier
-            [393].disable(), // Open door to Inside Hyrule Castle
-            [505].disable(), // Barrier "would you like to save?" text
         },
         // Wooden Bridge
         FieldLight 19 {
@@ -469,9 +380,14 @@ pub fn apply(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
             [34].disable(), // zelda_talk_c - Last chat before triangles
         },
 
+        // Philosopher's Cave (outside)
+        FieldDark 11 {
+            [81].disable(), // Hilda text (frees Flag 523 for use)
+        },
+
         // Lorule Blacksmith (outside)
         FieldDark 21 {
-            [19].disable(), // Hilda Text
+            [19].disable(), // Hilda Text (frees Flag 522 to be used to give Map Toggle)
         },
 
         // Link's House
@@ -599,9 +515,9 @@ pub fn apply(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
         },
 
         // Skull Woods B2
-        // DungeonDokuro 2 {
-        //     [363].disable(), // Remove door that can softlock player
-        // },
+        DungeonDokuro 2 {
+            [363].disable(), // Remove door that can softlock player
+        },
 
         // Thieves' Hideout
         DungeonHagure 1 {
@@ -669,7 +585,22 @@ pub fn apply(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
 }
 
 fn patch_hyrule_castle_dungeon(patcher: &mut Patcher, _: &Settings) {
+
+    let green_pendant_flag = prize_flag(PendantCourage);
     let yuga2_defeated_flag = Flag::Course(31);
+
+    // Hyrule Castle (exterior)
+    patcher.modify_objs(FieldLight, 18, &[
+
+        // Barrier
+        set_46_args(165, Flag::Event(1)), // Enable Barrier from game start
+        disable(505),                     // Barrier "would you like to save?" text
+
+        // Pendant of Courage opens the Hyrule Castle Dungeon
+        set_enable_flag(155, green_pendant_flag),  // HC dungeon loading zone
+        set_disable_flag(393, green_pendant_flag), // HC dungeon door
+    ]);
+
 
     // 2F
     patcher.modify_objs(DungeonCastle, 1, &[
@@ -682,7 +613,7 @@ fn patch_hyrule_castle_dungeon(patcher: &mut Patcher, _: &Settings) {
 
     let made_up_course_flag = Flag::Course(32); // 1,5,12,20,30,31 are taken
 
-    // 4F (sic)
+    // 4F
     patcher.modify_objs(DungeonCastle, 7, &[
         // set_enable_flag(19, Flag::Event(415)),
         // set_enable_flag(20, Flag::Event(415)),
@@ -711,34 +642,35 @@ fn patch_hyrule_castle_dungeon(patcher: &mut Patcher, _: &Settings) {
     // 8F
     patcher.modify_objs(DungeonCastle, 6, &[
         set_disable_flag(20, yuga2_defeated_flag), // Rewire entrance door to stay open with course flag 31 (Yuga defeated)
-        disable(25), // victory door
-        enable(28), // no revisits door
+        //disable(25), // victory door
+        disable(28), // no revisits door
     ]);
-    patcher.add_obj(DungeonCastle, 6,
-                    Obj::blue_warp(yuga2_defeated_flag,
-                                   0, 19, 30,
-                                   1, 3, 3,
-                                   Vec3 { x: 8.0, y: 0.0, z: -19.75 }));
 
-    // Blacksmith (Hyrule)
-    patcher.add_obj(IndoorLight, 19,
-                    Obj::green_warp(Flag::Event(1), // FIXME attach to Yuga 2
-                                    0, 15, 23,
-                                    3, 3, 3,
-                                    Vec3 { x: 3.25, y: 0.0, z: -3.5 }));
-    patcher.add_system(IndoorLight, 19,
-                       Obj::spawn_point(1, 0, 16, 24,
-                                        Vec3 { x: 3.25, y: 0.0, z: -3.5 }));
-
-    // Blacksmith (Lorule)
-    patcher.add_obj(IndoorDark, 4,
-                    Obj::green_warp(Flag::Event(1), // FIXME attach to Yuga 2
-                                    0, 13, 22,
-                                    1, 2, 18,
-                                    Vec3 { x: 3.25, y: 0.0, z: -3.5 }));
-    patcher.add_system(IndoorDark, 4,
-                       Obj::spawn_point(3, 0, 14, 23,
-                                        Vec3 { x: 3.25, y: 0.0, z: -3.5 }));
+    // patcher.add_obj(DungeonCastle, 6,
+    //                 Obj::blue_warp(yuga2_defeated_flag,
+    //                                0, 19, 30,
+    //                                1, 3, 3,
+    //                                Vec3 { x: 8.0, y: 0.0, z: -19.75 }));
+    //
+    // // Blacksmith (Hyrule)
+    // patcher.add_obj(IndoorLight, 19,
+    //                 Obj::green_warp(Flag::Event(1),
+    //                                 0, 15, 23,
+    //                                 3, 3, 3,
+    //                                 Vec3 { x: 3.25, y: 0.0, z: -3.5 }));
+    // patcher.add_system(IndoorLight, 19,
+    //                    Obj::spawn_point(1, 0, 16, 24,
+    //                                     Vec3 { x: 3.25, y: 0.0, z: -3.5 }));
+    //
+    // // Blacksmith (Lorule)
+    // patcher.add_obj(IndoorDark, 4,
+    //                 Obj::green_warp(Flag::Event(1),
+    //                                 0, 13, 22,
+    //                                 1, 2, 18,
+    //                                 Vec3 { x: 3.25, y: 0.0, z: -3.5 }));
+    // patcher.add_system(IndoorDark, 4,
+    //                    Obj::spawn_point(3, 0, 14, 23,
+    //                                     Vec3 { x: 3.25, y: 0.0, z: -3.5 }));
 
     // Zelda's Study
     patcher.modify_objs(IndoorLight, 7, &[
@@ -747,6 +679,7 @@ fn patch_hyrule_castle_dungeon(patcher: &mut Patcher, _: &Settings) {
         }),
         disable(26),  // Disable Curtain
         disable(29),  // Disable AreaDisableWallIn
+        disable(27),  // No backtracking Door
     ]);
 }
 
@@ -792,13 +725,43 @@ fn patch_thief_girl_cave(patcher: &mut Patcher, _: &Settings) {
     ]);
 }
 
-fn patch_softlock_prevention(patcher: &mut Patcher, settings: &Settings) {
+/// Modify the hitboxes of select big chests that could negatively affect gameplay
+fn patch_big_problem_chests(patcher: &mut Patcher, settings: &Settings) {
+    if !settings.options.chest_size_matches_contents {
+        return;
+    }
 
-    // Gales 1F East Room w/o lowering wall
-    // patcher.add_obj(DungeonWind, 1, Obj::warp_tile(
-    //     Flag::Course(4), 2, 146, 454,
-    //     0, 0, 34,
-    //     Vec3 { x: 25.5, y: 2.5, z: -28.0 }));
+    const BIG_PROBLEM_CHESTS: [(Id, u16, u16); 12] = [
+        (FieldLight, 3, 303),     // Death Mountain West Ledge
+        (FieldLight, 34, 71),     // Master Sword Pedestal
+        (FieldLight, 35, 155),    // Lake Hylia Ledge
+        (FieldLight, 33, 320),    // Southern Ruins Ledge
+        // (FieldLight, 1, 133),  // Lost Woods Big Rock
+        (AttractionLight, 2, 33), // Southern Ruins Treasure Dungeon
+        (DungeonWater, 1, 170),   // Swamp 1F West Room
+        (DungeonWater, 1, 299),   // Swamp 1F East Room
+        (DungeonWater, 1, 373),   // Swamp 1F SW Room
+        (DungeonWater, 2, 620),   // Swamp B1 Raft Room (Left)
+        (DungeonWater, 2, 621),   // Swamp B1 Raft Room (Right)
+        (DungeonDokuro, 2, 105),  // Skull B2 Moving Platform Room
+        // (DungeonIce, 1, 1122), // Ice Ruins B4 SW Fall
+        (DungeonGanon, 1, 882),   // Lorule Castle Ball Trial #2
+    ];
+
+    // Change collision scaling to effectively match the small chests
+    for (stage, stage_index, unq) in BIG_PROBLEM_CHESTS {
+        patcher.modify_objs(stage, stage_index, &[
+            call(unq, |obj| {
+                if obj.id == 34 {
+                    obj.srt.scale.x = 0.52632; // 0.52632 * 1.9 (actor profile) ~= 1.0
+                    obj.srt.scale.z = 0.75; // 0.75 * 1.2 (actor profile) = 0.9
+                }
+            }),
+        ]);
+    }
+}
+
+fn patch_softlock_prevention(patcher: &mut Patcher, settings: &Settings) {
 
     // Gales 1F - Add trigger to drop wall if player entered miniboss without hitting switch
     patcher.add_obj(DungeonWind, 1, Obj::trigger_cube(
@@ -822,9 +785,9 @@ fn patch_softlock_prevention(patcher: &mut Patcher, settings: &Settings) {
     }
 
     // Swamp Palace River Room w/o Merge
-    patcher.add_obj(DungeonWater, 2, Obj::hookshot_pole(
-        6, 224, 674, Vec3 { x: 22.5, y: 5.0, z: -59.75 },
-    ));
+    // patcher.add_obj(DungeonWater, 2, Obj::hookshot_pole(
+    //     6, 224, 674, Vec3 { x: 22.5, y: 5.0, z: -59.75 },
+    // ));
 
     // patcher.add_obj(DungeonWater, 2, Obj::warp_tile(
     //     Flag::Event(1), 6, 224, 674,
@@ -836,11 +799,97 @@ fn patch_softlock_prevention(patcher: &mut Patcher, settings: &Settings) {
     // ));
 
     // Swamp Palace SE Room w/o Merge
-    // TODO
-
     // Swamp Palace SW Room w/o Merge
-    // TODO
-
     // Skull Woods B2 Boss Hallway w/o Fire
-    // TODO
+}
+
+#[allow(unused)]
+fn debug_stuff(patcher: &mut Patcher, settings: &Settings) {
+
+    // Ravio's Shop
+    patcher.modify_objs(IndoorLight, 1, &[
+        call(24, |obj| {
+            obj.redirect(
+                // 5, 0, 26,   // No Redirect
+                0, 3, 4,    // Hilda's Study
+                // 0, 3, 14,   // Osfala Portrait
+                // 0, 1, 17,   // FieldDark 18
+                // 7, 4, 17,   // Sanctuary Dungeon End
+                // 0, 0, 33,   // Master Sword Pedestal
+                // 0, 2, 9,    // Rosso House
+                // 0, 14, 2,   // Swamp Palace 2F
+                // 24, 14, 1,  // Swamp Palace River Room
+                // 0, 0, 1,    // FieldLight 2
+                // 0, 0, 6,    // Outside Zora's Domain
+                // 4, 0, 8,    // Outside Fortune-Teller
+                // 0, 12, 5,   // Yuga 2 Boss
+                // 0, 12, 6,   // HC 4th Floor
+                // 1, 3, 3,    // Lorule Blacksmith
+                // 0, 12, 0,   // Hyrule Castle Dungeon
+                // 2, 1, 30,   // Zaganaga Portal
+                // 0, 1, 30,   // Misery Mire
+                // 0, 5, 2,    // Swamp Cave
+                // 0, 5, 13,   // Great Rupee Fairy Cave
+                // 1, 17, 0,   // Ice Ruins Boss
+                // 0, 17, 0,   // Ice Ruins Boss
+                // 0, 19, 2,   // Turtle Rock Boss
+                // 0, 5, 9,    // Chamber of Sages
+                // 0, 5, 14,   // Thief Girl Cave
+                // 0, 0, 19,   // Eastern Ruins Cutscene
+                // 5, 0, 17,   // Pendant of Courage cutscene
+                // 0, 0, 24,   // Haunted Grove
+                // 12, 13, 0,  // Dark Palace Boss
+                // 5, 1, 19,   // Outside Dark Palace
+                // 6, 10, 2,   // Gales Boss
+                // 0, 10, 0,   // Gales Entrance
+                // 0, 9, 2,    // Eastern Palace Boss
+                // 0, 9, 0,    // Eastern Palace Entrance
+                // 5, 0, 19    // Eastern Ruins WV
+                // 0, 9, 0     // Eastern Palace Lobby
+                // 20, 1, 0,   // Seres Portrait
+                // 0, 4, 3     // Kak Well Lower
+                // 1, 4, 3     // Kak Well Upper
+                // 10, 11, 0   // Tower of Hera Boss
+                // 0, 11, 0   // Tower of Hera Entrance
+                // 0, 13, 0   // Dark Entrance
+            );
+        }),
+    ]);
+
+
+    // patcher.modify_objs(FieldLight, 27, &[
+    //
+    //     // Flippers Roller 1
+    //     call(154, |obj| {
+    //         obj.set_id(94);
+    //         obj.arg.0 = 14;
+    //         obj.arg.1 = 2;
+    //     }),
+    //
+    //     // Flippers Roller 2
+    //     call(155, |obj| {
+    //         obj.set_id(94);
+    //         obj.arg.0 = 14;
+    //         obj.arg.1 = 2;
+    //     }),
+    //
+    //     // Gales Roller
+    //     call(156, |obj| {
+    //         obj.set_id(94);
+    //         obj.arg.0 = 13;
+    //         obj.arg.1 = 0;
+    //         obj.arg.2 = 1;
+    //         obj.arg.3 = 45;
+    //         obj.arg.4 = 0;
+    //         obj.arg.5 = 0;
+    //         obj.arg.6 = 10;
+    //     }),
+    //
+    //     // // Swamp Roller
+    //     // call(0, |obj| {
+    //     //     obj.set_id(94);
+    //     //     obj.arg.0 = 16;
+    //     //     obj.arg.1 = 2;
+    //     // }),
+    // ]);
 }

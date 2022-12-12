@@ -393,7 +393,7 @@ impl ItemExt for Item {
             ItemBell |
             PowerGlove | PowerfulGlove |
             ItemInsectNet | ItemInsectNetLv2 |
-            Kinsta |
+            // Kinsta |
             // BadgeBee |
             // GoldenBee | Bee | Fairy |
             GoldenBeeForSale |
@@ -566,7 +566,7 @@ pub fn plando() -> Result<(), Error> {
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (1)"), RupeeGold);
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (2)"), ItemMizukaki);
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (3)"), ItemHookShot);
-    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (4)"), ItemKandelaarLv2);
+    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (4)"), ItemIceRod);
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (5)"), ItemBombLv2);
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (6)"), HintGlasses); // Sand Rod Slot
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (7)"), RingHekiga);
@@ -583,7 +583,7 @@ pub fn plando() -> Result<(), Error> {
     layout.set(LocationInfo::new(regions::dungeons::dark::palace::SUBREGION, "Dark Palace Prize"), SageIrene);
     layout.set(LocationInfo::new(regions::dungeons::swamp::palace::SUBREGION, "Swamp Palace Prize"), SageOsfala);
     layout.set(LocationInfo::new(regions::dungeons::skull::woods::SUBREGION, "Skull Woods Prize"), SageRosso);
-    layout.set(LocationInfo::new(regions::dungeons::thieves::hideout::SUBREGION, "Thieves' Hideout Prize"), PendantPower);
+    layout.set(LocationInfo::new(regions::dungeons::thieves::hideout::SUBREGION, "Thieves' Hideout Prize"), SageGulley);
     layout.set(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "Ice Ruins Prize"), PendantCourage);
     layout.set(LocationInfo::new(regions::dungeons::desert::palace::SUBREGION, "Desert Palace Prize"), PendantPower);
     layout.set(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "Turtle Rock Prize"), PendantCourage);
@@ -657,17 +657,17 @@ pub fn plando() -> Result<(), Error> {
     layout.set(LocationInfo::new(regions::dungeons::dark::palace::SUBREGION, "[PD] Gemesaur King"), RupeeGold);
 
     // Swamp Palace
-    layout.set(LocationInfo::new(regions::dungeons::swamp::palace::SUBREGION, "[SP] (B1) Center"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::swamp::palace::SUBREGION, "[SP] (B1) Raft Room (Left)"), Compass);
-    layout.set(LocationInfo::new(regions::dungeons::swamp::palace::SUBREGION, "[SP] (B1) Raft Room (Right)"), Compass);
-    layout.set(LocationInfo::new(regions::dungeons::swamp::palace::SUBREGION, "[SP] (B1) Gyorm"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::swamp::palace::SUBREGION, "[SP] (B1) Waterfall Room"), Compass);
-    layout.set(LocationInfo::new(regions::dungeons::swamp::palace::SUBREGION, "[SP] (B1) Raft Room (Pillar)"), Compass);
+    layout.set(LocationInfo::new(regions::dungeons::swamp::palace::SUBREGION, "[SP] (B1) Center"), KeySmall);
+    layout.set(LocationInfo::new(regions::dungeons::swamp::palace::SUBREGION, "[SP] (B1) Raft Room (Left)"), KeySmall);
+    layout.set(LocationInfo::new(regions::dungeons::swamp::palace::SUBREGION, "[SP] (B1) Raft Room (Right)"), KeySmall);
+    layout.set(LocationInfo::new(regions::dungeons::swamp::palace::SUBREGION, "[SP] (B1) Gyorm"), KeySmall);
+    layout.set(LocationInfo::new(regions::dungeons::swamp::palace::SUBREGION, "[SP] (B1) Waterfall Room"), KeySmall);
+    layout.set(LocationInfo::new(regions::dungeons::swamp::palace::SUBREGION, "[SP] (B1) Raft Room (Pillar)"), KeySmall);
     layout.set(LocationInfo::new(regions::dungeons::swamp::palace::SUBREGION, "[SP] (B1) Big Chest (Secret)"), KeySmall);
     layout.set(LocationInfo::new(regions::dungeons::swamp::palace::SUBREGION, "[SP] (1F) Water Puzzle"), KeySmall);
     layout.set(LocationInfo::new(regions::dungeons::swamp::palace::SUBREGION, "[SP] (1F) East Room"), KeySmall);
     layout.set(LocationInfo::new(regions::dungeons::swamp::palace::SUBREGION, "[SP] (1F) West Room"), KeySmall);
-    layout.set(LocationInfo::new(regions::dungeons::swamp::palace::SUBREGION, "[SP] (1F) Big Chest (Fire)"), ItemSwordLv1);
+    layout.set(LocationInfo::new(regions::dungeons::swamp::palace::SUBREGION, "[SP] (1F) Big Chest (Fire)"), KeySmall);
     layout.set(LocationInfo::new(regions::dungeons::swamp::palace::SUBREGION, "[SP] Arrghus"), KeyBoss);
 
     // Skull Woods

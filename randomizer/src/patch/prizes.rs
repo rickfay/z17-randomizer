@@ -17,6 +17,127 @@ pub(crate) fn patch_dungeon_prizes(patcher: &mut Patcher, prizes: &DungeonPrizes
     patch_prize_byaml(patcher, &prizes, settings);
 }
 
+pub(crate) fn patch_required_portraits(patcher: &mut Patcher, _: &Settings) {
+
+    // Temporary: Match flag to the one for having enough Sages to open LC
+    let can_fight_yuganon_flag = Flag::Event(670); // TODO repurpose a Flag for this
+
+    // Throne Room
+    patcher.modify_objs(DungeonBoss, 1, &[
+
+        // fight start trigger
+        call(10, move |obj| {
+            obj.set_enable_flag(can_fight_yuganon_flag);
+            obj.set_active_flag(can_fight_yuganon_flag);
+        }),
+
+        clear_enable_flag(27), // Hilda
+        clear_enable_flag(41), // camera offset
+        clear_enable_flag(43), // NpcAttention1
+        clear_enable_flag(48), // ObjPictureZelda
+    ]);
+
+    // Hilda's Study
+    patcher.modify_objs(IndoorDark, 5, &[
+        disable(4),  // Trial's Door
+        disable(12), // Yuga revives Ganon cutscene
+        enable(34),  // Throne Room Loading Zone
+        enable(23),  // Skull (top right, controller obj)
+    ]);
+
+    // Hilda's Study (system)
+    patcher.modify_system(IndoorDark, 5, &[
+        enable(23), // Skull (top right, controller system obj)
+        enable(24), // Skull (middle right)
+        enable(25), // Skull (bottom right)
+        enable(41), // Skull (bottom left)
+        enable(46), // Skull (middle left)
+        enable(47), // Skull (top left)
+    ]);
+
+
+    // Add Door to Hilda's Study
+    // let bch = patcher.scene(IndoorLight, 6).unwrap().actors().get_map_actor_bch("dgn_CastleCorridorDoor").unwrap();
+    // let kcl = patcher.scene(IndoorLight, 6).unwrap().actors().get_map_actor_kcl("dgn_CastleCorridorDoor").unwrap();
+    // let _ = patcher.scene(IndoorDark, 4).unwrap().actors_mut().add(bch);
+    // let _ = patcher.scene(IndoorDark, 4).unwrap().actors_mut().add(kcl);
+    // let bch = patcher.scene(FieldDark, 17).unwrap().actors().get_actor_bch("DoorGanon").unwrap();
+    // let kcl = patcher.scene(FieldDark, 17).unwrap().actors().get_actor_kcl("DoorGanon").unwrap();
+    // let _ = patcher.scene(IndoorDark, 4).unwrap().actors_mut().add(bch);
+    // let _ = patcher.scene(IndoorDark, 4).unwrap().actors_mut().add(kcl);
+
+
+    // patcher.add_obj(IndoorDark, 5, Obj {
+    //     arg: Arg(0, 0, 0, 0, 4, 0, 708, 0, 0, 0, 0, 0, 0, 0.0),
+    //     clp: 1,
+    //     flg: (0, 0, 0, 0),
+    //     id: 441,
+    //     lnk: vec![],
+    //     nme: None,
+    //     ril: vec![],
+    //     ser: Some(14),
+    //     srt: Transform {
+    //         scale: Vec3::UNIT,
+    //         rotate: Vec3 { x: 10.0, y: 0.0, z: 0.0 },
+    //         translate: Vec3 { x: 65.0, y: 0.0, z: -15.5 },
+    //     },
+    //     typ: 1,
+    //     unq: 48,
+    // });
+
+    // patcher.add_obj(IndoorDark, 5, Obj {
+    //     arg: Arg(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 30, 0.0),
+    //     clp: 1,
+    //     flg: (0, 4, 0, 708),
+    //     id: 188,
+    //     lnk: vec![(49, 0, 0)],
+    //     nme: Some(String::from("dgn_CastleCorridorDoor")),
+    //     ril: vec![(0, 0)],
+    //     ser: Some(14),
+    //     srt: Transform {
+    //         scale: Vec3::UNIT,
+    //         rotate: Vec3::ZERO,
+    //         translate: Vec3 { x: 0.0, y: 0.0, z: -2.2 },
+    //     },
+    //     typ: 7,
+    //     unq: 48,
+    // });
+    //
+    // patcher.add_rail(IndoorDark, 5, Rail {
+    //     arg: (0, 0, 0, 0, 0.0, 0.0),
+    //     pnt: vec![Point {
+    //         arg: (0, 0, 0, 0, 0.0, 0.0),
+    //         ctl: [0.0, 0.0, -2.2, 0.0, 0.0, -2.2],
+    //         lnk: vec![],
+    //         srt: Transform {
+    //             scale: Vec3::UNIT,
+    //             rotate: Vec3::ZERO,
+    //             translate: Vec3 { x: 0.0, y: 0.0, z: -2.2 },
+    //         },
+    //     }],
+    //     rng: false,
+    //     unq: 0,
+    // });
+    //
+    // patcher.add_system(IndoorDark, 5, Obj {
+    //     arg: Arg(0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 163, 1, 0, 0.0),
+    //     clp: -1,
+    //     flg: (0, 0, 0, 0),
+    //     id: 27,
+    //     lnk: vec![],
+    //     nme: Some(String::from("Invalid")),
+    //     ril: vec![],
+    //     ser: None,
+    //     srt: Transform {
+    //         scale: Vec3 { x: 13.99381, y: 15.00000, z: 17.62970 },
+    //         rotate: Vec3::ZERO,
+    //         translate: Vec3 { x: -0.34722, y: 0.0, z: -7.41640 + -2.2 },
+    //     },
+    //     typ: 6,
+    //     unq: 49,
+    // });
+}
+
 /// Adds entries to the FlowChart for the MSBF files related to each Portrait
 fn patch_flowchart(patcher: &mut Patcher, prizes: &DungeonPrizes) {
 
@@ -88,18 +209,18 @@ fn patch_msbf_files(patcher: &mut Patcher, prizes: &DungeonPrizes) {
 fn patch_dungeon_prize_actors(patcher: &mut Patcher, prizes: &DungeonPrizes) {
 
     // Fetch and map Actors to their dungeon prizes
-    let pendant = patcher.scene(DungeonWind, 2).unwrap().actors().get("Pendant").unwrap();
+    let pendant = patcher.scene(DungeonWind, 2).unwrap().actors().get_actor_bch("Pendant").unwrap();
     let actor_map: HashMap<Item, Actor> = HashMap::from([
         (PendantCourage, pendant.clone()),
         (PendantWisdom, pendant.clone()),
         (PendantPower, pendant),
-        (SageGulley, patcher.scene(DungeonDark, 0).unwrap().actors().get("PictureBlacksmithBoy").unwrap()),
-        (SageOren, patcher.scene(DungeonWater, 2).unwrap().actors().get("PictureZoraQueen").unwrap()),
-        (SageSeres, patcher.scene(FieldDark, 0).unwrap().actors().get("PicturePriestGirl").unwrap()),
-        (SageOsfala, patcher.scene(IndoorDark, 14).unwrap().actors().get("PictureSahasPupil").unwrap()),
-        (SageImpa, patcher.scene(DungeonKame, 2).unwrap().actors().get("PictureInpa").unwrap()),
-        (SageIrene, patcher.scene(FieldDark, 30).unwrap().actors().get("PictureMaple").unwrap()),
-        (SageRosso, patcher.scene(DungeonIce, 0).unwrap().actors().get("PictureMountaineer").unwrap()),
+        (SageGulley, patcher.scene(DungeonDark, 0).unwrap().actors().get_actor_bch("PictureBlacksmithBoy").unwrap()),
+        (SageOren, patcher.scene(DungeonWater, 2).unwrap().actors().get_actor_bch("PictureZoraQueen").unwrap()),
+        (SageSeres, patcher.scene(FieldDark, 0).unwrap().actors().get_actor_bch("PicturePriestGirl").unwrap()),
+        (SageOsfala, patcher.scene(IndoorDark, 14).unwrap().actors().get_actor_bch("PictureSahasPupil").unwrap()),
+        (SageImpa, patcher.scene(DungeonKame, 2).unwrap().actors().get_actor_bch("PictureInpa").unwrap()),
+        (SageIrene, patcher.scene(FieldDark, 30).unwrap().actors().get_actor_bch("PictureMaple").unwrap()),
+        (SageRosso, patcher.scene(DungeonIce, 0).unwrap().actors().get_actor_bch("PictureMountaineer").unwrap()),
     ]);
 
     // Add Actors to relevant scenes
@@ -116,9 +237,9 @@ fn patch_dungeon_prize_actors(patcher: &mut Patcher, prizes: &DungeonPrizes) {
 
     // Inject Small Chests into scenes that don't have them for Pendants
     // TODO Remove after Pendants can be redirected
-    let chest_small = patcher.scene(DungeonHera, 0).unwrap().actors().get("TreasureBoxS").unwrap();
+    let chest_small = patcher.scene(DungeonHera, 0).unwrap().actors().get_actor_bch("TreasureBoxS").unwrap();
     if is_pendant(prizes.sp_prize) {
-        let warp_tile = patcher.scene(DungeonHera, 0).unwrap().actors().get("WarpTile").unwrap();
+        let warp_tile = patcher.scene(DungeonHera, 0).unwrap().actors().get_actor_bch("WarpTile").unwrap();
         patcher.scene(DungeonWater, 2).unwrap().actors_mut().add(warp_tile).unwrap();
         patcher.scene(DungeonWater, 2).unwrap().actors_mut().add(chest_small.clone()).unwrap();
     }

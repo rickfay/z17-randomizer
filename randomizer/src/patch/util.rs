@@ -94,8 +94,8 @@ pub(crate) fn prize_flag(pendant: Item) -> Flag {
     }
 }
 
-/// Fetch the placed Dungeon Rewards<br />
-/// TODO really need to clean up the Layout data structure...
+/// Fetch the placed Dungeon Rewards
+/// <br />TODO really need to clean up the Layout data structure...
 pub(crate) fn get_dungeon_prizes(layout: &Layout) -> DungeonPrizes {
     DungeonPrizes {
         ep_prize: layout.get(&LocationInfo::new(regions::dungeons::eastern::palace::SUBREGION, "Eastern Palace Prize")).unwrap(),

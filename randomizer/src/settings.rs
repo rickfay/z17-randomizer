@@ -42,6 +42,10 @@ pub struct Logic {
     pub mode: LogicMode,
     /// Randomizes the Pendants and Portraits between Hyrule and Lorule dungeons
     pub randomize_dungeon_prizes: bool,
+    /// The number of Portraits needed to trigger the Hilda cutscene to open Lorule Castle
+    pub lc_requirement: u8,
+    /// The number of Portraits needed to remove the final door before Yuga Ganon
+    pub yuganon_requirement: u8,
     /// Guarantees a Weapon is placed in Ravio's Shop
     pub assured_weapon: bool,
     /// Places the Bell in Ravio's Shop
@@ -200,11 +204,13 @@ pub fn open_default() -> Settings {
 pub fn plando_settings() -> Settings {
     Settings {
         logic: Logic {
+            lc_requirement: 4,
+            yuganon_requirement: 3,
             vanes_activated: true,
             ..Default::default()
         },
         options: Options {
-            chest_size_matches_contents: false,
+            chest_size_matches_contents: true,
             night_mode: false
         },
         ..Default::default()

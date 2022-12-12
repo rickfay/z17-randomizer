@@ -182,7 +182,7 @@ impl Patcher {
         // Add Actor if scene doesn't already have it
         if !self.scene(course, stage).unwrap().actors().contains(actor_name) {
             debug!("Adding {} to {}{}", actor_name, course.as_str(), stage + 1);
-            let actor = self.scene(DungeonHera, 0)?.actors().get(actor_name)?;
+            let actor = self.scene(DungeonHera, 0)?.actors().get_actor_bch(actor_name)?;
             self.scene(course, stage).unwrap().actors_mut().add(actor)?;
         }
 
@@ -273,14 +273,14 @@ impl Patcher {
         // self.scene(FieldLight, 16)?.actors_mut().update(heart_container.clone())?;
 
         // Add Warp Tiles to scenes for softlock prevention
-        let warp_tile = self.scene(DungeonHera, 0)?.actors().get("WarpTile")?;
+        let warp_tile = self.scene(DungeonHera, 0)?.actors().get_actor_bch("WarpTile")?;
         self.scene(DungeonWind, 0)?.actors_mut().add(warp_tile.clone())?; // Gales 1F
         self.scene(FieldDark, 19)?.actors_mut().add(warp_tile.clone())?; // Dark Maze
         self.scene(DungeonWater, 1)?.actors_mut().add(warp_tile.clone())?; // Swamp Palace B1
         self.scene(DungeonDokuro, 1)?.actors_mut().add(warp_tile.clone())?; // Skull Woods B2
 
         // Debug stuff
-        //let step_switch = self.scene(DungeonDark, 0)?.actors().get("SwitchStep")?;
+        // let step_switch = self.scene(DungeonDark, 0)?.actors().get("SwitchStep")?;
         // self.scene(DungeonKame, 2)?.actors_mut().add(step_switch.clone())?; // Turtle Rock Boss
         //self.scene(DungeonWind, 2)?.actors_mut().add(step_switch.clone())?; // Gales Boss
         // self.scene(DungeonHera, 0)?.actors_mut().add(step_switch.clone())?; // Hera Boss
@@ -291,12 +291,13 @@ impl Patcher {
         //self.scene(course::Id::IndoorLight, 0)?.actors_mut().add(fresco_arrow.clone())?;
 
         let prizes = get_dungeon_prizes(layout);
+        let free = self.rentals[8];
+        flow::apply(&mut self, free, settings)?;
         prizes::patch_dungeon_prizes(&mut self, &prizes, settings);
+        prizes::patch_required_portraits(&mut self, settings);
         maps::patch_maps(&mut self, &prizes, settings);
         scenes::apply(&mut self, settings)?;
 
-        let free = self.rentals[8];
-        flow::apply(&mut self, free)?;
         {
             let Self {
                 ref rentals,
@@ -536,7 +537,7 @@ fn cutscenes<'game, 'settings>(
                 430, // Fix Chamber of Sages Softlock
                 510, // Open Portals, Activate Hyrule Castle Midway
                 //522, // Hilda Blacksmith Text + get Map Swap icon on lower screen
-                523, // Hilda Graveyard Text
+                //523, // Hilda Graveyard Text
                 524, // Hilda ??? Text
                 525, // Skip Sahasrahla outside Link's House, make Hyrule Hotfoot appear
 
@@ -568,12 +569,19 @@ fn cutscenes<'game, 'settings>(
                 opening.add_event_flag(flag);
             }
 
-            if logic.swordless_mode {
-                opening.add_event_flag(410); // Tear down Barrier in Swordless Mode
+            // Enable opening Lorule Castle from start
+            if logic.lc_requirement == 0 {
+                opening.add_event_flag(670);
             }
 
+            // Tear down HC Barrier in Swordless Mode
+            if logic.swordless_mode {
+                opening.add_event_flag(410);
+            }
+
+            // Night Mode
             if options.night_mode {
-                opening.add_event_flag(964); // Night Mode
+                opening.add_event_flag(964);
             }
 
             if logic.vanes_activated {

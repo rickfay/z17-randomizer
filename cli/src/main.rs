@@ -1,6 +1,7 @@
 use std::{fs, panic};
 use std::io::{stdin, stdout, Read, Write};
 use std::path::Path;
+use std::str::FromStr;
 use log::{error, info};
 
 use randomizer::{Seed, Settings, plando, filler_new};
@@ -52,7 +53,29 @@ fn prompt_logic_mode() -> LogicMode
                 eprintln!("\nPlease enter 1, 2, 3, 4, 5, or 6");
                 continue;
             }
+        };
+    }
+}
+
+fn prompt_u8_in_range(prompt: &str, range_start: u8, range_end: u8) -> u8 {
+    print!("\n{}", prompt);
+    loop {
+        print!("\nEnter a number ({}-{}): ", range_start, range_end);
+
+        stdout().flush().unwrap();
+        let mut input = String::new();
+        stdin().read_line(&mut input).unwrap();
+
+        match u8::from_str(input.trim()) {
+            Err(_) => {}
+            Ok(result) => {
+                if (range_start..=range_end).contains(&result) {
+                    return result;
+                }
+            }
         }
+
+        eprintln!("Invalid input.");
     }
 }
 
@@ -109,12 +132,13 @@ fn create_paths() -> sys::Result<Paths> {
 }
 
 fn preset_ui() -> Settings {
-
     info!("No preset has been specified. Seed Options UI will be used instead.\n");
     println!("--- Seed Options ---");
 
     let mode = prompt_logic_mode();
     let randomize_dungeon_prizes = prompt_until_bool("Randomize Dungeon Prizes?");
+    let lc_requirement = prompt_u8_in_range("Choose how many Portraits are needed to enter Lorule Castle:", 0, 7);
+    let yuganon_requirement = 7; // TODO prompt_u8_in_range("Choose how many Portraits are needed to fight Yuganon:", 0, 7);
     //let start_with_bracelet = prompt_until_bool("Start with Ravio's Bracelet?");
     let assured_weapon = prompt_until_bool("Guarantee a Weapon is placed in Ravio's Shop?");
     let bell_in_shop = prompt_until_bool("Guarantee Bell in Ravio's Shop?");
@@ -137,6 +161,8 @@ fn preset_ui() -> Settings {
         logic: Logic {
             mode,
             randomize_dungeon_prizes,
+            lc_requirement,
+            yuganon_requirement,
             assured_weapon,
             bell_in_shop,
             pouch_in_shop,
@@ -192,10 +218,9 @@ fn main() -> randomizer::Result<()> {
         for x in 0..MAX_RETRIES {
             let seed = opt.seed.unwrap_or_else(rand::random);
 
-
             info!("Attempt:                        #{}", x + 1);
             info!("Preset:                         {}", opt.preset.as_ref().unwrap_or(&String::from("<None>")));
-            info!("Version:                        0.3.0 - Dev Build #1");
+            info!("Version:                        0.3.0 - Dev Build #2");
 
             //let randomizer = Generator::new(&preset, seed);
             let spoiler = panic::catch_unwind(|| filler_new(&preset, seed));
@@ -211,7 +236,6 @@ fn main() -> randomizer::Result<()> {
 
                 break;
             } else if x >= MAX_RETRIES - 1 {
-                // FIXME I hate this, but I'm struggling with Rust error handling so leaving it for now
                 panic!("Too many retry attempts have failed. Aborting...");
             } else {
                 info!("Seed was not completable (this is normal). Retrying...\n");
@@ -219,8 +243,16 @@ fn main() -> randomizer::Result<()> {
         }
 
         match result {
-            Ok(_) => info!("Successfully generated ALBWR seed :D"),
-            Err(_) => error!("Failed to generate ALBWR seed D:"),
+            Ok(_) => info!("Successfully generated seed :D"),
+            Err(_) => {
+                println!();
+                error!("An unknown error occurred while generating the seed D:\n");
+
+                error!("If you're seeing this error, there is likely an issue with your ROM.");
+                error!("Verify your ROM is (1) a North American copy of ALBW, and (2) decrypted.\n");
+
+                info!("For assistance, visit the #help-and-strats channel on the ALBW Randomizer Discord.");
+            },
         }
 
         pause();

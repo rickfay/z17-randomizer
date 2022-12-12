@@ -23,10 +23,28 @@ impl Actors {
             .unwrap_or(false)
     }
 
-    pub fn get(&self, name: &str) -> Result<Actor> {
+    pub fn get_actor_bch(&self, name: &str) -> Result<Actor> {
         self.archive
             .get()
             .extract(format!("World/Actor/{}.bch", name))
+    }
+
+    pub fn get_actor_kcl(&self, name: &str) -> Result<Actor> {
+        self.archive
+            .get()
+            .extract(format!("World/Actor/{}.kcl", name))
+    }
+
+    pub fn get_map_actor_bch(&self, name: &str) -> Result<Actor> {
+        self.archive
+            .get()
+            .extract(format!("World/MapActor/{}.bch", name))
+    }
+
+    pub fn get_map_actor_kcl(&self, name: &str) -> Result<Actor> {
+        self.archive
+            .get()
+            .extract(format!("World/MapActor/{}.kcl", name))
     }
 
     pub fn add(&mut self, actor: Actor) -> Result<()> {

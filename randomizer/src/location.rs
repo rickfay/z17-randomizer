@@ -32,6 +32,7 @@ pub enum Location {
     HyruleCastleInterior,
     HyruleCastleRoof,
     HyruleCastleDungeon,
+    HyruleCastleDungeonBoss,
     LostWoods,
     MasterSwordArea,
     FortuneTeller,

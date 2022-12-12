@@ -951,7 +951,13 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             path_free(HyruleField),
             path_free(HyruleCastleCourtyard),
             path_free(HyruleCastleInterior),
-            path_free(HyruleCastleDungeon),
+            path(HyruleCastleDungeon,
+                 Some(|p| p.has_pendant_of_courage()),
+                 None,
+                 None,
+                 None,
+                 None,
+            ),
         ])),
         (LostWoods, location("Lost Woods", vec![
             check(LocationInfo::new(regions::hyrule::lost::woods::SUBREGION, "Alcove"),
@@ -1732,7 +1738,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
             ),
             path_free(ThievesHideoutB1),
             path(LoruleCastle1F,
-                 Some(|p| p.has_all_sages()),
+                 Some(|p| p.has_lc_requirement()),
                  None,
                  None,
                  None,
@@ -3195,14 +3201,33 @@ fn inside_hyrule_castle() -> HashMap<Location, LocationNode> {
     HashMap::from([
         (HyruleCastleDungeon, location("Inside Hyrule Castle", vec![], vec![
             path_free(HyruleCastleRoof),
-            path(LoruleBlacksmith,
-                 Some(|p| (p.has_bow() || p.has_ice_rod()) && p.can_defeat_yuga2()),
+            path(HyruleCastleDungeonBoss,
+                 Some(|p| (p.can_merge() && p.can_attack()) || p.has_ice_rod()), // add Nice TRod, when nice items figured out
+                 Some(|p| p.has_bow() || p.has_nice_bombs()),
                  None,
-                 Some(|p| p.has_nice_bombs()), // not counting Nice TRod yet
                  None,
                  None,
             ),
-            // TODO add game mode check for Portalsanity
+        ])),
+        (HyruleCastleDungeonBoss, location("Hyrule Castle Dungeon Boss", vec![], vec![
+            path(HyruleCastleDungeon,
+                 Some(|p| p.can_defeat_yuga2()),
+                 None,
+                 None,
+                 None,
+                 None,
+            ),
+            path(ZeldasStudy,
+                 Some(|p| p.can_defeat_yuga2()),
+                 None,
+                 None,
+                 None,
+                 None,
+            ),
+        ])),
+        (ZeldasStudy, location("Zelda's Study", vec![], vec![
+            path_free(HyruleCastleDungeon),
+            portal(HildasStudy),
         ])),
     ])
 }
@@ -4156,6 +4181,7 @@ fn turtle_rock() -> HashMap<Location, LocationNode> {
 fn lorule_castle() -> HashMap<Location, LocationNode> {
     HashMap::from([
         (LoruleCastle1F, location("Lorule Castle 1F", vec![], vec![
+            path_free(LoruleCastleField),
             path(LoruleCastleEastLedge1F,
                  Some(|p| p.can_merge()),
                  None,
@@ -4320,32 +4346,23 @@ fn lorule_castle() -> HashMap<Location, LocationNode> {
         ], vec![
             path_free(LoruleCastle2F3F),
         ])),
-        (ZeldasStudy, location("Zelda's Study", vec![], vec![
-            portal(HildasStudy),
-        ])),
         (HildasStudy, location("Hilda's Study", vec![], vec![
             path_free(LoruleCastle2F3F),
             portal(ZeldasStudy),
-            path(ThroneRoom,
-                 Some(|p| p.has_all_sages() && p.can_access_lorule_castle_field()),
-                 None,
-                 None,
-                 None,
-                 None,
-            ),
+            path_free(ThroneRoom),
         ])),
         (ThroneRoom, location("Throne Room", vec![
             check(LocationInfo::new(regions::dungeons::castle::lorule::SUBREGION, "Zelda"),
-                  Some(|p| p.has_sword() || (p.swordless_mode() && p.has_net())),
-                  Some(|p| p.has_net()),
+                  Some(|p| p.has_yuganon_requirement() && (p.has_sword() || (p.swordless_mode() && p.has_net()))),
+                  Some(|p| p.has_yuganon_requirement() && p.has_net()),
                   None,
                   None,
                   None,
             ),
         ], vec![
             path(SacredRealm,
-                 Some(|p| (p.has_sword() || (p.swordless_mode() && p.has_net())) && p.can_merge() && p.has_bow_of_light()),
-                 Some(|p| p.has_net() && p.can_merge() && p.has_bow_of_light()),
+                 Some(|p| p.has_yuganon_requirement() && (p.has_sword() || (p.swordless_mode() && p.has_net())) && p.can_merge() && p.has_bow_of_light()),
+                 Some(|p| p.has_yuganon_requirement() && p.has_net() && p.can_merge() && p.has_bow_of_light()),
                  None,
                  None,
                  None,

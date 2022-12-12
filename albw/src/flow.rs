@@ -13,6 +13,7 @@ type Next = Option<u16>;
 
 #[derive(Debug)]
 pub struct Flow<'input> {
+    header: List<Ref<'input>, HEADER_LEN>,
     steps: List<Ref<'input>, STEP_LEN>,
     branches: Branches<'input>,
 }
@@ -35,17 +36,37 @@ impl<'input> FromFile for Flow<'input> {
         where
             Self: Sized,
     {
+        // Line 1: Should contain magic "MsgFlwBn"
         let msgbn = MsgBn::<Ref<'input>, 2>::try_read(input, MSGFLWBN)?;
+
+        // Line 2: seems to refer to length of the file
+
+        // Line 3: Should contain magic "FLW3"
         let flw = msgbn.get(FLW3).ok_or_else(|| Error::new("No FLW3"))?;
+
+        // Line 4: header, which contains the step and branch count
         let (step_ct, branch_ct, index) = get_flw(&*flw)?;
-        let (steps, branches) = Ref::map_split(flw, |flw| flw[0x10..].split_at(index));
+        let (header, body) = Ref::map_split(flw, |flw| flw.split_at(0x10));
+
+        // Each step is one line (16 bytes), and there should be as many as was specified in the header
+        let (steps, branches) = Ref::map_split(body, |body| body.split_at(index));
+
+        // Branches are 2 bytes each, and appear sequentially on the first line following the last step
+        // If the number of branches is not a multiple of 8 (i.e. it doesn't fill up a line), that line
+        // will be padded with "AB"
+
+        let header =
+            List::<Ref, HEADER_LEN>::new(1, header).ok_or_else(|| Error::new("malformed header"))?;
         let steps =
             List::<Ref, STEP_LEN>::new(step_ct, steps).ok_or_else(|| Error::new("unimpl33"))?;
         let branches = Branches(
             List::<Ref, BRANCH_LEN>::new(branch_ct, branches)
                 .ok_or_else(|| Error::new("unimpl33"))?,
         );
-        Ok(Self { steps, branches })
+
+        // Following the branches, the magic "FEN1" appears, followed by two bytes (size of remaining garbage?)
+
+        Ok(Self { header, steps, branches })
     }
 }
 
@@ -203,7 +224,6 @@ impl<'input> FlowMut<'input> {
         }
 
 
-
         println!("index,kind,arg1,arg2,arg3,value,next,command,count,branch");
         let mut step: Inner;
         for i in 0..(&self.steps.inner.len() / STEP_LEN) {
@@ -303,6 +323,20 @@ impl<'flow, 'input> StepMut<'flow, 'input> {
                 .get_unchecked_mut(0) = 3;
             Some(ActionMut(self))
         }
+    }
+
+    pub fn convert_into_branch(mut self, count: u8, branch_index: u8) -> Option<BranchMut<'flow, 'input>> {
+
+        Self::set_next(&mut self, None);
+        let bytes = self.flow.steps.get_mut(self.index).unwrap();
+
+        unsafe {
+            *bytes.get_unchecked_mut(0x0) = 2;
+            *bytes.get_unchecked_mut(0xC) = count;
+            *bytes.get_unchecked_mut(0xE) = branch_index;
+        }
+
+        Some(BranchMut(self))
     }
 
     fn set_kind(&mut self, kind: u16) {
@@ -546,5 +580,6 @@ fn next(index: u16) -> Next {
 
 const MSGFLWBN: &[u8; 8] = b"MsgFlwBn";
 const FLW3: &[u8; 4] = b"FLW3";
+const HEADER_LEN: usize = 0x10;
 const STEP_LEN: usize = 0x10;
 const BRANCH_LEN: usize = 2;

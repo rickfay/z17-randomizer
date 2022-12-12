@@ -1,7 +1,7 @@
 use albw::Item;
 
 use super::Patcher;
-use crate::Result;
+use crate::{Result, Settings};
 
 macro_rules! apply {
     ($patcher:expr, $($course:ident/$name:ident {
@@ -77,43 +77,41 @@ macro_rules! action {
     };
 }
 
-pub fn apply(patcher: &mut Patcher, free: Item) -> Result<()> {
+fn patch_portrait_requirements(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
+    let lc_requirement = settings.logic.lc_requirement as u32;
+    //let yg_requirement = settings.logic.yuganon_requirement as u32;
+
+    // TODO
+    // let mut thing = patcher.flow(DungeonDark)?;
+    // let mut stuff = thing.get_mut("Dark").unwrap().unwrap();
+    // let flow = stuff.get_mut();
+    //
+    // let mut step = flow.get_mut(5).unwrap().convert_into_branch(2, 2).unwrap();
+    // step.set_value(yg_requirement);
+    // step.set_kind(15); // count sages function
 
     apply!(patcher,
 
-        // Hyrule Castle Dungeon
-        DungeonCastle/Castle {
-            [276] => 62,  // [274]
-            [315] => 70,  // [ 19]
-            [236] => 74,  // [ 37]
-            [290] => 75,  // [284]
-            [234] => 79,  // [ 18]
-            [311] => 97,  // [255]
-            [184] => 107, // [106]
-            [107] => 110, // [109]
-            [312] => 175, // [ 87]
-            [313] => 176, // [ 88]
-            [227] => 177, // [ 89]
-            [281] => 178, // [ 16]
-            [228] => 179, // [ 14]
-            [229] => 180, // [ 17]
-            [314] => 181, // [ 15]
-            [237] => 183, // [104] // "what?"
-            [171] => 184, // [ 29]
-            [172] => 185, // [ 39]
-            [131] => 222, // [127]
-            [206] => 223, // [128]
-            [135] => 224, // [129]
-            [137] => 225, // [130]
-            [282] => 269, // [270]
-            [138] => 275, // [  1]
-            [303] => 286, // [ 76] "I wish only to possess..."
-
-            // After fight
-            [5]   => 247, // skip 149
-            [155] => 249, // skip 40
+        // Final Hilda before LC
+        FieldDark/FieldDark_1B_Hilda {
+            [3] => 5, // Skip text
         },
+
+        // Set custom number of Portraits to enter LC
+        DungeonDark/Dark   {[2 into_branch] value(lc_requirement),},
+        DungeonWater/Water {[3 into_branch] value(lc_requirement),},
+        FieldDark/Dokuro   {[3 into_branch] value(lc_requirement),},
+        IndoorDark/Hagure  {[4 into_branch] value(lc_requirement),},
+        Boot/Kame          {[3 into_branch] value(lc_requirement),},
+        FieldDark/Sand     {[3 into_branch] value(lc_requirement),},
+        DungeonIce/Ice     {[3 into_branch] value(lc_requirement),},
     );
+
+    Ok(())
+}
+
+pub fn apply(patcher: &mut Patcher, free: Item, settings: &Settings) -> Result<()> {
+    patch_portrait_requirements(patcher, settings)?;
 
     // Debugging
     // patcher.flow(albw::course::Id::DungeonCastle)?
@@ -147,6 +145,39 @@ pub fn apply(patcher: &mut Patcher, free: Item) -> Result<()> {
             [254] => 81, // Skip 212,  5,  82, 83, 214 - Rosso?
             [253] => 86, // Skip 218, 22,  87, 88, 216 - Irene?
             [251] => 91, // Skip 222, 26,  92, 93, 221 - Impa?
+        },
+
+        // Hyrule Castle Dungeon
+        DungeonCastle/Castle {
+            [276] => 62,  // [274]
+            [315] => 70,  // [ 19]
+            [236] => 74,  // [ 37]
+            [290] => 75,  // [284]
+            [234] => 79,  // [ 18]
+            [311] => 97,  // [255]
+            [184] => 107, // [106]
+            [107] => 110, // [109]
+            [312] => 175, // [ 87]
+            [313] => 176, // [ 88]
+            [227] => 177, // [ 89]
+            [281] => 178, // [ 16]
+            [228] => 179, // [ 14]
+            [229] => 180, // [ 17]
+            [314] => 181, // [ 15]
+            [237] => 183, // [104] // "what?"
+            [171] => 184, // [ 29]
+            [172] => 185, // [ 39]
+            [131] => 222, // [127]
+            [206] => 223, // [128]
+            [135] => 224, // [129]
+            [137] => 225, // [130]
+            [282] => 269, // [270]
+            [138] => 275, // [  1]
+            [303] => 286, // [ 76] "I wish only to possess..."
+
+            // After fight
+            [5]   => 247, // skip 149
+            [155] => 249, // skip 40
         },
 
         // Shady Guy (Zora's Domain)

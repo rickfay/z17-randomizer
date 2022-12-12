@@ -13,18 +13,28 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
 
 - Dungeon Rewards Shuffled
   - Pendants & Portraits are now randomly placed between the Hyrule and Lorule dungeons.
-  - Maps have been updated to show an X over Portrait dungeons.
+  - Maps will show an X over uncompleted Portrait dungeons.
+- Custom Portrait Requirements
+  - Specify how many Portraits are needed to enter Lorule Castle
+  - {todo: Yuganon config}
+- Hyrule Castle Overhaul
+  - {todo: details}
+  - HC is no longer a merge-free path to Lorule
 - Chest Size Matches Contents option
   - Turns all chests containing Progression into large chests, and all others into small chests.
-- Players can now return to Hyrule from Lorule via a Warp that appears in the Blacksmith after completing Hyrule Castle.
+    - Note: Some large chests have altered hitboxes to prevent negative gameplay interference.
 - Great Rupee Fairy improvements
-  - Automatically throw 3000 rupees as one (long) action. More work to be done.
+  - Automatically throw 3000 rupees as one (long) action.
+    - She's _better_, but there's more work to do.
 - Several cutscenes shortened/reworked
   - Triforce of Courage cutscene is notably skipped.
 - Logic Adjustments:
   - Irene + Shady Guy return, with improved cutscenes.
   - Rosso's House starts locked again, needs Green Pendant to unlock.
-- FIX: Chests containing the Compass in vanilla will now show up on their respective dungeon maps.
+- Fixes:
+  - Chests containing the Compass in vanilla will now show up on their respective dungeon maps.
+  - Softlock prevention added to Gales to prevent players from getting locked into the 1F miniboss
+  - Swamp Palace anti-softlock measures have been reversed
 
 *All changes from the unofficially released v0.1.3 have been folded into this update.*
 </details>

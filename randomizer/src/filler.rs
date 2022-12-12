@@ -31,22 +31,23 @@ pub fn fill_stuff(settings: &Settings, seed: Seed) -> Vec<(LocationInfo, Item)> 
         NoLogic => "No Logic",
     });
     info!("Dungeon Prizes:                 {}", if settings.logic.randomize_dungeon_prizes {"Randomized"} else {"Not Randomized"});
-    info!("Maiamai:                        {}", if settings.logic.maiamai_madness {"Shuffled"} else {"Not Shuffled"});
+    info!("LC Requirement:                 {} Portraits", settings.logic.lc_requirement);
+    //info!("Yuga Ganon Requirement:         {} Portraits", settings.logic.yuganon_requirement);
+    info!("Maiamai:                        {}", if settings.logic.maiamai_madness {"Randomized"} else {"Not Randomized"});
     info!("Weather Vanes:                  {}", if settings.logic.vanes_activated {"All Activated"} else {"Normal"});
     info!("Super Items:                    {}", if settings.logic.super_items {"Included"} else {"Not Included"});
     info!("Trials:                         {}", if settings.logic.skip_trials {"Skipped"} else {"Normal"});
     info!("Dark Rooms:                     {}", if settings.logic.lampless {"Lamp Not Required"} else {"Lamp Required"});
     info!("Swords:                         {}\n", if settings.logic.swordless_mode {"Swordless Mode - NO SWORDS"} else {"Normal"});
 
+    prevalidate(settings);
+
     let mut rng = StdRng::seed_from_u64(seed as u64);
 
     let mut world_graph = build_world_graph();
     let mut check_map = prefill_check_map(&mut world_graph);
 
-    let (
-        mut progression_pool,
-        mut trash_pool
-    ) = get_item_pools(settings, &mut rng);
+    let (mut progression_pool, mut trash_pool) = get_item_pools(settings, &mut rng);
 
     verify_all_locations_accessible(&mut world_graph, &progression_pool, settings);
 
@@ -59,6 +60,21 @@ pub fn fill_stuff(settings: &Settings, seed: Seed) -> Vec<(LocationInfo, Item)> 
     fill_trash(&mut check_map, &mut rng, &trash_pool);
 
     map_to_result(world_graph, check_map)
+}
+
+fn prevalidate(settings: &Settings) {
+
+    // LC Requirement
+    if !(0..=7).contains(&settings.logic.lc_requirement) {
+        error!("Invalid LC Requirement: {}\nExiting...", settings.logic.lc_requirement);
+        exit(1);
+    }
+
+    // Yuganon Requirement
+    if !(0..=7).contains(&settings.logic.yuganon_requirement) {
+        error!("Invalid Yuga Ganon Requirement: {}\nExiting...", settings.logic.yuganon_requirement);
+        exit(1);
+    }
 }
 
 /// Place static items ahead of the randomly filled ones
