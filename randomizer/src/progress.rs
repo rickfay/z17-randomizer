@@ -147,6 +147,16 @@ impl Progress {
         self.has_any(&[Lamp01, Lamp02, FireRod01, FireRod02])
     }
 
+    pub fn can_destroy_curtain(&self) -> bool {
+        self.has_any(&[
+            Sword01, Sword02, Sword03, Sword04,
+            Lamp01, Lamp02,
+            FireRod01, FireRod02,
+            Bombs01, Bombs02,
+            PegasusBoots,
+        ])
+    }
+
     pub fn can_extinguish_torches(&self) -> bool {
         self.has_any(&[
             Sword01, Sword02, Sword03, Sword04,

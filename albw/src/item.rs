@@ -70,7 +70,7 @@ Item(u16) {
     LiverPurple = 0x3B, // Monster Guts
     LiverYellow = 0x3C, // Monster Horn
     PackageSword = 0x3D, // Captain's Sword
-    ZeldaAmulet = 0x3E,
+    ZeldaAmulet = 0x3E, // Charm
     ClothesBlue = 0x3F,
     ClothesRed = 0x40,
     HyruleShield = 0x41,

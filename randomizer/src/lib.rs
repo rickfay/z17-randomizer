@@ -16,7 +16,7 @@ use sys::{Paths, System};
 
 use crate::filler::fill_stuff;
 use crate::filler_item::{convert, FillerItem};
-use crate::patch::r#ref::MsbfKey;
+use crate::patch::msbf::MsbfKey;
 use crate::settings::plando_settings;
 
 mod graph;
@@ -474,8 +474,8 @@ impl ItemExt for Item {
             SageOsfala => Some(MsbfKey::Hagure),
             SageIrene => Some(MsbfKey::Sand),
             SageRosso => Some(MsbfKey::Ice),
-            SageImpa => Option::None, // Impa special
-            PendantPower | PendantWisdom | PendantCourage => Option::None,
+            SageImpa => None, // Impa special
+            PendantPower | PendantWisdom | PendantCourage => None,
             _ => panic!()
         }
     }
@@ -564,14 +564,14 @@ pub fn plando() -> Result<(), Error> {
     //////////////////////////
 
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (1)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (2)"), ItemMizukaki);
-    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (3)"), ItemHookShot);
-    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (4)"), ItemIceRod);
-    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (5)"), ItemBombLv2);
+    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (2)"), PendantCourage);
+    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (3)"), PendantPower);
+    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (4)"), DashBoots);
+    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (5)"), PendantWisdom);
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (6)"), HintGlasses); // Sand Rod Slot
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (7)"), RingHekiga);
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (8)"), RingHekiga);
-    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (9)"), RupeeGold);
+    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (9)"), ItemMizukaki);
 
     /////////////////////////////
     // --- Dungeons Prizes --- //

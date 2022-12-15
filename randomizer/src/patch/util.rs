@@ -43,13 +43,20 @@ pub(crate) fn set_disable_flag(unq: u16, flag: Flag) -> (u16, Box<dyn Fn(&mut Ob
     (unq, Box::new(move |obj: &mut Obj| { obj.set_disable_flag(flag) }))
 }
 
-#[allow(unused)]
 pub(crate) fn clear_enable_flag(unq: u16) -> (u16, Box<dyn Fn(&mut Obj)>) {
-    (unq, Box::new(move |obj: &mut Obj| { obj.set_enable_flag(None) }))
+    (unq, Box::new(move |obj: &mut Obj| { obj.clear_enable_flag() }))
 }
 
 pub(crate) fn clear_disable_flag(unq: u16) -> (u16, Box<dyn Fn(&mut Obj)>) {
-    (unq, Box::new(move |obj: &mut Obj| { obj.set_disable_flag(None) }))
+    (unq, Box::new(move |obj: &mut Obj| { obj.clear_disable_flag() }))
+}
+
+pub(crate) fn clear_active_args(unq: u16) -> (u16, Box<dyn Fn(&mut Obj)>) {
+    (unq, Box::new(move |obj: &mut Obj| { obj.clear_active_args() }))
+}
+
+pub(crate) fn clear_inactive_args(unq: u16) -> (u16, Box<dyn Fn(&mut Obj)>) {
+    (unq, Box::new(move |obj: &mut Obj| { obj.clear_inactive_args() }))
 }
 
 pub(crate) fn redirect(unq: u16, spawn_point: i32, scene: i32, scene_index: i32) -> (u16, Box<dyn Fn(&mut Obj)>) {

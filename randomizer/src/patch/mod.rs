@@ -21,7 +21,7 @@ mod scenes;
 mod prizes;
 mod util;
 mod maps;
-pub mod r#ref;
+pub mod msbf;
 
 #[non_exhaustive]
 pub struct DungeonPrizes {
@@ -294,7 +294,6 @@ impl Patcher {
         let free = self.rentals[8];
         flow::apply(&mut self, free, settings)?;
         prizes::patch_dungeon_prizes(&mut self, &prizes, settings);
-        prizes::patch_required_portraits(&mut self, settings);
         maps::patch_maps(&mut self, &prizes, settings);
         scenes::apply(&mut self, settings)?;
 

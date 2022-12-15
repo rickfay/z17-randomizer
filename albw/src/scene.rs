@@ -258,11 +258,7 @@ impl Obj {
         }
     }
 
-    /// Generate a new Warp Tile object
-    /// Remember to import the actor: `WarpTile`
-    pub fn warp_tile(activation_flag: Flag, clp: i16, ser: u16, unq: u16, spawn: i32, scene: i32, scene_index: i32, translate: Vec3) -> Self {
-        Self::warp(208, 1, activation_flag, clp, ser, unq, spawn, scene, scene_index, translate)
-    }
+
 
     /// Generate a new Hookshot Pole object
     /// Remember to import the actor: `StatueWood`
@@ -298,6 +294,12 @@ impl Obj {
             typ: 1,
             unq,
         }
+    }
+
+    /// Generate a new Warp Tile object
+    /// Remember to import the actor: `WarpTile`
+    pub fn warp_tile(activation_flag: Flag, clp: i16, ser: u16, unq: u16, spawn: i32, scene: i32, scene_index: i32, translate: Vec3) -> Self {
+        Self::warp(208, 1, activation_flag, clp, ser, unq, spawn, scene, scene_index, translate)
     }
 
     /// Generate a new Blue Warp object
@@ -693,13 +695,19 @@ impl Clone for Point {
 
 #[derive(Debug, Copy, Clone)]
 pub enum Flag {
-    Course(u16),
-    Event(u16),
+    React(u16),   // 0 - Reactions with system objects, not persisted
+    Session(u16), // 1 - Flag persists until game is reset (I think?)
+    Two(u16),     // 2 - ???
+    Course(u16),  // 3 - Course-specific, shared between scenes of the same course
+    Event(u16),   // 4 - Global
 }
 
 impl Flag {
     pub fn into_pair(self) -> (u8, u16) {
         match self {
+            Flag::React(flag) => (0, flag),
+            Flag::Session(flag) => (1, flag),
+            Flag::Two(flag) => (2, flag),
             Flag::Course(flag) => (3, flag),
             Flag::Event(flag) => (4, flag),
         }

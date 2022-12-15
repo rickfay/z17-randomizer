@@ -1,8 +1,8 @@
 use albw::{course, scene::{Flag, Obj}};
 use albw::course::Id;
 use albw::course::Id::*;
-use albw::Item::PendantCourage;
-use albw::scene::Vec3;
+use albw::Item::*;
+use albw::scene::{Arg, Transform, Vec3};
 use super::Patcher;
 use crate::{Result, Settings};
 use crate::logic_mode::LogicMode;
@@ -93,7 +93,7 @@ pub fn apply(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
     patch_softlock_prevention(patcher, settings);
     patch_big_problem_chests(patcher, settings);
     patch_master_sword(patcher, settings);
-    patch_hyrule_castle_dungeon(patcher, settings);
+    patch_castles(patcher, settings);
     patch_dark_maze(patcher, settings);
     patch_thief_girl_cave(patcher, settings);
 
@@ -123,13 +123,6 @@ pub fn apply(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
         // Sanctuary Treasure Dungeon
         AttractionLight 5 {
             [26].disable(), // Skip Cutscene
-        },
-
-
-
-        // Lost Woods
-        FieldLight 1 {
-            [34].active(375), // Skip Poes
         },
 
         // East Death Mountain
@@ -373,9 +366,9 @@ pub fn apply(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
 
         // Sacred Realm
         FieldLight 43 {
-            [23].disable(), // seichi - "Sanctuary" - Initial text
+            //[23].disable(), // seichi - "Sanctuary" - Initial text
+            //[32].disable(), // Remove Clouds
             [26].disable(), // zelda_talk - Chat after standing up
-            [32].disable(), // Remove Clouds
             [33].disable(), // zelda_talk_b - Wait for Zelda
             [34].disable(), // zelda_talk_c - Last chat before triangles
         },
@@ -536,14 +529,6 @@ pub fn apply(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
         // DungeonWater 2 {
         //     [255].disable(), // Remove crystal switch, forces merge requirement to complete room to prevent softlock
         // },
-
-        // Lorule Castle
-        DungeonGanon 1 {
-            [1193].call {|obj: &mut Obj| { // Respawn Trial's Skip big rock upon leaving the room
-                obj.arg_mut().4 = 0;
-                obj.arg_mut().6 = 0;
-            }},
-        },
     );
 
     // Open Maiamai Cave only on non-glitch logics
@@ -558,15 +543,6 @@ pub fn apply(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
             );
         }
         _ => {}
-    }
-
-    // Skip Trials Option
-    if settings.logic.skip_trials {
-        apply!(patcher,
-            DungeonGanon 1 {
-                [158].disable(),
-            },
-        );
     }
 
     // Change 'System' properties
@@ -584,10 +560,12 @@ pub fn apply(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
     Ok(())
 }
 
-fn patch_hyrule_castle_dungeon(patcher: &mut Patcher, _: &Settings) {
-
+fn patch_castles(patcher: &mut Patcher, settings: &Settings) {
     let green_pendant_flag = prize_flag(PendantCourage);
-    let yuga2_defeated_flag = Flag::Course(31);
+    let hc_31 = Flag::Course(31); // Set after yuga2 defeated
+    let curtain_flag = Flag::Event(420); // repurposed
+    let open_trials_flag = Flag::Event(421); // repurposed
+    let can_fight_yuganon_flag = Flag::Event(670); // TODO separate from LC requirement
 
     // Hyrule Castle (exterior)
     patcher.modify_objs(FieldLight, 18, &[
@@ -602,88 +580,171 @@ fn patch_hyrule_castle_dungeon(patcher: &mut Patcher, _: &Settings) {
     ]);
 
 
-    // 2F
+    // 2F (there is no 1F of the dungeon)
     patcher.modify_objs(DungeonCastle, 1, &[
-        set_disable_flag(19, yuga2_defeated_flag),  // Armos Statue
+        set_disable_flag(19, hc_31),  // Armos Statue
         call(35, move |obj| { // Warp
-            obj.set_active_flag(yuga2_defeated_flag);
-            obj.set_enable_flag(yuga2_defeated_flag);
+            obj.set_active_flag(hc_31);
+            obj.set_enable_flag(hc_31);
         }),
     ]);
 
-    let made_up_course_flag = Flag::Course(32); // 1,5,12,20,30,31 are taken
 
     // 4F
     patcher.modify_objs(DungeonCastle, 7, &[
-        // set_enable_flag(19, Flag::Event(415)),
-        // set_enable_flag(20, Flag::Event(415)),
-        // set_enable_flag(21, Flag::Event(415)),
-        // set_enable_flag(22, Flag::Event(415)),
+        // set_disable_flag(10, yuga2_421_flag), // Yuga
+        // set_disable_flag(12, yuga2_421_flag), // Zelda
+        // set_disable_flag(13, yuga2_421_flag), // Zelda Portrait
+
+        // set_enable_flag(19, yuga2_defeated_after_flag),
+        // set_enable_flag(20, yuga2_defeated_after_flag),
+        // set_enable_flag(21, yuga2_defeated_after_flag),
+        // set_enable_flag(22, yuga2_defeated_after_flag),
 
         // Cutscene Trigger
         call(9, move |obj| {
-            obj.set_active_flag(Flag::Event(1));
-            obj.set_inactive_flag(made_up_course_flag);
-            obj.set_disable_flag(made_up_course_flag);
+            obj.set_active_flag(Flag::Event(1)); // activate regardless of barrier status
+            // obj.set_inactive_flag(yuga2_421_flag);
+            // obj.set_disable_flag(yuga2_421_flag);
         }),
-        set_disable_flag(10, made_up_course_flag), // Yuga
-        set_disable_flag(12, made_up_course_flag), // Zelda
-        set_disable_flag(13, made_up_course_flag), // Zelda Portrait
     ]);
 
     // 7F
     patcher.modify_objs(DungeonCastle, 5, &[
-        call(18, move |obj| {
-            obj.set_active_flag(yuga2_defeated_flag);
-            obj.set_enable_flag(yuga2_defeated_flag);
+        call(18, move |obj| { // warp
+            obj.set_active_flag(hc_31);
+            obj.set_enable_flag(hc_31);
         }),
     ]);
 
     // 8F
     patcher.modify_objs(DungeonCastle, 6, &[
-        set_disable_flag(20, yuga2_defeated_flag), // Rewire entrance door to stay open with course flag 31 (Yuga defeated)
-        //disable(25), // victory door
+        set_disable_flag(20, hc_31), // Rewire entrance door to stay open
+        // disable(25), // victory door
         disable(28), // no revisits door
     ]);
 
-    // patcher.add_obj(DungeonCastle, 6,
-    //                 Obj::blue_warp(yuga2_defeated_flag,
-    //                                0, 19, 30,
-    //                                1, 3, 3,
-    //                                Vec3 { x: 8.0, y: 0.0, z: -19.75 }));
-    //
-    // // Blacksmith (Hyrule)
-    // patcher.add_obj(IndoorLight, 19,
-    //                 Obj::green_warp(Flag::Event(1),
-    //                                 0, 15, 23,
-    //                                 3, 3, 3,
-    //                                 Vec3 { x: 3.25, y: 0.0, z: -3.5 }));
-    // patcher.add_system(IndoorLight, 19,
-    //                    Obj::spawn_point(1, 0, 16, 24,
-    //                                     Vec3 { x: 3.25, y: 0.0, z: -3.5 }));
-    //
-    // // Blacksmith (Lorule)
-    // patcher.add_obj(IndoorDark, 4,
-    //                 Obj::green_warp(Flag::Event(1),
-    //                                 0, 13, 22,
-    //                                 1, 2, 18,
-    //                                 Vec3 { x: 3.25, y: 0.0, z: -3.5 }));
-    // patcher.add_system(IndoorDark, 4,
-    //                    Obj::spawn_point(3, 0, 14, 23,
-    //                                     Vec3 { x: 3.25, y: 0.0, z: -3.5 }));
-
     // Zelda's Study
     patcher.modify_objs(IndoorLight, 7, &[
-        call(10, |obj| {
-            obj.arg.3 = 0; // Prevent Long Portal Transition
-        }),
-        disable(26),  // Disable Curtain
-        disable(29),  // Disable AreaDisableWallIn
         disable(27),  // No backtracking Door
+        set_disable_flag(26, curtain_flag),  // Curtain
+        set_disable_flag(29, curtain_flag),  // AreaDisableWallIn
+
+        // Portal
+        call(10, move |obj| {
+            obj.arg.3 = 0; // Prevent Long Portal Transition
+            obj.set_active_flag(open_trials_flag); // Open Trials Door
+        }),
+    ]);
+
+    // Hilda's Study
+    patcher.modify_objs(IndoorDark, 5, &[
+        disable(4),  // Trial's Door
+        disable(12), // Yuga revives Ganon cutscene
+        enable(34),  // Throne Room Loading Zone
+        enable(23),  // Skull (top right, controller obj)
+
+        // Portal
+        set_46_args(14, curtain_flag), // Set Flag to remove curtain
+    ]);
+
+    // Hilda's Study (system)
+    patcher.modify_system(IndoorDark, 5, &[
+        enable(23), // Skull (top right, controller system obj)
+        enable(24), // Skull (middle right)
+        enable(25), // Skull (bottom right)
+        enable(41), // Skull (bottom left)
+        enable(46), // Skull (middle left)
+        enable(47), // Skull (top left)
+    ]);
+
+    // Lorule Castle
+    let skip_trials = settings.logic.skip_trials;
+    patcher.modify_objs(DungeonGanon, 1, &[
+        clear_enable_flag(1193), // Respawn Trial's Skip big rock upon leaving the room
+        call(158, move |obj| { // Trial's Door
+            if skip_trials {
+                obj.disable();
+            } else {
+                obj.set_disable_flag(open_trials_flag);
+            }
+        }),
+
+        disable(265), // Trial's Door camera pan
+    ]);
+
+
+    // Throne Room
+    patcher.modify_objs(DungeonBoss, 1, &[
+
+        // fight start trigger
+        call(10, move |obj| {
+            obj.set_enable_flag(can_fight_yuganon_flag);
+            obj.set_active_flag(can_fight_yuganon_flag);
+        }),
+        clear_enable_flag(27), // Hilda
+        clear_enable_flag(41), // camera offset
+        clear_enable_flag(43), // NpcAttention1
+        clear_enable_flag(48), // ObjPictureZelda
     ]);
 }
 
 fn patch_master_sword(patcher: &mut Patcher, _: &Settings) {
+
+    // Lost Woods
+    patcher.modify_objs(FieldLight, 1, &[
+
+        // Rear LZ will always be present and lead to Master Sword area
+        redirect(17, 16, 0, 33),
+
+        // Repurpose front LZ for PoC, it'll block the Master Sword until obtained
+        call(34, |obj| {
+            obj.redirect(0, 0, 0);
+            obj.set_active_flag(Flag::Event(1)); // might not need this
+            obj.set_disable_flag(prize_flag(PendantCourage))
+        }),
+    ]);
+
+    // Wisdom blocker LZ, disappears with PoW Flag
+    let (flg1, flg3) = prize_flag(PendantWisdom).into_pair();
+    patcher.add_obj(FieldLight, 1, Obj {
+        arg: Arg(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.0),
+        clp: 0,
+        flg: (0, flg1, 0, flg3),
+        id: 8,
+        lnk: vec![],
+        nme: Some(String::from("Invalid")),
+        ril: vec![],
+        ser: Some(57),
+        srt: Transform {
+            scale: Vec3 { x: 6.0, y: 6.0, z: 6.0 },
+            rotate: Vec3 { x: 0.0, y: 180.0, z: 0.0 },
+            translate: Vec3 { x: -20.0, y: 0.0, z: -25.5 },
+        },
+        typ: 6,
+        unq: 327,
+    });
+
+    // Power blocker LZ, disappears with PoP Flag
+    let (flg1, flg3) = prize_flag(PendantPower).into_pair();
+    patcher.add_obj(FieldLight, 1, Obj {
+        arg: Arg(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.0),
+        clp: 0,
+        flg: (0, flg1, 0, flg3),
+        id: 8,
+        lnk: vec![],
+        nme: Some(String::from("Invalid")),
+        ril: vec![],
+        ser: Some(58),
+        srt: Transform {
+            scale: Vec3 { x: 6.0, y: 6.0, z: 6.0 },
+            rotate: Vec3 { x: 0.0, y: 180.0, z: 0.0 },
+            translate: Vec3 { x: -20.0, y: 0.0, z: -25.5 }, },
+        typ: 6,
+        unq: 328,
+    });
+
+    // Master Sword Pedestal
     patcher.modify_objs(FieldLight, 34, &[
         call(71, |obj| {
             obj.clear_active_args();
@@ -811,7 +872,14 @@ fn debug_stuff(patcher: &mut Patcher, settings: &Settings) {
         call(24, |obj| {
             obj.redirect(
                 // 5, 0, 26,   // No Redirect
+                // 0, 0, 0, // Lost Woods
+                // 20, 0, 17, // HC Roof
+                // 0, 5, 2,    // Swamp Cave
+                // 0,21,0, // Throne Room
+                // 0, 8, 7, // After final boss cutscene
+                // 0, 0, 42, // Sacred Realm
                 0, 3, 4,    // Hilda's Study
+                // 0, 2, 6,    // Zelda's Study (glitched for some reason)
                 // 0, 3, 14,   // Osfala Portrait
                 // 0, 1, 17,   // FieldDark 18
                 // 7, 4, 17,   // Sanctuary Dungeon End
@@ -828,7 +896,6 @@ fn debug_stuff(patcher: &mut Patcher, settings: &Settings) {
                 // 0, 12, 0,   // Hyrule Castle Dungeon
                 // 2, 1, 30,   // Zaganaga Portal
                 // 0, 1, 30,   // Misery Mire
-                // 0, 5, 2,    // Swamp Cave
                 // 0, 5, 13,   // Great Rupee Fairy Cave
                 // 1, 17, 0,   // Ice Ruins Boss
                 // 0, 17, 0,   // Ice Ruins Boss
@@ -855,6 +922,11 @@ fn debug_stuff(patcher: &mut Patcher, settings: &Settings) {
             );
         }),
     ]);
+
+    // Swamp Cave
+    // patcher.modify_objs(CaveDark, 3, &[
+    //     redirect(7, 20, 0, 17),
+    // ]);
 
 
     // patcher.modify_objs(FieldLight, 27, &[

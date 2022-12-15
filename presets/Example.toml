@@ -6,7 +6,7 @@ mode = "Normal"
 randomize_dungeon_prizes = true
 ## The number of Portraits (0-7) needed to trigger the Hilda cutscene to open Lorule Castle
 lc_requirement = 7
-## The number of Portraits (0-7) needed to remove the final door before Yuga Ganon
+## The number of Portraits (0-7) needed to fight before Yuga Ganon
 yuganon_requirement = 7
 ## Guarantees one of the following weapons will be placed in Ravio's Shop: Sword, Bow, Hammer, Fire Rod, Ice Rod, or Bombs
 assured_weapon = false

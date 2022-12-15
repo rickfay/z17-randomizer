@@ -1,46 +1,6 @@
-use albw::course::Id;
-use albw::course::Id::*;
-use albw::string_struct;
+use albw::string_constants;
 
-
-#[allow(non_camel_case_types, unused)]
-pub struct MsbfInfo {
-    course: Id,
-    msbf: Option<&'static str>,
-}
-
-// TODO reevaluate usefulness
-#[allow(unused)]
-impl MsbfInfo {
-    pub const EP: Self = Self { msbf: None, course: DungeonEast };
-    pub const HG: Self = Self { msbf: None, course: DungeonWind };
-    pub const TH: Self = Self { msbf: None, course: DungeonHera };
-    pub const PD: Self = Self { msbf: Some(MsbfKey::Dark), course: DungeonDark };
-    pub const SP: Self = Self { msbf: Some(MsbfKey::Water), course: DungeonWater };
-    pub const SW: Self = Self { msbf: Some(MsbfKey::Dokuro), course: FieldDark };
-    pub const TT: Self = Self { msbf: Some(MsbfKey::Hagure), course: IndoorDark };
-    pub const TR: Self = Self { msbf: None, course: DungeonKame };
-    pub const DP: Self = Self { msbf: Some(MsbfKey::Sand), course: FieldDark };
-    pub const IR: Self = Self { msbf: Some(MsbfKey::Ice), course: DungeonIce };
-
-    pub fn get_course(&self) -> Id {
-        self.course
-    }
-
-    pub fn has_msbf(&self) -> bool {
-        self.msbf.is_some()
-    }
-
-    pub fn get_msbf(&self) -> Option<&'static str> {
-        self.msbf
-    }
-
-    pub fn get_path(&self) -> String {
-        format!("World/Flow/{}.msbf", self.msbf.unwrap())
-    }
-}
-
-string_struct! {
+string_constants! {
     #[allow(non_upper_case_globals)]
     MsbfKey {
         Castle,

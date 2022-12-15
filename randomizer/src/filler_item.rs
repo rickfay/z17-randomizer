@@ -524,8 +524,8 @@ pub fn convert(fill_item: FillerItem) -> Option<Item> {
         FillerItem::OreRed => Some(Item::OreRed),
 
         // Small Keys
-        FillerItem::HyruleSanctuaryKey |
-        FillerItem::LoruleSanctuaryKey |
+        HyruleSanctuaryKey |
+        LoruleSanctuaryKey |
         EasternKeySmall01 |
         EasternKeySmall02 |
         GalesKeySmall01 |
@@ -545,7 +545,7 @@ pub fn convert(fill_item: FillerItem) -> Option<Item> {
         SkullKeySmall01 |
         SkullKeySmall02 |
         SkullKeySmall03 |
-        FillerItem::ThievesKeySmall |
+        ThievesKeySmall |
         IceKeySmall01 |
         IceKeySmall02 |
         IceKeySmall03 |
@@ -564,29 +564,29 @@ pub fn convert(fill_item: FillerItem) -> Option<Item> {
         LoruleCastleKeySmall05 => Some(KeySmall),
 
         // Big Keys
-        FillerItem::EasternKeyBig |
-        FillerItem::GalesKeyBig |
-        FillerItem::HeraKeyBig |
-        FillerItem::DarkKeyBig |
-        FillerItem::SwampKeyBig |
-        FillerItem::SkullKeyBig |
-        FillerItem::ThievesKeyBig |
-        FillerItem::IceKeyBig |
-        FillerItem::DesertKeyBig |
-        FillerItem::TurtleKeyBig => Some(KeyBoss),
+        EasternKeyBig |
+        GalesKeyBig |
+        HeraKeyBig |
+        DarkKeyBig |
+        SwampKeyBig |
+        SkullKeyBig |
+        ThievesKeyBig |
+        IceKeyBig |
+        DesertKeyBig |
+        TurtleKeyBig => Some(KeyBoss),
 
         // Compasses
-        FillerItem::EasternCompass |
-        FillerItem::GalesCompass |
-        FillerItem::HeraCompass |
-        FillerItem::DarkCompass |
-        FillerItem::SwampCompass |
-        FillerItem::SkullCompass |
-        FillerItem::ThievesCompass |
-        FillerItem::IceCompass |
-        FillerItem::DesertCompass |
-        FillerItem::TurtleCompass |
-        FillerItem::LoruleCastleCompass => Some(Compass),
+        EasternCompass |
+        GalesCompass |
+        HeraCompass |
+        DarkCompass |
+        SwampCompass |
+        SkullCompass |
+        ThievesCompass |
+        IceCompass |
+        DesertCompass |
+        TurtleCompass |
+        LoruleCastleCompass => Some(Compass),
 
         //GreatSpin => Some(SpecialMove),
         RupeeGreen => Some(RupeeG),

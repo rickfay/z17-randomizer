@@ -64,6 +64,9 @@ macro_rules! action {
     ($command:tt command($new_command:expr)) => {
         $command.set_command($new_command);
     };
+    ($command:tt count($new_command:expr)) => {
+        $command.set_count($new_command);
+    };
     ($command:tt => $next:expr) => {
         $command.set_next($next);
     };
@@ -114,12 +117,21 @@ pub fn apply(patcher: &mut Patcher, free: Item, settings: &Settings) -> Result<(
     patch_portrait_requirements(patcher, settings)?;
 
     // Debugging
-    // patcher.flow(albw::course::Id::DungeonCastle)?
-    //     .get_mut(stringify!(Castle))
+    // patcher.flow(albw::course::Id::FieldLight)?
+    //     .get_mut(stringify!(Ending))
     //     .ok_or_else(|| crate::Error::game("File not found."))??.get()
     //     .debug();
 
     apply!(patcher,
+
+        // Sacred Realm
+        FieldLight/Ending {
+            [226] => 82, // skip 21
+            [27] => 202, // skip 23
+            [227] => 98, // skip 201
+            [94] => 25, // skip 24
+            [101] => 135, // skip 99
+        },
 
         // Master Sword Pedestal
         FieldLight/FieldLight_00_Mayoinomori {
@@ -177,7 +189,16 @@ pub fn apply(patcher: &mut Patcher, free: Item, settings: &Settings) -> Result<(
 
             // After fight
             [5]   => 247, // skip 149
-            [155] => 249, // skip 40
+            //[155] => 249, // skip 40
+            [40 convert_into_action] each [ // set Course Flag 1, if not already set, to spawn 4F enemies
+                command(30),
+                value(3001),
+                count(0),
+            ],
+            [11] each [
+                value(369), // set Flag 415, if not already set, to clear 4F cutscene
+                => None, // End, skip setting Flag 420 and 421, freeing them for use
+            ],
         },
 
         // Shady Guy (Zora's Domain)

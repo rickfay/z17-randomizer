@@ -339,6 +339,7 @@ impl<'flow, 'input> StepMut<'flow, 'input> {
         Some(BranchMut(self))
     }
 
+    // FIXME this is actually setting the command, not the kind
     fn set_kind(&mut self, kind: u16) {
         unsafe {
             self.flow
@@ -384,6 +385,17 @@ impl<'flow, 'input> StepMut<'flow, 'input> {
                 .unwrap()
                 .get_unchecked_mut(0xA..0xC)
                 .copy_from_slice(&command.to_le_bytes());
+        }
+    }
+
+    fn set_count(&mut self, count: u16) {
+        unsafe {
+            self.flow
+                .steps
+                .get_mut(self.index)
+                .unwrap()
+                .get_unchecked_mut(0xC..0xE)
+                .copy_from_slice(&count.to_le_bytes());
         }
     }
 }
@@ -446,6 +458,10 @@ impl<'flow, 'input> ActionMut<'flow, 'input> {
 
     pub fn set_command(&mut self, command: u16) {
         self.0.set_command(command);
+    }
+
+    pub fn set_count(&mut self, count: u16) {
+        self.0.set_count(count);
     }
 }
 

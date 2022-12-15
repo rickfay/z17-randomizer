@@ -265,7 +265,7 @@ impl Game {
 const US_ID: u64 = 0x00040000000EC300;
 
 #[macro_export]
-macro_rules! string_struct {
+macro_rules! string_constants {
     (
         $(#[$attr:meta])*
         $type:ident {

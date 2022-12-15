@@ -44,7 +44,7 @@ pub struct Logic {
     pub randomize_dungeon_prizes: bool,
     /// The number of Portraits needed to trigger the Hilda cutscene to open Lorule Castle
     pub lc_requirement: u8,
-    /// The number of Portraits needed to remove the final door before Yuga Ganon
+    /// The number of Portraits needed to fight Yuga Ganon
     pub yuganon_requirement: u8,
     /// Guarantees a Weapon is placed in Ravio's Shop
     pub assured_weapon: bool,

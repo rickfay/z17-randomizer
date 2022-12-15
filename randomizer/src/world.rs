@@ -642,7 +642,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             fast_travel_hyrule(),
             path_free(HyruleField),
             path_free(CuccoDungeon),
-            portal(LoruleCastleField),
+            portal_std(LoruleCastleField),
         ])),
         (CuccoDungeon, location("Cucco Dungeon", vec![
             check_free(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Cucco Dungeon")),
@@ -892,7 +892,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             fast_travel_hyrule(),
             path_free(HyruleField),
             path_free(GraveyardLedgeCave),
-            portal(GraveyardLedgeLorule),
+            portal_std(GraveyardLedgeLorule),
         ])),
         (GraveyardLedgeCave, location("Graveyard Ledge Cave", vec![
             check_free(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Sanctuary Cave")),
@@ -1029,7 +1029,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             check_free(LocationInfo::new(regions::hyrule::kakariko::closed::SUBREGION, "Stylish Woman")),
             check_quest_free("Open Stylish Woman's House", StylishWomansHouseOpen),
         ], vec![
-            portal(LoruleCastleField),
+            portal_std(LoruleCastleField),
             path_free(HyruleField),
         ])),
         (MilkBar, location("Milk Bar", vec![
@@ -1133,7 +1133,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             path_free(HyruleField),
         ])),
         (SanctuaryChurch, location("Sanctuary Church", vec![], vec![
-            portal(LoruleSanctuaryCaveLower),
+            portal_std(LoruleSanctuaryCaveLower),
             path(HyruleField,
                  Some(|p| p.has_opened_sanctuary_doors()),
                  None,
@@ -1574,13 +1574,13 @@ fn hyrule() -> HashMap<Location, LocationNode> {
         ], vec![
             fast_travel_hyrule(),
             path_free(FireCaveBottom),
-            portal(RossosOreMineLorule),
+            portal_std(RossosOreMineLorule),
         ])),
         (FloatingIslandHyrule, location("Hyrule Floating Island", vec![
             check_free(LocationInfo::new(regions::hyrule::death::far_island::SUBREGION, "Floating Island")),
         ], vec![
             fast_travel_hyrule(),
-            portal(FloatingIslandLorule),
+            portal_std(FloatingIslandLorule),
         ])),
     ])
 }
@@ -1744,7 +1744,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                  None,
                  None,
             ),
-            portal(StylishWomanHouse),
+            portal_std(StylishWomanHouse),
             path_free(BigBombFlowerShop),
             path(BigBombFlowerField,
                  Some(|p| p.has_bomb_flower()),
@@ -1753,7 +1753,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                  None,
                  None,
             ),
-            portal(CuccoDungeonLedge),
+            portal_std(CuccoDungeonLedge),
         ])),
         (BigBombFlowerShop, location("Big Bomb Flower Shop", vec![], vec![
             path_free(LoruleCastleField),
@@ -1823,7 +1823,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
         ])),
         (GraveyardLedgeLorule, location("Graveyard Ledge Lorule", vec![], vec![
             fast_travel_lorule(),
-            portal(GraveyardLedgeHyrule),
+            portal_std(GraveyardLedgeHyrule),
             path_free(LoruleGraveyard),
         ])),
         (LoruleSanctuary, location("Lorule Sanctuary", vec![
@@ -1866,7 +1866,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
             ),
         ])),
         (LoruleSanctuaryCaveLower, location("Philosopher's Cave Lower", vec![], vec![
-            portal(SanctuaryChurch),
+            portal_std(SanctuaryChurch),
             path_free(LoruleGraveyard),
         ])),
         (LoruleSanctuaryCaveUpper, location("Philosopher's Cave Upper", vec![
@@ -1969,7 +1969,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
         ], vec![
             fast_travel_lorule(),
             path_free(LoruleCastleField),
-            portal(HyruleField),
+            portal_std(HyruleField),
         ])),
 
         // Desert / Misery Mire
@@ -1984,7 +1984,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
             ),
         ], vec![
             fast_travel_hyrule(),
-            portal(MiseryMire),
+            portal_std(MiseryMire),
             path(MiseryMireLedge, // todo portal-ify
                  Some(|p| p.can_merge() && p.has_bombs() && p.has_sand_rod()),
                  Some(|p| p.can_merge() && p.has_bombs() && p.has_stamina_scroll()),
@@ -2017,7 +2017,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
         (DesertSouthWestLedge, location("Desert South West Ledge", vec![], vec![
             fast_travel_hyrule(),
             path_free(Desert),
-            portal(MiseryMireBridge),
+            portal_std(MiseryMireBridge),
             path(DesertPalaceWeatherVane,
                  Some(|p| p.has_sand_rod()),
                  None,
@@ -2070,7 +2070,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
         ], vec![
             fast_travel_lorule(),
             path_free(SandRodDungeon),
-            portal(Desert),
+            portal_std(Desert),
             path(MiseryMireOoB,
                  None,
                  None,
@@ -2096,8 +2096,8 @@ fn lorule() -> HashMap<Location, LocationNode> {
         (MiseryMireBridge, location("Misery Mire Bridge", vec![], vec![
             fast_travel_lorule(),
             path_free(MiseryMire),
-            portal(Desert),
-            portal(DesertSouthWestLedge),
+            portal_std(Desert),
+            portal_std(DesertSouthWestLedge),
             path(MiseryMireOoB,
                  None,
                  None,
@@ -2110,7 +2110,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
             fast_travel_lorule(),
             path_free(MiseryMire),
             path_free(MiseryMireBridge),
-            portal(DesertZaganagaLedge),
+            portal_std(DesertZaganagaLedge),
             path_free(ZaganagasArena),
             path(MiseryMireRewardBasket,
                  None,
@@ -2156,7 +2156,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
             ),
         ], vec![
             fast_travel_lorule(),
-            portal(HyruleField),
+            portal_std(HyruleField),
             path(LoruleLakeWater,
                  Some(|p| p.has_flippers()),
                  None,
@@ -2190,7 +2190,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
             ),
         ], vec![
             fast_travel_lorule(),
-            portal(HyruleField),
+            portal_std(HyruleField),
             path_free(LakesideItemShopLorule),
             path(LoruleLakeSouthWest,
                  Some(|p| p.can_merge()),
@@ -2365,7 +2365,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
             ),
         ], vec![
             fast_travel_lorule(),
-            portal(HyruleField),
+            portal_std(HyruleField),
             path(DarkRuinsWeatherVane,
                  Some(|p| (p.can_merge() && p.can_destroy_skull()) || p.has_sage_gulley()),
                  None,
@@ -2447,7 +2447,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
             ),
         ], vec![
             fast_travel_lorule(),
-            portal(ZoraDomainArea),
+            portal_std(ZoraDomainArea),
             path(HinoxCaveWater,
                  Some(|p| p.has_flippers()),
                  None,
@@ -2588,9 +2588,9 @@ fn lorule() -> HashMap<Location, LocationNode> {
             ),
         ], vec![
             fast_travel_lorule(),
-            portal(RossoHouse),
+            portal_std(RossoHouse),
             path_free(MysteriousManCave),
-            portal(HyruleField),
+            portal_std(HyruleField),
             path_free(SkullWoodsFoyer),
         ])),
         (MysteriousManCave, location("Gold Bee Cave", vec![
@@ -2652,7 +2652,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
             ),
         ], vec![
             fast_travel_lorule(),
-            portal(DeathMountainBase),
+            portal_std(DeathMountainBase),
             path(RossosOreMineLorule,
                  None,
                  None,
@@ -2671,7 +2671,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
             ),
         ], vec![
             fast_travel_lorule(),
-            portal(RossosOreMine),
+            portal_std(RossosOreMine),
             path(LoruleDeathWest,
                  Some(|p| p.has_hookshot()),
                  None,
@@ -2755,7 +2755,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
         (FloatingIslandLorule, location("Floating Island Lorule", vec![], vec![
             fast_travel_lorule(),
             path_free(IceCaveNorthWest),
-            portal(FloatingIslandHyrule),
+            portal_std(FloatingIslandHyrule),
         ])),
         (IceCaveSouthWest, location("Ice Cave South West", vec![], vec![
             path_free(IceCaveWest),
@@ -3227,7 +3227,13 @@ fn inside_hyrule_castle() -> HashMap<Location, LocationNode> {
         ])),
         (ZeldasStudy, location("Zelda's Study", vec![], vec![
             path_free(HyruleCastleDungeon),
-            portal(HildasStudy),
+            portal(HildasStudy,
+                   Some(|p| p.can_merge() && p.can_destroy_curtain()),
+                   None,
+                   None,
+                   None,
+                   None,
+            ),
         ])),
     ])
 }
@@ -3986,11 +3992,11 @@ fn desert_palace() -> HashMap<Location, LocationNode> {
         (DesertZaganagaLedge, location("Desert Zaganaga Ledge", vec![], vec![
             fast_travel_hyrule(),
             path_free(DesertPalaceExit3F),
-            portal(ZaganagasArena),
+            portal_std(ZaganagasArena),
         ])),
         (ZaganagasArena, location("Zaganaga's Arena", vec![], vec![
             fast_travel_lorule(),
-            portal(DesertZaganagaLedge),
+            portal_std(DesertZaganagaLedge),
             path(MiseryMireRewardBasket,
                  Some(|p| p.can_defeat_zaganaga()),
                  None,
@@ -4348,7 +4354,7 @@ fn lorule_castle() -> HashMap<Location, LocationNode> {
         ])),
         (HildasStudy, location("Hilda's Study", vec![], vec![
             path_free(LoruleCastle2F3F),
-            portal(ZeldasStudy),
+            portal_std(ZeldasStudy),
             path_free(ThroneRoom),
         ])),
         (ThroneRoom, location("Throne Room", vec![
@@ -4437,9 +4443,18 @@ fn path(default: Location, normal: Option<fn(&Progress) -> bool>,
     Path::new(default, Logic::new(normal, hard, glitch_basic, glitch_advanced, glitch_hell))
 }
 
+fn portal_std(default: Location) -> Path {
+    portal(default, Some(|p| p.can_merge()), None, None, None, None)
+}
+
 // TODO read destination from portal map
-fn portal(default: Location) -> Path {
-    Path::new(default, Logic::new(Some(|p| p.can_merge()), None, None, None, None))
+fn portal(default: Location,
+          normal: Option<fn(&Progress) -> bool>,
+          hard: Option<fn(&Progress) -> bool>,
+          glitch_basic: Option<fn(&Progress) -> bool>,
+          glitch_advanced: Option<fn(&Progress) -> bool>,
+          glitch_hell: Option<fn(&Progress) -> bool>) -> Path {
+    Path::new(default, Logic::new(normal, hard, glitch_basic, glitch_advanced, glitch_hell))
 }
 
 fn fast_travel_hyrule() -> Path {
