@@ -16,9 +16,10 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
   - Maps will show an X over uncompleted Portrait dungeons.
 - Custom Portrait Requirements
   - Specify how many Portraits are needed to enter Lorule Castle
-  - {todo: Yuganon config}
-- Hyrule Castle Overhaul
-  - {todo: details}
+    - For now, Yuganon Requirement will match LC Requirement
+- Hyrule Castle Complete Overhaul
+  - HC has been revamped and returned to its vanilla roots
+  - Completing HC rewards players with backdoor access to LC
   - HC is no longer a merge-free path to Lorule
 - Chest Size Matches Contents option
   - Turns all chests containing Progression into large chests, and all others into small chests.
@@ -32,6 +33,7 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
   - Irene + Shady Guy return, with improved cutscenes.
   - Rosso's House starts locked again, needs Green Pendant to unlock.
 - Fixes:
+  - Pedestal requirements are properly enforced
   - Chests containing the Compass in vanilla will now show up on their respective dungeon maps.
   - Softlock prevention added to Gales to prevent players from getting locked into the 1F miniboss
   - Swamp Palace anti-softlock measures have been reversed
