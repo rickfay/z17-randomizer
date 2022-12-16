@@ -160,7 +160,7 @@ pub fn apply(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
             [101].disable(), // Dampe
             [102].disable(), // Seres
             [133].active(1), // Close Church Door by default
-            [133].disable(Flag::Event(415)), // Church Door rigged to open when Sanc left switch pulled
+            [133].disable(Flag::Event(523)), // Church Door rigged to open when Sanc left switch pulled
 
             [144].disable(), // Buzz Blob
             [145].enable(), // Buzz Blob
@@ -170,19 +170,19 @@ pub fn apply(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
 
         // Sanctuary Dungeon
         CaveLight 18 {
-            // 415 is a repurposed flag to control this
-            [35].active(415), // Pull Switch
-            [37].inactive(415), // Door
-            [107].active(415), // TagCameraFocus
-            [107].disable(Flag::Event(415)), // TagCameraFocus
+            // 523 is a repurposed flag to control this
+            [35].active(523), // Pull Switch
+            [37].inactive(523), // Door
+            [107].active(523), // TagCameraFocus
+            [107].disable(Flag::Event(523)), // TagCameraFocus
         },
 
         // Sanctuary Church
         IndoorLight 11 {
             [14].clear_enable_flag(), // Church Door
-            [14].disable(Flag::Event(415)), // Church Door
+            [14].disable(Flag::Event(523)), // Church Door
             [16].disable(), // Early game Priest
-            [20].active(415),
+            [20].active(523),
         },
 
         // Graveyard

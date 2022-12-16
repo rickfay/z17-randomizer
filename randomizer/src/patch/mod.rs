@@ -535,7 +535,7 @@ fn cutscenes<'game, 'settings>(
                 //415, // Skip Yuga capturing Zelda
                 430, // Fix Chamber of Sages Softlock
                 510, // Open Portals, Activate Hyrule Castle Midway
-                //522, // Hilda Blacksmith Text + get Map Swap icon on lower screen
+                522, // Hilda Blacksmith Text + get Map Swap icon on lower screen + correct Lorule music
                 //523, // Hilda Graveyard Text
                 524, // Hilda ??? Text
                 525, // Skip Sahasrahla outside Link's House, make Hyrule Hotfoot appear
@@ -554,6 +554,7 @@ fn cutscenes<'game, 'settings>(
                 600, // Hilda ??? Text
                 620, // Hilda ??? Text
                 640, // Hilda ??? Text
+                897, // Big Special Something
                 899, // Enable Quick Equip
                 902, // StreetPass Tree
                 906, // Monster Guts
