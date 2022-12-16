@@ -32,7 +32,7 @@ pub fn fill_stuff(settings: &Settings, seed: Seed) -> Vec<(LocationInfo, Item)> 
     });
     info!("Dungeon Prizes:                 {}", if settings.logic.randomize_dungeon_prizes {"Randomized"} else {"Not Randomized"});
     info!("LC Requirement:                 {} Portraits", settings.logic.lc_requirement);
-    //info!("Yuga Ganon Requirement:         {} Portraits", settings.logic.yuganon_requirement);
+    info!("Yuga Ganon Requirement:         {} Portraits", settings.logic.yuganon_requirement);
     info!("Maiamai:                        {}", if settings.logic.maiamai_madness {"Randomized"} else {"Not Randomized"});
     info!("Weather Vanes:                  {}", if settings.logic.vanes_activated {"All Activated"} else {"Normal"});
     info!("Super Items:                    {}", if settings.logic.super_items {"Included"} else {"Not Included"});

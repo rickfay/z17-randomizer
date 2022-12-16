@@ -137,8 +137,8 @@ fn preset_ui() -> Settings {
 
     let mode = prompt_logic_mode();
     let randomize_dungeon_prizes = prompt_until_bool("Randomize Dungeon Prizes?");
-    let lc_requirement = prompt_u8_in_range("Choose how many Portraits are needed to enter Lorule Castle:", 0, 7);
-    let yuganon_requirement = 7; // TODO prompt_u8_in_range("Choose how many Portraits are needed to fight Yuganon:", 0, 7);
+    let lc_requirement = prompt_u8_in_range("Choose how many Portraits are needed to enter Lorule Castle and fight Yuganon:", 0, 7);
+    //let yuganon_requirement = prompt_u8_in_range("Choose how many Portraits are needed to fight Yuganon:", 0, 7);
     //let start_with_bracelet = prompt_until_bool("Start with Ravio's Bracelet?");
     let assured_weapon = prompt_until_bool("Guarantee a Weapon is placed in Ravio's Shop?");
     let bell_in_shop = prompt_until_bool("Guarantee Bell in Ravio's Shop?");
@@ -162,7 +162,7 @@ fn preset_ui() -> Settings {
             mode,
             randomize_dungeon_prizes,
             lc_requirement,
-            yuganon_requirement,
+            yuganon_requirement: lc_requirement,
             assured_weapon,
             bell_in_shop,
             pouch_in_shop,
@@ -206,11 +206,14 @@ fn main() -> randomizer::Result<()> {
     } else {
         let system = randomizer::system()?;
 
-        let preset = if let Some(ref preset) = opt.preset {
+        let mut preset = if let Some(ref preset) = opt.preset {
             system.preset(&preset)?
         } else {
             preset_ui()
         };
+
+        // Temporary: Force Yuganon Requirement to be equal to LC Requirement
+        preset.logic.yuganon_requirement = preset.logic.lc_requirement;
 
         const MAX_RETRIES: u16 = 100;
         let mut result = Ok(());
@@ -222,7 +225,6 @@ fn main() -> randomizer::Result<()> {
             info!("Preset:                         {}", opt.preset.as_ref().unwrap_or(&String::from("<None>")));
             info!("Version:                        0.3.0 - Dev Build #2");
 
-            //let randomizer = Generator::new(&preset, seed);
             let spoiler = panic::catch_unwind(|| filler_new(&preset, seed));
 
             if spoiler.is_ok() {
