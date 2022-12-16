@@ -21,6 +21,7 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
   - HC has been revamped and returned to its vanilla roots
   - Completing HC rewards players with backdoor access to LC
   - HC is no longer a merge-free path to Lorule
+  - Swordless Mode no longer has a free pass through barrier
 - Chest Size Matches Contents option
   - Turns all chests containing Progression into large chests, and all others into small chests.
     - Note: Some large chests have altered hitboxes to prevent negative gameplay interference.
@@ -331,6 +332,9 @@ For Citra (emulator):
 
 `randomize_dungeon_prizes`
 - Randomizes the Pendants and Portraits between Hyrule and Lorule dungeons
+
+`lc_requirement`
+- The number of Portraits (0-7) needed to trigger the Hilda cutscene to open Lorule Castle
 
 `assured_weapon`
 - If enabled, guarantees that a weapon will be placed in Ravio's Shop
