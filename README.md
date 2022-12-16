@@ -368,8 +368,7 @@ For Citra (emulator):
 - If enabled, the player may have to cross dark rooms without a light source. If you're not sure, select 'false'.
 
 `swordless_mode`
-- Generates a seed with no Swords. Things you should know about Swordless:
-  - The Hyrule Castle Barrier will be torn down from game start, providing access to its checks and the Inside Hyrule Castle dungeon.
+- Generates a seed with no Swords.
   - You will need the [Net to play Tennis with Yuganon](https://www.twitch.tv/videos/1265170513). Good luck finding it!
 
 `chest_size_matches_contents`

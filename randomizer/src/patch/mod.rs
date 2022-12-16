@@ -574,11 +574,6 @@ fn cutscenes<'game, 'settings>(
                 opening.add_event_flag(670);
             }
 
-            // Tear down HC Barrier in Swordless Mode
-            if logic.swordless_mode {
-                opening.add_event_flag(410);
-            }
-
             // Night Mode
             if options.night_mode {
                 opening.add_event_flag(964);

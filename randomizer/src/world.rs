@@ -445,7 +445,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             ),
             path_free(LostWoods),
             path(HyruleCastleCourtyard,
-                 Some(|p| p.has_master_sword() || p.swordless_mode()),
+                 Some(|p| p.has_master_sword()),
                  None,
                  None,
                  None,
