@@ -88,7 +88,7 @@ macro_rules! action {
 }
 
 pub fn apply(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
-    // debug_stuff(patcher, settings); // FIX ME don't leave on
+    // debug_stuff(patcher, settings); // FIXME don't leave on
 
     patch_softlock_prevention(patcher, settings);
     patch_big_problem_chests(patcher, settings);
@@ -792,19 +792,26 @@ fn patch_big_problem_chests(patcher: &mut Patcher, settings: &Settings) {
         return;
     }
 
-    const BIG_PROBLEM_CHESTS: [(Id, u16, u16); 12] = [
+    const BIG_PROBLEM_CHESTS: [(Id, u16, u16); 19] = [
         (FieldLight, 3, 303),     // Death Mountain West Ledge
         (FieldLight, 34, 71),     // Master Sword Pedestal
         (FieldLight, 35, 155),    // Lake Hylia Ledge
         (FieldLight, 33, 320),    // Southern Ruins Ledge
         // (FieldLight, 1, 133),  // Lost Woods Big Rock
         (AttractionLight, 2, 33), // Southern Ruins Treasure Dungeon
+        (DungeonDark, 2, 127),    // Dark 1F Fall from 2F
+        (DungeonDark, 3, 269),    // Dark 2F East
         (DungeonWater, 1, 170),   // Swamp 1F West Room
         (DungeonWater, 1, 299),   // Swamp 1F East Room
         (DungeonWater, 1, 373),   // Swamp 1F SW Room
         (DungeonWater, 2, 620),   // Swamp B1 Raft Room (Left)
         (DungeonWater, 2, 621),   // Swamp B1 Raft Room (Right)
         (DungeonDokuro, 2, 105),  // Skull B2 Moving Platform Room
+        (DungeonKame, 1, 173),    // Turtle 1F SE Room
+        (DungeonKame, 2, 183),    // Turtle B1 East Platform
+        (DungeonSand, 1, 78),     // Desert 1F Entrance
+        (DungeonSand, 1, 565),    // Desert 1F South Sand Room
+        (DungeonSand, 2, 462),    // Desert 2F Below Big Chest
         // (DungeonIce, 1, 1122), // Ice Ruins B4 SW Fall
         (DungeonGanon, 1, 882),   // Lorule Castle Ball Trial #2
     ];
@@ -878,7 +885,8 @@ fn debug_stuff(patcher: &mut Patcher, settings: &Settings) {
                 // 0,21,0, // Throne Room
                 // 0, 8, 7, // After final boss cutscene
                 // 0, 0, 42, // Sacred Realm
-                0, 3, 4,    // Hilda's Study
+                // 0, 3, 4,    // Hilda's Study
+                9, 0, 32, // Southern Ruins Pillar Cave
                 // 0, 2, 6,    // Zelda's Study (glitched for some reason)
                 // 0, 3, 14,   // Osfala Portrait
                 // 0, 1, 17,   // FieldDark 18

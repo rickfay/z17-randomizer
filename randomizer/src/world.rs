@@ -3620,7 +3620,7 @@ fn skull_woods() -> HashMap<Location, LocationNode> {
             path_free(SkullWoodsEastB1South),
         ])),
         (SkullWoodsOutdoor3, location("Skull Woods Outdoor Area 3", vec![
-            check_free(LocationInfo::new(regions::lorule::skull::overworld::SUBREGION, "Skull Woods Outdoor Chest")), // Do not use [SW] prefix
+            check_free(LocationInfo::new(regions::dungeons::skull::woods::SUBREGION, "Skull Woods Outdoor Chest")), // Do not use [SW] prefix
         ], vec![
             fast_travel_lorule(),
             path_free(SkullWoodsEastB1SouthFoyer),
@@ -4142,7 +4142,7 @@ fn turtle_rock() -> HashMap<Location, LocationNode> {
             ),
         ])),
         (TurtleRockLeftBalcony, location("Turtle Rock Left Balcony", vec![
-            check_free(LocationInfo::new(regions::lorule::lake::lorule::SUBREGION, "Turtle Rock Left Balcony")), // Do not use [TR] prefix
+            check_free(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "Turtle Rock Left Balcony")), // Do not use [TR] prefix
         ], vec![
             fast_travel_lorule(),
             path_free(TurtleRockLeftBalconyPath),

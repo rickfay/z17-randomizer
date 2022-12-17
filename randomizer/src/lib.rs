@@ -676,8 +676,9 @@ pub fn plando() -> Result<(), Error> {
     layout.set(LocationInfo::new(regions::dungeons::skull::woods::SUBREGION, "[SW] (B1) Gibdo Room (Hole)"), KeySmall);
     layout.set(LocationInfo::new(regions::dungeons::skull::woods::SUBREGION, "[SW] (B1) Grate Room"), KeySmall);
     layout.set(LocationInfo::new(regions::dungeons::skull::woods::SUBREGION, "[SW] (B2) Moving Platform Room"), KeyBoss);
-    layout.set(LocationInfo::new(regions::dungeons::skull::woods::SUBREGION, "[SW] (B1) Big Chest (Upper)"), ItemKandelaarLv2);
     layout.set(LocationInfo::new(regions::dungeons::skull::woods::SUBREGION, "[SW] (B1) Big Chest (Eyes)"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::skull::woods::SUBREGION, "Skull Woods Outdoor Chest"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::skull::woods::SUBREGION, "[SW] (B1) Big Chest (Upper)"), ItemKandelaarLv2);
     layout.set(LocationInfo::new(regions::dungeons::skull::woods::SUBREGION, "[SW] Knucklemaster"), OreRed);
 
     // Thieves' Hideout
@@ -735,6 +736,7 @@ pub fn plando() -> Result<(), Error> {
     layout.set(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "[TR] (1F) Northeast Ledge"), KeySmall);
     layout.set(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "[TR] (1F) Southeast Chest"), RupeeGold);
     layout.set(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "[TR] (1F) Defeat Flamolas"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "Turtle Rock Left Balcony"), ItemMizukaki);
     layout.set(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "[TR] (B1) Northeast Room"), KeySmall);
     layout.set(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "[TR] (B1) Grate Chest (Small)"), RupeeGold);
     layout.set(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "[TR] (B1) Big Chest (Center)"), RupeeGold);
@@ -840,9 +842,9 @@ pub fn plando() -> Result<(), Error> {
 
     // Southern Ruins
     layout.set(LocationInfo::new(regions::hyrule::southern::ruins::SUBREGION, "Runaway Item Seller"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::southern::ruins::SUBREGION, "Behind Pillars"), RupeeGold);
+    layout.set(LocationInfo::new(regions::hyrule::southern::ruins::SUBREGION, "Behind Pillars"), ItemBowLight);
     layout.set(LocationInfo::new(regions::hyrule::southern::ruins::SUBREGION, "Treasure Room"), ItemHammer);
-    layout.set(LocationInfo::new(regions::hyrule::southern::ruins::SUBREGION, "Southern Ruins Ledge"), RupeeGold);
+    layout.set(LocationInfo::new(regions::hyrule::southern::ruins::SUBREGION, "Southern Ruins Ledge"), ItemHammer);
 
     // Lake Hylia
     layout.set(LocationInfo::new(regions::hyrule::lake::hylia::SUBREGION, "Torch Cave"), RupeeGold);
@@ -874,7 +876,6 @@ pub fn plando() -> Result<(), Error> {
     // Skull Woods (overworld)
     layout.set(LocationInfo::new(regions::lorule::skull::overworld::SUBREGION, "Canyon House"), RupeeGold);
     layout.set(LocationInfo::new(regions::lorule::skull::overworld::SUBREGION, "Cucco Shack"), RupeeGold);
-    layout.set(LocationInfo::new(regions::lorule::skull::overworld::SUBREGION, "Skull Woods Outdoor Chest"), RupeeGold);
 
     // Lorule Death Mountain
     layout.set(LocationInfo::new(regions::lorule::death::mountain::SUBREGION, "Ledge (East)"), RupeeGold);
@@ -904,7 +905,7 @@ pub fn plando() -> Result<(), Error> {
 
     // Lorule Lake
     layout.set(LocationInfo::new(regions::lorule::lake::lorule::SUBREGION, "Lorule Lake NW Chest"), RupeeGold);
-    layout.set(LocationInfo::new(regions::lorule::lake::lorule::SUBREGION, "Turtle Rock Left Balcony"), ItemMizukaki);
+
 
 
     ////////////////////////////

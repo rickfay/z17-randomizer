@@ -16,7 +16,7 @@ pouch_in_shop = false
 boots_in_shop = false
 ## Maiamai Madness. Shuffles Maiamai into the pool, adding 100 more locations
 maiamai_madness = false
-## Pre-activates all Weather Vanes (EXPERIMENTAL). May cause Bracelet(s) to be located in any region of Lorule.
+## Pre-activates all Weather Vanes (Note: No trackers currently support this)
 vanes_activated = false
 ## Include the Super Lamp and Super Net in the shuffled item pool
 super_items = false
@@ -44,7 +44,6 @@ night_mode = false
 [exclusions]
 "exclusions" = [
 #   "Great Rupee Fairy",
-#   "Thief Girl Cave",
 #   "Master Sword Pedestal",
-#   "[LC] Zelda"
+#   "Zelda"
 ]

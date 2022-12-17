@@ -356,6 +356,14 @@ For Citra (emulator):
 `boots_in_shop`
 - If enabled, guarantees the Pegasus Boots will be placed in Ravio's Shop.
 
+`maiamai_madness`
+- Shuffles Maiamai into the pool, adding 100 more locations
+
+`vanes_activated`
+- Pre-activates all Weather Vanes
+- This causes logic to consider players using the Bell to skip over overworld obstacles
+- <u>Note</u>: No trackers currently support this
+
 `super_items`
 - If enabled, includes the Super Lamp and Super Net in the shuffled item pool as progressive upgrades to the base Lamp and Net.
 
