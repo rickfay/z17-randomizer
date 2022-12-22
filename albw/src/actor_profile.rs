@@ -1,16 +1,55 @@
-use std::collections::HashMap;
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Deserializer, Serialize};
+use crate::{files::sarc::Sarc, File, byaml};
 
 // TODO.... make this work..
 
+
+pub struct ActorProfiles {
+    archive: File<Sarc>
+}
+
+impl ActorProfiles {
+    pub fn new(archive: File<Sarc>) -> Self {
+        Self {
+            archive
+        }
+    }
+
+    pub fn contains(&self, actor_profile: &str) -> bool {
+        self.archive
+            .get()
+            .contains(format!("{}.byaml", actor_profile))
+            .unwrap_or(false)
+    }
+
+    pub fn get_actor_profile(&mut self, profile: &str) -> File<ActorProfile> {
+        self.archive
+            .get()
+            .read(format!("{}.byaml", profile)).unwrap()
+            .try_map(|data| byaml::from_bytes(&data)).unwrap()
+    }
+
+    pub fn into_archive(self) -> File<Sarc> {
+        self.archive.map(Sarc::compress)
+    }
+}
+
+fn deserialize_null_default<'de, D, T>(deserializer: D) -> Result<T, D::Error>
+    where
+        T: Default + Deserialize<'de>,
+        D: Deserializer<'de>,
+{
+    let opt = Option::deserialize(deserializer)?;
+    Ok(opt.unwrap_or_default())
+}
 
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(rename_all = "PascalCase")]
 pub struct ActorProfile {
     pub collision: Vec<Collision>,
-    pub general: HashMap<String, String>, // nope
-    pub reaction: Vec<Reaction>,
-    pub shadow: Vec<Shadow>,
+    pub general: General,
+    pub reaction: Option<Vec<Reaction>>,
+    pub shadow: Option<Vec<Shadow>>,
 }
 
 impl ActorProfile {}
@@ -18,7 +57,8 @@ impl ActorProfile {}
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "PascalCase")]
 pub struct Collision {
-    pub scale: Vec<String>, // needs to be a dictionary
+    pub scale: Scale,
+    pub r#type: u8,
 }
 
 // #[derive(Debug, Serialize, Deserialize, Eq, PartialEq, Hash)]

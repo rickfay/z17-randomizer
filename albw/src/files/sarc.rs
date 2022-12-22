@@ -172,7 +172,7 @@ pub struct Archive {
 
 impl Archive {
     pub fn from(file: Box<[u8]>) -> Result<Self> {
-        bytey::typedef! { struct Header: TryFromBytes<'_> [0x14] {
+        typedef! { struct Header: TryFromBytes<'_> [0x14] {
             #b"SARC",
             [4] header_len: u16 where header_len == 0x14,
             [6] bom: u16 where bom == 0xFEFF,
@@ -181,7 +181,7 @@ impl Archive {
         }}
         let (header, sfat) = Header::try_from_slice(&file)?;
         if header.len as usize == file.len() {
-            bytey::typedef! { struct SFAT: TryFromBytes<'_> [0xC] {
+            typedef! { struct SFAT: TryFromBytes<'_> [0xC] {
                 #b"SFAT",
                 [6] count: u16,
                 [8] multiplier: u32,

@@ -31,6 +31,7 @@ pub use item::Item;
 pub use language::Language;
 use language::{FlowChart};
 pub use scene::{Scene, Stage};
+use crate::actor_profile::ActorProfiles;
 use crate::language::Load;
 use crate::scene::SceneMeta;
 
@@ -198,8 +199,13 @@ impl Game {
         ))
     }
 
-    pub fn actor_profile(&mut self) -> File<Sarc> {
-        self.romfs.borrow_mut().read("Archive/ActorProfile.szs").unwrap().map(Sarc::from)
+    pub fn actor_profile(&mut self) -> Result<ActorProfiles> {
+        Ok(ActorProfiles::new(
+            self.romfs
+                .borrow_mut()
+                .read("Archive/ActorProfile.szs")?
+                .map(Sarc::from),
+        ))
     }
 
     pub fn course(&self, id: course::Id) -> Course {

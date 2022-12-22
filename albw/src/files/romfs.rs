@@ -18,14 +18,14 @@ where
     R: Read + Seek,
 {
     pub fn load(mut file: R, offset: u32) -> Result<Self> {
-        bytey::typedef! { struct IVFC: TryFromBytes<'_> [HEADER_LEN] {
+        typedef! { struct IVFC: TryFromBytes<'_> [HEADER_LEN] {
             #b"IVFC",
             [0x4C] block_size: u32,
         }}
         let header = IVFC::try_read_from_offset(&mut file, offset)?;
         let block_size = 1 << header.block_size;
         let l3 = offset + block_size;
-        bytey::typedef! { struct L3: FromBytes<'_> [L3_HEADER_LEN] {
+        typedef! { struct L3: FromBytes<'_> [L3_HEADER_LEN] {
             [4] directory: SectionHeader,
             [0x14] file: SectionHeader,
             [0x24] file_data: u32,
@@ -60,7 +60,7 @@ where
                 .ok_or_else(|| Error::new(format!("File not found: '{}'.", path)))?;
             Ok(File::new(
                 path,
-                bytey::read_slice_from_offset(
+                read_slice_from_offset(
                     &mut self.file,
                     self.file_data + offset as u32,
                     length as usize,
@@ -78,14 +78,14 @@ where
             let mut offset =
                 unsafe { u32::from_slice_unchecked(&self.directories.hashtable[i * 4..]) };
             while offset != 0xFFFFFFFF {
-                bytey::typedef! { struct Metadata: FromBytes<'_> [0x18] {
+                typedef! { struct Metadata: FromBytes<'_> [0x18] {
                     [0] parent: u32,
                     [0x10] next: u32,
                     [0x14] name_len: u32,
                 }}
                 let metadata =
                     Metadata::read_from_offset(&mut self.file, self.directories.metadata + offset)?;
-                let name = bytey::read_slice(&mut self.file, metadata.name_len as usize)?;
+                let name = read_slice(&mut self.file, metadata.name_len as usize)?;
                 if metadata.parent == parent && path_eq(&name, dirname) {
                     return self.find_dir(child, offset);
                 } else {
@@ -102,7 +102,7 @@ where
         let i = (hash(filename, parent) % self.files.count) as usize;
         let mut offset = unsafe { u32::from_slice_unchecked(&self.files.hashtable[i * 4..]) };
         while offset != 0xFFFFFFFF {
-            bytey::typedef! { struct Metadata: FromBytes<'_> [0x20] {
+            typedef! { struct Metadata: FromBytes<'_> [0x20] {
                 [0] parent: u32,
                 [8] offset: u64,
                 [0x10] length: u64,
@@ -111,7 +111,7 @@ where
             }}
             let metadata =
                 Metadata::read_from_offset(&mut self.file, self.files.metadata + offset)?;
-            let name = bytey::read_slice(&mut self.file, metadata.name_len as usize)?;
+            let name = read_slice(&mut self.file, metadata.name_len as usize)?;
             if metadata.parent == parent && path_eq(&name, filename) {
                 let offset = metadata.offset;
                 let length = metadata.length;
@@ -124,7 +124,7 @@ where
     }
 }
 
-bytey::typedef! { struct SectionHeader: FromBytes<'_> [0x10] {
+typedef! { struct SectionHeader: FromBytes<'_> [0x10] {
     [0] hashtable_offset: u32,
     [4] hashtable_len: u32,
     [8] metadata_offset: u32,
@@ -142,7 +142,7 @@ impl Section {
     where
         R: Read + Seek,
     {
-        let hashtable = bytey::read_slice_from_offset(
+        let hashtable = read_slice_from_offset(
             &mut file,
             offset + header.hashtable_offset,
             header.hashtable_len as usize,

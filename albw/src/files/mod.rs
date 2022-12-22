@@ -135,7 +135,7 @@ pub struct File<T> {
 }
 
 impl<T> File<T> {
-    fn new(path: String, inner: T) -> Self {
+    pub fn new(path: String, inner: T) -> Self {
         Self { path, inner }
     }
 

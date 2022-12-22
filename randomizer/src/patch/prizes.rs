@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use albw::course::Id::*;
 use albw::{Actor, byaml, File, Item};
+use albw::actor_profile::ActorProfiles;
 use albw::course::Id;
 use albw::Item::*;
 use albw::language::FlowChart;
@@ -13,7 +14,6 @@ pub(crate) fn patch_dungeon_prizes(patcher: &mut Patcher, prizes: &DungeonPrizes
     patch_flowchart(patcher, &prizes);
     patch_msbf_files(patcher, &prizes);
     patch_dungeon_prize_actors(patcher, &prizes);
-    patch_actor_profile(patcher, &prizes);
     patch_prize_byaml(patcher, &prizes, settings);
 }
 
@@ -137,39 +137,18 @@ fn patch_dungeon_prize_actors(patcher: &mut Patcher, prizes: &DungeonPrizes) {
 }
 
 /// TODO
-fn patch_actor_profile(_patcher: &mut Patcher, _prizes: &DungeonPrizes) {
+pub(crate) fn patch_actor_profile(patcher: &mut Patcher, prizes: &DungeonPrizes) -> Option<ActorProfiles> {
+    //info!("Patching Actor Profiles...");
 
-    // let tr_prize = layout.get(&LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "Turtle Rock Prize")).unwrap();
-    //
-    // let smol_byaml = match tr_prize {
-    //     SageGulley => "ObjPictureBlacksmithBoy.byaml",
-    //     SageOren => "ObjPictureZoraQueen.byaml",
-    //     SageSeres => "ObjPicturePriestGirl.byaml",
-    //     SageOsfala => "ObjPictureSahasPupil.byaml",
-    //     SageIrene => "ObjPictureMaple.byaml",
-    //     SageRosso => "ObjPictureMountaineer.byaml",
-    //     SageImpa | PendantPower | PendantWisdom | PendantCourage => { return Ok(()); },
-    //     _ => panic!()
-    // };
-    //
-    // // Read and deserialize the FlowChart from RegionBoot
-    // let mut szs = self.game.actor_profile();
-    //
-    // // Make the collision of the TR Portrait larger so Link can 'Touch' it
-    // // let smol_raw = szs.get_mut().read(smol_byaml)?;
-    // // let mut smol_profile: File<ActorProfile> = smol_raw.try_map(|data| byaml::from_bytes(&data))?;
-    // // info!("read smol file");
-    // // smol_profile.get_mut().collision.get_mut(0).unwrap().scale = String::from("{X: 3.00000, Y: 3.00000, Z: 3.00000}");
-    //
-    // // Reduce the collision of Impa to match normal sages when not in TR
-    // let impa_raw = szs.get_mut().read("ObjPictureInpa.byaml")?;
-    // let mut impa_profile: File<ActorProfile> = impa_raw.try_map(|data| byaml::from_bytes(&data))?;
-    //
-    // info!("Being ActorProfile Serializing...");
-    //
-    // // Serialize and update the archive
-    // //self.boot.archive.get_mut().add(smol_profile.serialize())?;
-    // self.boot.archive.get_mut().add(impa_profile.serialize())?;
+    //let mut actor_profiles = patcher.game.actor_profile().unwrap();
+
+    //info!("Has Impa: {}", actor_profiles.contains("ObjPictureInpa"));
+
+    //let mut impa = actor_profiles.get_actor_profile("ObjPictureInpa");
+    //impa.get_mut().collision.get_mut(0).unwrap().scale = Scale { x: 1.0, y: 1.0, z: 1.0 };
+
+    //Some(actor_profiles)
+    None
 }
 
 fn patch_prize_byaml(patcher: &mut Patcher, prizes: &DungeonPrizes, settings: &Settings) {
