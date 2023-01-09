@@ -1,6 +1,7 @@
-use std::path::Path;
-
-use crate::{files::sarc::Sarc, File, Result};
+use {
+    crate::{files::sarc::Sarc, File, Result},
+    std::path::Path,
+};
 
 #[derive(Debug)]
 pub struct Actors {
@@ -10,41 +11,27 @@ pub struct Actors {
 
 impl Actors {
     pub(crate) fn new(archive: File<Sarc>) -> Self {
-        Self {
-            archive,
-            dirty: false,
-        }
+        Self { archive, dirty: false }
     }
 
     pub fn contains(&self, name: &str) -> bool {
-        self.archive
-            .get()
-            .contains(format!("World/Actor/{}.bch", name))
-            .unwrap_or(false)
+        self.archive.get().contains(format!("World/Actor/{}.bch", name)).unwrap_or(false)
     }
 
     pub fn get_actor_bch(&self, name: &str) -> Result<Actor> {
-        self.archive
-            .get()
-            .extract(format!("World/Actor/{}.bch", name))
+        self.archive.get().extract(format!("World/Actor/{}.bch", name))
     }
 
     pub fn get_actor_kcl(&self, name: &str) -> Result<Actor> {
-        self.archive
-            .get()
-            .extract(format!("World/Actor/{}.kcl", name))
+        self.archive.get().extract(format!("World/Actor/{}.kcl", name))
     }
 
     pub fn get_map_actor_bch(&self, name: &str) -> Result<Actor> {
-        self.archive
-            .get()
-            .extract(format!("World/MapActor/{}.bch", name))
+        self.archive.get().extract(format!("World/MapActor/{}.bch", name))
     }
 
     pub fn get_map_actor_kcl(&self, name: &str) -> Result<Actor> {
-        self.archive
-            .get()
-            .extract(format!("World/MapActor/{}.kcl", name))
+        self.archive.get().extract(format!("World/MapActor/{}.kcl", name))
     }
 
     pub fn add(&mut self, actor: Actor) -> Result<()> {

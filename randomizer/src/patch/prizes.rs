@@ -1,16 +1,23 @@
-use std::collections::HashMap;
-use albw::course::Id::*;
-use albw::{Actor, byaml, File, Item};
-use albw::actor_profile::ActorProfiles;
-use albw::course::Id;
-use albw::Item::*;
-use albw::language::FlowChart;
-use albw::scene::{Arg, Flag, Obj, Point, Rail, Transform, Vec3};
-use crate::patch::DungeonPrizes;
-use crate::{ItemExt, MsbfKey, Patcher, Settings};
-use crate::patch::util::*;
+use {
+    crate::{
+        patch::{util::*, DungeonPrizes},
+        ItemExt, MsbfKey, Patcher, Settings,
+    },
+    albw::{
+        actor_profile::ActorProfiles,
+        byaml,
+        course::{Id, Id::*},
+        language::FlowChart,
+        scene::{Arg, Flag, Obj, Point, Rail, Transform, Vec3},
+        Actor, File,
+        Item::{self, *},
+    },
+    std::collections::HashMap,
+};
 
-pub(crate) fn patch_dungeon_prizes(patcher: &mut Patcher, prizes: &DungeonPrizes, settings: &Settings) {
+pub(crate) fn patch_dungeon_prizes(
+    patcher: &mut Patcher, prizes: &DungeonPrizes, settings: &Settings,
+) {
     patch_flowchart(patcher, &prizes);
     patch_msbf_files(patcher, &prizes);
     patch_dungeon_prize_actors(patcher, &prizes);
@@ -19,7 +26,6 @@ pub(crate) fn patch_dungeon_prizes(patcher: &mut Patcher, prizes: &DungeonPrizes
 
 /// Adds entries to the FlowChart for the MSBF files related to each Portrait
 fn patch_flowchart(patcher: &mut Patcher, prizes: &DungeonPrizes) {
-
     // Map dungeon MsbfInfo to the randomized prizes
     let dungeon_msbf_mapping: Vec<(Option<&'static str>, Id)> = Vec::from([
         (prizes.ep_prize.msbf_key(), DungeonEast),
@@ -50,8 +56,7 @@ fn patch_flowchart(patcher: &mut Patcher, prizes: &DungeonPrizes) {
     // Add msbf for dungeon prize
     for (new_msbf, course) in &dungeon_msbf_mapping {
         if new_msbf.is_some() {
-            flow_chart.get_mut().load_mut().add_entry(
-                course.as_str(), new_msbf.unwrap());
+            flow_chart.get_mut().load_mut().add_entry(course.as_str(), new_msbf.unwrap());
         }
     }
 
@@ -61,6 +66,7 @@ fn patch_flowchart(patcher: &mut Patcher, prizes: &DungeonPrizes) {
 }
 
 /// Get msbf event files and inject them into scenes
+#[rustfmt::skip]
 fn patch_msbf_files(patcher: &mut Patcher, prizes: &DungeonPrizes) {
     let prize_msbf_map: HashMap<Item, (&str, File<Box<[u8]>>)> = HashMap::from([
         (SageGulley, (MsbfKey::Dark, patcher.language(DungeonDark).unwrap().flow().extract("World/Flow/Dark.msbf").unwrap())),
@@ -85,8 +91,8 @@ fn patch_msbf_files(patcher: &mut Patcher, prizes: &DungeonPrizes) {
 }
 
 /// Inject the prize actors into the relevant scenes
+#[rustfmt::skip]
 fn patch_dungeon_prize_actors(patcher: &mut Patcher, prizes: &DungeonPrizes) {
-
     // Fetch and map Actors to their dungeon prizes
     let pendant = patcher.scene(DungeonWind, 2).unwrap().actors().get_actor_bch("Pendant").unwrap();
     let actor_map: HashMap<Item, Actor> = HashMap::from([
@@ -137,7 +143,9 @@ fn patch_dungeon_prize_actors(patcher: &mut Patcher, prizes: &DungeonPrizes) {
 }
 
 /// TODO
-pub(crate) fn patch_actor_profile(patcher: &mut Patcher, prizes: &DungeonPrizes) -> Option<ActorProfiles> {
+pub(crate) fn patch_actor_profile(
+    patcher: &mut Patcher, prizes: &DungeonPrizes,
+) -> Option<ActorProfiles> {
     //info!("Patching Actor Profiles...");
 
     //let mut actor_profiles = patcher.game.actor_profile().unwrap();
@@ -170,7 +178,9 @@ fn patch_eastern(patcher: &mut Patcher, prize: Item, _: &Settings) {
 
     // Eastern Palace 1F - Add Dungeon Reward
     patcher.add_obj(DungeonEast, 1, Obj {
-        arg: Arg(0, data.arg1, 0, 0, 4, 4, 250, data.flag, 0, data.arg9, data.arg10, 0, data.arg12, 0.0),
+        arg: Arg(
+            0, data.arg1, 0, 0, 4, 4, 250, data.flag, 0, data.arg9, data.arg10, 0, data.arg12, 0.0,
+        ),
         clp: 0,
         flg: (4, 4, 250, data.flag),
         id: data.actor_id,
@@ -190,27 +200,29 @@ fn patch_eastern(patcher: &mut Patcher, prize: Item, _: &Settings) {
     if is_sage(prize) {
         reroute_sage_warp(patcher, prize, 5, 0, 17); // Outside Hyrule Castle
     } else {
-        patcher.modify_objs(DungeonEast, 1, &[
-            remove_collision(301),
-        ]);
+        patcher.modify_objs(DungeonEast, 1, &[remove_collision(301)]);
 
         let pendant_flag = prize_flag(prize);
-        patcher.add_obj(DungeonEast, 1,
-                        Obj::pendant_chest(prize, Flag::Event(250), pendant_flag,
-                                           0, 130, 302,
-                                           Vec3 { x: 0.0, y: 2.5, z: -5.75 }));
-        patcher.add_obj(DungeonEast, 1,
-                        Obj::blue_warp(pendant_flag,
-                                       0, 131, 303,
-                                       5, 0, 17,
-                                       Vec3 { x: -3.5, y: 2.5, z: -3.0 }));
+        patcher.add_obj(
+            DungeonEast,
+            1,
+            Obj::pendant_chest(prize, Flag::Event(250), pendant_flag, 0, 130, 302, Vec3 {
+                x: 0.0,
+                y: 2.5,
+                z: -5.75,
+            }),
+        );
+        patcher.add_obj(
+            DungeonEast,
+            1,
+            Obj::blue_warp(pendant_flag, 0, 131, 303, 5, 0, 17, Vec3 { x: -3.5, y: 2.5, z: -3.0 }),
+        );
     }
 
     // Eastern Ruins - Disable Post-EP cutscene
     patcher.modify_objs(FieldLight, 20, &[
         enable(214), // Paint Heart
         enable(215), // Paint Heart
-
         disable(83), // Sahasrahla
         disable(84), // Text box
         disable(85), // Loading Zone to FL18
@@ -222,20 +234,18 @@ fn patch_eastern(patcher: &mut Patcher, prize: Item, _: &Settings) {
         disable(208), // Textbox trigger
         disable(264), // lgt_NpcSoldier_Field1B_04_broke - idk what this is, but now it's nothing
         disable(529), // AreaSwitchCube
-        // enable(502), // Sahasrahla
+                      // enable(502), // Sahasrahla
     ]);
-    patcher.modify_system(FieldLight, 18, &[
-        call(199, |obj| {
-            obj.srt.translate.z = 12.75; // move to where cutscene normally ends
-        }),
-    ]);
+    patcher.modify_system(FieldLight, 18, &[call(199, |obj| {
+        obj.srt.translate.z = 12.75; // move to where cutscene normally ends
+    })]);
 
     // Rewire Post-EP checks to require PoC
     let green_pendant_flag = prize_flag(PendantCourage);
 
     // Haunted Grove
     patcher.modify_objs(FieldLight, 25, &[
-        set_enable_flag(122, green_pendant_flag), // Pouch
+        set_enable_flag(122, green_pendant_flag),  // Pouch
         set_disable_flag(123, green_pendant_flag), // Gulley
     ]);
 
@@ -261,22 +271,20 @@ fn patch_eastern(patcher: &mut Patcher, prize: Item, _: &Settings) {
     // Outside Rosso's House
     patcher.modify_objs(FieldLight, 2, &[
         set_enable_flag(11, green_pendant_flag), // Small Rock (controller, see below)
-        disable(88), // early game LZ to Rosso's House
-        clear_disable_flag(100), // Keep Entry_KikoriMan3 from disappearing
-        clear_disable_flag(100), // NpcMountaineer
+        disable(88),                             // early game LZ to Rosso's House
+        clear_disable_flag(100),                 // Keep Entry_KikoriMan3 from disappearing
+        clear_disable_flag(100),                 // NpcMountaineer
         set_disable_flag(128, green_pendant_flag), // "Not in right now." signboard
-        set_46_args(132, green_pendant_flag), // Door
-        disable(135), // Disable LZ to IndoorLight4 cutscene
+        set_46_args(132, green_pendant_flag),    // Door
+        disable(135),                            // Disable LZ to IndoorLight4 cutscene
         set_enable_flag(136, green_pendant_flag), // LZ to Rosso's House
     ]);
 
     // Rosso's House
-    patcher.modify_objs(IndoorLight, 10, &[
-        call(7, |obj| {
-            obj.set_inactive_flag(Flag::Event(282));
-            obj.enable();
-        }),
-    ]);
+    patcher.modify_objs(IndoorLight, 10, &[call(7, |obj| {
+        obj.set_inactive_flag(Flag::Event(282));
+        obj.enable();
+    })]);
 
     // Small Rocks
     patcher.modify_system(FieldLight, 2, &[
@@ -316,7 +324,6 @@ fn patch_eastern(patcher: &mut Patcher, prize: Item, _: &Settings) {
 
 /// House of Gales
 fn patch_gales(patcher: &mut Patcher, prize: Item, _: &Settings) {
-
     // Debug stuff
     // patcher.modify_objs(DungeonWind, 3, &[
     //     disable(436), // Margomill
@@ -345,22 +352,25 @@ fn patch_gales(patcher: &mut Patcher, prize: Item, _: &Settings) {
             }),
         ]);
 
-        patcher.add_obj(DungeonWind, 3,
-                        Obj::pendant_chest(prize, Flag::Event(340), prize_flag,
-                                           0, 100, 562,
-                                           Vec3 { x: 0.0, y: 0.0, z: -46.5 }));
-        patcher.add_obj(DungeonWind, 3,
-                        Obj::blue_warp(prize_flag,
-                                       0, 101, 563,
-                                       0, 0, 34,
-                                       Vec3 { x: 0.0, y: 0.0, z: -44.75 }));
+        patcher.add_obj(
+            DungeonWind,
+            3,
+            Obj::pendant_chest(prize, Flag::Event(340), prize_flag, 0, 100, 562, Vec3 {
+                x: 0.0,
+                y: 0.0,
+                z: -46.5,
+            }),
+        );
+        patcher.add_obj(
+            DungeonWind,
+            3,
+            Obj::blue_warp(prize_flag, 0, 101, 563, 0, 0, 34, Vec3 { x: 0.0, y: 0.0, z: -44.75 }),
+        );
     } else {
         reroute_sage_warp(patcher, prize, 0, 0, 34);
 
         if prize != SageGulley {
-            patcher.modify_objs(DungeonWind, 3, &[
-                add_rail(459, (12, 0)),
-            ]);
+            patcher.modify_objs(DungeonWind, 3, &[add_rail(459, (12, 0))]);
 
             let (end_y, end_z) = if prize == SageImpa { (2.0, -47.0) } else { (0.0, -46.5) };
             patcher.add_rail(DungeonWind, 3, Rail {
@@ -368,10 +378,7 @@ fn patch_gales(patcher: &mut Patcher, prize: Item, _: &Settings) {
                 pnt: vec![
                     Point {
                         arg: (0, 0, 0, 0, 0.0, 0.0),
-                        ctl: [
-                            0.0, end_y, end_z - 15.0,
-                            0.0, end_y, end_z - 15.0
-                        ],
+                        ctl: [0.0, end_y, end_z - 15.0, 0.0, end_y, end_z - 15.0],
                         lnk: vec![],
                         srt: Transform {
                             scale: Vec3 { x: 1.0, y: 1.0, z: 1.0 },
@@ -381,10 +388,7 @@ fn patch_gales(patcher: &mut Patcher, prize: Item, _: &Settings) {
                     },
                     Point {
                         arg: (0, 0, 0, 0, 0.0, 0.0),
-                        ctl: [
-                            0.0, end_y, end_z,
-                            0.0, end_y, end_z
-                        ],
+                        ctl: [0.0, end_y, end_z, 0.0, end_y, end_z],
                         lnk: vec![],
                         srt: Transform {
                             scale: Vec3 { x: 1.0, y: 1.0, z: 1.0 },
@@ -402,7 +406,6 @@ fn patch_gales(patcher: &mut Patcher, prize: Item, _: &Settings) {
 
 /// Tower of Hera
 fn patch_hera(patcher: &mut Patcher, prize: Item, _: &Settings) {
-
     // Debug stuff
     // patcher.modify_objs(DungeonHera, 1, &[
     //     disable(737), // Moldorm
@@ -416,9 +419,7 @@ fn patch_hera(patcher: &mut Patcher, prize: Item, _: &Settings) {
         return;
     }
 
-    patcher.modify_objs(DungeonHera, 1, &[
-        modify_reward(829, prize, false),
-    ]);
+    patcher.modify_objs(DungeonHera, 1, &[modify_reward(829, prize, false)]);
 
     if is_pendant(prize) {
         patcher.modify_objs(DungeonHera, 1, &[
@@ -429,22 +430,25 @@ fn patch_hera(patcher: &mut Patcher, prize: Item, _: &Settings) {
         ]);
 
         let pendant_flag = prize_flag(prize);
-        patcher.add_obj(DungeonHera, 1,
-                        Obj::pendant_chest(prize, Flag::Event(370), pendant_flag,
-                                           20, 314, 921,
-                                           Vec3 { x: 0.0, y: 101.0, z: -5.5 }));
-        patcher.add_obj(DungeonHera, 1,
-                        Obj::blue_warp(pendant_flag,
-                                       20, 315, 922,
-                                       3, 0, 2,
-                                       Vec3 { x: 0.0, y: 101.0, z: -1.5 }));
+        patcher.add_obj(
+            DungeonHera,
+            1,
+            Obj::pendant_chest(prize, Flag::Event(370), pendant_flag, 20, 314, 921, Vec3 {
+                x: 0.0,
+                y: 101.0,
+                z: -5.5,
+            }),
+        );
+        patcher.add_obj(
+            DungeonHera,
+            1,
+            Obj::blue_warp(pendant_flag, 20, 315, 922, 3, 0, 2, Vec3 { x: 0.0, y: 101.0, z: -1.5 }),
+        );
     } else {
         reroute_sage_warp(patcher, prize, 3, 0, 2);
 
         if prize != SageGulley {
-            patcher.modify_objs(DungeonHera, 1, &[
-                add_rail(829, (56, 0)),
-            ]);
+            patcher.modify_objs(DungeonHera, 1, &[add_rail(829, (56, 0))]);
 
             let (end_y, end_z) = if prize == SageImpa { (103.0, -6.0) } else { (101.0, -5.5) };
             patcher.add_rail(DungeonHera, 1, Rail {
@@ -452,10 +456,7 @@ fn patch_hera(patcher: &mut Patcher, prize: Item, _: &Settings) {
                 pnt: vec![
                     Point {
                         arg: (0, 0, 0, 0, 0.0, 0.0),
-                        ctl: [
-                            0.0, end_y, end_z - 15.0,
-                            0.0, end_y, end_z - 15.0
-                        ],
+                        ctl: [0.0, end_y, end_z - 15.0, 0.0, end_y, end_z - 15.0],
                         lnk: vec![],
                         srt: Transform {
                             scale: Vec3 { x: 1.0, y: 1.0, z: 1.0 },
@@ -465,10 +466,7 @@ fn patch_hera(patcher: &mut Patcher, prize: Item, _: &Settings) {
                     },
                     Point {
                         arg: (0, 0, 0, 0, 0.0, 0.0),
-                        ctl: [
-                            0.0, end_y, end_z,
-                            0.0, end_y, end_z
-                        ],
+                        ctl: [0.0, end_y, end_z, 0.0, end_y, end_z],
                         lnk: vec![],
                         srt: Transform {
                             scale: Vec3 { x: 1.0, y: 1.0, z: 1.0 },
@@ -486,7 +484,6 @@ fn patch_hera(patcher: &mut Patcher, prize: Item, _: &Settings) {
 
 /// Dark Palace
 fn patch_dark(patcher: &mut Patcher, prize: Item, _: &Settings) {
-
     // Debug stuff
     // patcher.modify_objs(DungeonDark, 1, &[
     //     disable(118), // Gemesaur
@@ -502,9 +499,7 @@ fn patch_dark(patcher: &mut Patcher, prize: Item, _: &Settings) {
 
     let prize_flag = prize_flag(prize);
 
-    patcher.modify_objs(DungeonDark, 1, &[
-        modify_reward(262, prize, false),
-    ]);
+    patcher.modify_objs(DungeonDark, 1, &[modify_reward(262, prize, false)]);
 
     if is_pendant(prize) {
         patcher.modify_objs(DungeonDark, 1, &[
@@ -514,23 +509,26 @@ fn patch_dark(patcher: &mut Patcher, prize: Item, _: &Settings) {
             disable(121), // ObjJewelMask Camera
         ]);
 
-
-        patcher.add_obj(DungeonDark, 1,
-                        Obj::pendant_chest(prize, Flag::Course(21), prize_flag,
-                                           4, 155, 300,
-                                           Vec3 { x: 0.0, y: 0.0, z: -47.5 }));
-        patcher.add_obj(DungeonDark, 1,
-                        Obj::blue_warp(prize_flag,
-                                       4, 156, 301,
-                                       5, 1, 19,
-                                       Vec3 { x: 0.0, y: 0.0, z: -44.75 }));
-    } else { // is_sage(prize)
+        patcher.add_obj(
+            DungeonDark,
+            1,
+            Obj::pendant_chest(prize, Flag::Course(21), prize_flag, 4, 155, 300, Vec3 {
+                x: 0.0,
+                y: 0.0,
+                z: -47.5,
+            }),
+        );
+        patcher.add_obj(
+            DungeonDark,
+            1,
+            Obj::blue_warp(prize_flag, 4, 156, 301, 5, 1, 19, Vec3 { x: 0.0, y: 0.0, z: -44.75 }),
+        );
+    } else {
+        // is_sage(prize)
 
         reroute_sage_warp(patcher, prize, 5, 1, 19);
 
-        patcher.modify_objs(DungeonDark, 1, &[
-            add_rail(262, (14, 0)),
-        ]);
+        patcher.modify_objs(DungeonDark, 1, &[add_rail(262, (14, 0))]);
 
         let (end_y, end_z) = if prize == SageImpa { (2.0, -48.0) } else { (0.0, -47.5) };
         patcher.add_rail(DungeonDark, 1, Rail {
@@ -538,10 +536,7 @@ fn patch_dark(patcher: &mut Patcher, prize: Item, _: &Settings) {
             pnt: vec![
                 Point {
                     arg: (0, 0, 0, 0, 0.0, 0.0),
-                    ctl: [
-                        0.0, 6.7700896, -48.9483577,
-                        0.0, 6.7700896, -48.9483577
-                    ],
+                    ctl: [0.0, 6.7700896, -48.9483577, 0.0, 6.7700896, -48.9483577],
                     lnk: vec![],
                     srt: Transform {
                         scale: Vec3 { x: 1.0, y: 1.0, z: 1.0 },
@@ -551,10 +546,7 @@ fn patch_dark(patcher: &mut Patcher, prize: Item, _: &Settings) {
                 },
                 Point {
                     arg: (0, 0, 0, 0, 0.0, 0.0),
-                    ctl: [
-                        0.0, end_y, end_z,
-                        0.0, end_y, end_z
-                    ],
+                    ctl: [0.0, end_y, end_z, 0.0, end_y, end_z],
                     lnk: vec![],
                     srt: Transform {
                         scale: Vec3 { x: 1.0, y: 1.0, z: 1.0 },
@@ -594,27 +586,28 @@ fn patch_swamp(patcher: &mut Patcher, prize: Item, _: &Settings) {
         return;
     }
 
-    patcher.modify_objs(DungeonWater, 3, &[
-        modify_reward(13, prize, true),
-    ]);
+    patcher.modify_objs(DungeonWater, 3, &[modify_reward(13, prize, true)]);
 
     if is_sage(prize) {
         reroute_sage_warp(patcher, prize, 0, 1, 32);
     } else {
-        patcher.modify_objs(DungeonWater, 3, &[
-            remove_collision(13),
-        ]);
+        patcher.modify_objs(DungeonWater, 3, &[remove_collision(13)]);
 
         let pendant_flag = prize_flag(prize);
-        patcher.add_obj(DungeonWater, 3,
-                        Obj::pendant_chest(prize, Flag::Event(1), pendant_flag,
-                                           0, 14, 25,
-                                           Vec3 { x: 0.0, y: 2.5, z: -40.15 }));
-        patcher.add_obj(DungeonWater, 3,
-                        Obj::warp_tile(pendant_flag,
-                                       0, 15, 26,
-                                       0, 1, 32,
-                                       Vec3 { x: 0.0, y: 0.0, z: -32.0 }));
+        patcher.add_obj(
+            DungeonWater,
+            3,
+            Obj::pendant_chest(prize, Flag::Event(1), pendant_flag, 0, 14, 25, Vec3 {
+                x: 0.0,
+                y: 2.5,
+                z: -40.15,
+            }),
+        );
+        patcher.add_obj(
+            DungeonWater,
+            3,
+            Obj::warp_tile(pendant_flag, 0, 15, 26, 0, 1, 32, Vec3 { x: 0.0, y: 0.0, z: -32.0 }),
+        );
     }
 }
 
@@ -624,27 +617,28 @@ fn patch_skull(patcher: &mut Patcher, prize: Item, _: &Settings) {
         return;
     }
 
-    patcher.modify_objs(FieldDark, 1, &[
-        modify_reward(273, prize, true),
-    ]);
+    patcher.modify_objs(FieldDark, 1, &[modify_reward(273, prize, true)]);
 
     if is_sage(prize) {
         reroute_sage_warp(patcher, prize, 10, 1, 0);
     } else {
-        patcher.modify_objs(FieldDark, 1, &[
-            remove_collision(273),
-        ]);
+        patcher.modify_objs(FieldDark, 1, &[remove_collision(273)]);
 
         let pendant_flag = prize_flag(prize);
-        patcher.add_obj(FieldDark, 1,
-                        Obj::pendant_chest(prize, Flag::Event(1), pendant_flag,
-                                           0, 76, 533,
-                                           Vec3 { x: -6.0, y: 0.0, z: -16.5 }));
-        patcher.add_obj(FieldDark, 1,
-                        Obj::blue_warp(pendant_flag,
-                                       0, 77, 534,
-                                       10, 1, 0,
-                                       Vec3 { x: -6.0, y: 0.0, z: -15.0 }));
+        patcher.add_obj(
+            FieldDark,
+            1,
+            Obj::pendant_chest(prize, Flag::Event(1), pendant_flag, 0, 76, 533, Vec3 {
+                x: -6.0,
+                y: 0.0,
+                z: -16.5,
+            }),
+        );
+        patcher.add_obj(
+            FieldDark,
+            1,
+            Obj::blue_warp(pendant_flag, 0, 77, 534, 10, 1, 0, Vec3 { x: -6.0, y: 0.0, z: -15.0 }),
+        );
     }
 }
 
@@ -654,21 +648,21 @@ fn patch_thieves(patcher: &mut Patcher, prize: Item, _: &Settings) {
         return;
     }
 
-    patcher.modify_objs(IndoorDark, 15, &[
-        modify_reward(3, prize, true),
-    ]);
+    patcher.modify_objs(IndoorDark, 15, &[modify_reward(3, prize, true)]);
 
     let prize_flag = prize_flag(prize);
     if is_pendant(prize) {
-        patcher.modify_objs(IndoorDark, 15, &[
-            remove_collision(3),
-        ]);
+        patcher.modify_objs(IndoorDark, 15, &[remove_collision(3)]);
 
-
-        patcher.add_obj(IndoorDark, 15,
-                        Obj::pendant_chest(prize, Flag::Event(1), prize_flag,
-                                           0, 7, 13,
-                                           Vec3 { x: 0.0, y: 0.0, z: -8.0 }));
+        patcher.add_obj(
+            IndoorDark,
+            15,
+            Obj::pendant_chest(prize, Flag::Event(1), prize_flag, 0, 7, 13, Vec3 {
+                x: 0.0,
+                y: 0.0,
+                z: -8.0,
+            }),
+        );
     } else {
         reroute_sage_warp(patcher, prize, 14, 1, 15);
     }
@@ -676,7 +670,6 @@ fn patch_thieves(patcher: &mut Patcher, prize: Item, _: &Settings) {
 
 /// Turtle Rock
 fn patch_turtle(patcher: &mut Patcher, prize: Item, _: &Settings) {
-
     // Debug stuff
     // patcher.modify_objs(DungeonKame, 3, &[
     //     disable(8), // Grinexx
@@ -690,9 +683,7 @@ fn patch_turtle(patcher: &mut Patcher, prize: Item, _: &Settings) {
         return;
     }
 
-    patcher.modify_objs(DungeonKame, 3, &[
-        modify_reward(56, prize, false),
-    ]);
+    patcher.modify_objs(DungeonKame, 3, &[modify_reward(56, prize, false)]);
 
     let dy = -2.0;
     let dz = 0.5;
@@ -708,25 +699,28 @@ fn patch_turtle(patcher: &mut Patcher, prize: Item, _: &Settings) {
         ]);
 
         let pendant_flag = prize_flag(prize);
-        patcher.add_obj(DungeonKame, 3,
-                        Obj::pendant_chest(prize, Flag::Course(130), pendant_flag,
-                                           0, 33, 72,
-                                           Vec3 { x: 0.0, y: 5.0, z: -44.0 }));
-        patcher.add_obj(DungeonKame, 3,
-                        Obj::blue_warp(pendant_flag,
-                                       0, 34, 73,
-                                       6, 1, 34,
-                                       Vec3 { x: 0.0, y: 5.0, z: -39.0 }));
+        patcher.add_obj(
+            DungeonKame,
+            3,
+            Obj::pendant_chest(prize, Flag::Course(130), pendant_flag, 0, 33, 72, Vec3 {
+                x: 0.0,
+                y: 5.0,
+                z: -44.0,
+            }),
+        );
+        patcher.add_obj(
+            DungeonKame,
+            3,
+            Obj::blue_warp(pendant_flag, 0, 34, 73, 6, 1, 34, Vec3 { x: 0.0, y: 5.0, z: -39.0 }),
+        );
     } else {
         reroute_sage_warp(patcher, prize, 6, 1, 34);
 
         if prize == SageGulley {
-            patcher.modify_objs(DungeonKame, 3, &[
-                call(56, move |obj| {
-                    obj.srt.translate.z += dz;
-                    obj.srt.translate.y += 15.0 + dy;
-                }),
-            ]);
+            patcher.modify_objs(DungeonKame, 3, &[call(56, move |obj| {
+                obj.srt.translate.z += dz;
+                obj.srt.translate.y += 15.0 + dy;
+            })]);
         }
 
         // Modify Rails so that non-Impa Portraits are reachable TODO modify ActorProfile
@@ -740,7 +734,7 @@ fn patch_turtle(patcher: &mut Patcher, prize: Item, _: &Settings) {
         };
 
         patcher.modify_rails(DungeonKame, 3, &[
-            call_rail(1, fn_extend_rails), // dgn_Kame_Pillar
+            call_rail(1, fn_extend_rails),  // dgn_Kame_Pillar
             call_rail(17, fn_extend_rails), // Impa
         ]);
     }
@@ -748,7 +742,6 @@ fn patch_turtle(patcher: &mut Patcher, prize: Item, _: &Settings) {
 
 /// Desert Palace
 fn patch_desert(patcher: &mut Patcher, prize: Item, _: &Settings) {
-
     // Debug stuff
     // patcher.modify_objs(FieldDark, 31, &[
     //     disable(67), // Zaganaga
@@ -772,26 +765,27 @@ fn patch_desert(patcher: &mut Patcher, prize: Item, _: &Settings) {
     if is_sage(prize) {
         reroute_sage_warp(patcher, prize, 30, 1, 30);
     } else {
-        patcher.modify_objs(FieldDark, 31, &[
-            remove_collision(76),
-        ]);
+        patcher.modify_objs(FieldDark, 31, &[remove_collision(76)]);
 
-
-        patcher.add_obj(FieldDark, 31,
-                        Obj::pendant_chest(prize, Flag::Event(1), prize_flag,
-                                           0, 56, 135,
-                                           Vec3 { x: -13.0, y: 0.0, z: -24.0 }));
-        patcher.add_obj(FieldDark, 31,
-                        Obj::blue_warp(prize_flag,
-                                       0, 57, 136,
-                                       30, 1, 30,
-                                       Vec3 { x: -10.5, y: 0.0, z: -21.25 }));
+        patcher.add_obj(
+            FieldDark,
+            31,
+            Obj::pendant_chest(prize, Flag::Event(1), prize_flag, 0, 56, 135, Vec3 {
+                x: -13.0,
+                y: 0.0,
+                z: -24.0,
+            }),
+        );
+        patcher.add_obj(
+            FieldDark,
+            31,
+            Obj::blue_warp(prize_flag, 0, 57, 136, 30, 1, 30, Vec3 { x: -10.5, y: 0.0, z: -21.25 }),
+        );
     }
 }
 
 /// Ice Ruins
 fn patch_ice(patcher: &mut Patcher, prize: Item, _: &Settings) {
-
     // Debug stuff
     // patcher.modify_system(DungeonIce, 1, &[
     //     call(68, |obj| {
@@ -803,27 +797,28 @@ fn patch_ice(patcher: &mut Patcher, prize: Item, _: &Settings) {
         return;
     }
 
-    patcher.modify_objs(DungeonIce, 1, &[
-        modify_reward(16, prize, true),
-    ]);
+    patcher.modify_objs(DungeonIce, 1, &[modify_reward(16, prize, true)]);
 
     if is_sage(prize) {
         reroute_sage_warp(patcher, prize, 0, 1, 4);
     } else {
-        patcher.modify_objs(DungeonIce, 1, &[
-            remove_collision(16),
-        ]);
+        patcher.modify_objs(DungeonIce, 1, &[remove_collision(16)]);
 
         let pendant_flag = prize_flag(prize);
-        patcher.add_obj(DungeonIce, 1,
-                        Obj::pendant_chest(prize, Flag::Event(1), pendant_flag,
-                                           6, 408, 1214,
-                                           Vec3 { x: 0.0, y: 0.0, z: -31.6 }));
-        patcher.add_obj(DungeonIce, 1,
-                        Obj::blue_warp(pendant_flag,
-                                       6, 409, 1215,
-                                       0, 1, 4,
-                                       Vec3 { x: 0.0, y: 0.0, z: -30.1 }));
+        patcher.add_obj(
+            DungeonIce,
+            1,
+            Obj::pendant_chest(prize, Flag::Event(1), pendant_flag, 6, 408, 1214, Vec3 {
+                x: 0.0,
+                y: 0.0,
+                z: -31.6,
+            }),
+        );
+        patcher.add_obj(
+            DungeonIce,
+            1,
+            Obj::blue_warp(pendant_flag, 6, 409, 1215, 0, 1, 4, Vec3 { x: 0.0, y: 0.0, z: -30.1 }),
+        );
     }
 }
 
@@ -838,7 +833,9 @@ struct PrizePatchData {
 }
 
 impl PrizePatchData {
-    fn new(actor_id: i16, flag: u16, rot_x: f32, arg1: i32, arg9: i32, arg10: i32, arg12: i32) -> Self {
+    fn new(
+        actor_id: i16, flag: u16, rot_x: f32, arg1: i32, arg9: i32, arg10: i32, arg12: i32,
+    ) -> Self {
         Self { actor_id, flag, rot_x, arg1, arg9, arg10, arg12 }
     }
 
@@ -854,13 +851,14 @@ impl PrizePatchData {
             PendantPower => Self::new(173, 372, 0.0, 0, 0, 0, 0),
             PendantWisdom => Self::new(173, 342, 0.0, 1, 0, 0, 0),
             PendantCourage => Self::new(173, 310, 0.0, 2, 0, 0, 0),
-            _ => panic!("\"{}\" is not a dungeon prize.", prize.as_str())
+            _ => panic!("\"{}\" is not a dungeon prize.", prize.as_str()),
         }
     }
 }
 
-fn reroute_sage_warp(patcher: &mut Patcher, prize: Item, spawn_point: i32, scene: i32, scene_index: i32) {
-
+fn reroute_sage_warp(
+    patcher: &mut Patcher, prize: Item, spawn_point: i32, scene: i32, scene_index: i32,
+) {
     // Get UNQ of warp object in the Chamber of Sages
     let unq_sage_warp = match prize {
         SageGulley => Some(73),
@@ -871,27 +869,33 @@ fn reroute_sage_warp(patcher: &mut Patcher, prize: Item, spawn_point: i32, scene
         SageIrene => Some(70),
         SageImpa => Some(68),
         PendantPower | PendantWisdom | PendantCourage => None,
-        _ => panic!("\"{}\" is not a dungeon prize.", prize.as_str())
+        _ => panic!("\"{}\" is not a dungeon prize.", prize.as_str()),
     };
 
     // Reroute
     if let Some(unq_sage_warp) = unq_sage_warp {
-        patcher.modify_objs(CaveDark, 10, &[
-            redirect(unq_sage_warp, spawn_point, scene, scene_index),
-        ]);
+        patcher.modify_objs(CaveDark, 10, &[redirect(
+            unq_sage_warp,
+            spawn_point,
+            scene,
+            scene_index,
+        )]);
     }
 }
 
 fn modify_reward(unq: u16, prize: Item, activate: bool) -> (u16, Box<dyn Fn(&mut Obj)>) {
     let data = PrizePatchData::get(prize);
-    (unq, Box::new(move |obj: &mut Obj| {
-        obj.set_id(data.actor_id);
-        obj.arg.1 = data.arg1;
-        if activate {
-            obj.set_active_flag(Flag::Event(1));
-        }
-        obj.set_inactive_flag(Flag::Event(data.flag));
-        obj.set_rotate(data.rot_x, 0.0, 0.0);
-        obj.set_disable_flag(Flag::Event(data.flag));
-    }))
+    (
+        unq,
+        Box::new(move |obj: &mut Obj| {
+            obj.set_id(data.actor_id);
+            obj.arg.1 = data.arg1;
+            if activate {
+                obj.set_active_flag(Flag::Event(1));
+            }
+            obj.set_inactive_flag(Flag::Event(data.flag));
+            obj.set_rotate(data.rot_x, 0.0, 0.0);
+            obj.set_disable_flag(Flag::Event(data.flag));
+        }),
+    )
 }

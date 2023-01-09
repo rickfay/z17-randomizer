@@ -1,32 +1,30 @@
-use serde::{Deserialize, Deserializer, Serialize};
-use crate::{files::sarc::Sarc, File, byaml};
+use {
+    crate::{byaml, files::sarc::Sarc, File},
+    serde::{Deserialize, Deserializer, Serialize},
+};
 
 // TODO.... make this work..
 
-
 pub struct ActorProfiles {
-    archive: File<Sarc>
+    archive: File<Sarc>,
 }
 
 impl ActorProfiles {
     pub fn new(archive: File<Sarc>) -> Self {
-        Self {
-            archive
-        }
+        Self { archive }
     }
 
     pub fn contains(&self, actor_profile: &str) -> bool {
-        self.archive
-            .get()
-            .contains(format!("{}.byaml", actor_profile))
-            .unwrap_or(false)
+        self.archive.get().contains(format!("{}.byaml", actor_profile)).unwrap_or(false)
     }
 
     pub fn get_actor_profile(&mut self, profile: &str) -> File<ActorProfile> {
         self.archive
             .get()
-            .read(format!("{}.byaml", profile)).unwrap()
-            .try_map(|data| byaml::from_bytes(&data)).unwrap()
+            .read(format!("{}.byaml", profile))
+            .unwrap()
+            .try_map(|data| byaml::from_bytes(&data))
+            .unwrap()
     }
 
     pub fn into_archive(self) -> File<Sarc> {
@@ -35,9 +33,9 @@ impl ActorProfiles {
 }
 
 fn deserialize_null_default<'de, D, T>(deserializer: D) -> Result<T, D::Error>
-    where
-        T: Default + Deserialize<'de>,
-        D: Deserializer<'de>,
+where
+    T: Default + Deserialize<'de>,
+    D: Deserializer<'de>,
 {
     let opt = Option::deserialize(deserializer)?;
     Ok(opt.unwrap_or_default())
@@ -74,7 +72,6 @@ pub struct Scale {
     pub y: f32,
     pub z: f32,
 }
-
 
 //noinspection SpellCheckingInspection
 #[derive(Debug, Serialize, Deserialize)]

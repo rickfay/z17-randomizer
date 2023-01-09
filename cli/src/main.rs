@@ -1,16 +1,24 @@
-use std::{fs, panic};
-use std::io::{stdin, stdout, Read, Write};
-use std::path::Path;
-use std::str::FromStr;
-use log::{error, info};
-
-use randomizer::{Seed, Settings, plando, filler_new};
-use simplelog::{LevelFilter, SimpleLogger};
-use structopt::StructOpt;
-use albw::Game;
-use randomizer::logic_mode::LogicMode;
-use randomizer::settings::{Logic, Options};
-use sys::Paths;
+use {
+    albw::Game,
+    log::{error, info},
+    randomizer::{
+        filler_new,
+        logic_mode::LogicMode,
+        plando,
+        settings::{Logic, Options},
+        Seed, Settings,
+    },
+    simplelog::{LevelFilter, SimpleLogger},
+    std::{
+        fs,
+        io::{stdin, stdout, Read, Write},
+        panic,
+        path::Path,
+        str::FromStr,
+    },
+    structopt::StructOpt,
+    sys::Paths,
+};
 
 #[derive(Debug, StructOpt)]
 struct Opt {
@@ -24,15 +32,26 @@ struct Opt {
     no_spoiler: bool,
 }
 
-fn prompt_logic_mode() -> LogicMode
-{
+fn prompt_logic_mode() -> LogicMode {
     print!("\nChoose Logic Mode:\n");
-    print!("[1] Normal              - Standard gameplay, no tricky item use or glitches. If unsure, choose this.\n");
-    print!("[2] Hard                - Adds tricks that aren't technically glitches. Lamp + Net considered as weapons. No glitches.\n");
-    print!("[3] Glitched (Basic)    - Includes the above plus \"basic\", easy-to-learn glitches.\n");
-    print!("[4] Glitched (Advanced) - Includes the above plus \"advanced\" glitches that may be a challenge to master.\n");
-    print!("[5] Glitched (Hell)     - Includes every known RTA-viable glitch, including the insane ones. DO NOT CHOOSE THIS.\n");
-    print!("[6] No Logic            - Items are placed with no logic at all. Seeds may not be completable.\n");
+    print!(
+        "[1] Normal              - Standard gameplay, no tricky item use or glitches. If unsure, choose this.\n"
+    );
+    print!(
+        "[2] Hard                - Adds tricks that aren't technically glitches. Lamp + Net considered as weapons. No glitches.\n"
+    );
+    print!(
+        "[3] Glitched (Basic)    - Includes the above plus \"basic\", easy-to-learn glitches.\n"
+    );
+    print!(
+        "[4] Glitched (Advanced) - Includes the above plus \"advanced\" glitches that may be a challenge to master.\n"
+    );
+    print!(
+        "[5] Glitched (Hell)     - Includes every known RTA-viable glitch, including the insane ones. DO NOT CHOOSE THIS.\n"
+    );
+    print!(
+        "[6] No Logic            - Items are placed with no logic at all. Seeds may not be completable.\n"
+    );
 
     loop {
         print!("\nEnter a number (1-6): ");
@@ -79,8 +98,7 @@ fn prompt_u8_in_range(prompt: &str, range_start: u8, range_end: u8) -> u8 {
     }
 }
 
-fn prompt_until_bool(prompt: &str) -> bool
-{
+fn prompt_until_bool(prompt: &str) -> bool {
     loop {
         print!("\n{}\nEnter (y/n): ", prompt);
         stdout().flush().unwrap();
@@ -99,8 +117,8 @@ fn prompt_until_bool(prompt: &str) -> bool
 }
 
 fn prompt_until<F>(prompt: &str, until: F, error: &str) -> sys::Result<String>
-    where
-        F: Fn(&str) -> bool,
+where
+    F: Fn(&str) -> bool,
 {
     loop {
         print!("{}: ", prompt);
@@ -137,20 +155,30 @@ fn preset_ui() -> Settings {
 
     let mode = prompt_logic_mode();
     let randomize_dungeon_prizes = prompt_until_bool("Randomize Dungeon Prizes?");
-    let lc_requirement = prompt_u8_in_range("Choose how many Portraits are needed to enter Lorule Castle and fight Yuganon:", 0, 7);
+    let lc_requirement = prompt_u8_in_range(
+        "Choose how many Portraits are needed to enter Lorule Castle and fight Yuganon:",
+        0,
+        7,
+    );
     //let yuganon_requirement = prompt_u8_in_range("Choose how many Portraits are needed to fight Yuganon:", 0, 7);
     //let start_with_bracelet = prompt_until_bool("Start with Ravio's Bracelet?");
     let assured_weapon = prompt_until_bool("Guarantee a Weapon is placed in Ravio's Shop?");
     let bell_in_shop = prompt_until_bool("Guarantee Bell in Ravio's Shop?");
     let pouch_in_shop = prompt_until_bool("Guarantee Pouch in Ravio's Shop?");
     let boots_in_shop = prompt_until_bool("Guarantee Pegasus Boots in Ravio's Shop?");
-    let maiamai_madness = prompt_until_bool("Enable Maiamai Madness? This shuffles Maiamai into the pool, adding 100 more locations.");
+    let maiamai_madness = prompt_until_bool(
+        "Enable Maiamai Madness? This shuffles Maiamai into the pool, adding 100 more locations.",
+    );
     let super_items = prompt_until_bool("Include the Super Lamp and Super Net?");
     let minigames_excluded = prompt_until_bool("Exclude all minigames?");
     let skip_trials = prompt_until_bool("Skip the Lorule Castle Trials?");
     let bow_of_light_in_castle = prompt_until_bool("Guarantee Bow of Light in Lorule Castle?");
-    let lampless = prompt_until_bool("Don't require Lamp? (advanced)\nIf \"y\", the player may have to cross dark rooms without a light source.\nIf you're not sure, select \"n\".");
-    let vanes_activated = prompt_until_bool("Pre-activate all Weather Vanes? (EXPERIMENTAL)\nThis may cause Ravio's Bracelet(s) to be placed in any region of Lorule.");
+    let lampless = prompt_until_bool(
+        "Don't require Lamp? (advanced)\nIf \"y\", the player may have to cross dark rooms without a light source.\nIf you're not sure, select \"n\".",
+    );
+    let vanes_activated = prompt_until_bool(
+        "Pre-activate all Weather Vanes? (EXPERIMENTAL)\nThis may cause Ravio's Bracelet(s) to be placed in any region of Lorule.",
+    );
     let swordless_mode = prompt_until_bool("Play in Swordless Mode? (advanced)");
     let chest_size_matches_contents = prompt_until_bool("Make chest sizes match their contents?");
 
@@ -177,10 +205,7 @@ fn preset_ui() -> Settings {
             swordless_mode,
             ..Default::default()
         },
-        options: Options {
-            chest_size_matches_contents,
-            ..Default::default()
-        },
+        options: Options { chest_size_matches_contents, ..Default::default() },
         ..Default::default()
     }
 }
@@ -195,7 +220,8 @@ fn pause() {
 fn main() -> randomizer::Result<()> {
     let opt = Opt::from_args();
 
-    SimpleLogger::init(LevelFilter::Info, Default::default()).expect("Could not initialize logger.");
+    SimpleLogger::init(LevelFilter::Info, Default::default())
+        .expect("Could not initialize logger.");
 
     info!("Initializing ALBW Randomizer...");
 
@@ -206,11 +232,8 @@ fn main() -> randomizer::Result<()> {
     } else {
         let system = randomizer::system()?;
 
-        let mut preset = if let Some(ref preset) = opt.preset {
-            system.preset(&preset)?
-        } else {
-            preset_ui()
-        };
+        let mut preset =
+            if let Some(ref preset) = opt.preset { system.preset(&preset)? } else { preset_ui() };
 
         // Temporary: Force Yuganon Requirement to be equal to LC Requirement
         preset.logic.yuganon_requirement = preset.logic.lc_requirement;
@@ -222,7 +245,10 @@ fn main() -> randomizer::Result<()> {
             let seed = opt.seed.unwrap_or_else(rand::random);
 
             info!("Attempt:                        #{}", x + 1);
-            info!("Preset:                         {}", opt.preset.as_ref().unwrap_or(&String::from("<None>")));
+            info!(
+                "Preset:                         {}",
+                opt.preset.as_ref().unwrap_or(&String::from("<None>"))
+            );
             info!("Version:                        0.3.0 - Dev Build #2");
 
             let spoiler = panic::catch_unwind(|| filler_new(&preset, seed));
@@ -251,10 +277,14 @@ fn main() -> randomizer::Result<()> {
                 error!("An unknown error occurred while generating the seed D:\n");
 
                 error!("If you're seeing this error, there is likely an issue with your ROM.");
-                error!("Verify your ROM is (1) a North American copy of ALBW, and (2) decrypted.\n");
+                error!(
+                    "Verify your ROM is (1) a North American copy of ALBW, and (2) decrypted.\n"
+                );
 
-                info!("For assistance, visit the #help-and-strats channel on the ALBW Randomizer Discord.");
-            },
+                info!(
+                    "For assistance, visit the #help-and-strats channel on the ALBW Randomizer Discord."
+                );
+            }
         }
 
         pause();

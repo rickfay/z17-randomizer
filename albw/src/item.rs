@@ -1,9 +1,9 @@
-use once_cell::sync::Lazy;
-use regex::Regex;
-use serde::Deserialize;
-
-use crate::{actors::Actor, int_map, Error, Game, Result};
-use crate::scene::Vec3;
+use {
+    crate::{actors::Actor, int_map, scene::Vec3, Error, Game, Result},
+    once_cell::sync::Lazy,
+    regex::Regex,
+    serde::Deserialize,
+};
 
 int_map! {
 /// An in-game item.

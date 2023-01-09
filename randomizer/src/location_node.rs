@@ -1,5 +1,4 @@
-use crate::check::Check;
-use crate::path::Path;
+use crate::{check::Check, path::Path};
 
 #[derive(Clone)]
 pub struct LocationNode {

@@ -1,17 +1,28 @@
 //! A library for reading data from a The Legend of Zelda: A Link Between Worlds ROM.
 
-use std::{
-    cell::RefCell,
-    error::Error as StdError,
-    fmt::{self, Display, Formatter},
-    fs, io,
-    path::{Path},
+use {
+    crate::{actor_profile::ActorProfiles, language::Load, scene::SceneMeta},
+    language::FlowChart,
+    log::info,
+    std::{
+        cell::RefCell,
+        error::Error as StdError,
+        fmt::{self, Display, Formatter},
+        fs, io,
+        path::Path,
+    },
 };
-
-use log::info;
-
-pub mod actors;
+pub use {
+    actors::{Actor, Actors},
+    course::Course,
+    demo::Demo,
+    files::{byaml, exheader::ExHeader, romfs::RomFs, sarc::Sarc, Cxi, File, IntoBytes},
+    item::{GetItem, Item},
+    language::Language,
+    scene::{Scene, Stage},
+};
 pub mod actor_profile;
+pub mod actors;
 pub mod course;
 pub mod demo;
 mod files;
@@ -19,21 +30,6 @@ pub mod flow;
 pub mod item;
 pub mod language;
 pub mod scene;
-
-pub use actors::{Actor, Actors};
-pub use course::Course;
-pub use demo::Demo;
-pub use files::exheader::ExHeader;
-pub use files::{byaml, romfs::RomFs, sarc::Sarc, Cxi};
-pub use files::{File, IntoBytes};
-pub use item::GetItem;
-pub use item::Item;
-pub use language::Language;
-use language::{FlowChart};
-pub use scene::{Scene, Stage};
-use crate::actor_profile::ActorProfiles;
-use crate::language::Load;
-use crate::scene::SceneMeta;
 
 pub type Result<T, E = Error> = ::std::result::Result<T, E>;
 
@@ -46,13 +42,10 @@ pub struct Error {
 
 impl Error {
     fn new<T>(err: T) -> Self
-        where
-            T: Into<Box<dyn StdError + Send + Sync + 'static>>,
+    where
+        T: Into<Box<dyn StdError + Send + Sync + 'static>>,
     {
-        Self {
-            kind: ErrorKind::Rom,
-            inner: err.into(),
-        }
+        Self { kind: ErrorKind::Rom, inner: err.into() }
     }
 
     /// Returns the type of this error.
@@ -68,10 +61,7 @@ impl Error {
 
 impl From<io::Error> for Error {
     fn from(err: io::Error) -> Self {
-        Self {
-            kind: ErrorKind::Io,
-            inner: err.into(),
-        }
+        Self { kind: ErrorKind::Io, inner: err.into() }
     }
 }
 
@@ -116,8 +106,8 @@ impl Game {
     /// Fails if the ROM is invalid for any reason, including general
     /// corruption, mismatched IDs, invalid region, etc.
     pub fn load<P>(path: P) -> Result<Self>
-        where
-            P: AsRef<Path>,
+    where
+        P: AsRef<Path>,
     {
         let path = path.as_ref().to_path_buf();
         info!("Loading ROM from:               {}", path.display());
@@ -139,14 +129,7 @@ impl Game {
                 .get()
                 .read("World/Byaml/Message.byaml")?
                 .try_map(|data| byaml::from_bytes(&data))?;
-            Ok(Self {
-                id,
-                exheader,
-                romfs: RefCell::new(romfs),
-                flow_chart,
-                get_item,
-                message,
-            })
+            Ok(Self { id, exheader, romfs: RefCell::new(romfs), flow_chart, get_item, message })
         } else {
             Err(Error::new("Invalid ROM ID."))
         }
@@ -170,41 +153,27 @@ impl Game {
         self.get_item
     }
 
-    pub fn match_items_to_get_items(&self) -> impl Iterator<Item=(Item, GetItem)> + '_ {
+    pub fn match_items_to_get_items(&self) -> impl Iterator<Item = (Item, GetItem)> + '_ {
         Item::iter().zip(self.get_item.get().iter().cloned())
     }
 
     fn get_item_actor(&self, name: &str) -> Result<Actor> {
-        self.romfs
-            .borrow_mut()
-            .read(format!("World/GetItem/{}.bch", name))
+        self.romfs.borrow_mut().read(format!("World/GetItem/{}.bch", name))
     }
 
     pub fn boot(&self) -> Result<Language> {
         let flow = self.flow_chart.get().load().boot()?.iter().cloned();
-        let archive = self
-            .romfs
-            .borrow_mut()
-            .read("US/RegionBoot.szs")?
-            .map(Sarc::from);
+        let archive = self.romfs.borrow_mut().read("US/RegionBoot.szs")?.map(Sarc::from);
         Ok(Language::new(flow, archive))
     }
 
     pub fn common(&mut self) -> Result<Actors> {
-        Ok(Actors::new(
-            self.romfs
-                .borrow_mut()
-                .read("Archive/ActorCommon.szs")?
-                .map(Sarc::from),
-        ))
+        Ok(Actors::new(self.romfs.borrow_mut().read("Archive/ActorCommon.szs")?.map(Sarc::from)))
     }
 
     pub fn actor_profile(&mut self) -> Result<ActorProfiles> {
         Ok(ActorProfiles::new(
-            self.romfs
-                .borrow_mut()
-                .read("Archive/ActorProfile.szs")?
-                .map(Sarc::from),
+            self.romfs.borrow_mut().read("Archive/ActorProfile.szs")?.map(Sarc::from),
         ))
     }
 
@@ -220,14 +189,7 @@ impl Game {
     }
 
     pub fn language(&self, course: course::Id) -> Result<Language> {
-        let flow = self
-            .flow_chart
-            .get()
-            .load()
-            .course(course)
-            .unwrap_or_default()
-            .iter()
-            .cloned();
+        let flow = self.flow_chart.get().load().course(course).unwrap_or_default().iter().cloned();
         let archive = self
             .romfs
             .borrow_mut()
@@ -258,11 +220,7 @@ impl Game {
         byaml::from_bytes(
             self.romfs
                 .borrow_mut()
-                .read(format!(
-                    "World/Byaml/{}{}_stage.byaml",
-                    course.as_str(),
-                    stage + 1
-                ))?
+                .read(format!("World/Byaml/{}{}_stage.byaml", course.as_str(), stage + 1))?
                 .get(),
         )
     }

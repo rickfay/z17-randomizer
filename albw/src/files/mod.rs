@@ -1,14 +1,17 @@
-use bytey::*;
-use data_encoding::HEXUPPER;
-use log::{info, error};
-use ring::digest::{Context, SHA256};
-use serde::Serialize;
-use std::{fs, io::{BufReader, prelude::*, stdin, stdout}, path::Path};
-
-use crate::{Error, Result};
-
-use self::{exheader::ExHeader, romfs::RomFs};
-
+use {
+    self::{exheader::ExHeader, romfs::RomFs},
+    crate::{Error, Result},
+    bytey::*,
+    data_encoding::HEXUPPER,
+    log::{error, info},
+    ring::digest::{Context, SHA256},
+    serde::Serialize,
+    std::{
+        fs,
+        io::{prelude::*, stdin, stdout, BufReader},
+        path::Path,
+    },
+};
 pub mod byaml;
 pub mod exheader;
 pub mod msgbn;
@@ -23,8 +26,8 @@ pub struct Cxi<R> {
 }
 
 impl<R> Cxi<R>
-    where
-        R: Read + Seek,
+where
+    R: Read + Seek,
 {
     pub fn id(&self) -> u64 {
         self.id
@@ -53,8 +56,8 @@ fn pause() {
 
 impl Cxi<fs::File> {
     pub fn open<P>(path: P) -> Result<Self>
-        where
-            P: AsRef<Path>,
+    where
+        P: AsRef<Path>,
     {
         let path = path.as_ref();
         let mut file = match fs::File::open(path) {
@@ -84,11 +87,7 @@ impl Cxi<fs::File> {
         let ncch = NCCH::try_read_from_offset(&mut file, offset + SIGNATURE_LEN as u32)?;
         cmp_id(ncch.id, header.id)?;
         cmp_id(ncch.program_id, header.id)?;
-        Ok(Self {
-            file,
-            id: header.id,
-            offset,
-        })
+        Ok(Self { file, id: header.id, offset })
     }
 }
 
@@ -156,34 +155,31 @@ impl<T> File<T> {
     }
 
     pub fn map<F, U>(self, f: F) -> File<U>
-        where
-            F: FnOnce(T) -> U,
+    where
+        F: FnOnce(T) -> U,
     {
         File::new(self.path, f(self.inner))
     }
 
     pub fn try_map<F, U>(self, f: F) -> Result<File<U>>
-        where
-            F: FnOnce(T) -> Result<U>,
+    where
+        F: FnOnce(T) -> Result<U>,
     {
         Ok(File::new(self.path, f(self.inner)?))
     }
 }
 
 impl<T> File<T>
-    where
-        T: IntoBytes,
+where
+    T: IntoBytes,
 {
     pub fn into_bytes(self) -> File<Box<[u8]>> {
-        File {
-            path: self.path,
-            inner: self.inner.into_bytes(),
-        }
+        File { path: self.path, inner: self.inner.into_bytes() }
     }
 
     pub fn dump<P>(self, path: P) -> Result<()>
-        where
-            P: AsRef<Path>,
+    where
+        P: AsRef<Path>,
     {
         let path = path.as_ref().join(self.path);
         if let Some(parent) = path.parent() {
@@ -198,17 +194,14 @@ impl<T> File<T>
 }
 
 impl<T> File<T>
-    where
-        T: Serialize,
+where
+    T: Serialize,
 {
     pub fn serialize(self) -> File<Box<[u8]>> {
         let mut buf = vec![];
         byaml::to_writer(std::io::Cursor::new(&mut buf), &self.inner)
             .expect("Could not serialize.");
-        File {
-            path: self.path,
-            inner: buf.into(),
-        }
+        File { path: self.path, inner: buf.into() }
     }
 }
 
@@ -252,16 +245,12 @@ pub trait FromFile {
 
     fn path(args: &Self::PathArgs) -> String;
     fn from_file(input: Self::Input) -> Result<Self>
-        where
-            Self: Sized;
+    where
+        Self: Sized;
 }
 
 fn cmp_id(left: u64, right: u64) -> Result<()> {
-    if left == right {
-        Ok(())
-    } else {
-        Err(Error::new("IDs did not match."))
-    }
+    if left == right { Ok(()) } else { Err(Error::new("IDs did not match.")) }
 }
 
 fn from_media_units(media_units: u32) -> u32 {

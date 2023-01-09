@@ -1,41 +1,49 @@
-use std::{collections::BTreeMap, error::Error as StdError, fs, fs::File, io};
-use std::io::{stdin, stdout, Write};
-use std::path::Path;
-
-use linked_hash_map::LinkedHashMap;
-use log::{debug, info};
-use serde::{ser::SerializeMap, Serialize, Serializer};
-
-use albw::{Game, Item};
-use albw::Item::*;
-use patch::Patcher;
-use regions::Subregion;
 pub use settings::Settings;
-use state::State;
-use sys::{Paths, System};
-
-use crate::filler::fill_stuff;
-use crate::filler_item::{convert, FillerItem};
-use crate::patch::msbf::MsbfKey;
-use crate::settings::plando_settings;
-
-mod graph;
-mod patch;
-mod regions;
-pub mod settings;
-mod state;
+use {
+    crate::{
+        filler::fill_stuff,
+        filler_item::{convert, FillerItem},
+        patch::msbf::MsbfKey,
+        settings::plando_settings,
+    },
+    albw::{
+        Game,
+        Item::{self, *},
+    },
+    linked_hash_map::LinkedHashMap,
+    log::{debug, info},
+    patch::Patcher,
+    regions::Subregion,
+    serde::{ser::SerializeMap, Serialize, Serializer},
+    state::State,
+    std::{
+        collections::BTreeMap,
+        error::Error as StdError,
+        fs::{self, File},
+        io::{self, stdin, stdout, Write},
+        path::Path,
+    },
+    sys::{Paths, System},
+};
 mod check;
+mod entrance_rando;
+mod filler;
 mod filler_item;
-mod loading_zone;
+mod filler_util;
+mod graph;
 mod loading_zone_pair;
 mod location;
 mod location_node;
-mod path;
-mod progress;
-mod world;
-mod filler;
 mod logic;
 pub mod logic_mode;
+mod patch;
+mod path;
+mod pool;
+mod progress;
+mod regions;
+pub mod settings;
+mod state;
+mod world;
 
 pub type Result<T, E = Error> = core::result::Result<T, E>;
 
@@ -47,23 +55,17 @@ pub struct Error {
 
 impl Error {
     fn game<S>(err: S) -> Self
-        where
-            S: Into<Box<dyn StdError + Send + Sync + 'static>>,
+    where
+        S: Into<Box<dyn StdError + Send + Sync + 'static>>,
     {
-        Self {
-            kind: ErrorKind::Game,
-            inner: err.into(),
-        }
+        Self { kind: ErrorKind::Game, inner: err.into() }
     }
 
     fn io<S>(err: S) -> Self
-        where
-            S: Into<Box<dyn StdError + Send + Sync + 'static>>,
+    where
+        S: Into<Box<dyn StdError + Send + Sync + 'static>>,
     {
-        Self {
-            kind: ErrorKind::Io,
-            inner: err.into(),
-        }
+        Self { kind: ErrorKind::Io, inner: err.into() }
     }
 
     /// Gets the type of this error.
@@ -83,28 +85,19 @@ impl From<albw::Error> for Error {
             albw::ErrorKind::Io => ErrorKind::Io,
             albw::ErrorKind::Rom => ErrorKind::Game,
         };
-        Self {
-            kind,
-            inner: err.into_inner(),
-        }
+        Self { kind, inner: err.into_inner() }
     }
 }
 
 impl From<io::Error> for Error {
     fn from(err: io::Error) -> Self {
-        Self {
-            kind: ErrorKind::Io,
-            inner: err.into(),
-        }
+        Self { kind: ErrorKind::Io, inner: err.into() }
     }
 }
 
 impl From<sys::Error> for Error {
     fn from(err: sys::Error) -> Self {
-        Self {
-            kind: ErrorKind::Sys,
-            inner: err.into(),
-        }
+        Self { kind: ErrorKind::Sys, inner: err.into() }
     }
 }
 
@@ -175,26 +168,16 @@ impl Layout {
     }
 
     fn get_node_mut(&mut self, node: &'static Subregion) -> &mut BTreeMap<&'static str, Item> {
-        self.world_mut(node.world())
-            .entry(node.name())
-            .or_insert_with(Default::default)
+        self.world_mut(node.world()).entry(node.name()).or_insert_with(Default::default)
     }
 
     fn get(&self, location: &LocationInfo) -> Option<Item> {
-        let LocationInfo {
-            subregion: node,
-            name,
-        } = location;
-        self.world(node.world())
-            .get(node.name())
-            .and_then(|region| region.get(name).copied())
+        let LocationInfo { subregion: node, name } = location;
+        self.world(node.world()).get(node.name()).and_then(|region| region.get(name).copied())
     }
 
     fn set(&mut self, location: LocationInfo, item: Item) {
-        let LocationInfo {
-            subregion: node,
-            name,
-        } = location;
+        let LocationInfo { subregion: node, name } = location;
         self.get_node_mut(node).insert(name, item.normalize());
         debug!(
             "Placed {} in {}/{}",
@@ -233,15 +216,15 @@ pub enum Portrait {
 pub(crate) type World = LinkedHashMap<&'static str, BTreeMap<&'static str, Item>>;
 
 fn serialize_world<S>(region: &World, ser: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
+where
+    S: Serializer,
 {
     struct Wrap<'a>(&'a BTreeMap<&'static str, Item>);
 
     impl<'a> Serialize for Wrap<'a> {
         fn serialize<S>(&self, ser: S) -> Result<S::Ok, S::Error>
-            where
-                S: Serializer,
+        where
+            S: Serializer,
         {
             let mut map = ser.serialize_map(Some(self.0.len()))?;
             for (k, v) in self.0 {
@@ -338,6 +321,7 @@ fn item_to_str(item: &Item) -> &'static str {
         SageIrene => "Sage Irene",
         SageRosso => "Sage Rosso",
 
+        ZeldaAmulet => "Charm",
         TriforceCourage => "Triforce of Courage",
 
         ItemPotShopRed => "Red Potion",
@@ -365,7 +349,8 @@ impl ItemExt for Item {
     }
 
     fn is_progression(&self) -> bool {
-        matches!(self,
+        matches!(
+            self,
             // Empty |
             KeySmall | KeyBoss |
             // Compass |
@@ -385,7 +370,7 @@ impl ItemExt for Item {
             // ItemPotShopRed | ItemPotShopBlue | ItemPotShopPurple | ItemPotShopYellow | Milk |
             ItemStoneBeauty |
             PendantPower | PendantWisdom | PendantCourage |
-            // ZeldaAmulet |
+            ZeldaAmulet |
             ItemKandelaar | ItemKandelaarLv2 |
             ItemSwordLv1 | ItemSwordLv2 | ItemSwordLv3 | ItemSwordLv4 | PackageSword |
             ItemMizukaki |
@@ -394,18 +379,18 @@ impl ItemExt for Item {
             PowerGlove | PowerfulGlove |
             ItemInsectNet | ItemInsectNetLv2 |
             // Kinsta |
-            // BadgeBee |
+            BadgeBee |
             // GoldenBee | Bee | Fairy |
             GoldenBeeForSale |
-            // HintGlasses |
+            HintGlasses |
             EscapeFruit |
-            // StopFruit |
+            StopFruit |
             // LiverBlue | LiverPurple | LiverYellow |
             ClothesBlue | ClothesRed |
             OreYellow | OreGreen | OreBlue | OreRed |
             GanbariPowerUp |
             // GanbariTubo |
-            // Pouch |
+            Pouch |
             DashBoots |
             MessageBottle | MilkMatured |
             SpecialMove |
@@ -419,10 +404,7 @@ impl ItemExt for Item {
     fn is_sword(&self) -> bool {
         matches!(
             self,
-            Item::ItemSwordLv1 |
-            Item::ItemSwordLv2 |
-            Item::ItemSwordLv3 |
-            Item::ItemSwordLv4
+            Item::ItemSwordLv1 | Item::ItemSwordLv2 | Item::ItemSwordLv3 | Item::ItemSwordLv4
         )
     }
 
@@ -435,17 +417,12 @@ impl ItemExt for Item {
     }
 
     fn is_ore(&self) -> bool {
-        matches!(
-            self,
-            Item::OreYellow | Item::OreGreen | Item::OreBlue | Item::OreRed
-        )
+        matches!(self, Item::OreYellow | Item::OreGreen | Item::OreBlue | Item::OreRed)
     }
 
     fn normalize(self) -> Self {
         match self {
-            PackageSword | ItemSwordLv1 | ItemSwordLv3 | ItemSwordLv4 => {
-                ItemSwordLv2
-            }
+            PackageSword | ItemSwordLv1 | ItemSwordLv3 | ItemSwordLv4 => ItemSwordLv2,
             ItemRentalIceRod => ItemIceRod,
             ItemRentalSandRod => ItemSandRod,
             ItemRentalTornadeRod => ItemTornadeRod,
@@ -476,7 +453,7 @@ impl ItemExt for Item {
             SageRosso => Some(MsbfKey::Ice),
             SageImpa => None, // Impa special
             PendantPower | PendantWisdom | PendantCourage => None,
-            _ => panic!()
+            _ => panic!(),
         }
     }
 }
@@ -520,8 +497,8 @@ pub fn test_game() -> albw::Result<Game> {
 }
 
 fn prompt_until<F>(prompt: &str, until: F, error: &str) -> sys::Result<String>
-    where
-        F: Fn(&str) -> bool,
+where
+    F: Fn(&str) -> bool,
 {
     loop {
         print!("{}: ", prompt);
@@ -552,6 +529,7 @@ fn create_paths() -> sys::Result<Paths> {
     Ok(Paths::new(rom.into(), output.into()))
 }
 
+#[rustfmt::skip]
 pub fn plando() -> Result<(), Error> {
     info!("Start the Plando!");
 
@@ -564,10 +542,10 @@ pub fn plando() -> Result<(), Error> {
     //////////////////////////
 
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (1)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (2)"), PendantCourage);
-    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (3)"), PendantPower);
-    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (4)"), DashBoots);
-    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (5)"), PendantWisdom);
+    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (2)"), DashBoots);
+    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (3)"), ItemKandelaar);
+    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (4)"), ItemBombLv2);
+    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (5)"), ItemBowLv2);
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (6)"), HintGlasses); // Sand Rod Slot
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (7)"), RingHekiga);
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (8)"), RingHekiga);
@@ -761,7 +739,7 @@ pub fn plando() -> Result<(), Error> {
     layout.set(LocationInfo::new(regions::dungeons::castle::lorule::SUBREGION, "[LC] (4F) Lamp Trial"), RupeeGold);
     layout.set(LocationInfo::new(regions::dungeons::castle::lorule::SUBREGION, "[LC] (4F) Hookshot Trial (Chest)"), RupeeGold);
     layout.set(LocationInfo::new(regions::dungeons::castle::lorule::SUBREGION, "[LC] (4F) Hookshot Trial (Eyes)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::castle::lorule::SUBREGION, "Zelda"), ItemBow);
+    layout.set(LocationInfo::new(regions::dungeons::castle::lorule::SUBREGION, "Final Zelda"), ItemBow);
 
     ////////////////////
     // --- Hyrule --- //
@@ -783,11 +761,13 @@ pub fn plando() -> Result<(), Error> {
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Irene"), RupeeGold);
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Haunted Grove Tree Stump"), RupeeGold);
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Cucco Dungeon"), RupeeSilver);
-
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Rupee Rush (Hyrule)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Castle (Indoors)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Castle Balcony"), RupeeGold);
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Sanctuary Cave"), RupeeGold);
+
+    // Hyrule Castle
+    layout.set(LocationInfo::new(regions::hyrule::hyrule_castle::hyrule::SUBREGION, "[HC] Left Entrance"), RupeeGold);
+    layout.set(LocationInfo::new(regions::hyrule::hyrule_castle::hyrule::SUBREGION, "[HC] Castle Balcony"), RupeeGold);
+    layout.set(LocationInfo::new(regions::hyrule::hyrule_castle::hyrule::SUBREGION, "[HC] Zelda"), ZeldaAmulet);
 
     // Lost Woods
     layout.set(LocationInfo::new(regions::hyrule::lost::woods::SUBREGION, "Master Sword Pedestal"), ItemIceRod);
@@ -817,6 +797,7 @@ pub fn plando() -> Result<(), Error> {
     layout.set(LocationInfo::new(regions::hyrule::kakariko::village::SUBREGION, "Well (Chest)"), RupeeGold); // TODO ---------------
     layout.set(LocationInfo::new(regions::hyrule::kakariko::village::SUBREGION, "Well (Upper)"), RupeeGold);
     layout.set(LocationInfo::new(regions::hyrule::kakariko::village::SUBREGION, "Jail"), RupeeGold);
+    layout.set(LocationInfo::new(regions::hyrule::kakariko::village::SUBREGION, "Woman"), ZeldaAmulet);
     layout.set(LocationInfo::new(regions::hyrule::kakariko::post_sanc::SUBREGION, "Merchant (Left)"), RupeeGold);
     layout.set(LocationInfo::new(regions::hyrule::kakariko::shady_guy::SUBREGION, "Merchant (Right)"), RupeeGold);
     layout.set(LocationInfo::new(regions::hyrule::kakariko::post_sanc::SUBREGION, "Bee Guy"), HintGlasses);
@@ -898,6 +879,7 @@ pub fn plando() -> Result<(), Error> {
     layout.set(LocationInfo::new(regions::lorule::dark::ruins::SUBREGION, "Hinox (4)"), RupeePurple);
     layout.set(LocationInfo::new(regions::lorule::dark::ruins::SUBREGION, "Hinox (5)"), RupeeSilver);
     layout.set(LocationInfo::new(regions::lorule::dark::ruins::SUBREGION, "Hinox (6)"), SpecialMove);
+    layout.set(LocationInfo::new(regions::lorule::dark::ruins::SUBREGION, "Ku's Domain"), ItemMizukaki);
 
     // Misery Mire
     layout.set(LocationInfo::new(regions::lorule::misery::mire::SUBREGION, "Misery Mire Ledge"), RupeeGold);
@@ -1018,21 +1000,12 @@ pub fn plando() -> Result<(), Error> {
     layout.set(LocationInfo::new(regions::lorule::maiamai::maiamai::SUBREGION, "[Mai] Lorule Lake Big Rock"), RupeeGold);
     layout.set(LocationInfo::new(regions::lorule::maiamai::maiamai::SUBREGION, "[Mai] Lorule Lake SE Wall"), RupeeGold);
 
-    let spoiler = Spoiler {
-        seed: 0,
-        settings: &settings,
-        layout,
-    };
+    let spoiler = Spoiler { seed: 0, settings: &settings, layout };
 
-    spoiler.patch(
-        system.get_or_create_paths(create_paths)?,
-        true,
-        true,
-    )
+    spoiler.patch(system.get_or_create_paths(create_paths)?, true, true)
 }
 
 pub fn filler_new(settings: &Settings, seed: Seed) -> Spoiler {
-
     // New Filler
     let filled: Vec<(LocationInfo, Item)> = fill_stuff(settings, seed);
 
@@ -1042,9 +1015,5 @@ pub fn filler_new(settings: &Settings, seed: Seed) -> Spoiler {
         layout.set(location_info, item);
     }
 
-    Spoiler {
-        seed,
-        settings,
-        layout,
-    }
+    Spoiler { seed, settings, layout }
 }

@@ -1,8 +1,8 @@
-use std::{mem::MaybeUninit, ops::Range};
-
-use bytey::*;
-
-use crate::{files::align, Error, Result};
+use {
+    crate::{files::align, Error, Result},
+    bytey::*,
+    std::{mem::MaybeUninit, ops::Range},
+};
 
 type Ref<'file> = ::core::cell::Ref<'file, [u8]>;
 type RefMut<'file> = &'file mut [u8];
@@ -53,8 +53,7 @@ impl<'file, const SECTIONS: usize> MsgBn<RefMut<'file>, SECTIONS> {
 }
 
 pub fn sections<const SECTIONS: usize>(
-    file: &[u8],
-    magic: &'static [u8; 8],
+    file: &[u8], magic: &'static [u8; 8],
 ) -> Result<Sections<SECTIONS>> {
     bytey::typedef! { struct Header<'h>: TryFromBytes<'h> [0x20] {
         [0] magic: &'h [u8; 8],
@@ -90,10 +89,9 @@ pub fn sections<const SECTIONS: usize>(
         }
     } else {
         Err(Error::new(format!(
-                    "Error parsing file: expected magic number ({:X?}) did not match file's magic number ({:X?})",
-                    magic,
-                    header.magic,
-                )))
+            "Error parsing file: expected magic number ({:X?}) did not match file's magic number ({:X?})",
+            magic, header.magic,
+        )))
     }
 }
 

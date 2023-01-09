@@ -1,9 +1,9 @@
-use std::io::prelude::*;
-
-use bytey::*;
-
-use super::File;
-use crate::{Error, Result};
+use {
+    super::File,
+    crate::{Error, Result},
+    bytey::*,
+    std::io::prelude::*,
+};
 
 #[derive(Debug)]
 pub struct RomFs<R> {
@@ -33,12 +33,7 @@ where
         let header = L3::read_from_offset(&mut file, l3)?;
         let directories = Section::read(&mut file, l3, header.directory)?;
         let files = Section::read(&mut file, l3, header.file)?;
-        Ok(Self {
-            file,
-            directories,
-            files,
-            file_data: l3 + header.file_data,
-        })
+        Ok(Self { file, directories, files, file_data: l3 + header.file_data })
     }
 
     pub fn read<P>(&mut self, path: P) -> Result<File<Box<[u8]>>>
@@ -149,11 +144,7 @@ impl Section {
         )?;
         let count = header.hashtable_len / 4;
         let metadata = offset + header.metadata_offset;
-        Ok(Self {
-            hashtable,
-            count,
-            metadata,
-        })
+        Ok(Self { hashtable, count, metadata })
     }
 }
 
@@ -164,9 +155,7 @@ fn hash(name: &str, seed: u32) -> u32 {
 }
 
 fn path_eq(this: &[u8], other: &str) -> bool {
-    this.chunks_exact(2)
-        .map(|ch| unsafe { u16::from_slice_unchecked(ch) })
-        .eq(other.encode_utf16())
+    this.chunks_exact(2).map(|ch| unsafe { u16::from_slice_unchecked(ch) }).eq(other.encode_utf16())
 }
 
 const HEADER_LEN: usize = 0x5C;

@@ -1,12 +1,11 @@
-use std::{
-    collections::{HashMap, HashSet},
-    hash::{Hash, Hasher},
+use {
+    crate::{entrance_rando::EntranceShuffleSetting, logic_mode::LogicMode, regions, LocationInfo},
+    serde::{Deserialize, Serialize},
+    std::{
+        collections::{HashMap, HashSet},
+        hash::{Hash, Hasher},
+    },
 };
-
-use serde::{Deserialize, Serialize};
-
-use crate::{LocationInfo, regions};
-use crate::logic_mode::LogicMode;
 
 /// Logic and behavior settings.
 #[derive(Clone, Debug, Default, Deserialize, Hash, Serialize)]
@@ -42,6 +41,10 @@ pub struct Logic {
     pub mode: LogicMode,
     /// Randomizes the Pendants and Portraits between Hyrule and Lorule dungeons
     pub randomize_dungeon_prizes: bool,
+
+    ///
+    pub entrance_rando: EntranceShuffleSetting,
+
     /// The number of Portraits needed to trigger the Hilda cutscene to open Lorule Castle
     pub lc_requirement: u8,
     /// The number of Portraits needed to fight Yuga Ganon
@@ -196,9 +199,7 @@ impl Hash for World {
 }
 
 pub fn open_default() -> Settings {
-    Settings {
-        ..Default::default()
-    }
+    Settings { ..Default::default() }
 }
 
 pub fn plando_settings() -> Settings {
@@ -209,10 +210,7 @@ pub fn plando_settings() -> Settings {
             vanes_activated: true,
             ..Default::default()
         },
-        options: Options {
-            chest_size_matches_contents: true,
-            night_mode: false
-        },
+        options: Options { chest_size_matches_contents: true, night_mode: false },
         ..Default::default()
     }
 }

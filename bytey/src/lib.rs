@@ -1,5 +1,7 @@
 //! A library for dealing with reading binary data.
 
+#[doc(hidden)]
+pub use bytey_macro::strip_lifetime;
 pub use std::io::{Error, ErrorKind, Result};
 use std::{
     alloc,
@@ -7,9 +9,6 @@ use std::{
     mem::{self, MaybeUninit},
     slice,
 };
-
-#[doc(hidden)]
-pub use bytey_macro::strip_lifetime;
 
 /// A trait for representing fixed-size sequence of bytes.
 pub trait Bytes: AsRef<[u8]> + AsMut<[u8]> + Sized {

@@ -12,6 +12,7 @@ crate::region! {
             "Hinox (4)": RupeeSilver @Event(CaveDark/FieldDark_17_NpcHinox [0x0A]),
             "Hinox (5)": RupeeSilver @Event(CaveDark/FieldDark_17_NpcHinox [0x11]),
             "Hinox (6)": RupeeGold @Event(CaveDark/FieldDark_17_NpcHinox [0x16]),
+            "Ku's Domain": RupeeSilver @Chest(7[55]),
         ],
         paths: [
             dungeons::dark::palace :- {|s| s.can_bomb() && s.can_lamp()},

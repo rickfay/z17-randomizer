@@ -1,16 +1,15 @@
-use std::{
-    error::Error as StdError,
-    fmt::{self, Display, Formatter},
-    fs, io,
-    marker::PhantomData,
-    path::{Path, PathBuf},
+use {
+    log::info,
+    prelude::*,
+    serde::{de::DeserializeOwned, Deserialize, Serialize},
+    std::{
+        error::Error as StdError,
+        fmt::{self, Display, Formatter},
+        fs, io,
+        marker::PhantomData,
+        path::{Path, PathBuf},
+    },
 };
-
-use log::info;
-use serde::{de::DeserializeOwned, Deserialize, Serialize};
-
-use prelude::*;
-
 pub mod prelude {
     pub use ::std::{self, io::prelude::*, prelude::v1::*};
 }
@@ -24,8 +23,8 @@ pub struct Error {
 
 impl Error {
     pub fn new<E>(err: E) -> Self
-        where
-            E: Into<Box<dyn StdError + Send + Sync + 'static>>,
+    where
+        E: Into<Box<dyn StdError + Send + Sync + 'static>>,
     {
         Self { inner: err.into() }
     }
@@ -58,10 +57,9 @@ pub struct System<P> {
 
 impl<P> System<P> {
     pub fn new() -> Result<Self>
-        where
-            P: Serialize,
+    where
+        P: Serialize,
     {
-
         // let config = PathBuf::from("");
         // // let config = config_dir()
         // //     .ok_or_else(|| Error::new("Could not find suitable configuration directory."))?;
@@ -80,10 +78,7 @@ impl<P> System<P> {
         //     }
         // }
 
-        Ok(Self {
-            config: PathBuf::from(""),
-            presets: PhantomData,
-        })
+        Ok(Self { config: PathBuf::from(""), presets: PhantomData })
     }
 
     pub fn preset(&self, name: &str) -> Result<P>
@@ -94,15 +89,12 @@ impl<P> System<P> {
 
         info!("Loading preset from:            {}\n", path.display());
 
-        toml::from_slice(&fs::read(
-            path,
-        )?)
-        .map_err(Error::new)
+        toml::from_slice(&fs::read(path)?).map_err(Error::new)
     }
 
     pub fn get_or_create_paths<F>(&self, create: F) -> Result<Paths>
-        where
-            F: FnOnce() -> Result<Paths>,
+    where
+        F: FnOnce() -> Result<Paths>,
     {
         let file = self.config.join("config.toml");
         if file.exists() {
@@ -111,10 +103,7 @@ impl<P> System<P> {
             info!("No config found at {}", file.to_path_buf().display());
             info!("Please enter configuration info:");
             let paths = create()?;
-            fs::write(
-                file,
-                toml::to_string_pretty(&paths).expect("Could not write config file."),
-            )?;
+            fs::write(file, toml::to_string_pretty(&paths).expect("Could not write config file."))?;
             Ok(paths)
         }
     }

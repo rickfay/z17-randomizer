@@ -1,8 +1,9 @@
-use bytey::*;
-
-use crate::{
-    files::{msgbn::MsgBn, FromFile},
-    Error, Result,
+use {
+    crate::{
+        files::{msgbn::MsgBn, FromFile},
+        Error, Result,
+    },
+    bytey::*,
 };
 
 type Ref<'input> = ::core::cell::Ref<'input, [u8]>;
@@ -33,8 +34,8 @@ impl<'input> FromFile for Flow<'input> {
     }
 
     fn from_file(input: Self::Input) -> Result<Self>
-        where
-            Self: Sized,
+    where
+        Self: Sized,
     {
         // Line 1: Should contain magic "MsgFlwBn"
         let msgbn = MsgBn::<Ref<'input>, 2>::try_read(input, MSGFLWBN)?;
@@ -55,8 +56,8 @@ impl<'input> FromFile for Flow<'input> {
         // If the number of branches is not a multiple of 8 (i.e. it doesn't fill up a line), that line
         // will be padded with "AB"
 
-        let header =
-            List::<Ref, HEADER_LEN>::new(1, header).ok_or_else(|| Error::new("malformed header"))?;
+        let header = List::<Ref, HEADER_LEN>::new(1, header)
+            .ok_or_else(|| Error::new("malformed header"))?;
         let steps =
             List::<Ref, STEP_LEN>::new(step_ct, steps).ok_or_else(|| Error::new("unimpl33"))?;
         let branches = Branches(
@@ -75,39 +76,21 @@ pub struct Steps<'flow, 'input>(&'flow Flow<'input>);
 
 impl<'flow, 'input> Steps<'flow, 'input> {
     pub fn get(&self, index: u16) -> Option<Result<Step>> {
-        self.0
-            .steps
-            .get(index)
-            .map(|bytes| Step::from_bytes(&bytes, &self.0.branches))
+        self.0.steps.get(index).map(|bytes| Step::from_bytes(&bytes, &self.0.branches))
     }
 
-    pub fn iter(&self) -> impl Iterator<Item=Result<Step>> + '_ {
-        self.0
-            .steps
-            .iter()
-            .map(move |bytes| Step::from_bytes(&bytes, &self.0.branches))
+    pub fn iter(&self) -> impl Iterator<Item = Result<Step>> + '_ {
+        self.0.steps.iter().map(move |bytes| Step::from_bytes(&bytes, &self.0.branches))
     }
 }
 
 #[derive(Debug)]
 pub enum Step {
-    Text {
-        next: Next,
-    },
-    Branch {
-        command: Branch,
-        branches: Vec<Next>,
-    },
-    Action {
-        command: Action,
-        next: Next,
-    },
-    Start {
-        next: Next,
-    },
-    Goto {
-        next: Next,
-    },
+    Text { next: Next },
+    Branch { command: Branch, branches: Vec<Next> },
+    Action { command: Action, next: Next },
+    Start { next: Next },
+    Goto { next: Next },
 }
 
 impl Step {
@@ -130,10 +113,7 @@ impl Step {
                 step.count,
                 step.branch,
             ),
-            3 => Ok(Self::Action {
-                command: Action::new(step.command, step.value),
-                next,
-            }),
+            3 => Ok(Self::Action { command: Action::new(step.command, step.value), next }),
             4 => Ok(Self::Start { next }),
             5 => Ok(Self::Goto { next }),
             kind => Err(Error::new(format!("Invalid flow value: {:X}.", kind))),
@@ -181,7 +161,7 @@ impl Action {
 struct Branches<'input>(List<Ref<'input>, BRANCH_LEN>);
 
 impl<'input> Branches<'input> {
-    pub fn iter(&self) -> impl Iterator<Item=u16> + '_ {
+    pub fn iter(&self) -> impl Iterator<Item = u16> + '_ {
         self.0.iter().map(|bytes| u16::from_bytes(&*bytes))
     }
 }
@@ -194,11 +174,7 @@ pub struct FlowMut<'input> {
 
 impl<'input> FlowMut<'input> {
     pub fn get_mut<'s>(&'s mut self, index: u16) -> Option<StepMut<'s, 'input>> {
-        if self.steps.get_mut(index).is_some() {
-            Some(StepMut { flow: self, index })
-        } else {
-            None
-        }
+        if self.steps.get_mut(index).is_some() { Some(StepMut { flow: self, index }) } else { None }
     }
 
     pub fn debug(&self) {
@@ -223,18 +199,34 @@ impl<'input> FlowMut<'input> {
             }
         }
 
-
         println!("index,kind,arg1,arg2,arg3,value,next,command,count,branch");
         let mut step: Inner;
         for i in 0..(&self.steps.inner.len() / STEP_LEN) {
-            step = unsafe { Inner::from_slice_unchecked(&self.steps.inner[(i * STEP_LEN)..((i * STEP_LEN) + STEP_LEN)]) };
-            println!("[{: >3}],{},{},{},{},{},{},{},{},{}",
-                     i, step.kind, step.arg1, step.arg2, step.arg3, step.value, step.next, step.command, step.count, step.branch);
+            step = unsafe {
+                Inner::from_slice_unchecked(
+                    &self.steps.inner[(i * STEP_LEN)..((i * STEP_LEN) + STEP_LEN)],
+                )
+            };
+            println!(
+                "[{: >3}],{},{},{},{},{},{},{},{},{}",
+                i,
+                step.kind,
+                step.arg1,
+                step.arg2,
+                step.arg3,
+                step.value,
+                step.next,
+                step.command,
+                step.count,
+                step.branch
+            );
         }
         println!("branches");
         let mut branch: InnerBranch;
         for i in 0..(&self.branches.inner.len() / 2) {
-            branch = unsafe { InnerBranch::from_slice_unchecked(&self.branches.inner[(i * 2)..((i * 2) + 2)]) };
+            branch = unsafe {
+                InnerBranch::from_slice_unchecked(&self.branches.inner[(i * 2)..((i * 2) + 2)])
+            };
             println!("[{}],{},{}", i, branch.arg0, branch.arg1);
         }
     }
@@ -249,13 +241,11 @@ impl<'input> FromFile for FlowMut<'input> {
     }
 
     fn from_file(input: Self::Input) -> Result<Self>
-        where
-            Self: Sized,
+    where
+        Self: Sized,
     {
         let msgbn = MsgBn::<RefMut<'input>, 2>::try_read(input, MSGFLWBN)?;
-        let flw = msgbn
-            .into_section(FLW3)
-            .ok_or_else(|| Error::new("No FLW3"))?;
+        let flw = msgbn.into_section(FLW3).ok_or_else(|| Error::new("No FLW3"))?;
         let (step_ct, branch_ct, index) = get_flw(&flw)?;
         let (steps, branches) = flw[0x10..].split_at_mut(index);
         let steps =
@@ -315,18 +305,14 @@ impl<'flow, 'input> StepMut<'flow, 'input> {
 
     pub fn convert_into_action(self) -> Option<ActionMut<'flow, 'input>> {
         unsafe {
-            *self
-                .flow
-                .steps
-                .get_mut(self.index)
-                .unwrap()
-                .get_unchecked_mut(0) = 3;
+            *self.flow.steps.get_mut(self.index).unwrap().get_unchecked_mut(0) = 3;
             Some(ActionMut(self))
         }
     }
 
-    pub fn convert_into_branch(mut self, count: u8, branch_index: u8) -> Option<BranchMut<'flow, 'input>> {
-
+    pub fn convert_into_branch(
+        mut self, count: u8, branch_index: u8,
+    ) -> Option<BranchMut<'flow, 'input>> {
         Self::set_next(&mut self, None);
         let bytes = self.flow.steps.get_mut(self.index).unwrap();
 
@@ -363,8 +349,8 @@ impl<'flow, 'input> StepMut<'flow, 'input> {
     }
 
     fn set_next<N>(&mut self, next: N)
-        where
-            N: Into<Next>,
+    where
+        N: Into<Next>,
     {
         let next = next.into().unwrap_or(0xFFFF);
         unsafe {
@@ -412,9 +398,10 @@ impl<'flow, 'input> BranchMut<'flow, 'input> {
         self.0.set_value(value);
     }
 
-    pub fn set_branch<N>(&mut self, index: u16, to: N) -> Result<()> // index:4, to:6
-        where
-            N: Into<Next>,
+    pub fn set_branch<N>(&mut self, index: u16, to: N) -> Result<()>
+    // index:4, to:6
+    where
+        N: Into<Next>,
     {
         bytey::typedef! { struct Inner: FromBytes<'_> [STEP_LEN] {
             [0xC] count: u16,
@@ -450,8 +437,8 @@ impl<'flow, 'input> ActionMut<'flow, 'input> {
     }
 
     pub fn set_next<N>(&mut self, next: N)
-        where
-            N: Into<Next>,
+    where
+        N: Into<Next>,
     {
         self.0.set_next(next);
     }
@@ -470,8 +457,8 @@ pub struct TextMut<'flow, 'input>(StepMut<'flow, 'input>);
 
 impl<'flow, 'input> TextMut<'flow, 'input> {
     pub fn set_next<N>(&mut self, next: N)
-        where
-            N: Into<Next>,
+    where
+        N: Into<Next>,
     {
         self.0.set_next(next);
     }
@@ -482,8 +469,8 @@ pub struct StartMut<'flow, 'input>(StepMut<'flow, 'input>);
 
 impl<'flow, 'input> StartMut<'flow, 'input> {
     pub fn set_next<N>(&mut self, next: N)
-        where
-            N: Into<Next>,
+    where
+        N: Into<Next>,
     {
         self.0.set_next(next);
     }
@@ -494,8 +481,8 @@ pub struct GotoMut<'flow, 'input>(StepMut<'flow, 'input>);
 
 impl<'flow, 'input> GotoMut<'flow, 'input> {
     pub fn set_next<N>(&mut self, next: N)
-        where
-            N: Into<Next>,
+    where
+        N: Into<Next>,
     {
         self.0.set_next(next);
     }
@@ -535,7 +522,7 @@ impl<'input, const SIZE: usize> List<Ref<'input>, SIZE> {
         })
     }
 
-    fn iter<'s>(&'s self) -> impl Iterator<Item=RefSized<'input, SIZE>> + 's {
+    fn iter<'s>(&'s self) -> impl Iterator<Item = RefSized<'input, SIZE>> + 's {
         (0..self.count).map(move |index| {
             let index = index as usize;
             Ref::map(Ref::clone(&self.inner), |inner| unsafe {
@@ -553,10 +540,7 @@ impl<'input, const SIZE: usize> List<RefMut<'input>, SIZE> {
         if inner.len() < len {
             None
         } else {
-            Some(Self {
-                count,
-                inner: unsafe { inner.get_unchecked_mut(0..len) },
-            })
+            Some(Self { count, inner: unsafe { inner.get_unchecked_mut(0..len) } })
         }
     }
 
@@ -564,10 +548,8 @@ impl<'input, const SIZE: usize> List<RefMut<'input>, SIZE> {
         if index <= self.count {
             let start = SIZE * index as usize;
             unsafe {
-                let ptr = self
-                    .inner
-                    .get_unchecked_mut(start..start + SIZE)
-                    .as_mut_ptr() as *mut [u8; SIZE];
+                let ptr = self.inner.get_unchecked_mut(start..start + SIZE).as_mut_ptr()
+                    as *mut [u8; SIZE];
                 Some(&mut *ptr)
             }
         } else {

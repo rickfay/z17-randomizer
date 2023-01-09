@@ -1,18 +1,18 @@
-use std::{
-    collections::BTreeMap,
-    convert::TryInto,
-    fmt::{self, Display, Formatter},
-    io::{Seek, SeekFrom, Write},
+use {
+    super::Kind,
+    crate::files::align,
+    serde::ser::{
+        self, Impossible, Serialize, SerializeMap, SerializeSeq, SerializeStruct,
+        SerializeStructVariant, SerializeTuple, SerializeTupleStruct, SerializeTupleVariant,
+    },
+    std::{
+        collections::BTreeMap,
+        convert::TryInto,
+        fmt::{self, Display, Formatter},
+        io::{Seek, SeekFrom, Write},
+    },
+    to_bytes::*,
 };
-
-use serde::ser::{
-    self, Impossible, Serialize, SerializeMap, SerializeSeq, SerializeStruct,
-    SerializeStructVariant, SerializeTuple, SerializeTupleStruct, SerializeTupleVariant,
-};
-
-use super::Kind;
-use crate::files::align;
-
 mod to_bytes {
     pub fn version(version: u16) -> [u8; 2] {
         version.to_le_bytes()
@@ -35,8 +35,6 @@ mod to_bytes {
         value.to_le_bytes()
     }
 }
-
-use to_bytes::*;
 
 type Result<T, E = Error> = ::core::result::Result<T, E>;
 
@@ -183,18 +181,13 @@ where
     }
 
     fn serialize_unit_variant(
-        self,
-        _name: &'static str,
-        _variant_index: u32,
-        _variant: &'static str,
+        self, _name: &'static str, _variant_index: u32, _variant: &'static str,
     ) -> Result<Self::Ok, Self::Error> {
         Err(Self::invalid_root("unit variant"))
     }
 
     fn serialize_newtype_struct<T: ?Sized>(
-        self,
-        _name: &'static str,
-        value: &T,
+        self, _name: &'static str, value: &T,
     ) -> Result<Self::Ok, Self::Error>
     where
         T: Serialize,
@@ -203,11 +196,7 @@ where
     }
 
     fn serialize_newtype_variant<T: ?Sized>(
-        self,
-        _name: &'static str,
-        _variant_index: u32,
-        _variant: &'static str,
-        _value: &T,
+        self, _name: &'static str, _variant_index: u32, _variant: &'static str, _value: &T,
     ) -> Result<Self::Ok, Self::Error>
     where
         T: Serialize,
@@ -224,19 +213,13 @@ where
     }
 
     fn serialize_tuple_struct(
-        self,
-        _name: &'static str,
-        len: usize,
+        self, _name: &'static str, len: usize,
     ) -> Result<Self::SerializeTupleStruct, Self::Error> {
         self.array(Some(len))
     }
 
     fn serialize_tuple_variant(
-        self,
-        _name: &'static str,
-        _variant_index: u32,
-        _variant: &'static str,
-        _len: usize,
+        self, _name: &'static str, _variant_index: u32, _variant: &'static str, _len: usize,
     ) -> Result<Self::SerializeTupleVariant, Self::Error> {
         Err(Self::invalid_root("tuple variant"))
     }
@@ -246,19 +229,13 @@ where
     }
 
     fn serialize_struct(
-        self,
-        _name: &'static str,
-        len: usize,
+        self, _name: &'static str, len: usize,
     ) -> Result<Self::SerializeStruct, Self::Error> {
         self.map(Some(len))
     }
 
     fn serialize_struct_variant(
-        self,
-        _name: &'static str,
-        _variant_index: u32,
-        _variant: &'static str,
-        _len: usize,
+        self, _name: &'static str, _variant_index: u32, _variant: &'static str, _len: usize,
     ) -> Result<Self::SerializeStructVariant, Self::Error> {
         Err(Self::invalid_root("struct variant"))
     }
@@ -277,24 +254,14 @@ where
     W: Write + Seek,
 {
     fn empty(writer: W) -> Result<Self> {
-        let mut this = Self {
-            writer,
-            keys: vec![],
-            strings: vec![],
-            end: 0,
-        };
+        let mut this = Self { writer, keys: vec![], strings: vec![], end: 0 };
         this.write_magic()?;
         this.write(&[0u8; 0xC])?;
         Ok(this)
     }
 
     fn with_document(writer: W, document: Document) -> Result<Self> {
-        let mut this = Self {
-            writer,
-            keys: vec![],
-            strings: vec![],
-            end: 0,
-        };
+        let mut this = Self { writer, keys: vec![], strings: vec![], end: 0 };
         this.write_magic()?;
         let mut keys = vec![];
         let offset = this.write_strings(document.keys, &mut keys)?;
@@ -310,25 +277,15 @@ where
     }
 
     fn seek(&mut self, offset: u32) -> Result<()> {
-        self.writer
-            .seek(SeekFrom::Start(offset as u64))
-            .map(|_| ())
-            .map_err(ser::Error::custom)
+        self.writer.seek(SeekFrom::Start(offset as u64)).map(|_| ()).map_err(ser::Error::custom)
     }
 
     fn position(&mut self) -> Result<u32> {
-        check_offset(
-            self.writer
-                .seek(SeekFrom::Current(0))
-                .map_err(|err| Error(err.to_string()))?,
-        )
+        check_offset(self.writer.seek(SeekFrom::Current(0)).map_err(|err| Error(err.to_string()))?)
     }
 
     fn write(&mut self, bytes: &[u8]) -> Result<()> {
-        self.writer
-            .write(bytes)
-            .map(|_| ())
-            .map_err(ser::Error::custom)
+        self.writer.write(bytes).map(|_| ()).map_err(ser::Error::custom)
     }
 
     fn write_magic(&mut self) -> Result<()> {
@@ -392,9 +349,8 @@ where
         let mut values = vec![0u8; count as usize * 4];
         self.write(&values)?;
         self.end = self.position()?;
-        for (node, (kind_mut, value_mut)) in array
-            .into_iter()
-            .zip(kinds.iter_mut().zip(values.chunks_mut(4)))
+        for (node, (kind_mut, value_mut)) in
+            array.into_iter().zip(kinds.iter_mut().zip(values.chunks_mut(4)))
         {
             let (kind, value) = self.write_node(node)?;
             *kind_mut = kind as u8;
@@ -464,11 +420,7 @@ pub struct RootArray<W> {
 
 impl<W> RootArray<W> {
     fn new(writer: W, count: Option<usize>) -> Result<Self> {
-        Ok(Self {
-            writer,
-            document: Default::default(),
-            array: Array::with_count(count)?,
-        })
+        Ok(Self { writer, document: Default::default(), array: Array::with_count(count)? })
     }
 
     fn write(self) -> Result<()>
@@ -547,11 +499,7 @@ pub struct RootMap<W> {
 
 impl<W> RootMap<W> {
     fn new(writer: W, count: Option<usize>) -> Result<Self> {
-        Ok(Self {
-            writer,
-            document: Default::default(),
-            map: Map::with_count(count)?,
-        })
+        Ok(Self { writer, document: Default::default(), map: Map::with_count(count)? })
     }
 
     fn write(self) -> Result<()>
@@ -598,9 +546,7 @@ where
     type Error = Error;
 
     fn serialize_field<T: ?Sized>(
-        &mut self,
-        key: &'static str,
-        value: &T,
+        &mut self, key: &'static str, value: &T,
     ) -> Result<(), Self::Error>
     where
         T: Serialize,
@@ -638,10 +584,7 @@ impl Document {
         T: TryInto<i32>,
         <T as TryInto<i32>>::Error: Display,
     {
-        integer
-            .try_into()
-            .map_err(ser::Error::custom)
-            .map(|integer| self.integer(integer))
+        integer.try_into().map_err(ser::Error::custom).map(|integer| self.integer(integer))
     }
 
     fn float(&self, float: f32) -> Node {
@@ -751,20 +694,13 @@ impl<'doc> ser::Serializer for &'doc mut Document {
     }
 
     fn serialize_unit_variant(
-        self,
-        _name: &'static str,
-        _variant_index: u32,
-        _variant: &'static str,
+        self, _name: &'static str, _variant_index: u32, _variant: &'static str,
     ) -> Result<Self::Ok, Self::Error> {
-        Err(ser::Error::custom(
-            "enum variant serialization not supported",
-        ))
+        Err(ser::Error::custom("enum variant serialization not supported"))
     }
 
     fn serialize_newtype_struct<T: ?Sized>(
-        self,
-        _name: &'static str,
-        value: &T,
+        self, _name: &'static str, value: &T,
     ) -> Result<Self::Ok, Self::Error>
     where
         T: Serialize,
@@ -773,18 +709,12 @@ impl<'doc> ser::Serializer for &'doc mut Document {
     }
 
     fn serialize_newtype_variant<T: ?Sized>(
-        self,
-        _name: &'static str,
-        _variant_index: u32,
-        _variant: &'static str,
-        _value: &T,
+        self, _name: &'static str, _variant_index: u32, _variant: &'static str, _value: &T,
     ) -> Result<Self::Ok, Self::Error>
     where
         T: Serialize,
     {
-        Err(ser::Error::custom(
-            "enum variant serialization not supported",
-        ))
+        Err(ser::Error::custom("enum variant serialization not supported"))
     }
 
     fn serialize_seq(self, len: Option<usize>) -> Result<Self::SerializeSeq, Self::Error> {
@@ -796,23 +726,15 @@ impl<'doc> ser::Serializer for &'doc mut Document {
     }
 
     fn serialize_tuple_struct(
-        self,
-        _name: &'static str,
-        len: usize,
+        self, _name: &'static str, len: usize,
     ) -> Result<Self::SerializeTupleStruct, Self::Error> {
         BArray::new(self, Some(len))
     }
 
     fn serialize_tuple_variant(
-        self,
-        _name: &'static str,
-        _variant_index: u32,
-        _variant: &'static str,
-        _len: usize,
+        self, _name: &'static str, _variant_index: u32, _variant: &'static str, _len: usize,
     ) -> Result<Self::SerializeTupleVariant, Self::Error> {
-        Err(ser::Error::custom(
-            "enum variant serialization not supported",
-        ))
+        Err(ser::Error::custom("enum variant serialization not supported"))
     }
 
     fn serialize_map(self, len: Option<usize>) -> Result<Self::SerializeMap, Self::Error> {
@@ -820,23 +742,15 @@ impl<'doc> ser::Serializer for &'doc mut Document {
     }
 
     fn serialize_struct(
-        self,
-        _name: &'static str,
-        len: usize,
+        self, _name: &'static str, len: usize,
     ) -> Result<Self::SerializeStruct, Self::Error> {
         BMap::new(self, Some(len))
     }
 
     fn serialize_struct_variant(
-        self,
-        _name: &'static str,
-        _variant_index: u32,
-        _variant: &'static str,
-        _len: usize,
+        self, _name: &'static str, _variant_index: u32, _variant: &'static str, _len: usize,
     ) -> Result<Self::SerializeStructVariant, Self::Error> {
-        Err(ser::Error::custom(
-            "enum variant serialization not supported",
-        ))
+        Err(ser::Error::custom("enum variant serialization not supported"))
     }
 }
 
@@ -852,9 +766,7 @@ impl Array {
                 Err(ser::Error::custom("sequence too large to be serialized"))
             }
         } else {
-            Err(ser::Error::custom(
-                "cannot serialize a sequence of unknown length",
-            ))
+            Err(ser::Error::custom("cannot serialize a sequence of unknown length"))
         }
     }
 
@@ -887,10 +799,7 @@ struct BArray<'doc> {
 
 impl<'doc> BArray<'doc> {
     fn new(document: &'doc mut Document, count: Option<usize>) -> Result<Self> {
-        Ok(Self {
-            document,
-            array: Array::with_count(count)?,
-        })
+        Ok(Self { document, array: Array::with_count(count)? })
     }
 }
 
@@ -973,9 +882,7 @@ impl Map {
                 Err(ser::Error::custom("map too large to be serialized"))
             }
         } else {
-            Err(ser::Error::custom(
-                "cannot serialize a map of unknown length",
-            ))
+            Err(ser::Error::custom("cannot serialize a map of unknown length"))
         }
     }
 
@@ -999,9 +906,7 @@ impl Map {
             self.entries.push((key, value.serialize(document)?));
             Ok(())
         } else {
-            Err(ser::Error::custom(
-                "called `serialize_value` before `serialize_key`",
-            ))
+            Err(ser::Error::custom("called `serialize_value` before `serialize_key`"))
         }
     }
 
@@ -1022,10 +927,7 @@ struct BMap<'doc> {
 
 impl<'doc> BMap<'doc> {
     fn new(document: &'doc mut Document, count: Option<usize>) -> Result<Self> {
-        Ok(Self {
-            document,
-            map: Map::with_count(count)?,
-        })
+        Ok(Self { document, map: Map::with_count(count)? })
     }
 }
 
@@ -1057,9 +959,7 @@ impl<'doc> SerializeStruct for BMap<'doc> {
     type Error = Error;
 
     fn serialize_field<T: ?Sized>(
-        &mut self,
-        key: &'static str,
-        value: &T,
+        &mut self, key: &'static str, value: &T,
     ) -> Result<(), Self::Error>
     where
         T: Serialize,
@@ -1078,9 +978,7 @@ impl<'doc> SerializeStructVariant for BMap<'doc> {
     type Error = Error;
 
     fn serialize_field<T: ?Sized>(
-        &mut self,
-        key: &'static str,
-        value: &T,
+        &mut self, key: &'static str, value: &T,
     ) -> Result<(), Self::Error>
     where
         T: Serialize,
@@ -1212,18 +1110,13 @@ impl<'doc> ser::Serializer for &'doc mut Strings {
     }
 
     fn serialize_unit_variant(
-        self,
-        _name: &'static str,
-        _variant_index: u32,
-        _variant: &'static str,
+        self, _name: &'static str, _variant_index: u32, _variant: &'static str,
     ) -> Result<Self::Ok, Self::Error> {
         Err(Strings::invalid("unit variant"))
     }
 
     fn serialize_newtype_struct<T: ?Sized>(
-        self,
-        _name: &'static str,
-        _value: &T,
+        self, _name: &'static str, _value: &T,
     ) -> Result<Self::Ok, Self::Error>
     where
         T: Serialize,
@@ -1232,11 +1125,7 @@ impl<'doc> ser::Serializer for &'doc mut Strings {
     }
 
     fn serialize_newtype_variant<T: ?Sized>(
-        self,
-        _name: &'static str,
-        _variant_index: u32,
-        _variant: &'static str,
-        _value: &T,
+        self, _name: &'static str, _variant_index: u32, _variant: &'static str, _value: &T,
     ) -> Result<Self::Ok, Self::Error>
     where
         T: Serialize,
@@ -1253,19 +1142,13 @@ impl<'doc> ser::Serializer for &'doc mut Strings {
     }
 
     fn serialize_tuple_struct(
-        self,
-        _name: &'static str,
-        _len: usize,
+        self, _name: &'static str, _len: usize,
     ) -> Result<Self::SerializeTupleStruct, Self::Error> {
         Err(Strings::invalid("tuple struct"))
     }
 
     fn serialize_tuple_variant(
-        self,
-        _name: &'static str,
-        _variant_index: u32,
-        _variant: &'static str,
-        _len: usize,
+        self, _name: &'static str, _variant_index: u32, _variant: &'static str, _len: usize,
     ) -> Result<Self::SerializeTupleVariant, Self::Error> {
         Err(Strings::invalid("tuple variant"))
     }
@@ -1275,28 +1158,20 @@ impl<'doc> ser::Serializer for &'doc mut Strings {
     }
 
     fn serialize_struct(
-        self,
-        _name: &'static str,
-        _len: usize,
+        self, _name: &'static str, _len: usize,
     ) -> Result<Self::SerializeStruct, Self::Error> {
         Err(Strings::invalid("struct"))
     }
 
     fn serialize_struct_variant(
-        self,
-        _name: &'static str,
-        _variant_index: u32,
-        _variant: &'static str,
-        _len: usize,
+        self, _name: &'static str, _variant_index: u32, _variant: &'static str, _len: usize,
     ) -> Result<Self::SerializeStructVariant, Self::Error> {
         Err(Strings::invalid("struct variant"))
     }
 }
 
 fn check_offset(offset: u64) -> Result<u32> {
-    offset
-        .try_into()
-        .map_err(|_| ser::Error::custom("file size too large"))
+    offset.try_into().map_err(|_| ser::Error::custom("file size too large"))
 }
 
 fn is_count_ok(count: usize) -> bool {

@@ -95,6 +95,7 @@ regions! {
         eastern;
         southern;
         lake;
+        hyrule_castle;
         maiamai;
     }
     lorule(Lorule) {
@@ -224,7 +225,7 @@ macro_rules! edge {
     ($method:ident) => {
         |state: &$crate::state::State| state.$method()
     };
-    ({|$state:ident| $fn:expr}) => {
+    ({ | $state:ident | $fn:expr }) => {
         |$state: &$crate::state::State| $fn
     };
 }
@@ -235,10 +236,10 @@ macro_rules! path {
     ($subarea:ident) => {
         super::$subarea::SUBREGION
     };
-    ($region:ident::$node:ident) => {
+    ($region:ident:: $node:ident) => {
         super::super::$region::$node::SUBREGION
     };
-    ($world:ident::$region:ident::$node:ident) => {
+    ($world:ident:: $region:ident:: $node:ident) => {
         crate::regions::$world::$region::$node::SUBREGION
     };
 }
@@ -252,7 +253,7 @@ macro_rules! quest {
     ($variant:ident) => {
         Some(crate::Quest::$variant)
     };
-    ($variant:ident::$subvariant:ident) => {
+    ($variant:ident:: $subvariant:ident) => {
         (Some(crate::Quest::$variant(crate::$variant::$subvariant)))
     };
 }

@@ -1,8 +1,8 @@
-use std::{fmt, path::Path};
-
-use serde::{de, ser::SerializeTuple, Deserialize, Deserializer, Serialize, Serializer};
-
-use crate::{actors::Actors, files::sarc::Sarc, File, Result, Item};
+use {
+    crate::{actors::Actors, files::sarc::Sarc, File, Item, Result},
+    serde::{de, ser::SerializeTuple, Deserialize, Deserializer, Serialize, Serializer},
+    std::{fmt, path::Path},
+};
 
 #[derive(Debug)]
 pub struct Scene {
@@ -12,10 +12,7 @@ pub struct Scene {
 
 impl Scene {
     pub(crate) fn new(stage: File<Stage>, actors: File<Sarc>) -> Self {
-        Self {
-            actors: Actors::new(actors),
-            stage,
-        }
+        Self { actors: Actors::new(actors), stage }
     }
 
     pub fn actors(&self) -> &Actors {
@@ -39,8 +36,8 @@ impl Scene {
     }
 
     pub fn dump<P>(self, path: P) -> Result<()>
-        where
-            P: AsRef<Path>,
+    where
+        P: AsRef<Path>,
     {
         let path = path.as_ref();
         self.actors.dump(path)?;
@@ -71,8 +68,8 @@ impl SceneMeta {
     }
 
     pub fn dump<P>(self, path: P) -> Result<()>
-        where
-            P: AsRef<Path>,
+    where
+        P: AsRef<Path>,
     {
         self.stage_meta.serialize().dump(path.as_ref())
     }
@@ -258,8 +255,6 @@ impl Obj {
         }
     }
 
-
-
     /// Generate a new Hookshot Pole object
     /// Remember to import the actor: `StatueWood`
     pub fn hookshot_pole(clp: i16, ser: u16, unq: u16, translate: Vec3) -> Self {
@@ -298,21 +293,33 @@ impl Obj {
 
     /// Generate a new Warp Tile object
     /// Remember to import the actor: `WarpTile`
-    pub fn warp_tile(activation_flag: Flag, clp: i16, ser: u16, unq: u16, spawn: i32, scene: i32, scene_index: i32, translate: Vec3) -> Self {
+    pub fn warp_tile(
+        activation_flag: Flag, clp: i16, ser: u16, unq: u16, spawn: i32, scene: i32,
+        scene_index: i32, translate: Vec3,
+    ) -> Self {
         Self::warp(208, 1, activation_flag, clp, ser, unq, spawn, scene, scene_index, translate)
     }
 
     /// Generate a new Blue Warp object
-    pub fn blue_warp(activation_flag: Flag, clp: i16, ser: u16, unq: u16, spawn: i32, scene: i32, scene_index: i32, translate: Vec3) -> Self {
+    pub fn blue_warp(
+        activation_flag: Flag, clp: i16, ser: u16, unq: u16, spawn: i32, scene: i32,
+        scene_index: i32, translate: Vec3,
+    ) -> Self {
         Self::warp(469, 0, activation_flag, clp, ser, unq, spawn, scene, scene_index, translate)
     }
 
     /// Generate a new Green Warp object
-    pub fn green_warp(activation_flag: Flag, clp: i16, ser: u16, unq: u16, spawn: i32, scene: i32, scene_index: i32, translate: Vec3) -> Self {
+    pub fn green_warp(
+        activation_flag: Flag, clp: i16, ser: u16, unq: u16, spawn: i32, scene: i32,
+        scene_index: i32, translate: Vec3,
+    ) -> Self {
         Self::warp(19, 0, activation_flag, clp, ser, unq, spawn, scene, scene_index, translate)
     }
 
-    fn warp(id: i16, arg1: i32, activation_flag: Flag, clp: i16, ser: u16, unq: u16, spawn: i32, scene: i32, scene_index: i32, translate: Vec3) -> Self {
+    fn warp(
+        id: i16, arg1: i32, activation_flag: Flag, clp: i16, ser: u16, unq: u16, spawn: i32,
+        scene: i32, scene_index: i32, translate: Vec3,
+    ) -> Self {
         let (arg4, arg6) = activation_flag.into_pair();
         Self {
             arg: Arg {
@@ -348,10 +355,12 @@ impl Obj {
         }
     }
 
-
     /// Generate a new Obj to act as a Dungeon Reward trigger <br />
     /// Remember to import the actor: `TreasureBoxS`
-    pub fn pendant_chest(prize: Item, active_flag: Flag, pendant_flag: Flag, clp: i16, ser: u16, unq: u16, translate: Vec3) -> Self {
+    pub fn pendant_chest(
+        prize: Item, active_flag: Flag, pendant_flag: Flag, clp: i16, ser: u16, unq: u16,
+        translate: Vec3,
+    ) -> Self {
         let (arg4, arg6) = Flag::into_pair(active_flag);
         let (arg5, arg7) = Flag::into_pair(pendant_flag);
         Self {
@@ -390,8 +399,8 @@ impl Obj {
     }
 
     pub fn set_active_flag<F>(&mut self, flag: F)
-        where
-            F: Into<Option<Flag>>,
+    where
+        F: Into<Option<Flag>>,
     {
         let (kind, flag) = match flag.into() {
             Some(flag) => flag.into_pair(),
@@ -402,8 +411,8 @@ impl Obj {
     }
 
     pub fn set_inactive_flag<F>(&mut self, flag: F)
-        where
-            F: Into<Option<Flag>>,
+    where
+        F: Into<Option<Flag>>,
     {
         let (kind, flag) = match flag.into() {
             Some(flag) => flag.into_pair(),
@@ -418,8 +427,8 @@ impl Obj {
     }
 
     pub fn set_enable_flag<F>(&mut self, flag: F)
-        where
-            F: Into<Option<Flag>>,
+    where
+        F: Into<Option<Flag>>,
     {
         let (kind, flag) = match flag.into() {
             Some(flag) => flag.into_pair(),
@@ -430,8 +439,8 @@ impl Obj {
     }
 
     pub fn set_disable_flag<F>(&mut self, flag: F)
-        where
-            F: Into<Option<Flag>>,
+    where
+        F: Into<Option<Flag>>,
     {
         let (kind, flag) = match flag.into() {
             Some(flag) => flag.into_pair(),
@@ -514,16 +523,7 @@ impl Obj {
 
 #[derive(Debug, Serialize, Deserialize, Copy, Clone)]
 #[serde(deny_unknown_fields)]
-pub struct IcnArgs(
-    pub i32,
-    pub i32,
-    pub i32,
-    pub i32,
-    pub u8,
-    pub u8,
-    pub u16,
-    pub u16,
-);
+pub struct IcnArgs(pub i32, pub i32, pub i32, pub i32, pub u8, pub u8, pub u16, pub u16);
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -566,8 +566,8 @@ impl Transform {
 
 impl<'de> Deserialize<'de> for Transform {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-        where
-            D: Deserializer<'de>,
+    where
+        D: Deserializer<'de>,
     {
         struct TransformVisitor;
 
@@ -579,42 +579,24 @@ impl<'de> Deserialize<'de> for Transform {
             }
 
             fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
-                where
-                    A: de::SeqAccess<'de>,
+            where
+                A: de::SeqAccess<'de>,
             {
                 Ok(Transform {
                     scale: Vec3 {
-                        x: seq
-                            .next_element()?
-                            .ok_or_else(|| de::Error::missing_field("S.x"))?,
-                        y: seq
-                            .next_element()?
-                            .ok_or_else(|| de::Error::missing_field("S.y"))?,
-                        z: seq
-                            .next_element()?
-                            .ok_or_else(|| de::Error::missing_field("S.z"))?,
+                        x: seq.next_element()?.ok_or_else(|| de::Error::missing_field("S.x"))?,
+                        y: seq.next_element()?.ok_or_else(|| de::Error::missing_field("S.y"))?,
+                        z: seq.next_element()?.ok_or_else(|| de::Error::missing_field("S.z"))?,
                     },
                     rotate: Vec3 {
-                        x: seq
-                            .next_element()?
-                            .ok_or_else(|| de::Error::missing_field("R.x"))?,
-                        y: seq
-                            .next_element()?
-                            .ok_or_else(|| de::Error::missing_field("R.y"))?,
-                        z: seq
-                            .next_element()?
-                            .ok_or_else(|| de::Error::missing_field("R.z"))?,
+                        x: seq.next_element()?.ok_or_else(|| de::Error::missing_field("R.x"))?,
+                        y: seq.next_element()?.ok_or_else(|| de::Error::missing_field("R.y"))?,
+                        z: seq.next_element()?.ok_or_else(|| de::Error::missing_field("R.z"))?,
                     },
                     translate: Vec3 {
-                        x: seq
-                            .next_element()?
-                            .ok_or_else(|| de::Error::missing_field("T.x"))?,
-                        y: seq
-                            .next_element()?
-                            .ok_or_else(|| de::Error::missing_field("T.y"))?,
-                        z: seq
-                            .next_element()?
-                            .ok_or_else(|| de::Error::missing_field("T.z"))?,
+                        x: seq.next_element()?.ok_or_else(|| de::Error::missing_field("T.x"))?,
+                        y: seq.next_element()?.ok_or_else(|| de::Error::missing_field("T.y"))?,
+                        z: seq.next_element()?.ok_or_else(|| de::Error::missing_field("T.z"))?,
                     },
                 })
             }
@@ -626,8 +608,8 @@ impl<'de> Deserialize<'de> for Transform {
 
 impl Serialize for Transform {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-        where
-            S: Serializer,
+    where
+        S: Serializer,
     {
         let mut s = serializer.serialize_tuple(9)?;
         s.serialize_element(&self.scale.x)?;

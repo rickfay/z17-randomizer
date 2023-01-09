@@ -1,14 +1,14 @@
-use std::{
-    cell::{Ref, RefCell},
-    cmp::Ordering,
-    io::Cursor,
+use {
+    super::{align, File, FromFile, IntoBytes},
+    crate::{Error, Result},
+    bytey::*,
+    log::debug,
+    std::{
+        cell::{Ref, RefCell},
+        cmp::Ordering,
+        io::Cursor,
+    },
 };
-
-use bytey::*;
-use log::debug;
-
-use super::{align, File, FromFile, IntoBytes};
-use crate::{Error, Result};
 
 #[derive(Debug)]
 pub struct Sarc(RefCell<Inner>);
@@ -31,8 +31,8 @@ impl Sarc {
     }
 
     pub fn contains<P>(&self, path: P) -> Result<bool>
-        where
-            P: Into<String>,
+    where
+        P: Into<String>,
     {
         let path = path.into();
         let archive = self.decompress()?;
@@ -40,40 +40,34 @@ impl Sarc {
     }
 
     pub fn read<P>(&self, path: P) -> Result<File<Ref<[u8]>>>
-        where
-            P: Into<String>,
+    where
+        P: Into<String>,
     {
         let path = path.into();
         debug!("Reading {} from archive", &path);
         let archive = self.decompress()?;
-        let (start, end) = archive
-            .find(&path)
-            .map_err(|_| Error::new(format!("File not found: '{}'.", path)))?;
-        let data = Ref::map(archive, |archive| {
-            &archive.files[start as usize..end as usize]
-        });
+        let (start, end) =
+            archive.find(&path).map_err(|_| Error::new(format!("File not found: '{}'.", path)))?;
+        let data = Ref::map(archive, |archive| &archive.files[start as usize..end as usize]);
         Ok(File::new(path, data))
     }
 
     pub fn read_from_file<'a, T>(&'a self, args: &T::PathArgs) -> Result<File<T>>
-        where
-            T: FromFile<Input=Ref<'a, [u8]>>,
+    where
+        T: FromFile<Input = Ref<'a, [u8]>>,
     {
         let path = T::path(args);
         debug!("Reading {} from archive", &path);
         let archive = self.decompress()?;
-        let (start, end) = archive
-            .find(&path)
-            .map_err(|_| Error::new(format!("File not found: '{}'.", path)))?;
-        let input = Ref::map(archive, |archive| {
-            &archive.files[start as usize..end as usize]
-        });
+        let (start, end) =
+            archive.find(&path).map_err(|_| Error::new(format!("File not found: '{}'.", path)))?;
+        let input = Ref::map(archive, |archive| &archive.files[start as usize..end as usize]);
         Ok(File::new(path, T::from_file(input)?))
     }
 
     pub fn extract<P>(&self, path: P) -> Result<File<Box<[u8]>>>
-        where
-            P: Into<String>,
+    where
+        P: Into<String>,
     {
         let path = path.into();
         debug!("Extracting {} from archive", &path);
@@ -83,8 +77,8 @@ impl Sarc {
     }
 
     pub fn open<P>(&mut self, path: P) -> Result<File<&mut [u8]>>
-        where
-            P: Into<String>,
+    where
+        P: Into<String>,
     {
         let path = path.into();
         debug!("Opening {} from archive", &path);
@@ -93,14 +87,13 @@ impl Sarc {
     }
 
     pub fn open_from_file<'s, T>(&'s mut self, args: &T::PathArgs) -> Result<File<T>>
-        where
-            T: FromFile<Input=&'s mut [u8]>,
+    where
+        T: FromFile<Input = &'s mut [u8]>,
     {
         let path = T::path(args);
         let archive = self.decompress_mut()?;
-        let (start, end) = archive
-            .find(&path)
-            .map_err(|_| Error::new(format!("File not found: '{}'.", path)))?;
+        let (start, end) =
+            archive.find(&path).map_err(|_| Error::new(format!("File not found: '{}'.", path)))?;
         let input = &mut archive.files[start as usize..end as usize];
         Ok(File::new(path, T::from_file(input)?))
     }
@@ -190,21 +183,14 @@ impl Archive {
             let mut nodes: Vec<_> = nodes.into();
             nodes.truncate(0x10 * sfat.count as usize);
             let files = file[header.offset as usize..].into();
-            Ok(Self {
-                count: sfat.count,
-                multiplier: sfat.multiplier,
-                nodes,
-                files,
-            })
+            Ok(Self { count: sfat.count, multiplier: sfat.multiplier, nodes, files })
         } else {
             Err(Error::new("unimpl113".to_string()))
         }
     }
 
     fn hash(&self, path: &str) -> u32 {
-        path.chars().fold(0, |hash, ch| {
-            (ch as u32) + hash.wrapping_mul(self.multiplier)
-        })
+        path.chars().fold(0, |hash, ch| (ch as u32) + hash.wrapping_mul(self.multiplier))
     }
 
     fn get(&self, path: &str) -> Result<&[u8]> {
@@ -227,7 +213,6 @@ impl Archive {
         debug!("Updating: {}", file.path);
         match self.search(self.hash(&file.path), 0, self.count - 1) {
             Ok((start, _end, node_index)) => {
-
                 // info!("File already exists: {}", file.path);
                 // info!("Start: {}, End: {}", start, end);
                 // info!("self.files.len(): {}", self.files.len());
@@ -236,7 +221,6 @@ impl Archive {
                 let File { path, inner } = file;
                 let hash = self.hash(&path);
                 let mut buf: Vec<_> = inner.into();
-
 
                 // let old_len = self.files.len();
                 // let old_size = end as usize - start as usize;
@@ -308,9 +292,7 @@ impl Archive {
                 //     // }
                 // }
 
-
                 //self.files.resize(prev.start as usize, 0);
-
 
                 // info!("Old File Length: {}", old_len);
                 // info!("New File Length: {}", ((old_len - old_size + new_size) as u32) as usize);
@@ -322,7 +304,6 @@ impl Archive {
                 //     self.files.splice(start as usize..new_end as usize, buf);
                 //     self.files.resize(((old_len - old_size + new_size) as u32) as usize, 0);
                 // }
-
 
                 //info!("Do we get here...");
                 //panic!();
@@ -366,9 +347,7 @@ impl Archive {
                 let (start, end, _) = v;
                 Ok((start, end))
             }
-            Err(v) => {
-                Err(v)
-            }
+            Err(v) => Err(v),
         }
     }
 

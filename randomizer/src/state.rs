@@ -1,10 +1,8 @@
-use std::{
-    collections::{HashMap, HashSet},
+use {
+    crate::Settings,
+    albw::course,
+    std::collections::{HashMap, HashSet},
 };
-
-use albw::course;
-
-use crate::Settings;
 
 #[derive(Clone, Debug)]
 pub struct State<'settings> {
@@ -14,14 +12,9 @@ pub struct State<'settings> {
 
 #[allow(unused)]
 impl<'settings> State<'settings> {
-
-
     pub fn glitched(&self) -> bool {
         false // todo remove this
     }
-
-
-
 
     // pub fn is_barrier_up(&self) -> bool {
     //     self.settings.behavior.barrier.is_start() || self.did_eastern()
@@ -38,11 +31,7 @@ impl<'settings> State<'settings> {
             || self.can_fire_rod()
             || self.can_hammer()
             || self.can_bow()
-            || (self.glitched() && (
-                self.can_lamp() ||
-                    self.has_boots() ||
-                    self.has_net()
-            ))
+            || (self.glitched() && (self.can_lamp() || self.has_boots() || self.has_net()))
     }
 
     pub fn can_hit_switch(&self) -> bool {
@@ -92,18 +81,16 @@ impl<'settings> State<'settings> {
     }
 
     /*
-        This is used just to determine if we can get Nice Bombs really
-        - Nice Bombs tricks aren't considered as we can't have them yet (also to avoid recursion lol)
-        - Fake Flippers is not considered as we'd need boots and that would already return true
-        - Glitched Logic is assumed
-     */
+       This is used just to determine if we can get Nice Bombs really
+       - Nice Bombs tricks aren't considered as we can't have them yet (also to avoid recursion lol)
+       - Fake Flippers is not considered as we'd need boots and that would already return true
+       - Glitched Logic is assumed
+    */
     fn can_get_10_maiamai(&self) -> bool {
-
         // Merge or Boots enable more than 10, easy logic if we have them
         if self.can_merge() || self.has_boots() {
             true
         } else {
-
             // 2 Maiamai initially available under bushes in Kakariko and Lost Woods
             let mut maiamai = 2;
 
@@ -112,8 +99,11 @@ impl<'settings> State<'settings> {
                 maiamai += 3; // LW, DM West, Kak Rooftop. DM East needs Merge or Boots.
 
                 // Kakariko path to Lost Woods Maiamai
-                if self.can_hammer() || self.can_hookshot() || self.can_lift_big() ||
-                    ((self.can_boomerang() || self.can_hookshot()) && self.can_escape()) {
+                if self.can_hammer()
+                    || self.can_hookshot()
+                    || self.can_lift_big()
+                    || ((self.can_boomerang() || self.can_hookshot()) && self.can_escape())
+                {
                     maiamai += 1;
                 }
 
@@ -278,11 +268,7 @@ impl<'settings> State<'settings> {
     }
 
     pub fn small_keys(&self, dungeon: course::Id) -> u8 {
-        self.player
-            .small_keys
-            .get(&dungeon)
-            .copied()
-            .unwrap_or_default()
+        self.player.small_keys.get(&dungeon).copied().unwrap_or_default()
     }
 
     pub fn has_boss_key(&self, dungeon: course::Id) -> bool {

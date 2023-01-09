@@ -1,4 +1,8 @@
-use crate::{language::Language, scene::{Scene, Stage}, Game, Result, SceneMeta};
+use crate::{
+    language::Language,
+    scene::{Scene, Stage},
+    Game, Result, SceneMeta,
+};
 
 #[derive(Debug)]
 pub struct Course<'a> {

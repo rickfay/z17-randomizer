@@ -1,13 +1,18 @@
-use std::{
-    cell::Ref,
-    collections::{BTreeMap, HashSet},
-    marker::PhantomData,
-    path::Path,
+use {
+    crate::{
+        course,
+        files::{sarc::Sarc, FromFile},
+        flow::{Flow, FlowMut},
+        Error, File, Result,
+    },
+    serde::{Deserialize, Serialize},
+    std::{
+        cell::Ref,
+        collections::{BTreeMap, HashSet},
+        marker::PhantomData,
+        path::Path,
+    },
 };
-
-use serde::{Deserialize, Serialize};
-
-use crate::{course, files::{sarc::Sarc, FromFile}, flow::{Flow, FlowMut}, Error, File, Result};
 
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(rename_all = "PascalCase")]
@@ -27,16 +32,11 @@ impl FlowChart {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct Load(
-    pub BTreeMap<String, Vec<String>>
-);
+pub struct Load(pub BTreeMap<String, Vec<String>>);
 
 impl Load {
     pub fn boot(&self) -> Result<&[String]> {
-        Ok(&self
-            .0
-            .get("Boot")
-            .ok_or_else(|| Error::new("Boot key not found."))?)
+        Ok(&self.0.get("Boot").ok_or_else(|| Error::new("Boot key not found."))?)
     }
 
     pub fn course(&self, id: course::Id) -> Option<&[String]> {
@@ -75,13 +75,10 @@ pub struct Language {
 
 impl Language {
     pub(crate) fn new<F>(flow: F, archive: File<Sarc>) -> Self
-        where
-            F: IntoIterator<Item=String>,
+    where
+        F: IntoIterator<Item = String>,
     {
-        Self {
-            flow: flow.into_iter().collect(),
-            archive,
-        }
+        Self { flow: flow.into_iter().collect(), archive }
     }
 
     pub fn flow(&self) -> Loaded<Flow> {
@@ -102,8 +99,8 @@ impl Language {
     }
 
     pub fn dump<P>(self, path: P) -> Result<()>
-        where
-            P: AsRef<Path>,
+    where
+        P: AsRef<Path>,
     {
         self.archive.map(Sarc::compress).dump(path)
     }
@@ -118,28 +115,20 @@ pub struct Loaded<'a, T> {
 
 impl<'a, T> Loaded<'a, T> {
     pub fn new(set: &'a HashSet<String>, archive: &'a File<Sarc>) -> Self {
-        Self {
-            set,
-            archive,
-            phantom: PhantomData,
-        }
+        Self { set, archive, phantom: PhantomData }
     }
 }
 
 impl<'a, T> Loaded<'a, T>
-    where
-        T: FromFile<PathArgs=str, Input=Ref<'a, [u8]>> + 'a,
+where
+    T: FromFile<PathArgs = str, Input = Ref<'a, [u8]>> + 'a,
 {
-    pub fn iter<'b: 'a>(&'b self) -> impl Iterator<Item=Result<File<T>>> + 'b {
-        self.set
-            .iter()
-            .map(move |name| self.archive.get().read_from_file(name.as_str()))
+    pub fn iter<'b: 'a>(&'b self) -> impl Iterator<Item = Result<File<T>>> + 'b {
+        self.set.iter().map(move |name| self.archive.get().read_from_file(name.as_str()))
     }
 
     pub fn get(&self, name: &str) -> Option<Result<File<T>>> {
-        self.set
-            .contains(name)
-            .then(|| self.archive.get().read_from_file(name))
+        self.set.contains(name).then(|| self.archive.get().read_from_file(name))
     }
 
     pub fn extract(&self, name: &str) -> Option<File<Box<[u8]>>> {
@@ -156,19 +145,13 @@ pub struct LoadedMut<'a, T> {
 
 impl<'a, T> LoadedMut<'a, T> {
     pub fn new(set: &'a mut HashSet<String>, archive: &'a mut File<Sarc>) -> Self {
-        Self {
-            set,
-            archive,
-            phantom: PhantomData,
-        }
+        Self { set, archive, phantom: PhantomData }
     }
 
     pub fn get_mut<'s>(&'s mut self, name: &str) -> Option<Result<File<T>>>
-        where
-            T: FromFile<PathArgs=str, Input=&'s mut [u8]> + 's,
+    where
+        T: FromFile<PathArgs = str, Input = &'s mut [u8]> + 's,
     {
-        self.set
-            .contains(name)
-            .then(move || self.archive.get_mut().open_from_file(name))
+        self.set.contains(name).then(move || self.archive.get_mut().open_from_file(name))
     }
 }

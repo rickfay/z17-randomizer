@@ -9,10 +9,9 @@ pub enum ShifterOperand {
 impl ShifterOperand {
     pub fn code(&self) -> u32 {
         match self {
-            Self::Immediate {
-                immed_8,
-                rotate_imm,
-            } => 0x2000000 | (*rotate_imm as u32) << 8 | *immed_8 as u32,
+            Self::Immediate { immed_8, rotate_imm } => {
+                0x2000000 | (*rotate_imm as u32) << 8 | *immed_8 as u32
+            }
             Self::Register { rm } => rm.shift(0),
         }
     }
@@ -21,10 +20,7 @@ impl ShifterOperand {
 impl From<u32> for ShifterOperand {
     fn from(immediate: u32) -> Self {
         if immediate & 0xFF == immediate {
-            Self::Immediate {
-                immed_8: immediate as u8,
-                rotate_imm: 0,
-            }
+            Self::Immediate { immed_8: immediate as u8, rotate_imm: 0 }
         } else {
             let mut shifted = immediate;
             ((1..=0xF)
@@ -32,10 +28,7 @@ impl From<u32> for ShifterOperand {
                 .find_map(|rotate_imm| {
                     shifted >>= 2;
                     if shifted & 0xFF == shifted {
-                        Some(Self::Immediate {
-                            immed_8: shifted as u8,
-                            rotate_imm,
-                        })
+                        Some(Self::Immediate { immed_8: shifted as u8, rotate_imm })
                     } else {
                         None
                     }

@@ -1,23 +1,23 @@
 mod data;
 mod ls;
 mod lsm;
-
 use std::array;
-
-pub use self::data::{add, cmp, mov};
-pub use ls::{ldr, ldrb, str_};
-pub use lsm::{ldm, pop, push, stm, AddressingMode::*};
-pub use Register::*;
+pub use {
+    self::data::{add, cmp, mov},
+    ls::{ldr, ldrb, str_},
+    lsm::{ldm, pop, push, stm, AddressingMode::*},
+    Register::*,
+};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Register {
-    R0 = 0,
-    R1 = 1,
-    R2 = 2,
-    R3 = 3,
-    R4 = 4,
-    R5 = 5,
-    R6 = 6,
+    R0  = 0,
+    R1  = 1,
+    R2  = 2,
+    R3  = 3,
+    R4  = 4,
+    R5  = 5,
+    R6  = 6,
     R13 = 13,
     R14 = 14,
     R15 = 15,
@@ -106,11 +106,7 @@ impl From<ls::Pseudo> for Pseudo {
 #[derive(Debug)]
 pub enum Instruction {
     Raw(u32),
-    Branch {
-        cond: Condition,
-        target_address: Address,
-        link: bool,
-    },
+    Branch { cond: Condition, target_address: Address, link: bool },
     Pseudo(Condition, Pseudo),
 }
 
@@ -122,15 +118,9 @@ impl Instruction {
     fn with_condition(self, cond: Condition) -> Self {
         match self {
             Self::Raw(raw) => Self::Raw(raw & 0x0FFFFFFF | cond.shift()),
-            Self::Branch {
-                target_address,
-                link,
-                ..
-            } => Self::Branch {
-                cond,
-                target_address,
-                link,
-            },
+            Self::Branch { target_address, link, .. } => {
+                Self::Branch { cond, target_address, link }
+            }
             Self::Pseudo(_, pseudo) => Self::Pseudo(cond, pseudo),
         }
     }
@@ -150,11 +140,7 @@ impl Instruction {
     fn assemble(self, assembler: &mut Assembler) -> u32 {
         match self {
             Self::Raw(code) => code,
-            Self::Branch {
-                cond,
-                target_address,
-                link,
-            } => {
+            Self::Branch { cond, target_address, link } => {
                 let signed_immed_24 = ((target_address.diff(assembler.pc()) - 8) >> 2) & 0xFFFFFF;
                 0xA000000
                     | (link as u32) << 24
@@ -177,11 +163,7 @@ pub struct Assembler {
 
 impl Assembler {
     fn new(start: Address, len: usize) -> Self {
-        Self {
-            start,
-            offset: 0,
-            bytes: vec![0u8; len],
-        }
+        Self { start, offset: 0, bytes: vec![0u8; len] }
     }
 
     fn write(&mut self, code: u32) {

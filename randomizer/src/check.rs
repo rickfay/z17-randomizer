@@ -1,6 +1,4 @@
-use crate::{FillerItem, LocationInfo};
-use crate::logic::Logic;
-use crate::progress::Progress;
+use crate::{logic::Logic, progress::Progress, FillerItem, LocationInfo};
 
 #[derive(Copy, Clone)]
 pub struct Check {
@@ -11,7 +9,10 @@ pub struct Check {
 }
 
 impl Check {
-    pub fn new(name: &'static str, logic: Logic, quest: Option<FillerItem>, location_info: Option<LocationInfo>) -> Self {
+    pub fn new(
+        name: &'static str, logic: Logic, quest: Option<FillerItem>,
+        location_info: Option<LocationInfo>,
+    ) -> Self {
         Self { name, logic, quest, location_info }
     }
 

@@ -1,10 +1,14 @@
-use albw::course::Id;
-use albw::course::Id::*;
-use albw::Item;
-use albw::scene::{Icn, IcnArgs, StageMeta};
-use crate::{Patcher, Settings};
-use crate::patch::DungeonPrizes;
-use crate::patch::util::*;
+use {
+    crate::{
+        patch::{util::*, DungeonPrizes},
+        Patcher, Settings,
+    },
+    albw::{
+        course::{Id, Id::*},
+        scene::{Icn, IcnArgs, StageMeta},
+        Item,
+    },
+};
 
 #[non_exhaustive]
 struct Icon;
@@ -55,12 +59,13 @@ fn patch_hyrule_maps(patcher: &mut Patcher, prizes: &DungeonPrizes, _: &Settings
 
         mark_by_prize(stage_meta, prizes.ep_prize, 21); // Eastern
         mark_by_prize(stage_meta, prizes.hg_prize, 39); // Gales
-        mark_by_prize(stage_meta, prizes.th_prize, 6);  // Hera
+        mark_by_prize(stage_meta, prizes.th_prize, 6); // Hera
     }
 }
 
 fn patch_lorule_maps(patcher: &mut Patcher, prizes: &DungeonPrizes, _: &Settings) {
-    const LORULE_MAPS: [Id; 7] = [AttractionDark, CaveDark, EnemyAttackS, EnemyAttackM, EnemyAttackL, FieldDark, IndoorDark];
+    const LORULE_MAPS: [Id; 7] =
+        [AttractionDark, CaveDark, EnemyAttackS, EnemyAttackM, EnemyAttackL, FieldDark, IndoorDark];
 
     for map in LORULE_MAPS {
         let stage_meta = patcher.scene_meta(map).stage_meta_mut().get_mut();
@@ -69,7 +74,7 @@ fn patch_lorule_maps(patcher: &mut Patcher, prizes: &DungeonPrizes, _: &Settings
 
         mark_by_prize(stage_meta, prizes.pd_prize, 22); // Dark
         mark_by_prize(stage_meta, prizes.sp_prize, 40); // Swamp
-        mark_by_prize(stage_meta, prizes.sw_prize, 1);  // Skull
+        mark_by_prize(stage_meta, prizes.sw_prize, 1); // Skull
         mark_by_prize(stage_meta, prizes.tt_prize, 16); // Thieves'
         mark_by_prize(stage_meta, prizes.tr_prize, 43); // Turtle
         mark_by_prize(stage_meta, prizes.dp_prize, 30); // Desert
@@ -93,7 +98,6 @@ fn disable_icn(stage_meta: &mut StageMeta, icn_index: usize) {
 
 /// Add icons for dungeon chests that contained the compass in vanilla
 fn add_compass_chests(patcher: &mut Patcher) {
-
     // Eastern
     patcher.scene_meta(DungeonEast).stage_meta_mut().get_mut().icn.push(Icn {
         arg: IcnArgs(Icon::CHEST, 1, 0, 0, 0, 3, 0, 2),

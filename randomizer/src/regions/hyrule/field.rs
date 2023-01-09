@@ -3,7 +3,7 @@ crate::region! {
     name: "Hyrule Field",
     main {
         locations: [
-            //"Delivery": PackageSword @None() where settings: !settings.items.captains_sword.is_skipped(),
+            "Blacksmith Table": PackageSword @Chest(IndoorLight 19[12]),
             "Dampe": ItemSwordLv1 @Event(FieldLight_13_Sister[0x1D]),
             "Rosso Cave": RupeeR @Chest(CaveLight 6[6]) :- {|p| p.can_hammer() || (p.glitched() && (p.can_boomerang() || p.can_hookshot()))},
             "Sanctuary Pegs": RupeeSilver @Chest(11[89]) :- can_hammer,
@@ -33,8 +33,6 @@ crate::region! {
             "Ravio (8)": ItemRentalBoomerang @Shop(Ravio(6)),
             "Ravio (9)": ItemRentalFireRod @Shop(Ravio(4)),
             "Rupee Rush (Hyrule)": HeartPiece @Event(FieldLight_28_Minigame[0x26]),
-            "Castle (Indoors)": RupeeB @Chest(IndoorLight 12[48]),
-            "Castle Balcony": RupeePurple @Chest(18[224]),
             "Sanctuary Cave": HeartPiece @Heart(CaveLight 5[2]),
         ],
     },

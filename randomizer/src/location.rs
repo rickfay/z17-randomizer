@@ -1,12 +1,12 @@
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum Location {
-
     // Hyrule -------------------
-
     HyruleBellTravel,
     HyruleField,
     EasternRuinsUpper,
     EasternRuinsEastLedge,
+    EasternFairyCave,    // todo
+    EasternBigFairyCave, // todo
     WitchCave,
     WitchHouse,
     RavioShop,
@@ -39,6 +39,7 @@ pub enum Location {
     KakarikoJailCell,
     WellUpper,
     WellLower,
+    WomanHouse,
     StylishWomanHouse,
     MilkBar,
     BeeGuyHouse,
@@ -88,11 +89,10 @@ pub enum Location {
     BoulderingLedgeBottom,
     BoulderingLedgeRight,
     RossosOreMine,
+    RossosOreMineFairyCave, // todo
     FloatingIslandHyrule,
 
-
     // Lorule -------------------
-
     LoruleBellTravel,
     LoruleCastleField,
     BigBombFlowerShop,
@@ -114,6 +114,8 @@ pub enum Location {
     HauntedGroveLedge,
 
     Desert,
+    DesertFairyLedge, // todo
+    DesertFairyCave,  // todo
     DesertSouthWestLedge,
     DesertPalaceWeatherVane,
     DesertPalaceMidwayLedge,
@@ -156,7 +158,6 @@ pub enum Location {
     FloatingIslandLorule,
 
     // Dungeons -----------------
-
     EasternPalaceFoyer,
     EasternPalace1F,
     EasternPalaceMiniboss,
@@ -172,6 +173,7 @@ pub enum Location {
     HouseOfGales3F,
     HouseOfGalesBoss,
 
+    TowerOfHeraEntrancePegs, // todo
     TowerOfHeraFoyer,
     TowerOfHeraBottom,
     TowerOfHeraMiddle,

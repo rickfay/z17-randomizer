@@ -1,7 +1,8 @@
-use albw::Item;
-
-use super::Patcher;
-use crate::{Result, Settings};
+use {
+    super::Patcher,
+    crate::{Result, Settings},
+    albw::Item,
+};
 
 macro_rules! apply {
     ($patcher:expr, $($course:ident/$name:ident {
@@ -117,9 +118,11 @@ pub fn apply(patcher: &mut Patcher, free: Item, settings: &Settings) -> Result<(
     patch_portrait_requirements(patcher, settings)?;
 
     // Debugging
-    // patcher.flow(albw::course::Id::FieldLight)?
-    //     .get_mut(stringify!(Ending))
-    //     .ok_or_else(|| crate::Error::game("File not found."))??.get()
+    // patcher
+    //     .flow(albw::course::Id::IndoorLight)?
+    //     .get_mut(stringify!(FieldLight_22_BlackSmith))
+    //     .ok_or_else(|| crate::Error::game("File not found."))??
+    //     .get()
     //     .debug();
 
     apply!(patcher,

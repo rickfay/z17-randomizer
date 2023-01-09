@@ -1,6 +1,7 @@
-use albw::Item;
-use albw::Item::*;
-use FillerItem::*;
+use {
+    albw::{Item, Item::*},
+    FillerItem::*,
+};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum FillerItem {
@@ -48,7 +49,7 @@ pub enum FillerItem {
     BeeBadge,
     HintGlasses,
     //GreatSpin,
-
+    Charm,
     RupeeGreen,
     RupeeBlue,
     RupeeRed,
@@ -112,7 +113,7 @@ pub enum FillerItem {
     RupeeSilver38,
     RupeeSilver39,
     RupeeSilver40,
-    //RupeeSilver41,
+    RupeeSilver41,
 
     RupeeGold01,
     RupeeGold02,
@@ -288,6 +289,7 @@ pub enum FillerItem {
     Sword02,
     Sword03,
     Sword04,
+    //Sword05,
 
     // 2 Gloves
     Glove01,
@@ -390,8 +392,7 @@ pub enum FillerItem {
     LoruleCastleKeySmall04,
     LoruleCastleKeySmall05,
 
-    // Quest Items -----------------------------------------------------------------------------
-
+    // Dungeon Prizes
     PendantOfCourage,
     PendantOfWisdom,
     PendantOfPower,
@@ -402,17 +403,22 @@ pub enum FillerItem {
     SageRosso,
     SageIrene,
     SageImpa,
-    EasternComplete,
-    DarkComplete,
-    ThievesComplete,
+
+    // Quest Items that are really normal items that haven't been randomized yet ---------------
     ScootFruit,
     FoulFruit,
     Shield,
     GoldBee,
+
+    // Quest Items -----------------------------------------------------------------------------
+    EasternComplete,
+    DarkComplete,
+    ThievesComplete,
     OpenSanctuaryDoors,
     ShadyGuyTrigger,
     BigBombFlower,
     StylishWomansHouseOpen,
+    WomanRoofMaiamai,
     SkullEyeRight,
     SkullEyeLeft,
     TurtleFlipped,
@@ -420,6 +426,7 @@ pub enum FillerItem {
     TurtleWall,
     AccessPotionShop,
     AccessMilkBar,
+    AccessFairyFountain,
     AccessHyruleBlacksmith,
     AccessLoruleCastleField,
     LcBombTrial,
@@ -456,67 +463,28 @@ pub fn convert(fill_item: FillerItem) -> Option<Item> {
         BeeBadge => Some(BadgeBee),
         FillerItem::HintGlasses => Some(Item::HintGlasses),
 
-        HeartPiece01 |
-        HeartPiece02 |
-        HeartPiece03 |
-        HeartPiece04 |
-        HeartPiece05 |
-        HeartPiece06 |
-        HeartPiece07 |
-        HeartPiece08 |
-        HeartPiece09 |
-        HeartPiece10 |
-        HeartPiece11 |
-        HeartPiece12 |
-        HeartPiece13 |
-        HeartPiece14 |
-        HeartPiece15 |
-        HeartPiece16 |
-        HeartPiece17 |
-        HeartPiece18 |
-        HeartPiece19 |
-        HeartPiece20 |
-        HeartPiece21 |
-        HeartPiece22 |
-        HeartPiece23 |
-        HeartPiece24 |
-        HeartPiece25 |
-        HeartPiece26 |
-        HeartPiece27 => Some(HeartPiece),
+        HeartPiece01 | HeartPiece02 | HeartPiece03 | HeartPiece04 | HeartPiece05 | HeartPiece06
+        | HeartPiece07 | HeartPiece08 | HeartPiece09 | HeartPiece10 | HeartPiece11
+        | HeartPiece12 | HeartPiece13 | HeartPiece14 | HeartPiece15 | HeartPiece16
+        | HeartPiece17 | HeartPiece18 | HeartPiece19 | HeartPiece20 | HeartPiece21
+        | HeartPiece22 | HeartPiece23 | HeartPiece24 | HeartPiece25 | HeartPiece26
+        | HeartPiece27 => Some(HeartPiece),
 
-        HeartContainer01 |
-        HeartContainer02 |
-        HeartContainer03 |
-        HeartContainer04 |
-        HeartContainer05 |
-        HeartContainer06 |
-        HeartContainer07 |
-        HeartContainer08 |
-        HeartContainer09 |
-        HeartContainer10 => Some(HeartContainer),
+        HeartContainer01 | HeartContainer02 | HeartContainer03 | HeartContainer04
+        | HeartContainer05 | HeartContainer06 | HeartContainer07 | HeartContainer08
+        | HeartContainer09 | HeartContainer10 => Some(HeartContainer),
 
-        Bottle01 |
-        Bottle02 |
-        Bottle03 |
-        Bottle04 |
-        Bottle05 => Some(ItemBottle),
+        Bottle01 | Bottle02 | Bottle03 | Bottle04 | Bottle05 => Some(ItemBottle),
 
-        Lamp01 |
-        Lamp02 => Some(ItemKandelaar),
+        Lamp01 | Lamp02 => Some(ItemKandelaar),
 
-        Sword01 |
-        Sword02 |
-        Sword03 |
-        Sword04 => Some(ItemSwordLv1),
+        Sword01 | Sword02 | Sword03 | Sword04 => Some(ItemSwordLv1),
 
-        Glove01 |
-        Glove02 => Some(PowerGlove),
+        Glove01 | Glove02 => Some(PowerGlove),
 
-        Net01 |
-        Net02 => Some(ItemInsectNet),
+        Net01 | Net02 => Some(ItemInsectNet),
 
-        Mail01 |
-        Mail02 => Some(ClothesBlue),
+        Mail01 | Mail02 => Some(ClothesBlue),
 
         FillerItem::OreYellow => Some(Item::OreYellow),
         FillerItem::OreGreen => Some(Item::OreGreen),
@@ -524,112 +492,101 @@ pub fn convert(fill_item: FillerItem) -> Option<Item> {
         FillerItem::OreRed => Some(Item::OreRed),
 
         // Small Keys
-        HyruleSanctuaryKey |
-        LoruleSanctuaryKey |
-        EasternKeySmall01 |
-        EasternKeySmall02 |
-        GalesKeySmall01 |
-        GalesKeySmall02 |
-        GalesKeySmall03 |
-        GalesKeySmall04 |
-        HeraKeySmall01 |
-        HeraKeySmall02 |
-        DarkKeySmall01 |
-        DarkKeySmall02 |
-        DarkKeySmall03 |
-        DarkKeySmall04 |
-        SwampKeySmall01 |
-        SwampKeySmall02 |
-        SwampKeySmall03 |
-        SwampKeySmall04 |
-        SkullKeySmall01 |
-        SkullKeySmall02 |
-        SkullKeySmall03 |
-        ThievesKeySmall |
-        IceKeySmall01 |
-        IceKeySmall02 |
-        IceKeySmall03 |
-        DesertKeySmall01 |
-        DesertKeySmall02 |
-        DesertKeySmall03 |
-        DesertKeySmall04 |
-        DesertKeySmall05 |
-        TurtleKeySmall01 |
-        TurtleKeySmall02 |
-        TurtleKeySmall03 |
-        LoruleCastleKeySmall01 |
-        LoruleCastleKeySmall02 |
-        LoruleCastleKeySmall03 |
-        LoruleCastleKeySmall04 |
-        LoruleCastleKeySmall05 => Some(KeySmall),
+        HyruleSanctuaryKey
+        | LoruleSanctuaryKey
+        | EasternKeySmall01
+        | EasternKeySmall02
+        | GalesKeySmall01
+        | GalesKeySmall02
+        | GalesKeySmall03
+        | GalesKeySmall04
+        | HeraKeySmall01
+        | HeraKeySmall02
+        | DarkKeySmall01
+        | DarkKeySmall02
+        | DarkKeySmall03
+        | DarkKeySmall04
+        | SwampKeySmall01
+        | SwampKeySmall02
+        | SwampKeySmall03
+        | SwampKeySmall04
+        | SkullKeySmall01
+        | SkullKeySmall02
+        | SkullKeySmall03
+        | ThievesKeySmall
+        | IceKeySmall01
+        | IceKeySmall02
+        | IceKeySmall03
+        | DesertKeySmall01
+        | DesertKeySmall02
+        | DesertKeySmall03
+        | DesertKeySmall04
+        | DesertKeySmall05
+        | TurtleKeySmall01
+        | TurtleKeySmall02
+        | TurtleKeySmall03
+        | LoruleCastleKeySmall01
+        | LoruleCastleKeySmall02
+        | LoruleCastleKeySmall03
+        | LoruleCastleKeySmall04
+        | LoruleCastleKeySmall05 => Some(KeySmall),
 
         // Big Keys
-        EasternKeyBig |
-        GalesKeyBig |
-        HeraKeyBig |
-        DarkKeyBig |
-        SwampKeyBig |
-        SkullKeyBig |
-        ThievesKeyBig |
-        IceKeyBig |
-        DesertKeyBig |
-        TurtleKeyBig => Some(KeyBoss),
+        EasternKeyBig | GalesKeyBig | HeraKeyBig | DarkKeyBig | SwampKeyBig | SkullKeyBig
+        | ThievesKeyBig | IceKeyBig | DesertKeyBig | TurtleKeyBig => Some(KeyBoss),
 
         // Compasses
-        EasternCompass |
-        GalesCompass |
-        HeraCompass |
-        DarkCompass |
-        SwampCompass |
-        SkullCompass |
-        ThievesCompass |
-        IceCompass |
-        DesertCompass |
-        TurtleCompass |
-        LoruleCastleCompass => Some(Compass),
+        EasternCompass | GalesCompass | HeraCompass | DarkCompass | SwampCompass | SkullCompass
+        | ThievesCompass | IceCompass | DesertCompass | TurtleCompass | LoruleCastleCompass => {
+            Some(Compass)
+        }
 
         //GreatSpin => Some(SpecialMove),
         RupeeGreen => Some(RupeeG),
         RupeeBlue => Some(RupeeB),
         RupeeRed => Some(RupeeR),
 
-        RupeePurple01 | RupeePurple02 | RupeePurple03 | RupeePurple04 | RupeePurple05 |
-        RupeePurple06 | RupeePurple07 | RupeePurple08 | RupeePurple09 | RupeePurple10 |
-        RupeePurple11 | RupeePurple12 | RupeePurple13 | RupeePurple14 | RupeePurple15 |
-        RupeePurple16 | RupeePurple17 | RupeePurple18 => Some(RupeePurple),
+        RupeePurple01 | RupeePurple02 | RupeePurple03 | RupeePurple04 | RupeePurple05
+        | RupeePurple06 | RupeePurple07 | RupeePurple08 | RupeePurple09 | RupeePurple10
+        | RupeePurple11 | RupeePurple12 | RupeePurple13 | RupeePurple14 | RupeePurple15
+        | RupeePurple16 | RupeePurple17 | RupeePurple18 => Some(RupeePurple),
 
-        RupeeSilver01 | RupeeSilver02 | RupeeSilver03 | RupeeSilver04 | RupeeSilver05 |
-        RupeeSilver06 | RupeeSilver07 | RupeeSilver08 | RupeeSilver09 | RupeeSilver10 |
-        RupeeSilver11 | RupeeSilver12 | RupeeSilver13 | RupeeSilver14 | RupeeSilver15 |
-        RupeeSilver16 | RupeeSilver17 | RupeeSilver18 | RupeeSilver19 | RupeeSilver20 |
-        RupeeSilver21 | RupeeSilver22 | RupeeSilver23 | RupeeSilver24 | RupeeSilver25 |
-        RupeeSilver26 | RupeeSilver27 | RupeeSilver28 | RupeeSilver29 | RupeeSilver30 |
-        RupeeSilver31 | RupeeSilver32 | RupeeSilver33 | RupeeSilver34 | RupeeSilver35 |
-        RupeeSilver36 | RupeeSilver37 | RupeeSilver38 | RupeeSilver39 | RupeeSilver40
-        => Some(RupeeSilver),
+        RupeeSilver01 | RupeeSilver02 | RupeeSilver03 | RupeeSilver04 | RupeeSilver05
+        | RupeeSilver06 | RupeeSilver07 | RupeeSilver08 | RupeeSilver09 | RupeeSilver10
+        | RupeeSilver11 | RupeeSilver12 | RupeeSilver13 | RupeeSilver14 | RupeeSilver15
+        | RupeeSilver16 | RupeeSilver17 | RupeeSilver18 | RupeeSilver19 | RupeeSilver20
+        | RupeeSilver21 | RupeeSilver22 | RupeeSilver23 | RupeeSilver24 | RupeeSilver25
+        | RupeeSilver26 | RupeeSilver27 | RupeeSilver28 | RupeeSilver29 | RupeeSilver30
+        | RupeeSilver31 | RupeeSilver32 | RupeeSilver33 | RupeeSilver34 | RupeeSilver35
+        | RupeeSilver36 | RupeeSilver37 | RupeeSilver38 | RupeeSilver39 | RupeeSilver40
+        | RupeeSilver41 => Some(RupeeSilver),
 
-        RupeeGold01 | RupeeGold02 | RupeeGold03 | RupeeGold04 | RupeeGold05 | RupeeGold06 |
-        RupeeGold07 | RupeeGold08 | RupeeGold09 | RupeeGold10 => Some(RupeeGold),
+        RupeeGold01 | RupeeGold02 | RupeeGold03 | RupeeGold04 | RupeeGold05 | RupeeGold06
+        | RupeeGold07 | RupeeGold08 | RupeeGold09 | RupeeGold10 => Some(RupeeGold),
 
-        Maiamai001 | Maiamai002 | Maiamai003 | Maiamai004 | Maiamai005 | Maiamai006 | Maiamai007 |
-        Maiamai008 | Maiamai009 | Maiamai010 | Maiamai011 | Maiamai012 | Maiamai013 | Maiamai014 |
-        Maiamai015 | Maiamai016 | Maiamai017 | Maiamai018 | Maiamai019 | Maiamai020 | Maiamai021 |
-        Maiamai022 | Maiamai023 | Maiamai024 | Maiamai025 | Maiamai026 | Maiamai027 | Maiamai028 |
-        Maiamai029 | Maiamai030 | Maiamai031 | Maiamai032 | Maiamai033 | Maiamai034 | Maiamai035 |
-        Maiamai036 | Maiamai037 | Maiamai038 | Maiamai039 | Maiamai040 | Maiamai041 | Maiamai042 |
-        Maiamai043 | Maiamai044 | Maiamai045 | Maiamai046 | Maiamai047 | Maiamai048 | Maiamai049 |
-        Maiamai050 | Maiamai051 | Maiamai052 | Maiamai053 | Maiamai054 | Maiamai055 | Maiamai056 |
-        Maiamai057 | Maiamai058 | Maiamai059 | Maiamai060 | Maiamai061 | Maiamai062 | Maiamai063 |
-        Maiamai064 | Maiamai065 | Maiamai066 | Maiamai067 | Maiamai068 | Maiamai069 | Maiamai070 |
-        Maiamai071 | Maiamai072 | Maiamai073 | Maiamai074 | Maiamai075 | Maiamai076 | Maiamai077 |
-        Maiamai078 | Maiamai079 | Maiamai080 | Maiamai081 | Maiamai082 | Maiamai083 | Maiamai084 |
-        Maiamai085 | Maiamai086 | Maiamai087 | Maiamai088 | Maiamai089 | Maiamai090 | Maiamai091 |
-        Maiamai092 | Maiamai093 | Maiamai094 | Maiamai095 | Maiamai096 | Maiamai097 | Maiamai098 |
-        Maiamai099 | Maiamai100 => Some(Kinsta),
+        Maiamai001 | Maiamai002 | Maiamai003 | Maiamai004 | Maiamai005 | Maiamai006
+        | Maiamai007 | Maiamai008 | Maiamai009 | Maiamai010 | Maiamai011 | Maiamai012
+        | Maiamai013 | Maiamai014 | Maiamai015 | Maiamai016 | Maiamai017 | Maiamai018
+        | Maiamai019 | Maiamai020 | Maiamai021 | Maiamai022 | Maiamai023 | Maiamai024
+        | Maiamai025 | Maiamai026 | Maiamai027 | Maiamai028 | Maiamai029 | Maiamai030
+        | Maiamai031 | Maiamai032 | Maiamai033 | Maiamai034 | Maiamai035 | Maiamai036
+        | Maiamai037 | Maiamai038 | Maiamai039 | Maiamai040 | Maiamai041 | Maiamai042
+        | Maiamai043 | Maiamai044 | Maiamai045 | Maiamai046 | Maiamai047 | Maiamai048
+        | Maiamai049 | Maiamai050 | Maiamai051 | Maiamai052 | Maiamai053 | Maiamai054
+        | Maiamai055 | Maiamai056 | Maiamai057 | Maiamai058 | Maiamai059 | Maiamai060
+        | Maiamai061 | Maiamai062 | Maiamai063 | Maiamai064 | Maiamai065 | Maiamai066
+        | Maiamai067 | Maiamai068 | Maiamai069 | Maiamai070 | Maiamai071 | Maiamai072
+        | Maiamai073 | Maiamai074 | Maiamai075 | Maiamai076 | Maiamai077 | Maiamai078
+        | Maiamai079 | Maiamai080 | Maiamai081 | Maiamai082 | Maiamai083 | Maiamai084
+        | Maiamai085 | Maiamai086 | Maiamai087 | Maiamai088 | Maiamai089 | Maiamai090
+        | Maiamai091 | Maiamai092 | Maiamai093 | Maiamai094 | Maiamai095 | Maiamai096
+        | Maiamai097 | Maiamai098 | Maiamai099 | Maiamai100 => Some(Kinsta),
 
         MonsterGuts => Some(LiverPurple),
         MonsterHorn => Some(LiverYellow),
         MonsterTail => Some(LiverBlue),
+
+        Charm => Some(ZeldaAmulet),
 
         // Dungeon Items
         PendantOfCourage => Some(PendantCourage),
@@ -643,16 +600,33 @@ pub fn convert(fill_item: FillerItem) -> Option<Item> {
         FillerItem::SageIrene => Some(Item::SageIrene),
         FillerItem::SageRosso => Some(Item::SageRosso),
 
-
         // Quest Items don't translate
-        EasternComplete | DarkComplete | ThievesComplete |
-        ScootFruit | FoulFruit | Shield |
-        ShadyGuyTrigger | OpenSanctuaryDoors |
-        GoldBee | BigBombFlower | StylishWomansHouseOpen |
-        SkullEyeRight | SkullEyeLeft |
-        TurtleFlipped | TurtleAttacked | TurtleWall |
-        AccessLoruleCastleField | AccessHyruleBlacksmith | AccessPotionShop | AccessMilkBar |
-        LcBombTrial | LcBallTrial | LcLampTrial | LcHookTrial |
-        Triforce => None
+        EasternComplete
+        | DarkComplete
+        | ThievesComplete
+        | ScootFruit
+        | FoulFruit
+        | Shield
+        | ShadyGuyTrigger
+        | OpenSanctuaryDoors
+        | GoldBee
+        | BigBombFlower
+        | StylishWomansHouseOpen
+        | WomanRoofMaiamai
+        | SkullEyeRight
+        | SkullEyeLeft
+        | TurtleFlipped
+        | TurtleAttacked
+        | TurtleWall
+        | AccessLoruleCastleField
+        | AccessHyruleBlacksmith
+        | AccessPotionShop
+        | AccessFairyFountain
+        | AccessMilkBar
+        | LcBombTrial
+        | LcBallTrial
+        | LcLampTrial
+        | LcHookTrial
+        | Triforce => None,
     }
 }

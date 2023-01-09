@@ -1,20 +1,17 @@
-use std::{
-    array,
-    collections::HashMap,
-    fs::{self, File},
-    io::prelude::*,
-    path::Path,
+use {
+    super::Patcher,
+    crate::Result,
+    albw::{ExHeader, Item},
+    arm::*,
+    std::{
+        array,
+        collections::HashMap,
+        fs::{self, File},
+        io::prelude::*,
+        path::Path,
+    },
 };
-
-use albw::{ExHeader, Item};
-
-use crate::{Result};
-
 mod arm;
-
-use arm::*;
-
-use super::Patcher;
 
 #[derive(Debug)]
 pub struct Code {
@@ -33,17 +30,11 @@ impl Code {
     }
 
     pub fn text(&mut self) -> Segment {
-        Segment {
-            address: &mut self.text,
-            ips: &mut self.ips,
-        }
+        Segment { address: &mut self.text, ips: &mut self.ips }
     }
 
     pub fn rodata(&mut self) -> Segment {
-        Segment {
-            address: &mut self.rodata,
-            ips: &mut self.ips,
-        }
+        Segment { address: &mut self.rodata, ips: &mut self.ips }
     }
 
     pub fn patch<const N: usize>(&mut self, addr: u32, instructions: [Instruction; N]) -> u32 {
@@ -54,15 +45,15 @@ impl Code {
     }
 
     pub fn overwrite<T>(&mut self, addr: u32, data: T)
-        where
-            T: Into<Box<[u8]>>,
+    where
+        T: Into<Box<[u8]>>,
     {
         self.ips.append(addr, data.into());
     }
 
     pub fn dump<P>(self, path: P, exheader: &ExHeader) -> Result<()>
-        where
-            P: AsRef<Path>,
+    where
+        P: AsRef<Path>,
     {
         let path = path.as_ref();
         let mut exheader = exheader.clone();
@@ -82,8 +73,8 @@ pub struct Segment<'a> {
 
 impl<'a> Segment<'a> {
     pub fn declare<T>(&mut self, data: T) -> u32
-        where
-            T: Into<Vec<u8>>,
+    where
+        T: Into<Vec<u8>>,
     {
         let mut data = data.into();
         let addr = *self.address;
@@ -110,8 +101,8 @@ impl<'a> Segment<'a> {
     }
 
     pub fn write<T>(&mut self, addr: u32, data: T)
-        where
-            T: Into<Box<[u8]>>,
+    where
+        T: Into<Box<[u8]>>,
     {
         self.ips.append(addr, data.into());
     }
@@ -125,15 +116,12 @@ pub struct Ips {
 
 impl Ips {
     pub fn new(offset: u32) -> Self {
-        Self {
-            buf: vec![],
-            offset,
-        }
+        Self { buf: vec![], offset }
     }
 
     pub fn append<T>(&mut self, offset: u32, data: T)
-        where
-            T: AsRef<[u8]>,
+    where
+        T: AsRef<[u8]>,
     {
         let offset = offset - self.offset;
         let data = data.as_ref();
@@ -143,8 +131,8 @@ impl Ips {
     }
 
     pub fn write<W>(self, mut writer: W) -> Result<()>
-        where
-            W: Write,
+    where
+        W: Write,
     {
         writer.write_all(b"PATCH")?;
         writer.write_all(&self.buf)?;
@@ -226,25 +214,19 @@ pub fn create(patcher: &Patcher) -> Code {
     }
     code.text().define([b(0x5D68F4)]);
     code.patch(0x5D688C, [b(overwrite_rentals)]);
-    let rentals = patcher
-        .rentals
-        .iter()
-        .map(|item| *item as u8)
-        .collect::<Vec<_>>();
+    let rentals = patcher.rentals.iter().map(|item| *item as u8).collect::<Vec<_>>();
     code.overwrite(0x6A0348, rentals);
     let sold_out = 0x5D6B84u32;
     let merchant_left = patcher.merchant[0];
     let merchant_left_actor = code.rodata().declare(VTABLE_STRING.to_le_bytes());
-    code.rodata()
-        .declare(actor_names.get(&merchant_left).unwrap().to_le_bytes());
+    code.rodata().declare(actor_names.get(&merchant_left).unwrap().to_le_bytes());
     code.rodata().declare(VTABLE_STRING.to_le_bytes());
     code.rodata().declare(sold_out.to_le_bytes());
     code.overwrite(0x707DD4, merchant_left_actor.to_le_bytes());
     code.overwrite(0x6A03E0, [merchant_left as u8]);
     let merchant_right = patcher.merchant[2];
     let merchant_right_actor = code.rodata().declare(VTABLE_STRING.to_le_bytes());
-    code.rodata()
-        .declare(actor_names.get(&merchant_right).unwrap().to_le_bytes());
+    code.rodata().declare(actor_names.get(&merchant_right).unwrap().to_le_bytes());
     code.rodata().declare(VTABLE_STRING.to_le_bytes());
     code.rodata().declare(sold_out.to_le_bytes());
     code.overwrite(0x707DE0, merchant_right_actor.to_le_bytes());
@@ -510,7 +492,7 @@ const ACTOR_NAME_OFFSETS: [(Item, u32); 29] = [
     (Item::HeartPiece, 0x5D7B94),
 ];
 
-const ACTOR_NAMES: [(Item, &str); 34] = [
+const ACTOR_NAMES: [(Item, &str); 35] = [
     (Item::KeyBoss, "KeyBoss"),
     (Item::Compass, "Compass"),
     (Item::ItemKandelaar, "GtEvKandelaar"),
@@ -544,6 +526,7 @@ const ACTOR_NAMES: [(Item, &str); 34] = [
     (Item::PendantPower, "Pendant"),
     (Item::PendantWisdom, "Pendant"),
     (Item::PendantCourage, "Pendant"),
+    (Item::ZeldaAmulet, "Pendant"),
     (Item::Empty, "DeliverSwordBroken"),
 ];
 
@@ -564,7 +547,7 @@ const ITEM_NAME_OFFSETS: [(Item, u32); 14] = [
     (Item::ItemStoneBeauty, 0x6F9D56),
 ];
 
-const ITEM_NAMES: [(Item, &str); 52] = [
+const ITEM_NAMES: [(Item, &str); 54] = [
     (Item::BadgeBee, "beebadge"),
     (Item::ItemBell, "bell"),
     (Item::ItemBowLight, "bow_light"),
@@ -582,6 +565,7 @@ const ITEM_NAMES: [(Item, &str); 52] = [
     (Item::GanbariPowerUp, "ganbari_power_up"),
     (Item::HeartContainer, "heartcontioner"),
     (Item::HeartPiece, "heartpiece"),
+    (Item::HintGlasses, "hintglass"),
     (Item::HyruleShield, "hyrule_shield"),
     (Item::KeyBoss, "keyboss"),
     (Item::KeySmall, "keysmall"),
@@ -617,6 +601,7 @@ const ITEM_NAMES: [(Item, &str); 52] = [
     (Item::ItemTornadeRodLv2, "tornaderod_LV2"),
     (Item::ItemMizukaki, "web"),
     (Item::PendantWisdom, "wisdom"),
+    (Item::ZeldaAmulet, "charm"),
 ];
 
 const SET_EVENT_FLAG_FN: u32 = 0x4CDF40;

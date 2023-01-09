@@ -1,8 +1,13 @@
-use std::collections::HashSet;
-
-use crate::filler_item::FillerItem;
-use crate::filler_item::FillerItem::*;
-use crate::Settings;
+use {
+    crate::{
+        filler_item::{FillerItem, FillerItem::*},
+        pool::{
+            get_gold_rupee_pool, get_maiamai_pool, get_purple_rupee_pool, get_silver_rupee_pool,
+        },
+        Settings,
+    },
+    std::collections::HashSet,
+};
 
 #[derive(Clone)]
 pub struct Progress {
@@ -64,7 +69,8 @@ impl Progress {
     fn count(&self, items: &[FillerItem]) -> u8 {
         let mut sum: u8 = 0;
         for item in items {
-            if self.clone().has(*item) { // fixme expensive clone
+            // fixme expensive clone
+            if self.clone().has(*item) {
                 sum += 1;
             }
         }
@@ -73,28 +79,9 @@ impl Progress {
     }
 
     pub fn has_rupees(&self, amount: u16) -> bool {
-        let purples = self.count(&[
-            RupeePurple01, RupeePurple02, RupeePurple03, RupeePurple04, RupeePurple05,
-            RupeePurple06, RupeePurple07, RupeePurple08, RupeePurple09, RupeePurple10,
-            RupeePurple11, RupeePurple12, RupeePurple13, RupeePurple14, RupeePurple15,
-            RupeePurple16, RupeePurple17, RupeePurple18,
-        ]);
-
-        let silvers = self.count(&[
-            RupeeSilver01, RupeeSilver02, RupeeSilver03, RupeeSilver04, RupeeSilver05,
-            RupeeSilver06, RupeeSilver07, RupeeSilver08, RupeeSilver09, RupeeSilver10,
-            RupeeSilver11, RupeeSilver12, RupeeSilver13, RupeeSilver14, RupeeSilver15,
-            RupeeSilver16, RupeeSilver17, RupeeSilver18, RupeeSilver19, RupeeSilver20,
-            RupeeSilver21, RupeeSilver22, RupeeSilver23, RupeeSilver24, RupeeSilver25,
-            RupeeSilver26, RupeeSilver27, RupeeSilver28, RupeeSilver29, RupeeSilver30,
-            RupeeSilver31, RupeeSilver32, RupeeSilver33, RupeeSilver34, RupeeSilver35,
-            RupeeSilver36, RupeeSilver37, RupeeSilver38,
-        ]);
-
-        let golds = self.count(&[
-            RupeeGold01, RupeeGold02, RupeeGold03, RupeeGold04, RupeeGold05,
-            RupeeGold06, RupeeGold07, RupeeGold08,
-        ]);
+        let purples = self.count(get_purple_rupee_pool().as_slice());
+        let silvers = self.count(get_silver_rupee_pool().as_slice());
+        let golds = self.count(get_gold_rupee_pool().as_slice());
 
         amount <= (purples as u16 * 50) + (silvers as u16 * 100) + (golds as u16 * 300)
     }
@@ -149,21 +136,34 @@ impl Progress {
 
     pub fn can_destroy_curtain(&self) -> bool {
         self.has_any(&[
-            Sword01, Sword02, Sword03, Sword04,
-            Lamp01, Lamp02,
-            FireRod01, FireRod02,
-            Bombs01, Bombs02,
+            Sword01,
+            Sword02,
+            Sword03,
+            Sword04,
+            Lamp01,
+            Lamp02,
+            FireRod01,
+            FireRod02,
+            Bombs01,
+            Bombs02,
             PegasusBoots,
         ])
     }
 
     pub fn can_extinguish_torches(&self) -> bool {
         self.has_any(&[
-            Sword01, Sword02, Sword03, Sword04,
-            Bombs01, Bombs02,
-            IceRod01, IceRod02,
-            TornadoRod01, TornadoRod02,
-            Net01, Net02
+            Sword01,
+            Sword02,
+            Sword03,
+            Sword04,
+            Bombs01,
+            Bombs02,
+            IceRod01,
+            IceRod02,
+            TornadoRod01,
+            TornadoRod02,
+            Net01,
+            Net02,
         ])
     }
 
@@ -228,23 +228,7 @@ impl Progress {
     }
 
     pub fn has_maiamai(&self, amount: u8) -> bool {
-        self.has_amount(amount, &[
-            Maiamai001, Maiamai002, Maiamai003, Maiamai004, Maiamai005, Maiamai006, Maiamai007,
-            Maiamai008, Maiamai009, Maiamai010, Maiamai011, Maiamai012, Maiamai013, Maiamai014,
-            Maiamai015, Maiamai016, Maiamai017, Maiamai018, Maiamai019, Maiamai020, Maiamai021,
-            Maiamai022, Maiamai023, Maiamai024, Maiamai025, Maiamai026, Maiamai027, Maiamai028,
-            Maiamai029, Maiamai030, Maiamai031, Maiamai032, Maiamai033, Maiamai034, Maiamai035,
-            Maiamai036, Maiamai037, Maiamai038, Maiamai039, Maiamai040, Maiamai041, Maiamai042,
-            Maiamai043, Maiamai044, Maiamai045, Maiamai046, Maiamai047, Maiamai048, Maiamai049,
-            Maiamai050, Maiamai051, Maiamai052, Maiamai053, Maiamai054, Maiamai055, Maiamai056,
-            Maiamai057, Maiamai058, Maiamai059, Maiamai060, Maiamai061, Maiamai062, Maiamai063,
-            Maiamai064, Maiamai065, Maiamai066, Maiamai067, Maiamai068, Maiamai069, Maiamai070,
-            Maiamai071, Maiamai072, Maiamai073, Maiamai074, Maiamai075, Maiamai076, Maiamai077,
-            Maiamai078, Maiamai079, Maiamai080, Maiamai081, Maiamai082, Maiamai083, Maiamai084,
-            Maiamai085, Maiamai086, Maiamai087, Maiamai088, Maiamai089, Maiamai090, Maiamai091,
-            Maiamai092, Maiamai093, Maiamai094, Maiamai095, Maiamai096, Maiamai097, Maiamai098,
-            Maiamai099, Maiamai100,
-        ])
+        self.has_amount(amount, get_maiamai_pool().as_slice())
     }
 
     pub fn has_smooth_gem(&self) -> bool {
@@ -285,96 +269,151 @@ impl Progress {
 
     pub fn can_destroy_skull(&self) -> bool {
         self.has_any(&[
-            Sword01, Sword02, Sword03, Sword04,
-            Bow01, Bow02,
-            Boomerang01, Boomerang02,
-            Hookshot01, Hookshot02,
-            Bombs01, Bombs02,
-            FireRod01, FireRod02,
-            IceRod01, IceRod02,
-            SandRod01, SandRod02,
-            Hammer01, Hammer02,
+            Sword01,
+            Sword02,
+            Sword03,
+            Sword04,
+            Bow01,
+            Bow02,
+            Boomerang01,
+            Boomerang02,
+            Hookshot01,
+            Hookshot02,
+            Bombs01,
+            Bombs02,
+            FireRod01,
+            FireRod02,
+            IceRod01,
+            IceRod02,
+            SandRod01,
+            SandRod02,
+            Hammer01,
+            Hammer02,
             PegasusBoots,
-            Glove01, Glove02,
+            Glove01,
+            Glove02,
         ])
     }
 
     pub fn can_cut_grass(&self) -> bool {
         self.has_any(&[
-            Sword01, Sword02, Sword03, Sword04,
-            Boomerang01, Boomerang02,
-            Bombs01, Bombs02,
-            FireRod01, FireRod02,
-            IceRod01, IceRod02,
-            Lamp01, Lamp02,
+            Sword01,
+            Sword02,
+            Sword03,
+            Sword04,
+            Boomerang01,
+            Boomerang02,
+            Bombs01,
+            Bombs02,
+            FireRod01,
+            FireRod02,
+            IceRod01,
+            IceRod02,
+            Lamp01,
+            Lamp02,
             PegasusBoots,
         ])
     }
 
     pub fn can_attack(&self) -> bool {
         self.has_any(&[
-            Sword01, Sword02, Sword03, Sword04,
-            Bow01, Bow02,
-            Bombs01, Bombs02,
-            FireRod01, FireRod02,
-            IceRod01, IceRod02,
-            Hammer01, Hammer02,
-            PegasusBoots
+            Sword01,
+            Sword02,
+            Sword03,
+            Sword04,
+            Bow01,
+            Bow02,
+            Bombs01,
+            Bombs02,
+            FireRod01,
+            FireRod02,
+            IceRod01,
+            IceRod02,
+            Hammer01,
+            Hammer02,
+            PegasusBoots,
         ])
     }
 
     pub fn can_attack_fireproof(&self) -> bool {
         self.has_any(&[
-            Sword01, Sword02, Sword03, Sword04,
-            Bow01, Bow02,
-            Bombs01, Bombs02,
-            IceRod01, IceRod02,
-            Hammer01, Hammer02,
-            PegasusBoots
+            Sword01,
+            Sword02,
+            Sword03,
+            Sword04,
+            Bow01,
+            Bow02,
+            Bombs01,
+            Bombs02,
+            IceRod01,
+            IceRod02,
+            Hammer01,
+            Hammer02,
+            PegasusBoots,
         ])
     }
 
     pub fn has_lamp_or_net(&self) -> bool {
-        self.has_any(&[
-            Lamp01, Lamp02,
-            Net01, Net02
-        ])
+        self.has_any(&[Lamp01, Lamp02, Net01, Net02])
     }
 
     pub fn can_hit_switch(&self) -> bool {
         self.has_any(&[
-            Sword01, Sword02, Sword03, Sword04,
-            Bow01, Bow02,
-            Boomerang01, Boomerang02,
-            Hookshot01, Hookshot02,
-            Bombs01, Bombs02,
-            IceRod01, IceRod02,
-            Hammer01, Hammer02
+            Sword01,
+            Sword02,
+            Sword03,
+            Sword04,
+            Bow01,
+            Bow02,
+            Boomerang01,
+            Boomerang02,
+            Hookshot01,
+            Hookshot02,
+            Bombs01,
+            Bombs02,
+            IceRod01,
+            IceRod02,
+            Hammer01,
+            Hammer02,
         ])
     }
 
     pub fn can_hit_far_switch(&self) -> bool {
         self.has_any(&[
-            Bow01, Bow02,
-            Boomerang01, Boomerang02,
-            Hookshot01, Hookshot02,
-            Bombs01, Bombs02
+            Bow01,
+            Bow02,
+            Boomerang01,
+            Boomerang02,
+            Hookshot01,
+            Hookshot02,
+            Bombs01,
+            Bombs02,
         ])
     }
 
     pub fn can_hit_shielded_switch(&self) -> bool {
         self.has_any(&[
-            Sword01, Sword02, Sword03, Sword04,
-            Bow01, Bow02,
-            Boomerang01, Boomerang02,
-            Hookshot01, Hookshot02,
-            Bombs01, Bombs02,
-            Hammer01, Hammer02
+            Sword01,
+            Sword02,
+            Sword03,
+            Sword04,
+            Bow01,
+            Bow02,
+            Boomerang01,
+            Boomerang02,
+            Hookshot01,
+            Hookshot02,
+            Bombs01,
+            Bombs02,
+            Hammer01,
+            Hammer02,
         ])
     }
 
     pub fn can_hit_hog_1f_switch(&self) -> bool {
-        self.can_hit_far_switch() || self.has_ice_rod() || (self.can_merge() && (self.has_sword() || self.has_hammer()))
+        self.can_hit_far_switch()
+            || self.has_ice_rod()
+            || (self.can_merge() && (self.has_sword() || self.has_hammer()))
     }
 
     pub fn has_sanctuary_key(&self) -> bool {
@@ -394,7 +433,12 @@ impl Progress {
     }
 
     pub fn has_gales_keys(&self, amount: u8) -> bool {
-        self.has_amount(amount, &[GalesKeySmall01, GalesKeySmall02, GalesKeySmall03, GalesKeySmall04])
+        self.has_amount(amount, &[
+            GalesKeySmall01,
+            GalesKeySmall02,
+            GalesKeySmall03,
+            GalesKeySmall04,
+        ])
     }
 
     pub fn has_gales_big_key(&self) -> bool {
@@ -402,13 +446,12 @@ impl Progress {
     }
 
     pub fn can_defeat_margomill(&self) -> bool {
-        self.has_tornado_rod() && (
-            self.has_sword()
+        self.has_tornado_rod()
+            && (self.has_sword()
                 || self.has_bow()
                 || self.has_bombs()
                 || self.has_fire_rod()
-                || self.has_hammer()
-        )
+                || self.has_hammer())
     }
 
     pub fn has_hera_keys(&self, amount: u8) -> bool {
@@ -444,7 +487,12 @@ impl Progress {
     }
 
     pub fn has_swamp_keys(&self, amount: u8) -> bool {
-        self.has_amount(amount, &[SwampKeySmall01, SwampKeySmall02, SwampKeySmall03, SwampKeySmall04])
+        self.has_amount(amount, &[
+            SwampKeySmall01,
+            SwampKeySmall02,
+            SwampKeySmall03,
+            SwampKeySmall04,
+        ])
     }
 
     pub fn has_swamp_big_key(&self) -> bool {
@@ -494,7 +542,13 @@ impl Progress {
     }
 
     pub fn has_desert_keys(&self, amount: u8) -> bool {
-        self.has_amount(amount, &[DesertKeySmall01, DesertKeySmall02, DesertKeySmall03, DesertKeySmall04, DesertKeySmall05])
+        self.has_amount(amount, &[
+            DesertKeySmall01,
+            DesertKeySmall02,
+            DesertKeySmall03,
+            DesertKeySmall04,
+            DesertKeySmall05,
+        ])
     }
 
     pub fn has_desert_big_key(&self) -> bool {
@@ -518,16 +572,21 @@ impl Progress {
     }
 
     pub fn has_lorule_keys(&self, amount: u8) -> bool {
-        self.has_amount(amount, &[LoruleCastleKeySmall01, LoruleCastleKeySmall02, LoruleCastleKeySmall03, LoruleCastleKeySmall04, LoruleCastleKeySmall05])
+        self.has_amount(amount, &[
+            LoruleCastleKeySmall01,
+            LoruleCastleKeySmall02,
+            LoruleCastleKeySmall03,
+            LoruleCastleKeySmall04,
+            LoruleCastleKeySmall05,
+        ])
     }
 
     pub fn has_completed_trials(&self) -> bool {
-        self.settings.logic.skip_trials || (
-            self.has(LcBombTrial)
+        self.settings.logic.skip_trials
+            || (self.has(LcBombTrial)
                 && self.has(LcBallTrial)
                 && self.has(LcLampTrial)
-                && self.has(LcHookTrial)
-        )
+                && self.has(LcHookTrial))
     }
 
     pub fn has_bow_of_light(&self) -> bool {
@@ -578,12 +637,22 @@ impl Progress {
 
     pub fn has_lc_requirement(&self) -> bool {
         self.has_amount(self.settings.logic.lc_requirement, &[
-            SageGulley, SageOren, SageSeres, SageOsfala, SageImpa, SageIrene, SageRosso])
+            SageGulley, SageOren, SageSeres, SageOsfala, SageImpa, SageIrene, SageRosso,
+        ])
     }
 
     pub fn has_yuganon_requirement(&self) -> bool {
         self.has_amount(self.settings.logic.yuganon_requirement, &[
-            SageGulley, SageOren, SageSeres, SageOsfala, SageImpa, SageIrene, SageRosso])
+            SageGulley, SageOren, SageSeres, SageOsfala, SageImpa, SageIrene, SageRosso,
+        ])
+    }
+
+    pub fn has_opened_stylish_womans_house(&self) -> bool {
+        self.has(StylishWomansHouseOpen)
+    }
+
+    pub fn has_woman_roof_maiamai(&self) -> bool {
+        self.has(WomanRoofMaiamai)
     }
 
     pub fn has_opened_sanctuary_doors(&self) -> bool {

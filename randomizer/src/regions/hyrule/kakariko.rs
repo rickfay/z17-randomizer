@@ -6,6 +6,7 @@ crate::region! {
             "Well (Chest)": RupeeR @Chest(CaveLight 4[6]),
             "Well (Upper)": HeartPiece @Heart(CaveLight 4[8]),
             "Jail": RupeeSilver @Chest(IndoorLight 3[3]) :- can_merge,
+            "Woman": RupeeR @Event(IndoorLight/FieldLight_18_MiddleLady[0xF]),
         ],
         paths: [
             post_sanc,
