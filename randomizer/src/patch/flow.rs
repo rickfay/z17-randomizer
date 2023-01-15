@@ -127,6 +127,11 @@ pub fn apply(patcher: &mut Patcher, free: Item, settings: &Settings) -> Result<(
 
     apply!(patcher,
 
+        // Eastern Palace
+        DungeonEast/East {
+            [8] => None, // skip 15 - Don't set Flag 251
+        },
+
         // Sacred Realm
         FieldLight/Ending {
             [226] => 82, // skip 21

@@ -244,29 +244,29 @@ fn patch_eastern(patcher: &mut Patcher, prize: Item, _: &Settings) {
     let green_pendant_flag = prize_flag(PendantCourage);
 
     // Haunted Grove
-    patcher.modify_objs(FieldLight, 25, &[
-        set_enable_flag(122, green_pendant_flag),  // Pouch
-        set_disable_flag(123, green_pendant_flag), // Gulley
-    ]);
+    // patcher.modify_objs(FieldLight, 25, &[
+    //     set_enable_flag(122, green_pendant_flag),  // Pouch
+    //     set_disable_flag(123, green_pendant_flag), // Gulley
+    // ]);
 
     // Irene (bridge)
-    patcher.modify_objs(FieldLight, 28, &[
-        set_46_args(55, green_pendant_flag), // Trigger - NpcMaple_BellGet_2D
-        set_enable_flag(56, green_pendant_flag), // Irene
-    ]);
+    // patcher.modify_objs(FieldLight, 28, &[
+    //     set_46_args(55, green_pendant_flag), // Trigger - NpcMaple_BellGet_2D
+    //     set_enable_flag(56, green_pendant_flag), // Irene
+    // ]);
 
     // Irene (Fortune-Teller)
-    patcher.modify_objs(FieldLight, 9, &[
-        set_46_args(83, green_pendant_flag), // Trigger - NpcMaple_BellGet_11
-        set_enable_flag(85, green_pendant_flag), // Irene
-    ]);
+    // patcher.modify_objs(FieldLight, 9, &[
+    //     set_46_args(83, green_pendant_flag), // Trigger - NpcMaple_BellGet_11
+    //     set_enable_flag(85, green_pendant_flag), // Irene
+    // ]);
 
     // Irene (small pond)
-    patcher.modify_objs(FieldLight, 10, &[
-        set_46_args(65, green_pendant_flag), // Trigger - NpcMaple_BellGet_12_00
-        set_enable_flag(67, green_pendant_flag), // Irene
-        set_46_args(68, green_pendant_flag), // Trigger - NpcMaple_BellGet_12_01
-    ]);
+    // patcher.modify_objs(FieldLight, 10, &[
+    //     set_46_args(65, green_pendant_flag), // Trigger - NpcMaple_BellGet_12_00
+    //     set_enable_flag(67, green_pendant_flag), // Irene
+    //     set_46_args(68, green_pendant_flag), // Trigger - NpcMaple_BellGet_12_01
+    // ]);
 
     // Outside Rosso's House
     patcher.modify_objs(FieldLight, 2, &[
@@ -850,7 +850,7 @@ impl PrizePatchData {
             SageImpa => Self::new(421, 656, 330.0, 0, 0, 0, 120),
             PendantPower => Self::new(173, 372, 0.0, 0, 0, 0, 0),
             PendantWisdom => Self::new(173, 342, 0.0, 1, 0, 0, 0),
-            PendantCourage => Self::new(173, 310, 0.0, 2, 0, 0, 0),
+            PendantCourage => Self::new(173, 251, 0.0, 2, 0, 0, 0),
             _ => panic!("\"{}\" is not a dungeon prize.", prize.as_str()),
         }
     }

@@ -93,7 +93,7 @@ pub(crate) fn prize_flag(pendant: Item) -> Flag {
     match pendant {
         PendantPower => Flag::Event(372),
         PendantWisdom => Flag::Event(342),
-        PendantCourage => Flag::Event(310),
+        PendantCourage => Flag::Event(251),
         SageGulley => Flag::Event(536),
         SageOren => Flag::Event(556),
         SageSeres => Flag::Event(576),

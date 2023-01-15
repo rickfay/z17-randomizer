@@ -490,9 +490,9 @@ fn cutscenes<'game, 'settings>(
         {
             let opening = opening.get_mut();
             for flag in array::IntoIter::new([
-                7, 9, 10, // Skip Gulley in prologue
-                11, // Fix Hyrule lighting, skip Gulley dialogue at Blacksmith
-                20, // Disable Gulley's callback
+                7, 9, 10,  // Skip Gulley in prologue
+                11,  // Fix Hyrule lighting, skip Gulley dialogue at Blacksmith
+                20,  // Disable Gulley's callback
                 55,  // ?
                 84,  // Enable Dampe + Seres conversation
                 107, // Spawn enemies
@@ -512,8 +512,8 @@ fn cutscenes<'game, 'settings>(
                 //246, // Skip Irene, make Hyrule Hotfoot appear, spawns certain enemies
                 248, // Skip Yuga killing Osfala
                 //250, // Yuga 1 Defeated
-                //251, // Set in Post-EP FieldLight20 cutscene
-                //310, // Watched HC Post-EP cutscene. Use this to record Pendant of Courage (for now, sound bug)
+                //251, // Set in Post-EP FieldLight20 cutscene, being used as PoC Flag
+                310, // Watched HC Post-EP cutscene, fixes overworld music issues
                 315, // Shop open???
                 // 320, // Shady Guy Trigger
                 321, 322, // Skip first Oren cutscenes
