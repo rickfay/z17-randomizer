@@ -14,6 +14,7 @@ type Next = Option<u16>;
 
 #[derive(Debug)]
 pub struct Flow<'input> {
+    #[allow(unused)]
     header: List<Ref<'input>, HEADER_LEN>,
     steps: List<Ref<'input>, STEP_LEN>,
     branches: Branches<'input>,
@@ -47,9 +48,8 @@ impl<'input> FromFile for Flow<'input> {
 
         // Line 4: header, which contains the step and branch count
         let (step_ct, branch_ct, index) = get_flw(&*flw)?;
-        let (header, body) = Ref::map_split(flw, |flw| flw.split_at(0x10));
 
-        // Each step is one line (16 bytes), and there should be as many as was specified in the header
+        let (header, body) = Ref::map_split(flw, |flw| flw.split_at(0x10));
         let (steps, branches) = Ref::map_split(body, |body| body.split_at(index));
 
         // Branches are 2 bytes each, and appear sequentially on the first line following the last step
@@ -68,6 +68,13 @@ impl<'input> FromFile for Flow<'input> {
         // Following the branches, the magic "FEN1" appears, followed by two bytes (size of remaining garbage?)
 
         Ok(Self { header, steps, branches })
+    }
+}
+
+typedef! {
+    struct Header: FromBytes<'_> [0x10] {
+        [0] steps: u16,
+        [2] branches: u16,
     }
 }
 
@@ -168,6 +175,8 @@ impl<'input> Branches<'input> {
 
 #[derive(Debug)]
 pub struct FlowMut<'input> {
+    #[allow(unused)]
+    header: List<RefMut<'input>, HEADER_LEN>,
     steps: List<RefMut<'input>, STEP_LEN>,
     branches: BranchesMut<'input>,
 }
@@ -247,12 +256,17 @@ impl<'input> FromFile for FlowMut<'input> {
         let msgbn = MsgBn::<RefMut<'input>, 2>::try_read(input, MSGFLWBN)?;
         let flw = msgbn.into_section(FLW3).ok_or_else(|| Error::new("No FLW3"))?;
         let (step_ct, branch_ct, index) = get_flw(&flw)?;
-        let (steps, branches) = flw[0x10..].split_at_mut(index);
+
+        let (header, body) = flw.split_at_mut(0x10);
+        let (steps, branches) = body.split_at_mut(index);
+
+        let header =
+            List::<RefMut, HEADER_LEN>::new(1, header).ok_or_else(|| Error::new("unimpl33"))?;
         let steps =
             List::<RefMut, STEP_LEN>::new(step_ct, steps).ok_or_else(|| Error::new("unimpl33"))?;
         let branches = List::<RefMut, BRANCH_LEN>::new(branch_ct, branches)
             .ok_or_else(|| Error::new("unimpl33"))?;
-        Ok(Self { steps, branches })
+        Ok(Self { header, steps, branches })
     }
 }
 
@@ -578,6 +592,6 @@ fn next(index: u16) -> Next {
 
 const MSGFLWBN: &[u8; 8] = b"MsgFlwBn";
 const FLW3: &[u8; 4] = b"FLW3";
-const HEADER_LEN: usize = 0x10;
+const HEADER_LEN: usize = 0x4;
 const STEP_LEN: usize = 0x10;
 const BRANCH_LEN: usize = 2;

@@ -33,45 +33,83 @@ impl Settings {
     }
 }
 
+const fn seven() -> u8 {
+    7
+}
+const fn r#true() -> bool {
+    true
+}
+
 /// Settings to change the randomizer's logic checks.
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq, Deserialize, Serialize)]
-#[serde(default, deny_unknown_fields)]
+#[serde(deny_unknown_fields)]
 pub struct Logic {
     /// Logic to use for item placement (Normal, Hard, Glitched (Basic, Advanced, Hell), No Logic)
+    #[serde(default)]
     pub mode: LogicMode,
+
     /// Randomizes the Pendants and Portraits between Hyrule and Lorule dungeons
+    #[serde(default = "r#true")]
     pub randomize_dungeon_prizes: bool,
 
-    ///
+    /// The number of Portraits needed to trigger the Hilda cutscene to open Lorule Castle
+    #[serde(default = "seven")]
+    pub lc_requirement: u8,
+
+    /// The number of Portraits needed to fight Yuga Ganon
+    #[serde(default = "seven")]
+    pub yuganon_requirement: u8,
+
+    /// todo
+    #[serde(default)]
     pub entrance_rando: EntranceShuffleSetting,
 
-    /// The number of Portraits needed to trigger the Hilda cutscene to open Lorule Castle
-    pub lc_requirement: u8,
-    /// The number of Portraits needed to fight Yuga Ganon
-    pub yuganon_requirement: u8,
     /// Guarantees a Weapon is placed in Ravio's Shop
+    #[serde(default)]
     pub assured_weapon: bool,
+
     /// Places the Bell in Ravio's Shop
+    #[serde(default)]
     pub bell_in_shop: bool,
+
     /// Places the Pouch in Ravio's Shop
+    #[serde(default)]
     pub pouch_in_shop: bool,
+
     /// Places the Pegasus Boots in Ravio's Shop
+    #[serde(default)]
     pub boots_in_shop: bool,
-    /// Excludes Cucco Ranch, both Rupee Rushes, Treacherous Tower, Octoball Derby, and Hyrule Hotfoot
+
+    /// Excludes Cucco Ranch, both Rupee Rushes, Treacherous Tower, Octoball Derby, and Hyrule Hotfoot (both races)
+    #[serde(default)]
     pub minigames_excluded: bool,
+
     /// Swordless Mode
+    #[serde(default)]
     pub swordless_mode: bool,
+
     /// Shuffle Super Lamp and Super Net
+    #[serde(default)]
     pub super_items: bool,
+
     /// Skip Trials Door in Lorule Castle
+    #[serde(default)]
     pub skip_trials: bool,
+
     /// Guarantees Bow of Light will be placed in Lorule Castle
+    #[serde(default)]
     pub bow_of_light_in_castle: bool,
+
     /// Lamp Requirement. If enabled, the player may have to cross dark rooms without Lamp
+    #[serde(default)]
     pub lampless: bool,
+
     /// Maiamai Madness
+    #[serde(default)]
     pub maiamai_madness: bool,
+
     /// Pre-activates Weather Vanes, allowing the Bell to travel anywhere from game start
+    #[serde(default)]
     pub vanes_activated: bool,
 }
 

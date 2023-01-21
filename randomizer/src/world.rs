@@ -215,14 +215,25 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                     ),
                     check(
                         LocationInfo::new(
-                            regions::hyrule::lake::hotfoot::SUBREGION,
-                            "Hyrule Hotfoot",
+                            regions::hyrule::lake::hylia::SUBREGION,
+                            "Hyrule Hotfoot - First Race",
+                        ),
+                        Some(|p| p.has_boots()),
+                        Some(|_| true),
+                        None,
+                        None,
+                        None,
+                    ),
+                    check(
+                        LocationInfo::new(
+                            regions::hyrule::lake::hylia::SUBREGION,
+                            "Hyrule Hotfoot - Second Race",
                         ),
                         Some(|p| p.has_boots()),
                         Some(|p| p.can_merge() && p.has_bell()),
                         None,
                         None,
-                        None,
+                        Some(|_| true), // Can just walk it
                     ),
                     check(
                         LocationInfo::new(regions::hyrule::lake::hylia::SUBREGION, "Bird Lover"),
@@ -1149,7 +1160,13 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             location(
                 "Rosso's House",
                 vec![
-                    check_free(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Rosso")),
+                    check(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Rosso"),
+                          Some(|p| p.has_pendant_of_courage()),
+                          None,
+                          None,
+                          None,
+                          None,
+                    ),
                     check(
                         LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Clean Rocks"),
                         Some(|p| p.has_pendant_of_courage() && p.has_power_glove()),
@@ -1277,8 +1294,8 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             location(
                 "Hyrule Castle Interior",
                 vec![check_free(LocationInfo::new(
-                    regions::hyrule::hyrule_castle::hyrule::SUBREGION,
-                    "[HC] Zelda",
+                    regions::dungeons::hyrule::castle::SUBREGION,
+                    "Hyrule Castle Prize",
                 ))],
                 vec![path_free(HyruleCastleCourtyard), path_free(HyruleCastleRoof)],
             ),
@@ -1292,7 +1309,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             location(
                 "Hyrule Castle Left Room",
                 vec![check_free(LocationInfo::new(
-                    regions::hyrule::hyrule_castle::hyrule::SUBREGION,
+                    regions::dungeons::hyrule::castle::SUBREGION,
                     "[HC] Left Entrance",
                 ))],
                 vec![path_free(HyruleCastleCourtyard)],
@@ -1303,7 +1320,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             location(
                 "Hyrule Castle Roof",
                 vec![check_free(LocationInfo::new(
-                    regions::hyrule::hyrule_castle::hyrule::SUBREGION,
+                    regions::dungeons::hyrule::castle::SUBREGION,
                     "[HC] Castle Balcony",
                 ))],
                 vec![
@@ -5917,7 +5934,7 @@ fn turtle_rock() -> HashMap<Location, LocationNode> {
                             "[TR] (B1) Big Chest (Top)",
                         ),
                         Some(|p| {
-                            (p.has_turtle_keys(1) && p.can_merge() && p.can_hit_shielded_switch())
+                            p.has_turtle_keys(1) && p.can_merge() && p.can_hit_shielded_switch()
                         }),
                         Some(|p| (p.has_turtle_keys(1) && p.can_merge())), // hit switch with pots
                         None,
@@ -6073,7 +6090,7 @@ fn lorule_castle() -> HashMap<Location, LocationNode> {
             location(
                 "Lorule Castle East Ledge 1F",
                 vec![check_free(LocationInfo::new(
-                    regions::dungeons::castle::lorule::SUBREGION,
+                    regions::dungeons::lorule::castle::SUBREGION,
                     "[LC] (1F) Ledge",
                 ))],
                 vec![path(LoruleCastle1F, Some(|p| p.can_merge()), None, None, None, None)],
@@ -6084,7 +6101,7 @@ fn lorule_castle() -> HashMap<Location, LocationNode> {
             location(
                 "Lorule Castle 1F Center",
                 vec![check_free(LocationInfo::new(
-                    regions::dungeons::castle::lorule::SUBREGION,
+                    regions::dungeons::lorule::castle::SUBREGION,
                     "[LC] (1F) Center",
                 ))],
                 vec![
@@ -6106,12 +6123,12 @@ fn lorule_castle() -> HashMap<Location, LocationNode> {
                 "Lorule Castle 2F 3F",
                 vec![
                     check_free(LocationInfo::new(
-                        regions::dungeons::castle::lorule::SUBREGION,
+                        regions::dungeons::lorule::castle::SUBREGION,
                         "[LC] (2F) Near Torches",
                     )),
                     check(
                         LocationInfo::new(
-                            regions::dungeons::castle::lorule::SUBREGION,
+                            regions::dungeons::lorule::castle::SUBREGION,
                             "[LC] (2F) Hidden Path",
                         ),
                         Some(|p| p.can_extinguish_torches()),
@@ -6122,7 +6139,7 @@ fn lorule_castle() -> HashMap<Location, LocationNode> {
                     ),
                     check(
                         LocationInfo::new(
-                            regions::dungeons::castle::lorule::SUBREGION,
+                            regions::dungeons::lorule::castle::SUBREGION,
                             "[LC] (2F) Ledge",
                         ),
                         Some(|p| p.can_merge()),
@@ -6133,7 +6150,7 @@ fn lorule_castle() -> HashMap<Location, LocationNode> {
                     ),
                     check(
                         LocationInfo::new(
-                            regions::dungeons::castle::lorule::SUBREGION,
+                            regions::dungeons::lorule::castle::SUBREGION,
                             "[LC] (3F) Bomb Trial (Chest)",
                         ),
                         Some(|p| p.has_bombs()),
@@ -6144,7 +6161,7 @@ fn lorule_castle() -> HashMap<Location, LocationNode> {
                     ),
                     check(
                         LocationInfo::new(
-                            regions::dungeons::castle::lorule::SUBREGION,
+                            regions::dungeons::lorule::castle::SUBREGION,
                             "[LC] (3F) Bomb Trial (Behind Rock)",
                         ),
                         Some(|p| p.has_bombs() && p.can_merge()),
@@ -6154,7 +6171,7 @@ fn lorule_castle() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check_free(LocationInfo::new(
-                        regions::dungeons::castle::lorule::SUBREGION,
+                        regions::dungeons::lorule::castle::SUBREGION,
                         "[LC] (3F) Ball Trial (Chest)",
                     )),
                     check_quest(
@@ -6168,7 +6185,7 @@ fn lorule_castle() -> HashMap<Location, LocationNode> {
                     ),
                     check(
                         LocationInfo::new(
-                            regions::dungeons::castle::lorule::SUBREGION,
+                            regions::dungeons::lorule::castle::SUBREGION,
                             "[LC] (3F) Ball Trial (Puzzle)",
                         ),
                         Some(|p| p.can_merge()),
@@ -6223,7 +6240,7 @@ fn lorule_castle() -> HashMap<Location, LocationNode> {
                 vec![
                     check(
                         LocationInfo::new(
-                            regions::dungeons::castle::lorule::SUBREGION,
+                            regions::dungeons::lorule::castle::SUBREGION,
                             "[LC] (4F) Lamp Trial",
                         ),
                         Some(|p| p.has_fire_source()),
@@ -6243,7 +6260,7 @@ fn lorule_castle() -> HashMap<Location, LocationNode> {
                     ),
                     check(
                         LocationInfo::new(
-                            regions::dungeons::castle::lorule::SUBREGION,
+                            regions::dungeons::lorule::castle::SUBREGION,
                             "[LC] (4F) Hookshot Trial (Eyes)",
                         ),
                         Some(|p| p.has_hookshot() && (p.has_ice_rod() || p.can_merge())),
@@ -6254,7 +6271,7 @@ fn lorule_castle() -> HashMap<Location, LocationNode> {
                     ),
                     check(
                         LocationInfo::new(
-                            regions::dungeons::castle::lorule::SUBREGION,
+                            regions::dungeons::lorule::castle::SUBREGION,
                             "[LC] (4F) Hookshot Trial (Chest)",
                         ),
                         Some(|p| p.has_hookshot()),
@@ -6273,12 +6290,12 @@ fn lorule_castle() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check_free(LocationInfo::new(
-                        regions::dungeons::castle::lorule::SUBREGION,
+                        regions::dungeons::lorule::castle::SUBREGION,
                         "[LC] (4F) Center",
                     )),
                     check(
                         LocationInfo::new(
-                            regions::dungeons::castle::lorule::SUBREGION,
+                            regions::dungeons::lorule::castle::SUBREGION,
                             "[LC] (4F) Hidden Path",
                         ),
                         Some(|p| p.can_extinguish_torches()),
@@ -6304,7 +6321,7 @@ fn lorule_castle() -> HashMap<Location, LocationNode> {
             location(
                 "Throne Room",
                 vec![check(
-                    LocationInfo::new(regions::dungeons::castle::lorule::SUBREGION, "Final Zelda"),
+                    LocationInfo::new(regions::dungeons::lorule::castle::SUBREGION, "Final Zelda"),
                     Some(|p| {
                         p.has_yuganon_requirement()
                             && (p.has_sword() || (p.swordless_mode() && p.has_net()))

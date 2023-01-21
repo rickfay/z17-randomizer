@@ -53,10 +53,12 @@ pub(crate) fn clear_disable_flag(unq: u16) -> (u16, Box<dyn Fn(&mut Obj)>) {
     (unq, Box::new(move |obj: &mut Obj| obj.clear_disable_flag()))
 }
 
+#[allow(unused)]
 pub(crate) fn clear_active_args(unq: u16) -> (u16, Box<dyn Fn(&mut Obj)>) {
     (unq, Box::new(move |obj: &mut Obj| obj.clear_active_args()))
 }
 
+#[allow(unused)]
 pub(crate) fn clear_inactive_args(unq: u16) -> (u16, Box<dyn Fn(&mut Obj)>) {
     (unq, Box::new(move |obj: &mut Obj| obj.clear_inactive_args()))
 }
@@ -84,7 +86,7 @@ pub(crate) fn is_sage(item: Item) -> bool {
 
 pub(crate) fn is_pendant(item: Item) -> bool {
     match item {
-        PendantPower | PendantWisdom | PendantCourage => true,
+        PendantPower | PendantWisdom | PendantCourage | ZeldaAmulet => true,
         _ => false,
     }
 }
@@ -94,6 +96,7 @@ pub(crate) fn prize_flag(pendant: Item) -> Flag {
         PendantPower => Flag::Event(372),
         PendantWisdom => Flag::Event(342),
         PendantCourage => Flag::Event(251),
+        ZeldaAmulet => Flag::Event(251),
         SageGulley => Flag::Event(536),
         SageOren => Flag::Event(556),
         SageSeres => Flag::Event(576),
@@ -125,6 +128,12 @@ pub(crate) fn get_dungeon_prizes(layout: &Layout) -> DungeonPrizes {
             .get(&LocationInfo::new(
                 regions::dungeons::tower::hera::SUBREGION,
                 "Tower of Hera Prize",
+            ))
+            .unwrap(),
+        hc_prize: layout
+            .get(&LocationInfo::new(
+                regions::dungeons::hyrule::castle::SUBREGION,
+                "Hyrule Castle Prize",
             ))
             .unwrap(),
         pd_prize: layout

@@ -108,17 +108,12 @@ fn preplace_items<'a>(
     check_map: &mut HashMap<&'a str, Option<FillerItem>>, settings: &'a Settings, rng: &mut StdRng,
     progression: &mut Vec<FillerItem>, trash: &mut Vec<FillerItem>,
 ) {
-    // Place un-randomized items
-    place_static(check_map, progression, LetterInABottle, "Shore");
-    place_static(check_map, progression, RupeeSilver41, "[TR] (1F) Under Center");
-    place_static(check_map, progression, RupeeGold09, "[TR] (B1) Under Center");
-    place_static(check_map, progression, RupeeGold10, "[PD] (2F) South Hidden Room");
-
     // Vanilla Dungeon Prizes
     if !settings.logic.randomize_dungeon_prizes {
         place_static(check_map, progression, PendantOfCourage, "Eastern Palace Prize");
         place_static(check_map, progression, PendantOfWisdom, "House of Gales Prize");
         place_static(check_map, progression, PendantOfPower, "Tower of Hera Prize");
+        place_static(check_map, progression, Charm, "Hyrule Castle Prize");
         place_static(check_map, progression, SageGulley, "Dark Palace Prize");
         place_static(check_map, progression, SageOren, "Swamp Palace Prize");
         place_static(check_map, progression, SageSeres, "Skull Woods Prize");
@@ -127,6 +122,13 @@ fn preplace_items<'a>(
         place_static(check_map, progression, SageIrene, "Desert Palace Prize");
         place_static(check_map, progression, SageRosso, "Ice Ruins Prize");
     }
+
+    // Place un-randomized items
+    place_static(check_map, progression, LetterInABottle, "Shore");
+    place_static(check_map, progression, RupeeSilver41, "Hyrule Hotfoot - Second Race");
+    place_static(check_map, progression, RupeeSilver42, "[TR] (1F) Under Center");
+    place_static(check_map, progression, RupeeGold09, "[TR] (B1) Under Center");
+    place_static(check_map, progression, RupeeGold10, "[PD] (2F) South Hidden Room");
 
     let mut shop_positions: Vec<&str> = Vec::new();
     let mut bow_light_positions: Vec<&str> = Vec::from(["Zelda"]);
@@ -194,7 +196,7 @@ fn preplace_items<'a>(
     // Exclude Minigames
     if settings.logic.minigames_excluded {
         exclude("Cucco Ranch", rng, check_map, trash);
-        exclude("Hyrule Hotfoot", rng, check_map, trash);
+        exclude("Hyrule Hotfoot - First Race", rng, check_map, trash);
         exclude("Rupee Rush (Hyrule)", rng, check_map, trash);
         exclude("Rupee Rush (Lorule)", rng, check_map, trash);
         exclude("Octoball Derby", rng, check_map, trash);
@@ -282,8 +284,8 @@ fn map_to_result(
 
 fn is_dungeon_prize(item: FillerItem) -> bool {
     match item {
-        PendantOfPower | PendantOfWisdom | PendantOfCourage | SageGulley | SageOren | SageSeres
-        | SageOsfala | SageImpa | SageIrene | SageRosso => true,
+        PendantOfPower | PendantOfWisdom | PendantOfCourage | Charm | SageGulley | SageOren
+        | SageSeres | SageOsfala | SageImpa | SageIrene | SageRosso => true,
         _ => false,
     }
 }
@@ -516,10 +518,10 @@ fn verify_all_locations_accessible(
 
     let reachable_checks = assumed_search(loc_map, progression_pool, &mut check_map, settings); //find_reachable_checks(loc_map, &everything, &mut check_map); //
 
-    const TOTAL_CHECKS: usize = 256 // Standard
-            + 10  // Dungeon Prizes
+    const TOTAL_CHECKS: usize = 254 // Standard
+            + 11  // Dungeon Prizes
             + 100 // Maiamai
-            + 3   // Unshuffled freestanding rupees
+            + 5   // Unshuffled
             + 29; // Quest
 
     if reachable_checks.len() != TOTAL_CHECKS {

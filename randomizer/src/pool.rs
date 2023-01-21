@@ -138,6 +138,7 @@ fn get_dungeon_prize_pool() -> Vec<FillerItem> {
         PendantOfPower,
         PendantOfWisdom,
         PendantOfCourage,
+        Charm,
         SageGulley,
         SageOren,
         SageSeres,
@@ -308,7 +309,6 @@ pub(crate) fn get_purple_rupee_pool() -> Vec<FillerItem> {
 
 fn get_base_trash_pool() -> Vec<FillerItem> {
     vec![
-        Charm,
         HintGlasses,
         // 2 Green Rupees
         RupeeGreen,

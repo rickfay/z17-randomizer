@@ -1,7 +1,7 @@
 crate::region! {
     course: DungeonGanon,
     name: "Lorule Castle",
-    lorule {
+    castle {
         locations: [
             "[LC] (1F) Ledge": RupeeR @Chest(1[714]),
             "[LC] (1F) Center": KeySmall @Chest(1[723]),

@@ -5,7 +5,7 @@ use {
         course::{Id, Id::*},
         demo::Timed,
         flow::FlowMut,
-        scene::{Arg, Obj, Rail, SceneMeta, Transform, Vec3},
+        scene::{Arg, Obj, Rail, SceneMeta},
         Demo, File, Game, IntoBytes, Item, Language, Scene,
     },
     fs_extra::dir::CopyOptions,
@@ -36,6 +36,7 @@ pub struct DungeonPrizes {
     ep_prize: Item,
     hg_prize: Item,
     th_prize: Item,
+    hc_prize: Item,
     pd_prize: Item,
     sp_prize: Item,
     sw_prize: Item,
@@ -74,6 +75,7 @@ impl Patcher {
         self.scene(id, stage_index - 1).unwrap().stage_mut().get_mut().add_rail(rail);
     }
 
+    #[allow(unused)]
     fn add_system(&mut self, id: Id, stage_index: u16, obj: Obj) {
         self.scene(id, stage_index - 1).unwrap().stage_mut().get_mut().add_system(obj);
     }

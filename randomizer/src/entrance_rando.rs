@@ -1,13 +1,4 @@
-use {
-    crate::{
-        loading_zone_pair::{LoadingZone, LoadingZoneId, LoadingZones},
-        location::Location,
-        Settings,
-    },
-    rand::rngs::StdRng,
-    serde::{Deserialize, Serialize},
-    std::collections::HashMap,
-};
+use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Deserialize, Serialize)]
 pub enum EntranceShuffleSetting {

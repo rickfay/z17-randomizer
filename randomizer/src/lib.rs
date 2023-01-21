@@ -25,6 +25,7 @@ use {
     },
     sys::{Paths, System},
 };
+
 mod check;
 mod entrance_rando;
 mod filler;
@@ -284,7 +285,7 @@ fn item_to_str(item: &Item) -> &'static str {
         PowerGlove => "Progressive Glove",
         ItemInsectNet => "Net",
         ItemInsectNetLv2 => "Super Net",
-        Kinsta => "Maiamai",
+        Kinsta => "Lost Maiamai",
         BadgeBee => "Bee Badge",
         HintGlasses => "Hint Glasses",
         LiverBlue => "Monster Tail",
@@ -312,6 +313,7 @@ fn item_to_str(item: &Item) -> &'static str {
         PendantPower => "Pendant of Power",
         PendantWisdom => "Pendant of Wisdom",
         PendantCourage => "Pendant of Courage",
+        ZeldaAmulet => "Charm",
 
         SageGulley => "Sage Gulley",
         SageOren => "Sage Oren",
@@ -321,7 +323,6 @@ fn item_to_str(item: &Item) -> &'static str {
         SageIrene => "Sage Irene",
         SageRosso => "Sage Rosso",
 
-        ZeldaAmulet => "Charm",
         TriforceCourage => "Triforce of Courage",
 
         ItemPotShopRed => "Red Potion",
@@ -452,7 +453,7 @@ impl ItemExt for Item {
             SageIrene => Some(MsbfKey::Sand),
             SageRosso => Some(MsbfKey::Ice),
             SageImpa => None, // Impa special
-            PendantPower | PendantWisdom | PendantCourage => None,
+            PendantPower | PendantWisdom | PendantCourage | ZeldaAmulet => None,
             _ => panic!(),
         }
     }
@@ -461,6 +462,7 @@ impl ItemExt for Item {
 /// A log of seed info and item placements
 #[derive(Debug, Serialize)]
 pub struct Spoiler<'settings> {
+    version: &'settings str,
     seed: Seed,
     settings: &'settings Settings,
     layout: Layout,
@@ -544,8 +546,8 @@ pub fn plando() -> Result<(), Error> {
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (1)"), RupeeGold);
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (2)"), ItemSwordLv1);
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (3)"), ItemSwordLv1);
-    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (4)"), DashBoots);
-    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (5)"), ItemBowLv2);
+    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (4)"), MilkMatured);
+    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (5)"), MessageBottle);
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (6)"), HintGlasses); // Sand Rod Slot
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (7)"), RingHekiga);
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (8)"), RingHekiga);
@@ -556,15 +558,17 @@ pub fn plando() -> Result<(), Error> {
     /////////////////////////////
 
     layout.set(LocationInfo::new(regions::dungeons::eastern::palace::SUBREGION, "Eastern Palace Prize"), PendantCourage);
-    layout.set(LocationInfo::new(regions::dungeons::house::gales::SUBREGION, "House of Gales Prize"), SageOren);
-    layout.set(LocationInfo::new(regions::dungeons::tower::hera::SUBREGION, "Tower of Hera Prize"), PendantCourage);
-    layout.set(LocationInfo::new(regions::dungeons::dark::palace::SUBREGION, "Dark Palace Prize"), SageIrene);
-    layout.set(LocationInfo::new(regions::dungeons::swamp::palace::SUBREGION, "Swamp Palace Prize"), SageOsfala);
-    layout.set(LocationInfo::new(regions::dungeons::skull::woods::SUBREGION, "Skull Woods Prize"), SageRosso);
-    layout.set(LocationInfo::new(regions::dungeons::thieves::hideout::SUBREGION, "Thieves' Hideout Prize"), SageGulley);
-    layout.set(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "Ice Ruins Prize"), PendantCourage);
-    layout.set(LocationInfo::new(regions::dungeons::desert::palace::SUBREGION, "Desert Palace Prize"), PendantPower);
-    layout.set(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "Turtle Rock Prize"), PendantCourage);
+    layout.set(LocationInfo::new(regions::dungeons::house::gales::SUBREGION, "House of Gales Prize"), PendantWisdom);
+    layout.set(LocationInfo::new(regions::dungeons::tower::hera::SUBREGION, "Tower of Hera Prize"), PendantPower);
+    layout.set(LocationInfo::new(regions::dungeons::hyrule::castle::SUBREGION, "Hyrule Castle Prize"), ZeldaAmulet);
+
+    layout.set(LocationInfo::new(regions::dungeons::dark::palace::SUBREGION, "Dark Palace Prize"), SageGulley);
+    layout.set(LocationInfo::new(regions::dungeons::swamp::palace::SUBREGION, "Swamp Palace Prize"), SageOren);
+    layout.set(LocationInfo::new(regions::dungeons::skull::woods::SUBREGION, "Skull Woods Prize"), SageSeres);
+    layout.set(LocationInfo::new(regions::dungeons::thieves::hideout::SUBREGION, "Thieves' Hideout Prize"), SageOsfala);
+    layout.set(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "Turtle Rock Prize"), SageImpa);
+    layout.set(LocationInfo::new(regions::dungeons::desert::palace::SUBREGION, "Desert Palace Prize"), SageIrene);
+    layout.set(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "Ice Ruins Prize"), SageRosso);
 
     //////////////////////
     // --- Dungeons --- //
@@ -725,21 +729,21 @@ pub fn plando() -> Result<(), Error> {
     layout.set(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "[TR] Grinexx"), KeyBoss);
 
     // Lorule Castle
-    layout.set(LocationInfo::new(regions::dungeons::castle::lorule::SUBREGION, "[LC] (1F) Ledge"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::castle::lorule::SUBREGION, "[LC] (1F) Center"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::castle::lorule::SUBREGION, "[LC] (2F) Near Torches"), Compass);
-    layout.set(LocationInfo::new(regions::dungeons::castle::lorule::SUBREGION, "[LC] (2F) Hidden Path"), KeySmall);
-    layout.set(LocationInfo::new(regions::dungeons::castle::lorule::SUBREGION, "[LC] (2F) Ledge"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::castle::lorule::SUBREGION, "[LC] (4F) Center"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::castle::lorule::SUBREGION, "[LC] (4F) Hidden Path"), ItemBowLight);
-    layout.set(LocationInfo::new(regions::dungeons::castle::lorule::SUBREGION, "[LC] (3F) Bomb Trial (Chest)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::castle::lorule::SUBREGION, "[LC] (3F) Bomb Trial (Behind Rock)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::castle::lorule::SUBREGION, "[LC] (3F) Ball Trial (Chest)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::castle::lorule::SUBREGION, "[LC] (3F) Ball Trial (Puzzle)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::castle::lorule::SUBREGION, "[LC] (4F) Lamp Trial"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::castle::lorule::SUBREGION, "[LC] (4F) Hookshot Trial (Chest)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::castle::lorule::SUBREGION, "[LC] (4F) Hookshot Trial (Eyes)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::castle::lorule::SUBREGION, "Final Zelda"), ItemBow);
+    layout.set(LocationInfo::new(regions::dungeons::lorule::castle::SUBREGION, "[LC] (1F) Ledge"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::lorule::castle::SUBREGION, "[LC] (1F) Center"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::lorule::castle::SUBREGION, "[LC] (2F) Near Torches"), Compass);
+    layout.set(LocationInfo::new(regions::dungeons::lorule::castle::SUBREGION, "[LC] (2F) Hidden Path"), KeySmall);
+    layout.set(LocationInfo::new(regions::dungeons::lorule::castle::SUBREGION, "[LC] (2F) Ledge"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::lorule::castle::SUBREGION, "[LC] (4F) Center"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::lorule::castle::SUBREGION, "[LC] (4F) Hidden Path"), ItemBowLight);
+    layout.set(LocationInfo::new(regions::dungeons::lorule::castle::SUBREGION, "[LC] (3F) Bomb Trial (Chest)"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::lorule::castle::SUBREGION, "[LC] (3F) Bomb Trial (Behind Rock)"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::lorule::castle::SUBREGION, "[LC] (3F) Ball Trial (Chest)"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::lorule::castle::SUBREGION, "[LC] (3F) Ball Trial (Puzzle)"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::lorule::castle::SUBREGION, "[LC] (4F) Lamp Trial"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::lorule::castle::SUBREGION, "[LC] (4F) Hookshot Trial (Chest)"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::lorule::castle::SUBREGION, "[LC] (4F) Hookshot Trial (Eyes)"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::lorule::castle::SUBREGION, "Final Zelda"), ItemBow);
 
     ////////////////////
     // --- Hyrule --- //
@@ -766,9 +770,9 @@ pub fn plando() -> Result<(), Error> {
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Sanctuary Cave"), RupeeGold);
 
     // Hyrule Castle
-    layout.set(LocationInfo::new(regions::hyrule::hyrule_castle::hyrule::SUBREGION, "[HC] Left Entrance"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::hyrule_castle::hyrule::SUBREGION, "[HC] Castle Balcony"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::hyrule_castle::hyrule::SUBREGION, "[HC] Zelda"), ZeldaAmulet);
+    layout.set(LocationInfo::new(regions::dungeons::hyrule::castle::SUBREGION, "[HC] Left Entrance"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::hyrule::castle::SUBREGION, "[HC] Castle Balcony"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::hyrule::castle::SUBREGION, "[HC] Zelda"), ZeldaAmulet);
 
     // Lost Woods
     layout.set(LocationInfo::new(regions::hyrule::lost::woods::SUBREGION, "Master Sword Pedestal"), ItemIceRod);
@@ -804,7 +808,7 @@ pub fn plando() -> Result<(), Error> {
     layout.set(LocationInfo::new(regions::hyrule::kakariko::post_sanc::SUBREGION, "Bee Guy"), HintGlasses);
     layout.set(LocationInfo::new(regions::hyrule::kakariko::post_sanc::SUBREGION, "Bee Guy (Golden Bee)"), ItemFireRod);
     layout.set(LocationInfo::new(regions::hyrule::kakariko::post_sanc::SUBREGION, "Fortune Teller"), RingRental);
-    layout.set(LocationInfo::new(regions::hyrule::kakariko::post_sanc::SUBREGION, "Milk Bar Owner"), MilkMatured);
+    layout.set(LocationInfo::new(regions::hyrule::kakariko::post_sanc::SUBREGION, "Milk Bar Owner"), LiverBlue);
     layout.set(LocationInfo::new(regions::hyrule::kakariko::post_sanc::SUBREGION, "Cucco Ranch"), RupeeGold);
     layout.set(LocationInfo::new(regions::hyrule::kakariko::shady_guy::SUBREGION, "Shady Guy"), RupeeGold);
     layout.set(LocationInfo::new(regions::hyrule::kakariko::closed::SUBREGION, "Stylish Woman"), RupeeGold);
@@ -834,7 +838,8 @@ pub fn plando() -> Result<(), Error> {
     layout.set(LocationInfo::new(regions::hyrule::lake::hylia::SUBREGION, "Bird Lover"), RupeeGold);
     layout.set(LocationInfo::new(regions::hyrule::lake::hylia::SUBREGION, "Secret Cave"), RupeeGold);
     layout.set(LocationInfo::new(regions::hyrule::lake::hylia::SUBREGION, "Shore"), MessageBottle);
-    layout.set(LocationInfo::new(regions::hyrule::lake::hotfoot::SUBREGION, "Hyrule Hotfoot"), RupeeGold);
+    layout.set(LocationInfo::new(regions::hyrule::lake::hylia::SUBREGION, "Hyrule Hotfoot - First Race"), HintGlasses);
+    layout.set(LocationInfo::new(regions::hyrule::lake::hylia::SUBREGION, "Hyrule Hotfoot - Second Race"), RupeeSilver);
 
     ////////////////////
     // --- Lorule --- //
@@ -1001,12 +1006,12 @@ pub fn plando() -> Result<(), Error> {
     layout.set(LocationInfo::new(regions::lorule::maiamai::maiamai::SUBREGION, "[Mai] Lorule Lake Big Rock"), RupeeGold);
     layout.set(LocationInfo::new(regions::lorule::maiamai::maiamai::SUBREGION, "[Mai] Lorule Lake SE Wall"), RupeeGold);
 
-    let spoiler = Spoiler { seed: 0, settings: &settings, layout };
+    let spoiler = Spoiler { seed: 0, version: "PLANDO", settings: &settings, layout };
 
     spoiler.patch(system.get_or_create_paths(create_paths)?, true, true)
 }
 
-pub fn filler_new(settings: &Settings, seed: Seed) -> Spoiler {
+pub fn filler_new<'a>(version: &'a str, settings: &'a Settings, seed: Seed) -> Spoiler<'a> {
     // New Filler
     let filled: Vec<(LocationInfo, Item)> = fill_stuff(settings, seed);
 
@@ -1016,5 +1021,5 @@ pub fn filler_new(settings: &Settings, seed: Seed) -> Spoiler {
         layout.set(location_info, item);
     }
 
-    Spoiler { seed, settings, layout }
+    Spoiler { seed, version, settings, layout }
 }

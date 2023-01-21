@@ -11,33 +11,48 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
 <details open="open">
 <summary>Version 0.3.0</summary>
 
-- Dungeon Rewards Shuffled
+- <u>Dungeon Rewards Shuffled</u>
   - Pendants & Portraits are now randomly placed between the Hyrule and Lorule dungeons.
-  - Maps will show an X over uncompleted Portrait dungeons.
-- Custom Portrait Requirements
-  - Specify how many Portraits are needed to enter Lorule Castle
-    - For now, Yuganon Requirement will match LC Requirement
-- Hyrule Castle Complete Overhaul
+  - Maps will show a red X over uncompleted Portrait dungeons.
+- <u>Custom Portrait Requirements</u>
+  - Lorule Castle: Choose how many Portraits are needed to enter the dungeon's front door.
+  - Yuga Ganon: Choose how many Portraits are needed to make the Final Boss spawn.
+- <u>Hyrule Castle Complete Overhaul</u>
   - HC has been revamped and returned to its vanilla roots
   - Completing HC rewards players with backdoor access to LC
   - HC is no longer a merge-free path to Lorule
   - Swordless Mode no longer has a free pass through barrier
-- Chest Size Matches Contents option
+- <u>Chest Size Matches Contents option</u>
   - Turns all chests containing Progression into large chests, and all others into small chests.
     - Note: Some large chests have altered hitboxes to prevent negative gameplay interference.
-- Great Rupee Fairy improvements
-  - Automatically throw 3000 rupees as one (long) action.
-    - She's _better_, but there's more work to do.
-- Several cutscenes shortened/reworked
+- <u>Newly Randomized Checks</u>:
+  - **Blacksmith Table**
+    - This was the Package Sword in vanilla, it'll be a chest on the table
+  - **Cucco Dungeon**
+    - ALttPR runners will know this as Cave 45, it has a freestanding Silver Rupee that will now be a random item.
+  - **Ku's Domain Fight**
+    - This is the Zora's Domain area, but in Lorule. For technical reasons, this will be a chest.
+  - **Woman**
+    - Yes, that's really her name. Rescue the Maiamai on her roof in Kakariko and then talk to her to get a reward.
+  - **Zelda (Hyrule Castle)**
+    - The north room in Hyrule Castle now has a chest in place of the item Zelda gives you in vanilla.
+- <u>Charm added to Item Pool</u>
+  - Zelda gives this out in vanilla when you visit her in Hyrule Castle.
+  - It is functionally useless - Don't mistake it for the actual Pendant of Courage.
+  - AKA the "Fool's Pendant"
+- <u>Great Rupee Fairy improvements</u>
+  - Automatically throw 3000 rupees as one ~1 minute long action.
+    - More work to do here, but this makes her much more tolerable.
+- <u>Several cutscenes shortened/reworked</u>
   - Triforce of Courage cutscene is notably skipped.
-- Logic Adjustments:
+- <u>Logic Adjustments</u>:
   - Irene + Shady Guy return, with improved cutscenes.
   - Rosso's House starts locked again, needs Green Pendant to unlock.
-- Fixes:
-  - Pedestal requirements are properly enforced
+- <u>Fixes</u>:
+  - Pedestal requirements are properly enforced.
   - Chests containing the Compass in vanilla will now show up on their respective dungeon maps.
-  - Softlock prevention added to Gales to prevent players from getting locked into the 1F miniboss
-  - Swamp Palace anti-softlock measures have been reversed
+  - Softlock prevention added to Gales to prevent players from getting locked into the 1F miniboss.
+  - Swamp Palace anti-softlock measures have been reversed.
 
 *All changes from the unofficially released v0.1.3 have been folded into this update.*
 </details>

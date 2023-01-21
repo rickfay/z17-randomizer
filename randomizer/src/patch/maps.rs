@@ -5,7 +5,7 @@ use {
     },
     albw::{
         course::{Id, Id::*},
-        scene::{Icn, IcnArgs, StageMeta},
+        scene::{Flag, Icn, IcnArgs, StageMeta},
         Item,
     },
 };
@@ -54,12 +54,12 @@ fn patch_hyrule_maps(patcher: &mut Patcher, prizes: &DungeonPrizes, _: &Settings
 
         disable_icn(stage_meta, 10); // Sanctuary
         disable_icn(stage_meta, 17); // Sahasrahla
-        disable_icn(stage_meta, 19); // Hyrule Castle
         disable_icn(stage_meta, 22); // Blacksmith
 
         mark_by_prize(stage_meta, prizes.ep_prize, 21); // Eastern
         mark_by_prize(stage_meta, prizes.hg_prize, 39); // Gales
         mark_by_prize(stage_meta, prizes.th_prize, 6); // Hera
+        mark_by_prize(stage_meta, prizes.hc_prize, 19); // Hyrule Castle
     }
 }
 
@@ -70,8 +70,6 @@ fn patch_lorule_maps(patcher: &mut Patcher, prizes: &DungeonPrizes, _: &Settings
     for map in LORULE_MAPS {
         let stage_meta = patcher.scene_meta(map).stage_meta_mut().get_mut();
 
-        disable_icn(stage_meta, 20); // Lorule Castle
-
         mark_by_prize(stage_meta, prizes.pd_prize, 22); // Dark
         mark_by_prize(stage_meta, prizes.sp_prize, 40); // Swamp
         mark_by_prize(stage_meta, prizes.sw_prize, 1); // Skull
@@ -79,6 +77,11 @@ fn patch_lorule_maps(patcher: &mut Patcher, prizes: &DungeonPrizes, _: &Settings
         mark_by_prize(stage_meta, prizes.tr_prize, 43); // Turtle
         mark_by_prize(stage_meta, prizes.dp_prize, 30); // Desert
         mark_by_prize(stage_meta, prizes.ir_prize, 10); // Ice
+
+        // Lorule Castle
+        let icn = stage_meta.icn.get_mut(20).unwrap();
+        icn.enable_on(Flag::Event(670));
+        icn.clear_disabled();
     }
 }
 

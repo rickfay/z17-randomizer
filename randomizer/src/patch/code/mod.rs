@@ -553,7 +553,6 @@ const ITEM_NAMES: [(Item, &str); 54] = [
     (Item::ItemBowLight, "bow_light"),
     (Item::RingHekiga, "bracelet"),
     (Item::ClothesBlue, "clothes_blue"),
-    (Item::PendantCourage, "courage"),
     (Item::EscapeFruit, "doron"),
     (Item::StopFruit, "durian"),
     (Item::RupeeR, "gamecoin"),
@@ -585,8 +584,10 @@ const ITEM_NAMES: [(Item, &str); 54] = [
     (Item::OreRed, "ore"),
     (Item::DashBoots, "pegasus"),
     (Item::Heart, "potshop_heart"),
-    (Item::Pouch, "pouch"),
+    (Item::PendantCourage, "courage"),
     (Item::PendantPower, "power"),
+    (Item::PendantWisdom, "wisdom"),
+    (Item::Pouch, "pouch"),
     (Item::PowerGlove, "powergloves"),
     (Item::ItemShield, "shield"),
     (Item::SpecialMove, "special_move"),
@@ -600,7 +601,6 @@ const ITEM_NAMES: [(Item, &str); 54] = [
     (Item::ItemSandRodLv2, "sandrod_LV2"),
     (Item::ItemTornadeRodLv2, "tornaderod_LV2"),
     (Item::ItemMizukaki, "web"),
-    (Item::PendantWisdom, "wisdom"),
     (Item::ZeldaAmulet, "charm"),
 ];
 

@@ -86,7 +86,7 @@ fn patch_portrait_requirements(patcher: &mut Patcher, settings: &Settings) -> Re
     //let yg_requirement = settings.logic.yuganon_requirement as u32;
 
     // TODO
-    // let mut thing = patcher.flow(DungeonDark)?;
+    // let mut thing = patcher.flow(albw::course::Id::DungeonDark)?;
     // let mut stuff = thing.get_mut("Dark").unwrap().unwrap();
     // let flow = stuff.get_mut();
     //
@@ -115,17 +115,42 @@ fn patch_portrait_requirements(patcher: &mut Patcher, settings: &Settings) -> Re
 }
 
 pub fn apply(patcher: &mut Patcher, free: Item, settings: &Settings) -> Result<()> {
-    patch_portrait_requirements(patcher, settings)?;
-
     // Debugging
     // patcher
     //     .flow(albw::course::Id::IndoorLight)?
-    //     .get_mut(stringify!(FieldLight_22_BlackSmith))
+    //     .get_mut(stringify!(FieldLight_18_MilkbarMaster))
     //     .ok_or_else(|| crate::Error::game("File not found."))??
     //     .get()
     //     .debug();
 
+    patch_portrait_requirements(patcher, settings)?;
+
     apply!(patcher,
+
+        // // Hyrule Hotfoot
+        // FieldLight/FieldLight_HyruleRace {
+        //
+        //     // skip initial branching text describing which race it is
+        //     // keep in textbox telling players the price
+        //     [71] => 50,
+        //
+        //     // Win race - skip to reward
+        //     [28 into_branch] switch [
+        //         [0] => 57, // skip 12
+        //     ],
+        //     [57] => 18, // skip 34
+        //
+        //     // Move reward to first race, silver rupee to 2nd
+        //     [18 into_branch] switch [
+        //         [0] => 20,
+        //         [1] => 33,
+        //     ],
+        //
+        //     // Remove post-reward text
+        //     [37] => None,
+        //     [33] => None,
+        //     [21] => None,
+        // },
 
         // Eastern Palace
         DungeonEast/East {

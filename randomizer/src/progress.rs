@@ -619,12 +619,12 @@ impl Progress {
         self.has(ShadyGuyTrigger)
     }
 
-    pub fn has_all_pendants(&self) -> bool {
-        self.has(PendantOfCourage) && self.has(PendantOfWisdom) && self.has(PendantOfPower)
+    pub fn has_pendant_of_courage(&self) -> bool {
+        self.has(Charm) && self.has(PendantOfCourage)
     }
 
-    pub fn has_pendant_of_courage(&self) -> bool {
-        self.has(PendantOfCourage)
+    pub fn has_all_pendants(&self) -> bool {
+        self.has_pendant_of_courage() && self.has(PendantOfWisdom) && self.has(PendantOfPower)
     }
 
     pub fn has_sage_osfala(&self) -> bool {

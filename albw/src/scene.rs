@@ -99,14 +99,19 @@ pub struct Icn {
 
 impl Icn {
     pub fn enable(&mut self) {
-        self.arg.4 = 0;
-        self.arg.6 = 0;
+        self.arg.4 = 4;
+        self.arg.6 = 1;
     }
 
     pub fn enable_on(&mut self, flag: Flag) {
         let (arg4, arg6) = flag.into_pair();
         self.arg.4 = arg4;
         self.arg.6 = arg6;
+    }
+
+    pub fn clear_enabled(&mut self) {
+        self.arg.4 = 0;
+        self.arg.6 = 0;
     }
 
     pub fn disable(&mut self) {
@@ -118,6 +123,11 @@ impl Icn {
         let (arg5, arg7) = flag.into_pair();
         self.arg.5 = arg5;
         self.arg.7 = arg7;
+    }
+
+    pub fn clear_disabled(&mut self) {
+        self.arg.5 = 0;
+        self.arg.7 = 0;
     }
 }
 
@@ -484,6 +494,10 @@ impl Obj {
 
     pub fn set_id(&mut self, id: i16) {
         self.id = id;
+    }
+
+    pub fn set_nme(&mut self, nme: Option<String>) {
+        self.nme = nme;
     }
 
     pub fn set_typ(&mut self, typ: i32) {

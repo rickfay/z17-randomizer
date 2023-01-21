@@ -212,12 +212,14 @@ fn preset_ui() -> Settings {
 
 fn pause() {
     let mut stdout = stdout();
-    stdout.write(b"\nPress Enter to continue...").unwrap();
+    stdout.write(b"\nPress Enter to continue...\n").unwrap();
     stdout.flush().unwrap();
     stdin().read(&mut [0]).unwrap();
 }
 
 fn main() -> randomizer::Result<()> {
+    const VERSION: &str = "v0.3.0 - Dev Build #3";
+
     let opt = Opt::from_args();
 
     SimpleLogger::init(LevelFilter::Info, Default::default())
@@ -249,9 +251,9 @@ fn main() -> randomizer::Result<()> {
                 "Preset:                         {}",
                 opt.preset.as_ref().unwrap_or(&String::from("<None>"))
             );
-            info!("Version:                        0.3.0 - Dev Build #2");
+            info!("Version:                        {}", VERSION);
 
-            let spoiler = panic::catch_unwind(|| filler_new(&preset, seed));
+            let spoiler = panic::catch_unwind(|| filler_new(VERSION, &preset, seed));
 
             if spoiler.is_ok() {
                 println!();

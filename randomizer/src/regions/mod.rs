@@ -75,6 +75,7 @@ regions! {
         eastern;
         house;
         tower;
+        hyrule;
         graveyard;
         dark;
         swamp;
@@ -83,7 +84,7 @@ regions! {
         ice;
         desert;
         turtle;
-        castle;
+        lorule;
     }
     hyrule(Hyrule) {
         field;
@@ -95,7 +96,6 @@ regions! {
         eastern;
         southern;
         lake;
-        hyrule_castle;
         maiamai;
     }
     lorule(Lorule) {

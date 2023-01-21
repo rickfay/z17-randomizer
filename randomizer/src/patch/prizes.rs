@@ -31,6 +31,7 @@ fn patch_flowchart(patcher: &mut Patcher, prizes: &DungeonPrizes) {
         (prizes.ep_prize.msbf_key(), DungeonEast),
         (prizes.hg_prize.msbf_key(), DungeonWind),
         (prizes.th_prize.msbf_key(), DungeonHera),
+        (prizes.hc_prize.msbf_key(), IndoorLight),
         (prizes.pd_prize.msbf_key(), DungeonDark),
         (prizes.sp_prize.msbf_key(), DungeonWater),
         (prizes.sw_prize.msbf_key(), FieldDark),
@@ -81,6 +82,7 @@ fn patch_msbf_files(patcher: &mut Patcher, prizes: &DungeonPrizes) {
     patcher.inject_msbf(DungeonEast, prize_msbf_map.get(&prizes.ep_prize)).unwrap();
     patcher.inject_msbf(DungeonWind, prize_msbf_map.get(&prizes.hg_prize)).unwrap();
     patcher.inject_msbf(DungeonHera, prize_msbf_map.get(&prizes.th_prize)).unwrap();
+    patcher.inject_msbf(IndoorLight, prize_msbf_map.get(&prizes.hc_prize)).unwrap();
     patcher.inject_msbf(DungeonDark, prize_msbf_map.get(&prizes.pd_prize)).unwrap();
     patcher.inject_msbf(DungeonWater, prize_msbf_map.get(&prizes.sp_prize)).unwrap();
     patcher.inject_msbf(FieldDark, prize_msbf_map.get(&prizes.sw_prize)).unwrap();
@@ -96,9 +98,10 @@ fn patch_dungeon_prize_actors(patcher: &mut Patcher, prizes: &DungeonPrizes) {
     // Fetch and map Actors to their dungeon prizes
     let pendant = patcher.scene(DungeonWind, 2).unwrap().actors().get_actor_bch("Pendant").unwrap();
     let actor_map: HashMap<Item, Actor> = HashMap::from([
-        (PendantCourage, pendant.clone()),
+        (PendantPower, pendant.clone()),
         (PendantWisdom, pendant.clone()),
-        (PendantPower, pendant),
+        (PendantCourage, pendant.clone()),
+        (ZeldaAmulet, pendant),
         (SageGulley, patcher.scene(DungeonDark, 0).unwrap().actors().get_actor_bch("PictureBlacksmithBoy").unwrap()),
         (SageOren, patcher.scene(DungeonWater, 2).unwrap().actors().get_actor_bch("PictureZoraQueen").unwrap()),
         (SageSeres, patcher.scene(FieldDark, 0).unwrap().actors().get_actor_bch("PicturePriestGirl").unwrap()),
@@ -112,6 +115,7 @@ fn patch_dungeon_prize_actors(patcher: &mut Patcher, prizes: &DungeonPrizes) {
     patcher.scene(DungeonEast, 0).unwrap().actors_mut().add(actor_map.get(&prizes.ep_prize).unwrap().clone()).unwrap();
     patcher.scene(DungeonWind, 2).unwrap().actors_mut().add(actor_map.get(&prizes.hg_prize).unwrap().clone()).unwrap();
     patcher.scene(DungeonHera, 0).unwrap().actors_mut().add(actor_map.get(&prizes.th_prize).unwrap().clone()).unwrap();
+    patcher.scene(IndoorLight, 11).unwrap().actors_mut().add(actor_map.get(&prizes.hc_prize).unwrap().clone()).unwrap();
     patcher.scene(DungeonDark, 0).unwrap().actors_mut().add(actor_map.get(&prizes.pd_prize).unwrap().clone()).unwrap();
     patcher.scene(DungeonWater, 2).unwrap().actors_mut().add(actor_map.get(&prizes.sp_prize).unwrap().clone()).unwrap();
     patcher.scene(FieldDark, 0).unwrap().actors_mut().add(actor_map.get(&prizes.sw_prize).unwrap().clone()).unwrap();
@@ -143,6 +147,7 @@ fn patch_dungeon_prize_actors(patcher: &mut Patcher, prizes: &DungeonPrizes) {
 }
 
 /// TODO
+#[allow(unused)]
 pub(crate) fn patch_actor_profile(
     patcher: &mut Patcher, prizes: &DungeonPrizes,
 ) -> Option<ActorProfiles> {
@@ -163,6 +168,7 @@ fn patch_prize_byaml(patcher: &mut Patcher, prizes: &DungeonPrizes, settings: &S
     patch_eastern(patcher, prizes.ep_prize, settings);
     patch_gales(patcher, prizes.hg_prize, settings);
     patch_hera(patcher, prizes.th_prize, settings);
+    patch_hyrule_castle(patcher, prizes.hc_prize, settings);
     patch_dark(patcher, prizes.pd_prize, settings);
     patch_swamp(patcher, prizes.sp_prize, settings);
     patch_skull(patcher, prizes.sw_prize, settings);
@@ -283,7 +289,8 @@ fn patch_eastern(patcher: &mut Patcher, prize: Item, _: &Settings) {
     // Rosso's House
     patcher.modify_objs(IndoorLight, 10, &[call(7, |obj| {
         obj.set_inactive_flag(Flag::Event(282));
-        obj.enable();
+        obj.set_enable_flag(prize_flag(PendantCourage));
+        obj.clear_disable_flag();
     })]);
 
     // Small Rocks
@@ -479,6 +486,32 @@ fn patch_hera(patcher: &mut Patcher, prize: Item, _: &Settings) {
                 unq: 56,
             });
         }
+    }
+}
+
+fn patch_hyrule_castle(patcher: &mut Patcher, prize: Item, _: &Settings) {
+    patcher.modify_objs(IndoorLight, 12, &[
+        modify_reward(23, prize, true),
+        call(23, |obj| {
+            obj.set_typ(4); // needed to make sure prize disappears when collected
+        }),
+    ]);
+
+    if is_sage(prize) {
+        reroute_sage_warp(patcher, prize, 1, 2, 11);
+    } else {
+        patcher.modify_objs(IndoorLight, 12, &[remove_collision(23)]);
+
+        let pendant_flag = prize_flag(prize);
+        patcher.add_obj(
+            IndoorLight,
+            12,
+            Obj::pendant_chest(prize, Flag::Event(1), pendant_flag, 3, 100, 147, Vec3 {
+                x: 0.0,
+                y: 6.0,
+                z: -54.5,
+            }),
+        );
     }
 }
 
@@ -851,6 +884,7 @@ impl PrizePatchData {
             PendantPower => Self::new(173, 372, 0.0, 0, 0, 0, 0),
             PendantWisdom => Self::new(173, 342, 0.0, 1, 0, 0, 0),
             PendantCourage => Self::new(173, 251, 0.0, 2, 0, 0, 0),
+            ZeldaAmulet => Self::new(173, 251, 0.0, 2, 0, 0, 0),
             _ => panic!("\"{}\" is not a dungeon prize.", prize.as_str()),
         }
     }
@@ -868,7 +902,7 @@ fn reroute_sage_warp(
         SageRosso => Some(69),
         SageIrene => Some(70),
         SageImpa => Some(68),
-        PendantPower | PendantWisdom | PendantCourage => None,
+        PendantPower | PendantWisdom | PendantCourage | ZeldaAmulet => None,
         _ => panic!("\"{}\" is not a dungeon prize.", prize.as_str()),
     };
 

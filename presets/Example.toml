@@ -31,7 +31,7 @@ vanes_activated = false
 ## Include the Super Lamp and Super Net in the shuffled item pool
 super_items = false
 
-## Exclude all minigames (Cucco Ranch, both Rupee Rushes, Hyrule Hotfoot, Treacherous Tower, and Octoball Derby)
+## Exclude all minigames (Cucco Ranch, Rupee Rushes (both), Hyrule Hotfoot (both races), Treacherous Tower, and Octoball Derby)
 minigames_excluded = false
 
 ## Skip the Trials in Lorule Castle

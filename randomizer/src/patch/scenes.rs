@@ -89,7 +89,7 @@ macro_rules! action {
 }
 
 pub fn apply(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
-    debug_stuff(patcher, settings); // FIXME don't leave on
+    // debug_stuff(patcher, settings);
 
     patch_softlock_prevention(patcher, settings);
     patch_big_problem_chests(patcher, settings);
@@ -597,16 +597,6 @@ fn patch_castles(patcher: &mut Patcher, settings: &Settings) {
     let open_trials_flag = Flag::Event(421); // repurposed
     let can_fight_yuganon_flag = Flag::Event(670); // TODO separate from LC requirement
 
-    // Hyrule Castle 1F (not the dungeon)
-    patcher.modify_objs(IndoorLight, 12, &[
-        // Convert Zelda to chest
-        call(23, |obj| {
-            obj.set_inactive_flag(Flag::Course(500)); // fake hopefully non-conflicting ID
-            obj.clear_disable_flag();
-            obj.set_typ(1);
-        }),
-    ]);
-
     // Hyrule Castle (exterior)
     patcher.modify_objs(FieldLight, 18, &[
         // Barrier
@@ -892,6 +882,7 @@ fn patch_softlock_prevention(patcher: &mut Patcher, settings: &Settings) {
 }
 
 #[rustfmt::skip]
+#[allow(unused)]
 fn debug_stuff(patcher: &mut Patcher, settings: &Settings) {
     // Ravio's Shop
     patcher.modify_objs(IndoorLight, 1, &[call(24, |obj| {
@@ -903,7 +894,7 @@ fn debug_stuff(patcher: &mut Patcher, settings: &Settings) {
             // 3, 0, 37,   // Lost Woods Maze - Unreachable Spawn Point
             // 1, 0, 37,   // Lost Woods Maze - Left 1st Poes
             // 20, 0, 17,  // HC Roof
-            // 0, 2, 11, // Hyrule Castle 1F
+            // 1, 2, 11, // Hyrule Castle 1F
             // 0, 5, 2,    // Swamp Cave
             // 0,21,0,     // Throne Room
             // 0, 8, 7,    // After final boss cutscene

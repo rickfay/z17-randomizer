@@ -13,9 +13,10 @@ Desired Groups:
 - Portals
 
  */
-
+#[allow(unused)]
 pub struct LoadingZones {}
 
+#[allow(unused)]
 pub struct LoadingZone {
     location: Location,
 
@@ -49,10 +50,12 @@ macro_rules! loading_zones {
     ) => {
         #[derive(Eq, PartialEq, Hash)]
         #[allow(non_camel_case_types)]
+        #[allow(unused)]
         pub enum LoadingZoneId {
             $($($name,)+)+
         }
 
+        #[allow(unused)]
         impl LoadingZones {
             $(pub fn $func() -> (HashMap<LoadingZoneId, LoadingZone>, HashMap<LoadingZoneId, LoadingZone>) {
                 let mut entrances = HashMap::new();
@@ -207,7 +210,3 @@ loading_zones! {
 //         DEATH_MOUNTAIN_WEST: hyrule(DeathMountainBase, FieldLight, 3, 361, 20, 818) lorule(LoruleDeathWest, FieldDark, 3, 45, 3, 848),
 //     }
 // }
-
-pub fn define_loading_zones() {
-    let hyrule_entrances = LoadingZones::hyrule_entrances();
-}

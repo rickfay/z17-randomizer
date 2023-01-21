@@ -49,7 +49,6 @@ pub enum FillerItem {
     BeeBadge,
     HintGlasses,
     //GreatSpin,
-    Charm,
     RupeeGreen,
     RupeeBlue,
     RupeeRed,
@@ -114,6 +113,7 @@ pub enum FillerItem {
     RupeeSilver39,
     RupeeSilver40,
     RupeeSilver41,
+    RupeeSilver42,
 
     RupeeGold01,
     RupeeGold02,
@@ -393,9 +393,10 @@ pub enum FillerItem {
     LoruleCastleKeySmall05,
 
     // Dungeon Prizes
-    PendantOfCourage,
-    PendantOfWisdom,
     PendantOfPower,
+    PendantOfWisdom,
+    PendantOfCourage,
+    Charm,
     SageGulley,
     SageOren,
     SageSeres,
@@ -426,7 +427,8 @@ pub enum FillerItem {
     TurtleWall,
     AccessPotionShop,
     AccessMilkBar,
-    AccessFairyFountain,
+    #[allow(unused)]
+    AccessFairyFountain, // todo add to world graph
     AccessHyruleBlacksmith,
     AccessLoruleCastleField,
     LcBombTrial,
@@ -559,7 +561,7 @@ pub fn convert(fill_item: FillerItem) -> Option<Item> {
         | RupeeSilver26 | RupeeSilver27 | RupeeSilver28 | RupeeSilver29 | RupeeSilver30
         | RupeeSilver31 | RupeeSilver32 | RupeeSilver33 | RupeeSilver34 | RupeeSilver35
         | RupeeSilver36 | RupeeSilver37 | RupeeSilver38 | RupeeSilver39 | RupeeSilver40
-        | RupeeSilver41 => Some(RupeeSilver),
+        | RupeeSilver41 | RupeeSilver42 => Some(RupeeSilver),
 
         RupeeGold01 | RupeeGold02 | RupeeGold03 | RupeeGold04 | RupeeGold05 | RupeeGold06
         | RupeeGold07 | RupeeGold08 | RupeeGold09 | RupeeGold10 => Some(RupeeGold),
@@ -586,12 +588,11 @@ pub fn convert(fill_item: FillerItem) -> Option<Item> {
         MonsterHorn => Some(LiverYellow),
         MonsterTail => Some(LiverBlue),
 
-        Charm => Some(ZeldaAmulet),
-
         // Dungeon Items
-        PendantOfCourage => Some(PendantCourage),
-        PendantOfWisdom => Some(PendantWisdom),
         PendantOfPower => Some(PendantPower),
+        PendantOfWisdom => Some(PendantWisdom),
+        PendantOfCourage => Some(PendantCourage),
+        Charm => Some(ZeldaAmulet),
         FillerItem::SageGulley => Some(Item::SageGulley),
         FillerItem::SageOren => Some(Item::SageOren),
         FillerItem::SageSeres => Some(Item::SageSeres),
