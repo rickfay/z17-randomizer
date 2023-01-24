@@ -335,6 +335,7 @@ impl Patcher {
 
         let prizes = get_dungeon_prizes(layout);
         let free = self.rentals[8];
+        let actor_profile = prizes::patch_actor_profile(&mut self, &prizes);
         flow::apply(&mut self, free, settings)?;
         prizes::patch_dungeon_prizes(&mut self, &prizes, settings);
         maps::patch_maps(&mut self, &prizes, settings);
@@ -376,6 +377,9 @@ impl Patcher {
         }
         for cutscene in cutscenes(&game, settings) {
             romfs.add(cutscene?);
+        }
+        if let Some(actor_profile) = actor_profile {
+            romfs.add(actor_profile.into_archive());
         }
         Ok(Patches { game, code, romfs })
     }

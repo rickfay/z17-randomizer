@@ -117,8 +117,8 @@ fn patch_portrait_requirements(patcher: &mut Patcher, settings: &Settings) -> Re
 pub fn apply(patcher: &mut Patcher, free: Item, settings: &Settings) -> Result<()> {
     // Debugging
     // patcher
-    //     .flow(albw::course::Id::IndoorLight)?
-    //     .get_mut(stringify!(FieldLight_18_MilkbarMaster))
+    //     .flow(albw::course::Id::IndoorDark)?
+    //     .get_mut(stringify!(FieldDark_18_BoxManDark))
     //     .ok_or_else(|| crate::Error::game("File not found."))??
     //     .get()
     //     .debug();

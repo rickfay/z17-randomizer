@@ -133,28 +133,16 @@ pub fn apply(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
         disable(66), // rupee throw camera
     ]);
 
-    apply!(patcher, // TODO convert to new approach
+    // Remove Treasure Dungeon mini-cutscenes only when CSMC is off (since they show the chests)
+    if !settings.options.chest_size_matches_contents {
+        patcher.modify_objs(AttractionLight, 1, &[disable(15)]);
+        patcher.modify_objs(AttractionLight, 2, &[disable(54)]);
+        patcher.modify_objs(AttractionLight, 3, &[disable(47)]);
+        patcher.modify_objs(AttractionLight, 4, &[disable(118)]);
+        patcher.modify_objs(AttractionLight, 5, &[disable(26)]);
+    }
 
-        // Eastern Ruins Treasure Dungeon
-        AttractionLight 1 {
-            [15].disable(), // Skip Cutscene
-        },
-        // Southern Ruins Treasure Dungeon
-        AttractionLight 2 {
-            [54].disable(), // Skip Cutscene
-        },
-        // Haunted Grove Treasure Dungeon
-        AttractionLight 3 {
-            [47].disable(), // Skip Cutscene
-        },
-        // Death Mountain Treasure Dungeon
-        AttractionLight 4 {
-            [118].disable(), // Skip Cutscene
-        },
-        // Sanctuary Treasure Dungeon
-        AttractionLight 5 {
-            [26].disable(), // Skip Cutscene
-        },
+    apply!(patcher, // TODO convert to new approach
 
         // East Death Mountain
         FieldLight 4 {
@@ -416,6 +404,21 @@ pub fn apply(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
 
         // Link's House
         IndoorLight 1 {
+
+            // Bow Slot - Keep at sale price of 10 Rupees always
+            [17].call {|obj: &mut Obj| {
+                obj.arg.3 = 10;
+            }},
+
+            // Tornado Rod Slot - Set to 20 Rupee sale price
+            [15].call {|obj: &mut Obj| {
+                obj.arg.3 = 20;
+            }},
+
+            // Hammer Slot - Set to 20 Rupee sale price
+            [19].call {|obj: &mut Obj| {
+                obj.arg.3 = 20;
+            }},
 
             // Convert standing Ravio into shopkeeper Ravio
             // [56].call {|obj: &mut Obj| {

@@ -1160,12 +1160,13 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             location(
                 "Rosso's House",
                 vec![
-                    check(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Rosso"),
-                          Some(|p| p.has_pendant_of_courage()),
-                          None,
-                          None,
-                          None,
-                          None,
+                    check(
+                        LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Rosso"),
+                        Some(|p| p.has_pendant_of_courage()),
+                        None,
+                        None,
+                        None,
+                        None,
                     ),
                     check(
                         LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Clean Rocks"),

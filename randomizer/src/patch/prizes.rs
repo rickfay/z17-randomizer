@@ -147,6 +147,13 @@ fn patch_dungeon_prize_actors(patcher: &mut Patcher, prizes: &DungeonPrizes) {
 }
 
 /// TODO
+/// This reads and modifies Byaml files from the ActorProfile successfully, but fails to repackage
+/// them for some reason.
+///
+/// Interrogating the data at all such as with the contains() function also corrupts the archive,
+/// even if no changes are made.
+///
+/// Unknown why this happens, needs investigating.
 #[allow(unused)]
 pub(crate) fn patch_actor_profile(
     patcher: &mut Patcher, prizes: &DungeonPrizes,
@@ -240,7 +247,7 @@ fn patch_eastern(patcher: &mut Patcher, prize: Item, _: &Settings) {
         disable(208), // Textbox trigger
         disable(264), // lgt_NpcSoldier_Field1B_04_broke - idk what this is, but now it's nothing
         disable(529), // AreaSwitchCube
-                      // enable(502), // Sahasrahla
+        // enable(502), // Sahasrahla
     ]);
     patcher.modify_system(FieldLight, 18, &[call(199, |obj| {
         obj.srt.translate.z = 12.75; // move to where cutscene normally ends

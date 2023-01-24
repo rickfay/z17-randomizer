@@ -381,8 +381,8 @@ impl ItemExt for Item {
             ItemInsectNet | ItemInsectNetLv2 |
             // Kinsta |
             BadgeBee |
-            // GoldenBee | Bee | Fairy |
-            GoldenBeeForSale |
+            GoldenBee |
+            // Bee | Fairy | GoldenBeeForSale |
             HintGlasses |
             EscapeFruit |
             StopFruit |
@@ -557,15 +557,15 @@ pub fn plando() -> Result<(), Error> {
     // --- Dungeons Prizes --- //
     /////////////////////////////
 
-    layout.set(LocationInfo::new(regions::dungeons::eastern::palace::SUBREGION, "Eastern Palace Prize"), PendantCourage);
+    layout.set(LocationInfo::new(regions::dungeons::eastern::palace::SUBREGION, "Eastern Palace Prize"), SageOsfala);
     layout.set(LocationInfo::new(regions::dungeons::house::gales::SUBREGION, "House of Gales Prize"), PendantWisdom);
     layout.set(LocationInfo::new(regions::dungeons::tower::hera::SUBREGION, "Tower of Hera Prize"), PendantPower);
-    layout.set(LocationInfo::new(regions::dungeons::hyrule::castle::SUBREGION, "Hyrule Castle Prize"), ZeldaAmulet);
+    layout.set(LocationInfo::new(regions::dungeons::hyrule::castle::SUBREGION, "Hyrule Castle Prize"), SageSeres);
 
     layout.set(LocationInfo::new(regions::dungeons::dark::palace::SUBREGION, "Dark Palace Prize"), SageGulley);
     layout.set(LocationInfo::new(regions::dungeons::swamp::palace::SUBREGION, "Swamp Palace Prize"), SageOren);
-    layout.set(LocationInfo::new(regions::dungeons::skull::woods::SUBREGION, "Skull Woods Prize"), SageSeres);
-    layout.set(LocationInfo::new(regions::dungeons::thieves::hideout::SUBREGION, "Thieves' Hideout Prize"), SageOsfala);
+    layout.set(LocationInfo::new(regions::dungeons::skull::woods::SUBREGION, "Skull Woods Prize"), PendantCourage);
+    layout.set(LocationInfo::new(regions::dungeons::thieves::hideout::SUBREGION, "Thieves' Hideout Prize"), ZeldaAmulet);
     layout.set(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "Turtle Rock Prize"), SageImpa);
     layout.set(LocationInfo::new(regions::dungeons::desert::palace::SUBREGION, "Desert Palace Prize"), SageIrene);
     layout.set(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "Ice Ruins Prize"), SageRosso);
