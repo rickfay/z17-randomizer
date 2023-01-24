@@ -4051,12 +4051,12 @@ fn eastern_palace() -> HashMap<Location, LocationNode> {
             EasternPalaceBoss,
             location("Eastern Palace 3F", vec![], vec![path(
                 EasternPalacePostYuga,
+                Some(|p| p.has_bow()),
                 Some(|p| {
-                    p.has_bow()
-                        || p.has_bombs()
-                        || ((p.has_boomerang() || p.has_hookshot()) && p.can_attack())
+                    p.has_bombs()
+                        || ((p.has_boomerang() || p.has_hookshot())
+                            && (p.can_attack() || p.has_lamp_or_net()))
                 }),
-                Some(|p| p.has_lamp_or_net() && (p.has_hookshot() || p.has_boomerang())),
                 None,
                 None,
                 Some(|p| p.has_master_sword() || p.has_ice_rod()), // gross
