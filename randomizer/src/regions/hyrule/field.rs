@@ -22,7 +22,7 @@ crate::region! {
                 FieldLight_12_Maple[0x26],
                 FieldLight_2D_Maple[0x07],
             ],
-            "Haunted Grove Tree Stump": ItemRentalTornadeRod @Event(FieldLight_2A_BlacksmithWife[0x15]),
+            "Wildlife Clearing Stump": ItemRentalTornadeRod @Event(FieldLight_2A_BlacksmithWife[0x15]),
             "Ravio (1)": ItemRentalIceRod @Shop(Ravio(0)),
             "Ravio (2)": DashBoots @Shop(Ravio(5)),
             "Ravio (3)": Pouch @Shop(Ravio(2)),

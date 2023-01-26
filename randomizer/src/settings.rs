@@ -60,6 +60,10 @@ pub struct Logic {
     #[serde(default = "seven")]
     pub yuganon_requirement: u8,
 
+    /// Makes Sage related checks and events be tied to rescuing the respective Sage
+    #[serde(default)]
+    pub saved_sage_logic: bool,
+
     /// todo
     #[serde(default)]
     pub entrance_rando: EntranceShuffleSetting,

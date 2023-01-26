@@ -312,8 +312,7 @@ fn item_to_str(item: &Item) -> &'static str {
 
         PendantPower => "Pendant of Power",
         PendantWisdom => "Pendant of Wisdom",
-        PendantCourage => "Pendant of Courage",
-        ZeldaAmulet => "Charm",
+        ZeldaAmulet | PendantCourage => "Progressive Pendant of Courage",
 
         SageGulley => "Sage Gulley",
         SageOren => "Sage Oren",
@@ -545,7 +544,7 @@ pub fn plando() -> Result<(), Error> {
 
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (1)"), RupeeGold);
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (2)"), ItemSwordLv1);
-    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (3)"), ItemSwordLv1);
+    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (3)"), ItemKandelaar);
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (4)"), MilkMatured);
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (5)"), MessageBottle);
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (6)"), HintGlasses); // Sand Rod Slot
@@ -557,15 +556,15 @@ pub fn plando() -> Result<(), Error> {
     // --- Dungeons Prizes --- //
     /////////////////////////////
 
-    layout.set(LocationInfo::new(regions::dungeons::eastern::palace::SUBREGION, "Eastern Palace Prize"), SageOsfala);
+    layout.set(LocationInfo::new(regions::dungeons::eastern::palace::SUBREGION, "Eastern Palace Prize"), PendantCourage);
     layout.set(LocationInfo::new(regions::dungeons::house::gales::SUBREGION, "House of Gales Prize"), PendantWisdom);
     layout.set(LocationInfo::new(regions::dungeons::tower::hera::SUBREGION, "Tower of Hera Prize"), PendantPower);
-    layout.set(LocationInfo::new(regions::dungeons::hyrule::castle::SUBREGION, "Hyrule Castle Prize"), SageSeres);
+    layout.set(LocationInfo::new(regions::dungeons::hyrule::castle::SUBREGION, "Hyrule Castle Prize"), ZeldaAmulet);
 
     layout.set(LocationInfo::new(regions::dungeons::dark::palace::SUBREGION, "Dark Palace Prize"), SageGulley);
     layout.set(LocationInfo::new(regions::dungeons::swamp::palace::SUBREGION, "Swamp Palace Prize"), SageOren);
-    layout.set(LocationInfo::new(regions::dungeons::skull::woods::SUBREGION, "Skull Woods Prize"), PendantCourage);
-    layout.set(LocationInfo::new(regions::dungeons::thieves::hideout::SUBREGION, "Thieves' Hideout Prize"), ZeldaAmulet);
+    layout.set(LocationInfo::new(regions::dungeons::skull::woods::SUBREGION, "Skull Woods Prize"), SageSeres);
+    layout.set(LocationInfo::new(regions::dungeons::thieves::hideout::SUBREGION, "Thieves' Hideout Prize"), SageOsfala);
     layout.set(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "Turtle Rock Prize"), SageImpa);
     layout.set(LocationInfo::new(regions::dungeons::desert::palace::SUBREGION, "Desert Palace Prize"), SageIrene);
     layout.set(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "Ice Ruins Prize"), SageRosso);
@@ -764,7 +763,7 @@ pub fn plando() -> Result<(), Error> {
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Rosso"), ItemIceRod);
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Clean Rocks"), RupeeGold);
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Irene"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Haunted Grove Tree Stump"), RupeeGold);
+    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Wildlife Clearing Stump"), RupeeGold);
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Cucco Dungeon"), RupeeSilver);
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Rupee Rush (Hyrule)"), RupeeGold);
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Sanctuary Cave"), RupeeGold);
@@ -893,7 +892,6 @@ pub fn plando() -> Result<(), Error> {
 
     // Lorule Lake
     layout.set(LocationInfo::new(regions::lorule::lake::lorule::SUBREGION, "Lorule Lake NW Chest"), RupeeGold);
-
 
 
     ////////////////////////////

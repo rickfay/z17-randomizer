@@ -88,6 +88,60 @@ macro_rules! action {
     };
 }
 
+/**
+ * Manually disables Hilda text events in BYAML
+ *
+ * We could just turn the triggers' respective flags on by default, but instead we manually disable
+ * all the Hilda trigger objects to free up their global Flags for use elsewhere.
+ *
+ * Flags Freed by this, and what they are repurposed to:
+ * - 522: Already has dual function as Map Toggle - Given out by default now
+ * - 523: Control Sanctuary Church Doors
+ * - 524:
+ * - 560:
+ * - 600:
+ * - 620: Charm Flag #1
+ * - 640: Charm Flag #2
+ */
+fn skip_hilda_text(patcher: &mut Patcher, _settings: &Settings) {
+
+    // Lorule Blacksmith - Flag 522
+    patcher.modify_objs(FieldDark, 21, &[disable(19)]);
+
+    // Lorule Graveyard - Flag 523
+    patcher.modify_objs(FieldDark, 11, &[disable(81)]);
+
+    // Dark Ruins - Flag 524
+    patcher.modify_objs(FieldDark, 13, &[disable(72)]);
+    patcher.modify_objs(FieldDark, 14, &[disable(57)]); // should be unreachable in vanilla game?
+    patcher.modify_objs(FieldDark, 15, &[disable(112)]);
+    patcher.modify_objs(FieldDark, 19, &[disable(92)]); // should be unreachable in vanilla game?
+    patcher.modify_objs(FieldDark, 22, &[disable(39)]);
+    patcher.modify_objs(FieldDark, 30, &[disable(36)]);
+
+    // Dark Maze - COURSE Flag 160
+    patcher.modify_objs(FieldDark, 20, &[disable(235)]);
+
+    // Skull Woods - Flag 560
+    patcher.modify_objs(FieldDark, 1, &[disable(517)]);
+    patcher.modify_objs(FieldDark, 2, &[disable(101)]);
+    patcher.modify_objs(FieldDark, 16, &[disable(109)]);
+
+    // Death Mountain - 600
+    patcher.modify_objs(FieldDark, 4, &[disable(42)]);
+
+    // Misery Mire - 620
+    patcher.modify_objs(FieldDark, 31, &[disable(130)]); // should be unreachable in vanilla game?
+    patcher.modify_objs(FieldDark, 37, &[disable(34)]);
+
+    // Lorule Lake - 640
+    patcher.modify_objs(FieldDark, 28, &[disable(79)]); // lol
+    patcher.modify_objs(FieldDark, 29, &[disable(73)]);
+    patcher.modify_objs(FieldDark, 35, &[disable(200), disable(204)]);
+    patcher.modify_objs(FieldDark, 36, &[disable(60)]);
+    patcher.modify_objs(FieldDark, 40, &[disable(23)]); // should be unreachable in vanilla game?
+}
+
 pub fn apply(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
     // debug_stuff(patcher, settings);
 
@@ -97,6 +151,8 @@ pub fn apply(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
     patch_castles(patcher, settings);
     patch_dark_maze(patcher, settings);
     patch_thief_girl_cave(patcher, settings);
+
+    skip_hilda_text(patcher, settings);
 
     // Chamber of Sages
     patcher.modify_objs(CaveDark, 10, &[
@@ -390,16 +446,6 @@ pub fn apply(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
             [26].disable(), // zelda_talk - Chat after standing up
             [33].disable(), // zelda_talk_b - Wait for Zelda
             [34].disable(), // zelda_talk_c - Last chat before triangles
-        },
-
-        // Philosopher's Cave (outside)
-        FieldDark 11 {
-            [81].disable(), // Hilda text (frees Flag 523 for use)
-        },
-
-        // Lorule Blacksmith (outside)
-        FieldDark 21 {
-            [19].disable(), // Hilda Text (frees Flag 522 to be used to give Map Toggle)
         },
 
         // Link's House
@@ -787,7 +833,6 @@ fn patch_dark_maze(patcher: &mut Patcher, _: &Settings) {
         disable(195), // NpcGuardMan
         disable(196), // NpcGuardMan
         disable(231), // AreaEventTalk
-        disable(235), // Hilda Text
     ]);
 }
 
@@ -890,14 +935,14 @@ fn debug_stuff(patcher: &mut Patcher, settings: &Settings) {
     // Ravio's Shop
     patcher.modify_objs(IndoorLight, 1, &[call(24, |obj| {
         obj.redirect(
-            5, 0, 26, // No Redirect
-            // 0, 22, 2, // Cucco Dungeon
-            // 0, 1, 6, // Ku's Domain
+            5, 0, 26,      // No Redirect
+            // 0, 22, 2,   // Cucco Dungeon
+            // 0, 1, 6,    // Ku's Domain
             // 0, 0, 0,    // Lost Woods
             // 3, 0, 37,   // Lost Woods Maze - Unreachable Spawn Point
             // 1, 0, 37,   // Lost Woods Maze - Left 1st Poes
             // 20, 0, 17,  // HC Roof
-            // 1, 2, 11, // Hyrule Castle 1F
+            // 1, 2, 11,   // Hyrule Castle 1F
             // 0, 5, 2,    // Swamp Cave
             // 0,21,0,     // Throne Room
             // 0, 8, 7,    // After final boss cutscene
@@ -923,7 +968,6 @@ fn debug_stuff(patcher: &mut Patcher, settings: &Settings) {
             // 0, 1, 30,   // Misery Mire
             // 0, 5, 13,   // Great Rupee Fairy Cave
             // 1, 17, 0,   // Ice Ruins Boss
-            // 0, 17, 0,   // Ice Ruins Boss
             // 0, 19, 2,   // Turtle Rock Boss
             // 0, 5, 9,    // Chamber of Sages
             // 0, 5, 14,   // Thief Girl Cave

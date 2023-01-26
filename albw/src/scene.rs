@@ -355,11 +355,7 @@ impl Obj {
             nme: None,
             ril: vec![],
             ser: Some(ser),
-            srt: Transform {
-                scale: Vec3 { x: 1.0, y: 1.0, z: 1.0 },
-                rotate: Vec3 { x: 0.0, y: 0.0, z: 0.0 },
-                translate,
-            },
+            srt: Transform { scale: Vec3::UNIT, rotate: Vec3::ZERO, translate },
             typ: 6,
             unq,
         }

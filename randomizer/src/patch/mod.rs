@@ -323,9 +323,9 @@ impl Patcher {
         self.scene(DungeonDokuro, 1)?.actors_mut().add(warp_tile.clone())?; // Skull Woods B2
 
         // Debug stuff
-        // let step_switch = self.scene(DungeonDark, 0)?.actors().get("SwitchStep")?;
+        // let step_switch = self.scene(DungeonDark, 0)?.actors().get_actor_bch("SwitchStep")?;
         // self.scene(DungeonKame, 2)?.actors_mut().add(step_switch.clone())?; // Turtle Rock Boss
-        //self.scene(DungeonWind, 2)?.actors_mut().add(step_switch.clone())?; // Gales Boss
+        // self.scene(DungeonWind, 2)?.actors_mut().add(step_switch.clone())?; // Gales Boss
         // self.scene(DungeonHera, 0)?.actors_mut().add(step_switch.clone())?; // Hera Boss
         // self.scene(FieldDark, 30)?.actors_mut().add(step_switch.clone())?; // Desert Boss
 
@@ -526,9 +526,7 @@ fn cutscenes<'game, 'settings>(
                 //415, // Skip Yuga capturing Zelda
                 430, // Fix Chamber of Sages Softlock
                 510, // Open Portals, Activate Hyrule Castle Midway
-                522, // Hilda Blacksmith Text + get Map Swap icon on lower screen + correct Lorule music
-                //523, // Hilda Graveyard Text
-                524, // Hilda ??? Text
+                522, // Hilda Text - Blacksmith + get Map Swap icon on lower screen + correct Lorule music
                 525, // Skip Sahasrahla outside Link's House, make Hyrule Hotfoot appear
                 // 536, 537, // Gulley
                 // 556, 557, // Oren Flags
@@ -538,11 +536,7 @@ fn cutscenes<'game, 'settings>(
                 // 636, 637, // Irene Flags
                 // 656, 657, // Impa Flags
                 542, 543, // Skip Bomb-Shop Man dialogue
-                560, // Hilda ??? Text
                 599, // Disable Sand Rod return
-                600, // Hilda ??? Text
-                620, // Hilda ??? Text
-                640, // Hilda ??? Text
                 897, // Big Special Something
                 899, // Enable Quick Equip
                 902, // StreetPass Tree

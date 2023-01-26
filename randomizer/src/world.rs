@@ -174,7 +174,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                     check(
                         LocationInfo::new(
                             regions::hyrule::field::main::SUBREGION,
-                            "Haunted Grove Tree Stump",
+                            "Wildlife Clearing Stump",
                         ),
                         Some(|p| p.has_pendant_of_courage()),
                         None,

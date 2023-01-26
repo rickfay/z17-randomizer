@@ -84,6 +84,13 @@ pub(crate) fn is_sage(item: Item) -> bool {
     }
 }
 
+pub(crate) fn is_green_pendant(item: Item) -> bool {
+    match item {
+        PendantCourage | ZeldaAmulet => true,
+        _ => false,
+    }
+}
+
 pub(crate) fn is_pendant(item: Item) -> bool {
     match item {
         PendantPower | PendantWisdom | PendantCourage | ZeldaAmulet => true,
@@ -105,6 +112,21 @@ pub(crate) fn prize_flag(pendant: Item) -> Flag {
         SageIrene => Flag::Event(636),
         SageImpa => Flag::Event(656),
         _ => panic!("{} is not a Dungeon Prize", pendant.as_str()),
+    }
+}
+
+/// bad bad bad <br />
+/// Pass in a green pendant prize, get the two associated charm flags in a different order
+pub(crate) fn charm_flag(item: Item) -> (u16, u16) {
+
+    // Repurposed Flags:
+    const FLAG_CHARM_1: u16 = 620;
+    const FLAG_CHARM_2: u16 = 640;
+
+    match item {
+        PendantCourage => (FLAG_CHARM_1, FLAG_CHARM_2),
+        ZeldaAmulet => (FLAG_CHARM_2, FLAG_CHARM_1),
+        _ => panic!("Item was neither Charm nor Pendant of Courage: {}", item.as_str()),
     }
 }
 
