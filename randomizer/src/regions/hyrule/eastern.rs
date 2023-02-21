@@ -2,22 +2,20 @@ crate::region! {
     course: FieldLight,
     name: "Eastern Ruins",
     ruins {
-        paths: [
-            hill :- {|p| p.can_use_projectile() || p.can_merge() || (p.glitched() && p.can_lift())},
-            lorule::dark::ruins :- can_merge,
-        ],
-    },
-    hill {
         locations: [
-            "Merge Treasure Dungeon": RupeeSilver @Chest(AttractionLight 1[4]) :- can_merge,
-            "Armos Chest": RupeeR @Chest(20[106]),
-            "Hookshot Chest": RupeeR @Chest(20[111]) :- can_hookshot,
-            "Merge Chest": RupeeSilver @Chest(20[107]) :- {|p| p.can_merge() || (p.glitched() && (p.can_tornado_rod() || p.can_ledge_boost()))},
-            "Cave": HeartPiece @Heart(CaveLight 29[10]) :- {|s| s.can_bomb() && s.can_merge()},
-            "Pegs (South)": HeartPiece @Heart(30[41]) :- {|p| p.can_hammer() || (p.glitched() && (p.can_boomerang() || p.can_hookshot() || p.can_tornado_rod()))}, // spare them from SRod
-        ],
-        paths: [
-            dungeons::eastern::palace,
+            "Bird Lover": ItemBottle @Event(FieldLight_2D_UnderBridgeStranger[0x2A]),
+            "Eastern Ruins Armos Chest": RupeeR @Chest(20[106]),
+            "Eastern Ruins Cave": HeartPiece @Heart(CaveLight 29[10]),
+            "Eastern Ruins Hookshot Chest": RupeeR @Chest(20[111]),
+            "Eastern Ruins Merge Chest": RupeeSilver @Chest(20[107]),
+            "Eastern Ruins Peg Circle": HeartPiece @Heart(30[41]),
+            "Eastern Ruins Treasure Dungeon": RupeeSilver @Chest(AttractionLight 1[4]),
+            "[Mai] Atop Eastern Rocks": Maiamai @Maiamai(22[42]),
+            "[Mai] Eastern Ruins Big Rock": Maiamai @Maiamai(30[69]),
+            "[Mai] Eastern Ruins Green Tree": Maiamai @Maiamai(29[44]),
+            "[Mai] Eastern Ruins Wall": Maiamai @Maiamai(20[144]),
+            "[Mai] Eastern Ruins Yellow Tree": Maiamai @Maiamai(20[145]),
+            "[Mai] Southern Bridge River": Maiamai @Maiamai(28[45]),
         ],
     },
 }

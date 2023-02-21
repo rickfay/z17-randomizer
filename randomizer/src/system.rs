@@ -1,6 +1,6 @@
 use {
+    crate::{constants::CONFIG_FILE_NAME, fail},
     log::info,
-    prelude::*,
     serde::{de::DeserializeOwned, Deserialize, Serialize},
     std::{
         error::Error as StdError,
@@ -10,9 +10,6 @@ use {
         path::{Path, PathBuf},
     },
 };
-pub mod prelude {
-    pub use ::std::{self, io::prelude::*, prelude::v1::*};
-}
 
 pub type Result<T, E = Error> = std::result::Result<T, E>;
 
@@ -60,24 +57,6 @@ impl<P> System<P> {
     where
         P: Serialize,
     {
-        // let config = PathBuf::from("");
-        // // let config = config_dir()
-        // //     .ok_or_else(|| Error::new("Could not find suitable configuration directory."))?;
-        // if !config.exists() {
-        //     let presets_dir = config.join("presets");
-        //     fs::create_dir_all(&presets_dir)?;
-        //     for (name, preset) in
-        //     iter::once_with(standard_preset).chain(presets.into_iter().map(|(name, preset)| {
-        //         (
-        //             name,
-        //             toml::to_string_pretty(&preset).expect("Could not create builtin presets."),
-        //         )
-        //     }))
-        //     {
-        //         fs::write(presets_dir.join(format!("{}.toml", name)), preset)?
-        //     }
-        // }
-
         Ok(Self { config: PathBuf::from(""), presets: PhantomData })
     }
 
@@ -85,32 +64,23 @@ impl<P> System<P> {
     where
         P: DeserializeOwned,
     {
-        let path = self.config.join("presets").join(format!("{}.toml", name));
-
+        let path = self.config.join("presets").join(format!("{}.json", name));
         info!("Loading preset from:            {}\n", path.display());
-
-        toml::from_slice(&fs::read(path)?).map_err(Error::new)
+        serde_json::from_slice(&fs::read(path)?).map_err(Error::new)
     }
 
-    pub fn get_or_create_paths<F>(&self, create: F) -> Result<Paths>
-    where
-        F: FnOnce() -> Result<Paths>,
-    {
-        let file = self.config.join("config.toml");
+    pub fn load_config(&self) -> Result<Paths> {
+        let file = self.config.join(CONFIG_FILE_NAME);
         if file.exists() {
-            Ok(toml::from_slice::<Paths>(&fs::read(file)?).map_err(Error::new)?)
+            Ok(serde_json::from_slice::<Paths>(&fs::read(file)?).map_err(Error::new)?)
         } else {
-            info!("No config found at {}", file.to_path_buf().display());
-            info!("Please enter configuration info:");
-            let paths = create()?;
-            fs::write(file, toml::to_string_pretty(&paths).expect("Could not write config file."))?;
-            Ok(paths)
+            fail!("No config file found at {}", file.to_path_buf().display());
         }
     }
 }
 
 /// Paths to the game ROM and output directories.
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Paths {
     rom: PathBuf,
     output: PathBuf,

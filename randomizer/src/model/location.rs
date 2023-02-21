@@ -3,6 +3,7 @@ pub enum Location {
     // Hyrule -------------------
     HyruleBellTravel,
     HyruleField,
+    MaiamaiCave,
     EasternRuinsUpper,
     EasternRuinsEastLedge,
     EasternFairyCave,    // todo
@@ -95,6 +96,7 @@ pub enum Location {
     // Lorule -------------------
     LoruleBellTravel,
     LoruleCastleField,
+    ThievesTownItemShop,
     BigBombFlowerShop,
     BigBombFlowerField,
     LoruleGraveyard,
@@ -131,7 +133,7 @@ pub enum Location {
     LoruleLakeEast,
     LoruleLakeNorthWest,
     LoruleLakeSouthWest,
-    LakesideItemShopLorule,
+    LoruleLakesideItemShop,
 
     DarkRuins,
     DarkRuinsWeatherVane,
@@ -172,6 +174,7 @@ pub enum Location {
     HouseOfGales2F,
     HouseOfGales3F,
     HouseOfGalesBoss,
+    HouseOfGalesPostBoss,
 
     TowerOfHeraEntrancePegs, // todo
     TowerOfHeraFoyer,
@@ -179,6 +182,7 @@ pub enum Location {
     TowerOfHeraMiddle,
     TowerOfHeraTop,
     TowerOfHeraBoss,
+    TowerOfHeraPostBoss,
 
     DarkPalaceFoyer,
     DarkPalaceSecondRoom,
@@ -191,6 +195,7 @@ pub enum Location {
     SwampPalaceAntechamber,
     SwampPalaceFoyer,
     SwampPalaceMain,
+    SwampPalacePostBoss,
 
     SkullWoodsFoyer,
     SkullWoodsMain,

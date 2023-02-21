@@ -1,5 +1,5 @@
 use {
-    crate::location::{Location, Location::*},
+    crate::model::location::{Location, Location::*},
     albw::course::{Id, Id::*},
     std::collections::HashMap,
     LoadingZoneId::*,

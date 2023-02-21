@@ -1,25 +1,15 @@
-use serde::{Deserialize, Serialize};
-
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Deserialize, Serialize)]
-pub enum EntranceShuffleSetting {
-    NotShuffled, // Entrances are not shuffled
-
-    Shuffled,
-    // Entrances are shuffled within their own world
-    PortalShuffle, // Portals are shuffled (except Zaganaga)
-
-    CrossShuffle,
-    // Entrances are shuffled Between Worlds (lord)
-    CrossPortalsanity, // Entrances and Portals are both shuffled within their categories
-}
-
-impl Default for EntranceShuffleSetting {
-    fn default() -> Self {
-        Self::NotShuffled
-    }
-}
-
-// pub fn lz_lut() -> (&'static mut HashMap<LoadingZoneId, LoadingZone>, &'static mut HashMap<LoadingZoneId, LoadingZone>) {
+// TODO uh come back to this, whenever the everything else has been built
+//
+// use {
+//     crate::{filler_util::shuffle, model::location::Location, Settings},
+//     rand::rngs::StdRng,
+//     std::collections::HashMap,
+// };
+//
+// pub fn lz_lut() -> (
+//     &'static mut HashMap<LoadingZoneId, LoadingZone>,
+//     &'static mut HashMap<LoadingZoneId, LoadingZone>,
+// ) {
 //     let lz_lut = (&mut HashMap::new(), &mut HashMap::new());
 //
 //     let he = LoadingZones::hyrule_entrances();
@@ -37,25 +27,25 @@ impl Default for EntranceShuffleSetting {
 //     lz_lut
 // }
 //
-// pub fn generate_door_map(rng: &mut StdRng, settings: &Settings) -> HashMap<LoadingZoneId, Location> {
-//
+// pub fn generate_door_map(
+//     rng: &mut StdRng, settings: &Settings,
+// ) -> HashMap<LoadingZoneId, Location> {
 //     let door_map = HashMap::new();
 //
 //     let (hyrule_entrances, hyrule_exits) = LoadingZones::hyrule_entrances();
 //     let (lorule_entrances, lorule_exits) = LoadingZones::lorule_entrances();
 //     let (hyrule_portals, lorule_portals) = LoadingZones::portals();
 //
-//     for (id, lz) in entries {
-//
-//     }
+//     for (id, lz) in entries {}
 //
 //     randomize_loading_zone_group(rng, vec![LoadingZones::HYRULE_DOORS]);
 //
 //     door_map
 // }
 //
-//
-// fn randomize_loading_zone_group(rng: &mut StdRng, lz_groups: Vec<&[(LoadingZone, LoadingZone)]>) -> Vec<(&LoadingZone, &LoadingZone)> {
+// fn randomize_loading_zone_group(
+//     rng: &mut StdRng, lz_groups: Vec<&[(LoadingZone, LoadingZone)]>,
+// ) -> Vec<(&LoadingZone, &LoadingZone)> {
 //     let mut entrances = Vec::<&LoadingZone>::new();
 //     let mut exits = Vec::<&LoadingZone>::new();
 //

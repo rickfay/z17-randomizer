@@ -1,9 +1,10 @@
 use {
     crate::{
-        filler_item::{FillerItem, FillerItem::*},
-        pool::{
+        item_pools::{
             get_gold_rupee_pool, get_maiamai_pool, get_purple_rupee_pool, get_silver_rupee_pool,
         },
+        model::filler_item::{FillerItem, FillerItem::*},
+        settings::pedestal_setting::PedestalSetting,
         Settings,
     },
     std::collections::HashSet,
@@ -40,7 +41,7 @@ impl Progress {
         new_items
     }
 
-    fn has(&self, item: FillerItem) -> bool {
+    pub fn has(&self, item: FillerItem) -> bool {
         self.items.contains(&item)
     }
 
@@ -86,16 +87,48 @@ impl Progress {
         amount <= (purples as u16 * 50) + (silvers as u16 * 100) + (golds as u16 * 300)
     }
 
+    pub fn has_lamp(&self) -> bool {
+        self.has_either(Lamp01, Lamp02)
+    }
+
+    #[allow(unused)]
+    pub fn has_super_lamp(&self) -> bool {
+        self.has_both(Lamp01, Lamp02)
+    }
+
     pub fn has_bow(&self) -> bool {
         self.has_either(Bow01, Bow02)
+    }
+
+    #[allow(unused)]
+    pub fn has_nice_bow(&self) -> bool {
+        self.has_both(Bow01, Bow02)
     }
 
     pub fn has_boomerang(&self) -> bool {
         self.has_either(Boomerang01, Boomerang02)
     }
 
+    #[allow(unused)]
+    pub fn has_nice_boomerang(&self) -> bool {
+        self.has_both(Boomerang01, Boomerang02)
+    }
+
     pub fn has_hookshot(&self) -> bool {
         self.has_either(Hookshot01, Hookshot02)
+    }
+
+    pub fn has_nice_hookshot(&self) -> bool {
+        self.has_both(Hookshot01, Hookshot02)
+    }
+
+    pub fn has_hammer(&self) -> bool {
+        self.has_either(Hammer01, Hammer02)
+    }
+
+    #[allow(unused)]
+    pub fn has_nice_hammer(&self) -> bool {
+        self.has_both(Hammer01, Hammer02)
     }
 
     pub fn has_bombs(&self) -> bool {
@@ -103,31 +136,62 @@ impl Progress {
     }
 
     pub fn has_nice_bombs(&self) -> bool {
-        self.has_either(Bombs01, Bombs02) && self.has_maiamai(10)
+        if self.settings.logic.nice_mode {
+            self.has_both(Bombs01, Bombs02)
+        } else {
+            self.has_either(Bombs01, Bombs02) && self.has_maiamai(10)
+        }
     }
 
     pub fn has_fire_rod(&self) -> bool {
         self.has_either(FireRod01, FireRod02)
     }
 
+    #[allow(unused)]
+    pub fn has_nice_fire_rod(&self) -> bool {
+        self.has_both(FireRod01, FireRod02)
+    }
+
     pub fn has_ice_rod(&self) -> bool {
         self.has_either(IceRod01, IceRod02)
     }
 
-    pub fn has_hammer(&self) -> bool {
-        self.has_either(Hammer01, Hammer02)
+    pub fn has_nice_ice_rod(&self) -> bool {
+        self.has_both(IceRod01, IceRod02)
+    }
+
+    pub fn has_tornado_rod(&self) -> bool {
+        self.has_either(TornadoRod01, TornadoRod02)
+    }
+
+    pub fn has_nice_tornado_rod(&self) -> bool {
+        self.has_both(TornadoRod01, TornadoRod02)
+    }
+
+    pub fn has_sand_rod(&self) -> bool {
+        self.has_either(SandRod01, SandRod02)
+    }
+
+    #[allow(unused)]
+    pub fn has_nice_sand_rod(&self) -> bool {
+        self.has_both(SandRod01, SandRod02)
+    }
+
+    pub fn has_net(&self) -> bool {
+        self.has_either(Net01, Net02)
     }
 
     pub fn has_shield(&self) -> bool {
-        self.has_either(Shield, HylianShield)
+        self.has_any(&[Shield01, Shield02, Shield03, Shield04, HylianShield])
     }
 
     pub fn has_scoot_fruit(&self) -> bool {
-        self.has(ScootFruit)
+        self.has_either(ScootFruit01, ScootFruit02)
     }
 
-    pub fn has_lamp(&self) -> bool {
-        self.has_either(Lamp01, Lamp02)
+    #[allow(unused)]
+    pub fn has_foul_fruit(&self) -> bool {
+        self.has_either(FoulFruit01, FoulFruit02)
     }
 
     pub fn has_fire_source(&self) -> bool {
@@ -136,34 +200,15 @@ impl Progress {
 
     pub fn can_destroy_curtain(&self) -> bool {
         self.has_any(&[
-            Sword01,
-            Sword02,
-            Sword03,
-            Sword04,
-            Lamp01,
-            Lamp02,
-            FireRod01,
-            FireRod02,
-            Bombs01,
-            Bombs02,
-            PegasusBoots,
+            Sword01, Sword02, Sword03, Sword04, Lamp01, Lamp02, FireRod01, FireRod02, Bombs01,
+            Bombs02, PegasusBoots,
         ])
     }
 
     pub fn can_extinguish_torches(&self) -> bool {
         self.has_any(&[
-            Sword01,
-            Sword02,
-            Sword03,
-            Sword04,
-            Bombs01,
-            Bombs02,
-            IceRod01,
-            IceRod02,
-            TornadoRod01,
-            TornadoRod02,
-            Net01,
-            Net02,
+            Sword01, Sword02, Sword03, Sword04, Bombs01, Bombs02, IceRod01, IceRod02, TornadoRod01,
+            TornadoRod02, Net01, Net02,
         ])
     }
 
@@ -179,24 +224,12 @@ impl Progress {
         self.has_bell() || self.has_fire_rod() || self.has_bombs()
     }
 
-    pub fn has_net(&self) -> bool {
-        self.has_either(Lamp01, Lamp02)
-    }
-
     pub fn has_stamina_scroll(&self) -> bool {
         self.has(StaminaScroll)
     }
 
     pub fn has_bottle(&self) -> bool {
         self.has_any(&[Bottle01, Bottle02, Bottle03, Bottle04, Bottle05])
-    }
-
-    pub fn has_sand_rod(&self) -> bool {
-        self.has_either(SandRod01, SandRod02)
-    }
-
-    pub fn has_tornado_rod(&self) -> bool {
-        self.has_either(TornadoRod01, TornadoRod02)
     }
 
     pub fn has_boots(&self) -> bool {
@@ -244,7 +277,7 @@ impl Progress {
     }
 
     pub fn has_gold_bee(&self) -> bool {
-        self.has(GoldBee)
+        self.has(GoldBee01) // Do not consider buying for 9999 in logic
     }
 
     pub fn has_sword(&self) -> bool {
@@ -263,94 +296,46 @@ impl Progress {
         self.settings.logic.lampless
     }
 
-    // pub fn has_great_spin(&self) -> bool {
-    //     self.has(GreatSpin)
-    // }
+    pub fn can_great_spin(&self) -> bool {
+        self.has_sword() && self.has(GreatSpin)
+    }
 
     pub fn can_destroy_skull(&self) -> bool {
         self.has_any(&[
-            Sword01,
-            Sword02,
-            Sword03,
-            Sword04,
-            Bow01,
-            Bow02,
-            Boomerang01,
-            Boomerang02,
-            Hookshot01,
-            Hookshot02,
-            Bombs01,
-            Bombs02,
-            FireRod01,
-            FireRod02,
-            IceRod01,
-            IceRod02,
-            SandRod01,
-            SandRod02,
-            Hammer01,
-            Hammer02,
-            PegasusBoots,
-            Glove01,
-            Glove02,
+            Sword01, Sword02, Sword03, Sword04, Bow01, Bow02, Boomerang01, Boomerang02, Hookshot01,
+            Hookshot02, Bombs01, Bombs02, FireRod01, FireRod02, IceRod01, IceRod02, SandRod01,
+            SandRod02, Hammer01, Hammer02, PegasusBoots, Glove01, Glove02,
         ])
     }
 
     pub fn can_cut_grass(&self) -> bool {
         self.has_any(&[
-            Sword01,
-            Sword02,
-            Sword03,
-            Sword04,
-            Boomerang01,
-            Boomerang02,
-            Bombs01,
-            Bombs02,
-            FireRod01,
-            FireRod02,
-            IceRod01,
-            IceRod02,
-            Lamp01,
-            Lamp02,
-            PegasusBoots,
+            Sword01, Sword02, Sword03, Sword04, Boomerang01, Boomerang02, Bombs01, Bombs02,
+            FireRod01, FireRod02, IceRod01, IceRod02, Lamp01, Lamp02, PegasusBoots,
         ])
     }
 
     pub fn can_attack(&self) -> bool {
-        self.has_any(&[
-            Sword01,
-            Sword02,
-            Sword03,
-            Sword04,
-            Bow01,
-            Bow02,
-            Bombs01,
-            Bombs02,
-            FireRod01,
-            FireRod02,
-            IceRod01,
-            IceRod02,
-            Hammer01,
-            Hammer02,
-            PegasusBoots,
-        ])
+        self.has_sword()
+            || self.has_bow()
+            || self.has_bombs()
+            || self.has_fire_rod()
+            || self.has_ice_rod()
+            || self.has_hammer()
+            || self.has_boots()
+            || self.has_nice_tornado_rod()
+            || self.has_nice_hookshot()
     }
 
     pub fn can_attack_fireproof(&self) -> bool {
-        self.has_any(&[
-            Sword01,
-            Sword02,
-            Sword03,
-            Sword04,
-            Bow01,
-            Bow02,
-            Bombs01,
-            Bombs02,
-            IceRod01,
-            IceRod02,
-            Hammer01,
-            Hammer02,
-            PegasusBoots,
-        ])
+        self.has_sword()
+            || self.has_bow()
+            || self.has_bombs()
+            || self.has_ice_rod()
+            || self.has_hammer()
+            || self.has_boots()
+            || self.has_nice_tornado_rod()
+            || self.has_nice_hookshot()
     }
 
     pub fn has_lamp_or_net(&self) -> bool {
@@ -358,55 +343,25 @@ impl Progress {
     }
 
     pub fn can_hit_switch(&self) -> bool {
-        self.has_any(&[
-            Sword01,
-            Sword02,
-            Sword03,
-            Sword04,
-            Bow01,
-            Bow02,
-            Boomerang01,
-            Boomerang02,
-            Hookshot01,
-            Hookshot02,
-            Bombs01,
-            Bombs02,
-            IceRod01,
-            IceRod02,
-            Hammer01,
-            Hammer02,
-        ])
+        self.has_sword()
+            || self.has_bow()
+            || self.has_boomerang()
+            || self.has_hookshot()
+            || self.has_bombs()
+            || self.has_ice_rod()
+            || self.has_hammer()
     }
 
     pub fn can_hit_far_switch(&self) -> bool {
         self.has_any(&[
-            Bow01,
-            Bow02,
-            Boomerang01,
-            Boomerang02,
-            Hookshot01,
-            Hookshot02,
-            Bombs01,
-            Bombs02,
+            Bow01, Bow02, Boomerang01, Boomerang02, Hookshot01, Hookshot02, Bombs01, Bombs02,
         ])
     }
 
     pub fn can_hit_shielded_switch(&self) -> bool {
         self.has_any(&[
-            Sword01,
-            Sword02,
-            Sword03,
-            Sword04,
-            Bow01,
-            Bow02,
-            Boomerang01,
-            Boomerang02,
-            Hookshot01,
-            Hookshot02,
-            Bombs01,
-            Bombs02,
-            Hammer01,
-            Hammer02,
+            Sword01, Sword02, Sword03, Sword04, Bow01, Bow02, Boomerang01, Boomerang02, Hookshot01,
+            Hookshot02, Bombs01, Bombs02, Hammer01, Hammer02,
         ])
     }
 
@@ -434,10 +389,7 @@ impl Progress {
 
     pub fn has_gales_keys(&self, amount: u8) -> bool {
         self.has_amount(amount, &[
-            GalesKeySmall01,
-            GalesKeySmall02,
-            GalesKeySmall03,
-            GalesKeySmall04,
+            GalesKeySmall01, GalesKeySmall02, GalesKeySmall03, GalesKeySmall04,
         ])
     }
 
@@ -488,10 +440,7 @@ impl Progress {
 
     pub fn has_swamp_keys(&self, amount: u8) -> bool {
         self.has_amount(amount, &[
-            SwampKeySmall01,
-            SwampKeySmall02,
-            SwampKeySmall03,
-            SwampKeySmall04,
+            SwampKeySmall01, SwampKeySmall02, SwampKeySmall03, SwampKeySmall04,
         ])
     }
 
@@ -543,10 +492,7 @@ impl Progress {
 
     pub fn has_desert_keys(&self, amount: u8) -> bool {
         self.has_amount(amount, &[
-            DesertKeySmall01,
-            DesertKeySmall02,
-            DesertKeySmall03,
-            DesertKeySmall04,
+            DesertKeySmall01, DesertKeySmall02, DesertKeySmall03, DesertKeySmall04,
             DesertKeySmall05,
         ])
     }
@@ -573,11 +519,8 @@ impl Progress {
 
     pub fn has_lorule_keys(&self, amount: u8) -> bool {
         self.has_amount(amount, &[
-            LoruleCastleKeySmall01,
-            LoruleCastleKeySmall02,
-            LoruleCastleKeySmall03,
-            LoruleCastleKeySmall04,
-            LoruleCastleKeySmall05,
+            LoruleCastleKeySmall01, LoruleCastleKeySmall02, LoruleCastleKeySmall03,
+            LoruleCastleKeySmall04, LoruleCastleKeySmall05,
         ])
     }
 
@@ -595,6 +538,36 @@ impl Progress {
 
     // Events ------------------------------------------------
 
+    // pub fn has_defeated_yuga(&self) -> bool {
+    //     self.has(Yuga)
+    // }
+    // pub fn has_defeated_margomill(&self) -> bool {
+    //     self.has(Margomill)
+    // }
+    // pub fn has_defeated_moldorm(&self) -> bool {
+    //     self.has(Moldorm)
+    // }
+    // pub fn has_defeated_gemesaur_king(&self) -> bool {
+    //     self.has(GemesaurKing)
+    // }
+    // pub fn has_defeated_arrghus(&self) -> bool {
+    //     self.has(Arrghus)
+    // }
+    // pub fn has_defeated_knucklemaster(&self) -> bool {
+    //     self.has(Knucklemaster)
+    // }
+    // pub fn has_defeated_stalblind(&self) -> bool {
+    //     self.has(Stalblind)
+    // }
+    // pub fn has_defeated_grinexx(&self) -> bool {
+    //     self.has(Grinexx)
+    // }
+    // pub fn has_defeated_zaganaga(&self) -> bool {
+    //     self.has(Zaganaga)
+    // }
+    // pub fn has_defeated_dharkstare(&self) -> bool {
+    //     self.has(Dharkstare)
+    // }
     // pub fn has_opened_stylish_womans_house(&self) -> bool {
     //     self.has(StylishWomansHouseOpen)
     // }
@@ -619,12 +592,22 @@ impl Progress {
         self.has(ShadyGuyTrigger)
     }
 
-    pub fn has_pendant_of_courage(&self) -> bool {
-        self.has(Charm) && self.has(PendantOfCourage)
+    fn has_charm(&self) -> bool {
+        self.has_either(PendantOfCourage01, PendantOfCourage02)
     }
 
-    pub fn has_all_pendants(&self) -> bool {
-        self.has_pendant_of_courage() && self.has(PendantOfWisdom) && self.has(PendantOfPower)
+    pub fn has_pendant_of_courage(&self) -> bool {
+        self.has_both(PendantOfCourage01, PendantOfCourage02)
+    }
+
+    pub fn has_required_pendants(&self) -> bool {
+        self.has(PendantOfWisdom)
+            && self.has(PendantOfPower)
+            && match self.settings.logic.ped_requirement {
+                PedestalSetting::Vanilla => true,
+                PedestalSetting::Charmed => self.has_charm(),
+                PedestalSetting::Standard => self.has_pendant_of_courage(),
+            }
     }
 
     pub fn has_sage_osfala(&self) -> bool {

@@ -1,7 +1,7 @@
 use {
-    crate::{patch::DungeonPrizes, regions, Layout, LocationInfo},
+    crate::{fail, patch::DungeonPrizes, regions, Layout, LocationInfo},
     albw::{
-        scene::{Flag, Obj, Rail, Vec3},
+        scene::{Dest, Flag, Obj, Rail, Vec3},
         Item::{self, *},
     },
 };
@@ -63,30 +63,22 @@ pub(crate) fn clear_inactive_args(unq: u16) -> (u16, Box<dyn Fn(&mut Obj)>) {
     (unq, Box::new(move |obj: &mut Obj| obj.clear_inactive_args()))
 }
 
-pub(crate) fn redirect(
-    unq: u16, spawn_point: i32, scene: i32, scene_index: i32,
-) -> (u16, Box<dyn Fn(&mut Obj)>) {
-    (unq, Box::new(move |obj: &mut Obj| obj.redirect(spawn_point, scene, scene_index)))
+pub(crate) fn redirect(unq: u16, dest: Dest) -> (u16, Box<dyn Fn(&mut Obj)>) {
+    (unq, Box::new(move |obj: &mut Obj| obj.redirect(dest)))
 }
 
 pub(crate) fn add_rail(unq: u16, rail: (i32, i32)) -> (u16, Box<dyn Fn(&mut Obj)>) {
     (unq, Box::new(move |obj: &mut Obj| obj.ril.push(rail)))
 }
 
+#[allow(unused)]
 pub(crate) fn remove_collision(unq: u16) -> (u16, Box<dyn Fn(&mut Obj)>) {
-    (unq, Box::new(|obj: &mut Obj| obj.srt.scale = Vec3 { x: 0.0, y: 0.0, z: 0.0 }))
+    (unq, Box::new(|obj: &mut Obj| obj.srt.scale = Vec3::ZERO))
 }
 
-pub(crate) fn is_sage(item: Item) -> bool {
+pub fn is_sage(item: Item) -> bool {
     match item {
         SageGulley | SageOren | SageSeres | SageOsfala | SageImpa | SageIrene | SageRosso => true,
-        _ => false,
-    }
-}
-
-pub(crate) fn is_green_pendant(item: Item) -> bool {
-    match item {
-        PendantCourage | ZeldaAmulet => true,
         _ => false,
     }
 }
@@ -103,7 +95,6 @@ pub(crate) fn prize_flag(pendant: Item) -> Flag {
         PendantPower => Flag::Event(372),
         PendantWisdom => Flag::Event(342),
         PendantCourage => Flag::Event(251),
-        ZeldaAmulet => Flag::Event(251),
         SageGulley => Flag::Event(536),
         SageOren => Flag::Event(556),
         SageSeres => Flag::Event(576),
@@ -111,22 +102,7 @@ pub(crate) fn prize_flag(pendant: Item) -> Flag {
         SageRosso => Flag::Event(616),
         SageIrene => Flag::Event(636),
         SageImpa => Flag::Event(656),
-        _ => panic!("{} is not a Dungeon Prize", pendant.as_str()),
-    }
-}
-
-/// bad bad bad <br />
-/// Pass in a green pendant prize, get the two associated charm flags in a different order
-pub(crate) fn charm_flag(item: Item) -> (u16, u16) {
-
-    // Repurposed Flags:
-    const FLAG_CHARM_1: u16 = 620;
-    const FLAG_CHARM_2: u16 = 640;
-
-    match item {
-        PendantCourage => (FLAG_CHARM_1, FLAG_CHARM_2),
-        ZeldaAmulet => (FLAG_CHARM_2, FLAG_CHARM_1),
-        _ => panic!("Item was neither Charm nor Pendant of Courage: {}", item.as_str()),
+        _ => fail!("{} is Charm or not a Dungeon Prize", pendant.as_str()),
     }
 }
 

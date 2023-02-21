@@ -1,0 +1,41 @@
+{
+  "logic": {
+    "mode":                        "Normal",   // Logic Mode. Choose one of: "Normal", "Hard", "GlitchBasic", "GlitchAdvanced", "GlitchHell", or "NoLogic"
+    "randomize_dungeon_prizes":    true,       // Randomizes the Portraits, Pendants, and Charm between Hyrule and Lorule dungeons
+    "lc_requirement":              7,          // The number of Portraits (0-7) needed to trigger the Hilda cutscene to open Lorule Castle
+    "ped_requirement":             "Standard", // Pedestal Requirements. Choose one of: "Vanilla" (red/blue), "Charmed" (red/blue + charm), "Standard" (red/blue/green)
+
+    "nice_mode":                   false,      // Shuffles Nice Items into the general item pool as progressive upgrades (temporary: removes Maiamai cave)
+    "super_items":                 false,      // Include the Super Lamp and Super Net in the shuffled item pool
+    "assured_weapon":              false,      // Guarantees one of the following weapons will be placed in Ravio's Shop: Sword, Bow, Hammer, Fire Rod, Ice Rod, or Bombs
+
+    "bell_in_shop":                true,       // The Bell will be placed in Ravio's Shop
+    "pouch_in_shop":               false,      // The Pouch will be placed in Ravio's Shop
+    "boots_in_shop":               false,      // The Pegasus Boots will be placed in Ravio's Shop
+
+    "maiamai_madness":             false,       // Maiamai Madness. Shuffles Maiamai into the pool, adding 100 more locations
+
+    "minigames_excluded":          true,       // Exclude all minigames (Cucco Ranch, Rupee Rushes (both), Hyrule Hotfoot (both races), Treacherous Tower, and Octoball Derby)
+    "skip_trials":                 false,      // Skip the Trials in Lorule Castle (removes the door)
+    "bow_of_light_in_castle":      true,       // Guarantees the Bow of Light will be placed *somewhere* in Lorule Castle (including possibly Zelda)
+
+    "vanes_activated":             false,      // Pre-activates all Weather Vanes (Note: No trackers currently support this)
+    "lampless":                    false,      // (Advanced) Don't require Lamp. If 'true', the player may have to cross dark rooms without a light source. Select 'false' if unsure.
+    "swordless_mode":              false       // (Advanced) Swordless Mode. Removes all Swords from the game. You will need the Net to play Tennis with Yuganon.
+  },
+  "options": {
+    "chest_size_matches_contents": true,       // Alters treasure chest sizes depending on their contents: Large for Progression items, Small for everything else.
+    "night_mode":                  false       // Experimental option to change lighting until you use Portals for the first time. May cause slight slowdowns on console.
+  },
+  // Exclude specific checks from having progression items. Checks listed here will be assigned a random junk item.
+  // Every check in the game has a *unique* name that can be placed here, consult a spoiler log for a complete list.
+  // Checks with '//' in front of them are commented out and will *not* be excluded.
+  "exclusions": {
+    "exclusions": [
+      //    "Great Rupee Fairy",
+      //    "Cucco Dungeon",
+      //    "Master Sword Pedestal",
+      //    "Final Zelda"
+    ]
+  }
+}

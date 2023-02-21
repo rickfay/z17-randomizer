@@ -1,29 +1,21 @@
 crate::region! {
     course: FieldDark,
-    name: "Death Mountain",
+    name: "Lorule Death Mountain",
     mountain {
         locations: [
-            "Ledge (East)": RupeeGold @Chest(4[25]) :- can_tornado_rod,
-            "Behind Ice Gimos (East)": RupeeSilver @Chest(4[94]) :- can_fire_rod,
-        ],
-        paths: [
-            west,
-            dungeons::ice::ruins :- can_fire_rod,
-            hyrule::death::far_island :- can_tornado_rod,
-        ],
-    },
-    west {
-        locations: [
-            "Ledge (West)": LiverBlue @Chest(3[108]),
-            "Defeat Ice Gimos (West)": RupeeSilver @Chest(3[109]),
-        ],
-        paths: [
-            tower,
-        ],
-    },
-    tower {
-        locations: [
-            "Treacherous Tower (Intermediate)": HeartPiece @Event(FieldDark_05_GameTower[0x7E]) :- {|p| p.can_hammer() || p.can_tornado_rod() || p.can_bomb()},
+            "Behind Ice Gimos": RupeeSilver @Chest(4[94]),
+            "Ice Gimos Fight": RupeeSilver @Chest(3[109]),
+            "Lorule Death Mountain East Ledge": RupeeGold @Chest(4[25]),
+            "Lorule Death Mountain West Ledge": LiverBlue @Chest(3[108]),
+            "Treacherous Tower Advanced (1)": ItemKandelaarLv2 @Event(FieldDark_05_GameTower[0x8D]),
+            "Treacherous Tower Advanced (2)": ItemInsectNetLv2 @Event(FieldDark_05_GameTower[0x98]),
+            "Treacherous Tower Intermediate": HeartPiece @Event(FieldDark_05_GameTower[0x7E]),
+            "[Mai] Lorule Death Mountain East Big Rock": Maiamai @Maiamai(4[24]),
+            "[Mai] Lorule Death Mountain East Skull": Maiamai @Maiamai(4[22]),
+            "[Mai] Lorule Death Mountain East Wall": Maiamai @Maiamai(4[23]),
+            "[Mai] Lorule Death Mountain West Big Rock": Maiamai @Maiamai(3[43]),
+            "[Mai] Lorule Death Mountain West Skull": Maiamai @Maiamai(3[42]),
+            "[Mai] Outside Ice Ruins": Maiamai @Maiamai(5[20]),
         ],
     },
 }

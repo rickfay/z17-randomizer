@@ -1,4 +1,10 @@
-use crate::{logic::Logic, progress::Progress, FillerItem, LocationInfo};
+use {
+    crate::{
+        model::{logic::Logic, progress::Progress},
+        FillerItem, LocationInfo,
+    },
+    std::hash::{Hash, Hasher},
+};
 
 #[derive(Copy, Clone)]
 pub struct Check {
@@ -30,5 +36,19 @@ impl Check {
 
     pub fn can_access(self, progress: &Progress) -> bool {
         self.logic.can_access(progress)
+    }
+}
+
+impl Eq for Check {}
+
+impl PartialEq<Self> for Check {
+    fn eq(&self, other: &Self) -> bool {
+        self.get_name().eq(other.get_name())
+    }
+}
+
+impl Hash for Check {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.name.hash(state);
     }
 }

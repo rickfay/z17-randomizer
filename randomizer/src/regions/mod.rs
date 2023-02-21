@@ -52,63 +52,140 @@ pub enum World {
     Dungeons,
 }
 
-macro_rules! regions {
-    ($($world:ident($variant:ident) {
-        $($region:ident;)+
-    })+) => {
-        use crate::patch::Patcher;
+// macro_rules! regions {
+//     ($($world:ident($variant:ident) {
+//         $($region:ident;)+
+//     })+) => {
+//         use crate::patch::Patcher;
+//
+//         $(pub(crate) mod $world {
+//             pub const WORLD: super::World = super::World::$variant;
+//             $(pub(crate) mod $region;)+
+//         })+
+//
+//         pub(crate) fn patch(patcher: &mut Patcher, layout: &crate::Layout, settings: &$crate::Settings) -> crate::Result<()> {
+//             $($($world::$region::patch(patcher, layout, settings)?;)+)+
+//             Ok(())
+//         }
+//     };
+// }
 
-        $(pub(crate) mod $world {
-            pub const WORLD: super::World = super::World::$variant;
-            $(pub(crate) mod $region;)+
-        })+
+use crate::{patch::Patcher, Settings};
 
-        pub(crate) fn patch(patcher: &mut Patcher, layout: &crate::Layout, settings: &$crate::Settings) -> crate::Result<()> {
-            $($($world::$region::patch(patcher, layout, settings)?;)+)+
-            Ok(())
-        }
-    };
+pub mod dungeons {
+    pub const WORLD: super::World = super::World::Dungeons;
+    pub mod dark;
+    pub mod desert;
+    pub mod eastern;
+    pub mod graveyards;
+    pub mod house;
+    pub mod hyrule;
+    pub mod ice;
+    pub mod lorule;
+    pub mod skull;
+    pub mod swamp;
+    pub mod thieves;
+    pub mod tower;
+    pub mod turtle;
+}
+pub mod hyrule {
+    pub const WORLD: super::World = super::World::Hyrule;
+    pub mod death;
+    pub mod desert;
+    pub mod eastern;
+    pub mod field;
+    pub mod irene;
+    pub mod kakariko;
+    pub mod lake;
+    pub mod lost;
+    pub mod southern;
+    pub mod zora;
+}
+pub mod lorule {
+    pub const WORLD: super::World = super::World::Lorule;
+    pub mod chamber;
+    pub mod dark;
+    pub mod death;
+    pub mod field;
+    pub mod lake;
+    pub mod misery;
+    pub mod skull;
 }
 
-regions! {
-    dungeons(Dungeons) {
-        eastern;
-        house;
-        tower;
-        hyrule;
-        graveyard;
-        dark;
-        swamp;
-        skull;
-        thieves;
-        ice;
-        desert;
-        turtle;
-        lorule;
-    }
-    hyrule(Hyrule) {
-        field;
-        lost;
-        death;
-        sanctuary;
-        kakariko;
-        zoras;
-        eastern;
-        southern;
-        lake;
-        maiamai;
-    }
-    lorule(Lorule) {
-        field;
-        skull;
-        death;
-        graveyard;
-        dark;
-        misery;
-        lake;
-        maiamai;
-    }
+pub(crate) fn patch(
+    patcher: &mut Patcher, layout: &crate::Layout, settings: &Settings,
+) -> crate::Result<()> {
+    dungeons::dark::patch(patcher, layout, settings)?;
+    dungeons::desert::patch(patcher, layout, settings)?;
+    dungeons::eastern::patch(patcher, layout, settings)?;
+    dungeons::graveyards::patch(patcher, layout, settings)?;
+    dungeons::house::patch(patcher, layout, settings)?;
+    dungeons::hyrule::patch(patcher, layout, settings)?;
+    dungeons::ice::patch(patcher, layout, settings)?;
+    dungeons::lorule::patch(patcher, layout, settings)?;
+    dungeons::skull::patch(patcher, layout, settings)?;
+    dungeons::swamp::patch(patcher, layout, settings)?;
+    dungeons::thieves::patch(patcher, layout, settings)?;
+    dungeons::tower::patch(patcher, layout, settings)?;
+    dungeons::turtle::patch(patcher, layout, settings)?;
+    hyrule::death::patch(patcher, layout, settings)?;
+    hyrule::desert::patch(patcher, layout, settings)?;
+    hyrule::eastern::patch(patcher, layout, settings)?;
+    hyrule::field::patch(patcher, layout, settings)?;
+    hyrule::irene::patch(patcher, layout, settings)?;
+    hyrule::kakariko::patch(patcher, layout, settings)?;
+    hyrule::lake::patch(patcher, layout, settings)?;
+    hyrule::lost::patch(patcher, layout, settings)?;
+    hyrule::southern::patch(patcher, layout, settings)?;
+    hyrule::zora::patch(patcher, layout, settings)?;
+    lorule::chamber::patch(patcher, layout, settings)?;
+    lorule::dark::patch(patcher, layout, settings)?;
+    lorule::death::patch(patcher, layout, settings)?;
+    lorule::field::patch(patcher, layout, settings)?;
+    lorule::lake::patch(patcher, layout, settings)?;
+    lorule::misery::patch(patcher, layout, settings)?;
+    lorule::skull::patch(patcher, layout, settings)?;
+    Ok(())
 }
+
+// regions! {
+//     dungeons(Dungeons) {
+//         dark;
+//         desert;
+//         eastern;
+//         graveyards;
+//         house;
+//         hyrule;
+//         ice;
+//         lorule;
+//         skull;
+//         swamp;
+//         thieves;
+//         tower;
+//         turtle;
+//     }
+//     hyrule(Hyrule) {
+//         death;
+//         desert;
+//         eastern;
+//         field;
+//         irene;
+//         kakariko;
+//         lake;
+//         lost;
+//         southern;
+//         zora;
+//     }
+//     lorule(Lorule) {
+//         chamber;
+//         dark;
+//         death;
+//         field;
+//         lake;
+//         misery;
+//         skull;
+//     }
+// }
 
 #[doc(hidden)]
 #[macro_export]
@@ -136,6 +213,7 @@ macro_rules! region {
         }
 
         pub const NAME: &str = $name;
+        #[allow(unused)]
         pub const COURSE: albw::course::Id = albw::course::Id::$course;
     };
 }
@@ -153,38 +231,17 @@ macro_rules! subregion {
         ],)?
         $(quest: $kind:ident$(::$qvariant:ident)?,)?
     }) => {
-        pub(crate) mod $id {
+        pub mod $id {
 
             use crate::{patch::Patcher, regions::Subregion};
 
             pub use super::COURSE;
 
-            pub(crate) const SUBREGION: &Subregion = &Subregion {
+            pub const SUBREGION: &Subregion = &Subregion {
                 name: super::NAME,
                 world: super::super::WORLD,
                 id: stringify!($id),
             };
-
-            #[allow(unused)]
-            #[inline]
-            pub fn add(graph: &mut dyn $crate::graph::Graph) {
-                $($(if $crate::settings_check!($($settings $where)?)(graph.settings()) {
-                    let edge = $crate::edge!($($condition)?);
-                    let location = $crate::LocationInfo::new(SUBREGION, $key);
-                    if graph.check(edge) {
-                        graph.add(location.into());
-                    } else {
-                        graph.add_edge(edge, location.into());
-                    }
-                })*)?
-                $($(let edge = $crate::edge!($($pcondition)?);
-                let path = $crate::path!($path$(::$path_rest)*);
-                if graph.check(edge) {
-                    graph.add(path.into());
-                } else {
-                    graph.add_edge(edge, path.into());
-                })*)?
-            }
 
             #[allow(unused)]
             #[inline]
@@ -209,52 +266,10 @@ macro_rules! subregion {
 #[macro_export]
 macro_rules! settings_check {
     () => {
-        |_: &$crate::settings::Settings| true
+        |_: &$crate::settings::settings::Settings| true
     };
     ($settings:ident $check:expr) => {
-        |$settings: &$crate::settings::Settings| $check
-    };
-}
-
-#[doc(hidden)]
-#[macro_export]
-macro_rules! edge {
-    () => {
-        |_: &$crate::state::State| true
-    };
-    ($method:ident) => {
-        |state: &$crate::state::State| state.$method()
-    };
-    ({ | $state:ident | $fn:expr }) => {
-        |$state: &$crate::state::State| $fn
-    };
-}
-
-#[doc(hidden)]
-#[macro_export]
-macro_rules! path {
-    ($subarea:ident) => {
-        super::$subarea::SUBREGION
-    };
-    ($region:ident:: $node:ident) => {
-        super::super::$region::$node::SUBREGION
-    };
-    ($world:ident:: $region:ident:: $node:ident) => {
-        crate::regions::$world::$region::$node::SUBREGION
-    };
-}
-
-#[doc(hidden)]
-#[macro_export]
-macro_rules! quest {
-    () => {
-        None
-    };
-    ($variant:ident) => {
-        Some(crate::Quest::$variant)
-    };
-    ($variant:ident:: $subvariant:ident) => {
-        (Some(crate::Quest::$variant(crate::$variant::$subvariant)))
+        |$settings: &$crate::settings::settings::Settings| $check
     };
 }
 

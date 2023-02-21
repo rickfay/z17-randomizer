@@ -1,16 +1,21 @@
 use {
     super::Patcher,
-    crate::Result,
-    albw::{ExHeader, Item},
+    crate::{
+        patch::util::prize_flag, settings::pedestal_setting::PedestalSetting::*, Result, Settings,
+    },
+    albw::{
+        ExHeader,
+        Item::{self, *},
+    },
     arm::*,
     std::{
-        array,
         collections::HashMap,
         fs::{self, File},
         io::prelude::*,
         path::Path,
     },
 };
+
 mod arm;
 
 #[derive(Debug)]
@@ -38,7 +43,7 @@ impl Code {
     }
 
     pub fn patch<const N: usize>(&mut self, addr: u32, instructions: [Instruction; N]) -> u32 {
-        let code = arm::assemble(addr, instructions);
+        let code = assemble(addr, instructions);
         let len = code.len() as u32;
         self.overwrite(addr, code);
         len
@@ -94,7 +99,7 @@ impl<'a> Segment<'a> {
     }
 
     pub fn patch<const N: usize>(&mut self, addr: u32, instructions: [Instruction; N]) -> u32 {
-        let code = arm::assemble(addr, instructions);
+        let code = assemble(addr, instructions);
         let len = code.len() as u32;
         self.write(addr, code);
         len
@@ -141,7 +146,7 @@ impl Ips {
     }
 }
 
-pub fn create(patcher: &Patcher) -> Code {
+pub fn create(patcher: &Patcher, settings: &Settings) -> Code {
     let mut code = Code::new(patcher.game.exheader());
 
     // Enable Y Button
@@ -154,6 +159,7 @@ pub fn create(patcher: &Patcher) -> Code {
     bracelet(&mut code);
     ore_progress(&mut code);
     merchant(&mut code);
+    configure_pedestal_requirements(&mut code, settings);
 
     // fix castle barrier?
     let master_sword_flag = code.text().define([
@@ -169,6 +175,14 @@ pub fn create(patcher: &Patcher) -> Code {
 
     // don't lose Bow of Light on defeat
     code.patch(0x502DD8, [mov(R0, R0)]);
+
+    // Infinite Scoot Fruit
+    code.patch(0x38D59C, [mov(R2, 0x2)]);
+
+    // Infinite Foul Fruit
+    code.patch(0x38D728, [mov(R0, R0)]); // Don't clear equipped slot
+    code.patch(0x38D734, [mov(R2, 0x2)]); // Keep fruit
+
     // blacksmith
     let get_sword_flag1 = code.text().define([
         push([LR]),
@@ -231,28 +245,168 @@ pub fn create(patcher: &Patcher) -> Code {
     code.rodata().declare(sold_out.to_le_bytes());
     code.overwrite(0x707DE0, merchant_right_actor.to_le_bytes());
     code.overwrite(0x6A03E8, [merchant_right as u8]);
+
     // Hearts
     code.patch(0x33497C, [ldr(R1, (R4, 0x2E)), mov(R0, R0)]);
+
     // Keys
     code.patch(0x192E58, [ldr(R1, (R4, 0x2E))]);
+
     // Maiamai
     code.patch(0x514254, [ldr(R1, (R4, 0x30))]);
+
     // Silver and Gold Rupees
     code.patch(0x1D6DBC, [ldr(R1, (R4, 0x2E)), mov(R0, R0)]);
+
     // Premium milk
     let premium_milk = code.text().define([
         ldr(R0, EVENT_FLAG_PTR),
         mov(R2, 1),
         ldr(R1, 0x395),
         ldr(R0, (R0, 0)),
-        bl(SET_EVENT_FLAG_FN),
+        bl(FN_SET_EVENT_FLAG),
         b(0x344F00),
     ]);
     code.patch(0x3455C4, [b(premium_milk)]);
+
     // Do not add message bottle or premium milk to inventory
     code.patch(0x345580, [mov(R0, 0xFF)]);
     code.patch(0x3455C0, [mov(R0, 0xFF)]);
+
+    // Pendant Redirection - Get destination coordinates from Byaml
+    let redirect_pendants = code.text().define([
+        mov(R7, 0x1), // ???
+        strb(R7, (SP, 0xA)),
+        ldrb(R0, (R4, 0x42)), // scene = arg10
+        str_(R0, (SP, 0x0)),
+        ldrb(R0, (R4, 0x44)), // scene index = arg11
+        str_(R0, (SP, 0x4)),
+        ldrb(R0, (R4, 0x2C)), // spawn point = arg0
+        strb(R0, (SP, 0x8)),
+        b(0x143a78),
+    ]);
+    code.patch(0x143a3c, [b(redirect_pendants)]);
+
+    // Pendant of Courage - Set Flag 251 when picked up
+    let set_courage_flag = code.text().define([
+        ldr(R0, EVENT_FLAG_PTR),
+        mov(R2, 1),
+        ldr(R1, prize_flag(PendantCourage).get_value() as u32),
+        ldr(R0, (R0, 0)),
+        bl(FN_SET_EVENT_FLAG),
+        b(0x344F00),
+    ]);
+    code.patch(0x344d9c, [b(set_courage_flag)]);
+
+    // Great Spin Fix to work with and not disappear when obtaining Forgotten Sword
+    let great_spin_fix = code.text().define([
+        ldr(R0, (R4, 0x4E4)),
+        cmp(R0, 0x3),
+        mov(R2, 0x2).ne(),
+        mov(R2, 0x3).eq(),
+        b(0x344df0),
+    ]);
+    code.patch(0x344dec, [b(great_spin_fix)]);
+
     code
+}
+
+fn configure_pedestal_requirements(code: &mut Code, settings: &Settings) {
+    const FLAG_PEDESTAL: u32 = 375;
+    const RETURN_LABEL: u32 = 0x1439c8;
+
+    let ped_instructions = match settings.logic.ped_requirement {
+        Vanilla => {
+            code.text().define([
+                // Power
+                ldr(R0, EVENT_FLAG_PTR),
+                ldr(R0, (R0, 0x0)),
+                ldr(R1, prize_flag(PendantPower).get_value() as u32),
+                bl(FN_GET_EVENT_FLAG),
+                cmp(R0, 0x0),
+                b(RETURN_LABEL).eq(),
+                // Wisdom
+                ldr(R0, EVENT_FLAG_PTR),
+                ldr(R0, (R0, 0x0)),
+                ldr(R1, prize_flag(PendantWisdom).get_value() as u32),
+                bl(FN_GET_EVENT_FLAG),
+                cmp(R0, 0x0),
+                b(RETURN_LABEL).eq(),
+                // Set Flag
+                ldr(R0, EVENT_FLAG_PTR),
+                mov(R2, 0x1),
+                ldr(R1, FLAG_PEDESTAL),
+                ldr(R0, (R0, 0x0)),
+                bl(FN_SET_EVENT_FLAG),
+                b(RETURN_LABEL),
+            ])
+        }
+        Charmed => {
+            code.text().define([
+                // Power
+                ldr(R0, EVENT_FLAG_PTR),
+                ldr(R0, (R0, 0x0)),
+                ldr(R1, prize_flag(PendantPower).get_value() as u32),
+                bl(FN_GET_EVENT_FLAG),
+                cmp(R0, 0x0),
+                b(RETURN_LABEL).eq(),
+                // Wisdom
+                ldr(R0, EVENT_FLAG_PTR),
+                ldr(R0, (R0, 0x0)),
+                ldr(R1, prize_flag(PendantWisdom).get_value() as u32),
+                bl(FN_GET_EVENT_FLAG),
+                cmp(R0, 0x0),
+                b(RETURN_LABEL).eq(),
+                // Charm
+                ldr(R0, PLAYER_OBJECT_SINGLETON),
+                ldr(R0, (R0, 0x0)),
+                mov(R1, 0x1B),
+                bl(FN_GET_ITEM_LEVEL),
+                cmp(R0, 0x0),
+                b(RETURN_LABEL).eq(),
+                // Set Flag
+                ldr(R0, EVENT_FLAG_PTR),
+                mov(R2, 0x1),
+                ldr(R1, FLAG_PEDESTAL),
+                ldr(R0, (R0, 0x0)),
+                bl(FN_SET_EVENT_FLAG),
+                b(RETURN_LABEL),
+            ])
+        }
+        Standard => {
+            code.text().define([
+                // Power
+                ldr(R0, EVENT_FLAG_PTR),
+                ldr(R0, (R0, 0x0)),
+                ldr(R1, prize_flag(PendantPower).get_value() as u32),
+                bl(FN_GET_EVENT_FLAG),
+                cmp(R0, 0x0),
+                b(RETURN_LABEL).eq(),
+                // Wisdom
+                ldr(R0, EVENT_FLAG_PTR),
+                ldr(R0, (R0, 0x0)),
+                ldr(R1, prize_flag(PendantWisdom).get_value() as u32),
+                bl(FN_GET_EVENT_FLAG),
+                cmp(R0, 0x0),
+                b(RETURN_LABEL).eq(),
+                // Courage
+                ldr(R0, EVENT_FLAG_PTR),
+                ldr(R0, (R0, 0x0)),
+                ldr(R1, prize_flag(PendantCourage).get_value() as u32),
+                bl(FN_GET_EVENT_FLAG),
+                cmp(R0, 0x0),
+                b(RETURN_LABEL).eq(),
+                // Set Flag
+                ldr(R0, EVENT_FLAG_PTR),
+                mov(R2, 0x1),
+                ldr(R1, FLAG_PEDESTAL),
+                ldr(R0, (R0, 0x0)),
+                bl(FN_SET_EVENT_FLAG),
+                b(RETURN_LABEL),
+            ])
+        }
+    };
+    code.patch(0x143968, [b(ped_instructions)]);
 }
 
 fn merchant(code: &mut Code) {
@@ -260,7 +414,7 @@ fn merchant(code: &mut Code) {
         ldr(R0, EVENT_FLAG_PTR),
         ldr(R0, (R0, 0)),
         ldr(R1, 0x143),
-        b(GET_EVENT_FLAG_FN),
+        b(FN_GET_EVENT_FLAG),
     ]);
     code.patch(0x19487C, [bl(get_merchant_event_flag)]);
 }
@@ -380,16 +534,107 @@ fn progressive_items(code: &mut Code) {
         mov(R5, 0x58).ne(),
         b(return_label),
     ]);
+    let progressive_bow = code.text().define([
+        cmp(R5, 0x11),
+        b(progressive_lamp).ne(),
+        ldr(R0, (R0, 0x444)),
+        cmp(R0, 0),
+        mov(R5, 0x11).eq(),
+        mov(R5, 0x55).ne(),
+        b(return_label),
+    ]);
+    let progressive_boomerang = code.text().define([
+        cmp(R5, 0xF),
+        b(progressive_bow).ne(),
+        ldr(R0, (R0, 0x440)),
+        cmp(R0, 0),
+        mov(R5, 0xF).eq(),
+        mov(R5, 0x53).ne(),
+        b(return_label),
+    ]);
+    let progressive_hookshot = code.text().define([
+        cmp(R5, 0xE),
+        b(progressive_boomerang).ne(),
+        ldr(R0, (R0, 0x460)),
+        cmp(R0, 0),
+        mov(R5, 0xE).eq(),
+        mov(R5, 0x52).ne(),
+        b(return_label),
+    ]);
+    let progressive_hammer = code.text().define([
+        cmp(R5, 0x10),
+        b(progressive_hookshot).ne(),
+        ldr(R0, (R0, 0x44C)),
+        cmp(R0, 0),
+        mov(R5, 0x10).eq(),
+        mov(R5, 0x54).ne(),
+        b(return_label),
+    ]);
+    let progressive_bombs = code.text().define([
+        cmp(R5, 0xC),
+        b(progressive_hammer).ne(),
+        ldr(R0, (R0, 0x43C)),
+        cmp(R0, 0),
+        mov(R5, 0xC).eq(),
+        mov(R5, 0x50).ne(),
+        b(return_label),
+    ]);
+    let progressive_fire_rod = code.text().define([
+        cmp(R5, 0xD),
+        b(progressive_bombs).ne(),
+        ldr(R0, (R0, 0x454)),
+        cmp(R0, 0),
+        mov(R5, 0xD).eq(),
+        mov(R5, 0x51).ne(),
+        b(return_label),
+    ]);
+    let progressive_ice_rod = code.text().define([
+        cmp(R5, 0x9),
+        b(progressive_fire_rod).ne(),
+        ldr(R0, (R0, 0x458)),
+        cmp(R0, 0),
+        mov(R5, 0x9).eq(),
+        mov(R5, 0x4D).ne(),
+        b(return_label),
+    ]);
+    let progressive_tornado_rod = code.text().define([
+        cmp(R5, 0xB),
+        b(progressive_ice_rod).ne(),
+        ldr(R0, (R0, 0x45C)),
+        cmp(R0, 0),
+        mov(R5, 0xB).eq(),
+        mov(R5, 0x4F).ne(),
+        b(return_label),
+    ]);
+    let progressive_sand_rod = code.text().define([
+        cmp(R5, 0xA),
+        b(progressive_tornado_rod).ne(),
+        ldr(R0, (R0, 0x450)),
+        cmp(R0, 0),
+        mov(R5, 0xA).eq(),
+        mov(R5, 0x4E).ne(),
+        b(return_label),
+    ]);
     let progressive_net = code.text().define([
         cmp(R5, 0x30),
-        b(progressive_lamp).ne(),
+        b(progressive_sand_rod).ne(),
         ldr(R0, (R0, 0x468)),
         cmp(R0, 0),
         mov(R5, 0x30).eq(),
         mov(R5, 0x59).ne(),
         b(return_label),
     ]);
-    code.patch(0x2922A0, [b(progressive_net)]);
+    let progressive_charm = code.text().define([
+        cmp(R5, 0x19),
+        b(progressive_net).ne(),
+        ldr(R0, (R0, 0x4A0)),
+        cmp(R0, 0),
+        mov(R5, 0x3E).eq(),
+        mov(R5, 0x19).ne(),
+        b(return_label),
+    ]);
+
+    code.patch(0x2922A0, [b(progressive_charm)]);
 }
 
 fn bracelet(code: &mut Code) {
@@ -403,13 +648,12 @@ fn bracelet(code: &mut Code) {
         b(0x344F00),
     ]);
     code.overwrite(0x3448F4, add_ring_hekiga.to_le_bytes());
-    let get_item_value = 0x55696C;
     let is_ring_hekiga = code.text().define([
         push([LR]),
-        ldr(R0, 0x70FB60),
+        ldr(R0, PLAYER_OBJECT_SINGLETON),
         ldr(R0, (R0, 0)),
         mov(R1, 0x17),
-        bl(get_item_value),
+        bl(FN_GET_ITEM_LEVEL),
         cmp(R0, 3),
         mov(R0, 1).eq(),
         mov(R0, 0).ne(),
@@ -443,8 +687,8 @@ fn ore_progress(code: &mut Code) {
 }
 
 fn actor_names(code: &mut Code) -> HashMap<Item, u32> {
-    let mut map = array::IntoIter::new(ACTOR_NAME_OFFSETS).collect::<HashMap<_, _>>();
-    map.extend(array::IntoIter::new(ACTOR_NAMES).map(|(item, name)| {
+    let mut map = IntoIterator::into_iter(ACTOR_NAME_OFFSETS).collect::<HashMap<_, _>>();
+    map.extend(IntoIterator::into_iter(ACTOR_NAMES).map(|(item, name)| {
         let name = format!("{}\0", name);
         (item, code.rodata().declare(name.as_bytes()))
     }));
@@ -452,159 +696,164 @@ fn actor_names(code: &mut Code) -> HashMap<Item, u32> {
 }
 
 fn item_names(code: &mut Code) -> HashMap<Item, u32> {
-    let mut map = array::IntoIter::new(ITEM_NAME_OFFSETS).collect::<HashMap<_, _>>();
-    map.extend(array::IntoIter::new(ITEM_NAMES).map(|(item, name)| {
+    let mut map = IntoIterator::into_iter(ITEM_NAME_OFFSETS).collect::<HashMap<_, _>>();
+    map.extend(IntoIterator::into_iter(ITEM_NAMES).map(|(item, name)| {
         let name = format!("item_name_{}\0", name);
         (item, code.rodata().declare(name.as_bytes()))
     }));
     map
 }
 
-const ACTOR_NAME_OFFSETS: [(Item, u32); 29] = [
-    (Item::ItemStoneBeauty, 0x5D2060),
-    (Item::RupeeR, 0x5D639C),
-    (Item::RupeeG, 0x5D639C),
-    (Item::RupeeB, 0x5D639C),
-    (Item::RupeePurple, 0x5D639C),
-    (Item::RupeeSilver, 0x5D63A4),
-    (Item::KeySmall, 0x5D6580),
-    (Item::ItemIceRod, 0x5D6AFC),
-    (Item::ItemSandRod, 0x5D6B08),
-    (Item::ItemTornadeRod, 0x5D6B18),
-    (Item::ItemBomb, 0x5D6B28),
-    (Item::ItemFireRod, 0x5D6B30),
-    (Item::ItemHookShot, 0x5D6B40),
-    (Item::ItemBoomerang, 0x5D6B50),
-    (Item::ItemHammer, 0x5D6B60),
-    (Item::ItemBow, 0x5D6B6C),
-    (Item::ItemShield, 0x5D6B78),
-    (Item::ItemBottle, 0x5D7048),
-    (Item::HintGlasses, 0x5D70AC),
-    (Item::RupeeGold, 0x5D7144),
-    (Item::ItemSwordLv2, 0x5D7178),
-    (Item::LiverPurple, 0x5D762C),
-    (Item::LiverYellow, 0x5D7640),
-    (Item::LiverBlue, 0x5D7654),
-    (Item::MessageBottle, 0x5D76A0),
-    (Item::Pouch, 0x5D7734),
-    (Item::ItemBowLight, 0x5D776C),
-    (Item::HeartContainer, 0x5D7B7C),
-    (Item::HeartPiece, 0x5D7B94),
+const ACTOR_NAME_OFFSETS: [(Item, u32); 30] = [
+    (ItemStoneBeauty, 0x5D2060),
+    (RupeeR, 0x5D639C),
+    (RupeeG, 0x5D639C),
+    (RupeeB, 0x5D639C),
+    (RupeePurple, 0x5D639C),
+    (RupeeSilver, 0x5D63A4),
+    (KeySmall, 0x5D6580),
+    (ItemIceRod, 0x5D6AFC),
+    (ItemSandRod, 0x5D6B08),
+    (ItemTornadeRod, 0x5D6B18),
+    (ItemBomb, 0x5D6B28),
+    (ItemFireRod, 0x5D6B30),
+    (ItemHookShot, 0x5D6B40),
+    (ItemBoomerang, 0x5D6B50),
+    (ItemHammer, 0x5D6B60),
+    (ItemBow, 0x5D6B6C),
+    (ItemShield, 0x5D6B78),
+    (ItemBottle, 0x5D7048),
+    (HintGlasses, 0x5D70AC),
+    (RupeeGold, 0x5D7144),
+    (ItemSwordLv2, 0x5D7178),
+    (SpecialMove, 0x5D7178),
+    (LiverPurple, 0x5D762C),
+    (LiverYellow, 0x5D7640),
+    (LiverBlue, 0x5D7654),
+    (MessageBottle, 0x5D76A0),
+    (Pouch, 0x5D7734),
+    (ItemBowLight, 0x5D776C),
+    (HeartContainer, 0x5D7B7C),
+    (HeartPiece, 0x5D7B94),
 ];
 
-const ACTOR_NAMES: [(Item, &str); 35] = [
-    (Item::KeyBoss, "KeyBoss"),
-    (Item::Compass, "Compass"),
-    (Item::ItemKandelaar, "GtEvKandelaar"),
-    (Item::ItemKandelaarLv2, "GtEvKandelaar"),
-    (Item::ItemMizukaki, "GtEvFin"),
-    (Item::RingHekiga, "RingRental"),
-    (Item::ItemBell, "GtEvBell"),
-    (Item::PowerGlove, "GtEvGloveA"),
-    (Item::ItemInsectNet, "GtEvNet"),
-    (Item::ItemInsectNetLv2, "GtEvNet"),
-    (Item::BadgeBee, "BadgeBee"),
-    (Item::ClothesBlue, "GtEvCloth"),
-    (Item::HyruleShield, "GtEvShieldB"),
-    (Item::OreYellow, "OreSword"),
-    (Item::OreGreen, "OreSword"),
-    (Item::OreBlue, "OreSword"),
-    (Item::GanbariPowerUp, "PowerUp"),
-    (Item::DashBoots, "GtEvBoots"),
-    (Item::OreRed, "OreSword"),
-    (Item::ItemIceRodLv2, "GtEvRodIceB"),
-    (Item::ItemSandRodLv2, "GtEvRodSandB"),
-    (Item::ItemTornadeRodLv2, "GtEvTornadoB"),
-    (Item::ItemBombLv2, "BombM"),
-    (Item::ItemFireRodLv2, "GtEvRodFireB"),
-    (Item::ItemHookShotLv2, "GtEvHookshotB"),
-    (Item::ItemBoomerangLv2, "GtEvBoomerangB"),
-    (Item::ItemHammerLv2, "GtEvHammerB"),
-    (Item::ItemBowLv2, "GtEvBowB"),
-    (Item::MilkMatured, "GtEvBottleMedicine"), // Red Milk lol
-    (Item::Kinsta, "KinSta"),
-    (Item::PendantPower, "Pendant"),
-    (Item::PendantWisdom, "Pendant"),
-    (Item::PendantCourage, "Pendant"),
-    (Item::ZeldaAmulet, "Pendant"),
-    (Item::Empty, "DeliverSwordBroken"),
+const ACTOR_NAMES: [(Item, &str); 37] = [
+    (KeyBoss, "KeyBoss"),
+    (Compass, "Compass"),
+    (ItemKandelaar, "GtEvKandelaar"),
+    (ItemKandelaarLv2, "GtEvKandelaar"),
+    (ItemMizukaki, "GtEvFin"),
+    (RingHekiga, "RingRental"),
+    (ItemBell, "GtEvBell"),
+    (PowerGlove, "GtEvGloveA"),
+    (ItemInsectNet, "GtEvNet"),
+    (ItemInsectNetLv2, "GtEvNet"),
+    (BadgeBee, "BadgeBee"),
+    (ClothesBlue, "GtEvCloth"),
+    (HyruleShield, "GtEvShieldB"),
+    (OreYellow, "OreSword"),
+    (OreGreen, "OreSword"),
+    (OreBlue, "OreSword"),
+    (GanbariPowerUp, "PowerUp"),
+    (DashBoots, "GtEvBoots"),
+    (OreRed, "OreSword"),
+    (ItemIceRodLv2, "GtEvRodIceB"),
+    (ItemSandRodLv2, "GtEvRodSandB"),
+    (ItemTornadeRodLv2, "GtEvTornadoB"),
+    (ItemBombLv2, "BombM"),
+    (ItemFireRodLv2, "GtEvRodFireB"),
+    (ItemHookShotLv2, "GtEvHookshotB"),
+    (ItemBoomerangLv2, "GtEvBoomerangB"),
+    (ItemHammerLv2, "GtEvHammerB"),
+    (ItemBowLv2, "GtEvBowB"),
+    (MilkMatured, "GtEvBottleMedicine"), // Red Milk lol
+    (Kinsta, "KinSta"),
+    (PendantPower, "Pendant"),
+    (PendantWisdom, "Pendant"),
+    (PendantCourage, "Pendant"),
+    (ZeldaAmulet, "Pendant"),
+    (Empty, "DeliverSwordBroken"),
+    (EscapeFruit, "FruitEscape"),
+    (StopFruit, "FruitStop"),
 ];
 
 const ITEM_NAME_OFFSETS: [(Item, u32); 14] = [
-    (Item::ItemBomb, 0x6F9A9A),
-    (Item::ItemSandRod, 0x6F9AD0),
-    (Item::ItemIceRod, 0x6F9AE2),
-    (Item::ItemTornadeRod, 0x6F9AF3),
-    (Item::ItemFireRod, 0x6F9B08),
-    (Item::LiverPurple, 0x6F9B55),
-    (Item::ItemBottle, 0x6F9B6C),
-    (Item::LiverBlue, 0x6F9B94),
-    (Item::ItemBoomerang, 0x6F9BA9),
-    (Item::ItemHammer, 0x6F9CCC),
-    (Item::ItemHookShot, 0x6F9CDD),
-    (Item::ItemBow, 0x6F9D08),
-    (Item::LiverYellow, 0x6F9D2F),
-    (Item::ItemStoneBeauty, 0x6F9D56),
+    (ItemBomb, 0x6F9A9A),
+    (ItemSandRod, 0x6F9AD0),
+    (ItemIceRod, 0x6F9AE2),
+    (ItemTornadeRod, 0x6F9AF3),
+    (ItemFireRod, 0x6F9B08),
+    (LiverPurple, 0x6F9B55),
+    (ItemBottle, 0x6F9B6C),
+    (LiverBlue, 0x6F9B94),
+    (ItemBoomerang, 0x6F9BA9),
+    (ItemHammer, 0x6F9CCC),
+    (ItemHookShot, 0x6F9CDD),
+    (ItemBow, 0x6F9D08),
+    (LiverYellow, 0x6F9D2F),
+    (ItemStoneBeauty, 0x6F9D56),
 ];
 
 const ITEM_NAMES: [(Item, &str); 54] = [
-    (Item::BadgeBee, "beebadge"),
-    (Item::ItemBell, "bell"),
-    (Item::ItemBowLight, "bow_light"),
-    (Item::RingHekiga, "bracelet"),
-    (Item::ClothesBlue, "clothes_blue"),
-    (Item::EscapeFruit, "doron"),
-    (Item::StopFruit, "durian"),
-    (Item::RupeeR, "gamecoin"),
-    (Item::RupeeG, "gamecoin"),
-    (Item::RupeeB, "gamecoin"),
-    (Item::RupeePurple, "gamecoin"),
-    (Item::RupeeSilver, "gamecoin"),
-    (Item::RupeeGold, "gamecoin"),
-    (Item::GanbariPowerUp, "ganbari_power_up"),
-    (Item::HeartContainer, "heartcontioner"),
-    (Item::HeartPiece, "heartpiece"),
-    (Item::HintGlasses, "hintglass"),
-    (Item::HyruleShield, "hyrule_shield"),
-    (Item::KeyBoss, "keyboss"),
-    (Item::KeySmall, "keysmall"),
-    (Item::Kinsta, "kinsta"),
-    (Item::ItemKandelaar, "lantern"),
-    (Item::ItemKandelaarLv2, "lantern_lv2"),
-    (Item::ItemSwordLv2, "mastersword"),
-    (Item::Empty, "mastersword"),
-    (Item::MessageBottle, "messagebottle"),
-    (Item::Milk, "milk"),
-    (Item::MilkMatured, "milk_matured"),
-    (Item::ItemInsectNet, "net"),
-    (Item::ItemInsectNetLv2, "net_lv2"),
-    (Item::OreYellow, "ore"),
-    (Item::OreGreen, "ore"),
-    (Item::OreBlue, "ore"),
-    (Item::OreRed, "ore"),
-    (Item::DashBoots, "pegasus"),
-    (Item::Heart, "potshop_heart"),
-    (Item::PendantCourage, "courage"),
-    (Item::PendantPower, "power"),
-    (Item::PendantWisdom, "wisdom"),
-    (Item::Pouch, "pouch"),
-    (Item::PowerGlove, "powergloves"),
-    (Item::ItemShield, "shield"),
-    (Item::SpecialMove, "special_move"),
-    (Item::ItemBombLv2, "bomb_LV2"),
-    (Item::ItemBoomerangLv2, "boomerang_LV2"),
-    (Item::ItemBowLv2, "bow_LV2"),
-    (Item::ItemFireRodLv2, "firerod_LV2"),
-    (Item::ItemHammerLv2, "hammer_LV2"),
-    (Item::ItemHookShotLv2, "hookshot_LV2"),
-    (Item::ItemIceRodLv2, "icerod_LV2"),
-    (Item::ItemSandRodLv2, "sandrod_LV2"),
-    (Item::ItemTornadeRodLv2, "tornaderod_LV2"),
-    (Item::ItemMizukaki, "web"),
-    (Item::ZeldaAmulet, "charm"),
+    (BadgeBee, "beebadge"),
+    (ItemBell, "bell"),
+    (ItemBowLight, "bow_light"),
+    (RingHekiga, "bracelet"),
+    (ClothesBlue, "clothes_blue"),
+    (EscapeFruit, "doron"),
+    (StopFruit, "durian"),
+    (RupeeR, "gamecoin"),
+    (RupeeG, "gamecoin"),
+    (RupeeB, "gamecoin"),
+    (RupeePurple, "gamecoin"),
+    (RupeeSilver, "gamecoin"),
+    (RupeeGold, "gamecoin"),
+    (GanbariPowerUp, "ganbari_power_up"),
+    (HeartContainer, "heartcontioner"),
+    (HeartPiece, "heartpiece"),
+    (HintGlasses, "hintglass"),
+    (HyruleShield, "hyrule_shield"),
+    (KeyBoss, "keyboss"),
+    (KeySmall, "keysmall"),
+    (Kinsta, "kinsta"),
+    (ItemKandelaar, "lantern"),
+    (ItemKandelaarLv2, "lantern_lv2"),
+    (ItemSwordLv2, "mastersword"),
+    (Empty, "mastersword"),
+    (MessageBottle, "messagebottle"),
+    (Milk, "milk"),
+    (MilkMatured, "milk_matured"),
+    (ItemInsectNet, "net"),
+    (ItemInsectNetLv2, "net_lv2"),
+    (OreYellow, "ore"),
+    (OreGreen, "ore"),
+    (OreBlue, "ore"),
+    (OreRed, "ore"),
+    (DashBoots, "pegasus"),
+    (Heart, "potshop_heart"),
+    (PendantCourage, "courage"),
+    (PendantPower, "power"),
+    (PendantWisdom, "wisdom"),
+    (Pouch, "pouch"),
+    (PowerGlove, "powergloves"),
+    (ItemShield, "shield"),
+    (SpecialMove, "special_move"),
+    (ItemBombLv2, "bomb_LV2"),
+    (ItemBoomerangLv2, "boomerang_LV2"),
+    (ItemBowLv2, "bow_LV2"),
+    (ItemFireRodLv2, "firerod_LV2"),
+    (ItemHammerLv2, "hammer_LV2"),
+    (ItemHookShotLv2, "hookshot_LV2"),
+    (ItemIceRodLv2, "icerod_LV2"),
+    (ItemSandRodLv2, "sandrod_LV2"),
+    (ItemTornadeRodLv2, "tornaderod_LV2"),
+    (ItemMizukaki, "web"),
+    (ZeldaAmulet, "charm"),
 ];
 
-const SET_EVENT_FLAG_FN: u32 = 0x4CDF40;
-const GET_EVENT_FLAG_FN: u32 = 0x584B94;
-const VTABLE_STRING: u32 = 0x6F5988;
 const EVENT_FLAG_PTR: u32 = 0x70B728;
+const FN_GET_ITEM_LEVEL: u32 = 0x55696C;
+const FN_GET_EVENT_FLAG: u32 = 0x584B94;
+const FN_SET_EVENT_FLAG: u32 = 0x4CDF40;
+const PLAYER_OBJECT_SINGLETON: u32 = 0x70FB60;
+const VTABLE_STRING: u32 = 0x6F5988;

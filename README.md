@@ -3,7 +3,7 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
 
 <br />
 <p align="center">
-  <img src="cli/icon.ico" alt="icon" />
+  <img src="randomizer/icon.ico" alt="icon" />
 </p>
 
 ## Updates
@@ -11,20 +11,37 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
 <details open="open">
 <summary>Version 0.3.0</summary>
 
+TODO: Come back and finish this, kind of left it mid-sentence...
+
 - <u>Dungeon Rewards Shuffled</u>
   - Pendants & Portraits are now randomly placed between the Hyrule and Lorule dungeons.
   - Maps will show a red X over uncompleted Portrait dungeons.
 - <u>Custom Portrait Requirements</u>
   - Lorule Castle: Choose how many Portraits are needed to enter the dungeon's front door.
   - Yuga Ganon: Choose how many Portraits are needed to make the Final Boss spawn.
+- <u>Progressive Pendant of Courage</u>
+  - The Pendant of Courage is now a Progressive Item that will appear in *two* dungeons.
+  - The first one found will be the Charm, an item that does nothing by itself
+  - The Charm's vanilla location in Hyrule Castle will contain a shuffled Portrait or Pendant
 - <u>Hyrule Castle Complete Overhaul</u>
-  - HC has been revamped and returned to its vanilla roots
-  - Completing HC rewards players with backdoor access to LC
-  - HC is no longer a merge-free path to Lorule
-  - Swordless Mode no longer has a free pass through barrier
+  - HC has been revamped and returned to its vanilla roots:
+    - Pendant of Courage is required to enter the "Inside Hyrule Castle" dungeon
+    - No longer a merge-free path to Lorule
+  - Completing HC rewards players with early access to:
+      - Lorule Castle via the Trials Door
+        - Taking the Portal to Hilda's Study will automatically mark the LC Trials as complete.
+      - Throne Room (Final Boss Room)
+        - Yuga Ganon will not spawn unless Portrait requirements are met
+- <u>Great Spin</u>
+  - Now available! Great Spin has been added to the general item pool
+  - Works with the Forgotten Sword (impossible in vanilla)
+  - The bug related to losing Great Spin if obtained before Forgotten Sword has been resolved with an ASM patch
 - <u>Chest Size Matches Contents option</u>
   - Turns all chests containing Progression into large chests, and all others into small chests.
-    - Note: Some large chests have altered hitboxes to prevent negative gameplay interference.
+  - Note: Some large chests have altered hitboxes to prevent negative gameplay interference.
+- <u>Hint System</u>
+  - OoTR-style Path Hints are now generated with seeds!
+  - See the [Hint System](#hint-system) section below for more details
 - <u>Newly Randomized Checks</u>:
   - **Blacksmith Table**
     - This was the Package Sword in vanilla, it'll be a chest on the table
@@ -33,13 +50,8 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
   - **Ku's Domain Fight**
     - This is the Zora's Domain area, but in Lorule. For technical reasons, this will be a chest.
   - **Woman**
-    - Yes, that's really her name. Rescue the Maiamai on her roof in Kakariko and then talk to her to get a reward.
-  - **Zelda (Hyrule Castle)**
-    - The north room in Hyrule Castle now has a chest in place of the item Zelda gives you in vanilla.
-- <u>Charm added to Item Pool</u>
-  - Zelda gives this out in vanilla when you visit her in Hyrule Castle.
-  - It is functionally useless - Don't mistake it for the actual Pendant of Courage.
-  - AKA the "Fool's Pendant"
+    - Rescue the Maiamai on her roof in Kakariko and then talk to her to get a reward.
+    - (Yes... that's really her name.)
 - <u>Great Rupee Fairy improvements</u>
   - Automatically throw 3000 rupees as one ~1 minute long action.
     - More work to do here, but this makes her much more tolerable.
@@ -48,6 +60,11 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
 - <u>Logic Adjustments</u>:
   - Irene + Shady Guy return, with improved cutscenes.
   - Rosso's House starts locked again, needs Green Pendant to unlock.
+- <u>Spoiler Log</u>:
+  - New Playthrough section
+      - Shows Sphere-by-Sphere logical path through seed.
+      - Note: For readability, minor progression (Rupees, Maiamais, Health, Events) items are omitted.
+  - Formatting improvements, should be easier to read.
 - <u>Fixes</u>:
   - Pedestal requirements are properly enforced.
   - Chests containing the Compass in vanilla will now show up on their respective dungeon maps.
@@ -79,7 +96,6 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
 
 
 </details>
-
 <details>
 <summary>Version 0.1.2</summary>
 
@@ -96,7 +112,6 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
   - There was previously special handling to make sure Bow of Light wouldn't land on Zelda if she was manually excluded, but it failed to consider any other check in Lorule Castle players might have excluded. This has been corrected, so if you exclude e.g. the Eyeball Chest while using this setting it's now guaranteed to not have Bow of Light (or any progression).
 
 </details>
-
 <details>
 <summary>Version 0.1.1</summary>
 
@@ -104,7 +119,6 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
 - **FIXED:** Normal Logic Swordless Mode bug
 
 </details>
-
 <details>
 <summary>Version 0.1.0</summary>
 
@@ -178,7 +192,7 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
   - This change is intended to prevent players from having to grind large amounts of rupees in the early game.
 
 
-- The randomizer will no longer generate a `Standard.toml` preset that overwrites itself. Instead, an `Example.toml` preset is provided to demonstrate the correct format, and you may modify or delete it ~~at your own peril.~~
+- The randomizer will no longer generate a `Standard.toml` preset that overwrites itself. Instead, an ~~`Example.toml`~~ `Example.json` preset is provided to demonstrate the correct format, and you may modify or delete it ~~at your own peril.~~
 
 
 - **FIXED:** Vanilla Bow of Light
@@ -289,8 +303,8 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
 - Download: [Latest Release (v0.3.0)](https://github.com/rickfay/z17-randomizer/releases/download/albwr-v0.3.0/albwr-0.3.0.zip)
 
 1. Unzip the download to your directory of choice.
-2. Move your A Link Between Worlds ROM into the same folder. Name it: `A Link Between Worlds (USA).3ds`
-   - If your ROM is located elsewhere or if you'd like to name it something different, you can modify the `config.toml` file to point to the ROM instead
+2. Move your A Link Between Worlds ROM into the same folder. Name it: `ALBW.3ds`
+   - If your ROM is located elsewhere or if you'd like to name it something different, you can modify the `config.json` file to point to the ROM instead
 
 ![fs-setup.png](docs/fs-setup.jpg?raw=true)
 
@@ -305,11 +319,14 @@ There are two ways you can run ALBWR:
 
 2. Use a command line interface. If you take this approach you may also specify a preset and/or seed to use for seed generation.
    - Using a preset will give you some additional options and allow you to manually configure excluded checks.
-     - See the example `presets/Example.toml` for more information.
+     - See the example `presets/Example.json` for more information.
    - Note that the randomizer looks in the local `presets` directory now, and does NOT check `AppData`
    - Examples:
      - `$ ./albw-randomizer.exe --preset racerman`
      - `$ ./albw-randomizer.exe --seed 4057320268`
+   - Additional parameters:
+     - Add `--no-patch` to skip generating the patch files
+     - Add `--no-spoiler` to skip generating the spoiler log
 
 ## Installing Seeds
 
@@ -400,6 +417,47 @@ For Citra (emulator):
 
 `chest_size_matches_contents`
 - Alters treasure chest sizes depending on their contents: Large for Progression items, Small for everything else.
+
+## Hint System
+
+New with version v0.3.0 is the addition of hints!
+
+### Path Hints Explained
+
+Path Hints take the following form:
+
+```
+They say there's a link between [LOCATION] and [BOSS].
+```
+
+- \[LOCATION\] refers to the specific region where the hinted `Path Item` can be found.
+  - To keep locations from being arbitrarily defined, the Maiamai Map is used for all
+
+#### Path Items
+
+A `Path Item` is any item that, according to the logic used to generate the seed, is required to reach and defeat a given boss.
+
+
+
+Notes about Path Items:
+- Path Items are not guaranteed to be the traditional items needed to complete a dungeon, so long as they are in some way logically required.
+  - E.g. The Sand Rod can be Path to Moldorm if the Hammer is in Desert Palace.
+- An item cannot be Path if an in-logic alternative exists.
+  - E.g. If Ravio's Shop contains two Lamps, neither of them can be Path to Knucklemaster.
+- Two Path Hints cannot refer to the same Path Item. They may refer to two items in the same logical chain, but each 
+
+The following will NEVER be Path Items:
+- Ravio's Bracelet
+- Keys
+- Sage Portraits
+- Pendants
+- "Progression Events", e.g. bumping into Shady Guy
+
+
+
+
+
+
 
 ## Logic Breakdown
 

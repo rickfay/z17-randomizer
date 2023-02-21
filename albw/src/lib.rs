@@ -249,15 +249,23 @@ macro_rules! string_constants {
 #[doc(hidden)]
 #[macro_export]
 macro_rules! int_map {
-    ($(#[$attr:meta])*
-    $type:ident($repr:ident) {
-        $($variant:ident = $value:literal,)+
-    }) => {
+    (
+        $(#[$attr:meta])*
+        $type:ident($repr:ident) {
+            $(
+                $(#[$attr_element:meta])*
+                $variant:ident = $value:literal,
+            )+
+        }
+    ) => {
         $(#[$attr])*
         #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, ::serde_repr::Deserialize_repr, ::serde_repr::Serialize_repr)]
         #[repr($repr)]
         pub enum $type {
-            $($variant = $value,)+
+            $(
+                $(#[$attr_element])*
+                $variant = $value,
+            )+
         }
 
         impl $type {

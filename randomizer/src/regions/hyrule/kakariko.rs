@@ -3,34 +3,27 @@ crate::region! {
     name: "Kakariko Village",
     village {
         locations: [
-            "Well (Chest)": RupeeR @Chest(CaveLight 4[6]),
-            "Well (Upper)": HeartPiece @Heart(CaveLight 4[8]),
-            "Jail": RupeeSilver @Chest(IndoorLight 3[3]) :- can_merge,
-            "Woman": RupeeR @Event(IndoorLight/FieldLight_18_MiddleLady[0xF]),
-        ],
-        paths: [
-            post_sanc,
-        ],
-    },
-    post_sanc {
-        locations: [
-            "Merchant (Left)": ItemBottle @Shop(Merchant(0)),
-            "Bee Guy": ItemInsectNet @Event(IndoorLight/FieldLight_18_InsectNet[0xB]) :- has_bottle,
-            "Bee Guy (Golden Bee)": BadgeBee @Event(IndoorLight/FieldLight_18_InsectNet[0x1F]) :- {|s| s.has_bottle() && s.can_merge()}, // Always require Golden Bee dude, don't care
-            "Fortune Teller": HintGlasses @Event(IndoorLight/FieldLight_11_FortuneGirl[4]),
-            "Milk Bar Owner": MilkMatured @Event(IndoorLight/FieldLight_18_MilkbarMaster[5]) :- has_message,
-            "Cucco Ranch": HeartPiece @Event(FieldLight_29_Kokko[0x67]),
-        ],
-    },
-    shady_guy {
-        locations: [
+            "Bee Guy (1)": ItemInsectNet @Event(IndoorLight/FieldLight_18_InsectNet[0xB]),
+            "Bee Guy (2)": BadgeBee @Event(IndoorLight/FieldLight_18_InsectNet[0x1F]),
+            "Dodge the Cuccos": HeartPiece @Event(FieldLight_29_Kokko[0x67]),
+            "Kakariko Item Shop (1)": EscapeFruit @None(),
+            "Kakariko Item Shop (2)": StopFruit @None(),
+            "Kakariko Item Shop (3)": ItemShield @None(),
+            "Kakariko Jail": RupeeSilver @Chest(IndoorLight 3[3]),
+            "Kakariko Well (Bottom)": RupeeR @Chest(CaveLight 4[6]),
+            "Kakariko Well (Top)": HeartPiece @Heart(CaveLight 4[8]),
+            "Milk Bar Owner": MilkMatured @Event(IndoorLight/FieldLight_18_MilkbarMaster[5]),
+            "Rupee Rush (Hyrule)": HeartPiece @Event(FieldLight_28_Minigame[0x26]),
             "Shady Guy": ItemRentalHookShot @Event(FieldLight_18_Touzoku[0x12]),
-            "Merchant (Right)": ItemStoneBeauty @Shop(Merchant(2)),
-        ],
-    },
-    closed {
-        locations: [
+            "Street Merchant (Left)": ItemBottle @Shop(Merchant(0)),
+            "Street Merchant (Right)": ItemStoneBeauty @Shop(Merchant(2)),
             "Stylish Woman": HeartPiece @Event(IndoorLight/FieldLight_18_ClosedHouse[4]),
+            "Woman": RupeeR @Event(IndoorLight/FieldLight_18_MiddleLady[0xF]),
+            "[Mai] Cucco Ranch Tree": Maiamai @Maiamai(24[42]),
+            "[Mai] Hyrule Rupee Rush Wall": Maiamai @Maiamai(45[46]),
+            "[Mai] Kakariko Bush": Maiamai @Maiamai(16[304]),
+            "[Mai] Kakariko Sand": Maiamai @Maiamai(16[393]),
+            "[Mai] Woman's Roof Rock": Maiamai @Maiamai(16[394]),
         ],
     },
 }

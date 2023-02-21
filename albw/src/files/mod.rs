@@ -10,6 +10,7 @@ use {
         fs,
         io::{prelude::*, stdin, stdout, BufReader},
         path::Path,
+        process::exit,
     },
 };
 pub mod byaml;
@@ -66,7 +67,7 @@ impl Cxi<fs::File> {
                 error!("Couldn't load ROM from: \"{}\"", path.display());
                 error!("Please check that config.toml points to a valid ROM.");
                 pause();
-                std::process::exit(1);
+                exit(1);
             }
         };
 

@@ -81,18 +81,43 @@ macro_rules! action {
     };
 }
 
-fn patch_portrait_requirements(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
-    let lc_requirement = settings.logic.lc_requirement as u32;
-    //let yg_requirement = settings.logic.yuganon_requirement as u32;
+/// Fuck data structures we're rawdoggin' it
+#[rustfmt::skip]
+#[allow(unused)]
+fn patch_yuganon_requirements(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
 
-    // TODO
-    // let mut thing = patcher.flow(albw::course::Id::DungeonDark)?;
-    // let mut stuff = thing.get_mut("Dark").unwrap().unwrap();
-    // let flow = stuff.get_mut();
-    //
-    // let mut step = flow.get_mut(5).unwrap().convert_into_branch(2, 2).unwrap();
-    // step.set_value(yg_requirement);
-    // step.set_kind(15); // count sages function
+    // Bad names, keeping them to 4 chars for readability below
+    let numb = settings.logic.yuganon_requirement as u8;
+    let f = &[0x0A, 0x02]; // 522 fixme
+
+    let mut ice_file = patcher.language(albw::course::Id::DungeonIce)?.open_raw("World/Flow/Ice.msbf")?;
+    let ice = ice_file.get_mut();
+
+    // Ice
+
+    // Section Header - Add 2 new steps and 2 new branches
+    ice[0x24] = 0x98;
+    ice[0x30..0x34].copy_from_slice(&[0x08, 0x00, 0x04, 0x00]);
+
+    // Point to YG check
+    ice[0x88] = 0x6;
+
+    // New Steps
+    ice[0xA0..0xB0].copy_from_slice(&[0x02, 0x00, 0x00, 0x00, numb, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x0F, 0x00, 0x02, 0x00, 0x02, 0x00]);
+    ice[0xB0..0xC0].copy_from_slice(&[0x03, 0x00, 0x00, 0x00, f[0], f[1], 0x00, 0x00, 0x05, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]);
+
+    // Branches - add 2 new and point false LC condition to YG check
+    ice[0xC0..0xD0].copy_from_slice(&[0x04, 0x00, 0x06, 0x00, 0x07, 0x00, 0x05, 0x00, 0xAB, 0xAB, 0xAB, 0xAB, 0xAB, 0xAB, 0xAB, 0xAB]);
+
+    // FEN1
+    ice[0xD0..0xE0].copy_from_slice(&[0x46, 0x45, 0x4E, 0x31, 0xCC, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]);
+    ice[0xE0..0xE8].copy_from_slice(&[0x3B, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]);
+
+    Ok(())
+}
+
+fn patch_lorule_castle_requirements(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
+    let lc_requirement = settings.logic.lc_requirement as u32;
 
     apply!(patcher,
 
@@ -115,6 +140,9 @@ fn patch_portrait_requirements(patcher: &mut Patcher, settings: &Settings) -> Re
 }
 
 pub fn apply(patcher: &mut Patcher, free: Item, settings: &Settings) -> Result<()> {
+    //patch_yuganon_requirements(patcher, settings)?;
+    patch_lorule_castle_requirements(patcher, settings)?;
+
     // Debugging
     // patcher
     //     .flow(albw::course::Id::IndoorDark)?
@@ -122,8 +150,6 @@ pub fn apply(patcher: &mut Patcher, free: Item, settings: &Settings) -> Result<(
     //     .ok_or_else(|| crate::Error::game("File not found."))??
     //     .get()
     //     .debug();
-
-    patch_portrait_requirements(patcher, settings)?;
 
     apply!(patcher,
 
@@ -151,6 +177,11 @@ pub fn apply(patcher: &mut Patcher, free: Item, settings: &Settings) -> Result<(
         //     [33] => None,
         //     [21] => None,
         // },
+
+        // Mysterious Man Cave
+        CaveDark/FieldDark_00_GoldenBeeShop {
+            [0 into_start] => 9, // allow repeated purchases
+        },
 
         // Eastern Palace
         DungeonEast/East {

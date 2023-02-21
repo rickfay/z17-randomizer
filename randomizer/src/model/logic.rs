@@ -1,4 +1,4 @@
-use crate::{logic_mode::LogicMode::*, progress::Progress};
+use crate::{model::progress::Progress, settings::logic_mode::LogicMode::*};
 
 // TODO I'd eventually like to externalize the logic, both for organization purposes and to allow users to write custom logic. But this is fine for now.
 
@@ -30,11 +30,7 @@ impl Logic {
                 Vec::from([self.normal, self.hard, self.glitch_basic, self.glitch_advanced])
             }
             GlitchHell => Vec::from([
-                self.normal,
-                self.hard,
-                self.glitch_basic,
-                self.glitch_advanced,
-                self.glitch_hell,
+                self.normal, self.hard, self.glitch_basic, self.glitch_advanced, self.glitch_hell,
             ]),
             NoLogic => {
                 return true;

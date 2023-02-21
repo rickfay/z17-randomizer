@@ -1,5 +1,5 @@
 use {
-    crate::{actors::Actors, files::sarc::Sarc, File, Item, Result},
+    crate::{actors::Actors, course::Id, files::sarc::Sarc, File, Item, Result},
     serde::{de, ser::SerializeTuple, Deserialize, Deserializer, Serialize, Serializer},
     std::{fmt, path::Path},
 };
@@ -524,10 +524,17 @@ impl Obj {
         self.srt.translate.z = z;
     }
 
-    pub fn redirect(&mut self, spawn_point: i32, scene: i32, scene_index: i32) {
+    #[deprecated]
+    pub fn redirect_old(&mut self, spawn_point: i32, scene: i32, scene_index: i32) {
         self.arg.0 = spawn_point;
         self.arg.10 = scene;
         self.arg.11 = scene_index;
+    }
+
+    pub fn redirect(&mut self, dest: Dest) {
+        self.arg.0 = dest.spawn_point;
+        self.arg.10 = dest.scene as i32;
+        self.arg.11 = dest.scene_index - 1;
     }
 }
 
@@ -636,6 +643,19 @@ impl Serialize for Transform {
 }
 
 #[derive(Debug, Copy, Clone)]
+pub struct Dest {
+    pub scene: Id,
+    pub scene_index: i32,
+    pub spawn_point: i32,
+}
+
+impl Dest {
+    pub fn new(scene: Id, scene_index: i32, spawn_point: i32) -> Self {
+        Self { scene, scene_index, spawn_point }
+    }
+}
+
+#[derive(Debug, Copy, Clone)]
 pub struct Vec3 {
     pub x: f32,
     pub y: f32,
@@ -695,6 +715,26 @@ pub enum Flag {
 }
 
 impl Flag {
+    pub fn get_type(self) -> u8 {
+        match self {
+            Flag::React(_) => 0,
+            Flag::Session(_) => 1,
+            Flag::Two(_) => 2,
+            Flag::Course(_) => 3,
+            Flag::Event(_) => 4,
+        }
+    }
+
+    pub fn get_value(self) -> u16 {
+        match self {
+            Flag::React(flag) => flag,
+            Flag::Session(flag) => flag,
+            Flag::Two(flag) => flag,
+            Flag::Course(flag) => flag,
+            Flag::Event(flag) => flag,
+        }
+    }
+
     pub fn into_pair(self) -> (u8, u16) {
         match self {
             Flag::React(flag) => (0, flag),

@@ -1,14 +1,14 @@
 mod data;
 mod ls;
 mod lsm;
-use std::array;
 pub use {
     self::data::{add, cmp, mov},
-    ls::{ldr, ldrb, str_},
+    ls::{ldr, ldrb, str_, strb},
     lsm::{ldm, pop, push, stm, AddressingMode::*},
     Register::*,
 };
 
+#[allow(unused)]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Register {
     R0  = 0,
@@ -18,6 +18,12 @@ pub enum Register {
     R4  = 4,
     R5  = 5,
     R6  = 6,
+    R7  = 7,
+    R8  = 8,
+    R9  = 9,
+    R10 = 10,
+    R11 = 11,
+    R12 = 12,
     R13 = 13,
     R14 = 14,
     R15 = 15,
@@ -209,7 +215,7 @@ where
     A: Into<Address>,
 {
     let mut assembler = Assembler::new(start.into(), N * 4);
-    for instruction in array::IntoIter::new(instructions) {
+    for instruction in IntoIterator::into_iter(instructions) {
         let code = instruction.assemble(&mut assembler);
         assembler.write(code);
     }

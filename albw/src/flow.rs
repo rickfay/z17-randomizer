@@ -208,7 +208,7 @@ impl<'input> FlowMut<'input> {
             }
         }
 
-        println!("index,kind,arg1,arg2,arg3,value,next,command,count,branch");
+        println!("index,kind,arg1,arg2,arg3,value,next,command,count,branch,+0,+1,notes");
         let mut step: Inner;
         for i in 0..(&self.steps.inner.len() / STEP_LEN) {
             step = unsafe {

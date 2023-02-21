@@ -108,3 +108,10 @@ where
 {
     instruction(addressing_mode.into().code(), false, false, rd)
 }
+
+pub fn strb<A>(rd: Register, addressing_mode: A) -> Instruction
+where
+    A: Into<AddressingMode>,
+{
+    instruction(addressing_mode.into().code(), true, false, rd)
+}

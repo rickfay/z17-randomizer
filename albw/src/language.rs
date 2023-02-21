@@ -89,6 +89,10 @@ impl Language {
         LoadedMut::new(&mut self.flow, &mut self.archive)
     }
 
+    pub fn open_raw(&mut self, name: &str) -> Result<File<&mut [u8]>> {
+        self.archive.get_mut().open(name)
+    }
+
     pub fn flow_inject(&mut self, name: &str, file: File<Box<[u8]>>) -> Result<()> {
         self.flow.insert(String::from(name));
         self.archive.get_mut().add(file)

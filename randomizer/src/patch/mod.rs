@@ -1,6 +1,6 @@
 use {
     self::code::Code,
-    crate::{patch::util::*, Error, ItemExt, Layout, Result, Settings},
+    crate::{fail, patch::util::*, Error, ItemExt, Layout, Result, Settings},
     albw::{
         course::{Id, Id::*},
         demo::Timed,
@@ -11,14 +11,7 @@ use {
     fs_extra::dir::CopyOptions,
     log::{debug, error, info},
     serde::Serialize,
-    std::{
-        array,
-        collections::HashMap,
-        fs,
-        io::{stdin, stdout, Read, Write},
-        iter,
-        path::Path,
-    },
+    std::{collections::HashMap, fs, iter, path::Path},
     tempfile::tempdir,
     try_insert_ext::*,
 };
@@ -29,7 +22,7 @@ mod maps;
 pub mod msbf;
 mod prizes;
 mod scenes;
-mod util;
+pub mod util;
 
 #[non_exhaustive]
 pub struct DungeonPrizes {
@@ -224,7 +217,7 @@ impl Patcher {
         let large_chest = (34, "TreasureBoxL");
 
         let chest_data = if settings.options.chest_size_matches_contents {
-            if item.is_progression() { large_chest } else { small_chest }
+            if item.goes_in_csmc_large_chest() { large_chest } else { small_chest }
         } else {
             if is_big { large_chest } else { small_chest }
         };
@@ -353,7 +346,7 @@ impl Patcher {
             kakariko_actors.add(item_actors.get(&merchant[0]).unwrap().clone())?;
             kakariko_actors.add(item_actors.get(&merchant[2]).unwrap().clone())?;
         }
-        let code = code::create(&self);
+        let code = code::create(&self, settings);
         let Self { game, boot, courses, .. } = self;
         let mut romfs = Files(vec![]);
 
@@ -426,14 +419,6 @@ pub struct Patches {
     romfs: Files,
 }
 
-// FIXME unnecssary duplicate
-fn pause() {
-    let mut stdout = stdout();
-    stdout.write(b"\nPress Enter to continue...").unwrap();
-    stdout.flush().unwrap();
-    stdin().read(&mut [0]).unwrap();
-}
-
 impl Patches {
     pub fn dump<P>(self, path: P) -> Result<()>
     where
@@ -460,8 +445,7 @@ impl Patches {
             Err(_) => {
                 error!("Couldn't write to:              {}", path.display());
                 error!("Please check that config.toml points to a valid output destination.");
-                pause();
-                std::process::exit(1);
+                fail!();
             }
         }
     }
@@ -495,7 +479,8 @@ fn cutscenes<'game, 'settings>(
         let mut opening = game.demo(0)?.map(truncate_cutscene);
         {
             let opening = opening.get_mut();
-            for flag in array::IntoIter::new([
+
+            for flag in IntoIterator::into_iter([
                 7, 9, 10,  // Skip Gulley in prologue
                 11,  // Fix Hyrule lighting, skip Gulley dialogue at Blacksmith
                 20,  // Disable Gulley's callback
@@ -523,12 +508,14 @@ fn cutscenes<'game, 'settings>(
                 315, // Shop open???
                 // 320, // Shady Guy Trigger
                 321, 322, // Skip first Oren cutscenes
+                374, // Fix Post-Gales and Post-Hera music by marking Sahasrahla telepathy as seen
                 //415, // Skip Yuga capturing Zelda
                 430, // Fix Chamber of Sages Softlock
                 510, // Open Portals, Activate Hyrule Castle Midway
-                522, // Hilda Text - Blacksmith + get Map Swap icon on lower screen + correct Lorule music
+                522, // Blacksmith Hilda Text, enable Map Swap icon, skip introductory Lorule music
+                524, 560, 600, 620, 640, // Skip Hilda Text, enable Lorule overworld music
                 525, // Skip Sahasrahla outside Link's House, make Hyrule Hotfoot appear
-                // 536, 537, // Gulley
+                // 536, 537, // Gulley Flags
                 // 556, 557, // Oren Flags
                 // 576, 577, // Seres Flags
                 // 596, 597, // Osfala Flags
@@ -563,7 +550,7 @@ fn cutscenes<'game, 'settings>(
             }
 
             if logic.vanes_activated {
-                for flag in array::IntoIter::new([
+                for flag in IntoIterator::into_iter([
                     920, //	Your House Weather Vane
                     921, //	Kakariko Village Weather Vane
                     922, //	Eastern Palace Weather Vane
@@ -590,6 +577,11 @@ fn cutscenes<'game, 'settings>(
                     opening.add_event_flag(flag);
                 }
             }
+
+            // Swordless Mode - Tear down Barrier at game start
+            if logic.swordless_mode {
+                opening.add_event_flag(410);
+            }
         }
 
         Ok(opening)
@@ -599,7 +591,7 @@ fn cutscenes<'game, 'settings>(
         let mut midgame = game.demo(4)?.map(truncate_cutscene);
         {
             let opening = midgame.get_mut();
-            for flag in array::IntoIter::new([
+            for flag in IntoIterator::into_iter([
                 510, // Skip Lorule Blacksmith's Wife dialogue
                 524, 560, 600, 620, 640, // Skip Hilda telepathy
             ]) {

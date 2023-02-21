@@ -1,99 +1,68 @@
 use {
     crate::{
-        check::Check,
-        convert,
-        location::Location,
-        location_node::LocationNode,
-        logic_mode::LogicMode::*,
-        pool::{get_item_pools, get_maiamai_pool},
-        progress::Progress,
+        convert, fail,
+        filler_util::shuffle,
+        item_pools::{get_item_pools, get_maiamai_pool},
+        model::{
+            check::Check, location::Location, location_node::LocationNode, progress::Progress,
+        },
+        patch::util::is_sage,
+        settings::logic_mode::LogicMode::*,
         world::build_world_graph,
         FillerItem::{self, *},
-        LocationInfo, Seed, Settings,
+        LocationInfo, Metrics, Seed, Settings,
     },
     albw::Item,
     log::{error, info},
     queue::Queue,
     rand::{rngs::StdRng, Rng, SeedableRng},
-    std::{
-        collections::{HashMap, HashSet},
-        process::exit,
-    },
+    std::collections::{BTreeMap, HashMap, HashSet},
 };
 
 /// Filler Algorithm
-#[rustfmt::skip]
-pub fn fill_stuff(settings: &Settings, seed: Seed) -> Vec<(LocationInfo, Item)> {
-    info!("Seed:                           {}", seed);
-    //info!("Hash:                           {}", settings.hash().0);
-    info!("Logic:                          {}", match settings.logic.mode {
-        Normal => "Normal",
-        Hard => "Hard",
-        GlitchBasic => "Glitched (Basic)",
-        GlitchAdvanced => "Glitched (Advanced)",
-        GlitchHell => "Glitched (Hell) - Did you really mean to choose this?",
-        NoLogic => "No Logic",
-    });
-    info!("Dungeon Prizes:                 {}", if settings.logic.randomize_dungeon_prizes { "Randomized" } else { "Not Randomized" });
-    info!("Lorule Castle Requirement:      {} Portraits", settings.logic.lc_requirement);
-    info!("Yuga Ganon Requirement:         {} Portraits", settings.logic.yuganon_requirement);
-    info!("Maiamai:                        {}", if settings.logic.maiamai_madness { "Randomized" } else { "Not Randomized" });
-    info!("Weather Vanes:                  {}", if settings.logic.vanes_activated { "All Activated" } else { "Normal" });
-    info!("Super Items:                    {}", if settings.logic.super_items { "Included" } else { "Not Included" });
-    info!("Trials:                         {}", if settings.logic.skip_trials { "Skipped" } else { "Normal" });
-    info!("Dark Rooms:                     {}", if settings.logic.lampless { "Lamp Not Required" } else { "Lamp Required" });
-    info!("Swords:                         {}\n", if settings.logic.swordless_mode { "Swordless Mode - NO SWORDS" } else { "Normal" });
-
+pub fn fill_stuff(settings: &Settings, seed: Seed) -> (Vec<(LocationInfo, Item)>, Metrics) {
+    settings.log(seed);
     prevalidate(settings);
 
     let mut rng = StdRng::seed_from_u64(seed as u64);
-
     let mut world_graph = build_world_graph();
     let mut check_map = prefill_check_map(&mut world_graph);
-
-    let (mut progression_pool, mut trash_pool) = get_item_pools(settings, &mut rng);
+    let (mut progression_pool, mut junk_pool) = get_item_pools(settings, &mut rng);
 
     verify_all_locations_accessible(&mut world_graph, &progression_pool, settings);
-
-    handle_exclusions(&mut check_map, settings, &mut rng, &mut trash_pool);
-
-    preplace_items(&mut check_map, settings, &mut rng, &mut progression_pool, &mut trash_pool);
-
+    handle_exclusions(&mut check_map, settings, &mut rng, &mut junk_pool);
+    preplace_items(&mut check_map, settings, &mut rng, &mut progression_pool, &mut junk_pool);
     assumed_fill(&mut world_graph, &mut rng, &mut progression_pool, &mut check_map, settings);
+    fill_junk(&mut check_map, &mut rng, &junk_pool);
 
-    fill_trash(&mut check_map, &mut rng, &trash_pool);
+    let metrics = calculate_metrics(&mut world_graph, &mut check_map, settings, &mut rng);
 
-    map_to_result(world_graph, check_map)
+    (map_to_result(world_graph, check_map), metrics)
 }
 
 fn prevalidate(settings: &Settings) {
     // LC Requirement
     if !(0..=7).contains(&settings.logic.lc_requirement) {
-        error!("Invalid LC Requirement: {}\nExiting...", settings.logic.lc_requirement);
-        exit(1);
+        fail!("Invalid LC Requirement: {}\nExiting...", settings.logic.lc_requirement);
     }
 
     // Yuganon Requirement
     if !(0..=7).contains(&settings.logic.yuganon_requirement) {
-        error!(
-            "Invalid Yuga Ganon Requirement: {}\nExiting...",
-            settings.logic.yuganon_requirement
-        );
-        exit(1);
+        fail!("Invalid Yuga Ganon Requirement: {}\nExiting...", settings.logic.yuganon_requirement);
     }
 }
 
 /// Place static items ahead of the randomly filled ones
 fn preplace_items<'a>(
     check_map: &mut HashMap<&'a str, Option<FillerItem>>, settings: &'a Settings, rng: &mut StdRng,
-    progression: &mut Vec<FillerItem>, trash: &mut Vec<FillerItem>,
+    progression: &mut Vec<FillerItem>, junk: &mut Vec<FillerItem>,
 ) {
     // Vanilla Dungeon Prizes
     if !settings.logic.randomize_dungeon_prizes {
-        place_static(check_map, progression, PendantOfCourage, "Eastern Palace Prize");
+        place_static(check_map, progression, PendantOfCourage01, "Eastern Palace Prize");
         place_static(check_map, progression, PendantOfWisdom, "House of Gales Prize");
         place_static(check_map, progression, PendantOfPower, "Tower of Hera Prize");
-        place_static(check_map, progression, Charm, "Hyrule Castle Prize");
+        place_static(check_map, progression, PendantOfCourage02, "Hyrule Castle Prize");
         place_static(check_map, progression, SageGulley, "Dark Palace Prize");
         place_static(check_map, progression, SageOren, "Swamp Palace Prize");
         place_static(check_map, progression, SageSeres, "Skull Woods Prize");
@@ -104,14 +73,73 @@ fn preplace_items<'a>(
     }
 
     // Place un-randomized items
-    place_static(check_map, progression, LetterInABottle, "Shore");
-    place_static(check_map, progression, RupeeSilver41, "Hyrule Hotfoot - Second Race");
-    place_static(check_map, progression, RupeeSilver42, "[TR] (1F) Under Center");
+    place_static(check_map, progression, LetterInABottle, "Southeastern Shore");
+    place_static(check_map, progression, RupeeSilver40, "Hyrule Hotfoot (Second Race)");
+    place_static(check_map, progression, RupeeSilver41, "[TR] (1F) Under Center");
     place_static(check_map, progression, RupeeGold09, "[TR] (B1) Under Center");
     place_static(check_map, progression, RupeeGold10, "[PD] (2F) South Hidden Room");
+    place_static(check_map, progression, HeartPiece28, "Fortune's Choice");
+
+    // Kakariko Item Shop
+    place_static(check_map, progression, ScootFruit01, "Kakariko Item Shop (1)");
+    place_static(check_map, progression, FoulFruit01, "Kakariko Item Shop (2)");
+    place_static(check_map, progression, Shield01, "Kakariko Item Shop (3)");
+
+    // Lakeside Item Shop
+    place_static(check_map, progression, ScootFruit02, "Lakeside Item Shop (1)");
+    place_static(check_map, progression, FoulFruit02, "Lakeside Item Shop (2)");
+    place_static(check_map, progression, Shield02, "Lakeside Item Shop (3)");
+
+    // Mysterious Man
+    place_static(check_map, progression, GoldBee01, "Mysterious Man");
+
+    // Thieves' Town Item Shop
+    place_static(check_map, progression, Bee01, "Thieves' Town Item Shop (1)");
+    place_static(check_map, progression, GoldBee02, "Thieves' Town Item Shop (2)");
+    place_static(check_map, progression, Fairy01, "Thieves' Town Item Shop (3)");
+    place_static(check_map, progression, Shield03, "Thieves' Town Item Shop (4)");
+
+    // Lorule Lake Item Shop
+    place_static(check_map, progression, Bee02, "Lorule Lakeside Item Shop (1)");
+    place_static(check_map, progression, GoldBee03, "Lorule Lakeside Item Shop (2)");
+    place_static(check_map, progression, Fairy02, "Lorule Lakeside Item Shop (3)");
+    place_static(check_map, progression, Shield04, "Lorule Lakeside Item Shop (4)");
+
+    // Super Items
+    if settings.logic.super_items {
+        exclude("Treacherous Tower Advanced (1)", rng, check_map, junk);
+        exclude("Treacherous Tower Advanced (2)", rng, check_map, junk);
+    } else {
+        place_static(check_map, progression, Lamp02, "Treacherous Tower Advanced (1)");
+        place_static(check_map, progression, Net02, "Treacherous Tower Advanced (2)");
+    }
+
+    // Nice Mode
+    if settings.logic.nice_mode {
+        exclude(" 10 Maiamai", rng, check_map, junk);
+        exclude(" 20 Maiamai", rng, check_map, junk);
+        exclude(" 30 Maiamai", rng, check_map, junk);
+        exclude(" 40 Maiamai", rng, check_map, junk);
+        exclude(" 50 Maiamai", rng, check_map, junk);
+        exclude(" 60 Maiamai", rng, check_map, junk);
+        exclude(" 70 Maiamai", rng, check_map, junk);
+        exclude(" 80 Maiamai", rng, check_map, junk);
+        exclude(" 90 Maiamai", rng, check_map, junk);
+    } else {
+        place_static(check_map, progression, Bow02, " 10 Maiamai");
+        place_static(check_map, progression, Boomerang02, " 20 Maiamai");
+        place_static(check_map, progression, Hookshot02, " 30 Maiamai");
+        place_static(check_map, progression, Hammer02, " 40 Maiamai");
+        place_static(check_map, progression, Bombs02, " 50 Maiamai");
+        place_static(check_map, progression, FireRod02, " 60 Maiamai");
+        place_static(check_map, progression, IceRod02, " 70 Maiamai");
+        place_static(check_map, progression, TornadoRod02, " 80 Maiamai");
+        place_static(check_map, progression, SandRod02, " 90 Maiamai");
+    }
+    exclude("100 Maiamai", rng, check_map, junk);
 
     let mut shop_positions: Vec<&str> = Vec::new();
-    let mut bow_light_positions: Vec<&str> = Vec::from(["Zelda"]);
+    let mut bow_light_positions: Vec<&str> = Vec::from(["Final Zelda"]);
     let mut maiamai_positions: Vec<&str> = Vec::new();
 
     for (check_name, item) in check_map.clone() {
@@ -137,13 +165,13 @@ fn preplace_items<'a>(
         let mut weapons = Vec::from([Bow01, Bombs01, FireRod01, IceRod01, Hammer01]);
 
         if !settings.logic.swordless_mode {
-            weapons.append(&mut Vec::from([Sword01, Sword02, Sword03, Sword04]));
+            weapons.extend_from_slice(&[Sword01]);
         }
 
         match settings.logic.mode {
             Normal => {}
             _ => {
-                weapons.append(&mut Vec::from([Lamp01, Net01]));
+                weapons.extend_from_slice(&[Lamp01, Net01]);
             }
         }
 
@@ -154,17 +182,20 @@ fn preplace_items<'a>(
         progression.retain(|x| *x != weapon);
     }
 
+    // Bell in Shop
     if settings.logic.bell_in_shop {
         check_map.insert(shop_positions.remove(rng.gen_range(0..shop_positions.len())), Some(Bell));
         progression.retain(|x| *x != Bell);
     }
 
+    // Pouch in Shop
     if settings.logic.pouch_in_shop {
         check_map
             .insert(shop_positions.remove(rng.gen_range(0..shop_positions.len())), Some(Pouch));
         progression.retain(|x| *x != Pouch);
     }
 
+    // Boots in Shop
     if settings.logic.boots_in_shop {
         check_map.insert(
             shop_positions.remove(rng.gen_range(0..shop_positions.len())),
@@ -175,25 +206,25 @@ fn preplace_items<'a>(
 
     // Exclude Minigames
     if settings.logic.minigames_excluded {
-        exclude("Cucco Ranch", rng, check_map, trash);
-        exclude("Hyrule Hotfoot - First Race", rng, check_map, trash);
-        exclude("Rupee Rush (Hyrule)", rng, check_map, trash);
-        exclude("Rupee Rush (Lorule)", rng, check_map, trash);
-        exclude("Octoball Derby", rng, check_map, trash);
-        exclude("Treacherous Tower (Intermediate)", rng, check_map, trash);
+        exclude("Dodge the Cuccos", rng, check_map, junk);
+        exclude("Hyrule Hotfoot (First Race)", rng, check_map, junk);
+        exclude("Rupee Rush (Hyrule)", rng, check_map, junk);
+        exclude("Rupee Rush (Lorule)", rng, check_map, junk);
+        exclude("Octoball Derby", rng, check_map, junk);
+        exclude("Treacherous Tower Intermediate", rng, check_map, junk);
 
-        // For Maiamai Madness, also turn the rupee rush maiamai into random trash
+        // For Maiamai Madness, also turn the rupee rush maiamai into random junk
         if settings.logic.maiamai_madness {
-            exclude("[Mai] Hyrule Rupee Rush Wall", rng, check_map, trash);
-            exclude("[Mai] Lorule Rupee Rush Wall", rng, check_map, trash);
+            exclude("[Mai] Hyrule Rupee Rush Wall", rng, check_map, junk);
+            exclude("[Mai] Lorule Rupee Rush Wall", rng, check_map, junk);
         }
     }
 
     // For non-Maiamai Madness seeds, default them to Maiamai
+    // FIXME Inefficient to add Maiamai to progression pool, shuffle, then remove them
     if !settings.logic.maiamai_madness {
         let mut maiamai_items = get_maiamai_pool();
         for check_name in maiamai_positions {
-            // FIXME Inefficient to add Maiamai to progression pool, shuffle, then remove them
             place_static(check_map, progression, maiamai_items.remove(0), check_name);
         }
     }
@@ -208,17 +239,19 @@ fn place_static<'a>(
     pool.retain(|x| *x != item);
 }
 
-// Exclude a location by placing a random trash item there
+// Exclude a location by placing a random junk item there
 fn exclude(
     check_name: &'static str, rng: &mut StdRng, check_map: &mut HashMap<&str, Option<FillerItem>>,
-    trash: &mut Vec<FillerItem>,
+    junk: &mut Vec<FillerItem>,
 ) {
-    check_map.insert(check_name, Some(trash.remove(rng.gen_range(0..trash.len()))));
+    if check_map.insert(check_name, Some(junk.remove(rng.gen_range(0..junk.len())))).is_none() {
+        fail!("Check not found: {}", check_name);
+    }
 }
 
 fn handle_exclusions<'a>(
     check_map: &mut HashMap<&'a str, Option<FillerItem>>, settings: &'a Settings, rng: &mut StdRng,
-    trash_pool: &mut Vec<FillerItem>,
+    junk_pool: &mut Vec<FillerItem>,
 ) {
     let opt = settings.exclusions.0.get("exclusions");
     if opt.is_none() {
@@ -231,15 +264,14 @@ fn handle_exclusions<'a>(
         if check_map.contains_key(&exclusion.as_str()) {
             check_map.insert(
                 &exclusion.as_str(),
-                Some(trash_pool.remove(rng.gen_range(0..trash_pool.len()))),
+                Some(junk_pool.remove(rng.gen_range(0..junk_pool.len()))),
             );
         } else {
             error!(
                 "Cannot exclude \"{}\", no matching check found with that name.",
                 &exclusion.as_str()
             );
-            error!("Consult a spoiler log for a list of valid check names.");
-            exit(1);
+            fail!("Consult a spoiler log for a list of valid check names.");
         }
     }
 }
@@ -251,9 +283,9 @@ fn map_to_result(
     let mut result: Vec<(LocationInfo, Item)> = Vec::new();
     for (_, location_node) in world_graph {
         for check in location_node.get_checks() {
-            if check.get_location_info().is_some() {
+            if let Some(loc_info) = check.get_location_info() {
                 result.push((
-                    check.get_location_info().unwrap(),
+                    loc_info,
                     convert(check_map.get(check.get_name()).unwrap().unwrap()).unwrap(),
                 ));
             }
@@ -264,8 +296,8 @@ fn map_to_result(
 
 fn is_dungeon_prize(item: FillerItem) -> bool {
     match item {
-        PendantOfPower | PendantOfWisdom | PendantOfCourage | Charm | SageGulley | SageOren
-        | SageSeres | SageOsfala | SageImpa | SageIrene | SageRosso => true,
+        PendantOfPower | PendantOfWisdom | PendantOfCourage01 | PendantOfCourage02 | SageGulley
+        | SageOren | SageSeres | SageOsfala | SageImpa | SageIrene | SageRosso => true,
         _ => false,
     }
 }
@@ -335,9 +367,9 @@ fn is_dungeon_item(item: FillerItem) -> bool {
     }
 }
 
-fn fill_trash(
+fn fill_junk(
     check_map: &mut HashMap<&str, Option<FillerItem>>, rng: &mut StdRng,
-    trash_items: &Vec<FillerItem>,
+    junk_items: &Vec<FillerItem>,
 ) {
     info!("Placing Junk Items...");
 
@@ -348,20 +380,29 @@ fn fill_trash(
         }
     }
 
-    if empty_check_keys.len() != trash_items.len() {
-        error!(
-            "Number of empty checks: {} does not match available trash items: {}",
+    if empty_check_keys.len() != junk_items.len() {
+        println!();
+
+        for key in &empty_check_keys {
+            info!("Empty Check: {}", key);
+        }
+
+        println!();
+
+        for key in junk_items {
+            info!("Junk: {}", convert(*key).unwrap().as_str());
+        }
+
+        fail!(
+            "Number of empty checks: {} does not match available junk items: {}",
             empty_check_keys.len(),
-            trash_items.len()
+            junk_items.len()
         );
-        exit(1);
     }
 
-    for trash in trash_items {
-        check_map.insert(
-            empty_check_keys.remove(rng.gen_range(0..empty_check_keys.len())),
-            Some(*trash),
-        );
+    for junk in junk_items {
+        check_map
+            .insert(empty_check_keys.remove(rng.gen_range(0..empty_check_keys.len())), Some(*junk));
     }
 }
 
@@ -431,7 +472,7 @@ fn filter_dungeon_checks(item: FillerItem, eligible_checks: &mut Vec<Check>) -> 
                 | LoruleCastleKeySmall05 => "[LC]",
 
                 _ => {
-                    panic!("Item {:?} is not a dungeon item", item);
+                    fail!("Item {:?} is not a dungeon item", item);
                 }
             })
         })
@@ -469,8 +510,7 @@ fn prefill_check_map(
                 })
                 .is_some()
             {
-                error!("Multiple checks have duplicate name: {}", check.get_name());
-                exit(1);
+                fail!("Multiple checks have duplicate name: {}", check.get_name());
             }
         }
     }
@@ -498,23 +538,46 @@ fn verify_all_locations_accessible(
 
     let reachable_checks = assumed_search(loc_map, progression_pool, &mut check_map, settings); //find_reachable_checks(loc_map, &everything, &mut check_map); //
 
-    const TOTAL_CHECKS: usize = 254 // Standard
-            + 11  // Dungeon Prizes
-            + 100 // Maiamai
-            + 5   // Unshuffled
-            + 29; // Quest
+    /**
+     * 427 TOTAL CHECKS <br /><br />
+     *
+     * 413 are considered in logic:
+     * - 254 Standard Checks
+     * - 100 Maiamai
+     * - 11 Dungeon Prizes
+     * - 29 Quest (non-items that are still progression)
+     * - 19 Statically Placed Items:
+     *     - 12x Shop Items (not including 9,999 items)
+     *     - 3x Obscure Gold/Silver Rupees
+     *     - Mysterious Man
+     *     - FIXME: Letter in a Bottle
+     *     - FIXME: Hyrule Hotfoot Second Race
+     *     - FIXME: Fortune's Choice
+     */
+    const TOTAL_CHECKS: usize = 427;
 
-    if reachable_checks.len() != TOTAL_CHECKS {
-        // for rc in &reachable_checks {
-        //     info!("Reachable Check: {}", rc.get_name());
-        // }
+    /**
+     * Checks intentionally considered unreachable:
+     * - FIXME: 10 Maiamai Rewards
+     * - 2 Golden Bees for 9,999 Rupees
+     * - 2 Treacherous Tower Advanced
+     */
+    const UNREACHABLE_CHECKS: usize = 14;
 
-        error!(
+    if reachable_checks.len() != TOTAL_CHECKS - UNREACHABLE_CHECKS {
+        let reachable_check_names: Vec<&str> =
+            reachable_checks.iter().map(|c| c.get_name()).collect();
+        for (check, _) in &check_map {
+            if !reachable_check_names.contains(check) {
+                info!("Unreachable Check: {}", check);
+            }
+        }
+
+        fail!(
             "Only {}/{} checks were reachable in the world graph",
             reachable_checks.len(),
-            TOTAL_CHECKS
+            TOTAL_CHECKS - UNREACHABLE_CHECKS
         );
-        exit(1);
     }
 }
 
@@ -536,8 +599,7 @@ fn find_reachable_checks(
         let location_node = match loc_map.get_mut(&location) {
             Some(loc) => loc,
             None => {
-                info!("Location Undefined: {:?}", location);
-                exit(1);
+                fail!("Location Undefined: {:?}", location);
             }
         };
 
@@ -661,3 +723,193 @@ fn assumed_search(
 
     reachable_checks
 }
+
+fn calculate_metrics(
+    world_graph: &mut HashMap<Location, LocationNode>,
+    check_map: &mut HashMap<&str, Option<FillerItem>>, settings: &Settings, rng: &mut StdRng,
+) -> Metrics {
+    let playthrough = sphere_search(world_graph, check_map, settings);
+
+    let hints = generate_path_hints(world_graph, check_map, settings, rng);
+
+    Metrics::new(playthrough.len(), playthrough, hints)
+}
+
+/// Sphere Search
+fn sphere_search<'a>(
+    world_graph: &mut HashMap<Location, LocationNode>,
+    mut check_map: &mut HashMap<&str, Option<FillerItem>>, settings: &Settings,
+) -> BTreeMap<String, BTreeMap<&'static str, &'static str>> {
+    let mut progress = Progress::new(settings.clone());
+    let mut reachable_checks: Vec<Check>;
+    let mut spheres = BTreeMap::new();
+    let mut sphere_num = 0;
+
+    loop {
+        reachable_checks = find_reachable_checks(world_graph, &progress);
+        let reachable_items =
+            get_items_from_reachable_checks(&reachable_checks, &mut check_map, settings);
+
+        let new_items = reachable_items.difference(&progress);
+
+        if new_items.is_empty() {
+            break;
+        }
+
+        for new_item in &new_items {
+            progress.add_item(*new_item);
+        }
+
+        let mut sphere = BTreeMap::new();
+        for reachable_check in reachable_checks {
+            let filler_item = check_map.get(reachable_check.get_name()).unwrap().unwrap();
+            if new_items.contains(&filler_item) && filler_item.is_progression() {
+                sphere.insert(reachable_check.get_name(), filler_item.as_str());
+            }
+        }
+        if sphere.is_empty() {
+            continue; // hide spheres with only minor progression items
+        }
+
+        spheres.insert(format!("Sphere {:02}", sphere_num), sphere);
+        sphere_num += 1;
+    }
+
+    spheres
+}
+
+fn generate_path_hints(
+    world_graph: &mut HashMap<Location, LocationNode>,
+    check_map: &mut HashMap<&str, Option<FillerItem>>, settings: &Settings, rng: &mut StdRng,
+) -> Vec<String> {
+    let mut bosses_and_prize_locations: Vec<(FillerItem, &str)> = vec![
+        (Yuga, "Eastern Palace Prize"),
+        (Margomill, "House of Gales Prize"),
+        (Moldorm, "Tower of Hera Prize"),
+        (GemesaurKing, "Dark Palace Prize"),
+        (Arrghus, "Swamp Palace Prize"),
+        (Knucklemaster, "Skull Woods Prize"),
+        (Stalblind, "Thieves' Hideout Prize"),
+        (Grinexx, "Turtle Rock Prize"),
+        (Zaganaga, "Desert Palace Prize"),
+        (Dharkstare, "Ice Ruins Prize"),
+    ];
+
+    bosses_and_prize_locations = shuffle(bosses_and_prize_locations, rng);
+
+    let mut taken_path_checks: Vec<Check> = Vec::new();
+    let mut path_hints = Vec::new();
+    for (boss, prize_loc) in bosses_and_prize_locations {
+        if is_sage(convert(check_map.get(prize_loc).unwrap().unwrap()).unwrap()) {
+            if let Some(path_check) =
+                get_path_check(boss, world_graph, check_map, settings, rng, &taken_path_checks)
+            {
+                taken_path_checks.push(path_check);
+                path_hints.push(format!(
+                    "They say there's a link between {} and {}.",
+                    path_check.get_location_info().unwrap().region(),
+                    boss.as_str()
+                ));
+            }
+        }
+    }
+
+    path_hints
+}
+
+fn get_path_check(
+    boss: FillerItem, world_graph: &mut HashMap<Location, LocationNode>,
+    check_map: &mut HashMap<&str, Option<FillerItem>>, settings: &Settings, rng: &mut StdRng,
+    taken_path_checks: &Vec<Check>,
+) -> Option<Check> {
+    let path_checks = get_path_checks(boss, world_graph, check_map, settings, taken_path_checks);
+
+    return if path_checks.is_empty() {
+        None
+    } else {
+        Some(*path_checks.get(rng.gen_range(0..path_checks.len())).unwrap())
+    };
+}
+
+/// Get Path Checks
+fn get_path_checks<'a>(
+    boss: FillerItem, world_graph: &mut HashMap<Location, LocationNode>,
+    mut check_map: &mut HashMap<&str, Option<FillerItem>>, settings: &Settings,
+    taken_path_checks: &Vec<Check>,
+) -> Vec<Check> {
+    let mut progress = Progress::new(settings.clone());
+    let mut reachable_checks: Vec<Check>;
+    let mut path_checks = Vec::new();
+
+    let mut potential_path_checks = HashSet::new();
+
+    // Find candidate Path Checks with a modified sphere search
+    loop {
+        reachable_checks = find_reachable_checks(world_graph, &progress);
+        potential_path_checks.extend(&reachable_checks);
+        let reachable_items =
+            get_items_from_reachable_checks(&reachable_checks, &mut check_map, settings);
+
+        let new_items = reachable_items.difference(&progress);
+
+        if new_items.is_empty() {
+            fail!("No possible path to defeat {}", boss.as_str());
+        }
+
+        for new_item in &new_items {
+            progress.add_item(*new_item);
+        }
+
+        if progress.has(boss) {
+            break;
+        }
+    }
+
+    // Limit potential paths to locations with valid Path Items that haven't yet been taken
+    potential_path_checks.retain(|check| {
+        !taken_path_checks.contains(check)
+            && POSSIBLE_PATH_ITEMS.contains(&check_map.get(check.get_name()).unwrap().unwrap())
+    });
+
+    // Test candidate items to see if Boss can be defeated without them
+    for check in potential_path_checks {
+        // Reset Progression
+        progress = Progress::new(settings.clone());
+
+        loop {
+            reachable_checks = find_reachable_checks(world_graph, &progress);
+
+            // Remove Potential Path Location
+            reachable_checks.retain(|c| check.ne(c));
+
+            let reachable_items =
+                get_items_from_reachable_checks(&reachable_checks, &mut check_map, settings);
+
+            let new_items = reachable_items.difference(&progress);
+
+            if new_items.is_empty() {
+                if !progress.has(boss) {
+                    // Boss couldn't be reached without the item on this check, therefore it's path
+                    path_checks.push(check);
+                }
+                break;
+            }
+
+            for new_item in &new_items {
+                progress.add_item(*new_item);
+            }
+        }
+    }
+
+    path_checks
+}
+
+const POSSIBLE_PATH_ITEMS: [FillerItem; 48] = [
+    Bow01, Bow02, Boomerang01, Boomerang02, Hookshot01, Hookshot02, Bombs01, Bombs02, FireRod01,
+    FireRod02, IceRod01, IceRod02, Hammer01, Hammer02, SandRod01, SandRod02, TornadoRod01,
+    TornadoRod02, Bell, StaminaScroll, PegasusBoots, Flippers, HylianShield, SmoothGem,
+    //LetterInABottle,
+    PremiumMilk, HintGlasses, GreatSpin, Bottle01, Bottle02, Bottle03, Bottle04, Bottle05, Lamp01,
+    Lamp02, Sword01, Sword02, Sword03, Sword04, Glove01, Glove02, Net01, Net02, Mail01, Mail02,
+    OreYellow, OreGreen, OreBlue, OreRed,
+];

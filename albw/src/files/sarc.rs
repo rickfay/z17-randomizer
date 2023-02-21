@@ -306,7 +306,7 @@ impl Archive {
                 // }
 
                 //info!("Do we get here...");
-                //panic!();
+                //fail!();
             }
             Err(_) => {
                 panic!("Can't update non-existent file: {}", file.path);

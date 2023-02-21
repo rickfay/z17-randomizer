@@ -1,5 +1,6 @@
 use {
     crate::{
+        fail,
         patch::{util::*, DungeonPrizes},
         ItemExt, MsbfKey, Patcher, Settings,
     },
@@ -8,7 +9,7 @@ use {
         byaml,
         course::{Id, Id::*},
         language::FlowChart,
-        scene::{Arg, Flag, Obj, Point, Rail, Transform, Vec3},
+        scene::{Arg, Dest, Flag, Obj, Point, Rail, Transform, Vec3},
         Actor, File,
         Item::{self, *},
     },
@@ -188,21 +189,35 @@ fn patch_prize_byaml(patcher: &mut Patcher, prizes: &DungeonPrizes, settings: &S
 /// Eastern Palace
 fn patch_eastern(patcher: &mut Patcher, prize: Item, _: &Settings) {
     let data = PrizePatchData::get(prize);
+    let outside_hyrule_castle = Dest::new(FieldLight, 18, 5);
 
     // Eastern Palace 1F - Add Dungeon Reward
     patcher.add_obj(DungeonEast, 1, Obj {
         arg: Arg(
-            0, data.arg1, 0, 0, 4, 4, 250, data.flag, 0, data.arg9, data.arg10, 0, data.arg12, 0.0,
+            outside_hyrule_castle.spawn_point,
+            data.arg1,
+            0,
+            0,
+            4,
+            data.flag.get_type(),
+            250,
+            data.flag.get_value(),
+            0,
+            data.arg9,
+            outside_hyrule_castle.scene as i32,
+            outside_hyrule_castle.scene_index - 1,
+            data.arg12,
+            0.0,
         ),
         clp: 0,
-        flg: (4, 4, 250, data.flag),
+        flg: (4, data.flag.get_type(), 250, data.flag.get_value()),
         id: data.actor_id,
         lnk: vec![],
         nme: None,
         ril: vec![],
         ser: Some(129),
         srt: Transform {
-            scale: Vec3 { x: 1.0, y: 1.0, z: 1.0 },
+            scale: Vec3::UNIT,
             rotate: Vec3 { x: data.rot_x, y: 0.0, z: 0.0 },
             translate: Vec3 { x: 0.0, y: 2.5, z: -5.75 },
         },
@@ -211,33 +226,7 @@ fn patch_eastern(patcher: &mut Patcher, prize: Item, _: &Settings) {
     });
 
     if is_sage(prize) {
-        reroute_sage_warp(patcher, prize, 5, 0, 17); // Outside Hyrule Castle
-    } else {
-        patcher.modify_objs(DungeonEast, 1, &[remove_collision(301)]);
-
-        if is_green_pendant(prize) {
-            generate_charm_chests(
-                patcher,
-                DungeonEast,
-                1,
-                prize,
-                Flag::Event(250),
-                0,
-                (131, 132),
-                (302, 303),
-                Vec3 { x: 0.0, y: 2.5, z: -5.75 },
-            );
-        } else {
-            patcher.add_obj(
-                DungeonEast,
-                1,
-                Obj::pendant_chest(prize, Flag::Event(250), prize_flag(prize), 0, 130, 302, Vec3 {
-                    x: 0.0,
-                    y: 2.5,
-                    z: -5.75,
-                }),
-            );
-        }
+        reroute_sage_warp(patcher, prize, outside_hyrule_castle);
     }
 
     // Eastern Ruins - Disable Post-EP cutscene
@@ -255,11 +244,12 @@ fn patch_eastern(patcher: &mut Patcher, prize: Item, _: &Settings) {
         disable(208), // Textbox trigger
         disable(264), // lgt_NpcSoldier_Field1B_04_broke - idk what this is, but now it's nothing
         disable(529), // AreaSwitchCube
-        // enable(502), // Sahasrahla
+        enable(502),  // Sahasrahla
     ]);
-    patcher.modify_system(FieldLight, 18, &[call(199, |obj| {
-        obj.srt.translate.z = 12.75; // move to where cutscene normally ends
-    })]);
+
+    // patcher.modify_system(FieldLight, 18, &[call(199, |obj| {
+    //     obj.srt.translate.z = 12.75; // move to where cutscene normally ends
+    // })]);
 
     // Rewire Post-EP checks to require PoC
     let green_pendant_flag = prize_flag(PendantCourage);
@@ -308,7 +298,7 @@ fn patch_eastern(patcher: &mut Patcher, prize: Item, _: &Settings) {
         obj.clear_disable_flag();
     })]);
 
-    // Small Rocks
+    // Rosso Rocks
     patcher.modify_system(FieldLight, 2, &[
         set_enable_flag(11, green_pendant_flag), // controller
         set_enable_flag(12, green_pendant_flag),
@@ -355,76 +345,39 @@ fn patch_gales(patcher: &mut Patcher, prize: Item, _: &Settings) {
     //                 Obj::step_switch(Flag::Event(340), 0, 102, 564,
     //                                  Vec3 { x: 0.0, y: 0.0, z: -39.5 }));
 
+    const UNQ_PRIZE: u16 = 459;
+
+    // Insta-spawn Pendants
+    if is_pendant(prize) {
+        patcher.modify_objs(DungeonWind, 3, &[call(UNQ_PRIZE, |obj| {
+            obj.lnk.clear();
+        })]);
+    }
+
     if prize == PendantWisdom {
         return;
     }
 
+    modify_dungeon_reward(
+        patcher,
+        prize,
+        UNQ_PRIZE,
+        DungeonWind,
+        3,
+        false,
+        Dest::new(FieldLight, 35, 0),
+    );
+
     let prize_flag = prize_flag(prize);
     patcher.modify_objs(DungeonWind, 3, &[
-        modify_reward(459, prize, false),
         set_enable_flag(490, prize_flag), // Warp to leave boss room
         set_enable_flag(543, prize_flag), // Destination Warp
     ]);
 
-    if is_pendant(prize) {
-        patcher.modify_objs(DungeonWind, 3, &[
-            remove_collision(459),
-            call(459, |obj| {
-                obj.lnk.clear(); // insta-spawn since chest will already be there
-            }),
-        ]);
-
-        if is_green_pendant(prize) {
-            generate_charm_chests(
-                patcher,
-                DungeonWind,
-                3,
-                prize,
-                Flag::Event(340),
-                0,
-                (103, 104),
-                (565, 566),
-                Vec3 { x: 0.0, y: 0.0, z: -46.5 },
-            );
-            generate_charm_warps(
-                patcher,
-                DungeonWind,
-                3,
-                prize,
-                0,
-                (105, 106),
-                (567, 568),
-                0,
-                0,
-                34,
-                Vec3 { x: 0.0, y: 0.0, z: -44.75 },
-                false,
-            );
-        } else {
-            patcher.add_obj(
-                DungeonWind,
-                3,
-                Obj::pendant_chest(prize, Flag::Event(340), prize_flag, 0, 100, 562, Vec3 {
-                    x: 0.0,
-                    y: 0.0,
-                    z: -46.5,
-                }),
-            );
-            patcher.add_obj(
-                DungeonWind,
-                3,
-                Obj::blue_warp(prize_flag, 0, 101, 563, 0, 0, 34, Vec3 {
-                    x: 0.0,
-                    y: 0.0,
-                    z: -44.75,
-                }),
-            );
-        }
-    } else {
-        reroute_sage_warp(patcher, prize, 0, 0, 34);
-
+    // Gulley will fall down on his own, other Sages need to be put on a Rail to appear
+    if is_sage(prize) {
         if prize != SageGulley {
-            patcher.modify_objs(DungeonWind, 3, &[add_rail(459, (12, 0))]);
+            patcher.modify_objs(DungeonWind, 3, &[add_rail(UNQ_PRIZE, (12, 0))]);
 
             let (end_y, end_z) = if prize == SageImpa { (2.0, -47.0) } else { (0.0, -46.5) };
             patcher.add_rail(DungeonWind, 3, Rail {
@@ -435,7 +388,7 @@ fn patch_gales(patcher: &mut Patcher, prize: Item, _: &Settings) {
                         ctl: [0.0, end_y, end_z - 15.0, 0.0, end_y, end_z - 15.0],
                         lnk: vec![],
                         srt: Transform {
-                            scale: Vec3 { x: 1.0, y: 1.0, z: 1.0 },
+                            scale: Vec3::UNIT,
                             rotate: Vec3 { x: 330.0, y: 0.0, z: 0.0 },
                             translate: Vec3 { x: 0.0, y: end_y, z: end_z - 15.0 },
                         },
@@ -445,7 +398,7 @@ fn patch_gales(patcher: &mut Patcher, prize: Item, _: &Settings) {
                         ctl: [0.0, end_y, end_z, 0.0, end_y, end_z],
                         lnk: vec![],
                         srt: Transform {
-                            scale: Vec3 { x: 1.0, y: 1.0, z: 1.0 },
+                            scale: Vec3::UNIT,
                             rotate: Vec3 { x: 330.0, y: 0.0, z: 0.0 },
                             translate: Vec3 { x: 0.0, y: end_y, z: end_z },
                         },
@@ -469,72 +422,33 @@ fn patch_hera(patcher: &mut Patcher, prize: Item, _: &Settings) {
     //                 Obj::step_switch(Flag::Event(370), 20, 313, 920,
     //                                  Vec3 { x: 0.0, y: 101.0, z: -1.5 }));
 
+    const UNQ_PRIZE: u16 = 829;
+
+    // Insta-spawn Pendants
+    if is_pendant(prize) {
+        patcher.modify_objs(DungeonHera, 1, &[call(UNQ_PRIZE, |obj| {
+            obj.lnk.clear();
+        })]);
+    }
+
     if prize == PendantPower {
         return;
     }
 
-    patcher.modify_objs(DungeonHera, 1, &[modify_reward(829, prize, false)]);
+    modify_dungeon_reward(
+        patcher,
+        prize,
+        UNQ_PRIZE,
+        DungeonHera,
+        1,
+        false,
+        Dest::new(FieldLight, 3, 3),
+    );
 
-    if is_pendant(prize) {
-        patcher.modify_objs(DungeonHera, 1, &[
-            remove_collision(829),
-            call(829, |obj| {
-                obj.lnk.clear(); // insta-spawn since chest will already be there
-            }),
-        ]);
-
-        if is_green_pendant(prize) {
-            generate_charm_chests(
-                patcher,
-                DungeonHera,
-                1,
-                prize,
-                Flag::Event(370),
-                20,
-                (316, 317),
-                (921, 922),
-                Vec3 { x: 0.0, y: 101.0, z: -5.5 },
-            );
-            generate_charm_warps(
-                patcher,
-                DungeonHera,
-                1,
-                prize,
-                20,
-                (318, 319),
-                (923, 924),
-                3,
-                0,
-                2,
-                Vec3 { x: 0.0, y: 101.0, z: -1.5 },
-                false,
-            );
-        } else {
-            let pendant_flag = prize_flag(prize);
-            patcher.add_obj(
-                DungeonHera,
-                1,
-                Obj::pendant_chest(prize, Flag::Event(370), pendant_flag, 20, 314, 921, Vec3 {
-                    x: 0.0,
-                    y: 101.0,
-                    z: -5.5,
-                }),
-            );
-            patcher.add_obj(
-                DungeonHera,
-                1,
-                Obj::blue_warp(pendant_flag, 20, 315, 922, 3, 0, 2, Vec3 {
-                    x: 0.0,
-                    y: 101.0,
-                    z: -1.5,
-                }),
-            );
-        }
-    } else {
-        reroute_sage_warp(patcher, prize, 3, 0, 2);
-
+    // Gulley will fall down on his own, other Sages need to be put on a Rail to appear
+    if is_sage(prize) {
         if prize != SageGulley {
-            patcher.modify_objs(DungeonHera, 1, &[add_rail(829, (56, 0))]);
+            patcher.modify_objs(DungeonHera, 1, &[add_rail(UNQ_PRIZE, (56, 0))]);
 
             let (end_y, end_z) = if prize == SageImpa { (103.0, -6.0) } else { (101.0, -5.5) };
             patcher.add_rail(DungeonHera, 1, Rail {
@@ -545,7 +459,7 @@ fn patch_hera(patcher: &mut Patcher, prize: Item, _: &Settings) {
                         ctl: [0.0, end_y, end_z - 15.0, 0.0, end_y, end_z - 15.0],
                         lnk: vec![],
                         srt: Transform {
-                            scale: Vec3 { x: 1.0, y: 1.0, z: 1.0 },
+                            scale: Vec3::UNIT,
                             rotate: Vec3 { x: 330.0, y: 0.0, z: 0.0 },
                             translate: Vec3 { x: 0.0, y: end_y, z: end_z - 15.0 },
                         },
@@ -555,7 +469,7 @@ fn patch_hera(patcher: &mut Patcher, prize: Item, _: &Settings) {
                         ctl: [0.0, end_y, end_z, 0.0, end_y, end_z],
                         lnk: vec![],
                         srt: Transform {
-                            scale: Vec3 { x: 1.0, y: 1.0, z: 1.0 },
+                            scale: Vec3::UNIT,
                             rotate: Vec3 { x: 330.0, y: 0.0, z: 0.0 },
                             translate: Vec3 { x: 0.0, y: end_y, z: end_z },
                         },
@@ -570,41 +484,22 @@ fn patch_hera(patcher: &mut Patcher, prize: Item, _: &Settings) {
 
 /// Hyrule Castle
 fn patch_hyrule_castle(patcher: &mut Patcher, prize: Item, _: &Settings) {
-    patcher.modify_objs(IndoorLight, 12, &[
-        modify_reward(23, prize, true),
-        call(23, |obj| {
-            obj.set_typ(4); // needed to make sure prize disappears when collected
-        }),
-    ]);
+    // Convert Zelda herself into the dungeon prize
+    const UNQ_ZELDA: u16 = 23;
+    modify_dungeon_reward(
+        patcher,
+        prize,
+        UNQ_ZELDA,
+        IndoorLight,
+        12,
+        true,
+        Dest::new(IndoorLight, 12, 1),
+    );
 
-    if is_sage(prize) {
-        reroute_sage_warp(patcher, prize, 1, 2, 11);
-    } else {
-        patcher.modify_objs(IndoorLight, 12, &[remove_collision(23)]);
-        if is_green_pendant(prize) {
-            generate_charm_chests(
-                patcher,
-                IndoorLight,
-                12,
-                prize,
-                Flag::Event(1),
-                3,
-                (100, 101),
-                (147, 148),
-                Vec3 { x: 0.0, y: 6.0, z: -54.5 },
-            );
-        } else {
-            patcher.add_obj(
-                IndoorLight,
-                12,
-                Obj::pendant_chest(prize, Flag::Event(1), prize_flag(prize), 3, 100, 147, Vec3 {
-                    x: 0.0,
-                    y: 6.0,
-                    z: -54.5,
-                }),
-            );
-        }
-    }
+    // Set TYP to 4 to make sure prize disappears when collected
+    patcher.modify_objs(IndoorLight, 12, &[call(UNQ_ZELDA, |obj| {
+        obj.set_typ(4);
+    })]);
 }
 
 /// Dark Palace
@@ -622,67 +517,17 @@ fn patch_dark(patcher: &mut Patcher, prize: Item, _: &Settings) {
         return;
     }
 
-    let prize_flag = prize_flag(prize);
-
-    patcher.modify_objs(DungeonDark, 1, &[modify_reward(262, prize, false)]);
+    modify_dungeon_reward(patcher, prize, 262, DungeonDark, 1, false, Dest::new(FieldDark, 20, 5));
 
     if is_pendant(prize) {
+        // Don't take camera control away from player to watch Mask break and reveal... nothing...
         patcher.modify_objs(DungeonDark, 1, &[
-            remove_collision(262),
             disable(121), // ObjJewelMask Camera
         ]);
-
-        if is_green_pendant(prize) {
-            generate_charm_chests(
-                patcher,
-                DungeonDark,
-                1,
-                prize,
-                Flag::Course(21),
-                4,
-                (160, 161),
-                (300, 301),
-                Vec3 { x: 0.0, y: 0.0, z: -47.5 },
-            );
-            generate_charm_warps(
-                patcher,
-                DungeonDark,
-                1,
-                prize,
-                4,
-                (162, 163),
-                (302, 303),
-                5,
-                1,
-                19,
-                Vec3 { x: 0.0, y: 0.0, z: -44.75 },
-                false,
-            );
-        } else {
-            patcher.add_obj(
-                DungeonDark,
-                1,
-                Obj::pendant_chest(prize, Flag::Course(21), prize_flag, 4, 155, 300, Vec3 {
-                    x: 0.0,
-                    y: 0.0,
-                    z: -47.5,
-                }),
-            );
-            patcher.add_obj(
-                DungeonDark,
-                1,
-                Obj::blue_warp(prize_flag, 4, 156, 301, 5, 1, 19, Vec3 {
-                    x: 0.0,
-                    y: 0.0,
-                    z: -44.75,
-                }),
-            );
-        }
     } else {
-        reroute_sage_warp(patcher, prize, 5, 1, 19);
-
+        // Put non-Gulley Portraits on a Rail so they drop down after the boss
+        // TODO Figure out how to attach skeletal animation to portraits so they drop non-jankily
         patcher.modify_objs(DungeonDark, 1, &[add_rail(262, (14, 0))]);
-
         let (end_y, end_z) = if prize == SageImpa { (2.0, -48.0) } else { (0.0, -47.5) };
         patcher.add_rail(DungeonDark, 1, Rail {
             arg: (0, 0, 0, 0, 0.0, 0.0),
@@ -713,7 +558,8 @@ fn patch_dark(patcher: &mut Patcher, prize: Item, _: &Settings) {
         });
     }
 
-    // // Remove Maze Guards after Dark Palace
+    // Remove Maze Guards after Dark Palace
+    // let prize_flag = prize_flag(prize);
     // patcher.modify_objs(FieldDark, 20, &[
     //     set_disable_flag(73, prize_flag),
     //     set_disable_flag(82, prize_flag),
@@ -739,60 +585,7 @@ fn patch_swamp(patcher: &mut Patcher, prize: Item, _: &Settings) {
         return;
     }
 
-    patcher.modify_objs(DungeonWater, 3, &[modify_reward(13, prize, true)]);
-
-    if is_sage(prize) {
-        reroute_sage_warp(patcher, prize, 0, 1, 32);
-    } else {
-        patcher.modify_objs(DungeonWater, 3, &[remove_collision(13)]);
-        if is_green_pendant(prize) {
-            generate_charm_chests(
-                patcher,
-                DungeonWater,
-                3,
-                prize,
-                Flag::Event(1),
-                0,
-                (14, 15),
-                (25, 26),
-                Vec3 { x: 0.0, y: 2.5, z: -40.15 },
-            );
-            generate_charm_warps(
-                patcher,
-                DungeonWater,
-                3,
-                prize,
-                0,
-                (16, 17),
-                (27, 28),
-                0,
-                1,
-                32,
-                Vec3 { x: 0.0, y: 0.0, z: -32.0 },
-                true,
-            );
-        } else {
-            let pendant_flag = prize_flag(prize);
-            patcher.add_obj(
-                DungeonWater,
-                3,
-                Obj::pendant_chest(prize, Flag::Event(1), pendant_flag, 0, 14, 25, Vec3 {
-                    x: 0.0,
-                    y: 2.5,
-                    z: -40.15,
-                }),
-            );
-            patcher.add_obj(
-                DungeonWater,
-                3,
-                Obj::warp_tile(pendant_flag, 0, 15, 26, 0, 1, 32, Vec3 {
-                    x: 0.0,
-                    y: 0.0,
-                    z: -32.0,
-                }),
-            );
-        }
-    }
+    modify_dungeon_reward(patcher, prize, 13, DungeonWater, 3, true, Dest::new(FieldDark, 33, 0));
 }
 
 /// Skull Woods
@@ -801,60 +594,7 @@ fn patch_skull(patcher: &mut Patcher, prize: Item, _: &Settings) {
         return;
     }
 
-    patcher.modify_objs(FieldDark, 1, &[modify_reward(273, prize, true)]);
-
-    if is_sage(prize) {
-        reroute_sage_warp(patcher, prize, 10, 1, 0);
-    } else {
-        patcher.modify_objs(FieldDark, 1, &[remove_collision(273)]);
-        if is_green_pendant(prize) {
-            generate_charm_chests(
-                patcher,
-                FieldDark,
-                1,
-                prize,
-                Flag::Event(1),
-                0,
-                (76, 77),
-                (533, 534),
-                Vec3 { x: -6.0, y: 0.0, z: -16.5 },
-            );
-            generate_charm_warps(
-                patcher,
-                FieldDark,
-                1,
-                prize,
-                0,
-                (78, 79),
-                (535, 536),
-                10,
-                1,
-                0,
-                Vec3 { x: -6.0, y: 0.0, z: -15.0 },
-                false,
-            );
-        } else {
-            let pendant_flag = prize_flag(prize);
-            patcher.add_obj(
-                FieldDark,
-                1,
-                Obj::pendant_chest(prize, Flag::Event(1), pendant_flag, 0, 76, 533, Vec3 {
-                    x: -6.0,
-                    y: 0.0,
-                    z: -16.5,
-                }),
-            );
-            patcher.add_obj(
-                FieldDark,
-                1,
-                Obj::blue_warp(pendant_flag, 0, 77, 534, 10, 1, 0, Vec3 {
-                    x: -6.0,
-                    y: 0.0,
-                    z: -15.0,
-                }),
-            );
-        }
-    }
+    modify_dungeon_reward(patcher, prize, 273, FieldDark, 1, true, Dest::new(FieldDark, 1, 10));
 }
 
 /// Thieves' Hideout
@@ -863,36 +603,7 @@ fn patch_thieves(patcher: &mut Patcher, prize: Item, _: &Settings) {
         return;
     }
 
-    patcher.modify_objs(IndoorDark, 15, &[modify_reward(3, prize, true)]);
-
-    if is_sage(prize) {
-        reroute_sage_warp(patcher, prize, 14, 1, 15);
-    } else {
-        patcher.modify_objs(IndoorDark, 15, &[remove_collision(3)]);
-        if is_green_pendant(prize) {
-            generate_charm_chests(
-                patcher,
-                IndoorDark,
-                15,
-                prize,
-                Flag::Event(1),
-                0,
-                (7, 8),
-                (13, 14),
-                Vec3 { x: 0.0, y: 0.0, z: -8.0 },
-            );
-        } else {
-            patcher.add_obj(
-                IndoorDark,
-                15,
-                Obj::pendant_chest(prize, Flag::Event(1), prize_flag(prize), 0, 7, 13, Vec3 {
-                    x: 0.0,
-                    y: 0.0,
-                    z: -8.0,
-                }),
-            );
-        }
-    }
+    modify_dungeon_reward(patcher, prize, 3, IndoorDark, 15, true, Dest::new(FieldDark, 16, 14));
 }
 
 /// Turtle Rock
@@ -910,85 +621,47 @@ fn patch_turtle(patcher: &mut Patcher, prize: Item, _: &Settings) {
         return;
     }
 
-    patcher.modify_objs(DungeonKame, 3, &[modify_reward(56, prize, false)]);
+    const UNQ_PRIZE: u16 = 56;
+    const DY: f32 = -2.0;
+    const DZ: f32 = 0.5;
 
-    let dy = -2.0;
-    let dz = 0.5;
+    modify_dungeon_reward(
+        patcher,
+        prize,
+        UNQ_PRIZE,
+        DungeonKame,
+        3,
+        false,
+        Dest::new(FieldDark, 35, 6),
+    );
 
     if is_pendant(prize) {
+        // Pendants don't ride on the pillar, so manually move them and remove the pillar
         patcher.modify_objs(DungeonKame, 3, &[
-            remove_collision(56),
-            call(56, move |obj| {
+            call(UNQ_PRIZE, move |obj| {
                 obj.srt.translate.z = -44.0;
                 obj.srt.translate.y = 5.0;
             }),
             disable(9), // dgn_Kame_Pillar
         ]);
-
-        if is_green_pendant(prize) {
-            generate_charm_chests(
-                patcher,
-                DungeonKame,
-                3,
-                prize,
-                Flag::Course(130),
-                0,
-                (33, 34),
-                (101, 102),
-                Vec3 { x: 0.0, y: 5.0, z: -44.0 },
-            );
-            generate_charm_warps(
-                patcher,
-                DungeonKame,
-                3,
-                prize,
-                0,
-                (35, 36),
-                (103, 104),
-                6,
-                1,
-                34,
-                Vec3 { x: 0.0, y: 5.0, z: -39.0 },
-                false,
-            );
-        } else {
-            let pendant_flag = prize_flag(prize);
-            patcher.add_obj(
-                DungeonKame,
-                3,
-                Obj::pendant_chest(prize, Flag::Course(130), pendant_flag, 0, 33, 72, Vec3 {
-                    x: 0.0,
-                    y: 5.0,
-                    z: -44.0,
-                }),
-            );
-            patcher.add_obj(
-                DungeonKame,
-                3,
-                Obj::blue_warp(pendant_flag, 0, 34, 73, 6, 1, 34, Vec3 {
-                    x: 0.0,
-                    y: 5.0,
-                    z: -39.0,
-                }),
-            );
-        }
     } else {
-        reroute_sage_warp(patcher, prize, 6, 1, 34);
-
+        // Gulley is a difficult child
         if prize == SageGulley {
-            patcher.modify_objs(DungeonKame, 3, &[call(56, move |obj| {
-                obj.srt.translate.z += dz;
-                obj.srt.translate.y += 15.0 + dy;
+            patcher.modify_objs(DungeonKame, 3, &[call(UNQ_PRIZE, move |obj| {
+                obj.srt.translate.z += DZ;
+                obj.srt.translate.y += 15.0 + DY;
             })]);
         }
 
-        // Modify Rails so that non-Impa Portraits are reachable TODO modify ActorProfile
+        // Modify Rails so that non-Impa Portraits are reachable
+        // TODO modify ActorProfile collision entries so this won't be needed
+
         let fn_extend_rails = move |rail: &mut Rail| {
             let rails_len = rail.pnt.len();
-            rail.pnt.get_mut(rails_len - 1).unwrap().srt.translate.y += dy;
+            rail.pnt.get_mut(rails_len - 1).unwrap().srt.translate.y += DY;
 
             let mut p = rail.pnt.get(rail.pnt.len() - 1).unwrap().clone();
-            p.srt.translate.z += dz;
+            p.srt.translate.z += DZ;
             rail.pnt.push(p);
         };
 
@@ -1014,65 +687,13 @@ fn patch_desert(patcher: &mut Patcher, prize: Item, _: &Settings) {
         return;
     }
 
+    modify_dungeon_reward(patcher, prize, 76, FieldDark, 31, true, Dest::new(FieldDark, 31, 30));
+
     let prize_flag = prize_flag(prize);
     patcher.modify_objs(FieldDark, 31, &[
-        modify_reward(76, prize, true),
         set_enable_flag(132, prize_flag), // Warp to leave boss area
         set_enable_flag(133, prize_flag), // Destination Warp
     ]);
-
-    if is_sage(prize) {
-        reroute_sage_warp(patcher, prize, 30, 1, 30);
-    } else {
-        patcher.modify_objs(FieldDark, 31, &[remove_collision(76)]);
-
-        if is_green_pendant(prize) {
-            generate_charm_chests(
-                patcher,
-                FieldDark,
-                31,
-                prize,
-                Flag::Event(1),
-                0,
-                (60, 61),
-                (140, 141),
-                Vec3 { x: -13.0, y: 0.0, z: -24.0 },
-            );
-            generate_charm_warps(
-                patcher,
-                FieldDark,
-                31,
-                prize,
-                0,
-                (62, 63),
-                (142, 143),
-                30,
-                1,
-                30,
-                Vec3 { x: -10.5, y: 0.0, z: -21.25 },
-                false,
-            );
-        } else {
-            patcher.add_obj(
-                FieldDark,
-                31,
-                Obj::pendant_chest(prize, Flag::Event(1), prize_flag, 0, 56, 135, Vec3 {
-                    x: -13.0,
-                    y: 0.0,
-                    z: -24.0,
-                }),
-            );
-            patcher.add_obj(
-                FieldDark,
-                31,
-                Obj::blue_warp(prize_flag, 0, 57, 136, 30, 1, 30, Vec3 {
-                    x: -10.5,
-                    y: 0.0,
-                    z: -21.25,
-                }),
-            );
-        }
-    }
 }
 
 /// Ice Ruins
@@ -1088,256 +709,42 @@ fn patch_ice(patcher: &mut Patcher, prize: Item, _: &Settings) {
         return;
     }
 
-    patcher.modify_objs(DungeonIce, 1, &[modify_reward(16, prize, true)]);
-
-    if is_sage(prize) {
-        reroute_sage_warp(patcher, prize, 0, 1, 4);
-    } else {
-        patcher.modify_objs(DungeonIce, 1, &[remove_collision(16)]);
-
-        if is_green_pendant(prize) {
-            generate_charm_chests(
-                patcher,
-                DungeonIce,
-                1,
-                prize,
-                Flag::Event(1),
-                6,
-                (410, 411),
-                (1220, 1221),
-                Vec3 { x: 0.0, y: 0.0, z: -31.6 },
-            );
-            generate_charm_warps(
-                patcher,
-                DungeonIce,
-                1,
-                prize,
-                6,
-                (412, 413),
-                (1222, 1223),
-                0,
-                1,
-                4,
-                Vec3 { x: 0.0, y: 0.0, z: -30.1 },
-                false,
-            );
-        } else {
-            let pendant_flag = prize_flag(prize);
-            patcher.add_obj(
-                DungeonIce,
-                1,
-                Obj::pendant_chest(prize, Flag::Event(1), pendant_flag, 6, 408, 1214, Vec3 {
-                    x: 0.0,
-                    y: 0.0,
-                    z: -31.6,
-                }),
-            );
-            patcher.add_obj(
-                DungeonIce,
-                1,
-                Obj::blue_warp(pendant_flag, 6, 409, 1215, 0, 1, 4, Vec3 {
-                    x: 0.0,
-                    y: 0.0,
-                    z: -30.1,
-                }),
-            );
-        }
-    }
-}
-
-/**
- * Warning: Dumb ahead
- *
- * Create two chests for green pendant: One has Charm, one actually has Green Pendant.
- * Charm has two flags: one for this dungeon and one for the "other" dungeon with Charm.
- * Opening this dungeon's Charm chest disables the other dungeon's Charm chest and enables
- * its full Green Pendant Chest, and vice-versa.
- *
- * Decide which Charm chest flag to use based on whether the filler gives us Charm or PoC
- */
-fn generate_charm_chests(
-    patcher: &mut Patcher, scene: Id, scene_index: u16, prize: Item, active_flag: Flag, clp: i16,
-    ser: (u16, u16), unq: (u16, u16), translate: Vec3,
-) {
-    let active_flag = Flag::into_pair(active_flag);
-    let green_pendant_flag = Flag::into_pair(prize_flag(PendantCourage));
-    let charm_flags = charm_flag(prize);
-
-    // Charm Chest
-    patcher.add_obj(scene, scene_index, Obj {
-        arg: Arg(
-            ZeldaAmulet as i32,
-            0,
-            0,
-            0,
-            active_flag.0,
-            4,
-            active_flag.1,
-            charm_flags.0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0.0,
-        ),
-        clp,
-        flg: (0, 4, 0, charm_flags.1),
-        id: 35,
-        lnk: vec![],
-        nme: None,
-        ril: vec![],
-        ser: Some(ser.0),
-        srt: Transform { scale: Vec3::UNIT, rotate: Vec3::ZERO, translate },
-        typ: 1,
-        unq: unq.0,
-    });
-
-    // Pendant of Courage Chest
-    patcher.add_obj(scene, scene_index, Obj {
-        arg: Arg(
-            PendantCourage as i32,
-            0,
-            0,
-            0,
-            active_flag.0,
-            green_pendant_flag.0,
-            active_flag.1,
-            green_pendant_flag.1,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0.0,
-        ),
-        clp,
-        flg: (4, 0, charm_flags.1, 0),
-        id: 35,
-        lnk: vec![],
-        nme: None,
-        ril: vec![],
-        ser: Some(ser.1),
-        srt: Transform { scale: Vec3::UNIT, rotate: Vec3::ZERO, translate },
-        typ: 1,
-        unq: unq.1,
-    });
-}
-
-/// Continuation of the dumbness above
-///
-/// Call this for scenes that need Pendant Warps when the reward is progressive green pendant
-fn generate_charm_warps(
-    patcher: &mut Patcher, scene: Id, scene_index: u16, prize: Item, clp: i16, ser: (u16, u16),
-    unq: (u16, u16), dest_spawn: i32, dest_scene: i32, dest_scene_index: i32, translate: Vec3,
-    is_swamp: bool,
-) {
-    let green_pendant_flag = Flag::into_pair(prize_flag(PendantCourage));
-    let charm_flags = charm_flag(prize);
-
-    // Swamp needs to use a Warp Tile instead of a Blue Warp
-    // This is just a quick and dirty way to put that in
-    let (id, arg1) = if is_swamp { (208, 1) } else { (469, 0) };
-
-    // Charm Warp (disappears when PoC obtained)
-    patcher.add_obj(scene, scene_index, Obj {
-        arg: Arg(
-            dest_spawn,
-            arg1,
-            0,
-            0,
-            4,
-            0,
-            charm_flags.0,
-            0,
-            0,
-            0,
-            dest_scene,
-            dest_scene_index,
-            0,
-            0.0,
-        ),
-        clp,
-        flg: (0, green_pendant_flag.0, 0, green_pendant_flag.1),
-        id,
-        lnk: vec![],
-        nme: None,
-        ril: vec![],
-        ser: Some(ser.0),
-        srt: Transform { scale: Vec3::UNIT, rotate: Vec3::ZERO, translate },
-        typ: 6,
-        unq: unq.0,
-    });
-
-    // Pendant of Courage Warp
-    patcher.add_obj(scene, scene_index, Obj {
-        arg: Arg(
-            dest_spawn,
-            arg1,
-            0,
-            0,
-            green_pendant_flag.0,
-            0,
-            green_pendant_flag.1,
-            0,
-            0,
-            0,
-            dest_scene,
-            dest_scene_index,
-            0,
-            0.0,
-        ),
-        clp,
-        flg: (0, 0, 0, 0),
-        id,
-        lnk: vec![],
-        nme: None,
-        ril: vec![],
-        ser: Some(ser.1),
-        srt: Transform { scale: Vec3::UNIT, rotate: Vec3::ZERO, translate },
-        typ: 6,
-        unq: unq.1,
-    });
+    modify_dungeon_reward(patcher, prize, 16, DungeonIce, 1, true, Dest::new(FieldDark, 5, 0));
 }
 
 struct PrizePatchData {
     actor_id: i16,
-    flag: u16,
+    flag: Flag,
     rot_x: f32,
     arg1: i32,
     arg9: i32,
-    arg10: i32,
     arg12: i32,
 }
 
 impl PrizePatchData {
-    fn new(
-        actor_id: i16, flag: u16, rot_x: f32, arg1: i32, arg9: i32, arg10: i32, arg12: i32,
-    ) -> Self {
-        Self { actor_id, flag, rot_x, arg1, arg9, arg10, arg12 }
+    fn new(actor_id: i16, flag: Flag, rot_x: f32, arg1: i32, arg9: i32, arg12: i32) -> Self {
+        Self { actor_id, flag, rot_x, arg1, arg9, arg12 }
     }
 
     fn get(prize: Item) -> Self {
         match prize {
-            SageGulley => Self::new(418, 536, 0.0, 0, 1, 180, 60),
-            SageOren => Self::new(423, 556, 330.0, 0, 0, 0, 30),
-            SageSeres => Self::new(420, 576, 330.0, 0, 0, 0, 30),
-            SageOsfala => Self::new(419, 596, 330.0, 0, 0, 0, 30),
-            SageRosso => Self::new(422, 616, 330.0, 0, 0, 0, 30),
-            SageIrene => Self::new(417, 636, 330.0, 0, 0, 0, 30),
-            SageImpa => Self::new(421, 656, 330.0, 0, 0, 0, 120),
-            PendantPower => Self::new(173, 372, 0.0, 0, 0, 0, 0),
-            PendantWisdom => Self::new(173, 342, 0.0, 1, 0, 0, 0),
-            PendantCourage => Self::new(173, 251, 0.0, 2, 0, 0, 0),
-            ZeldaAmulet => Self::new(173, 251, 0.0, 2, 0, 0, 0),
-            _ => panic!("\"{}\" is not a dungeon prize.", prize.as_str()),
+            SageGulley => Self::new(418, Flag::Event(536), 0.0, 0, 1, 60),
+            SageOren => Self::new(423, Flag::Event(556), 330.0, 0, 0, 30),
+            SageSeres => Self::new(420, Flag::Event(576), 330.0, 0, 0, 30),
+            SageOsfala => Self::new(419, Flag::Event(596), 330.0, 0, 0, 30),
+            SageRosso => Self::new(422, Flag::Event(616), 330.0, 0, 0, 30),
+            SageIrene => Self::new(417, Flag::Event(636), 330.0, 0, 0, 30),
+            SageImpa => Self::new(421, Flag::Event(656), 330.0, 0, 0, 120),
+            PendantPower => Self::new(173, Flag::Event(372), 0.0, 0, 0, 0),
+            PendantWisdom => Self::new(173, Flag::Event(342), 0.0, 1, 0, 0),
+            PendantCourage => Self::new(173, Flag::Course(500), 0.0, 2, 0, 0),
+            ZeldaAmulet => Self::new(173, Flag::Course(501), 0.0, 2, 0, 0),
+            _ => fail!("\"{}\" is not a dungeon prize.", prize.as_str()),
         }
     }
 }
 
-fn reroute_sage_warp(
-    patcher: &mut Patcher, prize: Item, spawn_point: i32, scene: i32, scene_index: i32,
-) {
+fn reroute_sage_warp(patcher: &mut Patcher, prize: Item, dest: Dest) {
     // Get UNQ of warp object in the Chamber of Sages
     let unq_sage_warp = match prize {
         SageGulley => Some(73),
@@ -1348,33 +755,34 @@ fn reroute_sage_warp(
         SageIrene => Some(70),
         SageImpa => Some(68),
         PendantPower | PendantWisdom | PendantCourage | ZeldaAmulet => None,
-        _ => panic!("\"{}\" is not a dungeon prize.", prize.as_str()),
+        _ => fail!("\"{}\" is not a dungeon prize.", prize.as_str()),
     };
 
     // Reroute
     if let Some(unq_sage_warp) = unq_sage_warp {
-        patcher.modify_objs(CaveDark, 10, &[redirect(
-            unq_sage_warp,
-            spawn_point,
-            scene,
-            scene_index,
-        )]);
+        patcher.modify_objs(CaveDark, 10, &[redirect(unq_sage_warp, dest)]);
     }
 }
 
-fn modify_reward(unq: u16, prize: Item, activate: bool) -> (u16, Box<dyn Fn(&mut Obj)>) {
+fn modify_dungeon_reward(
+    patcher: &mut Patcher, prize: Item, unq: u16, scene: Id, scene_index: u16, activate: bool,
+    dest: Dest,
+) {
     let data = PrizePatchData::get(prize);
-    (
-        unq,
-        Box::new(move |obj: &mut Obj| {
-            obj.set_id(data.actor_id);
-            obj.arg.1 = data.arg1;
-            if activate {
-                obj.set_active_flag(Flag::Event(1));
-            }
-            obj.set_inactive_flag(Flag::Event(data.flag));
-            obj.set_rotate(data.rot_x, 0.0, 0.0);
-            obj.set_disable_flag(Flag::Event(data.flag));
-        }),
-    )
+    patcher.modify_objs(scene, scene_index, &[call(unq, move |obj| {
+        obj.set_id(data.actor_id);
+        obj.arg.1 = data.arg1;
+        if activate {
+            obj.set_active_flag(Flag::Event(1));
+        }
+        obj.set_inactive_flag(data.flag);
+        obj.set_rotate(data.rot_x, 0.0, 0.0);
+        obj.set_disable_flag(data.flag);
+        if is_pendant(prize) {
+            obj.redirect(dest);
+        }
+    })]);
+    if is_sage(prize) {
+        reroute_sage_warp(patcher, prize, dest);
+    }
 }

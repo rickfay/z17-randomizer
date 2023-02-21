@@ -1,11 +1,6 @@
-use crate::{regions::Subregion, state::State, Condition, LocationInfo, Settings};
+use crate::{regions::Subregion, LocationInfo};
 
-pub trait Graph {
-    fn settings(&self) -> &Settings;
-    fn check(&self, predicate: fn(&State) -> bool) -> bool;
-    fn add(&mut self, node: Node);
-    fn add_edge(&mut self, edge: Condition, node: Node);
-}
+pub trait Graph {}
 
 #[derive(Clone, Debug)]
 pub enum Node {
