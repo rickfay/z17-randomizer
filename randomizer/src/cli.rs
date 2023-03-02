@@ -134,12 +134,12 @@ pub fn seed_settings_ui() -> Settings {
 #[rustfmt::skip]
 fn prompt_logic_mode() -> LogicMode {
     print!("\n[Logic Mode]\n");
-    print!("[1] Normal            - Standard gameplay, no tricky item use or glitches. If unsure, choose this.\n");
-    print!("[2] Hard              - Adds tricks that aren't technically glitches. Lamp + Net considered as weapons. No glitches.\n");
-    print!("[3] Glitched          - Includes the above plus \"basic\", easy-to-learn glitches.\n");
-    print!("[4] Advanced Glitched - Includes the above plus \"advanced\" glitches that may be a challenge to master.\n");
-    print!("[5] Hell              - Includes every known RTA-viable glitch, including the insane ones. You don't want this.\n");
-    print!("[6] No Logic          - Items are placed with no logic at all. Seeds are likely to not be completable.\n");
+    print!("[1] Normal        - Standard gameplay, no tricky item use or glitches. If unsure, choose this.\n");
+    print!("[2] Hard          - Adds tricks that aren't technically glitches. Lamp + Net considered as weapons. No glitches.\n");
+    print!("[3] Glitched      - Includes the above plus a selection of easy-to-learn glitches.\n");
+    print!("[4] Adv. Glitched - Includes the above plus \"advanced\" glitches that may be a challenge to master.\n");
+    print!("[5] Hell          - Includes every known RTA-viable glitch, including the insane ones. Don't choose this.\n");
+    print!("[6] No Logic      - Items are placed with no logic at all. Seeds are likely to not be completable.\n");
 
     loop {
         print!("\nEnter a number (1-6): ");
@@ -152,9 +152,9 @@ fn prompt_logic_mode() -> LogicMode {
         return match input.as_str() {
             "1" => LogicMode::Normal,
             "2" => LogicMode::Hard,
-            "3" => LogicMode::GlitchBasic,
-            "4" => LogicMode::GlitchAdvanced,
-            "5" => LogicMode::GlitchHell,
+            "3" => LogicMode::Glitched,
+            "4" => LogicMode::AdvGlitched,
+            "5" => LogicMode::Hell,
             "6" => LogicMode::NoLogic,
             _ => {
                 eprintln!("\nPlease enter 1, 2, 3, 4, 5, or 6");

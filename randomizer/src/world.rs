@@ -2489,9 +2489,9 @@ fn lorule() -> HashMap<Location, LocationNode> {
             ),
         ])),
         (KusDomain, location("Ku's Domain", vec![
-            check(LocationInfo::new(regions::lorule::dark::ruins::SUBREGION, "Ku's Domain"),
-                  Some(|p| { p.has_bow() || p.has_bombs() || p.can_great_spin() || p.has_nice_ice_rod() }),
-                  Some(|p| p.has_sword() && p.has_power_glove()),
+            check(LocationInfo::new(regions::lorule::dark::ruins::SUBREGION, "Ku's Domain Fight"),
+                  Some(|p| { p.has_bow() || p.has_bombs() || p.can_great_spin() || p.has_nice_ice_rod() || p.has_nice_hookshot() }),
+                  Some(|p| p.has_master_sword() || (p.has_sword() && p.has_power_glove())),
                   None,
                   None,
                   None,
@@ -5320,26 +5320,26 @@ fn location(name: &'static str, checks: Vec<Check>, paths: Vec<Path>) -> Locatio
 
 // fn logic(normal: Option<fn(&Progress) -> bool>,
 //          hard: Option<fn(&Progress) -> bool>,
-//          glitch_basic: Option<fn(&Progress) -> bool>,
-//          glitch_advanced: Option<fn(&Progress) -> bool>,
-//          glitch_hell: Option<fn(&Progress) -> bool>) -> Logic {
+//          glitched: Option<fn(&Progress) -> bool>,
+//          adv_glitched: Option<fn(&Progress) -> bool>,
+//          hell: Option<fn(&Progress) -> bool>) -> Logic {
 //     Logic {
 //         normal,
 //         hard,
-//         glitch_basic,
-//         glitch_advanced,
-//         glitch_hell,
+//         glitched,
+//         adv_glitched,
+//         hell,
 //     }
 // }
 
 fn check(
     location_info: LocationInfo, normal: Option<fn(&Progress) -> bool>,
-    hard: Option<fn(&Progress) -> bool>, glitch_basic: Option<fn(&Progress) -> bool>,
-    glitch_advanced: Option<fn(&Progress) -> bool>, glitch_hell: Option<fn(&Progress) -> bool>,
+    hard: Option<fn(&Progress) -> bool>, glitched: Option<fn(&Progress) -> bool>,
+    adv_glitched: Option<fn(&Progress) -> bool>, hell: Option<fn(&Progress) -> bool>,
 ) -> Check {
     Check::new(
         location_info.name,
-        Logic::new(normal, hard, glitch_basic, glitch_advanced, glitch_hell),
+        Logic::new(normal, hard, glitched, adv_glitched, hell),
         None,
         Some(location_info),
     )
@@ -5355,9 +5355,9 @@ fn check_unreachable(location_info: LocationInfo) -> Check {
         Logic {
             normal: None,
             hard: None,
-            glitch_basic: None,
-            glitch_advanced: None,
-            glitch_hell: None,
+            glitched: None,
+            adv_glitched: None,
+            hell: None,
         },
         None,
         Some(location_info),
@@ -5366,12 +5366,12 @@ fn check_unreachable(location_info: LocationInfo) -> Check {
 
 fn check_quest(
     name: &'static str, quest: FillerItem, normal: Option<fn(&Progress) -> bool>,
-    hard: Option<fn(&Progress) -> bool>, glitch_basic: Option<fn(&Progress) -> bool>,
-    glitch_advanced: Option<fn(&Progress) -> bool>, glitch_hell: Option<fn(&Progress) -> bool>,
+    hard: Option<fn(&Progress) -> bool>, glitched: Option<fn(&Progress) -> bool>,
+    adv_glitched: Option<fn(&Progress) -> bool>, hell: Option<fn(&Progress) -> bool>,
 ) -> Check {
     Check::new(
         name,
-        Logic::new(normal, hard, glitch_basic, glitch_advanced, glitch_hell),
+        Logic::new(normal, hard, glitched, adv_glitched, hell),
         Some(quest),
         None,
     )
@@ -5388,10 +5388,10 @@ fn path_free(default: Location) -> Path {
 // add logic to choose random entrances here
 fn path(
     default: Location, normal: Option<fn(&Progress) -> bool>, hard: Option<fn(&Progress) -> bool>,
-    glitch_basic: Option<fn(&Progress) -> bool>, glitch_advanced: Option<fn(&Progress) -> bool>,
-    glitch_hell: Option<fn(&Progress) -> bool>,
+    glitched: Option<fn(&Progress) -> bool>, adv_glitched: Option<fn(&Progress) -> bool>,
+    hell: Option<fn(&Progress) -> bool>,
 ) -> Path {
-    Path::new(default, Logic::new(normal, hard, glitch_basic, glitch_advanced, glitch_hell))
+    Path::new(default, Logic::new(normal, hard, glitched, adv_glitched, hell))
 }
 
 fn portal_std(default: Location) -> Path {
@@ -5401,10 +5401,10 @@ fn portal_std(default: Location) -> Path {
 // TODO read destination from portal map
 fn portal(
     default: Location, normal: Option<fn(&Progress) -> bool>, hard: Option<fn(&Progress) -> bool>,
-    glitch_basic: Option<fn(&Progress) -> bool>, glitch_advanced: Option<fn(&Progress) -> bool>,
-    glitch_hell: Option<fn(&Progress) -> bool>,
+    glitched: Option<fn(&Progress) -> bool>, adv_glitched: Option<fn(&Progress) -> bool>,
+    hell: Option<fn(&Progress) -> bool>,
 ) -> Path {
-    Path::new(default, Logic::new(normal, hard, glitch_basic, glitch_advanced, glitch_hell))
+    Path::new(default, Logic::new(normal, hard, glitched, adv_glitched, hell))
 }
 
 fn fast_travel_hyrule() -> Path {

@@ -1,6 +1,6 @@
 {
   "logic": {
-    "mode":                        "Normal",   // Logic Mode. Choose one of: "Normal", "Hard", "GlitchBasic", "GlitchAdvanced", "GlitchHell", or "NoLogic"
+    "mode":                        "Normal",   // Logic Mode. Choose one of: "Normal", "Hard", "Glitched", "AdvGlitched", "Hell", or "NoLogic"
     "randomize_dungeon_prizes":    true,       // Randomizes the Portraits, Pendants, and Charm between Hyrule and Lorule dungeons
     "lc_requirement":              7,          // The number of Portraits (0-7) needed to trigger the Hilda cutscene to open Lorule Castle
     "ped_requirement":             "Standard", // Pedestal Requirements. Choose one of: "Vanilla" (red/blue), "Charmed" (red/blue + charm), "Standard" (red/blue/green)

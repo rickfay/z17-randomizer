@@ -382,7 +382,7 @@ fn build_layout() -> Layout {
     layout.set(LocationInfo::new(regions::lorule::dark::ruins::SUBREGION, "Hinox (4)"), RupeePurple);
     layout.set(LocationInfo::new(regions::lorule::dark::ruins::SUBREGION, "Hinox (5)"), RupeeSilver);
     layout.set(LocationInfo::new(regions::lorule::dark::ruins::SUBREGION, "Hinox (6)"), SpecialMove);
-    layout.set(LocationInfo::new(regions::lorule::dark::ruins::SUBREGION, "Ku's Domain"), ItemMizukaki);
+    layout.set(LocationInfo::new(regions::lorule::dark::ruins::SUBREGION, "Ku's Domain Fight"), ItemMizukaki);
     layout.set(LocationInfo::new(regions::lorule::dark::ruins::SUBREGION, "[Mai] Atop Dark Ruins Rocks"), RupeeGold);
     layout.set(LocationInfo::new(regions::lorule::dark::ruins::SUBREGION, "[Mai] Dark Maze Center Wall"), RupeeGold);
     layout.set(LocationInfo::new(regions::lorule::dark::ruins::SUBREGION, "[Mai] Dark Maze Entrance Wall"), RupeeGold);

@@ -26,7 +26,7 @@ pub(crate) fn get_item_pools(
 
     // Remove the Bee Badge from Hell Logic to keep Bee Boosting viable
     match settings.logic.mode {
-        LogicMode::GlitchHell => junk_pool.push(Empty),
+        LogicMode::Hell => junk_pool.push(Empty),
         _ => progression_items.push(BeeBadge),
     };
 

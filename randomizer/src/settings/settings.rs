@@ -45,9 +45,9 @@ impl Settings {
         info!("Logic:                          {}", match self.logic.mode {
             Normal => "Normal",
             Hard => "Hard",
-            GlitchBasic => "Glitched (Basic)",
-            GlitchAdvanced => "Glitched (Advanced)",
-            GlitchHell => "Glitched (Hell) - Did you really mean to choose this?",
+            Glitched => "Glitched",
+            AdvGlitched => "Adv. Glitched",
+            Hell => "Hell - Did you really mean to choose this?",
             NoLogic => "No Logic",
         });
         info!("Dungeon Prizes:                 {}", if self.logic.randomize_dungeon_prizes { "Randomized" } else { "Not Randomized" });

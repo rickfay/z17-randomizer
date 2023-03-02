@@ -12,7 +12,7 @@ crate::region! {
             "Hinox (4)": RupeeSilver @Event(CaveDark/FieldDark_17_NpcHinox [0x0A]),
             "Hinox (5)": RupeeSilver @Event(CaveDark/FieldDark_17_NpcHinox [0x11]),
             "Hinox (6)": RupeeGold @Event(CaveDark/FieldDark_17_NpcHinox [0x16]),
-            "Ku's Domain": RupeeSilver @Chest(7[55]),
+            "Ku's Domain Fight": RupeeSilver @Chest(7[55]),
             "[Mai] Ku's Domain Water": Maiamai @Maiamai(7[12]),
             "[Mai] Dark Ruins Waterfall": Maiamai @Maiamai(13[71]),
             "[Mai] Outside Hinox Cave": Maiamai @Maiamai(14[56]),

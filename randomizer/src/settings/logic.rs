@@ -10,7 +10,7 @@ use {
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct Logic {
-    /// Logic to use for item placement (Normal, Hard, Glitched (Basic, Advanced, Hell), No Logic)
+    /// Logic to use for item placement (Normal, Hard, Glitched, Adv. Glitched, Hell, No Logic)
     #[serde(default)]
     pub mode: LogicMode,
 

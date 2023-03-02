@@ -4,9 +4,9 @@ use serde::{Deserialize, Serialize};
 pub enum LogicMode {
     Normal,
     Hard,
-    GlitchBasic,
-    GlitchAdvanced,
-    GlitchHell,
+    Glitched,
+    AdvGlitched,
+    Hell,
     NoLogic,
 }
 
