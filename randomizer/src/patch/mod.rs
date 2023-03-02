@@ -10,6 +10,7 @@ use {
     },
     fs_extra::dir::CopyOptions,
     log::{debug, error, info},
+    path_absolutize::*,
     serde::Serialize,
     std::{collections::HashMap, fs, iter, path::Path},
     tempfile::tempdir,
@@ -433,7 +434,11 @@ impl Patches {
             file.dump(&romfs)?;
         }
         let path = path.as_ref();
-        info!("Writing patch to:               {}\\{:016X}", path.display(), self.game.id());
+        info!(
+            "Writing Patch Files to:         {}\\{:016X}",
+            &path.absolutize()?.display(),
+            self.game.id()
+        );
 
         match fs_extra::copy_items(&[moddir], path, &CopyOptions {
             overwrite: true,
@@ -509,7 +514,7 @@ fn cutscenes<'game, 'settings>(
                 // 320, // Shady Guy Trigger
                 321, 322, // Skip first Oren cutscenes
                 374, // Fix Post-Gales and Post-Hera music by marking Sahasrahla telepathy as seen
-                //415, // Skip Yuga capturing Zelda
+                415, // Skip Yuga capturing Zelda
                 430, // Fix Chamber of Sages Softlock
                 510, // Open Portals, Activate Hyrule Castle Midway
                 522, // Blacksmith Hilda Text, enable Map Swap icon, skip introductory Lorule music
@@ -581,6 +586,17 @@ fn cutscenes<'game, 'settings>(
             // Swordless Mode - Tear down Barrier at game start
             if logic.swordless_mode {
                 opening.add_event_flag(410);
+            }
+
+            // Trial's Skip
+            // Set flags to auto-complete the trials, advanced LC music, and show doors opening.
+            // Intentionally not setting 713 (lower-right square) so door will do check and open itself.
+            if logic.skip_trials {
+                for flag in
+                    IntoIterator::into_iter([710, 711, 712, /*713,*/ 714, 715, 716, 717])
+                {
+                    opening.add_event_flag(flag);
+                }
             }
         }
 

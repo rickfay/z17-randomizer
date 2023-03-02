@@ -4,6 +4,7 @@ use {
     crate::{actor_profile::ActorProfiles, language::Load, scene::SceneMeta},
     language::FlowChart,
     log::info,
+    path_absolutize::*,
     std::{
         cell::RefCell,
         error::Error as StdError,
@@ -110,7 +111,7 @@ impl Game {
         P: AsRef<Path>,
     {
         let path = path.as_ref().to_path_buf();
-        info!("Loading ROM from:               {}", path.display());
+        info!("Loading ROM from:               {}", &path.absolutize()?.display());
         let mut cxi = Cxi::open(&path)?;
         if cxi.id() == US_ID {
             let id = cxi.id();

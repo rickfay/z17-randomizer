@@ -609,11 +609,11 @@ pub fn apply(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
     Ok(())
 }
 
-fn patch_castles(patcher: &mut Patcher, settings: &Settings) {
+fn patch_castles(patcher: &mut Patcher, _settings: &Settings) {
     let green_pendant_flag = prize_flag(PendantCourage);
-    let hc_31 = Flag::Course(31); // Set after yuga2 defeated
-    let curtain_flag = Flag::Event(420); // repurposed
-    let open_trials_flag = Flag::Event(421); // repurposed
+    let yuga_defeated = Flag::Event(420); // Set after Yuga 2 defeated
+    let hc_31 = Flag::Course(31); // Also set after Yuga 2 defeated
+    let hacky_flag = Flag::Event(421); // Repurposed for Curtain/Trial's Door removal
     let can_fight_yuganon_flag = Flag::Event(670); // TODO separate from LC requirement
 
     // Hyrule Castle (exterior)
@@ -638,21 +638,10 @@ fn patch_castles(patcher: &mut Patcher, settings: &Settings) {
 
     // 4F
     patcher.modify_objs(DungeonCastle, 7, &[
-        // set_disable_flag(10, yuga2_421_flag), // Yuga
-        // set_disable_flag(12, yuga2_421_flag), // Zelda
-        // set_disable_flag(13, yuga2_421_flag), // Zelda Portrait
-
-        // set_enable_flag(19, yuga2_defeated_after_flag),
-        // set_enable_flag(20, yuga2_defeated_after_flag),
-        // set_enable_flag(21, yuga2_defeated_after_flag),
-        // set_enable_flag(22, yuga2_defeated_after_flag),
-
-        // Cutscene Trigger
-        call(9, move |obj| {
-            obj.set_active_flag(Flag::Event(1)); // activate regardless of barrier status
-            // obj.set_inactive_flag(yuga2_421_flag);
-            // obj.set_disable_flag(yuga2_421_flag);
-        }),
+        enable(19), // Green Soldier
+        enable(20), // Green Soldier
+        enable(21), // Red Spear Soldier
+        enable(22), // Red Spear Soldier
     ]);
 
     // 7F
@@ -665,55 +654,59 @@ fn patch_castles(patcher: &mut Patcher, settings: &Settings) {
     // 8F
     patcher.modify_objs(DungeonCastle, 6, &[
         set_disable_flag(20, hc_31), // Rewire entrance door to stay open
-        // disable(25), // victory door
-        disable(28), // no revisits door
+        disable(28),                 // no revisits door
     ]);
 
     // Zelda's Study
     patcher.modify_objs(IndoorLight, 7, &[
-        disable(27),                        // No backtracking Door
-        set_disable_flag(26, curtain_flag), // Curtain
-        set_disable_flag(29, curtain_flag), // AreaDisableWallIn
+        // No backtracking door
+        call(27, move |obj| {
+            obj.clear_enable_flag();
+            obj.set_disable_flag(yuga_defeated);
+        }),
+        set_disable_flag(26, hacky_flag), // Curtain
+        set_disable_flag(29, hacky_flag), // AreaDisableWallIn
         // Portal
         call(10, move |obj| {
             obj.arg.3 = 0; // Prevent Long Portal Transition
-            obj.set_active_flag(open_trials_flag); // Open Trials Door
+            obj.set_active_flag(hacky_flag); // Open Trials Door
         }),
+        // Fairies
+        set_enable_flag(18, can_fight_yuganon_flag),
+        set_enable_flag(19, can_fight_yuganon_flag),
+        set_enable_flag(20, can_fight_yuganon_flag),
+        set_enable_flag(21, can_fight_yuganon_flag),
+        // Hearts (Painted)
+        set_disable_flag(36, can_fight_yuganon_flag),
+        set_disable_flag(41, can_fight_yuganon_flag),
+        set_disable_flag(42, can_fight_yuganon_flag),
+        set_disable_flag(43, can_fight_yuganon_flag),
     ]);
 
     // Hilda's Study
     patcher.modify_objs(IndoorDark, 5, &[
-        disable(4),  // Trial's Door
-        disable(12), // Yuga revives Ganon cutscene
-        enable(34),  // Throne Room Loading Zone
-        enable(23),  // Skull (top right, controller obj)
-        // Portal
-        set_46_args(14, curtain_flag), // Set Flag to remove curtain
+        disable(4),                                  // Trial's Door
+        disable(12),                                 // Yuga revives Ganon cutscene
+        enable(34),                                  // Throne Room Loading Zone
+        set_enable_flag(23, can_fight_yuganon_flag), // Skull (top right, controller obj)
+        set_46_args(14, hacky_flag),                 // Portal - Set Flag to remove curtain
     ]);
 
     // Hilda's Study (system)
     patcher.modify_system(IndoorDark, 5, &[
-        enable(23), // Skull (top right, controller system obj)
-        enable(24), // Skull (middle right)
-        enable(25), // Skull (bottom right)
-        enable(41), // Skull (bottom left)
-        enable(46), // Skull (middle left)
-        enable(47), // Skull (top left)
+        set_enable_flag(23, can_fight_yuganon_flag), // Skull (top right, controller system obj)
+        set_enable_flag(24, can_fight_yuganon_flag), // Skull (middle right)
+        set_enable_flag(25, can_fight_yuganon_flag), // Skull (bottom right)
+        set_enable_flag(41, can_fight_yuganon_flag), // Skull (bottom left)
+        set_enable_flag(46, can_fight_yuganon_flag), // Skull (middle left)
+        set_enable_flag(47, can_fight_yuganon_flag), // Skull (top left)
     ]);
 
     // Lorule Castle
-    let skip_trials = settings.logic.skip_trials;
     patcher.modify_objs(DungeonGanon, 1, &[
         clear_enable_flag(1193), // Respawn Trial's Skip big rock upon leaving the room
-        call(158, move |obj| {
-            // Trial's Door
-            if skip_trials {
-                obj.disable();
-            } else {
-                obj.set_disable_flag(open_trials_flag);
-            }
-        }),
-        disable(265), // Trial's Door camera pan
+        set_disable_flag(158, hacky_flag), // Trial's Door
+        disable(265),            // Trial's Door camera pan
     ]);
 
     // Throne Room
@@ -865,10 +858,12 @@ fn debug_stuff(patcher: &mut Patcher, settings: &Settings) {
     // Ravio's Shop
     patcher.modify_objs(IndoorLight, 1, &[call(24, |obj| {
         obj.redirect(Dest::new(
-            // FieldLight, 27, 5,  // No Redirect
+            FieldLight, 27, 5,  // No Redirect
             // IndoorLight, 15, 0, // Osfala Portrait
+            // DungeonGanon, 1, 18, // LC 3F Center Warp Tile
             // CaveDark, 8, 0,     // Mysterious Man Cave
-            FieldDark, 31, 0, // Misery Mire
+            // FieldDark, 31, 0, // Misery Mire
+            // DungeonCastle, 6, 0, // Yuga 2 Boss
         ));
         //obj.redirect_old(
         // 12, 13, 0,  // Dark Palace Boss
@@ -896,7 +891,6 @@ fn debug_stuff(patcher: &mut Patcher, settings: &Settings) {
         // 0, 0, 1,    // FieldLight 2
         // 0, 0, 6,    // Outside Zora's Domain
         // 4, 0, 8,    // Outside Fortune-Teller
-        // 0, 12, 5,   // Yuga 2 Boss
         // 0, 12, 6,   // HC 4th Floor
         // 1, 3, 3,    // Lorule Blacksmith
         // 0, 12, 0,   // Hyrule Castle Dungeon

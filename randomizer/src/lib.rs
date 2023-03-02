@@ -14,6 +14,7 @@ use {
     log::{debug, error, info},
     model::filler_item::{convert, FillerItem},
     patch::Patcher,
+    path_absolutize::*,
     regions::Subregion,
     serde::{ser::SerializeMap, Serialize, Serializer},
     std::{
@@ -457,6 +458,7 @@ impl<'settings> Spoiler<'settings> {
 
     pub fn patch(self, paths: Paths, patch: bool, spoiler: bool) -> Result<()> {
         if patch {
+            info!("Generating Patch Files...");
             let game = Game::load(paths.rom())?;
             let mut patcher = Patcher::new(game)?;
             regions::patch(&mut patcher, &self.layout, self.settings)?;
@@ -464,8 +466,8 @@ impl<'settings> Spoiler<'settings> {
             patches.dump(paths.output())?;
         }
         if spoiler {
-            let path = paths.output().join(format!("spoiler {:0>10}.json", self.seed));
-            info!("Writing spoiler to:             {}", path.display());
+            let path = paths.output().join(format!("{:0>10}_spoiler.json", self.seed));
+            info!("Writing Spoiler Log to:         {}", &path.absolutize()?.display());
 
             let mut serialized = serde_json::to_string_pretty(&self).unwrap();
             align_json_values(&mut serialized);

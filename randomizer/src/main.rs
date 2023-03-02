@@ -43,8 +43,8 @@ fn main() -> randomizer::Result<()> {
         let spoiler = catch_unwind(|| filler_new(VERSION, &preset, seed));
 
         if spoiler.is_ok() {
+            info!("Successfully Determined Completable Item Layout");
             println!();
-            info!("Seed generated. Patching...");
             result = spoiler.unwrap().patch(system.load_config()?, !opt.no_patch, !opt.no_spoiler);
 
             break;

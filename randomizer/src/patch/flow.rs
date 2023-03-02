@@ -81,41 +81,6 @@ macro_rules! action {
     };
 }
 
-/// Fuck data structures we're rawdoggin' it
-#[rustfmt::skip]
-#[allow(unused)]
-fn patch_yuganon_requirements(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
-
-    // Bad names, keeping them to 4 chars for readability below
-    let numb = settings.logic.yuganon_requirement as u8;
-    let f = &[0x0A, 0x02]; // 522 fixme
-
-    let mut ice_file = patcher.language(albw::course::Id::DungeonIce)?.open_raw("World/Flow/Ice.msbf")?;
-    let ice = ice_file.get_mut();
-
-    // Ice
-
-    // Section Header - Add 2 new steps and 2 new branches
-    ice[0x24] = 0x98;
-    ice[0x30..0x34].copy_from_slice(&[0x08, 0x00, 0x04, 0x00]);
-
-    // Point to YG check
-    ice[0x88] = 0x6;
-
-    // New Steps
-    ice[0xA0..0xB0].copy_from_slice(&[0x02, 0x00, 0x00, 0x00, numb, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x0F, 0x00, 0x02, 0x00, 0x02, 0x00]);
-    ice[0xB0..0xC0].copy_from_slice(&[0x03, 0x00, 0x00, 0x00, f[0], f[1], 0x00, 0x00, 0x05, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]);
-
-    // Branches - add 2 new and point false LC condition to YG check
-    ice[0xC0..0xD0].copy_from_slice(&[0x04, 0x00, 0x06, 0x00, 0x07, 0x00, 0x05, 0x00, 0xAB, 0xAB, 0xAB, 0xAB, 0xAB, 0xAB, 0xAB, 0xAB]);
-
-    // FEN1
-    ice[0xD0..0xE0].copy_from_slice(&[0x46, 0x45, 0x4E, 0x31, 0xCC, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]);
-    ice[0xE0..0xE8].copy_from_slice(&[0x3B, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]);
-
-    Ok(())
-}
-
 fn patch_lorule_castle_requirements(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
     let lc_requirement = settings.logic.lc_requirement as u32;
 
@@ -139,9 +104,50 @@ fn patch_lorule_castle_requirements(patcher: &mut Patcher, settings: &Settings) 
     Ok(())
 }
 
+fn patch_castle_connection(patcher: &mut Patcher, _settings: &Settings) -> Result<()> {
+    apply!(patcher,
+
+        // Hyrule Castle Dungeon
+        DungeonCastle/Castle {
+            [276] => 62,  // [274]
+            [315] => 70,  // [ 19]
+            [236] => 74,  // [ 37]
+            [290] => 75,  // [284]
+            [234] => 79,  // [ 18]
+            [311] => 97,  // [255]
+            [184] => 107, // [106]
+            [107] => 110, // [109]
+            [312] => 175, // [ 87]
+            [313] => 176, // [ 88]
+            [227] => 177, // [ 89]
+            [281] => 178, // [ 16]
+            [228] => 179, // [ 14]
+            [229] => 180, // [ 17]
+            [314] => 181, // [ 15]
+            [237] => 183, // [104] // "what?"
+            [171] => 184, // [ 29]
+            [172] => 185, // [ 39]
+            [131] => 222, // [127]
+            [206] => 223, // [128]
+            [135] => 224, // [129]
+            [137] => 225, // [130]
+            [282] => 269, // [270]
+            [138] => 275, // [  1]
+            [303] => 286, // [ 76] "I wish only to possess..."
+
+            // After fight
+            [5]   => 247,  // skip 149 - "Gah! I bore of this fight.\0"
+            [155] => 249,  // skip 40  - "Once I have released Ganon..."
+            [11]  => None, // Set 420 but then skip setting 421, freeing it for use
+        },
+    );
+
+    Ok(())
+}
+
 pub fn apply(patcher: &mut Patcher, free: Item, settings: &Settings) -> Result<()> {
-    //patch_yuganon_requirements(patcher, settings)?;
     patch_lorule_castle_requirements(patcher, settings)?;
+    patch_castle_connection(patcher, settings)?;
 
     // Debugging
     // patcher
@@ -221,48 +227,6 @@ pub fn apply(patcher: &mut Patcher, free: Item, settings: &Settings) -> Result<(
             [254] => 81, // Skip 212,  5,  82, 83, 214 - Rosso?
             [253] => 86, // Skip 218, 22,  87, 88, 216 - Irene?
             [251] => 91, // Skip 222, 26,  92, 93, 221 - Impa?
-        },
-
-        // Hyrule Castle Dungeon
-        DungeonCastle/Castle {
-            [276] => 62,  // [274]
-            [315] => 70,  // [ 19]
-            [236] => 74,  // [ 37]
-            [290] => 75,  // [284]
-            [234] => 79,  // [ 18]
-            [311] => 97,  // [255]
-            [184] => 107, // [106]
-            [107] => 110, // [109]
-            [312] => 175, // [ 87]
-            [313] => 176, // [ 88]
-            [227] => 177, // [ 89]
-            [281] => 178, // [ 16]
-            [228] => 179, // [ 14]
-            [229] => 180, // [ 17]
-            [314] => 181, // [ 15]
-            [237] => 183, // [104] // "what?"
-            [171] => 184, // [ 29]
-            [172] => 185, // [ 39]
-            [131] => 222, // [127]
-            [206] => 223, // [128]
-            [135] => 224, // [129]
-            [137] => 225, // [130]
-            [282] => 269, // [270]
-            [138] => 275, // [  1]
-            [303] => 286, // [ 76] "I wish only to possess..."
-
-            // After fight
-            [5]   => 247, // skip 149
-            //[155] => 249, // skip 40
-            [40 convert_into_action] each [ // set Course Flag 1, if not already set, to spawn 4F enemies
-                command(30),
-                value(3001),
-                count(0),
-            ],
-            [11] each [
-                value(369), // set Flag 415, if not already set, to clear 4F cutscene
-                => None, // End, skip setting Flag 420 and 421, freeing them for use
-            ],
         },
 
         // Shady Guy (Zora's Domain)
