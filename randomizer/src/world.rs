@@ -569,9 +569,9 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             path(RossoCave,
                  Some(|p| p.has_hammer()),
                  None,
-                 Some(|p| p.has_hookshot() || p.has_boomerang()),
-                 Some(|p| p.has_shield() && p.has_tornado_rod()),
-                 Some(|p| p.has_sand_rod()),
+                 Some(|p| p.has_boomerang() || (p.not_nice_mode() && p.has_hookshot())),
+                 Some(|p| p.not_nice_mode() && (p.can_use_shield() && p.has_tornado_rod())),
+                 None,
             ),
             path(TornadoRodDungeon,
                  Some(|p| p.has_bombs()),
@@ -1050,16 +1050,16 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             check(LocationInfo::new(regions::hyrule::lost::woods::SUBREGION, "Lost Woods Alcove"),
                   Some(|p| p.can_merge()),
                   None,
-                  Some(|p| p.can_escape() && (p.has_boomerang() || p.has_hookshot())),
+                  Some(|p| p.can_escape() && (p.has_boomerang() || (p.not_nice_mode() && p.has_hookshot()))),
                   None,
-                  Some(|p| p.has_boomerang() || p.has_hookshot()), // Use Crow to escape
+                  Some(|p| p.has_boomerang() || (p.not_nice_mode() && p.has_hookshot())), // Use Crow to escape
             ),
             check(LocationInfo::new(regions::hyrule::lost::woods::SUBREGION, "Lost Woods Big Rock Chest"),
                   Some(|p| p.has_titans_mitt()),
                   None,
                   None,
                   None,
-                  Some(|p| p.has_boomerang() || p.has_hookshot()), // Use Crow to escape
+                  Some(|p| p.has_boomerang() || (p.not_nice_mode() && p.has_hookshot())), // Use Crow to escape
             ),
             check_free(LocationInfo::new(
                 regions::hyrule::lost::woods::SUBREGION,
@@ -2538,7 +2538,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                   Some(|p| p.can_merge()),
                   None,
                   None,
-                  Some(|p| p.has_hookshot() || p.has_boomerang()), // portal clip through house
+                  Some(|p| p.has_boomerang() || (p.not_nice_mode() && p.has_hookshot())), // portal clip through house
                   None,
             ),
             check_free(LocationInfo::new(
@@ -3658,30 +3658,30 @@ fn dark_palace() -> HashMap<Location, LocationNode> {
 /// Swamp Palace
 fn swamp_palace() -> HashMap<Location, LocationNode> {
     HashMap::from([
-        (
-            SwampPalaceOutside,
-            location("Swamp Palace Outside", vec![], vec![
-                path(
-                    LoruleCastleField,
-                    Some(|p| p.has_hookshot() || p.has_flippers() || p.has_bomb_flower()),
-                    None,
-                    None,
-                    None,
-                    None,
-                ),
-                path_free(SwampPalaceAntechamber),
-            ]),
-        ),
-        (
-            SwampPalaceAntechamber,
+        (SwampPalaceOutside, location("Swamp Palace Outside", vec![], vec![
+            path(LoruleCastleField,
+                Some(|p| p.has_hookshot() || p.has_flippers() || p.has_bomb_flower()),
+                None,
+                None,
+                None,
+                None,
+            ),
+            path_free(SwampPalaceAntechamber),
+        ])),
+        (SwampPalaceAntechamber,
             location("Swamp Palace Antechamber", vec![], vec![
                 path_free(SwampPalaceOutside),
                 path(
                     SwampPalaceFoyer,
                     Some(|p| p.has_bomb_flower()),
                     None,
-                    Some(|p| p.can_merge() && p.has_ice_rod() && p.has_flippers()),
                     None,
+                    Some(|p| p.not_nice_mode()
+                         && p.can_merge()
+                         && p.has_ice_rod()
+                         && p.has_flippers()
+                         && (p.has_sword() || p.has_tornado_rod() || p.has_net() || p.has_bombs())
+                    ),
                     None,
                 ),
             ]),
@@ -3737,7 +3737,7 @@ fn swamp_palace() -> HashMap<Location, LocationNode> {
                         Some(|p| p.has_swamp_keys(2) && p.can_merge()),
                         Some(|p| p.has_swamp_keys(2) && p.has_bow()),
                         Some(|p| p.has_swamp_keys(2) && p.has_boots()),
-                        Some(|p| p.has_swamp_keys(2) && p.has_ice_rod()),
+                        Some(|p| p.has_swamp_keys(2) && p.not_nice_mode() && p.has_ice_rod()),
                         None,
                     ),
                     check(
@@ -3748,7 +3748,7 @@ fn swamp_palace() -> HashMap<Location, LocationNode> {
                         Some(|p| p.has_swamp_keys(2) && p.can_merge()),
                         None,
                         None,
-                        Some(|p| p.has_ice_rod()),
+                        Some(|p| p.not_nice_mode() && p.has_ice_rod()),
                         None,
                     ),
                     check(
@@ -3759,7 +3759,7 @@ fn swamp_palace() -> HashMap<Location, LocationNode> {
                         Some(|p| p.has_swamp_keys(2) && p.can_merge()),
                         None,
                         None,
-                        Some(|p| p.has_ice_rod()),
+                        Some(|p| p.not_nice_mode() && p.has_ice_rod()),
                         None,
                     ),
                     check(
@@ -3770,7 +3770,7 @@ fn swamp_palace() -> HashMap<Location, LocationNode> {
                         Some(|p| p.has_swamp_keys(2) && p.can_merge()),
                         None,
                         None,
-                        Some(|p| p.can_merge() && p.has_ice_rod()),
+                        Some(|p| p.not_nice_mode() && p.can_merge() && p.has_ice_rod()),
                         None,
                     ),
                     check(
@@ -3786,7 +3786,7 @@ fn swamp_palace() -> HashMap<Location, LocationNode> {
                         }),
                         Some(|p| p.can_merge() && p.has_swamp_keys(2)),
                         Some(|p| p.has_boots()),
-                        Some(|p| p.has_ice_rod()),
+                        Some(|p| p.not_nice_mode() && p.has_ice_rod()),
                         None,
                     ),
                 ],
@@ -3800,7 +3800,7 @@ fn swamp_palace() -> HashMap<Location, LocationNode> {
                     }),
                     None,
                     None,
-                    Some(|p| p.has_ice_rod() && (p.has_swamp_big_key() || p.has_tornado_rod())),
+                    Some(|p| p.not_nice_mode() && p.has_ice_rod() && (p.has_swamp_big_key() || p.has_tornado_rod())),
                     None,
                 )],
             ),

@@ -74,11 +74,11 @@ fn plando_settings() -> Settings {
         dev_mode: true,
         logic: Logic {
             mode: LogicMode::Normal,
-            randomize_dungeon_prizes: false,
+            randomize_dungeon_prizes: true,
             lc_requirement: 1,
             yuganon_requirement: 1,
             ped_requirement: PedestalSetting::Standard,
-            nice_mode: false,
+            nice_mode: true,
             saved_sage_logic: false,
             entrance_rando: EntranceShuffleSetting::NotShuffled,
             assured_weapon: false,
@@ -110,8 +110,8 @@ fn build_layout() -> Layout {
     //////////////////////////
 
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (1)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (2)"), ItemFireRod);
-    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (3)"), ItemSandRodLv2);
+    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (2)"), ItemHookShotLv2);
+    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (3)"), ItemBell);
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (4)"), ItemBombLv2);
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (5)"), DashBoots);
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (6)"), HintGlasses);

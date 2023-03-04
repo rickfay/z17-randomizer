@@ -181,8 +181,8 @@ impl Progress {
         self.has_either(Net01, Net02)
     }
 
-    pub fn has_shield(&self) -> bool {
-        self.has_any(&[Shield01, Shield02, Shield03, Shield04, HylianShield])
+    pub fn can_use_shield(&self) -> bool {
+        self.has_sword() && self.has_any(&[Shield01, Shield02, Shield03, Shield04, HylianShield])
     }
 
     pub fn has_scoot_fruit(&self) -> bool {
@@ -290,6 +290,14 @@ impl Progress {
 
     pub fn swordless_mode(&self) -> bool {
         self.settings.logic.swordless_mode
+    }
+
+    pub fn nice_mode(&self) -> bool {
+        self.settings.logic.nice_mode
+    }
+
+    pub fn not_nice_mode(&self) -> bool {
+        !self.nice_mode()
     }
 
     pub fn lampless(&self) -> bool {
