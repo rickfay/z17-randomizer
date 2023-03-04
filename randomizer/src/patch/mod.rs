@@ -333,7 +333,7 @@ impl Patcher {
         flow::apply(&mut self, free, settings)?;
         prizes::patch_dungeon_prizes(&mut self, &prizes, settings);
         maps::patch_maps(&mut self, &prizes, settings);
-        scenes::apply(&mut self, settings)?;
+        scenes::patch_byaml_files(&mut self, settings)?;
 
         {
             let Self { ref rentals, ref merchant, ref mut courses, .. } = self;
@@ -597,6 +597,12 @@ fn cutscenes<'game, 'settings>(
                 {
                     opening.add_event_flag(flag);
                 }
+            }
+
+            // Big Bomb Flower Skip
+            // Removes the Big Rock (FieldDark33) to drain the water (CaveDark1)
+            if logic.skip_big_bomb_flower {
+                opening.add_event_flag(541);
             }
         }
 

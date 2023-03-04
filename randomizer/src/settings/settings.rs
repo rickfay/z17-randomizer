@@ -17,7 +17,7 @@ use {
 #[serde(default, deny_unknown_fields)]
 pub struct Settings {
     #[serde(skip_serializing_if = "crate::settings::is_false")]
-    pub debug: bool,
+    pub dev_mode: bool,
     pub logic: Logic,
     pub options: Options,
     pub exclusions: Exclusion,

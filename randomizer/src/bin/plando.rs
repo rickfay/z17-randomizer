@@ -71,7 +71,7 @@ struct RunArgs {
 
 fn plando_settings() -> Settings {
     Settings {
-        debug: true,
+        dev_mode: true,
         logic: Logic {
             mode: LogicMode::Normal,
             randomize_dungeon_prizes: false,
@@ -86,6 +86,7 @@ fn plando_settings() -> Settings {
             pouch_in_shop: false,
             boots_in_shop: false,
             minigames_excluded: false,
+            skip_big_bomb_flower: false,
             swordless_mode: false,
             super_items: false,
             skip_trials: false,

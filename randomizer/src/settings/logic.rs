@@ -34,6 +34,10 @@ pub struct Logic {
     #[serde(default)]
     pub nice_mode: bool,
 
+    /// Skips the Big Bomb Flower by removing the 5 Big Rocks in Lorule Field (Does not affect Lorule Castle Bomb Trial)
+    #[serde(default)]
+    pub skip_big_bomb_flower: bool,
+
     /// todo
     /// Makes Sage related checks and events be tied to rescuing the respective Sage
     #[serde(default, skip_serializing)]

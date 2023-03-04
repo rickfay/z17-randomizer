@@ -16,6 +16,7 @@
     "maiamai_madness":             false,       // Maiamai Madness. Shuffles Maiamai into the pool, adding 100 more locations
 
     "minigames_excluded":          true,       // Exclude all minigames (Cucco Ranch, Rupee Rushes (both), Hyrule Hotfoot (both races), Treacherous Tower, and Octoball Derby)
+    "skip_big_bomb_flower":        false,      // Skips the Big Bomb Flower by removing the 5 Big Rocks in Lorule Field (Does not affect Lorule Castle Bomb Trial)
     "skip_trials":                 false,      // Skip the Trials in Lorule Castle (removes the door)
     "bow_of_light_in_castle":      true,       // Guarantees the Bow of Light will be placed *somewhere* in Lorule Castle (including possibly Zelda)
 

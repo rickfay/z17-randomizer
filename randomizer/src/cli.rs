@@ -72,6 +72,11 @@ pub fn seed_settings_ui() -> Settings {
         "Exclude Minigames",
         "Excludes the following: Octoball Derby, Cucco Ranch, Hyrule Hotfoot, Treacherous Tower, and both Rupee Rushes",
     );
+    let skip_big_bomb_flower = prompt_bool(
+        "Skip Big Bomb Flower",
+        "Skips the Big Bomb Flower by removing the 5 Big Rocks in Lorule Field.\n\
+        (Does not affect Lorule Castle Bomb Trial)",
+    );
     let skip_trials =
         prompt_bool("Skip Trials", "Automatically opens the Lorule Castle Trials door.");
 
@@ -120,6 +125,7 @@ pub fn seed_settings_ui() -> Settings {
             vanes_activated,
             super_items,
             minigames_excluded,
+            skip_big_bomb_flower,
             skip_trials,
             bow_of_light_in_castle,
             lampless,

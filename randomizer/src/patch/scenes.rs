@@ -88,81 +88,9 @@ macro_rules! action {
     };
 }
 
-// Hyrule Blacksmith
-fn patch_blacksmith_hyrule(patcher: &mut Patcher, _settings: &Settings) {
-    patcher.modify_objs(IndoorLight, 19, &[
-        // Make PackageSword a Chest
-        call(12, |obj| {
-            obj.clear_active_args();
-            obj.set_inactive_flag(Flag::Event(26));
-            //obj.clear_disable_flag();
-            obj.set_typ(1);
-            obj.srt.translate.x = -1.957;
-            obj.srt.translate.y = 0.6;
-            obj.srt.scale = match obj.id {
-                35 => Vec3 { x: 1.00000, y: 2.00000, z: 2.22222 },
-                34 => Vec3 { x: 0.52632, y: 2.00000, z: 1.66667 },
-                _ => {
-                    fail!("PackageSword wasn't a chest")
-                }
-            }
-        }),
-        disable(19), // Map attention
-    ]);
-}
-
-// Chamber of Sages
-fn patch_chamber_of_sages(patcher: &mut Patcher, _settings: &Settings) {
-    patcher.modify_objs(CaveDark, 10, &[
-        set_46_args(74, Flag::Event(0)), // Staircase
-    ]);
-}
-
-// Ku's Domain
-fn patch_kus_domain(patcher: &mut Patcher, _settings: &Settings) {
-    patcher.modify_objs(FieldDark, 7, &[
-        call(55, |obj| {
-            obj.set_typ(4); // changed to chest automatically, set typ here
-        }),
-        disable(66), // rupee throw camera
-    ]);
-}
-
-// Treasure Dungeons
-fn patch_treasure_dungeons(patcher: &mut Patcher, settings: &Settings) {
-    // Remove Treasure Dungeon mini-cutscenes only when CSMC is off (since they show the chests)
-    if !settings.options.chest_size_matches_contents {
-        patcher.modify_objs(AttractionLight, 1, &[disable(15)]);
-        patcher.modify_objs(AttractionLight, 2, &[disable(54)]);
-        patcher.modify_objs(AttractionLight, 3, &[disable(47)]);
-        patcher.modify_objs(AttractionLight, 4, &[disable(118)]);
-        patcher.modify_objs(AttractionLight, 5, &[disable(26)]);
-    }
-}
-
-// Zora
-fn patch_zora(patcher: &mut Patcher, _settings: &Settings) {
-    // Lake Hylia
-    patcher.modify_objs(FieldLight, 35, &[
-        enable(151), // Zora outside House of Gales
-    ]);
-
-    // Zora's Domain
-    patcher.modify_objs(CaveLight, 7, &[
-        enable(116),            // Thin Oren
-        enable(119),            // Zora Attendant
-        enable(127),            // Thin Attendant
-        clear_enable_flag(131), // AreaSwitchCube, fix for not being able to turn in Smooth Gem
-        clear_enable_flag(132), // Enable Zora Queen event always
-        enable(134),            // Thicc Oren
-    ]);
-}
-
-pub fn apply(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
-    if settings.debug {
-        debug_stuff(patcher, settings);
-    }
-
+/// Patch Scene BYAML Files
+pub fn patch_byaml_files(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
+    do_dev_stuff(patcher, settings);
     patch_big_problem_chests(patcher, settings);
     patch_blacksmith_hyrule(patcher, settings);
     patch_castles(patcher, settings);
@@ -175,9 +103,13 @@ pub fn apply(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
     patch_treasure_dungeons(patcher, settings);
     patch_zora(patcher, settings);
 
+    patch_nice_mode(patcher, settings);
+    patch_big_bomb_flower_skip(patcher, settings);
+
     patcher.modify_objs(FieldLight, 18, &[disable(529)]);
 
-    apply!(patcher, // TODO convert to new approach
+    // TODO convert to new approach
+    apply!(patcher,
 
         // East Death Mountain
         FieldLight 4 {
@@ -609,6 +541,76 @@ pub fn apply(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
     Ok(())
 }
 
+// Hyrule Blacksmith
+fn patch_blacksmith_hyrule(patcher: &mut Patcher, _settings: &Settings) {
+    patcher.modify_objs(IndoorLight, 19, &[
+        // Make PackageSword a Chest
+        call(12, |obj| {
+            obj.clear_active_args();
+            obj.set_inactive_flag(Flag::Event(26));
+            //obj.clear_disable_flag();
+            obj.set_typ(1);
+            obj.srt.translate.x = -1.957;
+            obj.srt.translate.y = 0.6;
+            obj.srt.scale = match obj.id {
+                35 => Vec3 { x: 1.00000, y: 2.00000, z: 2.22222 },
+                34 => Vec3 { x: 0.52632, y: 2.00000, z: 1.66667 },
+                _ => {
+                    fail!("PackageSword wasn't a chest")
+                }
+            }
+        }),
+        disable(19), // Map attention
+    ]);
+}
+
+// Chamber of Sages
+fn patch_chamber_of_sages(patcher: &mut Patcher, _settings: &Settings) {
+    patcher.modify_objs(CaveDark, 10, &[
+        set_46_args(74, Flag::Event(0)), // Staircase
+    ]);
+}
+
+// Ku's Domain
+fn patch_kus_domain(patcher: &mut Patcher, _settings: &Settings) {
+    patcher.modify_objs(FieldDark, 7, &[
+        call(55, |obj| {
+            obj.set_typ(4); // changed to chest automatically, set typ here
+        }),
+        disable(66), // rupee throw camera
+    ]);
+}
+
+// Treasure Dungeons
+fn patch_treasure_dungeons(patcher: &mut Patcher, settings: &Settings) {
+    // Remove Treasure Dungeon mini-cutscenes only when CSMC is off (since they show the chests)
+    if !settings.options.chest_size_matches_contents {
+        patcher.modify_objs(AttractionLight, 1, &[disable(15)]);
+        patcher.modify_objs(AttractionLight, 2, &[disable(54)]);
+        patcher.modify_objs(AttractionLight, 3, &[disable(47)]);
+        patcher.modify_objs(AttractionLight, 4, &[disable(118)]);
+        patcher.modify_objs(AttractionLight, 5, &[disable(26)]);
+    }
+}
+
+// Zora
+fn patch_zora(patcher: &mut Patcher, _settings: &Settings) {
+    // Lake Hylia
+    patcher.modify_objs(FieldLight, 35, &[
+        enable(151), // Zora outside House of Gales
+    ]);
+
+    // Zora's Domain
+    patcher.modify_objs(CaveLight, 7, &[
+        enable(116),            // Thin Oren
+        enable(119),            // Zora Attendant
+        enable(127),            // Thin Attendant
+        clear_enable_flag(131), // AreaSwitchCube, fix for not being able to turn in Smooth Gem
+        clear_enable_flag(132), // Enable Zora Queen event always
+        enable(134),            // Thicc Oren
+    ]);
+}
+
 fn patch_castles(patcher: &mut Patcher, _settings: &Settings) {
     let green_pendant_flag = prize_flag(PendantCourage);
     let yuga_defeated = Flag::Event(420); // Set after Yuga 2 defeated
@@ -845,10 +847,51 @@ fn patch_softlock_prevention(patcher: &mut Patcher, settings: &Settings) {
     // Skull Woods B2 Boss Hallway w/o Fire
 }
 
+/// Nice Mode
+fn patch_nice_mode(patcher: &mut Patcher, settings: &Settings) {
+    if !settings.logic.nice_mode {
+        return;
+    }
+
+    // Make Maiamai Cave Reject Player - TODO Undo this when Maiamai Rewards are shuffled
+    patcher.modify_objs(FieldLight, 35, &[redirect(140, Dest::new(FieldLight, 35, 8))]);
+}
+
+/// Big Bomb Flower Skip
+fn patch_big_bomb_flower_skip(patcher: &mut Patcher, settings: &Settings) {
+    if !settings.logic.skip_big_bomb_flower {
+        return;
+    }
+
+    // Big Bomb Flower Field
+    patcher.modify_objs(FieldDark, 24, &[
+        disable(86), // Unlock Big Bomb Flower
+        disable(93), // Great Rupee Fairy
+    ]);
+
+    // South of Octoball Derby
+    patcher.modify_objs(FieldDark, 32, &[
+        disable(89), // Boulder of Destiny
+    ]);
+
+    // Lorule Southern Ruins
+    patcher.modify_objs(FieldDark, 33, &[
+        /* Swamp Palace gets drained by setting Flag 541 */
+        disable(201), // Swamp Cave
+    ]);
+}
+
 //noinspection ALL
 #[rustfmt::skip]
 #[allow(unused)]
-fn debug_stuff(patcher: &mut Patcher, settings: &Settings) {
+/**
+ * Development Zone
+ * Make changes here for dev & testing we don't want to risk making it into the actual release.
+ */
+fn do_dev_stuff(patcher: &mut Patcher, settings: &Settings) {
+    if !settings.dev_mode {
+        return;
+    }
 
     // Osfala Portrait
     // patcher.modify_objs(IndoorDark, 15, &[
@@ -865,58 +908,5 @@ fn debug_stuff(patcher: &mut Patcher, settings: &Settings) {
             // FieldDark, 31, 0, // Misery Mire
             // DungeonCastle, 6, 0, // Yuga 2 Boss
         ));
-        //obj.redirect_old(
-        // 12, 13, 0,  // Dark Palace Boss
-        // 0, 0, 42,   // Sacred Realm
-        // 0, 0, 0,    // Lost Woods
-        // 0, 0, 33,   // Master Sword Pedestal
-        // 0, 3, 4,    // Hilda's Study
-        // 0, 2, 6,    // Zelda's Study (glitched for some reason)
-        // 1, 3, 10,   // Vacant House rear
-        // 0, 22, 2,   // Cucco Dungeon
-        // 0, 1, 6,    // Ku's Domain
-        // 3, 0, 37,   // Lost Woods Maze - Unreachable Spawn Point
-        // 1, 0, 37,   // Lost Woods Maze - Left 1st Poes
-        // 20, 0, 17,  // HC Roof
-        // 1, 2, 11,   // Hyrule Castle 1F
-        // 0, 5, 2,    // Swamp Cave
-        // 0,21,0,     // Throne Room
-        // 0, 8, 7,    // After final boss cutscene
-        // 9, 0, 32,   // Southern Ruins Pillar Cave
-        // 0, 1, 17,   // FieldDark 18
-        // 7, 4, 17,   // Sanctuary Dungeon End
-        // 0, 2, 9,    // Rosso House
-        // 0, 14, 2,   // Swamp Palace 2F
-        // 24, 14, 1,  // Swamp Palace River Room
-        // 0, 0, 1,    // FieldLight 2
-        // 0, 0, 6,    // Outside Zora's Domain
-        // 4, 0, 8,    // Outside Fortune-Teller
-        // 0, 12, 6,   // HC 4th Floor
-        // 1, 3, 3,    // Lorule Blacksmith
-        // 0, 12, 0,   // Hyrule Castle Dungeon
-        // 2, 1, 30,   // Zaganaga Portal
-        // 0, 1, 30,   // Misery Mire
-        // 0, 5, 13,   // Great Rupee Fairy Cave
-        // 1, 17, 0,   // Ice Ruins Boss
-        // 0, 19, 2,   // Turtle Rock Boss
-        // 0, 5, 9,    // Chamber of Sages
-        // 0, 5, 14,   // Thief Girl Cave
-        // 0, 0, 19,   // Eastern Ruins Cutscene
-        // 5, 0, 17,   // Pendant of Courage cutscene
-        // 0, 0, 24,   // Haunted Grove
-        // 5, 1, 19,   // Outside Dark Palace
-        // 6, 10, 2,   // Gales Boss
-        // 0, 10, 0,   // Gales Entrance
-        // 0, 9, 2,    // Eastern Palace Boss
-        // 0, 9, 0,    // Eastern Palace Entrance
-        // 5, 0, 19    // Eastern Ruins WV
-        // 0, 9, 0     // Eastern Palace Lobby
-        // 20, 1, 0,   // Seres Portrait
-        // 0, 4, 3     // Kak Well Lower
-        // 1, 4, 3     // Kak Well Upper
-        // 10, 11, 0   // Tower of Hera Boss
-        // 0, 11, 0   // Tower of Hera Entrance
-        // 0, 13, 0   // Dark Entrance
-        //);
     })]);
 }
