@@ -539,13 +539,13 @@ fn verify_all_locations_accessible(
     let reachable_checks = assumed_search(loc_map, progression_pool, &mut check_map, settings); //find_reachable_checks(loc_map, &everything, &mut check_map); //
 
     /**
-     * 427 TOTAL CHECKS <br /><br />
+     * 430 TOTAL CHECKS <br /><br />
      *
      * 413 are considered in logic:
      * - 254 Standard Checks
      * - 100 Maiamai
      * - 11 Dungeon Prizes
-     * - 29 Quest (non-items that are still progression)
+     * - 32 Quest (non-items that are still progression)
      * - 19 Statically Placed Items:
      *     - 12x Shop Items (not including 9,999 items)
      *     - 3x Obscure Gold/Silver Rupees
@@ -554,7 +554,7 @@ fn verify_all_locations_accessible(
      *     - FIXME: Hyrule Hotfoot Second Race
      *     - FIXME: Fortune's Choice
      */
-    const TOTAL_CHECKS: usize = 427;
+    const TOTAL_CHECKS: usize = 430;
 
     /**
      * Checks intentionally considered unreachable:

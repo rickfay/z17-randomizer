@@ -34,6 +34,11 @@ pub struct Logic {
     #[serde(default)]
     pub nice_mode: bool,
 
+    /// Removes Enemies from dungeons that are themselves Progression (e.g.: Bawbs, the bomb enemy).
+    /// Logic will be adjusted to require the player's items instead.
+    #[serde(default)]
+    pub no_progression_enemies: bool,
+
     /// Skips the Big Bomb Flower by removing the 5 Big Rocks in Lorule Field (Does not affect Lorule Castle Bomb Trial)
     #[serde(default)]
     pub skip_big_bomb_flower: bool,

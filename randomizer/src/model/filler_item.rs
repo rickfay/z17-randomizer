@@ -457,6 +457,9 @@ pub enum FillerItem {
     WomanRoofMaiamai,
     SkullEyeRight,
     SkullEyeLeft,
+    ThievesB1DoorOpen,
+    ThievesB2DoorOpen,
+    ThievesB3WaterDrained,
     TurtleFlipped,
     TurtleAttacked,
     TurtleWall,
@@ -841,6 +844,9 @@ impl FillerItem {
             // WomanRoofMaiamai |
             // SkullEyeRight |
             // SkullEyeLeft |
+            // ThievesB1DoorOpen |
+            // ThievesB2DoorOpen |
+            // ThievesB3WaterDrained |
             // TurtleFlipped |
             // TurtleAttacked |
             // TurtleWall |
@@ -925,6 +931,9 @@ impl FillerItem {
             WomanRoofMaiamai => "Woman's Roof Maiamai",
             SkullEyeRight => "Skull Woods Right Eye",
             SkullEyeLeft => "Skull Woods Left Eye",
+            ThievesB1DoorOpen => "Thieves' Hideout B1 Door Open",
+            ThievesB2DoorOpen => "Thieves' Hideout B2 Door Open",
+            ThievesB3WaterDrained => "Thieves' Hideout B3 Water Drained",
             TurtleFlipped => "Turtle Flipped",
             TurtleAttacked => "Turtle Bullied",
             TurtleWall => "Turtle Wall",
@@ -1133,6 +1142,9 @@ pub fn convert(fill_item: FillerItem) -> Option<Item> {
         | WomanRoofMaiamai
         | SkullEyeRight
         | SkullEyeLeft
+        | ThievesB1DoorOpen
+        | ThievesB2DoorOpen
+        | ThievesB3WaterDrained
         | TurtleFlipped
         | TurtleAttacked
         | TurtleWall

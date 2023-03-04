@@ -105,6 +105,7 @@ pub fn patch_byaml_files(patcher: &mut Patcher, settings: &Settings) -> Result<(
 
     patch_nice_mode(patcher, settings);
     patch_big_bomb_flower_skip(patcher, settings);
+    patch_no_progression_enemies(patcher, settings);
 
     patcher.modify_objs(FieldLight, 18, &[disable(529)]);
 
@@ -878,6 +879,44 @@ fn patch_big_bomb_flower_skip(patcher: &mut Patcher, settings: &Settings) {
     patcher.modify_objs(FieldDark, 33, &[
         /* Swamp Palace gets drained by setting Flag 541 */
         disable(201), // Swamp Cave
+    ]);
+}
+
+/// No Progression Enemies
+fn patch_no_progression_enemies(patcher: &mut Patcher, settings: &Settings) {
+    if !settings.logic.no_progression_enemies {
+        return;
+    }
+
+    // Swamp
+    patcher.modify_objs(DungeonWater, 1, &[
+        disable(451), // Bawb (west)
+        disable(452), // Bawb (east)
+    ]);
+
+    // Skull
+    patcher.modify_objs(DungeonDokuro, 1, &[
+        disable(271), // Wall Master (North B1)
+    ]);
+
+    // Thieves'
+    patcher.modify_objs(DungeonHagure, 1, &[
+        disable(707),  // Bawb (center)
+        disable(1057), // Bawb (west)
+        disable(1133), // Sluggula
+    ]);
+
+    // Desert
+    patcher.modify_objs(DungeonSand, 3, &[
+        disable(234), // Bawb
+        disable(240), // Bawb
+        disable(252), // Bawb
+    ]);
+
+    // Ice
+    patcher.modify_objs(DungeonIce, 1, &[
+        disable(234), // Keelon
+        disable(235), // Keelon
     ]);
 }
 

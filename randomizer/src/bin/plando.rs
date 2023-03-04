@@ -79,6 +79,8 @@ fn plando_settings() -> Settings {
             yuganon_requirement: 1,
             ped_requirement: PedestalSetting::Standard,
             nice_mode: true,
+            super_items: false,
+            no_progression_enemies: true,
             saved_sage_logic: false,
             entrance_rando: EntranceShuffleSetting::NotShuffled,
             assured_weapon: false,
@@ -88,7 +90,6 @@ fn plando_settings() -> Settings {
             minigames_excluded: false,
             skip_big_bomb_flower: false,
             swordless_mode: false,
-            super_items: false,
             skip_trials: false,
             bow_of_light_in_castle: false,
             lampless: false,
@@ -110,14 +111,14 @@ fn build_layout() -> Layout {
     //////////////////////////
 
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (1)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (2)"), ItemHookShotLv2);
-    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (3)"), ItemBell);
-    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (4)"), ItemBombLv2);
-    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (5)"), DashBoots);
+    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (2)"), ItemIceRodLv2);
+    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (3)"), RingHekiga);
+    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (4)"), RingHekiga);
+    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (5)"), ItemBowLv2);
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (6)"), HintGlasses);
-    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (7)"), RingHekiga);
-    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (8)"), RingHekiga);
-    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (9)"), RupeeGold);
+    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (7)"), ItemBell);
+    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (8)"), ItemBoomerangLv2);
+    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (9)"), ItemFireRodLv2);
     // layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Thanks"), Item::RingHekiga);
 
     /////////////////////////////
@@ -540,21 +541,21 @@ fn build_layout() -> Layout {
     layout.set(LocationInfo::new(regions::dungeons::thieves::hideout::SUBREGION, "Stalblind"), OreYellow);
 
     // Ice Ruins
-    layout.set(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "[IR] (1F) Hidden Chest"), Compass);
-    layout.set(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "[IR] (B3) Grate Chest (Left)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "[IR] (B3) Grate Chest (Right)"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "[IR] (1F) Hidden Chest"), KeySmall);
+    layout.set(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "[IR] (B3) Grate Chest (Left)"), KeySmall);
+    layout.set(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "[IR] (B3) Grate Chest (Right)"), KeySmall);
     layout.set(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "[IR] (B4) Ice Pillar"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "[IR] (B5) Big Chest"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "[IR] (B5) Big Chest"), KeyBoss);
     layout.set(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "[IR] (B1) East Chest"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "[IR] (B1) Narrow Ledge"), KeySmall);
+    layout.set(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "[IR] (B1) Narrow Ledge"), RupeeGold);
     layout.set(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "[IR] (B1) Upper Chest"), RupeeGold);
     layout.set(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "[IR] (B3) Big Chest (Puzzle)"), RupeeGold);
     layout.set(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "[IR] (B4) Switches"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "[IR] (B4) Southwest Chest (Fall)"), KeySmall);
+    layout.set(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "[IR] (B4) Southwest Chest (Fall)"), RupeeGold);
     layout.set(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "[IR] (B4) Narrow Platform"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "[IR] (B2) Far North"), DashBoots);
+    layout.set(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "[IR] (B2) Far North"), RupeeGold);
     layout.set(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "[IR] (B4) Southeast Chest (Fall)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "[IR] Dharkstare"), KeyBoss);
+    layout.set(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "[IR] Dharkstare"), RupeeGold);
 
     // Desert Palace
     layout.set(LocationInfo::new(regions::dungeons::desert::palace::SUBREGION, "[DP] (1F) Entrance"), Compass);

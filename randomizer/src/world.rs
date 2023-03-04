@@ -3660,1137 +3660,709 @@ fn swamp_palace() -> HashMap<Location, LocationNode> {
     HashMap::from([
         (SwampPalaceOutside, location("Swamp Palace Outside", vec![], vec![
             path(LoruleCastleField,
-                Some(|p| p.has_hookshot() || p.has_flippers() || p.has_bomb_flower()),
-                None,
-                None,
-                None,
-                None,
+                 Some(|p| p.has_hookshot() || p.has_flippers() || p.has_bomb_flower()),
+                 None,
+                 None,
+                 None,
+                 None,
             ),
             path_free(SwampPalaceAntechamber),
         ])),
-        (SwampPalaceAntechamber,
-            location("Swamp Palace Antechamber", vec![], vec![
-                path_free(SwampPalaceOutside),
-                path(
-                    SwampPalaceFoyer,
-                    Some(|p| p.has_bomb_flower()),
-                    None,
-                    None,
-                    Some(|p| p.not_nice_mode()
-                         && p.can_merge()
-                         && p.has_ice_rod()
-                         && p.has_flippers()
-                         && (p.has_sword() || p.has_tornado_rod() || p.has_net() || p.has_bombs())
-                    ),
-                    None,
-                ),
-            ]),
-        ),
-        (
-            SwampPalaceFoyer,
-            location("Swamp Palace Foyer", vec![], vec![
-                path_free(SwampPalaceAntechamber),
-                path(
-                    SwampPalaceMain,
-                    Some(|p| p.has_flippers() && p.has_hookshot()),
-                    None,
-                    None, // what a cruel game
-                    None,
-                    None,
-                ),
-            ]),
-        ),
-        (
-            SwampPalaceMain,
-            location(
-                "Swamp Palace",
-                vec![
-                    check_free(LocationInfo::new(
-                        regions::dungeons::swamp::palace::SUBREGION,
-                        "[SP] (B1) Center",
-                    )),
-                    check_free(LocationInfo::new(
-                        regions::dungeons::swamp::palace::SUBREGION,
-                        "[SP] (B1) Waterfall Room",
-                    )),
-                    check_free(LocationInfo::new(
-                        regions::dungeons::swamp::palace::SUBREGION,
-                        "[SP] (B1) Raft Room (Pillar)",
-                    )),
-                    check_free(LocationInfo::new(
-                        regions::dungeons::swamp::palace::SUBREGION,
-                        "[SP] (B1) Raft Room (Right)",
-                    )),
-                    check_free(LocationInfo::new(
-                        regions::dungeons::swamp::palace::SUBREGION,
-                        "[SP] (B1) Raft Room (Left)",
-                    )),
-                    check_free(LocationInfo::new(
-                        regions::dungeons::swamp::palace::SUBREGION,
-                        "[SP] (B1) Gyorm",
-                    )),
-                    check(
-                        LocationInfo::new(
-                            regions::dungeons::swamp::palace::SUBREGION,
-                            "[SP] (B1) Big Chest (Secret)",
-                        ),
-                        Some(|p| p.has_swamp_keys(2) && p.can_merge()),
-                        Some(|p| p.has_swamp_keys(2) && p.has_bow()),
-                        Some(|p| p.has_swamp_keys(2) && p.has_boots()),
-                        Some(|p| p.has_swamp_keys(2) && p.not_nice_mode() && p.has_ice_rod()),
-                        None,
-                    ),
-                    check(
-                        LocationInfo::new(
-                            regions::dungeons::swamp::palace::SUBREGION,
-                            "[SP] (1F) West Room",
-                        ),
-                        Some(|p| p.has_swamp_keys(2) && p.can_merge()),
-                        None,
-                        None,
-                        Some(|p| p.not_nice_mode() && p.has_ice_rod()),
-                        None,
-                    ),
-                    check(
-                        LocationInfo::new(
-                            regions::dungeons::swamp::palace::SUBREGION,
-                            "[SP] (1F) East Room",
-                        ),
-                        Some(|p| p.has_swamp_keys(2) && p.can_merge()),
-                        None,
-                        None,
-                        Some(|p| p.not_nice_mode() && p.has_ice_rod()),
-                        None,
-                    ),
-                    check(
-                        LocationInfo::new(
-                            regions::dungeons::swamp::palace::SUBREGION,
-                            "[SP] (1F) Water Puzzle",
-                        ),
-                        Some(|p| p.has_swamp_keys(2) && p.can_merge()),
-                        None,
-                        None,
-                        Some(|p| p.not_nice_mode() && p.can_merge() && p.has_ice_rod()),
-                        None,
-                    ),
-                    check(
-                        LocationInfo::new(
-                            regions::dungeons::swamp::palace::SUBREGION,
-                            "[SP] (1F) Big Chest (Fire)",
-                        ),
-                        Some(|p| {
-                            p.can_merge()
-                                && (p.has_swamp_keys(4)
-                                || (p.has_swamp_keys(2)
-                                && (p.has_tornado_rod() || p.has_ice_rod())))
-                        }),
-                        Some(|p| p.can_merge() && p.has_swamp_keys(2)),
-                        Some(|p| p.has_boots()),
-                        Some(|p| p.not_nice_mode() && p.has_ice_rod()),
-                        None,
-                    ),
-                ],
-                vec![path(
-                    SwampPalacePostBoss,
-                    Some(|p| {
-                        p.can_merge()
-                            && p.has_swamp_keys(4)
-                            && p.has_swamp_big_key()
-                            && p.can_defeat_arrgus()
-                    }),
-                    None,
-                    None,
-                    Some(|p| p.not_nice_mode() && p.has_ice_rod() && (p.has_swamp_big_key() || p.has_tornado_rod())),
-                    None,
-                )],
+        (SwampPalaceAntechamber, location("Swamp Palace Antechamber", vec![], vec![
+            path_free(SwampPalaceOutside),
+            path(SwampPalaceFoyer,
+                 Some(|p| p.has_bomb_flower()),
+                 None,
+                 None,
+                 Some(|p| p.not_nice_mode()
+                     && p.can_merge()
+                     && p.has_ice_rod()
+                     && p.has_flippers()
+                     && (p.has_sword() || p.has_tornado_rod() || p.has_net() || p.has_bombs())
+                 ),
+                 None,
             ),
-        ),
-        (
-            SwampPalacePostBoss,
-            location(
-                "Swamp Palace Post Boss",
-                vec![
-                    check_free(LocationInfo::new(
-                        regions::dungeons::swamp::palace::SUBREGION,
-                        "[SP] Arrghus",
-                    )),
-                    check_free(LocationInfo::new(
-                        regions::dungeons::swamp::palace::SUBREGION,
-                        "Swamp Palace Prize",
-                    )),
-                    check_quest_free("Arrghus", Arrghus),
-                ],
-                vec![],
+        ])),
+        (SwampPalaceFoyer, location("Swamp Palace Foyer", vec![], vec![
+            path_free(SwampPalaceAntechamber),
+            path(SwampPalaceMain,
+                 Some(|p| p.has_flippers() && p.has_hookshot()),
+                 None,
+                 None, // what a cruel game
+                 None,
+                 None,
             ),
-        ),
+        ])),
+        (SwampPalaceMain, location("Swamp Palace", vec![
+            check_free(LocationInfo::new(regions::dungeons::swamp::palace::SUBREGION, "[SP] (B1) Center")),
+            check_free(LocationInfo::new(regions::dungeons::swamp::palace::SUBREGION, "[SP] (B1) Waterfall Room")),
+            check_free(LocationInfo::new(regions::dungeons::swamp::palace::SUBREGION, "[SP] (B1) Raft Room (Pillar)")),
+            check_free(LocationInfo::new(regions::dungeons::swamp::palace::SUBREGION, "[SP] (B1) Raft Room (Right)")),
+            check_free(LocationInfo::new(regions::dungeons::swamp::palace::SUBREGION, "[SP] (B1) Raft Room (Left)")),
+            check_free(LocationInfo::new(regions::dungeons::swamp::palace::SUBREGION, "[SP] (B1) Gyorm")),
+            check(LocationInfo::new(regions::dungeons::swamp::palace::SUBREGION, "[SP] (B1) Big Chest (Secret)"),
+                  Some(|p| p.has_swamp_keys(2) && p.can_merge() && (p.progression_enemies() || p.break_floor_tiles())),
+                  Some(|p| p.has_swamp_keys(2) && p.has_bow() && (p.progression_enemies() || p.break_floor_tiles())),
+                  Some(|p| p.has_swamp_keys(2) && p.has_boots()),
+                  Some(|p| p.has_swamp_keys(2) && p.not_nice_mode() && p.has_ice_rod()),
+                  None,
+            ),
+            check(LocationInfo::new(regions::dungeons::swamp::palace::SUBREGION, "[SP] (1F) West Room"),
+                  Some(|p| p.has_swamp_keys(2) && p.can_merge() && (p.progression_enemies() || p.break_floor_tiles())),
+                  None,
+                  None,
+                  Some(|p| p.not_nice_mode() && p.has_ice_rod()),
+                  None,
+            ),
+            check(LocationInfo::new(regions::dungeons::swamp::palace::SUBREGION, "[SP] (1F) East Room"),
+                  Some(|p| p.has_swamp_keys(2) && p.can_merge() && (p.progression_enemies() || p.break_floor_tiles())),
+                  None,
+                  None,
+                  Some(|p| p.not_nice_mode() && p.has_ice_rod()),
+                  None,
+            ),
+            check(LocationInfo::new(regions::dungeons::swamp::palace::SUBREGION, "[SP] (1F) Water Puzzle"),
+                  Some(|p| p.has_swamp_keys(2) && p.can_merge() && (p.progression_enemies() || p.break_floor_tiles())),
+                  None,
+                  None,
+                  Some(|p| p.not_nice_mode() && p.can_merge() && p.has_ice_rod()),
+                  None,
+            ),
+            check(LocationInfo::new(regions::dungeons::swamp::palace::SUBREGION, "[SP] (1F) Big Chest (Fire)"),
+                  Some(|p| p.can_merge()
+                      && (p.progression_enemies() || p.has_bombs() || p.has_hammer())
+                      && (p.has_swamp_keys(4) || (p.has_swamp_keys(2) && (p.has_tornado_rod() || p.has_ice_rod())))
+                  ),
+                  Some(|p| p.can_merge() && (p.progression_enemies() || p.has_bombs() || p.has_hammer()) && p.has_swamp_keys(2)),
+                  Some(|p| p.has_boots()),
+                  Some(|p| p.not_nice_mode() && p.has_ice_rod()),
+                  None,
+            ),
+        ], vec![
+            path(SwampPalacePostBoss,
+                 Some(|p| p.can_merge() && (p.progression_enemies() || p.has_bombs() || p.has_hammer()) && p.has_swamp_keys(4) && p.has_swamp_big_key() && p.can_defeat_arrgus()),
+                 None,
+                 None,
+                 Some(|p| p.not_nice_mode() && p.has_ice_rod() && (p.has_swamp_big_key() || p.has_tornado_rod())),
+                 None,
+            )
+        ])),
+        (SwampPalacePostBoss, location("Swamp Palace Post Boss", vec![
+            check_free(LocationInfo::new(regions::dungeons::swamp::palace::SUBREGION, "[SP] Arrghus")),
+            check_free(LocationInfo::new(regions::dungeons::swamp::palace::SUBREGION, "Swamp Palace Prize")),
+            check_quest_free("Arrghus", Arrghus),
+        ], vec![])),
     ])
 }
 
 /// Skull Woods
 fn skull_woods() -> HashMap<Location, LocationNode> {
     HashMap::from([
-        (
-            SkullWoodsFoyer,
-            location("Skull Woods Foyer", vec![], vec![
-                path_free(SkullWoodsOverworld),
-                path(
-                    SkullWoodsMain,
-                    Some(|p| p.has_lamp() || p.lampless()),
-                    None,
-                    None,
-                    None,
-                    None,
-                ),
-            ]),
-        ),
-        (
-            SkullWoodsMain,
-            location(
-                "Skull Woods",
-                vec![
-                    check_free(LocationInfo::new(
-                        regions::dungeons::skull::woods::SUBREGION,
-                        "[SW] (B1) South Chest",
-                    )),
-                    check_free(LocationInfo::new(
-                        regions::dungeons::skull::woods::SUBREGION,
-                        "[SW] (B1) Gibdo Room (Lower)",
-                    )),
-                    check(
-                        LocationInfo::new(
-                            regions::dungeons::skull::woods::SUBREGION,
-                            "[SW] (B1) Gibdo Room (Hole)",
-                        ),
-                        Some(|p| p.has_skull_keys(1)),
-                        None,
-                        None,
-                        None,
-                        None,
-                    ),
-                    check(
-                        LocationInfo::new(
-                            regions::dungeons::skull::woods::SUBREGION,
-                            "[SW] (B1) Grate Room",
-                        ),
-                        Some(|p| p.has_skull_keys(1)),
-                        None,
-                        None,
-                        None,
-                        None,
-                    ),
-                ],
-                vec![
-                    path_free(SkullWoodsFoyer),
-                    path(
-                        SkullWoodsB2,
-                        Some(|p| p.has_skull_keys(2) && p.can_merge()),
-                        None,
-                        None,
-                        None,
-                        None,
-                    ),
-                ],
+        (SkullWoodsFoyer, location("Skull Woods Foyer", vec![], vec![
+            path_free(SkullWoodsOverworld),
+            path(SkullWoodsMain,
+                 Some(|p| p.has_lamp() || p.lampless()),
+                 None,
+                 None,
+                 None,
+                 None,
             ),
-        ),
-        (
-            SkullWoodsB2,
-            location("Skull Woods B2", vec![], vec![
-                path(
-                    SkullWoodsMain,
-                    Some(|p| p.can_merge() && p.can_attack()),
-                    Some(|p| p.can_merge() && p.has_lamp_or_net()),
-                    None,
-                    None,
-                    None,
-                ),
-                path(
-                    SkullWoodsElevatorHallway,
-                    Some(|p| p.can_merge() && p.can_attack()),
-                    Some(|p| p.can_merge() && p.has_lamp_or_net()),
-                    None,
-                    None,
-                    None,
-                ),
-            ]),
-        ),
-        (
-            SkullWoodsElevatorHallway,
-            location(
-                "Skull Woods Elevator Hallway",
-                vec![check_free(LocationInfo::new(
-                    regions::dungeons::skull::woods::SUBREGION,
-                    "[SW] (B2) Moving Platform Room",
-                ))],
-                vec![
-                    path_free(SkullWoodsB2),
-                    path(
-                        SkullWoodsBossHallway,
-                        Some(|p| p.has_skull_keys(3)),
-                        None,
-                        None,
-                        None,
-                        None,
-                    ),
-                ],
+        ])),
+        (SkullWoodsMain, location("Skull Woods", vec![
+            check_free(LocationInfo::new(regions::dungeons::skull::woods::SUBREGION, "[SW] (B1) South Chest")),
+            check_free(LocationInfo::new(regions::dungeons::skull::woods::SUBREGION, "[SW] (B1) Gibdo Room (Lower)")),
+            check(LocationInfo::new(regions::dungeons::skull::woods::SUBREGION, "[SW] (B1) Gibdo Room (Hole)"),
+                  Some(|p| p.has_skull_keys(1)),
+                  None,
+                  None,
+                  None,
+                  None,
             ),
-        ),
-        (
-            SkullWoodsBossHallway,
-            location("Skull Woods Boss Hallway", vec![], vec![
-                path_free(SkullWoodsElevatorHallway),
-                path(
-                    SkullWoodsEastB1NorthFoyer,
-                    Some(|p| p.has_fire_source() && p.can_attack()),
-                    Some(|p| p.has_lamp()),
-                    None,
-                    None,
-                    None,
-                ),
-                path(SkullWoodsBossRoom, Some(|p| p.has_skull_big_key()), None, None, None, None),
-            ]),
-        ),
-        (
-            SkullWoodsBossRoom,
-            location(
-                "Skull Woods Boss Room",
-                vec![check(
-                    LocationInfo::new(
-                        regions::dungeons::skull::woods::SUBREGION,
-                        "[SW] Knucklemaster",
-                    ),
-                    Some(|p| p.can_defeat_knucklemaster()),
-                    None,
-                    None,
-                    None,
-                    None,
-                )],
-                vec![
-                    path(
-                        SkullWoodsBossHallway,
-                        Some(|p| p.can_defeat_knucklemaster()),
-                        None,
-                        None,
-                        None,
-                        None,
-                    ),
-                    path(
-                        SkullWoodsSeresGrove,
-                        Some(|p| p.can_defeat_knucklemaster()),
-                        None,
-                        Some(|p| p.has_tornado_rod()),
-                        None,
-                        None,
-                    ),
-                ],
+            check(LocationInfo::new(regions::dungeons::skull::woods::SUBREGION, "[SW] (B1) Grate Room"),
+                  Some(|p| p.has_skull_keys(1) && (p.progression_enemies() || p.break_floor_tiles())),
+                  None,
+                  None,
+                  None,
+                  None,
             ),
-        ),
-        (
-            SkullWoodsSeresGrove,
-            location(
-                "Skull Woods Seres Grove",
-                vec![
-                    check_free(LocationInfo::new(
-                        regions::dungeons::skull::woods::SUBREGION,
-                        "Skull Woods Prize",
-                    )),
-                    check_quest_free("Knucklemaster", Knucklemaster),
-                ],
-                vec![path_free(SkullWoodsBossRoom)],
+        ], vec![
+            path_free(SkullWoodsFoyer),
+            path(SkullWoodsB2,
+                 Some(|p| p.has_skull_keys(2) && p.can_merge() && (p.progression_enemies() || p.break_floor_tiles())),
+                 None,
+                 None,
+                 None,
+                 None,
             ),
-        ),
-        (
-            SkullWoodsEastB1NorthFoyer,
-            location("Skull Woods East B1 North Foyer", vec![], vec![
-                path_free(SkullWoodsBossHallway),
-                path(SkullWoodsEastB1North, Some(|p| p.can_merge()), None, None, None, None),
-            ]),
-        ),
-        (
-            SkullWoodsEastB1North,
-            location(
-                "Skull Woods East B1 North",
-                vec![
-                    check(
-                        LocationInfo::new(
-                            regions::dungeons::skull::woods::SUBREGION,
-                            "[SW] (B1) Big Chest (Eyes)",
-                        ),
-                        Some(|p| p.has_skull_eyes()),
-                        None,
-                        None, // Eyeball dupe cannot be considered as it cannot be retried if missed
-                        None,
-                        None,
-                    ),
-                    check_quest_free("Skull Eye Right", SkullEyeRight),
-                ],
-                vec![
-                    path(
-                        SkullWoodsEastB1NorthFoyer,
+        ])),
+        (SkullWoodsB2, location("Skull Woods B2", vec![], vec![
+            path(SkullWoodsMain,
+                 Some(|p| p.can_merge() && p.can_attack()),
+                 Some(|p| p.can_merge() && p.has_lamp_or_net()),
+                 None,
+                 None,
+                 None,
+            ),
+            path(SkullWoodsElevatorHallway,
+                 Some(|p| p.can_merge() && p.can_attack()),
+                 Some(|p| p.can_merge() && p.has_lamp_or_net()),
+                 None,
+                 None,
+                 None,
+            ),
+        ])),
+        (SkullWoodsElevatorHallway, location("Skull Woods Elevator Hallway", vec![
+            check_free(LocationInfo::new(regions::dungeons::skull::woods::SUBREGION, "[SW] (B2) Moving Platform Room"))
+        ], vec![
+            path_free(SkullWoodsB2),
+            path(SkullWoodsBossHallway,
+                 Some(|p| p.has_skull_keys(3)),
+                 None,
+                 None,
+                 None,
+                 None,
+            ),
+        ])),
+        (SkullWoodsBossHallway, location("Skull Woods Boss Hallway", vec![], vec![
+            path_free(SkullWoodsElevatorHallway),
+            path(SkullWoodsEastB1NorthFoyer,
+                 Some(|p| p.has_fire_source() && p.can_attack()),
+                 Some(|p| p.has_lamp()),
+                 None,
+                 None,
+                 None,
+            ),
+            path(SkullWoodsBossRoom,
+                 Some(|p| p.has_skull_big_key()),
+                 None,
+                 None,
+                 None,
+                 None,
+            ),
+        ])),
+        (SkullWoodsBossRoom, location("Skull Woods Boss Room", vec![
+            check(LocationInfo::new(regions::dungeons::skull::woods::SUBREGION, "[SW] Knucklemaster"),
+                  Some(|p| p.can_defeat_knucklemaster()),
+                  None,
+                  None,
+                  None,
+                  None,
+            )
+        ], vec![
+            path(SkullWoodsBossHallway,
+                 Some(|p| p.can_defeat_knucklemaster()),
+                 None,
+                 None,
+                 None,
+                 None,
+            ),
+            path(SkullWoodsSeresGrove,
+                 Some(|p| p.can_defeat_knucklemaster()),
+                 None,
+                 Some(|p| p.has_tornado_rod()),
+                 None,
+                 None,
+            ),
+        ])),
+        (SkullWoodsSeresGrove, location("Skull Woods Seres Grove", vec![
+            check_free(LocationInfo::new(regions::dungeons::skull::woods::SUBREGION, "Skull Woods Prize")),
+            check_quest_free("Knucklemaster", Knucklemaster),
+        ], vec![
+            path_free(SkullWoodsBossRoom)
+        ])),
+        (SkullWoodsEastB1NorthFoyer, location("Skull Woods East B1 North Foyer", vec![], vec![
+            path_free(SkullWoodsBossHallway),
+            path(SkullWoodsEastB1North, Some(|p| p.can_merge()), None, None, None, None),
+        ])),
+        (SkullWoodsEastB1North, location("Skull Woods East B1 North", vec![
+            check(LocationInfo::new(regions::dungeons::skull::woods::SUBREGION, "[SW] (B1) Big Chest (Eyes)"),
+                  Some(|p| p.has_skull_eyes()),
+                  None,
+                  None, // Eyeball dupe cannot be considered as it cannot be retried if missed
+                  None,
+                  None,
+            ),
+            check_quest_free("Skull Eye Right", SkullEyeRight),
+        ], vec![
+            path(SkullWoodsEastB1NorthFoyer,
+                 Some(|p| p.can_merge()),
+                 None,
+                 None,
+                 None,
+                 None,
+            ),
+            path(SkullWoodsEastB1South,
+                 Some(|p| p.has_skull_eye_right()),
+                 None,
+                 None,
+                 None,
+                 None,
+            ),
+        ])),
+        (SkullWoodsEastB1South, location("Skull Woods East B1 South", vec![], vec![
+            path(SkullWoodsEastB1North,
+                 Some(|p| p.can_merge() && p.has_skull_eye_right()),
+                 None,
+                 None,
+                 None,
+                 None,
+            ),
+            path(SkullWoodsEastB1SouthFoyer,
+                 Some(|p| p.can_merge()),
+                 None,
+                 None,
+                 None,
+                 None,
+            ),
+        ])),
+        (SkullWoodsEastB1SouthFoyer, location("Skull Woods East B1 South Foyer", vec![], vec![
+            path(SkullWoodsEastB1South,
+                 Some(|p| p.can_merge()),
+                 None,
+                 None,
+                 None,
+                 None,
+            ),
+            path_free(SkullWoodsOutdoor3),
+        ])),
+        (SkullWoodsEastB1SouthLedges, location("Skull Woods East B1 South Ledges", vec![
+            check(LocationInfo::new(regions::dungeons::skull::woods::SUBREGION, "[SW] (B1) Big Chest (Upper)"),
+                  Some(|p| p.can_merge()),
+                  None,
+                  None,
+                  None,
+                  None,
+            ),
+            check_quest("Skull Eye Left", SkullEyeLeft,
                         Some(|p| p.can_merge()),
                         None,
                         None,
                         None,
                         None,
-                    ),
-                    path(
-                        SkullWoodsEastB1South,
-                        Some(|p| p.has_skull_eye_right()),
-                        None,
-                        None,
-                        None,
-                        None,
-                    ),
-                ],
             ),
-        ),
-        (
-            SkullWoodsEastB1South,
-            location("Skull Woods East B1 South", vec![], vec![
-                path(
-                    SkullWoodsEastB1North,
-                    Some(|p| p.can_merge() && p.has_skull_eye_right()),
-                    None,
-                    None,
-                    None,
-                    None,
-                ),
-                path(SkullWoodsEastB1SouthFoyer, Some(|p| p.can_merge()), None, None, None, None),
-            ]),
-        ),
-        (
-            SkullWoodsEastB1SouthFoyer,
-            location("Skull Woods East B1 South Foyer", vec![], vec![
-                path(SkullWoodsEastB1South, Some(|p| p.can_merge()), None, None, None, None),
-                path_free(SkullWoodsOutdoor3),
-            ]),
-        ),
-        (
-            SkullWoodsEastB1SouthLedges,
-            location(
-                "Skull Woods East B1 South Ledges",
-                vec![
-                    check(
-                        LocationInfo::new(
-                            regions::dungeons::skull::woods::SUBREGION,
-                            "[SW] (B1) Big Chest (Upper)",
-                        ),
-                        Some(|p| p.can_merge()),
-                        None,
-                        None,
-                        None,
-                        None,
-                    ),
-                    check_quest(
-                        "Skull Eye Left",
-                        SkullEyeLeft,
-                        Some(|p| p.can_merge()),
-                        None,
-                        None,
-                        None,
-                        None,
-                    ),
-                ],
-                vec![path_free(SkullWoodsEastB1South)],
-            ),
-        ),
-        (
-            SkullWoodsOutdoor3,
-            location(
-                "Skull Woods Outdoor Area 3",
-                vec![
-                    check_free(LocationInfo::new(
-                        regions::dungeons::skull::woods::SUBREGION,
-                        "Skull Woods Outdoor Chest",
-                    )), // Do not use [SW] prefix
-                ],
-                vec![
-                    fast_travel_lorule(),
-                    path_free(SkullWoodsEastB1SouthFoyer),
-                    path_free(SkullWoodsEastB1SouthLedges),
-                ],
-            ),
-        ),
+        ], vec![
+            path_free(SkullWoodsEastB1South)
+        ])),
+        (SkullWoodsOutdoor3, location("Skull Woods Outdoor Area 3", vec![
+            check_free(LocationInfo::new(regions::dungeons::skull::woods::SUBREGION, "Skull Woods Outdoor Chest")), // Do not use [SW] prefix
+        ], vec![
+            fast_travel_lorule(),
+            path_free(SkullWoodsEastB1SouthFoyer),
+            path_free(SkullWoodsEastB1SouthLedges),
+        ])),
     ])
 }
 
 /// Thieves' Hideout
 fn thieves_hideout() -> HashMap<Location, LocationNode> {
     HashMap::from([
-        (
-            ThievesHideoutB1,
-            location(
-                "Thieves' Hideout",
-                vec![
-                    check_free(LocationInfo::new(
-                        regions::dungeons::thieves::hideout::SUBREGION,
-                        "[T'H] (B1) Grate Chest",
-                    )),
-                    check(
-                        LocationInfo::new(
-                            regions::dungeons::thieves::hideout::SUBREGION,
-                            "[T'H] (B1) Jail Cell",
-                        ),
-                        Some(|p| p.can_merge()),
-                        None,
-                        Some(|p| p.has_boots()), // jailbreak
-                        None,
-                        Some(|p| {
-                            p.has_tornado_rod()
-                                && (p.has_bombs()
-                                || (p.has_ice_rod()
-                                && (p.has_fire_rod() || p.has_scoot_fruit())))
-                        }),
-                    ),
-                ],
-                vec![
-                    path_free(LoruleCastleField),
-                    path(
-                        ThievesHideoutB2,
+        (ThievesHideoutB1, location("Thieves' Hideout", vec![
+            /* B1 */
+            check_free(LocationInfo::new(regions::dungeons::thieves::hideout::SUBREGION, "[T'H] (B1) Grate Chest")),
+            check(LocationInfo::new(regions::dungeons::thieves::hideout::SUBREGION, "[T'H] (B1) Jail Cell"),
+                  Some(|p| p.can_merge()),
+                  None,
+                  Some(|p| p.has_boots()), // jailbreak
+                  None,
+                  Some(|p| p.hell_thieves_statue_clip() && p.has_tornado_rod() && p.can_escape_dungeon()),
+            ),
+            check_quest("Thieves' Hideout B1 Door Open", ThievesB1DoorOpen,
                         Some(|p| p.can_merge() && p.can_hit_switch()),
                         None,
                         Some(|p| p.has_boots() && (p.has_boomerang() || p.has_ice_rod())),
-                        Some(|p| p.has_boomerang() || p.has_ice_rod()),
+                        Some(|p| p.has_boots() && (p.has_boomerang() || p.has_ice_rod())),
+                        Some(|p| p.has_boots() && p.has_bombs()),
+            ),
+            /* B2 */
+            check(LocationInfo::new(regions::dungeons::thieves::hideout::SUBREGION, "[T'H] (B2) Grate Chest (Fall)"),
+                  Some(|p| p.thieves_b1_door_open()),
+                  None,
+                  None,
+                  Some(|p| p.has_boomerang() || p.has_ice_rod()),
+                  Some(|p| p.has_bombs()),
+            ),
+            check_quest("Thieves' Hideout B2 Door Open", ThievesB2DoorOpen,
+                        Some(|p| p.thieves_b1_door_open() && p.can_merge() && (p.progression_enemies() || p.has_bombs())),
+                        None,
+                        None,
+                        Some(|p| (p.can_merge() || p.can_escape_dungeon()) && p.adv_thieves_statue_clip()),
                         Some(|p| p.has_bombs()),
-                    ),
-                ],
             ),
-        ),
-        (
-            ThievesHideoutB2,
-            location(
-                "Thieves' Hideout B2",
-                vec![
-                    check_free(LocationInfo::new(
-                        regions::dungeons::thieves::hideout::SUBREGION,
-                        "[T'H] (B2) Grate Chest (Fall)",
-                    )),
-                    check(
-                        LocationInfo::new(
-                            regions::dungeons::thieves::hideout::SUBREGION,
-                            "[T'H] (B2) Jail Cell",
-                        ),
-                        Some(|p| p.can_merge()),
-                        None,
-                        None,
-                        None,
-                        Some(|p| (p.has_bombs() || p.has_ice_rod()) && p.has_tornado_rod()), // reach from B3 Out of Bounds
-                    ),
-                    check_free(LocationInfo::new(
-                        regions::dungeons::thieves::hideout::SUBREGION,
-                        "[T'H] (B2) Switch Puzzle Room",
-                    )),
-                    check(
-                        LocationInfo::new(
-                            regions::dungeons::thieves::hideout::SUBREGION,
-                            "[T'H] (B2) Eyegores",
-                        ),
-                        Some(|p| p.can_merge() && p.can_hit_shielded_switch() && p.can_attack()),
-                        Some(|p| {
-                            p.can_merge() && p.can_hit_shielded_switch() && p.has_lamp_or_net()
-                        }),
-                        None,
-                        Some(|p| (p.has_bombs() || p.has_ice_rod()) && p.has_boots()),
-                        None,
-                    ),
-                ],
-                vec![
-                    path_free(ThievesHideoutB1),
-                    path(
-                        ThievesHideoutEscape,
-                        Some(|p| {
-                            p.has_thieves_key()
-                                && p.can_merge()
-                                && p.has_flippers()
-                                && p.can_attack()
-                        }),
-                        Some(|p| {
-                            p.has_thieves_key()
-                                && p.can_merge()
-                                && p.has_flippers()
-                                && p.has_lamp_or_net()
-                        }),
-                        None,
-                        Some(|p| (p.has_ice_rod() || p.has_bombs()) && p.has_tornado_rod()),
-                        None,
-                    ),
-                ],
+            check(LocationInfo::new(regions::dungeons::thieves::hideout::SUBREGION, "[T'H] (B2) Jail Cell"),
+                  Some(|p| p.thieves_b1b2_doors_open() && p.can_merge()),
+                  None,
+                  None,
+                  Some(|p| p.can_merge() && p.can_hit_switch()),
+                  Some(|p| p.hell_thieves_statue_clip() && p.has_tornado_rod()), // reach from B3 Out of Bounds
             ),
-        ),
-        (
-            ThievesHideoutEscape,
-            location(
-                "Thieves' Hideout Escape",
-                vec![
-                    check(
-                        LocationInfo::new(
-                            regions::dungeons::thieves::hideout::SUBREGION,
-                            "[T'H] (B3) Underwater",
-                        ),
-                        Some(|p| p.can_merge()),
-                        None,
-                        None,
-                        None,
-                        None,
-                    ),
-                    check_free(LocationInfo::new(
-                        regions::dungeons::thieves::hideout::SUBREGION,
-                        "[T'H] (B3) Big Chest (Hidden)",
-                    )),
-                    check(
-                        LocationInfo::new(
-                            regions::dungeons::thieves::hideout::SUBREGION,
-                            "[T'H] (B1) Behind Wall",
-                        ),
-                        Some(|p| {
-                            p.has_thieves_key()
-                                && p.can_merge()
-                                && p.has_flippers()
-                                && p.can_attack()
-                        }),
-                        Some(|p| {
-                            p.has_thieves_key()
-                                && p.can_merge()
-                                && p.has_flippers()
-                                && p.has_lamp_or_net()
-                        }),
-                        None,
-                        None, // I'm just not including this
-                        Some(|p| {
-                            (p.has_ice_rod() || p.has_bombs())
-                                && p.has_tornado_rod()
-                                && (p.has_fire_rod() || p.has_bombs() || p.has_scoot_fruit())
-                        }),
-                    ),
-                    check(
-                        LocationInfo::new(
-                            regions::dungeons::thieves::hideout::SUBREGION,
-                            "[T'H] (B1) Big Chest (Entrance)",
-                        ),
-                        Some(|p| {
-                            p.has_thieves_key()
-                                && p.can_merge()
-                                && p.has_flippers()
-                                && p.can_attack()
-                        }),
-                        Some(|p| {
-                            p.has_thieves_key()
-                                && p.can_merge()
-                                && p.has_flippers()
-                                && p.has_lamp_or_net()
-                        }),
-                        None,
-                        None, // I'm just not including this
-                        Some(|p| (p.has_ice_rod() || p.has_bombs()) && p.has_tornado_rod()),
-                    ),
-                ],
-                vec![
-                    path_free(ThievesHideoutB2),
-                    path(
-                        ThievesBoss,
-                        Some(|p| {
-                            p.has_thieves_big_key()
-                                && p.has_thieves_key()
-                                && p.can_merge()
-                                && p.can_attack()
-                        }),
-                        Some(|p| {
-                            p.has_thieves_big_key()
-                                && p.has_thieves_key()
-                                && p.can_merge()
-                                && p.has_lamp_or_net()
-                        }),
-                        None,
-                        None,
-                        None,
-                    ),
-                ],
+            check(LocationInfo::new(regions::dungeons::thieves::hideout::SUBREGION, "[T'H] (B2) Switch Puzzle Room"),
+                  Some(|p| p.thieves_b1b2_doors_open()),
+                  None,
+                  None,
+                  Some(|p| p.adv_thieves_statue_clip()),
+                  Some(|p| p.hell_thieves_statue_clip()),
             ),
-        ),
-        (
-            ThievesBoss,
-            location("Thieves' Hideout Boss", vec![], vec![path(
-                ThievesPostBoss,
-                Some(|p| p.can_merge() || p.can_attack()),
-                Some(|p| p.can_merge() || p.has_lamp_or_net()),
+            check(LocationInfo::new(regions::dungeons::thieves::hideout::SUBREGION, "[T'H] (B2) Eyegores"),
+                  Some(|p| {
+                      p.thieves_b1b2_doors_open()
+                          && p.can_merge()
+                          && (p.progression_enemies() || p.has_bombs())
+                          && p.can_hit_shielded_switch()
+                          && (p.has_sword() || p.has_bow()) // Fight is too hard for "any attacking item" to be in Normal Logic. Limit to Sword or Bow (which deals triple damage)
+                  }),
+                  Some(|p| {
+                      p.thieves_b1b2_doors_open()
+                          && p.can_merge()
+                          && (p.progression_enemies() || p.has_bombs())
+                          && p.can_hit_shielded_switch()
+                          && (p.can_attack() || p.has_lamp_or_net())
+                  }),
+                  None,
+                  Some(|p| p.adv_thieves_statue_clip() && (p.has_boots() || p.has_tornado_rod())),
+                  None,
+            ),
+            /* Escape */
+            check_quest("Thieves' Hideout B3 Water Drained", ThievesB3WaterDrained,
+                Some(|p| p.thieves_b1b2_doors_open() && p.has_thieves_key() && p.can_merge() && p.has_flippers() && p.can_attack()),
+                Some(|p| p.thieves_b1b2_doors_open() && p.has_thieves_key() && p.can_merge() && p.has_flippers() && p.has_lamp_or_net()),
                 None,
-                None,
-                None,
-            )]),
-        ),
-        (
-            ThievesPostBoss,
-            location(
-                "Thieves' Hideout Post Boss",
-                vec![
-                    check_free(LocationInfo::new(
-                        regions::dungeons::thieves::hideout::SUBREGION,
-                        "Stalblind",
-                    )),
-                    check_free(LocationInfo::new(
-                        regions::dungeons::thieves::hideout::SUBREGION,
-                        "Thieves' Hideout Prize",
-                    )),
-                    check_quest_free("Stalblind Defeated", Stalblind),
-                ],
-                vec![],
+                Some(|p| p.adv_thieves_statue_clip() && p.has_tornado_rod()),
+                Some(|p| p.hell_thieves_statue_clip() && p.has_tornado_rod()),
             ),
-        ),
+            check(LocationInfo::new(regions::dungeons::thieves::hideout::SUBREGION, "[T'H] (B3) Underwater"),
+                  Some(|p| p.thieves_escape_equipment() && p.can_attack()),
+                  Some(|p| p.thieves_escape_equipment() && p.has_lamp_or_net()),
+                  None,
+                  Some(|p| p.adv_thieves_statue_clip() && p.has_tornado_rod()),
+                  Some(|p| p.hell_thieves_statue_clip() && p.has_tornado_rod()),
+            ),
+            check(LocationInfo::new(regions::dungeons::thieves::hideout::SUBREGION, "[T'H] (B3) Big Chest (Hidden)"),
+                  Some(|p| p.thieves_escape_equipment() && p.can_attack()),
+                  Some(|p| p.thieves_escape_equipment() && p.has_lamp_or_net()),
+                  None,
+                  Some(|p| p.adv_thieves_statue_clip() && p.has_tornado_rod()),
+                  Some(|p| p.hell_thieves_statue_clip() && p.has_tornado_rod()),
+            ),
+            check(LocationInfo::new(regions::dungeons::thieves::hideout::SUBREGION, "[T'H] (B1) Behind Wall"),
+                  Some(|p| p.thieves_escape_equipment() && p.can_attack()),
+                  Some(|p| p.thieves_escape_equipment() && p.has_lamp_or_net()),
+                  None,
+                  None, // I'm just not including this
+                  Some(|p| p.hell_thieves_statue_clip() && p.has_tornado_rod() && p.can_escape_dungeon()),
+            ),
+            check(LocationInfo::new(regions::dungeons::thieves::hideout::SUBREGION, "[T'H] (B1) Big Chest (Entrance)"),
+                  Some(|p| p.thieves_escape_equipment() && p.can_attack()),
+                  Some(|p| p.thieves_escape_equipment() && p.has_lamp_or_net()),
+                  None,
+                  None, // I'm just not including this
+                  Some(|p| p.hell_thieves_statue_clip() && p.has_tornado_rod()),
+            ),
+        ], vec![
+            path_free(LoruleCastleField),
+            path(ThievesBoss,
+                 Some(|p|  p.has_thieves_big_key() && p.has_thieves_key() && p.thieves_b1b2_doors_open() && p.thieves_b3_water_drained() && p.can_merge() && p.can_attack()),
+                 Some(|p|  p.has_thieves_big_key() && p.has_thieves_key() && p.thieves_b1b2_doors_open() && p.thieves_b3_water_drained() && p.can_merge() && p.has_lamp_or_net()),
+                 None,
+                 None,
+                 None,
+            ),
+        ])),
+        (ThievesBoss, location("Thieves' Hideout Boss", vec![], vec![
+            path(ThievesPostBoss,
+                 Some(|p| p.can_merge() || p.can_attack()),
+                 Some(|p| p.can_merge() || p.has_lamp_or_net()),
+                 None,
+                 None,
+                 None,
+            )
+        ])),
+        (ThievesPostBoss, location("Thieves' Hideout Post Boss", vec![
+            check_free(LocationInfo::new(regions::dungeons::thieves::hideout::SUBREGION, "Stalblind")),
+            check_free(LocationInfo::new(regions::dungeons::thieves::hideout::SUBREGION, "Thieves' Hideout Prize")),
+            check_quest_free("Stalblind Defeated", Stalblind),
+        ], vec![])),
     ])
 }
 
 /// Ice Ruins
 fn ice_ruins() -> HashMap<Location, LocationNode> {
     HashMap::from([
-        (
-            IceRuinsFoyer,
-            location("Ice Ruins Entrance", vec![], vec![
-                path_free(LoruleDeathEastTop),
-                path(IceRuins, Some(|p| p.has_fire_rod()), None, None, None, None),
-            ]),
-        ),
+        (IceRuinsFoyer, location("Ice Ruins Entrance", vec![], vec![
+            path_free(LoruleDeathEastTop),
+            path(IceRuins,
+                 Some(|p| p.has_fire_rod()),
+                 None,
+                 None,
+                 None,
+                 None,
+            ),
+        ])),
         // Require Fire Rod
-        (
-            IceRuins,
-            location(
-                "Ice Ruins",
-                vec![
-                    check_free(LocationInfo::new(
-                        regions::dungeons::ice::ruins::SUBREGION,
-                        "[IR] (1F) Hidden Chest",
-                    )),
-                    check_free(LocationInfo::new(
-                        regions::dungeons::ice::ruins::SUBREGION,
-                        "[IR] (B4) Ice Pillar",
-                    )),
-                    check_free(LocationInfo::new(
-                        regions::dungeons::ice::ruins::SUBREGION,
-                        "[IR] (B3) Grate Chest (Left)",
-                    )),
-                    check_free(LocationInfo::new(
-                        regions::dungeons::ice::ruins::SUBREGION,
-                        "[IR] (B3) Grate Chest (Right)",
-                    )),
-                    check_free(LocationInfo::new(
-                        regions::dungeons::ice::ruins::SUBREGION,
-                        "[IR] (B5) Big Chest",
-                    )),
-                    check(
-                        LocationInfo::new(
-                            regions::dungeons::ice::ruins::SUBREGION,
-                            "[IR] (B1) Narrow Ledge",
-                        ),
-                        Some(|p| p.can_merge() && p.has_ice_keys(1)),
-                        None,
-                        None,
-                        Some(|p| p.can_merge() && p.has_boots() && p.has_tornado_rod()),
-                        None,
-                    ),
-                    check(
-                        LocationInfo::new(
-                            regions::dungeons::ice::ruins::SUBREGION,
-                            "[IR] (B1) East Chest",
-                        ),
-                        Some(|p| p.has_ice_keys(1)),
-                        None,
-                        None,
-                        Some(|p| p.has_boots() && p.has_tornado_rod()),
-                        None,
-                    ),
-                    check(
-                        LocationInfo::new(
-                            regions::dungeons::ice::ruins::SUBREGION,
-                            "[IR] (B1) Upper Chest",
-                        ),
-                        Some(|p| p.has_ice_keys(2)),
-                        None,
-                        None,
-                        Some(|p| p.has_boots() && p.has_tornado_rod()),
-                        None,
-                    ),
-                    check(
-                        LocationInfo::new(
-                            regions::dungeons::ice::ruins::SUBREGION,
-                            "[IR] (B2) Far North",
-                        ),
-                        Some(|p| p.has_ice_keys(2) && p.can_merge() && p.has_stamina_scroll()),
-                        None,
-                        None,
-                        None,
-                        None,
-                    ),
-                    check(
-                        LocationInfo::new(
-                            regions::dungeons::ice::ruins::SUBREGION,
-                            "[IR] (B3) Big Chest (Puzzle)",
-                        ),
-                        Some(|p| p.has_ice_keys(2) && p.can_merge() && p.can_hit_switch()),
-                        None,
-                        None,
-                        Some(|p| p.has_boots()),
-                        None,
-                    ),
-                    check(
-                        LocationInfo::new(
-                            regions::dungeons::ice::ruins::SUBREGION,
-                            "[IR] (B4) Switches",
-                        ),
-                        Some(|p| p.has_ice_keys(2) && p.can_merge()),
-                        None,
-                        None,
-                        Some(|p| p.has_boots()),
-                        None,
-                    ),
-                    check(
-                        LocationInfo::new(
-                            regions::dungeons::ice::ruins::SUBREGION,
-                            "[IR] (B4) Southwest Chest (Fall)",
-                        ),
-                        Some(|p| p.has_ice_keys(2) && p.can_merge()),
-                        None,
-                        None,
-                        Some(|p| p.has_boots()),
-                        None,
-                    ),
-                    check(
-                        LocationInfo::new(
-                            regions::dungeons::ice::ruins::SUBREGION,
-                            "[IR] (B4) Narrow Platform",
-                        ),
-                        Some(|p| p.has_ice_keys(2) && p.can_merge()),
-                        None,
-                        None,
-                        Some(|p| p.has_boots()),
-                        None,
-                    ),
-                    check(
-                        LocationInfo::new(
-                            regions::dungeons::ice::ruins::SUBREGION,
-                            "[IR] (B4) Southeast Chest (Fall)",
-                        ),
-                        Some(|p| p.has_ice_keys(2) && p.can_merge()),
-                        None,
-                        None,
-                        Some(|p| p.has_boots()),
-                        None,
-                    ),
-                ],
-                vec![
-                    path(IceRuinsFoyer, Some(|p| p.has_fire_rod()), None, None, None, None),
-                    path(
-                        IceRuinsBoss,
-                        Some(|p| p.has_ice_keys(3) && p.has_ice_big_key() && p.can_merge()),
-                        None,
-                        None,
-                        Some(|p| p.has_boots()),
-                        None,
-                    ),
-                ],
+        (IceRuins, location("Ice Ruins", vec![
+            check_free(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "[IR] (1F) Hidden Chest")),
+            check_free(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "[IR] (B4) Ice Pillar")),
+            check_free(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "[IR] (B3) Grate Chest (Left)")),
+            check_free(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "[IR] (B3) Grate Chest (Right)")),
+            check_free(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "[IR] (B5) Big Chest")),
+            check(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "[IR] (B1) Narrow Ledge"),
+                  Some(|p| p.can_merge() && p.has_ice_keys(1)),
+                  None,
+                  None,
+                  Some(|p| p.can_merge() && p.has_boots() && p.has_tornado_rod()),
+                  None,
             ),
-        ),
-        (
-            IceRuinsBoss,
-            location("Ice Ruins Boss", vec![], vec![path(
-                IceRuinsPostBoss,
-                Some(|p| p.can_defeat_dharkstare()),
-                None,
-                None,
-                None,
-                None,
-            )]),
-        ),
-        (
-            IceRuinsPostBoss,
-            location(
-                "Ice Ruins Post Boss",
-                vec![
-                    check_free(LocationInfo::new(
-                        regions::dungeons::ice::ruins::SUBREGION,
-                        "[IR] Dharkstare",
-                    )),
-                    check_free(LocationInfo::new(
-                        regions::dungeons::ice::ruins::SUBREGION,
-                        "Ice Ruins Prize",
-                    )),
-                    check_quest_free("Dharkstare", Dharkstare),
-                ],
-                vec![],
+            check(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "[IR] (B1) East Chest"),
+                  Some(|p| p.has_ice_keys(1)),
+                  None,
+                  None,
+                  Some(|p| p.has_boots() && p.has_tornado_rod()),
+                  None,
             ),
-        ),
+            check(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "[IR] (B1) Upper Chest"),
+                  Some(|p| p.has_ice_keys(2)),
+                  None,
+                  None,
+                  Some(|p| p.has_boots() && p.has_tornado_rod()),
+                  None,
+            ),
+            check(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "[IR] (B2) Far North"),
+                  Some(|p| p.has_ice_keys(2) && p.can_merge() && p.has_stamina_scroll()),
+                  None,
+                  None,
+                  None,
+                  None,
+            ),
+            check(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "[IR] (B3) Big Chest (Puzzle)"),
+                  Some(|p| p.has_ice_keys(2) && p.can_merge() && p.can_hit_switch()),
+                  None,
+                  None,
+                  Some(|p| p.has_boots()),
+                  None,
+            ),
+            check(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "[IR] (B4) Switches"),
+                  Some(|p| p.has_ice_keys(2) && p.can_merge() && (p.progression_enemies() || p.has_bombs() || p.has_nice_ice_rod())),
+                  None,
+                  None,
+                  Some(|p| p.has_boots() && (p.progression_enemies() || p.has_bombs() || p.has_nice_ice_rod())),
+                  None,
+            ),
+            check(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "[IR] (B4) Southwest Chest (Fall)"),
+                  Some(|p| p.has_ice_keys(2) && p.can_merge()),
+                  None,
+                  None,
+                  Some(|p| p.has_boots()),
+                  None,
+            ),
+            check(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "[IR] (B4) Narrow Platform"),
+                  Some(|p| p.has_ice_keys(2) && p.can_merge()),
+                  None,
+                  None,
+                  Some(|p| p.has_boots()),
+                  None,
+            ),
+            check(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "[IR] (B4) Southeast Chest (Fall)"),
+                  Some(|p| p.has_ice_keys(2) && p.can_merge()),
+                  None,
+                  None,
+                  Some(|p| p.has_boots()),
+                  None,
+            ),
+        ], vec![
+            path(IceRuinsFoyer, Some(|p| p.has_fire_rod()), None, None, None, None),
+            path(IceRuinsBoss,
+                 Some(|p| p.has_ice_keys(3) && p.has_ice_big_key() && p.can_merge()),
+                 None,
+                 None,
+                 Some(|p| p.has_boots()),
+                 None,
+            ),
+        ])),
+        (IceRuinsBoss, location("Ice Ruins Boss", vec![], vec![
+            path(IceRuinsPostBoss,
+                 Some(|p| p.can_defeat_dharkstare()),
+                 None,
+                 None,
+                 None,
+                 None,
+            )
+        ])),
+        (IceRuinsPostBoss, location("Ice Ruins Post Boss", vec![
+            check_free(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "[IR] Dharkstare")),
+            check_free(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "Ice Ruins Prize")),
+            check_quest_free("Dharkstare", Dharkstare),
+        ], vec![])),
     ])
 }
 
 /// Desert Palace
 fn desert_palace() -> HashMap<Location, LocationNode> {
     HashMap::from([
-        (
-            DesertPalaceFoyer,
-            location(
-                "Desert Palace Entrance",
-                vec![check(
-                    LocationInfo::new(
-                        regions::dungeons::desert::palace::SUBREGION,
-                        "[DP] (1F) Entrance",
-                    ),
-                    Some(|p| p.has_sand_rod() && p.can_merge()),
-                    None,
-                    None,
-                    None,
-                    None,
-                )],
-                vec![
-                    path_free(DesertPalaceWeatherVane),
-                    path(
-                        DesertPalace1F,
-                        Some(|p| p.has_sand_rod() && p.can_merge() && p.can_attack()),
-                        Some(|p| p.has_sand_rod() && p.can_merge() && p.has_lamp_or_net()),
-                        None,
-                        None,
-                        None,
-                    ),
-                ],
+        (DesertPalaceFoyer, location("Desert Palace Entrance", vec![
+            check(LocationInfo::new(regions::dungeons::desert::palace::SUBREGION, "[DP] (1F) Entrance"),
+                  Some(|p| p.has_sand_rod() && p.can_merge()),
+                  None,
+                  None,
+                  None,
+                  None,
+            )
+        ], vec![
+            path_free(DesertPalaceWeatherVane),
+            path(DesertPalace1F,
+                 Some(|p| p.has_sand_rod() && p.can_merge() && p.can_attack()),
+                 Some(|p| p.has_sand_rod() && p.can_merge() && p.has_lamp_or_net()),
+                 None,
+                 None,
+                 None,
             ),
-        ),
-        (
-            DesertPalace1F,
-            location(
-                "Desert Palace 1F",
-                vec![
-                    check_free(LocationInfo::new(
-                        regions::dungeons::desert::palace::SUBREGION,
-                        "[DP] (1F) Sand Switch Room",
-                    )),
-                    check_free(LocationInfo::new(
-                        regions::dungeons::desert::palace::SUBREGION,
-                        "[DP] (1F) Sand Room (North)",
-                    )),
-                    check_free(LocationInfo::new(
-                        regions::dungeons::desert::palace::SUBREGION,
-                        "[DP] (1F) Sand Room (South)",
-                    )),
-                    check(
-                        LocationInfo::new(
-                            regions::dungeons::desert::palace::SUBREGION,
-                            "[DP] (1F) Behind Rocks",
-                        ),
-                        Some(|p| p.has_titans_mitt()),
-                        None,
-                        None,
-                        None,
-                        None,
-                    ),
-                    check(
-                        LocationInfo::new(
-                            regions::dungeons::desert::palace::SUBREGION,
-                            "[DP] (1F) Big Chest (Behind Wall)",
-                        ),
-                        Some(|p| p.has_desert_keys(1)),
-                        None,
-                        None,
-                        None,
-                        None,
-                    ),
-                ],
-                vec![
-                    path(
-                        DesertPalaceFoyer,
-                        Some(|p| p.has_sand_rod() && p.can_attack()),
-                        Some(|p| p.has_sand_rod() && p.has_lamp_or_net()),
-                        None,
-                        None,
-                        None,
-                    ),
-                    path(
-                        DesertPalaceMidwayLedge,
-                        Some(|p| p.has_desert_keys(2) && p.has_titans_mitt()),
-                        None,
-                        None,
-                        None,
-                        None,
-                    ),
-                ],
+        ])),
+        (DesertPalace1F, location("Desert Palace 1F", vec![
+            check_free(LocationInfo::new(regions::dungeons::desert::palace::SUBREGION, "[DP] (1F) Sand Switch Room")),
+            check_free(LocationInfo::new(regions::dungeons::desert::palace::SUBREGION, "[DP] (1F) Sand Room (North)")),
+            check_free(LocationInfo::new(regions::dungeons::desert::palace::SUBREGION, "[DP] (1F) Sand Room (South)")),
+            check(LocationInfo::new(regions::dungeons::desert::palace::SUBREGION, "[DP] (1F) Behind Rocks"),
+                  Some(|p| p.has_titans_mitt()),
+                  None,
+                  None,
+                  None,
+                  None,
             ),
-        ),
-        (
-            DesertPalaceMidwayLedge,
-            location("Desert Palace Midway Ledge", vec![], vec![
-                fast_travel_hyrule(),
-                path_free(DesertPalaceWeatherVane),
-                path_free(DesertPalace1F),
-                path_free(DesertPalace2F),
-            ]),
-        ),
-        (
-            DesertPalace2F,
-            location(
-                "Desert Palace 2F",
-                vec![
-                    check(
-                        LocationInfo::new(
-                            regions::dungeons::desert::palace::SUBREGION,
-                            "[DP] (2F) Under Rock (Left)",
-                        ),
-                        Some(|p| p.has_titans_mitt()),
-                        None,
-                        None,
-                        None,
-                        None,
-                    ),
-                    check(
-                        LocationInfo::new(
-                            regions::dungeons::desert::palace::SUBREGION,
-                            "[DP] (2F) Under Rock (Right)",
-                        ),
-                        Some(|p| p.has_titans_mitt()),
-                        None,
-                        None,
-                        None,
-                        None,
-                    ),
-                    check(
-                        LocationInfo::new(
-                            regions::dungeons::desert::palace::SUBREGION,
-                            "[DP] (2F) Under Rock (Ball Room)",
-                        ),
-                        Some(|p| p.has_titans_mitt()),
-                        None,
-                        None,
-                        None,
-                        None,
-                    ),
-                    check_free(LocationInfo::new(
-                        regions::dungeons::desert::palace::SUBREGION,
-                        "[DP] (2F) Beamos Room",
-                    )),
-                    check_free(LocationInfo::new(
-                        regions::dungeons::desert::palace::SUBREGION,
-                        "[DP] (2F) Red/Blue Switches",
-                    )),
-                    check(
-                        LocationInfo::new(
-                            regions::dungeons::desert::palace::SUBREGION,
-                            "[DP] (2F) Big Chest (Puzzle)",
-                        ),
-                        Some(|p| p.can_merge()),
-                        None,
-                        None,
-                        None,
-                        None,
-                    ),
-                    check(
-                        LocationInfo::new(
-                            regions::dungeons::desert::palace::SUBREGION,
-                            "[DP] (2F) Leever Room",
-                        ),
-                        Some(|p| p.has_desert_keys(3)),
-                        None,
-                        None,
-                        Some(|p| p.has_tornado_rod()),
-                        None,
-                    ),
-                ],
-                vec![
-                    path_free(DesertPalaceMidwayLedge),
-                    path(
-                        DesertPalace1F,
-                        Some(|p| p.can_attack()),      // midway
-                        Some(|p| p.has_lamp_or_net()), // midway
-                        None,
-                        None,
-                        None,
-                    ),
-                    path(
-                        DesertPalace3F,
-                        Some(|p| p.has_desert_keys(4) && p.can_merge() && p.has_sand_rod()),
-                        None,
-                        None,
-                        Some(|p| p.has_tornado_rod() && p.has_boots()),
-                        None,
-                    ),
-                ],
+            check(LocationInfo::new(regions::dungeons::desert::palace::SUBREGION, "[DP] (1F) Big Chest (Behind Wall)"),
+                  Some(|p| p.has_desert_keys(1)),
+                  None,
+                  None,
+                  None,
+                  None,
             ),
-        ),
-        (
-            DesertPalace3F,
-            location(
-                "Desert Palace 3F",
-                vec![
-                    check_free(LocationInfo::new(
-                        regions::dungeons::desert::palace::SUBREGION,
-                        "[DP] (3F) Behind Falling Sand",
-                    )),
-                    check(
-                        LocationInfo::new(
-                            regions::dungeons::desert::palace::SUBREGION,
-                            "[DP] (3F) Armos Room",
-                        ),
-                        Some(|p| p.can_attack()),
-                        Some(|_| true),
-                        None,
-                        None,
-                        None,
-                    ),
-                ],
-                vec![
-                    path_free(DesertPalace2F),
-                    path(
-                        DesertPalaceExit3F,
-                        Some(|p| p.has_desert_keys(5) && p.has_desert_big_key()),
-                        None,
-                        Some(|p| p.has_tornado_rod() && p.has_desert_big_key()),
-                        Some(|p| p.has_tornado_rod()),
-                        None,
-                    ),
-                ],
+        ], vec![
+            path(DesertPalaceFoyer,
+                 Some(|p| p.has_sand_rod() && p.can_attack()),
+                 Some(|p| p.has_sand_rod() && p.has_lamp_or_net()),
+                 None,
+                 None,
+                 None,
             ),
-        ),
-        (
-            DesertPalaceExit3F,
-            location("Desert Palace Exit 3F", vec![], vec![
-                path(DesertPalace3F, Some(|p| p.has_sand_rod()), None, None, None, None),
-                path_free(DesertZaganagaLedge),
-            ]),
-        ),
-        (
-            DesertZaganagaLedge,
-            location("Desert Zaganaga Ledge", vec![], vec![
-                fast_travel_hyrule(),
-                path_free(DesertPalaceExit3F),
-                portal_std(ZaganagasArena),
-            ]),
-        ),
-        (
-            ZaganagasArena,
-            location("Zaganaga's Arena", vec![], vec![
-                fast_travel_lorule(),
-                portal_std(DesertZaganagaLedge),
-                path(
-                    MiseryMireRewardBasket,
-                    Some(|p| p.can_defeat_zaganaga()),
-                    None,
-                    None,
-                    None,
-                    Some(|p| p.has_bow() || p.has_master_sword()),
-                ),
-            ]),
-        ),
-        (
-            MiseryMireRewardBasket,
-            location(
-                "Misery Mire Reward Basket",
-                vec![
-                    check_free(LocationInfo::new(
-                        regions::dungeons::desert::palace::SUBREGION,
-                        "Zaganaga",
-                    )), // Do not use [DP] prefix
-                    check_free(LocationInfo::new(
-                        regions::dungeons::desert::palace::SUBREGION,
-                        "Desert Palace Prize",
-                    )),
-                    check_quest_free("Zaganaga Defeated", Zaganaga),
-                ],
-                vec![fast_travel_lorule()],
+            path(DesertPalaceMidwayLedge,
+                 Some(|p| p.has_desert_keys(2) && p.has_titans_mitt()),
+                 None,
+                 None,
+                 None,
+                 None,
             ),
-        ),
+        ])),
+        (DesertPalaceMidwayLedge,
+         location("Desert Palace Midway Ledge", vec![], vec![
+             fast_travel_hyrule(),
+             path_free(DesertPalaceWeatherVane),
+             path_free(DesertPalace1F),
+             path_free(DesertPalace2F),
+         ])),
+        (DesertPalace2F, location("Desert Palace 2F", vec![
+            check(LocationInfo::new(regions::dungeons::desert::palace::SUBREGION, "[DP] (2F) Under Rock (Left)"),
+                  Some(|p| p.has_titans_mitt()),
+                  None,
+                  None,
+                  None,
+                  None,
+            ),
+            check(LocationInfo::new(regions::dungeons::desert::palace::SUBREGION, "[DP] (2F) Under Rock (Right)"),
+                  Some(|p| p.has_titans_mitt()),
+                  None,
+                  None,
+                  None,
+                  None,
+            ),
+            check(LocationInfo::new(regions::dungeons::desert::palace::SUBREGION, "[DP] (2F) Under Rock (Ball Room)"),
+                  Some(|p| p.has_titans_mitt()),
+                  None,
+                  None,
+                  None,
+                  None,
+            ),
+            check_free(LocationInfo::new(regions::dungeons::desert::palace::SUBREGION, "[DP] (2F) Beamos Room")),
+            check_free(LocationInfo::new(regions::dungeons::desert::palace::SUBREGION, "[DP] (2F) Red/Blue Switches")),
+            check(LocationInfo::new(regions::dungeons::desert::palace::SUBREGION, "[DP] (2F) Big Chest (Puzzle)"),
+                  Some(|p| p.can_merge()),
+                  None,
+                  None,
+                  None,
+                  None,
+            ),
+            check(LocationInfo::new(regions::dungeons::desert::palace::SUBREGION, "[DP] (2F) Leever Room"),
+                  Some(|p| p.has_desert_keys(3)),
+                  None,
+                  None,
+                  Some(|p| p.has_tornado_rod()),
+                  None,
+            ),
+        ], vec![
+            path_free(DesertPalaceMidwayLedge),
+            path(DesertPalace1F,
+                 Some(|p| p.can_attack()),      // midway
+                 Some(|p| p.has_lamp_or_net()), // midway
+                 None,
+                 None,
+                 None,
+            ),
+            path(DesertPalace3F,
+                 Some(|p| p.has_desert_keys(4) && p.can_merge() && p.has_sand_rod()),
+                 None,
+                 None,
+                 Some(|p| p.has_tornado_rod() && p.has_boots()),
+                 None,
+            ),
+        ])),
+        (DesertPalace3F, location("Desert Palace 3F", vec![
+            check_free(LocationInfo::new(regions::dungeons::desert::palace::SUBREGION, "[DP] (3F) Behind Falling Sand")),
+            check(LocationInfo::new(regions::dungeons::desert::palace::SUBREGION, "[DP] (3F) Armos Room"),
+                  Some(|p| p.can_attack()),
+                  Some(|_| true),
+                  None,
+                  None,
+                  None,
+            ),
+        ], vec![
+            path_free(DesertPalace2F),
+            path(DesertPalaceExit3F,
+                 Some(|p| p.has_desert_keys(5) && p.has_desert_big_key() && (p.progression_enemies() || p.has_bombs())),
+                 None,
+                 Some(|p| p.has_tornado_rod() && p.has_desert_big_key()),
+                 Some(|p| p.has_tornado_rod()),
+                 None,
+            ),
+        ])),
+        (DesertPalaceExit3F, location("Desert Palace Exit 3F", vec![], vec![
+            path(DesertPalace3F,
+                 Some(|p| p.has_sand_rod()),
+                 None,
+                 None,
+                 None,
+                 None,
+            ),
+            path_free(DesertZaganagaLedge),
+        ])),
+        (DesertZaganagaLedge, location("Desert Zaganaga Ledge", vec![], vec![
+            fast_travel_hyrule(),
+            path_free(DesertPalaceExit3F),
+            portal_std(ZaganagasArena),
+        ])),
+        (ZaganagasArena, location("Zaganaga's Arena", vec![], vec![
+            fast_travel_lorule(),
+            portal_std(DesertZaganagaLedge),
+            path(MiseryMireRewardBasket,
+                 Some(|p| p.can_defeat_zaganaga()),
+                 None,
+                 None,
+                 None,
+                 Some(|p| p.has_bow() || p.has_master_sword()),
+            ),
+        ])),
+        (MiseryMireRewardBasket, location("Misery Mire Reward Basket", vec![
+            check_free(LocationInfo::new(regions::dungeons::desert::palace::SUBREGION, "Zaganaga")), // Do not use [DP] prefix
+            check_free(LocationInfo::new(regions::dungeons::desert::palace::SUBREGION, "Desert Palace Prize")),
+            check_quest_free("Zaganaga Defeated", Zaganaga),
+        ], vec![
+            fast_travel_lorule()
+        ])),
     ])
 }
 

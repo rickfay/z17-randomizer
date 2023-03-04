@@ -212,7 +212,8 @@ pub enum Location {
     SkullWoodsSeresGrove,
 
     ThievesHideoutB1,
-    ThievesHideoutB2,
+    ThievesHideoutB2NorthWest,
+    ThievesHideoutB2Main,
     ThievesHideoutEscape,
     ThievesBoss,
     ThievesPostBoss,

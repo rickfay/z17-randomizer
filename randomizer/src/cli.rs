@@ -49,6 +49,12 @@ pub fn seed_settings_ui() -> Settings {
         "This shuffles a second progressive copy of the Lamp and Net into the general item pool.",
     );
 
+    let no_progression_enemies = prompt_bool(
+        "No Progression Enemies",
+        "Removes Enemies from dungeons that are themselves Progression (e.g.: Bawbs, the bomb enemy).\n\
+        Logic will be adjusted to require the player's items instead.",
+    );
+
     //let start_with_bracelet = prompt_until_bool("Start with Ravio's Bracelet?");
     let assured_weapon = prompt_bool(
         "Guaranteed Weapon",
@@ -117,13 +123,14 @@ pub fn seed_settings_ui() -> Settings {
             yuganon_requirement: lc_requirement,
             ped_requirement,
             nice_mode,
+            super_items,
+            no_progression_enemies,
             assured_weapon,
             bell_in_shop,
             pouch_in_shop,
             boots_in_shop,
             maiamai_madness,
             vanes_activated,
-            super_items,
             minigames_excluded,
             skip_big_bomb_flower,
             skip_trials,

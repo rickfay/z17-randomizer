@@ -224,6 +224,10 @@ impl Progress {
         self.has_bell() || self.has_fire_rod() || self.has_bombs()
     }
 
+    pub fn can_escape_dungeon(&self) -> bool {
+        self.has_fire_rod() || self.has_bombs() || self.has_scoot_fruit()
+    }
+
     pub fn has_stamina_scroll(&self) -> bool {
         self.has(StaminaScroll)
     }
@@ -294,6 +298,14 @@ impl Progress {
 
     pub fn nice_mode(&self) -> bool {
         self.settings.logic.nice_mode
+    }
+
+    pub fn progression_enemies(&self) -> bool {
+        !self.settings.logic.no_progression_enemies
+    }
+
+    pub fn break_floor_tiles(&self) -> bool {
+        self.has_bombs() || self.has_hammer()
     }
 
     pub fn not_nice_mode(&self) -> bool {
@@ -586,6 +598,34 @@ impl Progress {
 
     pub fn has_skull_eyes(&self) -> bool {
         self.has_both(SkullEyeLeft, SkullEyeRight)
+    }
+
+    pub fn thieves_b1_door_open(&self) -> bool {
+        self.has(ThievesB1DoorOpen)
+    }
+
+    pub fn thieves_b2_door_open(&self) -> bool {
+        self.has(ThievesB2DoorOpen)
+    }
+
+    pub fn thieves_b3_water_drained(&self) -> bool {
+        self.has(ThievesB3WaterDrained)
+    }
+
+    pub fn thieves_b1b2_doors_open(&self) -> bool {
+        self.thieves_b1_door_open() && self.thieves_b2_door_open()
+    }
+
+    pub fn thieves_escape_equipment(&self) -> bool {
+        self.thieves_b1b2_doors_open() && self.has_thieves_key() && self.can_merge() && self.thieves_b3_water_drained()
+    }
+
+    pub fn adv_thieves_statue_clip(&self) -> bool {
+        self.has_boomerang() || self.has_ice_rod() || (self.can_merge() && self.can_hit_switch())
+    }
+
+    pub fn hell_thieves_statue_clip(&self) -> bool {
+        self.has_bombs() || self.adv_thieves_statue_clip()
     }
 
     pub fn can_rescue_turtles(&self) -> bool {

@@ -7,8 +7,9 @@
 
     "nice_mode":                   false,      // Shuffles Nice Items into the general item pool as progressive upgrades (temporary: removes Maiamai cave)
     "super_items":                 false,      // Include the Super Lamp and Super Net in the shuffled item pool
-    "assured_weapon":              false,      // Guarantees one of the following weapons will be placed in Ravio's Shop: Sword, Bow, Hammer, Fire Rod, Ice Rod, or Bombs
+    "no_progression_enemies":      false,      // Removes Enemies from dungeons that are themselves Progression (e.g.: Bawbs, the bomb enemy).
 
+    "assured_weapon":              false,      // Guarantees one of the following weapons will be placed in Ravio's Shop: Sword, Bow, Hammer, Fire Rod, Ice Rod, or Bombs
     "bell_in_shop":                true,       // The Bell will be placed in Ravio's Shop
     "pouch_in_shop":               false,      // The Pouch will be placed in Ravio's Shop
     "boots_in_shop":               false,      // The Pegasus Boots will be placed in Ravio's Shop
