@@ -8,6 +8,7 @@
 
     "nice_mode":                   false,
     "super_items":                 false,
+    "reverse_sage_events":         false,
     "no_progression_enemies":      false,
 
     "assured_weapon":              false,
@@ -20,7 +21,7 @@
     "minigames_excluded":          true,
     "skip_big_bomb_flower":        false,
     "skip_trials":                 false,
-    "bow_of_light_in_castle":      true,
+    "bow_of_light_in_castle":      false,
 
     "weather_vanes_activated":     false,
     "dark_rooms_lampless":         false,

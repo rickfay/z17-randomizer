@@ -145,26 +145,9 @@ fn patch_castle_connection(patcher: &mut Patcher, _settings: &Settings) -> Resul
     Ok(())
 }
 
-fn patch_reverse_sage_events(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
-    if !settings.logic.reverse_sage_events {
-        return Ok(());
-    }
-
-    // Hyrule Castle
-    // apply!(patcher,
-    //     FieldLight/FieldLight_1B_Impa {
-    //         // [86 into_start] => 92,
-    //         [93 into_start] => 98,
-    //     },
-    // );
-
-    Ok(())
-}
-
 pub fn apply(patcher: &mut Patcher, free: Item, settings: &Settings) -> Result<()> {
     patch_lorule_castle_requirements(patcher, settings)?;
     patch_castle_connection(patcher, settings)?;
-    patch_reverse_sage_events(patcher, settings)?;
 
     // Debugging
     // patcher

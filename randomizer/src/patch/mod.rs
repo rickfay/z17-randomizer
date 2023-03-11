@@ -495,7 +495,7 @@ fn cutscenes<'game, 'settings>(
                 110, // Post Sanctuary
                 131, // Suppress Ravio's Gift
                 210, // Skip Thanks item
-                224, // Skip Zelda dialogue
+                223, // Skip Hyrule Castle Art Gallery Event
                 225, // Correct field music
                 231, // Skip Hyrule Castle events
                 232, // Enable Ravio's freebie
@@ -605,10 +605,8 @@ fn cutscenes<'game, 'settings>(
             }
 
             // Reverse Sage Events
-            // Keep the guard around and have Impa open the door when RSE enabled, else skip them
             if !logic.reverse_sage_events {
-                opening.add_event_flag(222);
-                opening.add_event_flag(223);
+                opening.add_event_flag(222); // Open Hyrule Castle Front Door
             }
         }
 

@@ -106,7 +106,6 @@ pub fn patch_byaml_files(patcher: &mut Patcher, settings: &Settings) -> Result<(
     patch_nice_mode(patcher, settings);
     patch_big_bomb_flower_skip(patcher, settings);
     patch_no_progression_enemies(patcher, settings);
-    patch_reverse_sage_events(patcher, settings);
 
     patcher.modify_objs(FieldLight, 18, &[disable(529)]);
 
@@ -338,15 +337,6 @@ pub fn patch_byaml_files(patcher: &mut Patcher, settings: &Settings) -> Result<(
             [346].disable(), // Buzz Blob
         },
 
-        // // Lake Hylia - Special stuff for Flora REMOVE ME
-        // FieldLight 35 {
-        //     [39].disable(), // Remove EnemyZora
-        //     [40].disable(), // Remove EnemyZora
-        //     [41].disable(), // Remove EnemyZora
-        //
-        //     [45].set_translate(25.0, 0.0, -24.0), // Move Weather Vane for Flora (5.5, 0.0, -3.0)
-        // },
-
         // Hyrule Hotfoot Area
         FieldLight 36 {
             [43].disable(), // Disable Letter in a Bottle text
@@ -413,13 +403,18 @@ pub fn patch_byaml_files(patcher: &mut Patcher, settings: &Settings) -> Result<(
 
         // Hyrule Castle
         IndoorLight 12 {
+            //[24].disable(), // Entry Impa
             [26].disable(), // NPC Soldier
             [28].disable(), // NPC Soldier
             [29].disable(), // NPC Soldier
-            [36].disable(), // Impa
             [37].disable(), // NPC Soldier
             [38].disable(), // NPC Soldier
             [39].disable(), // NPC Soldier
+
+            // [40].disable(), // Textbox trigger FieldLight_1B_Impa_ACT03_01 (left)
+            // [41].disable(), // Textbox trigger FieldLight_1B_Impa_ACT03_02 (right)
+            // [43].disable(), // Textbox trigger FieldLight_1B_Impa_ACT03_00 (main exit)
+            [45].disable(), // Disable ZeldaFirstTimeEvent_01 (Get Charm)
             [46].disable(), // NPC Soldier
             [47].disable(), // NPC Soldier
             [53].clear_enable_flag(), // Blue Soldier
@@ -436,7 +431,12 @@ pub fn patch_byaml_files(patcher: &mut Patcher, settings: &Settings) -> Result<(
             [80].clear_enable_flag(), // Dagger Soldier
             [81].clear_enable_flag(), // Green Spear Soldier
             [82].clear_enable_flag(), // Red Spear Soldier
+            //[92].disable(), // NPC Soldier (lower right)
+            //[93].disable(), // NPC Soldier (lower left)
             [94].disable(), // Scholar
+            //[99].disable(), // Text box trigger FieldLight_1B_Impa_ACT_03_05
+            [100].disable(), // NpcZeldaDemo
+            //[101].disable(), // TIMER
             [103].clear_enable_flag(), // Hyrule Paint Soldier
             [104].clear_enable_flag(), // Hyrule Paint Soldier
             [105].clear_enable_flag(), // Hyrule Paint Soldier
@@ -445,6 +445,13 @@ pub fn patch_byaml_files(patcher: &mut Patcher, settings: &Settings) -> Result<(
             [108].clear_enable_flag(), // Hyrule Paint Soldier
             [109].clear_enable_flag(), // Hyrule Paint Soldier
             [110].clear_enable_flag(), // Hyrule Paint Soldier
+
+            [125].disable(), // NPC Solider (upper right)
+            [126].disable(), // NPC Solider (upper left)
+            [127].disable(), // FieldLight_Right_Soldier_Area
+            [128].disable(), // FieldLight_Left_Soldier_Area
+
+
             [131].disable(), // NPC Soldier ACT 3
             [132].disable(), // NPC Soldier ACT 3
             [133].disable(), // NPC Soldier
@@ -458,6 +465,7 @@ pub fn patch_byaml_files(patcher: &mut Patcher, settings: &Settings) -> Result<(
             [141].clear_enable_flag(), // Hyrule Paint Soldier
             [142].clear_enable_flag(), // Hyrule Paint Soldier
             [143].clear_enable_flag(), // Hyrule Paint Soldier
+            // [145].disable(), // Impa stops makes you wait and lets you go see Zelda
             [146].clear_enable_flag(), // Blue Soldier
 
             // Fix chest to not respawn
@@ -600,16 +608,6 @@ fn patch_zora(patcher: &mut Patcher, _settings: &Settings) {
     // Lake Hylia
     patcher.modify_objs(FieldLight, 35, &[
         enable(151), // Zora outside House of Gales
-    ]);
-
-    // Zora's Domain
-    patcher.modify_objs(CaveLight, 7, &[
-        enable(116),            // Thin Oren
-        enable(119),            // Zora Attendant
-        enable(127),            // Thin Attendant
-        clear_enable_flag(131), // AreaSwitchCube, fix for not being able to turn in Smooth Gem
-        clear_enable_flag(132), // Enable Zora Queen event always
-        enable(134),            // Thicc Oren
     ]);
 }
 
@@ -921,25 +919,6 @@ fn patch_no_progression_enemies(patcher: &mut Patcher, settings: &Settings) {
     ]);
 }
 
-/// Reverse Sage Events
-fn patch_reverse_sage_events(patcher: &mut Patcher, settings: &Settings) {
-    if !settings.logic.reverse_sage_events {
-        return;
-    }
-
-    // Oren todo
-
-    // Impa todo
-    patcher.modify_objs(FieldLight, 18, &[
-        set_enable_flag(269, prize_flag(SageImpa)), // Front door solider
-        set_enable_flag(270, prize_flag(SageImpa)), // Impa
-    ]);
-
-    // Irene todo
-
-    // Rosso todo
-}
-
 //noinspection ALL
 #[rustfmt::skip]
 #[allow(unused)]
@@ -952,16 +931,12 @@ fn do_dev_stuff(patcher: &mut Patcher, settings: &Settings) {
         return;
     }
 
-    // Osfala Portrait
-    // patcher.modify_objs(IndoorDark, 15, &[
-    //     redirect(6, 20, 1, 0), // Seres Portrait
-    // ]);
-
     // Ravio's Shop
     patcher.modify_objs(IndoorLight, 1, &[call(24, |obj| {
         obj.redirect(Dest::new(
-            // FieldLight, 27, 5,  // No Redirect
-            FieldLight, 18, 20, // Hyrule Castle Roof (SLZ)
+            FieldLight, 27, 5,  // No Redirect
+            // FieldLight, 18, 10, // Hyrule Castle Front Door
+            // CaveLight, 7, 0, // Zora's Domain
             // IndoorLight, 15, 0, // Osfala Portrait
             // DungeonGanon, 1, 18, // LC 3F Center Warp Tile
             // CaveDark, 8, 0,     // Mysterious Man Cave
@@ -969,4 +944,9 @@ fn do_dev_stuff(patcher: &mut Patcher, settings: &Settings) {
             // DungeonCastle, 6, 0, // Yuga 2 Boss
         ));
     })]);
+
+    // Osfala Portrait House
+    // patcher.modify_objs(IndoorDark, 15, &[
+    //     redirect(6, 20, 1, 0), // Seres Portrait
+    // ]);
 }

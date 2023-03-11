@@ -15,7 +15,7 @@ use {
         LocationInfo, Metrics, Seed, Settings,
     },
     albw::Item,
-    log::{error, info, warn},
+    log::{debug, error, info},
     queue::Queue,
     rand::{rngs::StdRng, Rng, SeedableRng},
     std::collections::{BTreeMap, HashMap, HashSet},
@@ -745,7 +745,6 @@ fn sphere_search<'a>(
     world_graph: &mut HashMap<Location, LocationNode>,
     mut check_map: &mut HashMap<&str, Option<FillerItem>>, settings: &Settings,
 ) -> BTreeMap<String, BTreeMap<&'static str, &'static str>> {
-
     info!("Generating Playthrough...");
 
     let mut progress = Progress::new(settings.clone());
@@ -791,7 +790,6 @@ fn generate_hints(
     world_graph: &mut HashMap<Location, LocationNode>,
     check_map: &mut HashMap<&str, Option<FillerItem>>, settings: &Settings, rng: &mut StdRng,
 ) -> Hints {
-
     info!("Generating Hints...");
 
     const NUM_TOTAL_HINTS: usize = 28;
@@ -983,7 +981,7 @@ fn generate_sometimes_hints(
         }
 
         if sometimes_checks.is_empty() {
-            warn!("Ran out of possible Sometimes Hints");
+            debug!("Ran out of possible Sometimes Hints");
             break;
         }
 
@@ -1055,7 +1053,7 @@ fn generate_path_hints(
                 chosen_path_checks.push((chosen_path_check, boss));
                 backup_path_checks.extend(backups.iter().map(|&check| (check, boss)));
             } else {
-                eprintln!("No Paths possible for: {}", boss.as_str());
+                debug!("No Paths possible for: {}", boss.as_str());
 
                 extra_paths_needed += 1;
             }
@@ -1070,7 +1068,7 @@ fn generate_path_hints(
         }
 
         if backup_path_checks.is_empty() {
-            warn!("Ran out of potential path checks");
+            debug!("Ran out of potential path checks");
             break;
         }
 

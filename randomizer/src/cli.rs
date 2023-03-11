@@ -49,6 +49,16 @@ pub fn seed_settings_ui() -> Settings {
         "This shuffles a second progressive copy of the Lamp and Net into the general item pool.",
     );
 
+    let reverse_sage_events = prompt_bool(
+        "Reverse Sage Events",
+        "Ties Sage-related checks and events to actually rescuing that Sage.\n\
+        Makes the following changes:\n\
+        - Irene => Unlocks the Irene check (instead of Pendant of Courage)\n\
+        - Rosso => Unlocks Rosso's House and his two checks (instead of Pendant of Courage)\n\
+        - Oren  => Unlocks the Smooth Gem check and the Shady Guy Event\n\
+        - Impa  => Unlocks the front door to Hyrule Castle",
+    );
+
     let no_progression_enemies = prompt_bool(
         "No Progression Enemies",
         "Removes Enemies from dungeons that are themselves Progression (e.g.: Bawbs, the bomb enemy).\n\
@@ -124,6 +134,7 @@ pub fn seed_settings_ui() -> Settings {
             ped_requirement,
             nice_mode,
             super_items,
+            reverse_sage_events,
             no_progression_enemies,
             assured_weapon,
             bell_in_shop,

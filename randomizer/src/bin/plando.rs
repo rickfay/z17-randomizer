@@ -57,7 +57,7 @@ fn execute_plandomizer(run_args: RunArgs) -> randomizer::Result<()> {
     let version = format!("PLANDO - {}", VERSION);
     let spoiler =
         Spoiler::new(version.as_str(), PLANDO_SEED, &settings, layout, Metrics::default());
-    spoiler.patch(system.load_config()?, !run_args.no_patch, !run_args.no_spoiler)
+    spoiler.patch(system.load_config()?, !run_args.no_patch, !run_args.no_spoiler, false)
 }
 
 #[derive(Debug, StructOpt)]

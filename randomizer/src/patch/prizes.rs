@@ -172,6 +172,7 @@ pub(crate) fn patch_actor_profile(
     None
 }
 
+/// Patches the BYAML files to shuffle Dungeon Prizes
 fn patch_prize_byaml(patcher: &mut Patcher, prizes: &DungeonPrizes, settings: &Settings) {
     patch_eastern(patcher, prizes.ep_prize, settings);
     patch_gales(patcher, prizes.hg_prize, settings);
@@ -184,6 +185,180 @@ fn patch_prize_byaml(patcher: &mut Patcher, prizes: &DungeonPrizes, settings: &S
     patch_turtle(patcher, prizes.tr_prize, settings);
     patch_desert(patcher, prizes.dp_prize, settings);
     patch_ice(patcher, prizes.ir_prize, settings);
+
+    patch_checks_unlocked_by_prizes(patcher, settings);
+}
+
+/// Patch Checks unlocked by specific Dungeon Prizes
+fn patch_checks_unlocked_by_prizes(patcher: &mut Patcher, settings: &Settings) {
+    patch_oren(patcher, settings);
+    patch_impa(patcher, settings);
+    patch_irene(patcher, settings);
+    patch_rosso(patcher, settings);
+}
+
+/// Oren
+fn patch_oren(patcher: &mut Patcher, settings: &Settings) {
+    let credits_flag = Flag::Event(730);
+
+    // Zora's Domain
+    patcher.modify_objs(CaveLight, 7, &[
+        set_disable_flag(116, credits_flag), // Thin Oren
+        set_disable_flag(119, credits_flag), // Zora Attendant
+        set_disable_flag(127, credits_flag), // Zora Attendant
+        set_disable_flag(134, credits_flag), // Thicc Oren
+    ]);
+
+    if settings.logic.reverse_sage_events {
+        let oren_flag = prize_flag(SageOren);
+
+        // Shady Guy Trigger
+        patcher.modify_objs(FieldLight, 7, &[
+            set_enable_flag(14, oren_flag), // Cutscene trigger
+            set_enable_flag(16, oren_flag), // Shady Guy
+        ]);
+
+        // Zora's Domain
+        patcher.modify_objs(CaveLight, 7, &[
+            // Hide Oren + Attendants until Oren is saved
+            set_enable_flag(116, oren_flag), // Thin Oren
+            set_enable_flag(119, oren_flag), // Zora Attendant
+            set_enable_flag(127, oren_flag), // Zora Attendant
+            set_enable_flag(134, oren_flag), // Thicc Oren
+            // Require saving Oren to turn in Smooth Gem
+            set_enable_flag(131, oren_flag), // AreaSwitchCube
+            set_enable_flag(132, oren_flag), // Throw Smooth Gem textbox trigger
+        ]);
+    } else {
+        // Zora's Domain
+        patcher.modify_objs(CaveLight, 7, &[
+            // Always allow turning in Smooth Gem
+            clear_enable_flag(131), // AreaSwitchCube, fix for not being able to turn in Smooth Gem
+            clear_enable_flag(132), // Throw Smooth Gem textbox trigger
+        ]);
+    }
+}
+
+/// Impa
+fn patch_impa(patcher: &mut Patcher, settings: &Settings) {
+    let impa_flag = prize_flag(SageImpa);
+    if !settings.logic.reverse_sage_events {
+        // Remove HC Impa when not RSE
+        patcher.modify_objs(IndoorLight, 12, &[disable(36)]);
+        return;
+    }
+
+    // Show Impa in Hyrule Castle's Throne Room after she's been rescued
+    patcher.modify_objs(IndoorLight, 12, &[
+        // Impa
+        call(36, move |obj| {
+            obj.set_enable_flag(impa_flag);
+            obj.clear_disable_flag();
+        }),
+    ]);
+
+    // RSE - Make Impa required to enter HC Front Door
+    if settings.logic.reverse_sage_events {
+        patcher.modify_objs(FieldLight, 18, &[
+            // Front Door Soldier
+            call(269, move |obj| {
+                obj.clear_disable_flag();
+                obj.set_enable_flag(impa_flag);
+            }),
+            set_enable_flag(270, impa_flag), // Impa
+        ]);
+    }
+}
+
+/// Irene
+fn patch_irene(patcher: &mut Patcher, settings: &Settings) {
+    if !settings.logic.reverse_sage_events {
+        return;
+    }
+
+    let irene_flag = prize_flag(SageIrene);
+
+    // Bridge
+    patcher.modify_objs(FieldLight, 28, &[
+        set_46_args(55, irene_flag),     // Trigger - NpcMaple_BellGet_2D
+        set_enable_flag(56, irene_flag), // Irene
+    ]);
+
+    // Fortune-Teller
+    patcher.modify_objs(FieldLight, 9, &[
+        set_46_args(83, irene_flag),     // Trigger - NpcMaple_BellGet_11
+        set_enable_flag(85, irene_flag), // Irene
+    ]);
+
+    // Small Pond
+    patcher.modify_objs(FieldLight, 10, &[
+        set_46_args(65, irene_flag),     // Trigger - NpcMaple_BellGet_12_00
+        set_enable_flag(67, irene_flag), // Irene
+        set_46_args(68, irene_flag),     // Trigger - NpcMaple_BellGet_12_01
+    ]);
+}
+
+/// Rosso
+fn patch_rosso(patcher: &mut Patcher, settings: &Settings) {
+    let rosso_flag = if settings.logic.reverse_sage_events {
+        prize_flag(SageRosso)
+    } else {
+        prize_flag(PendantCourage)
+    };
+
+    // Outside Rosso's House
+    patcher.modify_objs(FieldLight, 2, &[
+        set_enable_flag(11, rosso_flag), // Small Rock (controller, see below)
+        disable(88),                     // early game LZ to Rosso's House
+        clear_disable_flag(100),         // Keep Entry_KikoriMan3 from disappearing
+        clear_disable_flag(100),         // NpcMountaineer
+        set_disable_flag(128, rosso_flag), // "Not in right now." signboard
+        set_46_args(132, rosso_flag),    // Door
+        disable(135),                    // Disable LZ to IndoorLight4 cutscene
+        set_enable_flag(136, rosso_flag), // LZ to Rosso's House
+    ]);
+
+    // Rosso's House
+    patcher.modify_objs(IndoorLight, 10, &[call(7, move |obj| {
+        obj.set_inactive_flag(Flag::Event(282));
+        obj.set_enable_flag(rosso_flag);
+        obj.clear_disable_flag();
+    })]);
+
+    // Rosso Rocks
+    patcher.modify_system(FieldLight, 2, &[
+        set_enable_flag(11, rosso_flag), // controller
+        set_enable_flag(12, rosso_flag),
+        set_enable_flag(14, rosso_flag),
+        set_enable_flag(15, rosso_flag),
+        set_enable_flag(16, rosso_flag),
+        set_enable_flag(18, rosso_flag),
+        set_enable_flag(19, rosso_flag),
+        set_enable_flag(20, rosso_flag),
+        set_enable_flag(21, rosso_flag),
+        set_enable_flag(93, rosso_flag),
+        set_enable_flag(94, rosso_flag),
+        set_enable_flag(102, rosso_flag),
+        set_enable_flag(103, rosso_flag),
+        set_enable_flag(104, rosso_flag),
+        set_enable_flag(105, rosso_flag),
+        set_enable_flag(106, rosso_flag),
+        set_enable_flag(107, rosso_flag),
+        set_enable_flag(108, rosso_flag),
+        set_enable_flag(109, rosso_flag),
+        set_enable_flag(110, rosso_flag),
+        set_enable_flag(111, rosso_flag),
+        set_enable_flag(112, rosso_flag),
+        set_enable_flag(118, rosso_flag),
+        set_enable_flag(119, rosso_flag),
+        set_enable_flag(120, rosso_flag),
+        set_enable_flag(121, rosso_flag),
+        set_enable_flag(122, rosso_flag),
+        set_enable_flag(123, rosso_flag),
+        set_enable_flag(124, rosso_flag),
+        set_enable_flag(125, rosso_flag),
+        set_enable_flag(126, rosso_flag),
+    ]);
 }
 
 /// Eastern Palace
@@ -250,88 +425,6 @@ fn patch_eastern(patcher: &mut Patcher, prize: Item, _: &Settings) {
     // patcher.modify_system(FieldLight, 18, &[call(199, |obj| {
     //     obj.srt.translate.z = 12.75; // move to where cutscene normally ends
     // })]);
-
-    // Rewire Post-EP checks to require PoC
-    let green_pendant_flag = prize_flag(PendantCourage);
-
-    // Haunted Grove
-    // patcher.modify_objs(FieldLight, 25, &[
-    //     set_enable_flag(122, green_pendant_flag),  // Pouch
-    //     set_disable_flag(123, green_pendant_flag), // Gulley
-    // ]);
-
-    // Irene (bridge)
-    // patcher.modify_objs(FieldLight, 28, &[
-    //     set_46_args(55, green_pendant_flag), // Trigger - NpcMaple_BellGet_2D
-    //     set_enable_flag(56, green_pendant_flag), // Irene
-    // ]);
-
-    // Irene (Fortune-Teller)
-    // patcher.modify_objs(FieldLight, 9, &[
-    //     set_46_args(83, green_pendant_flag), // Trigger - NpcMaple_BellGet_11
-    //     set_enable_flag(85, green_pendant_flag), // Irene
-    // ]);
-
-    // Irene (small pond)
-    // patcher.modify_objs(FieldLight, 10, &[
-    //     set_46_args(65, green_pendant_flag), // Trigger - NpcMaple_BellGet_12_00
-    //     set_enable_flag(67, green_pendant_flag), // Irene
-    //     set_46_args(68, green_pendant_flag), // Trigger - NpcMaple_BellGet_12_01
-    // ]);
-
-    // Outside Rosso's House
-    patcher.modify_objs(FieldLight, 2, &[
-        set_enable_flag(11, green_pendant_flag), // Small Rock (controller, see below)
-        disable(88),                             // early game LZ to Rosso's House
-        clear_disable_flag(100),                 // Keep Entry_KikoriMan3 from disappearing
-        clear_disable_flag(100),                 // NpcMountaineer
-        set_disable_flag(128, green_pendant_flag), // "Not in right now." signboard
-        set_46_args(132, green_pendant_flag),    // Door
-        disable(135),                            // Disable LZ to IndoorLight4 cutscene
-        set_enable_flag(136, green_pendant_flag), // LZ to Rosso's House
-    ]);
-
-    // Rosso's House
-    patcher.modify_objs(IndoorLight, 10, &[call(7, |obj| {
-        obj.set_inactive_flag(Flag::Event(282));
-        obj.set_enable_flag(prize_flag(PendantCourage));
-        obj.clear_disable_flag();
-    })]);
-
-    // Rosso Rocks
-    patcher.modify_system(FieldLight, 2, &[
-        set_enable_flag(11, green_pendant_flag), // controller
-        set_enable_flag(12, green_pendant_flag),
-        set_enable_flag(14, green_pendant_flag),
-        set_enable_flag(15, green_pendant_flag),
-        set_enable_flag(16, green_pendant_flag),
-        set_enable_flag(18, green_pendant_flag),
-        set_enable_flag(19, green_pendant_flag),
-        set_enable_flag(20, green_pendant_flag),
-        set_enable_flag(21, green_pendant_flag),
-        set_enable_flag(93, green_pendant_flag),
-        set_enable_flag(94, green_pendant_flag),
-        set_enable_flag(102, green_pendant_flag),
-        set_enable_flag(103, green_pendant_flag),
-        set_enable_flag(104, green_pendant_flag),
-        set_enable_flag(105, green_pendant_flag),
-        set_enable_flag(106, green_pendant_flag),
-        set_enable_flag(107, green_pendant_flag),
-        set_enable_flag(108, green_pendant_flag),
-        set_enable_flag(109, green_pendant_flag),
-        set_enable_flag(110, green_pendant_flag),
-        set_enable_flag(111, green_pendant_flag),
-        set_enable_flag(112, green_pendant_flag),
-        set_enable_flag(118, green_pendant_flag),
-        set_enable_flag(119, green_pendant_flag),
-        set_enable_flag(120, green_pendant_flag),
-        set_enable_flag(121, green_pendant_flag),
-        set_enable_flag(122, green_pendant_flag),
-        set_enable_flag(123, green_pendant_flag),
-        set_enable_flag(124, green_pendant_flag),
-        set_enable_flag(125, green_pendant_flag),
-        set_enable_flag(126, green_pendant_flag),
-    ]);
 }
 
 /// House of Gales

@@ -662,12 +662,37 @@ impl Progress {
             }
     }
 
-    pub fn has_sage_osfala(&self) -> bool {
-        self.has(SageOsfala)
+    /// Reverse Sage Events
+    pub fn is_rse(&self) -> bool {
+        self.settings.logic.reverse_sage_events
     }
 
     pub fn has_sage_gulley(&self) -> bool {
         self.has(SageGulley)
+    }
+
+    pub fn has_sage_oren(&self) -> bool {
+        self.has(SageOren)
+    }
+
+    pub fn has_sage_seres(&self) -> bool {
+        self.has(SageSeres)
+    }
+
+    pub fn has_sage_osfala(&self) -> bool {
+        self.has(SageOsfala)
+    }
+
+    pub fn has_sage_impa(&self) -> bool {
+        self.has(SageImpa)
+    }
+
+    pub fn has_sage_irene(&self) -> bool {
+        self.has(SageIrene)
+    }
+
+    pub fn has_sage_rosso(&self) -> bool {
+        self.has(SageRosso)
     }
 
     pub fn has_lc_requirement(&self) -> bool {
