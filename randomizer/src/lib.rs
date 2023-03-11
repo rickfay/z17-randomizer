@@ -456,7 +456,7 @@ impl<'settings> Spoiler<'settings> {
         Self { version, seed, settings, layout, metrics }
     }
 
-    pub fn patch(self, paths: Paths, patch: bool, spoiler: bool) -> Result<()> {
+    pub fn patch(self, paths: Paths, patch: bool, spoiler: bool, hints: bool) -> Result<()> {
         if patch {
             info!("Generating Patch Files...");
             let game = Game::load(paths.rom())?;
@@ -474,6 +474,15 @@ impl<'settings> Spoiler<'settings> {
 
             write!(File::create(path)?, "{}", serialized)
                 .expect("Could not write the spoiler log.");
+        }
+        if hints {
+            let path = paths.output().join(format!("{:0>10}_hints.json", self.seed));
+            info!("Writing Hints to:               {}", &path.absolutize()?.display());
+
+            let mut serialized = serde_json::to_string_pretty(&self.metrics.get_hints()).unwrap();
+            align_json_values(&mut serialized);
+
+            write!(File::create(path)?, "{}", serialized).expect("Could not write the hints file.");
         }
         Ok(())
     }

@@ -3,7 +3,7 @@ crate::region! {
     name: "Zora's River",
     river {
         locations: [
-            "Oren": ItemMizukaki @Event(CaveLight/FieldLight_0F_Zora[0x6B]),
+            "Queen Oren": ItemMizukaki @Event(CaveLight/FieldLight_0F_Zora[0x6B]),
             "Waterfall Cave": HeartPiece @Heart(CaveLight 13[103]),
             "Zora's Domain Ledge": RupeeR @Chest(15[35]),
             "Zora's River Treasure Dungeon": RupeeSilver @Chest(AttractionLight 5[24]),

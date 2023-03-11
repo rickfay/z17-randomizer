@@ -90,8 +90,8 @@ pub(crate) fn is_pendant(item: Item) -> bool {
     }
 }
 
-pub(crate) fn prize_flag(pendant: Item) -> Flag {
-    match pendant {
+pub(crate) fn prize_flag(prize: Item) -> Flag {
+    match prize {
         PendantPower => Flag::Event(372),
         PendantWisdom => Flag::Event(342),
         PendantCourage => Flag::Event(251),
@@ -102,7 +102,7 @@ pub(crate) fn prize_flag(pendant: Item) -> Flag {
         SageRosso => Flag::Event(616),
         SageIrene => Flag::Event(636),
         SageImpa => Flag::Event(656),
-        _ => fail!("{} is Charm or not a Dungeon Prize", pendant.as_str()),
+        _ => fail!("{} is Charm or not a Dungeon Prize", prize.as_str()),
     }
 }
 

@@ -3,8 +3,10 @@ use {
         convert, fail,
         filler_util::shuffle,
         item_pools::{get_item_pools, get_maiamai_pool},
+        item_to_str,
         model::{
             check::Check, location::Location, location_node::LocationNode, progress::Progress,
+            Hints,
         },
         patch::util::is_sage,
         settings::logic_mode::LogicMode::*,
@@ -13,7 +15,7 @@ use {
         LocationInfo, Metrics, Seed, Settings,
     },
     albw::Item,
-    log::{error, info},
+    log::{error, info, warn},
     queue::Queue,
     rand::{rngs::StdRng, Rng, SeedableRng},
     std::collections::{BTreeMap, HashMap, HashSet},
@@ -139,7 +141,7 @@ fn preplace_items<'a>(
     exclude("100 Maiamai", rng, check_map, junk);
 
     let mut shop_positions: Vec<&str> = Vec::new();
-    let mut bow_light_positions: Vec<&str> = Vec::from(["Final Zelda"]);
+    let mut bow_light_positions: Vec<&str> = Vec::from(["Zelda"]);
     let mut maiamai_positions: Vec<&str> = Vec::new();
 
     for (check_name, item) in check_map.clone() {
@@ -539,13 +541,13 @@ fn verify_all_locations_accessible(
     let reachable_checks = assumed_search(loc_map, progression_pool, &mut check_map, settings); //find_reachable_checks(loc_map, &everything, &mut check_map); //
 
     /**
-     * 430 TOTAL CHECKS <br /><br />
+     * 431 TOTAL CHECKS <br /><br />
      *
      * 413 are considered in logic:
      * - 254 Standard Checks
      * - 100 Maiamai
      * - 11 Dungeon Prizes
-     * - 32 Quest (non-items that are still progression)
+     * - 33 Quest (non-items that are still progression)
      * - 19 Statically Placed Items:
      *     - 12x Shop Items (not including 9,999 items)
      *     - 3x Obscure Gold/Silver Rupees
@@ -554,7 +556,7 @@ fn verify_all_locations_accessible(
      *     - FIXME: Hyrule Hotfoot Second Race
      *     - FIXME: Fortune's Choice
      */
-    const TOTAL_CHECKS: usize = 430;
+    const TOTAL_CHECKS: usize = 431;
 
     /**
      * Checks intentionally considered unreachable:
@@ -728,9 +730,12 @@ fn calculate_metrics(
     world_graph: &mut HashMap<Location, LocationNode>,
     check_map: &mut HashMap<&str, Option<FillerItem>>, settings: &Settings, rng: &mut StdRng,
 ) -> Metrics {
+    println!();
+    info!("Calculating Metrics...");
+
     let playthrough = sphere_search(world_graph, check_map, settings);
 
-    let hints = generate_path_hints(world_graph, check_map, settings, rng);
+    let hints = generate_hints(world_graph, check_map, settings, rng);
 
     Metrics::new(playthrough.len(), playthrough, hints)
 }
@@ -740,6 +745,9 @@ fn sphere_search<'a>(
     world_graph: &mut HashMap<Location, LocationNode>,
     mut check_map: &mut HashMap<&str, Option<FillerItem>>, settings: &Settings,
 ) -> BTreeMap<String, BTreeMap<&'static str, &'static str>> {
+
+    info!("Generating Playthrough...");
+
     let mut progress = Progress::new(settings.clone());
     let mut reachable_checks: Vec<Check>;
     let mut spheres = BTreeMap::new();
@@ -778,14 +786,234 @@ fn sphere_search<'a>(
     spheres
 }
 
-fn generate_path_hints(
+/// Generates Always, Path, and Sometimes Hints based on settings
+fn generate_hints(
     world_graph: &mut HashMap<Location, LocationNode>,
+    check_map: &mut HashMap<&str, Option<FillerItem>>, settings: &Settings, rng: &mut StdRng,
+) -> Hints {
+
+    info!("Generating Hints...");
+
+    const NUM_TOTAL_HINTS: usize = 28;
+    let mut taken_checks: Vec<&'static str> = Vec::new();
+
+    let always_hints = generate_always_hints(&mut taken_checks, check_map, settings);
+    let path_hints = generate_path_hints(&mut taken_checks, world_graph, check_map, settings, rng);
+
+    let num_sometimes_hints = NUM_TOTAL_HINTS - always_hints.len() - path_hints.len();
+    let sometimes_hints =
+        generate_sometimes_hints(num_sometimes_hints, &mut taken_checks, check_map, settings, rng);
+
+    let bow_of_light_hint = generate_bow_of_light_hint(world_graph, check_map);
+
+    Hints { path_hints, always_hints, sometimes_hints, bow_of_light_hint }
+}
+
+/// Generates the Bow of Light Hint
+fn generate_bow_of_light_hint(
+    world_graph: &mut HashMap<Location, LocationNode>,
+    check_map: &mut HashMap<&str, Option<FillerItem>>,
+) -> Vec<&'static str> {
+    for (_, location_node) in world_graph {
+        for check in location_node.clone().get_checks() {
+            if BowOfLight.eq(&check_map.get(check.get_name()).unwrap().unwrap()) {
+                return vec![check.get_location_info().unwrap().region()];
+            }
+        }
+    }
+
+    panic!("Failed to generate Bow of Light Hint");
+}
+
+/**
+ * Always Hints
+ * Generates hints for checks that should always be hinted, depending on settings.
+ */
+fn generate_always_hints(
+    taken_checks: &mut Vec<&'static str>, check_map: &mut HashMap<&str, Option<FillerItem>>,
+    settings: &Settings,
+) -> HashMap<&'static str, &'static str> {
+    let mut always_checks =
+        vec!["Master Sword Pedestal", "Great Rupee Fairy", "Blacksmith (Lorule)", "Bouldering Guy"];
+
+    // todo
+    // if settings.logic.nice_mode {
+    //     always_checks.extend(vec![" 30 Maiamai", " 40 Maiamai", " 50 Maiamai"]);
+    // }
+
+    if !settings.logic.minigames_excluded {
+        always_checks.extend(vec!["Octoball Derby", "Treacherous Tower Intermediate"]);
+    }
+
+    let mut always_hints = HashMap::new();
+    for check_name in always_checks {
+        taken_checks.push(check_name);
+        let filler_item = check_map.get(check_name).unwrap().unwrap();
+        always_hints.insert(check_name, item_to_str(&convert(filler_item).unwrap()));
+    }
+
+    always_hints
+}
+
+/**
+ * Sometimes Hints
+ * Generates hints for checks that are only "sometimes" hinted, depending on settings. The checks
+ * that get hinted are chosen randomly.
+ */
+fn generate_sometimes_hints(
+    num_sometimes_hints: usize, taken_checks: &mut Vec<&'static str>,
+    check_map: &mut HashMap<&str, Option<FillerItem>>, settings: &Settings, rng: &mut StdRng,
+) -> HashMap<&'static str, &'static str> {
+    let mut sometimes_checks = vec![
+        "Bee Guy (2)",
+        "Behind Ice Gimos",
+        "Bird Lover",
+        "Blacksmith",
+        "Blacksmith Cave",
+        "Cucco Treasure Dungeon",
+        "Death Mountain Treasure Dungeon",
+        "Donkey Cave Pegs",
+        "Eastern Ruins Peg Circle",
+        "Eastern Ruins Treasure Dungeon",
+        "Fire Cave Pillar",
+        "Floating Island",
+        "Graveyard Ledge Cave",
+        "Ice Gimos Fight",
+        "Ice Rod Cave",
+        "Irene",
+        "Ku's Domain Fight",
+        "Lorule Field Treasure Dungeon",
+        "Milk Bar Owner",
+        "Misery Mire Ledge",
+        "Misery Mire Treasure Dungeon",
+        "Osfala",
+        "Philosopher's Cave",
+        "Queen Oren",
+        "Rosso",
+        "Rosso Rocks",
+        "Shady Guy",
+        "Spectacle Rock",
+        "Southern Ruins Treasure Dungeon",
+        "Street Merchant (Right)",
+        "Thief Girl Cave",
+        "Waterfall Cave",
+        "Wildlife Clearing Stump",
+        "Woman",
+        "Zelda",
+        "Zora's River Treasure Dungeon",
+        "[DP] (2F) Under Rock (Ball Room)",
+        "[DP] (2F) Under Rock (Left)",
+        "[DP] (2F) Under Rock (Right)",
+        "[EP] (1F) Escape Chest",
+        "[HC] Battlement",
+        "[HC] West Wing",
+        "[HG] (3F) Fire Bubbles",
+        "[HG] (2F) Fire Ring",
+        "[IR] (B2) Long Merge Chest",
+        "[IR] (B4) Southeast Chest (Fall)",
+        "[LC] (3F) Ball Trial (Puzzle)",
+        "[LC] (3F) Bomb Trial (Behind Rock)",
+        "[LC] (4F) Hookshot Trial (Eyes)",
+        "[LC] (4F) Lamp Trial",
+        "[PD] (2F) Big Chest (Hidden)",
+        "[PD] (B1) Big Chest (Switches)",
+        "[SP] (B1) Big Chest (Secret)",
+        "[SW] (B1) Big Chest (Eyes)",
+        "[SW] (B1) South Chest",
+        "[T'H] (B2) Eyegores",
+        "[T'H] (B3) Big Chest (Hidden)",
+        "[TH] (8F) Fairy Room",
+        "[TR] (B1) Big Chest (Center)",
+        "[TR] (1F) Defeat Flamolas",
+    ];
+
+    // Maiamai Madness
+    if settings.logic.maiamai_madness {
+        sometimes_checks.extend(vec![
+            "[Mai] Blacksmith Tornado Tile",
+            "[Mai] Buried in the Desert",
+            "[Mai] Buried near Desert Palace",
+            "[Mai] Cucco Treasure Dungeon Big Rock",
+            "[Mai] Dark Ruins South Area Wall",
+            "[Mai] Death Mountain East Ledge Rock",
+            "[Mai] Eastern Ruins Big Rock",
+            "[Mai] Hyrule Castle Tornado Tile",
+            "[Mai] Hyrule Hotfoot Big Rock",
+            "[Mai] Hyrule Rupee Rush Wall",
+            "[Mai] Island Tornado Tile",
+            "[Mai] Kakariko Sand",
+            "[Mai] Ku's Domain Water",
+            "[Mai] Lorule Death Mountain East Skull",
+            "[Mai] Lorule Death Mountain West Big Rock",
+            "[Mai] Lorule Fortune-Teller Big Rock",
+            "[Mai] Lorule Graveyard Peninsula Tree",
+            "[Mai] Lorule Lake Big Rock",
+            "[Mai] Lorule Lake Skull",
+            "[Mai] Lorule Rupee Rush Wall",
+            "[Mai] Rosso's Ore Mine Rock",
+            "[Mai] Skull Woods Big Rock",
+            "[Mai] Southern Ruins Big Rock",
+            "[Mai] Southern Ruins Bomb Cave",
+        ]);
+    }
+
+    // Nice Mode
+    // todo
+    // if settings.logic.nice_mode {
+    //     sometimes_checks.extend(vec![" 20 Maiamai"]);
+    // }
+
+    // Minigames
+    if !settings.logic.minigames_excluded {
+        sometimes_checks.extend(vec![
+            "Dodge the Cuccos",
+            "Rupee Rush (Hyrule)",
+            "Rupee Rush (Lorule)",
+            "Hyrule Hotfoot (First Race)",
+        ]);
+    }
+
+    sometimes_checks.retain(|check| !taken_checks.contains(check));
+
+    let mut sometimes_hints = HashMap::new();
+    let mut sometimes_hint_count = 0;
+    loop {
+        if sometimes_hint_count >= num_sometimes_hints {
+            break;
+        }
+
+        if sometimes_checks.is_empty() {
+            warn!("Ran out of possible Sometimes Hints");
+            break;
+        }
+
+        let selected_hint = sometimes_checks.remove(rng.gen_range(0..sometimes_checks.len()));
+        let filler_item = check_map.get(selected_hint).unwrap().unwrap();
+        sometimes_hints.insert(selected_hint, item_to_str(&convert(filler_item).unwrap()));
+
+        sometimes_hint_count += 1;
+    }
+
+    sometimes_hints
+}
+
+/**
+ * Path Hints
+ *
+ * Generates up to 7 Path Hints for each Boss guarding a Sage Portrait.
+ *
+ * A "Path Hint" is a hint that specifies the location of a "Path Item" that is required to reach
+ * and defeat a certain Boss, according the chosen Logic Mode and Settings.
+ */
+fn generate_path_hints(
+    taken_checks: &mut Vec<&'static str>, world_graph: &mut HashMap<Location, LocationNode>,
     check_map: &mut HashMap<&str, Option<FillerItem>>, settings: &Settings, rng: &mut StdRng,
 ) -> Vec<String> {
     let mut bosses_and_prize_locations: Vec<(FillerItem, &str)> = vec![
         (Yuga, "Eastern Palace Prize"),
         (Margomill, "House of Gales Prize"),
         (Moldorm, "Tower of Hera Prize"),
+        (ZeldasThrone, "Hyrule Castle Prize"),
         (GemesaurKing, "Dark Palace Prize"),
         (Arrghus, "Swamp Palace Prize"),
         (Knucklemaster, "Skull Woods Prize"),
@@ -797,51 +1025,97 @@ fn generate_path_hints(
 
     bosses_and_prize_locations = shuffle(bosses_and_prize_locations, rng);
 
-    let mut taken_path_checks: Vec<Check> = Vec::new();
+    let mut chosen_path_checks: Vec<(Check, FillerItem)> = Vec::new();
+    let mut backup_path_checks: Vec<(Check, FillerItem)> = Vec::new();
     let mut path_hints = Vec::new();
+    let mut extra_paths_needed = 0;
+
     for (boss, prize_loc) in bosses_and_prize_locations {
         if is_sage(convert(check_map.get(prize_loc).unwrap().unwrap()).unwrap()) {
-            if let Some(path_check) =
-                get_path_check(boss, world_graph, check_map, settings, rng, &taken_path_checks)
+            if let Some((chosen_path_check, backups)) =
+                get_path_checks(boss, world_graph, check_map, settings, rng, &taken_checks)
             {
-                taken_path_checks.push(path_check);
-                path_hints.push(format!(
-                    "They say there's a link between {} and {}.",
-                    path_check.get_location_info().unwrap().region(),
-                    boss.as_str()
-                ));
+                // Debug
+                // println!(
+                //     "\nChosen Path: {} ({}) --------------> {}",
+                //     check_map.get(chosen_path_check.get_name()).unwrap().unwrap().as_str(),
+                //     chosen_path_check.get_name(),
+                //     boss.as_str()
+                // );
+                // println!("Backups:");
+                // for backup in &backups {
+                //     println!(
+                //         "{: <30} ({})",
+                //         backup.get_name(),
+                //         check_map.get(backup.get_name()).unwrap().unwrap().as_str(),
+                //     );
+                // }
+
+                taken_checks.push(chosen_path_check.get_name());
+                chosen_path_checks.push((chosen_path_check, boss));
+                backup_path_checks.extend(backups.iter().map(|&check| (check, boss)));
+            } else {
+                eprintln!("No Paths possible for: {}", boss.as_str());
+
+                extra_paths_needed += 1;
             }
         }
+    }
+
+    // Add extra paths if some bosses didn't have any path items
+    let mut i = 0;
+    loop {
+        if i >= extra_paths_needed {
+            break;
+        }
+
+        if backup_path_checks.is_empty() {
+            warn!("Ran out of potential path checks");
+            break;
+        }
+
+        let (backup_check, backup_boss) =
+            backup_path_checks.remove(rng.gen_range(0..backup_path_checks.len()));
+
+        // Prevent reusing existing check
+        if taken_checks.contains(&backup_check.get_name()) {
+            continue;
+        }
+
+        chosen_path_checks.push((backup_check, backup_boss));
+        taken_checks.push(backup_check.get_name());
+
+        i += 1;
+    }
+
+    // Format
+    for (check, boss) in &chosen_path_checks {
+        path_hints.push(format!(
+            "They say there's a link between {} and {}.",
+            check.get_location_info().unwrap().region(),
+            boss.as_str()
+        ));
     }
 
     path_hints
 }
 
-fn get_path_check(
-    boss: FillerItem, world_graph: &mut HashMap<Location, LocationNode>,
-    check_map: &mut HashMap<&str, Option<FillerItem>>, settings: &Settings, rng: &mut StdRng,
-    taken_path_checks: &Vec<Check>,
-) -> Option<Check> {
-    let path_checks = get_path_checks(boss, world_graph, check_map, settings, taken_path_checks);
-
-    return if path_checks.is_empty() {
-        None
-    } else {
-        Some(*path_checks.get(rng.gen_range(0..path_checks.len())).unwrap())
-    };
-}
-
-/// Get Path Checks
+/**
+ * Get Path Checks
+ * Determines the possible Path Check locations for a given Boss, if any. One Path Check is chosen
+ * and returned to become the Path Hint for this boss, while the others are also returned to be used
+ * as backups in case extra hints are needed.
+ */
 fn get_path_checks<'a>(
     boss: FillerItem, world_graph: &mut HashMap<Location, LocationNode>,
-    mut check_map: &mut HashMap<&str, Option<FillerItem>>, settings: &Settings,
-    taken_path_checks: &Vec<Check>,
-) -> Vec<Check> {
+    mut check_map: &mut HashMap<&str, Option<FillerItem>>, settings: &Settings, rng: &mut StdRng,
+    taken_path_checks: &Vec<&'static str>,
+) -> Option<(Check, Vec<Check>)> {
     let mut progress = Progress::new(settings.clone());
     let mut reachable_checks: Vec<Check>;
     let mut path_checks = Vec::new();
 
-    let mut potential_path_checks = HashSet::new();
+    let mut potential_path_checks: HashSet<Check> = HashSet::new();
 
     // Find candidate Path Checks with a modified sphere search
     loop {
@@ -867,7 +1141,7 @@ fn get_path_checks<'a>(
 
     // Limit potential paths to locations with valid Path Items that haven't yet been taken
     potential_path_checks.retain(|check| {
-        !taken_path_checks.contains(check)
+        !taken_path_checks.contains(&check.get_name())
             && POSSIBLE_PATH_ITEMS.contains(&check_map.get(check.get_name()).unwrap().unwrap())
     });
 
@@ -901,7 +1175,12 @@ fn get_path_checks<'a>(
         }
     }
 
-    path_checks
+    if path_checks.is_empty() {
+        None
+    } else {
+        let chosen_path_hint = path_checks.remove(rng.gen_range(0..path_checks.len()));
+        Some((chosen_path_hint, path_checks))
+    }
 }
 
 const POSSIBLE_PATH_ITEMS: [FillerItem; 48] = [

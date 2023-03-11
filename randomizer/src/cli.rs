@@ -87,29 +87,29 @@ pub fn seed_settings_ui() -> Settings {
         prompt_bool("Skip Trials", "Automatically opens the Lorule Castle Trials door.");
 
     let bow_of_light_in_castle = prompt_bool(
-        "Tournament Bow of Light",
-        "Forces the Bow of Light to be placed in Lorule Castle (including possibly Zelda).",
+        "Bow of Light in Castle",
+        "Limits the Bow of Light's placement to somewhere in Lorule Castle (including possibly Zelda).",
     );
-    let vanes_activated = prompt_bool(
+    let weather_vanes_activated = prompt_bool(
         "Pre-Activated Weather Vanes",
         "Begin the game with all Weather Vanes activated.\n\
         The logic may expect players to use the Bell to reach otherwise unreachable locations this way.\n\
         NOTE: Trackers do not currently support this feature.",
     );
-    let lampless = prompt_bool(
+    let dark_rooms_lampless = prompt_bool(
         "Dark Room Crossing (advanced)",
         "If enabled the logic may expect players to cross Dark Rooms without the Lamp.\n\
         Not for beginners and those who like being able to see things.",
     );
     let swordless_mode = prompt_bool(
         "Swordless Mode (advanced)",
-        "Removes all Swords from the item pool.\n\
+        "Removes *ALL* Swords from the game.\n\
         The Bug Net becomes a required item to play Dead Man's Volley against Yuga Ganon.",
     );
     let chest_size_matches_contents = prompt_bool(
         "Chest Size Matches Contents",
         "All chests containing progression or unique items will become large, and others will be made small.\n\
-        Note: Some large chests will have altered collision to prevent negative gameplay interference.",
+        Note: Some large chests will have a reduced hitbox to prevent negative gameplay interference.",
     );
 
     println!();
@@ -130,12 +130,12 @@ pub fn seed_settings_ui() -> Settings {
             pouch_in_shop,
             boots_in_shop,
             maiamai_madness,
-            vanes_activated,
+            weather_vanes_activated,
             minigames_excluded,
             skip_big_bomb_flower,
             skip_trials,
             bow_of_light_in_castle,
-            lampless,
+            dark_rooms_lampless,
             swordless_mode,
             ..Default::default()
         },

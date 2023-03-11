@@ -43,9 +43,11 @@ fn main() -> randomizer::Result<()> {
         let spoiler = catch_unwind(|| filler_new(VERSION, &preset, seed));
 
         if spoiler.is_ok() {
-            info!("Successfully Determined Completable Item Layout");
             println!();
-            result = spoiler.unwrap().patch(system.load_config()?, !opt.no_patch, !opt.no_spoiler);
+            info!("All seed information has been successfully generated.");
+            println!();
+            result =
+                spoiler.unwrap().patch(system.load_config()?, !opt.no_patch, !opt.no_spoiler, true);
 
             break;
         } else if x >= MAX_RETRIES - 1 {

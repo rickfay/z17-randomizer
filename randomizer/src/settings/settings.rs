@@ -14,7 +14,7 @@ use {
 
 /// Logic and behavior settings.
 #[derive(Clone, Debug, Default, Deserialize, Hash, Serialize)]
-#[serde(default, deny_unknown_fields)]
+#[serde(default)]
 pub struct Settings {
     #[serde(skip_serializing_if = "crate::settings::is_false")]
     pub dev_mode: bool,
@@ -69,8 +69,8 @@ impl Settings {
         info!("Minigames:                      {}", if self.logic.minigames_excluded { "Excluded" } else { "Included" });
         info!("Trials:                         {}", if self.logic.skip_trials { "Skipped" } else { "Normal" });
         info!("Bow of Light:                   {}", if self.logic.bow_of_light_in_castle { "Tournament" } else { "Normal" });
-        info!("Weather Vanes:                  {}", if self.logic.vanes_activated { "All Activated" } else { "Normal" });
-        info!("Dark Room Crossing:             {}", if self.logic.lampless { "Lamp Not Required" } else { "Lamp Required" });
+        info!("Weather Vanes:                  {}", if self.logic.weather_vanes_activated { "All Activated" } else { "Normal" });
+        info!("Dark Room Crossing:             {}", if self.logic.dark_rooms_lampless { "Lamp Not Required" } else { "Lamp Required" });
         info!("Swords:                         {}", if self.logic.swordless_mode { "Swordless Mode - NO SWORDS" } else { "Normal" });
         info!("Chest Size:                     {}\n", if self.options.chest_size_matches_contents { "Matches Contents" } else { "Normal" });
     }

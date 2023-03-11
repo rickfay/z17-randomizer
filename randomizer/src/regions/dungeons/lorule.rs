@@ -17,7 +17,7 @@ crate::region! {
             "[LC] (4F) Lamp Trial": KeySmall @Chest(1[1092]),
             "[LC] (4F) Hookshot Trial (Chest)": RupeePurple @Chest(1[1581]),
             "[LC] (4F) Hookshot Trial (Eyes)": KeySmall @Chest(1[1308]),
-            "Final Zelda": ItemBowLight @Event(DungeonBoss/Ganon[0x42]),
+            "Zelda": ItemBowLight @Event(DungeonBoss/Ganon[0x42]),
         ],
     },
 }

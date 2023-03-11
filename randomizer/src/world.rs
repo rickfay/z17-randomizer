@@ -339,110 +339,70 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                   None,
                   None,
             ),
-            check(
-                LocationInfo::new(
-                    regions::hyrule::field::main::SUBREGION,
-                    "[Mai] Tree West of Link's House",
-                ),
+            check(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "[Mai] Tree West of Link's House", ),
                 Some(|p| p.has_boots()),
                 None,
                 None,
                 None,
                 None,
             ),
-            check(
-                LocationInfo::new(
-                    regions::hyrule::field::main::SUBREGION,
-                    "[Mai] Behind Link's House",
-                ),
+            check(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "[Mai] Behind Link's House", ),
                 Some(|p| p.can_merge()),
                 None,
                 None,
                 None,
                 None,
             ),
-            check(
-                LocationInfo::new(
-                    regions::hyrule::eastern::ruins::SUBREGION,
-                    "[Mai] Southern Bridge River",
-                ),
+            check(LocationInfo::new(regions::hyrule::eastern::ruins::SUBREGION, "[Mai] Southern Bridge River", ),
                 Some(|p| p.has_flippers()),
                 None,
                 None,
                 Some(|p| p.has_boots() && (p.has_fire_rod() || p.has_nice_bombs())),
                 Some(|p| p.has_boots()), // bee boost fake flippers
             ),
-            check(
-                LocationInfo::new(
-                    regions::hyrule::southern::ruins::SUBREGION,
-                    "[Mai] Southern Ruins Pillars",
-                ),
+            check(LocationInfo::new(regions::hyrule::southern::ruins::SUBREGION, "[Mai] Southern Ruins Pillars", ),
                 Some(|p| p.has_boots()),
                 None,
                 None,
                 None,
                 None,
             ),
-            check(
-                LocationInfo::new(
-                    regions::hyrule::southern::ruins::SUBREGION,
-                    "[Mai] Outside Flippers Dungeon",
-                ),
+            check(LocationInfo::new(regions::hyrule::southern::ruins::SUBREGION, "[Mai] Outside Flippers Dungeon", ),
                 Some(|p| p.has_flippers()),
                 None,
                 None,
                 None,
                 None,
             ),
-            check(
-                LocationInfo::new(
-                    regions::hyrule::lake::hylia::SUBREGION,
-                    "[Mai] Outside Maiamai Cave",
-                ),
+            check(LocationInfo::new(regions::hyrule::lake::hylia::SUBREGION, "[Mai] Outside Maiamai Cave", ),
                 Some(|p| p.can_merge()),
                 None,
                 None,
                 None,
                 None,
             ),
-            check(
-                LocationInfo::new(
-                    regions::hyrule::lake::hylia::SUBREGION,
-                    "[Mai] Lake Hylia SE Wall",
-                ),
+            check(LocationInfo::new(regions::hyrule::lake::hylia::SUBREGION, "[Mai] Lake Hylia SE Wall", ),
                 Some(|p| p.can_merge()),
                 None,
                 None,
                 None,
                 None,
             ),
-            check(
-                LocationInfo::new(
-                    regions::hyrule::lake::hylia::SUBREGION,
-                    "[Mai] Hyrule Hotfoot Big Rock",
-                ),
+            check(LocationInfo::new(regions::hyrule::lake::hylia::SUBREGION, "[Mai] Hyrule Hotfoot Big Rock", ),
                 Some(|p| p.can_merge() && p.has_titans_mitt()),
                 None,
                 None,
                 None,
                 None,
             ),
-            check(
-                LocationInfo::new(
-                    regions::hyrule::desert::mystery::SUBREGION,
-                    "[Mai] Southern Ruins Big Rock",
-                ),
+            check(LocationInfo::new(regions::hyrule::desert::mystery::SUBREGION, "[Mai] Southern Ruins Big Rock"),
                 Some(|p| p.has_titans_mitt()),
                 None,
                 None,
                 None,
                 None,
             ),
-            check(
-                LocationInfo::new(
-                    regions::hyrule::lake::hylia::SUBREGION,
-                    "[Mai] Lake Hylia Shallow Ring",
-                ),
+            check(LocationInfo::new(regions::hyrule::lake::hylia::SUBREGION, "[Mai] Lake Hylia Shallow Ring"),
                 Some(|p| p.has_flippers()),
                 None,
                 None,
@@ -751,23 +711,15 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             path_free(HyruleField)
         ])),
         (EasternRuinsUpper, location("Eastern Ruins Upper", vec![
-            check_free(LocationInfo::new(
-                regions::hyrule::eastern::ruins::SUBREGION,
-                "Eastern Ruins Armos Chest",
-            )),
-            check(
-                LocationInfo::new(
-                    regions::hyrule::eastern::ruins::SUBREGION,
-                    "Eastern Ruins Hookshot Chest",
-                ),
+            check_free(LocationInfo::new(regions::hyrule::eastern::ruins::SUBREGION, "Eastern Ruins Armos Chest")),
+            check(LocationInfo::new(regions::hyrule::eastern::ruins::SUBREGION, "Eastern Ruins Hookshot Chest"),
                 Some(|p| p.has_hookshot()),
                 None,
                 None,
                 None,
                 None,
             ),
-            check(
-                LocationInfo::new(regions::hyrule::eastern::ruins::SUBREGION, "Eastern Ruins Merge Chest"),
+            check(LocationInfo::new(regions::hyrule::eastern::ruins::SUBREGION, "Eastern Ruins Merge Chest"),
                 Some(|p| p.can_merge()),
                 None,
                 Some(|p| p.has_tornado_rod() || p.has_fire_rod() || p.has_nice_bombs()),
@@ -805,7 +757,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             path_free(HyruleField),
         ])),
         (ZoraDomain, location("Zora's Domain", vec![
-            check(LocationInfo::new(regions::hyrule::zora::river::SUBREGION, "Oren"),
+            check(LocationInfo::new(regions::hyrule::zora::river::SUBREGION, "Queen Oren"),
                   Some(|p| p.has_smooth_gem()),
                   None,
                   None,
@@ -1018,7 +970,8 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             ),
         ])),
         (HyruleCastleInterior, location("Hyrule Castle Interior", vec![
-            check_free(LocationInfo::new(regions::dungeons::hyrule::castle::SUBREGION, "Hyrule Castle Prize"))
+            check_free(LocationInfo::new(regions::dungeons::hyrule::castle::SUBREGION, "Hyrule Castle Prize")),
+            check_quest_free("Zelda's Throne", ZeldasThrone),
         ], vec![
             path_free(HyruleCastleCourtyard), path_free(HyruleCastleRoof),
         ])),
@@ -1198,7 +1151,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             check(LocationInfo::new(regions::hyrule::southern::ruins::SUBREGION, "Southern Ruins Treasure Dungeon"),
                   Some(|p| p.has_boomerang() && p.has_hookshot() && p.has_flippers()),
                   Some(|p| { p.has_hookshot() && p.has_flippers() && (p.has_master_sword() || p.has_bombs()) }),
-                  Some(|p| p.has_nice_bombs()),
+                  Some(|p| p.has_nice_bombs() || p.has_nice_ice_rod() || p.can_great_spin()),
                   None,
                   None,
             )
@@ -1333,6 +1286,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             path_free(DeathWeatherVaneCaveLeft),
             path(DeathFairyCave, Some(|p| p.can_merge()), None, None, None, None),
             path_free(DonkeyCaveLower),
+            portal_std(LoruleDeathWest),
         ])),
         (DeathBombCave, location("Death Mountain Blocked Cave", vec![
             check_free(LocationInfo::new(regions::hyrule::death::mountain::SUBREGION, "Death Mountain Blocked Cave"))
@@ -2815,477 +2769,293 @@ fn lorule() -> HashMap<Location, LocationNode> {
 /// Eastern Palace
 fn eastern_palace() -> HashMap<Location, LocationNode> {
     HashMap::from([
-        (
-            EasternPalaceFoyer,
-            location(
-                "Eastern Palace",
-                vec![check(
-                    LocationInfo::new(
-                        regions::dungeons::eastern::palace::SUBREGION,
-                        "[EP] (1F) Outside (East)",
-                    ),
-                    Some(|p| p.can_merge()),
-                    None,
-                    None,
-                    None,
-                    None,
-                )],
-                vec![
-                    path_free(EasternRuinsUpper),
-                    path(
-                        EasternPalace1F,
-                        Some(|p| p.can_hit_far_switch() || p.can_merge()),
-                        Some(|p| p.has_master_sword()),
-                        None,
-                        None,
-                        None, // not including Nice Ice Rod for now
-                    ),
-                ],
-            ),
-        ),
-        (
-            EasternPalace1F,
-            location(
-                "Eastern Palace 1F",
-                vec![
-                    check(
-                        LocationInfo::new(
-                            regions::dungeons::eastern::palace::SUBREGION,
-                            "[EP] (1F) Near Entrance",
-                        ),
-                        Some(|p| p.can_hit_far_switch()),
-                        Some(|_| true), // throw pot
-                        None,
-                        None,
-                        None,
-                    ),
-                    check(
-                        LocationInfo::new(
-                            regions::dungeons::eastern::palace::SUBREGION,
-                            "[EP] (1F) Defeat Popos",
-                        ),
-                        Some(|p| p.can_attack()),
-                        Some(|p| p.has_lamp_or_net()),
-                        None,
-                        None,
-                        None,
-                    ),
-                    check(
-                        LocationInfo::new(
-                            regions::dungeons::eastern::palace::SUBREGION,
-                            "[EP] (1F) Hidden Door",
-                        ),
-                        Some(|p| p.can_attack()),
-                        Some(|p| p.has_lamp_or_net()),
-                        None,
-                        None,
-                        None,
-                    ),
-                    check(
-                        LocationInfo::new(
-                            regions::dungeons::eastern::palace::SUBREGION,
-                            "[EP] (1F) Switch Puzzle",
-                        ),
-                        Some(|p| p.can_hit_far_switch()),
-                        Some(|p| p.has_ice_rod() || p.has_master_sword()), // Ice Rod + Pot
-                        None,
-                        None,
-                        None,
-                    ),
-                ],
-                vec![
-                    path(
-                        EasternPalaceFoyer,
-                        Some(|p| p.can_hit_switch() || p.can_merge()),
-                        None,
-                        None,
-                        None,
-                        None,
-                    ),
-                    path(
-                        EasternPalaceMiniboss,
-                        Some(|p| p.has_eastern_keys(1)),
-                        None,
-                        None,
-                        None,
-                        None,
-                    ),
-                ],
-            ),
-        ),
-        (
-            EasternPalaceMiniboss,
-            location("Eastern Palace Miniboss", vec![], vec![
-                path(
-                    EasternPalace1F,
-                    Some(|p| p.can_attack()),
-                    Some(|p| p.has_lamp_or_net()),
-                    None,
-                    None,
-                    None,
-                ),
-                path(
-                    EasternPalace2F,
-                    Some(|p| p.can_attack()),
-                    Some(|p| p.has_lamp_or_net()),
-                    None,
-                    None,
-                    None,
-                ),
-            ]),
-        ),
-        (
-            EasternPalace2F,
-            location(
-                "Eastern Palace 2F",
-                vec![
-                    check(
-                        LocationInfo::new(
-                            regions::dungeons::eastern::palace::SUBREGION,
-                            "[EP] (2F) Defeat Popos",
-                        ),
-                        Some(|p| p.can_attack()),
-                        Some(|p| p.has_lamp_or_net()),
-                        None,
-                        None,
-                        None,
-                    ),
-                    check_free(LocationInfo::new(
-                        regions::dungeons::eastern::palace::SUBREGION,
-                        "[EP] (2F) Ball Room",
-                    )),
-                    check(
-                        LocationInfo::new(
-                            regions::dungeons::eastern::palace::SUBREGION,
-                            "[EP] (2F) Switch Room",
-                        ),
-                        Some(|p| p.can_hit_far_switch() || p.has_ice_rod()),
-                        Some(|_| true), // pots
-                        None,
-                        None,
-                        None,
-                    ),
-                    check(
-                        LocationInfo::new(
-                            regions::dungeons::eastern::palace::SUBREGION,
-                            "[EP] (2F) Big Chest",
-                        ),
-                        Some(|p| p.has_eastern_keys(2)),
-                        None,
-                        None,
-                        Some(|p| p.has_tornado_rod()),
-                        None,
-                    ),
-                ],
-                vec![
-                    path_free(EasternPalaceMiniboss),
-                    path(
-                        EasternPalaceBoss,
-                        Some(|p| {
-                            p.has_eastern_big_key()
-                                && p.has_eastern_keys(2)
-                                && p.can_attack()
-                                && p.can_hit_far_switch()
-                        }),
-                        Some(|p| {
-                            p.has_eastern_big_key()
-                                && (p.has_bombs()
-                                || p.has_ice_rod()
-                                || (p.has_eastern_keys(2)
-                                && p.has_lamp_or_net()
-                                && p.can_hit_far_switch()))
-                        }),
-                        None,
-                        Some(|p| p.has_tornado_rod()),
-                        None,
-                    ),
-                ],
-            ),
-        ),
-        (
-            EasternPalaceBoss,
-            location("Eastern Palace 3F", vec![], vec![path(
-                EasternPalacePostYuga,
-                Some(|p| p.has_bow()),
-                Some(|p| {
-                    p.has_bombs()
-                        || ((p.has_boomerang() || p.has_hookshot())
-                        && (p.can_attack() || p.has_lamp_or_net()))
-                }),
+        (EasternPalaceFoyer, location("Eastern Palace", vec![
+            check(LocationInfo::new(regions::dungeons::eastern::palace::SUBREGION, "[EP] (1F) Merge Chest"),
+                  Some(|p| p.can_merge()),
+                  None,
+                  None,
+                  None,
+                  None,
+            )
+        ], vec![
+            path_free(EasternRuinsUpper),
+            path(
+                EasternPalace1F,
+                Some(|p| p.can_hit_far_switch() || p.can_merge() || p.has_nice_ice_rod()),
+                Some(|p| p.has_master_sword()),
                 None,
                 None,
-                Some(|p| p.has_master_sword() || p.has_ice_rod()), // gross
-            )]),
-        ),
-        (
-            EasternPalacePostYuga,
-            location(
-                "Eastern Palace Post Yuga",
-                vec![
-                    check_free(LocationInfo::new(
-                        regions::dungeons::eastern::palace::SUBREGION,
-                        "[EP] (3F) After Cutscene",
-                    )),
-                    check_free(LocationInfo::new(
-                        regions::dungeons::eastern::palace::SUBREGION,
-                        "[EP] Yuga",
-                    )),
-                    check_free(LocationInfo::new(
-                        regions::dungeons::eastern::palace::SUBREGION,
-                        "Eastern Palace Prize",
-                    )),
-                    check_quest_free("Eastern Palace Complete", Yuga),
-                ],
-                vec![
-                    path_free(EasternPalace2F),
-                    path(EasternPalaceEscape, Some(|p| p.can_merge()), None, None, None, None),
-                ],
+                None, // not including Nice Ice Rod for now
             ),
-        ),
-        (
-            EasternPalaceEscape,
-            location(
-                "Eastern Palace Escape",
-                vec![
-                    check_free(LocationInfo::new(
-                        regions::dungeons::eastern::palace::SUBREGION,
-                        "[EP] (3F) Outside (North)",
-                    )),
-                    check_free(LocationInfo::new(
-                        regions::dungeons::eastern::palace::SUBREGION,
-                        "[EP] (1F) Outside (West)",
-                    )),
-                ],
-                vec![
-                    // do not include path back to 3F
-                    path_free(EasternPalace1F),
-                ],
+        ])),
+        (EasternPalace1F, location("Eastern Palace 1F", vec![
+            check(LocationInfo::new(regions::dungeons::eastern::palace::SUBREGION, "[EP] (1F) Left Door Chest"),
+                  Some(|p| p.can_hit_far_switch() || p.has_nice_ice_rod()),
+                  Some(|_| true), // throw pot
+                  None,
+                  None,
+                  None,
             ),
-        ),
+            check(LocationInfo::new(regions::dungeons::eastern::palace::SUBREGION, "[EP] (1F) Popo Room"),
+                  Some(|p| p.can_attack()),
+                  Some(|p| p.has_lamp_or_net()),
+                  None,
+                  None,
+                  None,
+            ),
+            check(LocationInfo::new(regions::dungeons::eastern::palace::SUBREGION, "[EP] (1F) Secret Room"),
+                  Some(|p| p.can_attack()),
+                  Some(|p| p.has_lamp_or_net()),
+                  None,
+                  None,
+                  None,
+            ),
+            check(LocationInfo::new(regions::dungeons::eastern::palace::SUBREGION, "[EP] (1F) Switch Room"),
+                  Some(|p| p.can_hit_far_switch()),
+                  Some(|p| p.has_ice_rod() || p.has_master_sword()), // Ice Rod + Pot
+                  None,
+                  None,
+                  None,
+            ),
+        ], vec![
+            path(EasternPalaceFoyer,
+                 Some(|p| p.can_hit_switch() || p.can_merge()),
+                 None,
+                 None,
+                 None,
+                 None,
+            ),
+            path(EasternPalaceMiniboss,
+                 Some(|p| p.has_eastern_keys(1)),
+                 None,
+                 None,
+                 None,
+                 None,
+            ),
+        ])),
+        (EasternPalaceMiniboss, location("Eastern Palace Miniboss", vec![], vec![
+            path(EasternPalace1F,
+                 Some(|p| p.can_attack()),
+                 Some(|p| p.has_lamp_or_net()),
+                 None,
+                 None,
+                 None,
+            ),
+            path(EasternPalace2F,
+                 Some(|p| p.can_attack()),
+                 Some(|p| p.has_lamp_or_net()),
+                 None,
+                 None,
+                 None,
+            ),
+        ])),
+        (EasternPalace2F, location("Eastern Palace 2F", vec![
+            check(LocationInfo::new(regions::dungeons::eastern::palace::SUBREGION, "[EP] (2F) Defeat Popos"),
+                  Some(|p| p.can_attack()),
+                  Some(|p| p.has_lamp_or_net()),
+                  None,
+                  None,
+                  None,
+            ),
+            check_free(LocationInfo::new(regions::dungeons::eastern::palace::SUBREGION, "[EP] (2F) Ball Room")),
+            check(LocationInfo::new(regions::dungeons::eastern::palace::SUBREGION, "[EP] (2F) Switch Room"),
+                  Some(|p| p.can_hit_far_switch() || p.has_ice_rod()),
+                  Some(|_| true), // pots
+                  None,
+                  None,
+                  None,
+            ),
+            check(LocationInfo::new(regions::dungeons::eastern::palace::SUBREGION, "[EP] (2F) Big Chest"),
+                  Some(|p| p.has_eastern_keys(2)),
+                  None,
+                  None,
+                  Some(|p| p.has_tornado_rod()),
+                  None,
+            ),
+        ], vec![
+            path_free(EasternPalaceMiniboss),
+            path(EasternPalaceBoss,
+                 Some(|p| {
+                     p.has_eastern_big_key()
+                         && p.has_eastern_keys(2)
+                         && p.can_attack()
+                         && p.can_hit_far_switch()
+                 }),
+                 Some(|p| {
+                     p.has_eastern_big_key()
+                         && (p.has_bombs()
+                         || p.has_ice_rod()
+                         || (p.has_eastern_keys(2)
+                         && p.has_lamp_or_net()
+                         && p.can_hit_far_switch()))
+                 }),
+                 None,
+                 Some(|p| p.has_tornado_rod()),
+                 None,
+            ),
+        ])),
+        (EasternPalaceBoss, location("Eastern Palace 3F", vec![], vec![
+            path(EasternPalacePostYuga,
+                 Some(|p| p.has_bow()),
+                 Some(|p| { p.has_bombs() || ((p.has_boomerang() || p.has_hookshot()) && (p.can_attack() || p.has_lamp_or_net())) || p.has_nice_ice_rod() }),
+                 None,
+                 None,
+                 Some(|p| p.has_master_sword() || p.has_ice_rod()), // gross
+            )
+        ])),
+        (EasternPalacePostYuga, location("Eastern Palace Post Yuga", vec![
+            check_free(LocationInfo::new(regions::dungeons::eastern::palace::SUBREGION, "[EP] Yuga (1)")),
+            check_free(LocationInfo::new(regions::dungeons::eastern::palace::SUBREGION, "[EP] Yuga (2)")),
+            check_free(LocationInfo::new(regions::dungeons::eastern::palace::SUBREGION, "Eastern Palace Prize")),
+            check_quest_free("Eastern Palace Complete", Yuga),
+        ], vec![
+            path_free(EasternPalace2F),
+            path(EasternPalaceEscape, Some(|p| p.can_merge()), None, None, None, None),
+        ])),
+        (EasternPalaceEscape, location("Eastern Palace Escape", vec![
+            check_free(LocationInfo::new(regions::dungeons::eastern::palace::SUBREGION, "[EP] (3F) Escape Chest")),
+            check_free(LocationInfo::new(regions::dungeons::eastern::palace::SUBREGION, "[EP] (1F) Escape Chest")),
+        ], vec![
+            // do not include path back to 3F
+            path_free(EasternPalace1F),
+        ])),
     ])
 }
 
 /// House of Gales
 fn house_of_gales() -> HashMap<Location, LocationNode> {
     HashMap::from([
-        (
-            HouseOfGalesFoyer,
-            location("House of Gales Entrance", vec![], vec![
-                path_free(HouseOfGalesIsland),
-                path(HouseOfGalesEast1F, Some(|p| p.has_tornado_rod()), None, None, None, None),
-            ]),
-        ),
-        (
-            HouseOfGalesEast1F,
-            location(
-                "House of Gales East 1F",
-                vec![
-                    check(
-                        LocationInfo::new(
-                            regions::dungeons::house::gales::SUBREGION,
-                            "[HG] (1F) Torches",
-                        ),
-                        Some(|p| p.has_fire_source()),
-                        None,
-                        None,
-                        None,
-                        None,
-                    ),
-                    check(
-                        LocationInfo::new(
-                            regions::dungeons::house::gales::SUBREGION,
-                            "[HG] (1F) Switch Room",
-                        ),
-                        Some(|p| p.can_merge()),
-                        Some(|_| true), // might need to deathwarp to escape
-                        None,
-                        None,
-                        None,
-                    ),
-                    check(
-                        LocationInfo::new(
-                            regions::dungeons::house::gales::SUBREGION,
-                            "[HG] (1F) Fire Bubbles",
-                        ),
-                        Some(|p| p.can_merge() && p.can_attack_fireproof()),
-                        Some(|p| p.can_merge() && p.has_net()),
-                        None,
-                        None,
-                        None,
-                    ),
-                ],
-                vec![
-                    path_free(HouseOfGalesFoyer),
-                    path(
-                        HouseOfGalesWest1F,
-                        Some(|p| p.has_gales_keys(1) && p.can_merge()),
-                        Some(|p| p.has_gales_keys(1)), // TRod jump onto blocks
-                        None,
-                        None,
-                        None,
-                    ),
-                ],
+        (HouseOfGalesFoyer, location("House of Gales Entrance", vec![], vec![
+            path_free(HouseOfGalesIsland),
+            path(HouseOfGalesEast1F, Some(|p| p.has_tornado_rod()), None, None, None, None),
+        ])),
+        (HouseOfGalesEast1F, location("House of Gales East 1F", vec![
+            check(LocationInfo::new(regions::dungeons::house::gales::SUBREGION, "[HG] (1F) Torches"),
+                  Some(|p| p.has_fire_source()),
+                  None,
+                  None,
+                  None,
+                  None,
             ),
-        ),
-        (
-            HouseOfGalesWest1F,
-            location(
-                "House of Gales West 1F",
-                vec![
-                    check_free(LocationInfo::new(
-                        regions::dungeons::house::gales::SUBREGION,
-                        "[HG] (1F) Blue Bari Room",
-                    )),
-                    check(
-                        LocationInfo::new(
-                            regions::dungeons::house::gales::SUBREGION,
-                            "[HG] (1F) Blue Bari Room (Bottom Left)",
-                        ),
-                        Some(|p| p.can_merge()),
-                        None,
-                        None,
-                        None,
-                        None,
-                    ),
-                ],
-                vec![
-                    path_free(HouseOfGalesEast1F),
-                    path(
-                        HouseOfGales2F,
-                        Some(|p| p.can_hit_hog_1f_switch()), // oddly specific switch hitting requirements
-                        Some(|p| p.has_master_sword()),
-                        None,
-                        None,
-                        None,
-                    ),
-                ],
+            check(LocationInfo::new(regions::dungeons::house::gales::SUBREGION, "[HG] (1F) Switch Room"),
+                  Some(|p| p.can_merge()),
+                  Some(|_| true), // might need to deathwarp to escape
+                  None,
+                  None,
+                  None,
             ),
-        ),
-        (
-            HouseOfGales2F,
-            location(
-                "House of Gales 2F",
-                vec![
-                    check(
-                        LocationInfo::new(
-                            regions::dungeons::house::gales::SUBREGION,
-                            "[HG] (2F) Narrow Ledge",
-                        ),
-                        Some(|p| p.can_merge() || p.has_boomerang() || p.has_hookshot()),
-                        Some(|_| true), // can just grab it with TRod
-                        None,
-                        None,
-                        None,
-                    ),
-                    check_free(LocationInfo::new(
-                        regions::dungeons::house::gales::SUBREGION,
-                        "[HG] (2F) Big Chest",
-                    )),
-                    check(
-                        LocationInfo::new(
-                            regions::dungeons::house::gales::SUBREGION,
-                            "[HG] (2F) Fire Ring",
-                        ),
-                        Some(|p| p.can_merge() && p.has_gales_keys(3)), // should really be 2, but defending against bad key use
-                        None,
-                        Some(|p| p.can_merge() && p.has_boots()),
-                        None,
-                        Some(|p| p.can_merge()), // awful Armos Boost
-                    ),
-                ],
-                vec![
-                    path_free(HouseOfGalesWest1F),
-                    path(
-                        HouseOfGales3F,
-                        Some(|p| {
-                            p.has_gales_keys(3)
-                                && p.can_attack_fireproof()
-                                && p.can_hit_switch()
-                                && p.can_merge()
-                        }),
-                        Some(|p| {
-                            p.has_gales_keys(3)
-                                && p.has_net()
-                                && p.can_hit_switch()
-                                && p.can_merge()
-                        }),
-                        Some(|p| p.can_merge()), // Skip Skip Skip
-                        None,
-                        None,
-                    ),
-                ],
+            check(LocationInfo::new(regions::dungeons::house::gales::SUBREGION, "[HG] (1F) Fire Bubbles"),
+                  Some(|p| p.can_merge() && p.can_attack_fireproof()),
+                  Some(|p| p.can_merge() && p.has_net()),
+                  None,
+                  None,
+                  None,
             ),
-        ),
-        (
-            HouseOfGales3F,
-            location(
-                "House of Gales 3F",
-                vec![
-                    check(
-                        LocationInfo::new(
-                            regions::dungeons::house::gales::SUBREGION,
-                            "[HG] (3F) Fire Bubbles",
-                        ),
-                        Some(|p| p.has_fire_source()),
-                        None,
-                        None,
-                        None,
-                        None,
-                    ),
-                    check(
-                        LocationInfo::new(
-                            regions::dungeons::house::gales::SUBREGION,
-                            "[HG] (3F) Rat Room",
-                        ),
-                        Some(|p| p.has_fire_source() || p.has_gales_keys(4)),
-                        None,
-                        None,
-                        None,
-                        None,
-                    ),
-                ],
-                vec![
-                    path_free(HouseOfGales2F),
-                    path(
-                        HouseOfGalesBoss,
-                        Some(|p| p.has_gales_keys(4) && p.has_gales_big_key()),
-                        None,
-                        None,
-                        None,
-                        None,
-                    ),
-                ],
+        ], vec![
+            path_free(HouseOfGalesFoyer),
+            path(HouseOfGalesWest1F,
+                 Some(|p| p.has_gales_keys(1) && p.can_merge()),
+                 Some(|p| p.has_gales_keys(1)), // TRod jump onto blocks
+                 None,
+                 None,
+                 None,
             ),
-        ),
-        (
-            HouseOfGalesBoss,
-            location("House of Gales Boss", vec![], vec![path(
-                HouseOfGalesPostBoss,
-                Some(|p| p.can_defeat_margomill()),
-                None,
-                None,
-                None,
-                None,
-            )]),
-        ),
-        (
-            HouseOfGalesPostBoss,
-            location(
-                "Margomill Defeated",
-                vec![
-                    check_free(LocationInfo::new(
-                        regions::dungeons::house::gales::SUBREGION,
-                        "[HG] Margomill",
-                    )),
-                    check_free(LocationInfo::new(
-                        regions::dungeons::house::gales::SUBREGION,
-                        "House of Gales Prize",
-                    )),
-                    check_quest_free("Margomill Defeated", Margomill),
-                ],
-                vec![],
+        ])),
+        (HouseOfGalesWest1F, location("House of Gales West 1F", vec![
+            check_free(LocationInfo::new(regions::dungeons::house::gales::SUBREGION, "[HG] (1F) Blue Bari Room")),
+            check(LocationInfo::new(regions::dungeons::house::gales::SUBREGION, "[HG] (1F) Blue Bari Room (Bottom Left)"),
+                  Some(|p| p.can_merge()),
+                  None,
+                  None,
+                  None,
+                  None,
             ),
-        ),
+        ], vec![
+            path_free(HouseOfGalesEast1F),
+            path(HouseOfGales2F,
+                 Some(|p| p.can_hit_hog_1f_switch()), // oddly specific switch hitting requirements
+                 Some(|p| p.has_master_sword()),
+                 None,
+                 None,
+                 None,
+            ),
+        ])),
+        (HouseOfGales2F, location("House of Gales 2F", vec![
+            check(LocationInfo::new(regions::dungeons::house::gales::SUBREGION, "[HG] (2F) Narrow Ledge"),
+                  Some(|p| p.can_merge() || p.has_boomerang() || p.has_hookshot()),
+                  Some(|_| true), // can just grab it with TRod
+                  None,
+                  None,
+                  None,
+            ),
+            check_free(LocationInfo::new(regions::dungeons::house::gales::SUBREGION, "[HG] (2F) Big Chest")),
+            check(LocationInfo::new(regions::dungeons::house::gales::SUBREGION, "[HG] (2F) Fire Ring"),
+                  Some(|p| p.can_merge() && p.has_gales_keys(3)), // should really be 2, but defending against bad key use
+                  None,
+                  Some(|p| p.can_merge() && p.has_boots()),
+                  None,
+                  Some(|p| p.can_merge()), // awful Armos Boost
+            ),
+        ], vec![
+            path_free(HouseOfGalesWest1F),
+            path(HouseOfGales3F,
+                 Some(|p| {
+                     p.has_gales_keys(3)
+                         && p.can_attack_fireproof()
+                         && p.can_hit_switch()
+                         && p.can_merge()
+                 }),
+                 Some(|p| {
+                     p.has_gales_keys(3)
+                         && p.has_net()
+                         && p.can_hit_switch()
+                         && p.can_merge()
+                 }),
+                 Some(|p| p.can_merge()), // Skip Skip Skip
+                 None,
+                 None,
+            ),
+        ])),
+        (HouseOfGales3F,
+         location("House of Gales 3F", vec![
+             check(LocationInfo::new(regions::dungeons::house::gales::SUBREGION, "[HG] (3F) Fire Bubbles"),
+                   Some(|p| p.has_fire_source()),
+                   None,
+                   None,
+                   None,
+                   None,
+             ),
+             check(LocationInfo::new(regions::dungeons::house::gales::SUBREGION, "[HG] (3F) Rat Room"),
+                   Some(|p| p.has_fire_source() || p.has_gales_keys(4)),
+                   None,
+                   None,
+                   None,
+                   None,
+             ),
+         ], vec![
+             path_free(HouseOfGales2F),
+             path(HouseOfGalesBoss,
+                  Some(|p| p.has_gales_keys(4) && p.has_gales_big_key()),
+                  None,
+                  None,
+                  None,
+                  None,
+             ),
+         ])),
+        (HouseOfGalesBoss, location("House of Gales Boss", vec![], vec![
+            path(HouseOfGalesPostBoss,
+                 Some(|p| p.can_defeat_margomill()),
+                 None,
+                 None,
+                 None,
+                 None,
+            )
+        ])),
+        (HouseOfGalesPostBoss, location("Margomill Defeated", vec![
+            check_free(LocationInfo::new(regions::dungeons::house::gales::SUBREGION, "[HG] Margomill")),
+            check_free(LocationInfo::new(regions::dungeons::house::gales::SUBREGION, "House of Gales Prize")),
+            check_quest_free("Margomill Defeated", Margomill),
+        ], vec![])),
     ])
 }
 
@@ -3441,41 +3211,32 @@ fn tower_of_hera() -> HashMap<Location, LocationNode> {
 /// Inside Hyrule Castle
 fn inside_hyrule_castle() -> HashMap<Location, LocationNode> {
     HashMap::from([
-        (
-            HyruleCastleDungeon,
-            location("Inside Hyrule Castle", vec![], vec![
-                path_free(HyruleCastleRoof),
-                path(
-                    HyruleCastleDungeonBoss,
-                    Some(|p| (p.can_merge() && p.can_attack()) || p.has_ice_rod()), // add Nice TRod, when nice items figured out
-                    Some(|p| p.has_bow() || p.has_nice_bombs()),
-                    None,
-                    None,
-                    None,
-                ),
-            ]),
-        ),
-        (
-            HyruleCastleDungeonBoss,
-            location("Hyrule Castle Dungeon Boss", vec![], vec![
-                path(HyruleCastleDungeon, Some(|p| p.can_defeat_yuga2()), None, None, None, None),
-                path(ZeldasStudy, Some(|p| p.can_defeat_yuga2()), None, None, None, None),
-            ]),
-        ),
-        (
-            ZeldasStudy,
-            location("Zelda's Study", vec![], vec![
-                //path_free(HyruleCastleDungeonBoss), // Don't allow reverse Hyrule Castle
-                portal(
-                    HildasStudy,
-                    Some(|p| p.can_merge() && p.can_destroy_curtain()),
-                    None,
-                    None,
-                    None,
-                    None,
-                ),
-            ]),
-        ),
+        (HyruleCastleDungeon, location("Inside Hyrule Castle", vec![], vec![
+            path_free(HyruleCastleRoof),
+            path(
+                HyruleCastleDungeonBoss,
+                Some(|p| (p.can_merge() && p.can_attack()) || p.has_ice_rod()), // add Nice TRod, when nice items figured out
+                Some(|p| p.has_bow() || p.has_nice_bombs()),
+                None,
+                None,
+                None,
+            ),
+        ])),
+        (HyruleCastleDungeonBoss, location("Hyrule Castle Dungeon Boss", vec![], vec![
+            path(HyruleCastleDungeon, Some(|p| p.can_defeat_yuga2()), None, None, None, None),
+            path(ZeldasStudy, Some(|p| p.can_defeat_yuga2()), None, None, None, None),
+        ])),
+        (ZeldasStudy, location("Zelda's Study", vec![], vec![
+            //path_free(HyruleCastleDungeonBoss), // Don't allow reverse Hyrule Castle
+            portal(
+                HildasStudy,
+                Some(|p| p.can_merge() && p.can_destroy_curtain()),
+                None,
+                None,
+                None,
+                None,
+            ),
+        ])),
     ])
 }
 
@@ -3503,12 +3264,12 @@ fn dark_palace() -> HashMap<Location, LocationNode> {
                 vec![
                     check_free(LocationInfo::new(
                         regions::dungeons::dark::palace::SUBREGION,
-                        "[PD] (1F) Near Entrance",
+                        "[PD] (1F) Right Pit",
                     )),
                     check(
                         LocationInfo::new(
                             regions::dungeons::dark::palace::SUBREGION,
-                            "[PD] (1F) Narrow Ledge",
+                            "[PD] (1F) Left Pit",
                         ),
                         Some(|p| p.can_merge() || p.has_boomerang() || p.has_hookshot()),
                         None,
@@ -3970,7 +3731,7 @@ fn thieves_hideout() -> HashMap<Location, LocationNode> {
                         Some(|p| p.can_merge() && p.can_hit_switch()),
                         None,
                         Some(|p| p.has_boots() && (p.has_boomerang() || p.has_ice_rod())),
-                        Some(|p| p.has_boots() && (p.has_boomerang() || p.has_ice_rod())),
+                        None,
                         Some(|p| p.has_boots() && p.has_bombs()),
             ),
             /* B2 */
@@ -3978,8 +3739,8 @@ fn thieves_hideout() -> HashMap<Location, LocationNode> {
                   Some(|p| p.thieves_b1_door_open()),
                   None,
                   None,
-                  Some(|p| p.has_boomerang() || p.has_ice_rod()),
-                  Some(|p| p.has_bombs()),
+                  Some(|p| p.adv_thieves_statue_clip()),
+                  Some(|p| p.hell_thieves_statue_clip()),
             ),
             check_quest("Thieves' Hideout B2 Door Open", ThievesB2DoorOpen,
                         Some(|p| p.thieves_b1_door_open() && p.can_merge() && (p.progression_enemies() || p.has_bombs())),
@@ -4023,11 +3784,11 @@ fn thieves_hideout() -> HashMap<Location, LocationNode> {
             ),
             /* Escape */
             check_quest("Thieves' Hideout B3 Water Drained", ThievesB3WaterDrained,
-                Some(|p| p.thieves_b1b2_doors_open() && p.has_thieves_key() && p.can_merge() && p.has_flippers() && p.can_attack()),
-                Some(|p| p.thieves_b1b2_doors_open() && p.has_thieves_key() && p.can_merge() && p.has_flippers() && p.has_lamp_or_net()),
-                None,
-                Some(|p| p.adv_thieves_statue_clip() && p.has_tornado_rod()),
-                Some(|p| p.hell_thieves_statue_clip() && p.has_tornado_rod()),
+                        Some(|p| p.thieves_b1b2_doors_open() && p.has_thieves_key() && p.can_merge() && p.has_flippers() && p.can_attack()),
+                        Some(|p| p.thieves_b1b2_doors_open() && p.has_thieves_key() && p.can_merge() && p.has_flippers() && p.has_lamp_or_net()),
+                        None,
+                        Some(|p| p.adv_thieves_statue_clip() && p.has_tornado_rod()),
+                        Some(|p| p.hell_thieves_statue_clip() && p.has_tornado_rod()),
             ),
             check(LocationInfo::new(regions::dungeons::thieves::hideout::SUBREGION, "[T'H] (B3) Underwater"),
                   Some(|p| p.thieves_escape_equipment() && p.can_attack()),
@@ -4060,8 +3821,8 @@ fn thieves_hideout() -> HashMap<Location, LocationNode> {
         ], vec![
             path_free(LoruleCastleField),
             path(ThievesBoss,
-                 Some(|p|  p.has_thieves_big_key() && p.has_thieves_key() && p.thieves_b1b2_doors_open() && p.thieves_b3_water_drained() && p.can_merge() && p.can_attack()),
-                 Some(|p|  p.has_thieves_big_key() && p.has_thieves_key() && p.thieves_b1b2_doors_open() && p.thieves_b3_water_drained() && p.can_merge() && p.has_lamp_or_net()),
+                 Some(|p| p.has_thieves_big_key() && p.has_thieves_key() && p.thieves_escape_equipment() && p.can_merge() && p.can_attack()),
+                 Some(|p| p.has_thieves_big_key() && p.has_thieves_key() && p.thieves_escape_equipment() && p.can_merge() && p.has_lamp_or_net()),
                  None,
                  None,
                  None,
@@ -4125,7 +3886,7 @@ fn ice_ruins() -> HashMap<Location, LocationNode> {
                   Some(|p| p.has_boots() && p.has_tornado_rod()),
                   None,
             ),
-            check(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "[IR] (B2) Far North"),
+            check(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "[IR] (B2) Long Merge Chest"),
                   Some(|p| p.has_ice_keys(2) && p.can_merge() && p.has_stamina_scroll()),
                   None,
                   None,
@@ -4849,7 +4610,7 @@ fn lorule_castle() -> HashMap<Location, LocationNode> {
             location(
                 "Throne Room",
                 vec![check(
-                    LocationInfo::new(regions::dungeons::lorule::castle::SUBREGION, "Final Zelda"),
+                    LocationInfo::new(regions::dungeons::lorule::castle::SUBREGION, "Zelda"),
                     Some(|p| {
                         p.has_yuganon_requirement()
                             && (p.has_sword() || (p.swordless_mode() && p.has_net()))

@@ -106,6 +106,7 @@ pub fn patch_byaml_files(patcher: &mut Patcher, settings: &Settings) -> Result<(
     patch_nice_mode(patcher, settings);
     patch_big_bomb_flower_skip(patcher, settings);
     patch_no_progression_enemies(patcher, settings);
+    patch_reverse_sage_events(patcher, settings);
 
     patcher.modify_objs(FieldLight, 18, &[disable(529)]);
 
@@ -819,7 +820,7 @@ fn patch_softlock_prevention(patcher: &mut Patcher, settings: &Settings) {
     );
 
     // Dark Maze w/o Merge
-    if settings.logic.vanes_activated {
+    if settings.logic.weather_vanes_activated {
         // 1st Prison Cell softlock prevention
         patcher.add_obj(
             FieldDark,
@@ -920,6 +921,25 @@ fn patch_no_progression_enemies(patcher: &mut Patcher, settings: &Settings) {
     ]);
 }
 
+/// Reverse Sage Events
+fn patch_reverse_sage_events(patcher: &mut Patcher, settings: &Settings) {
+    if !settings.logic.reverse_sage_events {
+        return;
+    }
+
+    // Oren todo
+
+    // Impa todo
+    patcher.modify_objs(FieldLight, 18, &[
+        set_enable_flag(269, prize_flag(SageImpa)), // Front door solider
+        set_enable_flag(270, prize_flag(SageImpa)), // Impa
+    ]);
+
+    // Irene todo
+
+    // Rosso todo
+}
+
 //noinspection ALL
 #[rustfmt::skip]
 #[allow(unused)]
@@ -940,7 +960,8 @@ fn do_dev_stuff(patcher: &mut Patcher, settings: &Settings) {
     // Ravio's Shop
     patcher.modify_objs(IndoorLight, 1, &[call(24, |obj| {
         obj.redirect(Dest::new(
-            FieldLight, 27, 5,  // No Redirect
+            // FieldLight, 27, 5,  // No Redirect
+            FieldLight, 18, 20, // Hyrule Castle Roof (SLZ)
             // IndoorLight, 15, 0, // Osfala Portrait
             // DungeonGanon, 1, 18, // LC 3F Center Warp Tile
             // CaveDark, 8, 0,     // Mysterious Man Cave

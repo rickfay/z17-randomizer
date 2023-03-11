@@ -43,10 +43,9 @@ pub struct Logic {
     #[serde(default)]
     pub skip_big_bomb_flower: bool,
 
-    /// todo
     /// Makes Sage related checks and events be tied to rescuing the respective Sage
-    #[serde(default, skip_serializing)]
-    pub saved_sage_logic: bool,
+    #[serde(default)]
+    pub reverse_sage_events: bool,
 
     /// todo
     ///
@@ -89,9 +88,9 @@ pub struct Logic {
     #[serde(default)]
     pub bow_of_light_in_castle: bool,
 
-    /// Lamp Requirement. If enabled, the player may have to cross dark rooms without Lamp
+    /// Dark Room Lamp Requirement. If enabled, the player may have to cross dark rooms without Lamp
     #[serde(default)]
-    pub lampless: bool,
+    pub dark_rooms_lampless: bool,
 
     /// Maiamai Madness
     #[serde(default)]
@@ -99,5 +98,5 @@ pub struct Logic {
 
     /// Pre-activates Weather Vanes, allowing the Bell to travel anywhere from game start
     #[serde(default)]
-    pub vanes_activated: bool,
+    pub weather_vanes_activated: bool,
 }

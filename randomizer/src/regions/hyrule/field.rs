@@ -1,6 +1,6 @@
 crate::region! {
     course: FieldLight,
-    name: "Hyrule Field",
+    name: "Central Hyrule",
     main {
         locations: [
             "Cucco Treasure Dungeon": RupeeSilver @SilverRupee(AttractionLight 3[9]),

@@ -495,7 +495,6 @@ fn cutscenes<'game, 'settings>(
                 110, // Post Sanctuary
                 131, // Suppress Ravio's Gift
                 210, // Skip Thanks item
-                222, 223, // Skip Hyrule Castle events
                 224, // Skip Zelda dialogue
                 225, // Correct field music
                 231, // Skip Hyrule Castle events
@@ -554,7 +553,7 @@ fn cutscenes<'game, 'settings>(
                 opening.add_event_flag(964);
             }
 
-            if logic.vanes_activated {
+            if logic.weather_vanes_activated {
                 for flag in IntoIterator::into_iter([
                     920, //	Your House Weather Vane
                     921, //	Kakariko Village Weather Vane
@@ -603,6 +602,13 @@ fn cutscenes<'game, 'settings>(
             // Removes the Big Rock (FieldDark33) to drain the water (CaveDark1)
             if logic.skip_big_bomb_flower {
                 opening.add_event_flag(541);
+            }
+
+            // Reverse Sage Events
+            // Keep the guard around and have Impa open the door when RSE enabled, else skip them
+            if !logic.reverse_sage_events {
+                opening.add_event_flag(222);
+                opening.add_event_flag(223);
             }
         }
 

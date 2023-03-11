@@ -217,7 +217,7 @@ impl Progress {
     }
 
     pub fn are_vanes_activated(&self) -> bool {
-        self.settings.logic.vanes_activated
+        self.settings.logic.weather_vanes_activated
     }
 
     pub fn can_escape(&self) -> bool {
@@ -313,7 +313,7 @@ impl Progress {
     }
 
     pub fn lampless(&self) -> bool {
-        self.settings.logic.lampless
+        self.settings.logic.dark_rooms_lampless
     }
 
     pub fn can_great_spin(&self) -> bool {
@@ -388,6 +388,7 @@ impl Progress {
     pub fn can_hit_hog_1f_switch(&self) -> bool {
         self.can_hit_far_switch()
             || self.has_ice_rod()
+            || self.can_great_spin()
             || (self.can_merge() && (self.has_sword() || self.has_hammer()))
     }
 
@@ -617,7 +618,10 @@ impl Progress {
     }
 
     pub fn thieves_escape_equipment(&self) -> bool {
-        self.thieves_b1b2_doors_open() && self.has_thieves_key() && self.can_merge() && self.thieves_b3_water_drained()
+        self.thieves_b1b2_doors_open()
+            && self.has_thieves_key()
+            && self.can_merge()
+            && self.thieves_b3_water_drained()
     }
 
     pub fn adv_thieves_statue_clip(&self) -> bool {

@@ -3,8 +3,8 @@ crate::region! {
     name: "Dark Palace",
     palace {
         locations: [
-            "[PD] (1F) Near Entrance": RupeeB @Chest(2[23]),
-            "[PD] (1F) Narrow Ledge": KeySmall @Key(2[25]),
+            "[PD] (1F) Right Pit": RupeeB @Chest(2[23]),
+            "[PD] (1F) Left Pit": KeySmall @Key(2[25]),
             "[PD] (1F) Switch Puzzle": Compass @Chest(2[122]),
             "[PD] (1F) Hidden Room (Upper)": RupeePurple @Chest(2[102]),
             "[PD] (1F) Hidden Room (Lower)": LiverBlue @Chest(2[233]),

@@ -441,6 +441,7 @@ pub enum FillerItem {
     Yuga,
     Margomill,
     Moldorm,
+    ZeldasThrone,
     GemesaurKing,
     Arrghus,
     Knucklemaster,
@@ -915,6 +916,7 @@ impl FillerItem {
             Yuga => "Yuga",
             Margomill => "Margomill",
             Moldorm => "Moldorm",
+            ZeldasThrone => "Zelda's Throne",
 
             GemesaurKing => "Gemesaur King",
             Arrghus => "Arrghus",
@@ -1128,6 +1130,7 @@ pub fn convert(fill_item: FillerItem) -> Option<Item> {
         Yuga
         | Margomill
         | Moldorm
+        | ZeldasThrone
         | GemesaurKing
         | Arrghus
         | Knucklemaster
