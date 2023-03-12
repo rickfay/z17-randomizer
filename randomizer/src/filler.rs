@@ -170,7 +170,7 @@ fn preplace_items<'a>(
             weapons.extend_from_slice(&[Sword01]);
         }
 
-        match settings.logic.mode {
+        match settings.logic.logic_mode {
             Normal => {}
             _ => {
                 weapons.extend_from_slice(&[Lamp01, Net01]);
@@ -531,42 +531,40 @@ fn build_progress_from_items(items: &Vec<FillerItem>, settings: &Settings) -> Pr
 }
 
 fn verify_all_locations_accessible(
-    loc_map: &mut HashMap<Location, LocationNode>, progression_pool: &Vec<FillerItem>,
+    world_graph: &mut HashMap<Location, LocationNode>, progression_pool: &Vec<FillerItem>,
     settings: &Settings,
 ) {
     info!("Verifying all locations accessible...");
 
-    let mut check_map = prefill_check_map(loc_map);
+    let mut check_map = prefill_check_map(world_graph);
 
-    let reachable_checks = assumed_search(loc_map, progression_pool, &mut check_map, settings); //find_reachable_checks(loc_map, &everything, &mut check_map); //
+    let reachable_checks = assumed_search(world_graph, progression_pool, &mut check_map, settings); //find_reachable_checks(loc_map, &everything, &mut check_map); //
 
     /**
-     * 431 TOTAL CHECKS <br /><br />
+     * 384 In-Logic Checks
      *
-     * 413 are considered in logic:
      * - 254 Standard Checks
      * - 100 Maiamai
      * - 11 Dungeon Prizes
-     * - 33 Quest (non-items that are still progression)
      * - 19 Statically Placed Items:
      *     - 12x Shop Items (not including 9,999 items)
      *     - 3x Obscure Gold/Silver Rupees
      *     - Mysterious Man
-     *     - FIXME: Letter in a Bottle
-     *     - FIXME: Hyrule Hotfoot Second Race
-     *     - FIXME: Fortune's Choice
-     */
-    const TOTAL_CHECKS: usize = 431;
-
-    /**
-     * Checks intentionally considered unreachable:
-     * - FIXME: 10 Maiamai Rewards
+     *     - TODO: Letter in a Bottle
+     *     - TODO: Hyrule Hotfoot Second Race
+     *     - TODO: Fortune's Choice
+     *
+     * 14 Out-of-Logic checks NOT included:
+     * - TODO: 10 Maiamai Rewards
      * - 2 Golden Bees for 9,999 Rupees
      * - 2 Treacherous Tower Advanced
      */
-    const UNREACHABLE_CHECKS: usize = 14;
+    const IN_LOGIC_CHECKS: usize = 384;
 
-    if reachable_checks.len() != TOTAL_CHECKS - UNREACHABLE_CHECKS {
+    /// "Progression Events" (non-item checks that are still progression)
+    const PROGRESSION_EVENTS: usize = 33;
+
+    if reachable_checks.len() != IN_LOGIC_CHECKS + PROGRESSION_EVENTS {
         let reachable_check_names: Vec<&str> =
             reachable_checks.iter().map(|c| c.get_name()).collect();
         for (check, _) in &check_map {
@@ -578,7 +576,7 @@ fn verify_all_locations_accessible(
         fail!(
             "Only {}/{} checks were reachable in the world graph",
             reachable_checks.len(),
-            TOTAL_CHECKS - UNREACHABLE_CHECKS
+            IN_LOGIC_CHECKS + PROGRESSION_EVENTS
         );
     }
 }

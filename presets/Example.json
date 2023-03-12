@@ -1,7 +1,7 @@
 {
   "instructions": "Visit the project GitHub for details about each option: https://github.com/rickfay/z17-randomizer/tree/v0.3.0",
   "logic": {
-    "mode":                        "Normal",
+    "logic_mode":                  "Normal",
     "randomize_dungeon_prizes":    true,
     "lc_requirement":              7,
     "ped_requirement":             "Standard",
@@ -11,6 +11,7 @@
     "reverse_sage_events":         false,
     "no_progression_enemies":      false,
 
+    "start_with_merge":            true,
     "assured_weapon":              false,
     "bell_in_shop":                true,
     "pouch_in_shop":               false,

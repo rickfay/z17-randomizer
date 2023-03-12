@@ -73,7 +73,7 @@ fn plando_settings() -> Settings {
     Settings {
         dev_mode: true,
         logic: Logic {
-            mode: LogicMode::Normal,
+            logic_mode: LogicMode::Normal,
             randomize_dungeon_prizes: true,
             lc_requirement: 1,
             yuganon_requirement: 1,
@@ -83,6 +83,7 @@ fn plando_settings() -> Settings {
             no_progression_enemies: true,
             reverse_sage_events: true,
             entrance_rando: EntranceShuffleSetting::NotShuffled,
+            start_with_merge: true,
             assured_weapon: false,
             bell_in_shop: false,
             pouch_in_shop: false,
@@ -112,9 +113,9 @@ fn build_layout() -> Layout {
 
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (1)"), RupeeGold);
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (2)"), ItemIceRodLv2);
-    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (3)"), RingHekiga);
-    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (4)"), RingHekiga);
-    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (5)"), ItemBowLv2);
+    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (3)"), RingRental);
+    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (4)"), ItemBowLv2);
+    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (5)"), SpecialMove);
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (6)"), HintGlasses);
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (7)"), ItemBell);
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (8)"), ItemBoomerangLv2);
@@ -215,7 +216,7 @@ fn build_layout() -> Layout {
     layout.set(LocationInfo::new(regions::hyrule::kakariko::village::SUBREGION, "Milk Bar Owner"), LiverBlue);
     layout.set(LocationInfo::new(regions::hyrule::kakariko::village::SUBREGION, "Rupee Rush (Hyrule)"), RupeeGold);
     layout.set(LocationInfo::new(regions::hyrule::kakariko::village::SUBREGION, "Shady Guy"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::kakariko::village::SUBREGION, "Street Merchant (Left)"), RupeeGold);
+    layout.set(LocationInfo::new(regions::hyrule::kakariko::village::SUBREGION, "Street Merchant (Left)"), SpecialMove);
     layout.set(LocationInfo::new(regions::hyrule::kakariko::village::SUBREGION, "Street Merchant (Right)"), RupeeGold);
     layout.set(LocationInfo::new(regions::hyrule::kakariko::village::SUBREGION, "Stylish Woman"), RupeeGold);
     layout.set(LocationInfo::new(regions::hyrule::kakariko::village::SUBREGION, "Woman"), RupeeR);

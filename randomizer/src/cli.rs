@@ -17,11 +17,13 @@ pub fn seed_settings_ui() -> Settings {
     info!("No preset has been specified. Seed Settings UI will be used instead.\n");
     println!("\n--- Seed Settings ---");
 
-    let mode = prompt_logic_mode();
+    let logic_mode = prompt_logic_mode();
+
     let randomize_dungeon_prizes = prompt_bool(
         "Randomize Dungeon Prizes",
         "This shuffles all Sage Portraits, Pendants, and the Charm among themselves.",
     );
+
     let lc_requirement = prompt_u8_in_range(
         "Lorule Castle Requirement",
         "Choose how many Portraits are needed to enter Lorule Castle and fight Yuganon:",
@@ -65,11 +67,16 @@ pub fn seed_settings_ui() -> Settings {
         Logic will be adjusted to require the player's items instead.",
     );
 
-    //let start_with_bracelet = prompt_until_bool("Start with Ravio's Bracelet?");
+    let start_with_merge = prompt_bool(
+        "Start with Merge",
+        "Start with the ability to Merge into walls, without Ravio's Bracelet.",
+    );
+
     let assured_weapon = prompt_bool(
         "Guaranteed Weapon",
         "If enabled a weapon is guarantee to be placed in Ravio's Shop.",
     );
+
     let bell_in_shop =
         prompt_bool("Bell in Shop", "If enabled the Bell will be placed in Ravio's Shop.");
 
@@ -80,19 +87,23 @@ pub fn seed_settings_ui() -> Settings {
         "Boots in Shop",
         "If enabled the Pegasus Boots will be placed in Ravio's Shop.",
     );
+
     let maiamai_madness = prompt_bool(
         "Maiamai Madness",
         "This shuffles Maiamai into the pool, adding 100 more locations.",
     );
+
     let minigames_excluded = prompt_bool(
         "Exclude Minigames",
         "Excludes the following: Octoball Derby, Cucco Ranch, Hyrule Hotfoot, Treacherous Tower, and both Rupee Rushes",
     );
+
     let skip_big_bomb_flower = prompt_bool(
         "Skip Big Bomb Flower",
         "Skips the Big Bomb Flower by removing the 5 Big Rocks in Lorule Field.\n\
         (Does not affect Lorule Castle Bomb Trial)",
     );
+
     let skip_trials =
         prompt_bool("Skip Trials", "Automatically opens the Lorule Castle Trials door.");
 
@@ -100,22 +111,26 @@ pub fn seed_settings_ui() -> Settings {
         "Bow of Light in Castle",
         "Limits the Bow of Light's placement to somewhere in Lorule Castle (including possibly Zelda).",
     );
+
     let weather_vanes_activated = prompt_bool(
         "Pre-Activated Weather Vanes",
         "Begin the game with all Weather Vanes activated.\n\
         The logic may expect players to use the Bell to reach otherwise unreachable locations this way.\n\
         NOTE: Trackers do not currently support this feature.",
     );
+
     let dark_rooms_lampless = prompt_bool(
         "Dark Room Crossing (advanced)",
         "If enabled the logic may expect players to cross Dark Rooms without the Lamp.\n\
         Not for beginners and those who like being able to see things.",
     );
+
     let swordless_mode = prompt_bool(
         "Swordless Mode (advanced)",
         "Removes *ALL* Swords from the game.\n\
         The Bug Net becomes a required item to play Dead Man's Volley against Yuga Ganon.",
     );
+
     let chest_size_matches_contents = prompt_bool(
         "Chest Size Matches Contents",
         "All chests containing progression or unique items will become large, and others will be made small.\n\
@@ -127,7 +142,7 @@ pub fn seed_settings_ui() -> Settings {
 
     Settings {
         logic: Logic {
-            mode,
+            logic_mode,
             randomize_dungeon_prizes,
             lc_requirement,
             yuganon_requirement: lc_requirement,
@@ -136,6 +151,7 @@ pub fn seed_settings_ui() -> Settings {
             super_items,
             reverse_sage_events,
             no_progression_enemies,
+            start_with_merge,
             assured_weapon,
             bell_in_shop,
             pouch_in_shop,

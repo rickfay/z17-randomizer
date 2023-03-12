@@ -253,7 +253,7 @@ impl Progress {
     }
 
     pub fn can_merge(&self) -> bool {
-        self.has_both(RaviosBracelet01, RaviosBracelet02)
+        self.settings.logic.start_with_merge || self.has_both(RaviosBracelet01, RaviosBracelet02)
     }
 
     pub fn has_mail(&self) -> bool {

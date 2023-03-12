@@ -523,7 +523,7 @@ pub fn patch_byaml_files(patcher: &mut Patcher, settings: &Settings) -> Result<(
     );
 
     // Open Maiamai Cave only on non-glitch logics
-    match settings.logic.mode {
+    match settings.logic.logic_mode {
         LogicMode::Normal | LogicMode::Hard | LogicMode::NoLogic => {
             apply!(patcher,
                 // Lake Hylia

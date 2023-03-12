@@ -150,8 +150,12 @@ impl Game {
         self.get_item.get()[item as usize].clone()
     }
 
-    pub fn get_items(self) -> File<Vec<GetItem>> {
-        self.get_item
+    pub fn get_items(&mut self) -> &mut File<Vec<GetItem>> {
+        &mut self.get_item
+    }
+
+    pub fn dump_get_items(&mut self) -> File<Vec<GetItem>> {
+        self.get_item.clone()
     }
 
     pub fn match_items_to_get_items(&self) -> impl Iterator<Item = (Item, GetItem)> + '_ {
@@ -160,6 +164,10 @@ impl Game {
 
     fn get_item_actor(&self, name: &str) -> Result<Actor> {
         self.romfs.borrow_mut().read(format!("World/GetItem/{}.bch", name))
+    }
+
+    pub fn get_player_item_actor(&self, name: &str) -> Result<Actor> {
+        self.romfs.borrow_mut().read(format!("World/PlayerItem/{}.bch", name))
     }
 
     pub fn boot(&self) -> Result<Language> {

@@ -42,7 +42,7 @@ impl Settings {
     #[rustfmt::skip]
     pub fn log(&self, seed: Seed) {
         info!("Seed:                           {:0>10}", seed);
-        info!("Logic:                          {}", match self.logic.mode {
+        info!("Logic:                          {}", match self.logic.logic_mode {
             Normal => "Normal",
             Hard => "Hard",
             Glitched => "Glitched",
@@ -56,6 +56,7 @@ impl Settings {
         info!("Pedestal Requirement:           {}", self.logic.ped_requirement);
         info!("Nice Items:                     {}", if self.logic.nice_mode { "Shuffled" } else { "Not Shuffled" });
         info!("Super Items:                    {}", if self.logic.super_items { "Shuffled" } else { "Not Shuffled" });
+        info!("Start with Merge:               {}", if self.logic.start_with_merge { "Yes" } else { "No" });
         let shop_items = vec![
             if self.logic.assured_weapon { Some("Weapon") } else { None },
             if self.logic.bell_in_shop { Some("Bell") } else { None },

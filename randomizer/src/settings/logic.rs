@@ -12,7 +12,7 @@ use {
 pub struct Logic {
     /// Logic to use for item placement (Normal, Hard, Glitched, Adv. Glitched, Hell, No Logic)
     #[serde(default)]
-    pub mode: LogicMode,
+    pub logic_mode: LogicMode,
 
     /// Randomizes the Pendants and Portraits between Hyrule and Lorule dungeons
     #[serde(default = "crate::settings::r#true")]
@@ -51,6 +51,10 @@ pub struct Logic {
     ///
     #[serde(default, skip_serializing)]
     pub entrance_rando: EntranceShuffleSetting,
+
+    /// Start with the ability to Merge into walls, without Ravio's Bracelet.
+    #[serde(default)]
+    pub start_with_merge: bool,
 
     /// Guarantees a Weapon is placed in Ravio's Shop
     #[serde(default)]

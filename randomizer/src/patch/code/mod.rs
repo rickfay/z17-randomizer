@@ -156,7 +156,7 @@ pub fn create(patcher: &Patcher, settings: &Settings) -> Code {
     code.overwrite(0x17A430, [0xFF]);
     rental_items(&mut code);
     progressive_items(&mut code);
-    bracelet(&mut code);
+    bracelet(&mut code, settings);
     ore_progress(&mut code);
     merchant(&mut code);
     configure_pedestal_requirements(&mut code, settings);
@@ -487,26 +487,15 @@ fn progressive_items(code: &mut Code) {
             b(return_label),
         ])
     };*/
-    let progressive_bracelet = //if settings.items.first_bracelet.is_skipped() {
-        // code.text().define([
-        //     cmp(R5, 0x2A),
-        //     cmp(R5, 0x2B).ne(),
-        //     b(progressive_sword).ne(),
-        //     mov(R5, 0x2B),
-        //     b(return_label),
-        // ]);
-        // } else {
-        code.text().define([
-            cmp(R5, 0x2A),
-            cmp(R5, 0x2B).ne(),
-            b(progressive_sword).ne(),
-            ldr(R0, (R0, 0x490)),
-            cmp(R0, 0),
-            mov(R5, 0x2A).eq(),
-            mov(R5, 0x2B).ne(),
-            b(return_label),
-        ]);
-    // };
+    let progressive_bracelet = code.text().define([
+        cmp(R5, 0x2A),
+        b(progressive_sword).ne(),
+        ldr(R0, (R0, 0x490)),
+        cmp(R0, 0),
+        mov(R5, 0x2A).eq(),
+        mov(R5, 0x2B).ne(),
+        b(return_label),
+    ]);
     let progressive_glove = code.text().define([
         cmp(R5, 0x2F),
         b(progressive_bracelet).ne(),
@@ -637,7 +626,28 @@ fn progressive_items(code: &mut Code) {
     code.patch(0x2922A0, [b(progressive_charm)]);
 }
 
-fn bracelet(code: &mut Code) {
+fn bracelet(code: &mut Code, settings: &Settings) {
+    if settings.logic.start_with_merge {
+        // Check Flag 1 (always set) instead of Flag 250 to see if we can merge.
+        code.patch(0x4266c8, [mov(R1, 0x1)]);
+        code.patch(0x537c40, [mov(R1, 0x1)]);
+        return;
+    }
+
+    /*
+     * FIXME
+     *
+     * In vanilla, the game determines whether you can merge not by checking your inventory but by
+     * checking Flag 250 (Yuga 1 defeated). This patch adds an entry in the Add() function for
+     * RingHekiga (full bracelet) and raises the Bracelet level in the inventory to 3 (impossible in
+     * vanilla, where it's either 0 if you don't have it or 2 if you have RingRental). The patch
+     * then changes all the locations where Flag 250 is checked and instead has them check the
+     * player inventory for Bracelet level 3.
+     *
+     * This works in rando, but breaks the ability to Merge if a vanilla file is loaded as the
+     * player inventory for the Bracelet can never be set to 3. Low priority, but change this.
+     */
+
     let item_set_value = 0x255494;
     let add_ring_hekiga = code.text().define([
         add(R0, R4, 0x400),
@@ -648,7 +658,7 @@ fn bracelet(code: &mut Code) {
         b(0x344F00),
     ]);
     code.overwrite(0x3448F4, add_ring_hekiga.to_le_bytes());
-    let is_ring_hekiga = code.text().define([
+    let can_merge = code.text().define([
         push([LR]),
         ldr(R0, PLAYER_OBJECT_SINGLETON),
         ldr(R0, (R0, 0)),
@@ -659,9 +669,9 @@ fn bracelet(code: &mut Code) {
         mov(R0, 0).ne(),
         pop([PC]),
     ]);
-    code.patch(0x1DCA8C, [bl(is_ring_hekiga)]);
-    code.patch(0x4266D0, [bl(is_ring_hekiga)]);
-    code.patch(0x52E654, [bl(is_ring_hekiga)]);
+    code.patch(0x1DCA8C, [bl(can_merge)]);
+    code.patch(0x4266D0, [bl(can_merge)]);
+    code.patch(0x52E654, [bl(can_merge)]);
 }
 
 fn ore_progress(code: &mut Code) {
@@ -704,7 +714,7 @@ fn item_names(code: &mut Code) -> HashMap<Item, u32> {
     map
 }
 
-const ACTOR_NAME_OFFSETS: [(Item, u32); 30] = [
+const ACTOR_NAME_OFFSETS: [(Item, u32); 29] = [
     (ItemStoneBeauty, 0x5D2060),
     (RupeeR, 0x5D639C),
     (RupeeG, 0x5D639C),
@@ -726,7 +736,6 @@ const ACTOR_NAME_OFFSETS: [(Item, u32); 30] = [
     (HintGlasses, 0x5D70AC),
     (RupeeGold, 0x5D7144),
     (ItemSwordLv2, 0x5D7178),
-    (SpecialMove, 0x5D7178),
     (LiverPurple, 0x5D762C),
     (LiverYellow, 0x5D7640),
     (LiverBlue, 0x5D7654),
@@ -737,12 +746,13 @@ const ACTOR_NAME_OFFSETS: [(Item, u32); 30] = [
     (HeartPiece, 0x5D7B94),
 ];
 
-const ACTOR_NAMES: [(Item, &str); 37] = [
+const ACTOR_NAMES: [(Item, &str); 39] = [
     (KeyBoss, "KeyBoss"),
     (Compass, "Compass"),
     (ItemKandelaar, "GtEvKandelaar"),
     (ItemKandelaarLv2, "GtEvKandelaar"),
     (ItemMizukaki, "GtEvFin"),
+    (RingRental, "RingRental"),
     (RingHekiga, "RingRental"),
     (ItemBell, "GtEvBell"),
     (PowerGlove, "GtEvGloveA"),
@@ -775,6 +785,7 @@ const ACTOR_NAMES: [(Item, &str); 37] = [
     (Empty, "DeliverSwordBroken"),
     (EscapeFruit, "FruitEscape"),
     (StopFruit, "FruitStop"),
+    (SpecialMove, "SwordD"),
 ];
 
 const ITEM_NAME_OFFSETS: [(Item, u32); 14] = [
@@ -794,10 +805,11 @@ const ITEM_NAME_OFFSETS: [(Item, u32); 14] = [
     (ItemStoneBeauty, 0x6F9D56),
 ];
 
-const ITEM_NAMES: [(Item, &str); 54] = [
+const ITEM_NAMES: [(Item, &str); 55] = [
     (BadgeBee, "beebadge"),
     (ItemBell, "bell"),
     (ItemBowLight, "bow_light"),
+    (RingRental, "bracelet"),
     (RingHekiga, "bracelet"),
     (ClothesBlue, "clothes_blue"),
     (EscapeFruit, "doron"),

@@ -41,6 +41,7 @@ crate::int_map! {
         IndoorDark = 0x3,
         CaveLight = 0x4,
         CaveDark = 0x5,
+        CrossBattle = 0x7,
         Demo = 0x8,
         DungeonEast = 0x9,
         DungeonWind = 0xA,

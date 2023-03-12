@@ -22,7 +22,7 @@ impl Logic {
 
     pub fn can_access(self, progress: &Progress) -> bool {
         // Progression is available if the current logic or a lower tiered logic passes
-        for logic in match progress.get_settings().logic.mode {
+        for logic in match progress.get_settings().logic.logic_mode {
             Normal => Vec::from([self.normal]),
             Hard => Vec::from([self.normal, self.hard]),
             Glitched => Vec::from([self.normal, self.hard, self.glitched]),

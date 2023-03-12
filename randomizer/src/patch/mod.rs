@@ -6,7 +6,9 @@ use {
         demo::Timed,
         flow::FlowMut,
         scene::{Arg, Obj, Rail, SceneMeta},
-        Demo, File, Game, IntoBytes, Item, Language, Scene,
+        Demo, File, Game, IntoBytes,
+        Item::{self, SpecialMove},
+        Language, Scene,
     },
     fs_extra::dir::CopyOptions,
     log::{debug, error, info},
@@ -294,12 +296,16 @@ impl Patcher {
     }
 
     pub fn prepare(mut self, layout: &Layout, settings: &Settings) -> Result<Patches> {
+        let common_archive = self.game.common()?;
         let mut item_actors = HashMap::new();
 
         for (item, get_item) in self.game.match_items_to_get_items() {
-            let actor_opt = get_item.actor(&self.game);
-            if actor_opt.is_some() {
-                let mut actor = actor_opt.unwrap();
+            if SpecialMove.as_str().eq(&get_item.0) {
+                // fixme hacky and gross
+                let mut actor = common_archive.get_actor_bch("SwordD")?.clone();
+                actor.rename(String::from("World/Actor/SwordD.bch"));
+                item_actors.insert(item, actor);
+            } else if let Some(mut actor) = get_item.actor(&self.game) {
                 actor.rename(format!("World/Actor/{}.bch", get_item.actor_name()?));
                 item_actors.insert(item, actor);
             }

@@ -2,7 +2,7 @@ use {
     crate::{actors::Actor, int_map, scene::Vec3, Error, Game, Result},
     once_cell::sync::Lazy,
     regex::Regex,
-    serde::Deserialize,
+    serde::{Deserialize, Serialize},
 };
 
 int_map! {
@@ -259,7 +259,7 @@ Item(u16) {
     SageRosso = 0x67,
 }}
 
-#[derive(Clone, Debug, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct GetItem(
     pub String,
