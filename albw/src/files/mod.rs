@@ -65,7 +65,7 @@ impl Cxi<fs::File> {
             Ok(file) => file,
             Err(_) => {
                 error!("Couldn't load ROM from: \"{}\"", path.display());
-                error!("Please check that config.toml points to a valid ROM.");
+                error!("Please check that config.json points to a valid ROM.");
                 pause();
                 exit(1);
             }

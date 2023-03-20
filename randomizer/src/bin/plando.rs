@@ -78,26 +78,32 @@ fn plando_settings() -> Settings {
             lc_requirement: 1,
             yuganon_requirement: 1,
             ped_requirement: PedestalSetting::Standard,
+
             nice_mode: true,
-            super_items: false,
-            no_progression_enemies: true,
+            super_items: true,
             reverse_sage_events: true,
+            no_progression_enemies: true,
             entrance_rando: EntranceShuffleSetting::NotShuffled,
+
             start_with_merge: true,
-            assured_weapon: false,
             bell_in_shop: false,
             pouch_in_shop: false,
+            sword_in_shop: false,
             boots_in_shop: false,
+            assured_weapon: false,
+
+            maiamai_madness: false,
+
             minigames_excluded: false,
             skip_big_bomb_flower: false,
-            swordless_mode: false,
             skip_trials: false,
             bow_of_light_in_castle: false,
-            dark_rooms_lampless: false,
-            maiamai_madness: false,
+
             weather_vanes_activated: true,
+            dark_rooms_lampless: false,
+            swordless_mode: false,
         },
-        options: Options { chest_size_matches_contents: true, night_mode: false },
+        options: Options { chest_size_matches_contents: true, night_mode: true },
         exclusions: Exclusion { 0: Default::default() },
         exclude: Exclude::new(),
     }
@@ -113,9 +119,9 @@ fn build_layout() -> Layout {
 
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (1)"), RupeeGold);
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (2)"), ItemIceRodLv2);
-    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (3)"), RingRental);
-    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (4)"), ItemBowLv2);
-    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (5)"), SpecialMove);
+    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (3)"), ItemBombLv2);
+    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (4)"), EscapeFruit);
+    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (5)"), ItemBowLv2);
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (6)"), HintGlasses);
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (7)"), ItemBell);
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (8)"), ItemBoomerangLv2);
@@ -168,6 +174,8 @@ fn build_layout() -> Layout {
 
     // Lost Woods
     layout.set(LocationInfo::new(regions::hyrule::lost::woods::SUBREGION, "Fortune-Teller"), RingRental);
+    layout.set(LocationInfo::new(regions::hyrule::lost::woods::SUBREGION, "Hyrule Hotfoot (First Race)"), HintGlasses);
+    layout.set(LocationInfo::new(regions::hyrule::lost::woods::SUBREGION, "Hyrule Hotfoot (Second Race)"), RupeeSilver);
     layout.set(LocationInfo::new(regions::hyrule::lost::woods::SUBREGION, "Lost Woods Alcove"), ItemHookShot);
     layout.set(LocationInfo::new(regions::hyrule::lost::woods::SUBREGION, "Lost Woods Big Rock Chest"), ItemIceRod);
     layout.set(LocationInfo::new(regions::hyrule::lost::woods::SUBREGION, "Master Sword Pedestal"), ItemIceRod);
@@ -282,8 +290,6 @@ fn build_layout() -> Layout {
     layout.set(LocationInfo::new(regions::hyrule::lake::hylia::SUBREGION, " 90 Maiamai"), ItemSandRodLv2);
     layout.set(LocationInfo::new(regions::hyrule::lake::hylia::SUBREGION, "100 Maiamai"), SpecialMove);
 
-    layout.set(LocationInfo::new(regions::hyrule::lake::hylia::SUBREGION, "Hyrule Hotfoot (First Race)"), HintGlasses);
-    layout.set(LocationInfo::new(regions::hyrule::lake::hylia::SUBREGION, "Hyrule Hotfoot (Second Race)"), RupeeSilver);
     layout.set(LocationInfo::new(regions::hyrule::lake::hylia::SUBREGION, "Ice Rod Cave"), RupeeGold);
     layout.set(LocationInfo::new(regions::hyrule::lake::hylia::SUBREGION, "Lake Hylia Dark Cave"), RupeeGold);
     layout.set(LocationInfo::new(regions::hyrule::lake::hylia::SUBREGION, "Lake Hylia Ledge Chest"), RupeeGold);

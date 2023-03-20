@@ -475,9 +475,13 @@ impl<'settings> Spoiler<'settings> {
 
     pub fn patch(self, paths: Paths, patch: bool, spoiler: bool, hints: bool) -> Result<()> {
         if patch {
-            info!("Generating Patch Files...");
+            info!("Starting Patch Process...");
+
             let game = Game::load(paths.rom())?;
             let mut patcher = Patcher::new(game)?;
+
+            info!("ROM Loaded.\n");
+
             regions::patch(&mut patcher, &self.layout, self.settings)?;
             let patches = patcher.prepare(&self.layout, self.settings)?;
             patches.dump(paths.output())?;

@@ -7,6 +7,7 @@ use {
         scene::{Dest, Flag, Obj, Vec3},
         Item::*,
     },
+    log::info,
 };
 
 macro_rules! apply {
@@ -90,6 +91,8 @@ macro_rules! action {
 
 /// Patch Scene BYAML Files
 pub fn patch_byaml_files(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
+    info!("Patching BYAML Files...");
+
     do_dev_stuff(patcher, settings);
     patch_big_problem_chests(patcher, settings);
     patch_blacksmith_hyrule(patcher, settings);
@@ -106,6 +109,7 @@ pub fn patch_byaml_files(patcher: &mut Patcher, settings: &Settings) -> Result<(
     patch_nice_mode(patcher, settings);
     patch_big_bomb_flower_skip(patcher, settings);
     patch_no_progression_enemies(patcher, settings);
+    // patch_open_lost_woods(patcher, settings);
 
     patcher.modify_objs(FieldLight, 18, &[disable(529)]);
 
@@ -549,6 +553,21 @@ pub fn patch_byaml_files(patcher: &mut Patcher, settings: &Settings) -> Result<(
     );
 
     Ok(())
+}
+
+#[allow(unused)]
+fn patch_open_lost_woods(patcher: &mut Patcher, _settings: &Settings) {
+    patcher.modify_objs(FieldLight, 38, &[
+        // 1st Poes
+        disable(132),
+        disable(133),
+        // 2nd Poes
+        disable(170),
+        disable(185),
+        // 3rd Poes
+        disable(175),
+        disable(186),
+    ]);
 }
 
 // Hyrule Blacksmith

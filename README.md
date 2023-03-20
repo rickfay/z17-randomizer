@@ -11,18 +11,16 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
 <details open="open">
 <summary>Version 0.3.0</summary>
 
-TODO: Come back and finish this, kind of left it mid-sentence...
-
 - <u>Dungeon Rewards Shuffled</u>
-  - Pendants & Portraits are now randomly placed between the Hyrule and Lorule dungeons.
+  - The 7 Sage Portraits & 4 Pendants are now randomly shuffled between the Hyrule and Lorule dungeons.
   - Maps will show a red X over uncompleted Portrait dungeons.
-- <u>Custom Portrait Requirements</u>
-  - Lorule Castle: Choose how many Portraits are needed to enter the dungeon's front door.
-  - Yuga Ganon: Choose how many Portraits are needed to make the Final Boss spawn.
+- <u>Hint System</u>
+  - ZOOTR-style Path Hints are now generated with seeds!
+  - See the [Hint System](#hint-system) section below for more details
 - <u>Progressive Pendant of Courage</u>
   - The Pendant of Courage is now a Progressive Item that will appear in *two* dungeons.
   - The first one found will be the Charm, an item that does nothing by itself
-  - The Charm's vanilla location in Hyrule Castle will contain a shuffled Portrait or Pendant
+  - The Charm's vanilla location in Hyrule Castle will contain a shuffled Sage Portrait or Pendant
 - <u>Hyrule Castle Complete Overhaul</u>
   - HC has been revamped and returned to its vanilla roots:
     - Pendant of Courage is required to enter the "Inside Hyrule Castle" dungeon
@@ -32,6 +30,8 @@ TODO: Come back and finish this, kind of left it mid-sentence...
         - Taking the Portal to Hilda's Study will automatically mark the LC Trials as complete.
       - Throne Room (Final Boss Room)
         - Yuga Ganon will not spawn unless Portrait requirements are met
+- <u>Custom Portrait Requirements</u>
+  - Lorule Castle: Choose how many Portraits are needed to enter the dungeon's front door.
 - <u>Great Spin</u>
   - Now available! Great Spin has been added to the general item pool
   - Works with the Forgotten Sword (impossible in vanilla)
@@ -39,14 +39,13 @@ TODO: Come back and finish this, kind of left it mid-sentence...
 - <u>Chest Size Matches Contents option</u>
   - Turns all chests containing Progression into large chests, and all others into small chests.
   - Note: Some large chests have altered hitboxes to prevent negative gameplay interference.
-- <u>Hint System</u>
-  - OoTR-style Path Hints are now generated with seeds!
-  - See the [Hint System](#hint-system) section below for more details
 - <u>Newly Randomized Checks</u>:
+  - **Zelda's Throne in Hyrule Castle**
+    - A Sage Portrait or Pendant will be here every seed
   - **Blacksmith Table**
-    - This was the Package Sword in vanilla, it'll be a chest on the table
+    - This was the Captain's Sword package for delivery in vanilla, it'll be a chest on the table
   - **Cucco Dungeon**
-    - ALttPR runners will know this as Cave 45, it has a freestanding Silver Rupee that will now be a random item.
+    - ALttPR runners will know this as Cave 45. Our version has a freestanding Silver Rupee that will now be a random item.
   - **Ku's Domain Fight**
     - This is the Zora's Domain area, but in Lorule. For technical reasons, this will be a chest.
   - **Woman**
@@ -58,8 +57,12 @@ TODO: Come back and finish this, kind of left it mid-sentence...
 - <u>Several cutscenes shortened/reworked</u>
   - Triforce of Courage cutscene is notably skipped.
 - <u>Logic Adjustments</u>:
-  - Irene + Shady Guy return, with improved cutscenes.
-  - Rosso's House starts locked again, needs Green Pendant to unlock.
+  - Irene + Shady Guy events return
+    - Their cutscenes are not instant, but they are greatly shortened
+  - Rosso's House starts locked again
+    - Needs Pendant of Courage to unlock (or Rosso if playing with the new RSE Setting)
+- <u>Night Mode Improved</u>:
+  - The effect no longer disappears when entering a Portal and will last indefinitely.
 - <u>Spoiler Log</u>:
   - New Playthrough section
       - Shows Sphere-by-Sphere logical path through seed.
@@ -70,6 +73,7 @@ TODO: Come back and finish this, kind of left it mid-sentence...
   - Chests containing the Compass in vanilla will now show up on their respective dungeon maps.
   - Softlock prevention added to Gales to prevent players from getting locked into the 1F miniboss.
   - Swamp Palace anti-softlock measures have been reversed.
+  - Misc. textbox changes and fixes
 
 *All changes from the unofficially released v0.1.3 have been folded into this update.*
 </details>
@@ -300,33 +304,40 @@ TODO: Come back and finish this, kind of left it mid-sentence...
 
 ## Setup
 
-- Download: [Latest Release (v0.3.0)](https://github.com/rickfay/z17-randomizer/releases/download/albwr-v0.3.0/albwr-0.3.0.zip)
+- Download: (Link TBA upon release)
 
 1. Unzip the download to your directory of choice.
 2. Move your A Link Between Worlds ROM into the same folder. Name it: `ALBW.3ds`
    - If your ROM is located elsewhere or if you'd like to name it something different, you can modify the `config.json` file to point to the ROM instead
 
-![fs-setup.png](docs/fs-setup.jpg?raw=true)
+![fs-setup.png](docs/fs-setup.png)
 
 ## Running the Randomizer
 
 There are two ways you can run ALBWR:
 
-1. Double click `albw-randomizer.exe` to start the randomizer with basic settings. The randomizer will provide a simple interface for setting game options, after which it will attempt to generate a completable seed.
+1. Double click `albw-randomizer.exe` (or `albw-randomizer` on Linux) to start the randomizer with basic settings. The randomizer will provide a simple interface for setting game options, after which it will attempt to generate a completable seed.
    - The randomizer may make multiple attempts to generate a completable seed. This is normal, and will happen automatically.
 
-![cli-example.png](docs/cli-example.png)
+
 
 2. Use a command line interface. If you take this approach you may also specify a preset and/or seed to use for seed generation.
    - Using a preset will give you some additional options and allow you to manually configure excluded checks.
      - See the example `presets/Example.json` for more information.
-   - Note that the randomizer looks in the local `presets` directory now, and does NOT check `AppData`
    - Examples:
-     - `$ ./albw-randomizer.exe --preset racerman`
-     - `$ ./albw-randomizer.exe --seed 4057320268`
+     - Windows:
+       - `$ ./albw-randomizer.exe --preset Example`
+       - `$ ./albw-randomizer.exe --seed 2893837151`
+     - Linux:
+       - `$ ./albw-randomizer --preset Example`
+       - `$ ./albw-randomizer --seed 2893837151`
    - Additional parameters:
      - Add `--no-patch` to skip generating the patch files
      - Add `--no-spoiler` to skip generating the spoiler log
+
+Later versions of the randomizer may look slightly different, but you should see something like the following when the seed is generated successfully:
+
+![cli-success.png](docs/cli-success.png)
 
 ## Installing Seeds
 
@@ -358,26 +369,63 @@ For Citra (emulator):
 
 ## Game Options
 
-`mode`
+`logic_mode`
 - Determines the Logic to use when generating the seed.
-  - Options are: `Normal`, `Hard`, `GlitchBasic`, `GlitchAdvanced`, `GlitchHell`, or `NoLogic`
+- Available Logic Modes are:
+
+| Setting       | Description                                                                                  |
+|---------------|----------------------------------------------------------------------------------------------|
+| `Normal`      | Standard gameplay, no tricky item use or glitches. If unsure, choose this.                   |
+| `Hard`        | Adds tricks that aren't technically glitches. Lamp + Net considered as weapons. No glitches. |
+| `Glitched`    | Includes the above plus a selection of easy-to-learn glitches.                               |
+| `AdvGlitched` | Includes the above plus "advanced" glitches that may be a challenge to master.               |
+| `Hell`        | Includes every known RTA-viable glitch, including the insane ones. Don't choose this.        |
+| `NoLogic`     | Items are placed with no logic at all. Seeds are likely to not be completable.               |
+
 
 `randomize_dungeon_prizes`
-- Randomizes the Pendants and Portraits between Hyrule and Lorule dungeons
+- This shuffles all Sage Portraits, Pendants, and the Charm among themselves.
 
 `lc_requirement`
-- The number of Portraits (0-7) needed to trigger the Hilda cutscene to open Lorule Castle
+- Choose how many Portraits are needed to enter Lorule Castle and fight Yuganon
 
-`assured_weapon`
-- If enabled, guarantees that a weapon will be placed in Ravio's Shop
-  - Potential weapons include:
-    - Sword (if not playing Swordless)
-    - Bow
-    - Hammer
-    - Fire Rod
-    - Ice Rod
-    - Bombs
-    - Lamp/Net (if playing Hard Logic or higher)
+`ped_requirement`
+- Choose which Pendants are required to reach the Master Sword Pedestal:
+- Available options are:
+
+| Setting    | Description                                                                          |
+|------------|--------------------------------------------------------------------------------------|
+| `Vanilla`  | Only the Pendants of Power and Wisdom are required                                   |
+| `Charmed`  | All three Pendants are required, but Charm may substitute for the Pendant of Courage |
+| `Standard` | All Pendants are required                                                            |
+
+
+`nice_mode`
+- This shuffles a second progressive copy of each Ravio Item into the general item pool.
+- <u>Note 1</u>: Removes Mother Maiamai Cave from the game
+  - This is temporary, until Maiamai Rewards are properly implemented
+- <u>Note 2</u>: For Glitched modes, tricks that become impossible or very difficult with the Nice version of an item will go out of logic
+
+`super_items`
+- This shuffles a second progressive copy of the Lamp and Net into the general item pool.
+
+`reverse_sage_events`
+- Ties Sage-related checks and events to actually rescuing that Sage.
+- Makes the following changes for each rescued Sage:
+
+| Sage  | Effects                                                                  |
+|-------|--------------------------------------------------------------------------|
+| Irene | Unlocks the Irene check (instead of Pendant of Courage)                  |
+| Rosso | Unlocks Rosso's House and his two checks (instead of Pendant of Courage) |
+| Oren  | Unlocks the Smooth Gem check and the Shady Guy Event                     |
+| Impa  | Unlocks the front door to Hyrule Castle                                  |
+
+`no_progression_enemies`
+- Removes Enemies from dungeons that are themselves Progression (e.g.: Bawbs, the bomb enemy).
+- Logic will be adjusted to require the player's items instead.
+
+`start_with_merge`
+- Start with the ability to Merge into walls, without Ravio's Bracelet.
 
 `bell_in_shop`
 - If enabled, guarantees the Bell will be placed in Ravio's Shop.
@@ -385,66 +433,106 @@ For Citra (emulator):
 `pouch_in_shop`
 - If enabled, guarantees the Pouch will be placed in Ravio's Shop.
 
+`sword_in_shop`
+- If enabled, guarantees the Pegasus Boots will be placed in Ravio's Shop.
+- <u>Note</u>: Incompatible with `assured_weapon` or `swordless_mode` settings.
+
 `boots_in_shop`
 - If enabled, guarantees the Pegasus Boots will be placed in Ravio's Shop.
+- <u>Note</u>: Incompatible with `assured_weapon` setting.
+
+`assured_weapon`
+- If enabled, guarantees that a weapon will be placed in Ravio's Shop
+- <u>Note</u>: Incompatible with `sword_in_shop` or `boots_in_shop` settings.
+- Potential weapons include:
+  - Sword (if not playing Swordless)
+  - Bow
+  - Hammer
+  - Fire Rod
+  - Ice Rod
+  - Bombs
+  - Lamp/Net (if playing Hard Logic or higher)
 
 `maiamai_madness`
 - Shuffles Maiamai into the pool, adding 100 more locations
 
-`vanes_activated`
-- Pre-activates all Weather Vanes
-- This causes logic to consider players using the Bell to skip over overworld obstacles
-- <u>Note</u>: No trackers currently support this
-
-`super_items`
-- If enabled, includes the Super Lamp and Super Net in the shuffled item pool as progressive upgrades to the base Lamp and Net.
-
 `minigames_excluded`
 - Excludes Cucco Rush, Hyrule Hotfoot, Treacherous Tower, Octoball Derby, and both Rupee Rush minigames from having progression.
 
+`skip_big_bomb_flower`
+- Skips the Big Bomb Flower by removing the 5 Big Rocks in Lorule Field.
+- This setting does not affect the Lorule Castle Bomb Trial.
+
 `skip_trials`
-- If enabled, the Trials door in Lorule Castle will be removed.
+- Automatically opens the Lorule Castle Trials door.
 
 `bow_of_light_in_castle`
-- If enabled, guarantees the Bow of Light will be placed *somewhere* in Lorule Castle (including possibly Zelda)
+- Limits the Bow of Light's placement to somewhere in Lorule Castle (including possibly Zelda).
 
-`lampless`
-- If enabled, the player may have to cross dark rooms without a light source. If you're not sure, select 'false'.
+`weather_vanes_activated`
+- Begin the game with all Weather Vanes activated.
+- The logic may expect players to use the Bell to reach otherwise unreachable locations this way.
+- <u>Note</u>: Trackers do not currently support this feature.
+
+`dark_rooms_lampless`
+- If enabled the logic may expect players to cross Dark Rooms without the Lamp.
+- Not for beginners and those who like being able to see things.
 
 `swordless_mode`
-- Generates a seed with no Swords.
-  - You will need the [Net to play Tennis with Yuganon](https://www.twitch.tv/videos/1265170513). Good luck finding it!
+- Removes *ALL* Swords from the game.
+- [The Bug Net becomes a required item to play Dead Man's Volley against Yuga Ganon.](https://www.twitch.tv/videos/1265170513)
 
 `chest_size_matches_contents`
-- Alters treasure chest sizes depending on their contents: Large for Progression items, Small for everything else.
+- All chests containing progression or unique items will become large, and others will be made small.
+- <u>Note</u>: Some large chests will have a reduced hitbox to prevent negative gameplay interference.
 
 ## Hint System
 
 New with version v0.3.0 is the addition of hints!
 
-### Path Hints Explained
+These are still fairly new and work to improve them is ongoing.
+
+### Path Hints
+
+Path Hints in ALBWR are similar to Path Hints in recent seasons of ZOOTR.
+
+They can be thought of like "Way of the Hero" Hints from other Zelda randomizers, except instead of hinting a location with an item needed to beat the seed they instead hint a location with a [Path Item](#path-items) needed to reach a particular goal.
 
 Path Hints take the following form:
 
 ```
-They say there's a link between [LOCATION] and [BOSS].
+It says here that [LOCATION] is on the path to [GOAL].
 ```
 
-- \[LOCATION\] refers to the specific region where the hinted `Path Item` can be found.
-  - To keep locations from being arbitrarily defined, the Maiamai Map is used for all
+`[GOAL]`
+- Presently, goals will always be the Bosses of dungeons housing a Sage Portrait.
+
+`[LOCATION]`
+- Refers to the specific region where the hinted `Path Item` can be found.
+- To keep locations from being arbitrarily defined, the Maiamai Map boundaries are used for (nearly) all region boundaries.
+  - <u>Exception</u>: The Overworld screens containing the Hyrule Sanctuary, Hyrule Graveyard, and Lorule Graveyard are all collectively referred to as the `Graveyard`.
+  - <u>Special Cases</u>:
+    - Hyrule Hotfoot is considered part of the `Lost Woods Region`, as it is there that the reward is given out.
+    - Irene can appear in multiple regions, and so she has a unique region called `Irene the Witch`.
+    - Osfala's item is given out in a special region called `Chamber of the Sages`
+
+![region-map-hyrule.png](docs/region-map-hyrule.png)
+
+![region-map-lorule.png](docs/region-map-lorule.png)
 
 #### Path Items
 
-A `Path Item` is any item that, according to the logic used to generate the seed, is required to reach and defeat a given boss.
+A `Path Item` is any item that, according to the logic used to generate the seed, is required to reach a given Goal.
 
-
-
-Notes about Path Items:
-- Path Items are not guaranteed to be the traditional items needed to complete a dungeon, so long as they are in some way logically required.
+Path Items are not guaranteed to be the traditional items needed to complete a dungeon, so long as they are in some way logically required.
   - E.g. The Sand Rod can be Path to Moldorm if the Hammer is in Desert Palace.
-- An item cannot be Path if an in-logic alternative exists.
-  - E.g. If Ravio's Shop contains two Lamps, neither of them can be Path to Knucklemaster.
-- Two Path Hints cannot refer to the same Path Item. They may refer to two items in the same logical chain, but each 
+
+An item cannot be Path if an in-logic alternative exists. Put another way, an item with a 2nd copy must "lock" that copy in order for it to be Path, as if they don't then that copy could be used to reach the Goal instead of that would-be Path Item.
+  - E.g. If Ravio's Shop contains two Lamps, neither of them can be Path to Knucklemaster as neither Lamp locks the other.
+
+Two Path Hints cannot refer to the same Path Item. They may refer to two items in the same logical chain, but each hint will refer to single item.
+
+Locations hinted by an [Always Hint](#always-hints) will never contain a Path Item, as they are already hinted.
 
 The following will NEVER be Path Items:
 - Ravio's Bracelet
@@ -453,11 +541,41 @@ The following will NEVER be Path Items:
 - Pendants
 - "Progression Events", e.g. bumping into Shady Guy
 
+#### Extra Path Hints
 
+The randomizer will attempt to generate a Path Hint for every Boss guarding a Sage Portrait, but depending on settings (especially if [Nice Mode](#game-options) is enabled) there may not be *any* viable Path Items leading to the Boss.
 
+In that case, other Bosses may receive an extra Path Hint to make up the numbers.
 
+If you notice that you receive multiple paths for a particular Boss, pay attention to which boss(es) you *didn't* get Path Hints for, as you will be able to make inferences about where their required items are by knowing that the filler couldn't select any of them to be a Path Item.
 
+Occasionally, there may not be enough viable Path Items to generate the required number of Path Hints. In such cases there will simply be fewer Path Hints, and additional Sometimes Hints will be generated in their place.
 
+### Always Hints
+
+Always Hints are hints that will be generated with every seed to give away the items at specific locations.
+
+The locations chosen for Always Hints are considered to be especially terrible, to the point where players will always want to know what item is held there as that knowledge can have a major impact on routing.
+
+Different settings will affect which locations are selected to be Always Hints.
+
+### Sometimes Hints
+
+Sometimes Hints give away the items at a selection of random locations.
+
+The pool of possible locations for Sometimes Hints varies based on settings, but locations that are already hinted at by a [Path Hint](#path-hints) will not also be chosen for a Sometimes Hint.
+
+These types of hints are generated last as filler to achieve the desired total amount of Hints.
+
+### Bow of Light Hint
+
+The Bow of Light is a special hint specifically for (you guessed it) the Bow of Light.
+
+Much like the Light Arrows in ZOOTR the Bow of Light is required to beat the game, but since it does not lock anything else it can theoretically be placed anywhere. Unlucky Bow of Light placements have the potential to artificially extend the time it takes to beat a seed, hence this hint is created to prevent an extended "Bow of Light Hunt" at the end of a seed.
+
+The Hint will give away the region where the Bow of Light has been placed.
+
+The Bow of Light Hint will be generated for every seed even if an [Always](#always-hints) or [Sometimes](#sometimes-hints) Hint was already generated that explicitly gives away the Bow of Light's location.
 
 ## Logic Breakdown
 
@@ -500,7 +618,7 @@ This mode is recommended for players who have played the game before and are fam
   - Lorule Castle
     - Play Tennis with Yuganon using the Net
 
-### Glitched (Basic) Logic
+### Glitched Logic
 
 This mode is intended for players who want to use some of the game's many glitches, but not the hard ones.
 
@@ -524,7 +642,7 @@ This mode is intended for players who want to use some of the game's many glitch
   - Thieves' Hideout:
     - Jailbreak to activate switches and reach B2 without merge (Boots + either Boomerang or Ice Rod)
 
-### Glitched (Advanced) Logic
+### Adv. Glitched Logic
 
 This mode is for experienced players who are comfortable with this game's harder, more involved glitches. 
 
@@ -565,9 +683,9 @@ This mode is for experienced players who are comfortable with this game's harder
     - Reverse Desert Palace with Fire Rod or Nice Bombs
     - Armos Boost to skip West 2F
 
-### Glitched (Hell) Logic
+### Hell Logic
 
-This mode logically includes every known RTA-viable glitch, including those that are wildly inconsistent and inconsiderate of a player's time. It is not recommended for anyone, other than those seeking a challenge.
+This mode logically includes every known RTA-viable glitch, including those that are wildly inconsistent and/or inconsiderate of a player's time. It is not recommended for anyone, other than those seeking a challenge.
 
 <u>Note</u>: Glitched Logic EXPECTS you to spend your first 10 Maiamai on Nice Bombs due to the many glitches they enable. Failure to do so could make your seed much harder or potentially even impossible to complete.
 
@@ -591,6 +709,8 @@ It's all in the name: no logic is used to place items at all. Dungeon items are 
 
 ## Known Issues
 
+- Some item models appear too low and some even clip through the floor. If you do not see any item on the Kakariko Item Merchant, try interacting with it anyway.
+- Hyrule Castle overworld music may be missing until the player has either broken the barrier or obtained the Pendant of Courage.
 - Bow of Light crashes the game if used outside the final boss arena (on 3DS console)
 - Some text boxes will overflow
 - Mother Maiamai item text is wrong, the text reflects the slots in Ravio's Shop. The pictures are correct, use those when selecting which item to upgrade.

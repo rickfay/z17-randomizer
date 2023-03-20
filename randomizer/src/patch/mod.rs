@@ -440,6 +440,7 @@ impl Patches {
             file.dump(&romfs)?;
         }
         let path = path.as_ref();
+        println!();
         info!(
             "Writing Patch Files to:         {}\\{:016X}",
             &path.absolutize()?.display(),
@@ -455,7 +456,7 @@ impl Patches {
             Ok(_) => Ok(()),
             Err(_) => {
                 error!("Couldn't write to:              {}", path.display());
-                error!("Please check that config.toml points to a valid output destination.");
+                error!("Please check that config.json points to a valid output destination.");
                 fail!();
             }
         }
@@ -485,6 +486,7 @@ impl Files {
 fn cutscenes<'game, 'settings>(
     game: &'game Game, settings: &'settings Settings,
 ) -> impl Iterator<Item = Result<File<Demo>>> + 'game {
+    info!("Patching Cutscenes...");
     let Settings { logic, options, .. } = settings.clone();
     let early = iter::once_with(move || {
         let mut opening = game.demo(0)?.map(truncate_cutscene);

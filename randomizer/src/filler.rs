@@ -45,12 +45,37 @@ pub fn fill_stuff(settings: &Settings, seed: Seed) -> (Vec<(LocationInfo, Item)>
 fn prevalidate(settings: &Settings) {
     // LC Requirement
     if !(0..=7).contains(&settings.logic.lc_requirement) {
-        fail!("Invalid LC Requirement: {}\nExiting...", settings.logic.lc_requirement);
+        fail!(
+            "Invalid Lorule Castle Requirement: \"{}\" was not between 0-7, inclusive.",
+            settings.logic.lc_requirement
+        );
     }
 
     // Yuganon Requirement
-    if !(0..=7).contains(&settings.logic.yuganon_requirement) {
-        fail!("Invalid Yuga Ganon Requirement: {}\nExiting...", settings.logic.yuganon_requirement);
+    // if !(0..=7).contains(&settings.logic.yuganon_requirement) {
+    //     fail!("Invalid Yuga Ganon Requirement: \"{}\" was not between 0-7, inclusive.", settings.logic.yuganon_requirement);
+    // }
+    if settings.logic.yuganon_requirement != settings.logic.lc_requirement {
+        fail!(
+            "Yuga Ganon Requirement: \"{}\" is different than Lorule Castle Requirement: \"{}\"\n\
+        Different values for these settings are not yet supported!",
+            settings.logic.yuganon_requirement,
+            settings.logic.lc_requirement
+        );
+    }
+
+    // Swords
+    if settings.logic.sword_in_shop && settings.logic.swordless_mode {
+        fail!("The sword_in_shop and swordless_mode settings cannot both be enabled.");
+    }
+
+    // Assured Weapons
+    if settings.logic.assured_weapon
+        && (settings.logic.sword_in_shop || settings.logic.boots_in_shop)
+    {
+        fail!(
+            "The assured_weapon setting cannot be enabled when either sword_in_shop or boots_in_shop is also enabled."
+        );
     }
 }
 
@@ -162,9 +187,40 @@ fn preplace_items<'a>(
         progression.retain(|x| *x != BowOfLight);
     }
 
+    // Bell in Shop
+    if settings.logic.bell_in_shop {
+        check_map.insert(shop_positions.remove(rng.gen_range(0..shop_positions.len())), Some(Bell));
+        progression.retain(|x| *x != Bell);
+    }
+
+    // Pouch in Shop
+    if settings.logic.pouch_in_shop {
+        check_map
+            .insert(shop_positions.remove(rng.gen_range(0..shop_positions.len())), Some(Pouch));
+        progression.retain(|x| *x != Pouch);
+    }
+
+    // Sword in Shop
+    if settings.logic.sword_in_shop {
+        check_map
+            .insert(shop_positions.remove(rng.gen_range(0..shop_positions.len())), Some(Sword01));
+        progression.retain(|x| *x != Sword01);
+    }
+
+    // Boots in Shop
+    if settings.logic.boots_in_shop {
+        check_map.insert(
+            shop_positions.remove(rng.gen_range(0..shop_positions.len())),
+            Some(PegasusBoots),
+        );
+        progression.retain(|x| *x != PegasusBoots);
+    }
+
     // Assures a weapon will be available in Ravio's Shop
-    if settings.logic.assured_weapon {
-        let mut weapons = Vec::from([Bow01, Bombs01, FireRod01, IceRod01, Hammer01]);
+    if (!settings.logic.sword_in_shop && !settings.logic.boots_in_shop)
+        && settings.logic.assured_weapon
+    {
+        let mut weapons = Vec::from([Bow01, Bombs01, FireRod01, IceRod01, Hammer01, PegasusBoots]);
 
         if !settings.logic.swordless_mode {
             weapons.extend_from_slice(&[Sword01]);
@@ -182,28 +238,6 @@ fn preplace_items<'a>(
         check_map
             .insert(shop_positions.remove(rng.gen_range(0..shop_positions.len())), Some(weapon));
         progression.retain(|x| *x != weapon);
-    }
-
-    // Bell in Shop
-    if settings.logic.bell_in_shop {
-        check_map.insert(shop_positions.remove(rng.gen_range(0..shop_positions.len())), Some(Bell));
-        progression.retain(|x| *x != Bell);
-    }
-
-    // Pouch in Shop
-    if settings.logic.pouch_in_shop {
-        check_map
-            .insert(shop_positions.remove(rng.gen_range(0..shop_positions.len())), Some(Pouch));
-        progression.retain(|x| *x != Pouch);
-    }
-
-    // Boots in Shop
-    if settings.logic.boots_in_shop {
-        check_map.insert(
-            shop_positions.remove(rng.gen_range(0..shop_positions.len())),
-            Some(PegasusBoots),
-        );
-        progression.retain(|x| *x != PegasusBoots);
     }
 
     // Exclude Minigames
@@ -232,7 +266,7 @@ fn preplace_items<'a>(
     }
 }
 
-// Statically place an item in a give location, then remove it from the item pool provided
+// Statically place an item in a given location, then remove it from the item pool provided
 fn place_static<'a>(
     check_map: &mut HashMap<&'a str, Option<FillerItem>>, pool: &mut Vec<FillerItem>,
     item: FillerItem, check_name: &'a str,
@@ -790,7 +824,7 @@ fn generate_hints(
 ) -> Hints {
     info!("Generating Hints...");
 
-    const NUM_TOTAL_HINTS: usize = 28;
+    const NUM_TOTAL_HINTS: usize = 27;
     let mut taken_checks: Vec<&'static str> = Vec::new();
 
     let always_hints = generate_always_hints(&mut taken_checks, check_map, settings);
@@ -1087,7 +1121,7 @@ fn generate_path_hints(
     // Format
     for (check, boss) in &chosen_path_checks {
         path_hints.push(format!(
-            "They say there's a link between {} and {}.",
+            "It says here that {} is on the path to {}.",
             check.get_location_info().unwrap().region(),
             boss.as_str()
         ));

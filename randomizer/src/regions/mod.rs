@@ -1,6 +1,9 @@
-use std::{
-    fmt::{self, Debug, Formatter},
-    hash::{Hash, Hasher},
+use {
+    log::info,
+    std::{
+        fmt::{self, Debug, Formatter},
+        hash::{Hash, Hasher},
+    },
 };
 
 pub struct Subregion {
@@ -115,6 +118,9 @@ pub mod lorule {
 pub(crate) fn patch(
     patcher: &mut Patcher, layout: &crate::Layout, settings: &Settings,
 ) -> crate::Result<()> {
+    info!("Patching Randomized Checks...");
+
+    // todo unravel this
     dungeons::dark::patch(patcher, layout, settings)?;
     dungeons::desert::patch(patcher, layout, settings)?;
     dungeons::eastern::patch(patcher, layout, settings)?;

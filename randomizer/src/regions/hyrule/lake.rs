@@ -13,8 +13,6 @@ crate::region! {
             " 80 Maiamai": ItemTornadeRodLv2 @None(),
             " 90 Maiamai": ItemSandRodLv2 @None(),
             "100 Maiamai": SpecialMove @None(),
-            "Hyrule Hotfoot (First Race)": RupeeSilver @Event(FieldLight_HyruleRace[0x21]),
-            "Hyrule Hotfoot (Second Race)": HeartPiece @Event(FieldLight_HyruleRace[0x14]),
             "Ice Rod Cave": RupeeGold @Chest(CaveLight 9[12]),
             "Lake Hylia Dark Cave": RupeePurple @Chest(CaveLight 11[8]),
             "Lake Hylia Ledge Chest": RupeeR @Chest(35[155]),

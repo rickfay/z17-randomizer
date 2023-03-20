@@ -2,6 +2,7 @@ use {
     super::Patcher,
     crate::{Result, Settings},
     albw::Item,
+    log::info,
 };
 
 macro_rules! apply {
@@ -109,6 +110,7 @@ fn patch_castle_connection(patcher: &mut Patcher, _settings: &Settings) -> Resul
 
         // Hyrule Castle Dungeon
         DungeonCastle/Castle {
+            // Text skip
             [276] => 62,  // [274]
             [315] => 70,  // [ 19]
             [236] => 74,  // [ 37]
@@ -146,6 +148,8 @@ fn patch_castle_connection(patcher: &mut Patcher, _settings: &Settings) -> Resul
 }
 
 pub fn apply(patcher: &mut Patcher, free: Item, settings: &Settings) -> Result<()> {
+    info!("Patching Flow Charts...");
+
     patch_lorule_castle_requirements(patcher, settings)?;
     patch_castle_connection(patcher, settings)?;
 
@@ -158,6 +162,17 @@ pub fn apply(patcher: &mut Patcher, free: Item, settings: &Settings) -> Result<(
     //     .debug();
 
     apply!(patcher,
+
+        // Runaway Item Seller
+        Boot/FieldLight_33_Douguya {
+            // Entry_DouguyaOtto_00
+            [5 into_start] => 71, // Skip to check obtained Flag (3/168)
+            [71 into_branch] switch [
+                [0] => 32, // Skip to hand in Scoot Fruit dialog
+            ],
+            [73] => 70, // Don't lose Scoot Fruit
+            [70] => None, // End after setting obtained Flag (3/168)
+        },
 
         // // Hyrule Hotfoot
         // FieldLight/FieldLight_HyruleRace {
@@ -359,11 +374,6 @@ pub fn apply(patcher: &mut Patcher, free: Item, settings: &Settings) -> Result<(
 
     // untouched
     apply!(patcher,
-        // Runaway Item Seller
-        Boot/FieldLight_33_Douguya {
-            // Entry_DouguyaOtto_00
-            [5 into_start] => 0x3D, // Skip to Scoot Fruit choice
-        },
         // Bird statues
         Boot/Telephone {
             // TelephoneCall

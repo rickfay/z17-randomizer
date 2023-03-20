@@ -160,6 +160,7 @@ pub fn create(patcher: &Patcher, settings: &Settings) -> Code {
     ore_progress(&mut code);
     merchant(&mut code);
     configure_pedestal_requirements(&mut code, settings);
+    night_mode(&mut code, settings);
 
     // fix castle barrier?
     let master_sword_flag = code.text().define([
@@ -309,6 +310,13 @@ pub fn create(patcher: &Patcher, settings: &Settings) -> Code {
     code.patch(0x344dec, [b(great_spin_fix)]);
 
     code
+}
+
+fn night_mode(code: &mut Code, settings: &Settings) {
+    if settings.options.night_mode {
+        // Keeps Flag 964 from being unset
+        code.patch(0x3a8624, [mov(R2, 0x1)]);
+    }
 }
 
 fn configure_pedestal_requirements(code: &mut Code, settings: &Settings) {

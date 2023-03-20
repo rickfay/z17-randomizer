@@ -4,6 +4,8 @@ crate::region! {
     woods {
         locations: [
             "Fortune-Teller": HintGlasses @Event(IndoorLight/FieldLight_11_FortuneGirl[4]),
+            "Hyrule Hotfoot (First Race)": RupeeSilver @Event(FieldLight_HyruleRace[0x21]),
+            "Hyrule Hotfoot (Second Race)": HeartPiece @Event(FieldLight_HyruleRace[0x14]),
             "Lost Woods Alcove": HeartPiece @Heart(1[46]),
             "Lost Woods Big Rock Chest": RupeeR @Chest(1[133]),
             "Master Sword Pedestal": ItemSwordLv2 @Chest(34[71]),

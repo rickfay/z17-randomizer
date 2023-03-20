@@ -625,11 +625,18 @@ impl Progress {
     }
 
     pub fn adv_thieves_statue_clip(&self) -> bool {
-        self.has_boomerang() || self.has_ice_rod() || (self.can_merge() && self.can_hit_switch())
+        self.can_merge()
+            && (self.has_bow() || self.has_boomerang() || self.has_ice_rod() || self.has_bombs())
     }
 
     pub fn hell_thieves_statue_clip(&self) -> bool {
-        self.has_bombs() || self.adv_thieves_statue_clip()
+        self.has_bombs()
+            || (self.has_master_sword()
+                && (self.can_merge()
+                    || self.has_boomerang()
+                    || self.has_ice_rod()
+                    || self.can_great_spin()))
+            || self.adv_thieves_statue_clip()
     }
 
     pub fn can_rescue_turtles(&self) -> bool {

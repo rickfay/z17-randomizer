@@ -72,21 +72,31 @@ pub fn seed_settings_ui() -> Settings {
         "Start with the ability to Merge into walls, without Ravio's Bracelet.",
     );
 
-    let assured_weapon = prompt_bool(
-        "Guaranteed Weapon",
-        "If enabled a weapon is guarantee to be placed in Ravio's Shop.",
-    );
-
     let bell_in_shop =
         prompt_bool("Bell in Shop", "If enabled the Bell will be placed in Ravio's Shop.");
 
     let pouch_in_shop =
         prompt_bool("Pouch in Shop", "If enabled the Pouch will be placed in Ravio's Shop.");
 
+    let sword_in_shop = prompt_bool(
+        "Sword in Shop",
+        "If enabled at least one Sword will be placed in Ravio's Shop.\n\
+        Note: This option is incompatible with Swordless Mode, which removes all Swords from the game.",
+    );
+
     let boots_in_shop = prompt_bool(
         "Boots in Shop",
         "If enabled the Pegasus Boots will be placed in Ravio's Shop.",
     );
+
+    let assured_weapon = if !sword_in_shop && !boots_in_shop {
+        prompt_bool(
+            "Assured Weapon in Shop",
+            "If enabled at least one weapon is guaranteed to be placed in Ravio's Shop.",
+        )
+    } else {
+        false
+    };
 
     let maiamai_madness = prompt_bool(
         "Maiamai Madness",
@@ -116,7 +126,7 @@ pub fn seed_settings_ui() -> Settings {
         "Pre-Activated Weather Vanes",
         "Begin the game with all Weather Vanes activated.\n\
         The logic may expect players to use the Bell to reach otherwise unreachable locations this way.\n\
-        NOTE: Trackers do not currently support this feature.",
+        Note: Trackers do not currently support this feature.",
     );
 
     let dark_rooms_lampless = prompt_bool(
@@ -125,11 +135,15 @@ pub fn seed_settings_ui() -> Settings {
         Not for beginners and those who like being able to see things.",
     );
 
-    let swordless_mode = prompt_bool(
-        "Swordless Mode (advanced)",
-        "Removes *ALL* Swords from the game.\n\
+    let swordless_mode = if !sword_in_shop {
+        prompt_bool(
+            "Swordless Mode (advanced)",
+            "Removes *ALL* Swords from the game.\n\
         The Bug Net becomes a required item to play Dead Man's Volley against Yuga Ganon.",
-    );
+        )
+    } else {
+        false
+    };
 
     let chest_size_matches_contents = prompt_bool(
         "Chest Size Matches Contents",
@@ -152,10 +166,11 @@ pub fn seed_settings_ui() -> Settings {
             reverse_sage_events,
             no_progression_enemies,
             start_with_merge,
-            assured_weapon,
             bell_in_shop,
             pouch_in_shop,
+            sword_in_shop,
             boots_in_shop,
+            assured_weapon,
             maiamai_madness,
             weather_vanes_activated,
             minigames_excluded,

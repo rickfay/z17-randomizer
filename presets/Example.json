@@ -12,14 +12,15 @@
     "no_progression_enemies":      false,
 
     "start_with_merge":            true,
-    "assured_weapon":              false,
     "bell_in_shop":                true,
     "pouch_in_shop":               false,
+    "sword_in_shop":               false,
     "boots_in_shop":               false,
+    "assured_weapon":              false,
 
     "maiamai_madness":             false,
 
-    "minigames_excluded":          true,
+    "minigames_excluded":          false,
     "skip_big_bomb_flower":        false,
     "skip_trials":                 false,
     "bow_of_light_in_castle":      false,

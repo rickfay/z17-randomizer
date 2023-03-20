@@ -13,12 +13,14 @@ use {
         Actor, File,
         Item::{self, *},
     },
+    log::info,
     std::collections::HashMap,
 };
 
 pub(crate) fn patch_dungeon_prizes(
     patcher: &mut Patcher, prizes: &DungeonPrizes, settings: &Settings,
 ) {
+    info!("Patching Dungeon Prizes...");
     patch_flowchart(patcher, &prizes);
     patch_msbf_files(patcher, &prizes);
     patch_dungeon_prize_actors(patcher, &prizes);
@@ -323,6 +325,7 @@ fn patch_rosso(patcher: &mut Patcher, settings: &Settings) {
         obj.set_inactive_flag(Flag::Event(282));
         obj.set_enable_flag(rosso_flag);
         obj.clear_disable_flag();
+        obj.set_typ(1);
     })]);
 
     // Rosso Rocks

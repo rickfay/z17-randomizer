@@ -30,9 +30,9 @@ fn main() -> randomizer::Result<()> {
 
     const MAX_RETRIES: u16 = 100;
     let mut result = Ok(());
+    let mut seed = opt.seed.unwrap_or_else(rand::random);
 
     for x in 0..MAX_RETRIES {
-        let seed = opt.seed.unwrap_or_else(rand::random);
         let no_preset = String::from("<None>");
         let preset_str = opt.preset.as_ref().unwrap_or(&no_preset);
 
@@ -46,19 +46,26 @@ fn main() -> randomizer::Result<()> {
             println!();
             info!("All seed information has been successfully generated.");
             println!();
-            result =
-                spoiler.unwrap().patch(system.load_config()?, !opt.no_patch, !opt.no_spoiler, true);
+            let path_config = system.load_config().unwrap_or_else(|error| {
+                fail!("Failed to parse configuration file: config.json\n\
+                Commonly Fixed By: Replace any single backslash characters '\\' with a forward slash '/' or double backslash '\\\\'.\n\
+                Full Error: {}\n", error);
+            });
+            result = spoiler.unwrap().patch(path_config, !opt.no_patch, !opt.no_spoiler, true);
 
             break;
         } else if x >= MAX_RETRIES - 1 {
             fail!("Too many retry attempts have failed. Aborting...");
         } else {
             info!("Seed was not completable (this is normal). Retrying...\n");
+            seed = opt.seed.unwrap_or_else(rand::random);
         }
     }
 
+    println!();
+
     match result {
-        Ok(_) => info!("Successfully generated seed :D"),
+        Ok(_) => info!("Successfully generated ALBW Randomizer Seed: {}", seed),
         Err(_) => {
             println!();
             error!("An unknown error occurred while generating the seed D:\n");

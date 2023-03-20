@@ -56,10 +56,6 @@ pub struct Logic {
     #[serde(default)]
     pub start_with_merge: bool,
 
-    /// Guarantees a Weapon is placed in Ravio's Shop
-    #[serde(default)]
-    pub assured_weapon: bool,
-
     /// Places the Bell in Ravio's Shop
     #[serde(default)]
     pub bell_in_shop: bool,
@@ -68,15 +64,25 @@ pub struct Logic {
     #[serde(default)]
     pub pouch_in_shop: bool,
 
+    /// Places a Sword in Ravio's Shop. Disables the ability to play in Swordless Mode.
+    #[serde(default)]
+    pub sword_in_shop: bool,
+
     /// Places the Pegasus Boots in Ravio's Shop
     #[serde(default)]
     pub boots_in_shop: bool,
+
+    /// Guarantees a Weapon is placed in Ravio's Shop.
+    /// Not available if [`boots_in_shop`] or [`sword_in_shop`] are enabled as they already are weapons.
+    #[serde(default)]
+    pub assured_weapon: bool,
 
     /// Excludes Cucco Ranch, both Rupee Rushes, Treacherous Tower, Octoball Derby, and Hyrule Hotfoot (both races)
     #[serde(default)]
     pub minigames_excluded: bool,
 
     /// Swordless Mode
+    /// Not available if [`sword_in_shop`] option is enabled.
     #[serde(default)]
     pub swordless_mode: bool,
 

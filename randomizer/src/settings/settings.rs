@@ -42,7 +42,7 @@ impl Settings {
     #[rustfmt::skip]
     pub fn log(&self, seed: Seed) {
         info!("Seed:                           {:0>10}", seed);
-        info!("Logic:                          {}", match self.logic.logic_mode {
+        info!("Logic Mode:                     {}", match self.logic.logic_mode {
             Normal => "Normal",
             Hard => "Hard",
             Glitched => "Glitched",
@@ -54,19 +54,28 @@ impl Settings {
         info!("Lorule Castle Requirement:      {} Portraits", self.logic.lc_requirement);
         info!("Yuga Ganon Requirement:         {} Portraits", self.logic.yuganon_requirement);
         info!("Pedestal Requirement:           {}", self.logic.ped_requirement);
-        info!("Nice Items:                     {}", if self.logic.nice_mode { "Shuffled" } else { "Not Shuffled" });
+
+        info!("Nice Mode:                      {}", if self.logic.nice_mode { "ON" } else { "OFF" });
         info!("Super Items:                    {}", if self.logic.super_items { "Shuffled" } else { "Not Shuffled" });
+        info!("Reverse Sage Events:            {}", if self.logic.reverse_sage_events { "ON" } else { "OFF" });
+        info!("Progression-Granting Enemies:   {}", if self.logic.no_progression_enemies { "Removed" } else { "Vanilla" });
+
+        info!("Maiamai:                        {}", if self.logic.maiamai_madness { "Madness" } else { "Not Randomized" });
+
         info!("Start with Merge:               {}", if self.logic.start_with_merge { "Yes" } else { "No" });
         let shop_items = vec![
-            if self.logic.assured_weapon { Some("Weapon") } else { None },
-            if self.logic.bell_in_shop { Some("Bell") } else { None },
-            if self.logic.pouch_in_shop { Some("Pouch") } else { None },
-            if self.logic.boots_in_shop { Some("Pegasus Boots") } else { None },
-        ].iter().filter(|i| i.is_some()).map(|i| i.unwrap()).collect::<Vec<_>>().join(", ");
+            (self.logic.bell_in_shop, "Bell"),
+            (self.logic.pouch_in_shop, "Pouch"),
+            (self.logic.sword_in_shop, "Sword"),
+            (self.logic.boots_in_shop, "Pegasus Boots"),
+            (self.logic.assured_weapon, "Weapon"),
+        ].iter()
+            .flat_map(|(setting, str)| if *setting {Some(*str)} else { None })
+            .collect::<Vec<_>>()
+            .join(", ");
         if !shop_items.is_empty() {
             info!("Starting Shop Items:            {}", shop_items);
         }
-        info!("Maiamai:                        {}", if self.logic.maiamai_madness { "Madness" } else { "Not Randomized" });
         info!("Minigames:                      {}", if self.logic.minigames_excluded { "Excluded" } else { "Included" });
         info!("Trials:                         {}", if self.logic.skip_trials { "Skipped" } else { "Normal" });
         info!("Bow of Light:                   {}", if self.logic.bow_of_light_in_castle { "Tournament" } else { "Normal" });

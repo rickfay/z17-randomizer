@@ -8,6 +8,7 @@ use {
         scene::{Flag, Icn, IcnArgs, StageMeta},
         Item,
     },
+    log::info,
 };
 
 #[non_exhaustive]
@@ -41,6 +42,7 @@ impl Icon {
 }
 
 pub fn patch_maps(patcher: &mut Patcher, prizes: &DungeonPrizes, settings: &Settings) {
+    info!("Patching Maps...");
     patch_hyrule_maps(patcher, prizes, settings);
     patch_lorule_maps(patcher, prizes, settings);
     add_compass_chests(patcher);
