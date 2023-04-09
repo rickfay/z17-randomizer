@@ -650,6 +650,7 @@ fn patch_hint_ghosts_overworld(patcher: &mut Patcher) {
 }
 
 // Hide All Dungeon Hint Ghosts
+#[allow(unused)]
 fn patch_hint_ghosts_dungeons(patcher: &mut Patcher) {
     // Eastern
     patcher.modify_objs(DungeonEast, 1, &[

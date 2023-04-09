@@ -2,23 +2,32 @@ use {
     albw::Item::*,
     log::{error, info, LevelFilter},
     randomizer::{
-        constants::VERSION,
-        model::metrics::Metrics,
-        pause, regions,
+        cli,
+        regions,
         settings::{
             entrance_shuffle_setting::EntranceShuffleSetting,
-            hint_settings::{HintGhostPrice, HintGhostPrice::*},
+            hint_settings::HintGhostPrice::*,
             logic::Logic,
             logic_mode::LogicMode,
             pedestal_setting::PedestalSetting,
             settings::{Exclude, Exclusion, Options, Settings},
         },
-        system, Layout, LocationInfo, Spoiler,
+        Layout, LocationInfo,
     },
     simplelog::SimpleLogger,
     structopt::StructOpt,
 };
-use randomizer::cli;
+use randomizer::fail;
+use randomizer::system::{System, UserConfig};
+
+#[derive(Debug, StructOpt)]
+struct Opt {
+    #[structopt(long)]
+    no_patch: bool,
+
+    #[structopt(long)]
+    no_spoiler: bool,
+}
 
 /**
  * PLANDOMIZER
@@ -27,49 +36,35 @@ use randomizer::cli;
  * filler algorithm. TODO: Rework this to build Plandos from input JSON instead of hardcoding them.
  */
 fn main() {
-    let run_args: RunArgs = RunArgs::from_args();
+    let args = Opt::from_args();
     SimpleLogger::init(LevelFilter::Info, Default::default()).expect("Failed to init logger.");
 
     info!("Initializing ALBW Plandomizer...\n");
-    let result = execute_plandomizer(run_args);
 
-    match result {
+    // Load User Config
+    let user_config: UserConfig = System::load_config().unwrap_or_else(|error| {
+        fail!("Failed to parse configuration file: config.json\n\
+                Commonly Fixed By: Replace any single backslash characters '\\' with a forward slash '/' or double backslash '\\\\'.\n\
+                Full Error: {}\n", error);
+    });
+
+    const PLANDO_SEED: u32 = 0;
+    let settings = plando_settings();
+    settings.log_settings();
+    let layout = build_layout();
+
+    match randomizer::generate_seed(PLANDO_SEED, &settings, &user_config, args.no_patch, args.no_spoiler) {
         Ok(_) => {
-            info!("Plandomizer execution finished successfully :D");
+            println!();
+            info!("Successfully Generated ALBW Plandomizer Seed");
         }
         Err(err) => {
+            println!();
             error!("Plandomizer execution failed:\n{}", err.into_inner());
         }
     }
 
     cli::pause();
-}
-
-fn execute_plandomizer(run_args: RunArgs) -> randomizer::Result<()> {
-    const PLANDO_SEED: u32 = 0;
-    let settings = plando_settings();
-
-    settings.log(PLANDO_SEED);
-
-    let layout = build_layout();
-
-    info!("Successfully Built Plando Layout");
-
-    let version = format!("PLANDO - {}", VERSION);
-
-    todo!()
-
-    // let spoiler = Spoiler::new(version.as_str(), PLANDO_SEED, &settings, layout, Metrics::default());
-    // spoiler.patch(system.load_config()?, !run_args.no_patch, !run_args.no_spoiler, false)
-}
-
-#[derive(Debug, StructOpt)]
-struct RunArgs {
-    #[structopt(long)]
-    no_patch: bool,
-
-    #[structopt(long)]
-    no_spoiler: bool,
 }
 
 fn plando_settings() -> Settings {
@@ -116,6 +111,8 @@ fn plando_settings() -> Settings {
 
 #[rustfmt::skip]
 fn build_layout() -> Layout {
+
+    info!("Building Item Layout from Plan...");
     let mut layout = Layout::default();
 
     //////////////////////////
@@ -620,6 +617,8 @@ fn build_layout() -> Layout {
     layout.set(LocationInfo::new(regions::dungeons::lorule::castle::SUBREGION, "[LC] (4F) Hookshot Trial (Chest)"), RupeeGold);
     layout.set(LocationInfo::new(regions::dungeons::lorule::castle::SUBREGION, "[LC] (4F) Hookshot Trial (Eyes)"), RupeeGold);
     layout.set(LocationInfo::new(regions::dungeons::lorule::castle::SUBREGION, "Zelda"), ItemBow);
+
+    info!("Successfully Built Layout");
 
     layout
 }
