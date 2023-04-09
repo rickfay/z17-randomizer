@@ -2,7 +2,7 @@ use {
     crate::{
         regions,
         settings::{logic::Logic, logic_mode::LogicMode::*},
-        LocationInfo, Seed,
+        LocationInfo,
     },
     log::info,
     serde::{Deserialize, Serialize},
@@ -39,10 +39,10 @@ impl Settings {
             .unwrap_or(false)
     }
 
-    #[rustfmt::skip]
-    pub fn log(&self, seed: Seed) {
-        info!("Seed:                           {:0>10}", seed);
-        info!("Logic Mode:                     {}", match self.logic.logic_mode {
+    pub fn log_settings(&self) {
+        let Settings { logic, options, .. } = self;
+
+        info!("Logic Mode:                     {}", match logic.logic_mode {
             Normal => "Normal",
             Hard => "Hard",
             Glitched => "Glitched",
@@ -50,39 +50,81 @@ impl Settings {
             Hell => "Hell - Did you really mean to choose this?",
             NoLogic => "No Logic",
         });
-        info!("Dungeon Prizes:                 {}", if self.logic.randomize_dungeon_prizes { "Randomized" } else { "Not Randomized" });
-        info!("Lorule Castle Requirement:      {} Portraits", self.logic.lc_requirement);
-        info!("Yuga Ganon Requirement:         {} Portraits", self.logic.yuganon_requirement);
-        info!("Pedestal Requirement:           {}", self.logic.ped_requirement);
+        info!(
+            "Dungeon Prizes:                 {}",
+            if logic.randomize_dungeon_prizes { "Randomized" } else { "Not Randomized" }
+        );
+        info!("Lorule Castle Requirement:      {} Portraits", logic.lc_requirement);
+        info!("Yuga Ganon Requirement:         {} Portraits", logic.yuganon_requirement);
+        info!("Pedestal Requirement:           {}", logic.ped_requirement);
 
-        info!("Nice Mode:                      {}", if self.logic.nice_mode { "ON" } else { "OFF" });
-        info!("Super Items:                    {}", if self.logic.super_items { "Shuffled" } else { "Not Shuffled" });
-        info!("Reverse Sage Events:            {}", if self.logic.reverse_sage_events { "ON" } else { "OFF" });
-        info!("Progression-Granting Enemies:   {}", if self.logic.no_progression_enemies { "Removed" } else { "Vanilla" });
+        info!("Nice Mode:                      {}", if logic.nice_mode { "ON" } else { "OFF" });
+        info!(
+            "Super Items:                    {}",
+            if logic.super_items { "Shuffled" } else { "Not Shuffled" }
+        );
+        info!(
+            "Reverse Sage Events:            {}",
+            if logic.reverse_sage_events { "ON" } else { "OFF" }
+        );
+        info!(
+            "Progression-Granting Enemies:   {}",
+            if logic.no_progression_enemies { "Removed" } else { "Vanilla" }
+        );
 
-        info!("Maiamai:                        {}", if self.logic.maiamai_madness { "Madness" } else { "Not Randomized" });
+        info!(
+            "Maiamai:                        {}",
+            if logic.maiamai_madness { "Madness" } else { "Not Randomized" }
+        );
 
-        info!("Start with Merge:               {}", if self.logic.start_with_merge { "Yes" } else { "No" });
+        info!(
+            "Start with Merge:               {}",
+            if logic.start_with_merge { "Yes" } else { "No" }
+        );
         let shop_items = vec![
-            (self.logic.bell_in_shop, "Bell"),
-            (self.logic.pouch_in_shop, "Pouch"),
-            (self.logic.sword_in_shop, "Sword"),
-            (self.logic.boots_in_shop, "Pegasus Boots"),
-            (self.logic.assured_weapon, "Weapon"),
-        ].iter()
-            .flat_map(|(setting, str)| if *setting {Some(*str)} else { None })
-            .collect::<Vec<_>>()
-            .join(", ");
+            (logic.bell_in_shop, "Bell"),
+            (logic.pouch_in_shop, "Pouch"),
+            (logic.sword_in_shop, "Sword"),
+            (logic.boots_in_shop, "Pegasus Boots"),
+            (logic.assured_weapon, "Weapon"),
+        ]
+        .iter()
+        .flat_map(|(setting, str)| if *setting { Some(*str) } else { None })
+        .collect::<Vec<_>>()
+        .join(", ");
         if !shop_items.is_empty() {
             info!("Starting Shop Items:            {}", shop_items);
         }
-        info!("Minigames:                      {}", if self.logic.minigames_excluded { "Excluded" } else { "Included" });
-        info!("Trials:                         {}", if self.logic.skip_trials { "Skipped" } else { "Normal" });
-        info!("Bow of Light:                   {}", if self.logic.bow_of_light_in_castle { "Tournament" } else { "Normal" });
-        info!("Weather Vanes:                  {}", if self.logic.weather_vanes_activated { "All Activated" } else { "Normal" });
-        info!("Dark Room Crossing:             {}", if self.logic.dark_rooms_lampless { "Lamp Not Required" } else { "Lamp Required" });
-        info!("Swords:                         {}", if self.logic.swordless_mode { "Swordless Mode - NO SWORDS" } else { "Normal" });
-        info!("Chest Size:                     {}\n", if self.options.chest_size_matches_contents { "Matches Contents" } else { "Normal" });
+        info!(
+            "Minigames:                      {}",
+            if logic.minigames_excluded { "Excluded" } else { "Included" }
+        );
+        info!(
+            "Trials:                         {}",
+            if logic.skip_trials { "Skipped" } else { "Normal" }
+        );
+        info!(
+            "Bow of Light:                   {}",
+            if logic.bow_of_light_in_castle { "Tournament" } else { "Normal" }
+        );
+        info!(
+            "Weather Vanes:                  {}",
+            if logic.weather_vanes_activated { "All Activated" } else { "Normal" }
+        );
+        info!(
+            "Dark Room Crossing:             {}",
+            if logic.dark_rooms_lampless { "Lamp Not Required" } else { "Lamp Required" }
+        );
+        info!(
+            "Swords:                         {}",
+            if logic.swordless_mode { "Swordless Mode - NO SWORDS" } else { "Normal" }
+        );
+        info!(
+            "Chest Size:                     {}",
+            if options.chest_size_matches_contents { "Matches Contents" } else { "Normal" }
+        );
+        info!("Hint Ghost Price:               {}", logic.hint_ghost_price);
+        println!();
     }
 }
 

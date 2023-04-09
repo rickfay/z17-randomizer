@@ -1,14 +1,12 @@
 use {
     self::code::Code,
-    crate::{fail, patch::util::*, Error, ItemExt, Layout, Result, Settings},
+    crate::{fail, patch::util::*, Error, ItemExt, Result, SeedInfo, Settings},
     albw::{
         course::{Id, Id::*},
         demo::Timed,
         flow::FlowMut,
         scene::{Arg, Obj, Rail, SceneMeta},
-        Demo, File, Game, IntoBytes,
-        Item::{self, SpecialMove},
-        Language, Scene,
+        Demo, File, Game, IntoBytes, Item, Language, Scene,
     },
     fs_extra::dir::CopyOptions,
     log::{debug, error, info},
@@ -22,6 +20,7 @@ use {
 mod code;
 mod flow;
 mod maps;
+mod messages;
 pub mod msbf;
 mod prizes;
 mod scenes;
@@ -143,7 +142,7 @@ impl Patcher {
             .map(|load| Course {
                 language: load,
                 scenes: Default::default(),
-                scene_meta: game.course(course).scene_meta().unwrap(),
+                scene_meta: game.course(course).scene_meta(),
             })
             .unwrap()
     }
@@ -168,7 +167,12 @@ impl Patcher {
         let Self { game, ref mut courses, .. } = self;
         let Course { ref mut scene_meta, .. } =
             courses.entry(course).or_insert(Self::load_course(game, course));
-        scene_meta
+        scene_meta.as_mut().unwrap()
+    }
+
+    fn update(&mut self, (course, file): (Id, File<Vec<u8>>)) -> Result<()> {
+        self.language(course)?.update(file)?;
+        Ok(())
     }
 
     fn inject_msbf(&mut self, course: Id, msbf: Option<&(&str, File<Box<[u8]>>)>) -> Result<()> {
@@ -295,12 +299,12 @@ impl Patcher {
         Ok(())
     }
 
-    pub fn prepare(mut self, layout: &Layout, settings: &Settings) -> Result<Patches> {
+    pub fn prepare(mut self, seed_info: &SeedInfo) -> Result<Patches> {
         let common_archive = self.game.common()?;
         let mut item_actors = HashMap::new();
 
         for (item, get_item) in self.game.match_items_to_get_items() {
-            if SpecialMove.as_str().eq(&get_item.0) {
+            if Item::SpecialMove.as_str().eq(&get_item.0) {
                 // fixme hacky and gross
                 let mut actor = common_archive.get_actor_bch("SwordD")?.clone();
                 actor.rename(String::from("World/Actor/SwordD.bch"));
@@ -333,13 +337,14 @@ impl Patcher {
         //self.scene(course::Id::DungeonWater, 2)?.actors_mut().add(fresco_arrow.clone())?;
         //self.scene(course::Id::IndoorLight, 0)?.actors_mut().add(fresco_arrow.clone())?;
 
-        let prizes = get_dungeon_prizes(layout);
+        let prizes = get_dungeon_prizes(&seed_info.layout);
         let free = self.rentals[8];
         let actor_profile = prizes::patch_actor_profile(&mut self, &prizes);
-        flow::apply(&mut self, free, settings)?;
-        prizes::patch_dungeon_prizes(&mut self, &prizes, settings);
-        maps::patch_maps(&mut self, &prizes, settings);
-        scenes::patch_byaml_files(&mut self, settings)?;
+        flow::apply(&mut self, free, seed_info.settings)?;
+        messages::patch_messages(&mut self, seed_info)?;
+        prizes::patch_dungeon_prizes(&mut self, &prizes, seed_info.settings);
+        maps::patch_maps(&mut self, &prizes);
+        scenes::patch_byaml_files(&mut self, seed_info.settings)?;
 
         {
             let Self { ref rentals, ref merchant, ref mut courses, .. } = self;
@@ -353,7 +358,7 @@ impl Patcher {
             kakariko_actors.add(item_actors.get(&merchant[0]).unwrap().clone())?;
             kakariko_actors.add(item_actors.get(&merchant[2]).unwrap().clone())?;
         }
-        let code = code::create(&self, settings);
+        let code = code::create(&self, seed_info.settings);
         let Self { game, boot, courses, .. } = self;
         let mut romfs = Files(vec![]);
 
@@ -366,7 +371,9 @@ impl Patcher {
         romfs.add(boot.into_archive());
         for (_, Course { language, scenes, scene_meta }) in courses {
             romfs.add(language.into_archive());
-            romfs.add_serialize(scene_meta.into_file());
+            if let Some(scene_meta) = scene_meta {
+                romfs.add_serialize(scene_meta.into_file());
+            }
             for (_, scene) in scenes {
                 let (actors, stage) = scene.into_files();
                 if let Some(archive) = actors {
@@ -375,7 +382,7 @@ impl Patcher {
                 romfs.add_serialize(stage);
             }
         }
-        for cutscene in cutscenes(&game, settings) {
+        for cutscene in cutscenes(&game, seed_info.settings) {
             romfs.add(cutscene?);
         }
         if let Some(actor_profile) = actor_profile {
@@ -389,7 +396,7 @@ impl Patcher {
 pub struct Course {
     language: Language,
     scenes: HashMap<u16, Scene>,
-    scene_meta: SceneMeta,
+    scene_meta: Option<SceneMeta>,
 }
 
 #[derive(Clone, Debug)]
@@ -483,8 +490,8 @@ impl Files {
 }
 
 /// Removes extraneous events from all important cutscenes.
-fn cutscenes<'game, 'settings>(
-    game: &'game Game, settings: &'settings Settings,
+fn cutscenes<'game>(
+    game: &'game Game, settings: &Settings,
 ) -> impl Iterator<Item = Result<File<Demo>>> + 'game {
     info!("Patching Cutscenes...");
     let Settings { logic, options, .. } = settings.clone();
@@ -542,6 +549,7 @@ fn cutscenes<'game, 'settings>(
                 906, // Monster Guts
                 907, // Monster Tail
                 908, // Monster Horn
+                919, // Skip Hint Ghost tutorial
                 920, // Link's House Weather Vane
                 940, // Vacant House Weather Vane
                 950, // Maiamai

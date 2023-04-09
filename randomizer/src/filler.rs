@@ -1,87 +1,39 @@
 use {
     crate::{
         convert, fail,
-        filler_util::shuffle,
-        item_pools::{get_item_pools, get_maiamai_pool},
-        item_to_str,
-        model::{
-            check::Check, location::Location, location_node::LocationNode, progress::Progress,
-            Hints,
-        },
-        patch::util::is_sage,
+        item_pools::{get_maiamai_pool, Pool},
+        model::{check::Check, location::Location, progress::Progress},
         settings::logic_mode::LogicMode::*,
-        world::build_world_graph,
+        world::WorldGraph,
+        CheckMap,
         FillerItem::{self, *},
-        LocationInfo, Metrics, Seed, Settings,
+        LocationInfo, Settings,
     },
     albw::Item,
-    log::{debug, error, info},
+    log::{error, info},
     queue::Queue,
-    rand::{rngs::StdRng, Rng, SeedableRng},
-    std::collections::{BTreeMap, HashMap, HashSet},
+    rand::{prelude::StdRng, Rng},
+    std::collections::{HashMap, HashSet},
 };
 
-/// Filler Algorithm
-pub fn fill_stuff(settings: &Settings, seed: Seed) -> (Vec<(LocationInfo, Item)>, Metrics) {
-    settings.log(seed);
-    prevalidate(settings);
-
-    let mut rng = StdRng::seed_from_u64(seed as u64);
-    let mut world_graph = build_world_graph();
-    let mut check_map = prefill_check_map(&mut world_graph);
-    let (mut progression_pool, mut junk_pool) = get_item_pools(settings, &mut rng);
-
-    verify_all_locations_accessible(&mut world_graph, &progression_pool, settings);
-    handle_exclusions(&mut check_map, settings, &mut rng, &mut junk_pool);
-    preplace_items(&mut check_map, settings, &mut rng, &mut progression_pool, &mut junk_pool);
-    assumed_fill(&mut world_graph, &mut rng, &mut progression_pool, &mut check_map, settings);
-    fill_junk(&mut check_map, &mut rng, &junk_pool);
-
-    let metrics = calculate_metrics(&mut world_graph, &mut check_map, settings, &mut rng);
-
-    (map_to_result(world_graph, check_map), metrics)
-}
-
-fn prevalidate(settings: &Settings) {
-    // LC Requirement
-    if !(0..=7).contains(&settings.logic.lc_requirement) {
-        fail!(
-            "Invalid Lorule Castle Requirement: \"{}\" was not between 0-7, inclusive.",
-            settings.logic.lc_requirement
-        );
-    }
-
-    // Yuganon Requirement
-    // if !(0..=7).contains(&settings.logic.yuganon_requirement) {
-    //     fail!("Invalid Yuga Ganon Requirement: \"{}\" was not between 0-7, inclusive.", settings.logic.yuganon_requirement);
-    // }
-    if settings.logic.yuganon_requirement != settings.logic.lc_requirement {
-        fail!(
-            "Yuga Ganon Requirement: \"{}\" is different than Lorule Castle Requirement: \"{}\"\n\
-        Different values for these settings are not yet supported!",
-            settings.logic.yuganon_requirement,
-            settings.logic.lc_requirement
-        );
-    }
-
-    // Swords
-    if settings.logic.sword_in_shop && settings.logic.swordless_mode {
-        fail!("The sword_in_shop and swordless_mode settings cannot both be enabled.");
-    }
-
-    // Assured Weapons
-    if settings.logic.assured_weapon
-        && (settings.logic.sword_in_shop || settings.logic.boots_in_shop)
-    {
-        fail!(
-            "The assured_weapon setting cannot be enabled when either sword_in_shop or boots_in_shop is also enabled."
-        );
-    }
+/// Fill Seed such that All Locations are Reachable
+///
+/// This is the "standard" filler algorithm for ALBWR.
+pub fn fill_all_locations_reachable(
+    world_graph: &mut WorldGraph, check_map: &mut CheckMap, progression_pool: &mut Pool,
+    junk_pool: &mut Pool, settings: &Settings, rng: &mut StdRng,
+) -> Vec<(LocationInfo, Item)> {
+    verify_all_locations_accessible(world_graph, check_map, progression_pool, settings);
+    handle_exclusions(check_map, settings, rng, junk_pool);
+    preplace_items(check_map, settings, rng, progression_pool, junk_pool);
+    assumed_fill(world_graph, rng, progression_pool, check_map, settings);
+    fill_junk(check_map, rng, junk_pool);
+    map_to_result(world_graph, check_map)
 }
 
 /// Place static items ahead of the randomly filled ones
-fn preplace_items<'a>(
-    check_map: &mut HashMap<&'a str, Option<FillerItem>>, settings: &'a Settings, rng: &mut StdRng,
+fn preplace_items(
+    check_map: &mut CheckMap, settings: &Settings, rng: &mut StdRng,
     progression: &mut Vec<FillerItem>, junk: &mut Vec<FillerItem>,
 ) {
     // Vanilla Dungeon Prizes
@@ -165,17 +117,17 @@ fn preplace_items<'a>(
     }
     exclude("100 Maiamai", rng, check_map, junk);
 
-    let mut shop_positions: Vec<&str> = Vec::new();
-    let mut bow_light_positions: Vec<&str> = Vec::from(["Zelda"]);
-    let mut maiamai_positions: Vec<&str> = Vec::new();
+    let mut shop_positions: Vec<String> = Vec::new();
+    let mut bow_light_positions: Vec<String> = Vec::from(["Zelda".to_owned()]);
+    let mut maiamai_positions: Vec<String> = Vec::new();
 
     for (check_name, item) in check_map.clone() {
         if check_name.starts_with("[LC]") && item.is_none() {
-            let _ = &bow_light_positions.push(check_name);
+            let _ = &bow_light_positions.push(check_name.clone());
         } else if check_name.starts_with("Ravio") && !check_name.contains("6") {
-            let _ = &shop_positions.push(check_name);
+            let _ = &shop_positions.push(check_name.clone());
         } else if check_name.starts_with("[Mai]") {
-            let _ = &maiamai_positions.push(check_name);
+            let _ = &maiamai_positions.push(check_name.clone());
         }
     }
 
@@ -261,32 +213,29 @@ fn preplace_items<'a>(
     if !settings.logic.maiamai_madness {
         let mut maiamai_items = get_maiamai_pool();
         for check_name in maiamai_positions {
-            place_static(check_map, progression, maiamai_items.remove(0), check_name);
+            place_static(check_map, progression, maiamai_items.remove(0), &check_name);
         }
     }
 }
 
 // Statically place an item in a given location, then remove it from the item pool provided
-fn place_static<'a>(
-    check_map: &mut HashMap<&'a str, Option<FillerItem>>, pool: &mut Vec<FillerItem>,
-    item: FillerItem, check_name: &'a str,
-) {
-    check_map.insert(check_name, Some(item));
+fn place_static(check_map: &mut CheckMap, pool: &mut Pool, item: FillerItem, check_name: &str) {
+    check_map.insert(check_name.to_owned(), Some(item));
     pool.retain(|x| *x != item);
 }
 
 // Exclude a location by placing a random junk item there
-fn exclude(
-    check_name: &'static str, rng: &mut StdRng, check_map: &mut HashMap<&str, Option<FillerItem>>,
-    junk: &mut Vec<FillerItem>,
-) {
-    if check_map.insert(check_name, Some(junk.remove(rng.gen_range(0..junk.len())))).is_none() {
+fn exclude(check_name: &str, rng: &mut StdRng, check_map: &mut CheckMap, junk: &mut Pool) {
+    if check_map
+        .insert(check_name.to_owned(), Some(junk.remove(rng.gen_range(0..junk.len()))))
+        .is_none()
+    {
         fail!("Check not found: {}", check_name);
     }
 }
 
-fn handle_exclusions<'a>(
-    check_map: &mut HashMap<&'a str, Option<FillerItem>>, settings: &'a Settings, rng: &mut StdRng,
+fn handle_exclusions(
+    check_map: &mut CheckMap, settings: &Settings, rng: &mut StdRng,
     junk_pool: &mut Vec<FillerItem>,
 ) {
     let opt = settings.exclusions.0.get("exclusions");
@@ -297,16 +246,11 @@ fn handle_exclusions<'a>(
     let exclusions = opt.unwrap();
 
     for exclusion in exclusions {
-        if check_map.contains_key(&exclusion.as_str()) {
-            check_map.insert(
-                &exclusion.as_str(),
-                Some(junk_pool.remove(rng.gen_range(0..junk_pool.len()))),
-            );
+        if check_map.contains_key(exclusion) {
+            let rng_index = rng.gen_range(0..junk_pool.len());
+            check_map.insert(exclusion.clone(), Some(junk_pool.remove(rng_index)));
         } else {
-            error!(
-                "Cannot exclude \"{}\", no matching check found with that name.",
-                &exclusion.as_str()
-            );
+            error!("Cannot exclude \"{}\", no matching check found with that name.", exclusion);
             fail!("Consult a spoiler log for a list of valid check names.");
         }
     }
@@ -314,11 +258,11 @@ fn handle_exclusions<'a>(
 
 /// Super dirty mapping I hate it
 fn map_to_result(
-    world_graph: HashMap<Location, LocationNode>, check_map: HashMap<&str, Option<FillerItem>>,
+    world_graph: &mut WorldGraph, check_map: &mut CheckMap,
 ) -> Vec<(LocationInfo, Item)> {
     let mut result: Vec<(LocationInfo, Item)> = Vec::new();
     for (_, location_node) in world_graph {
-        for check in location_node.get_checks() {
+        for check in location_node.clone().get_checks() {
             if let Some(loc_info) = check.get_location_info() {
                 result.push((
                     loc_info,
@@ -403,10 +347,7 @@ fn is_dungeon_item(item: FillerItem) -> bool {
     }
 }
 
-fn fill_junk(
-    check_map: &mut HashMap<&str, Option<FillerItem>>, rng: &mut StdRng,
-    junk_items: &Vec<FillerItem>,
-) {
+fn fill_junk(check_map: &mut CheckMap, rng: &mut StdRng, junk_items: &mut Pool) {
     info!("Placing Junk Items...");
 
     let mut empty_check_keys = Vec::new();
@@ -417,18 +358,6 @@ fn fill_junk(
     }
 
     if empty_check_keys.len() != junk_items.len() {
-        println!();
-
-        for key in &empty_check_keys {
-            info!("Empty Check: {}", key);
-        }
-
-        println!();
-
-        for key in junk_items {
-            info!("Junk: {}", convert(*key).unwrap().as_str());
-        }
-
         fail!(
             "Number of empty checks: {} does not match available junk items: {}",
             empty_check_keys.len(),
@@ -437,21 +366,20 @@ fn fill_junk(
     }
 
     for junk in junk_items {
-        check_map
-            .insert(empty_check_keys.remove(rng.gen_range(0..empty_check_keys.len())), Some(*junk));
+        let rng_index = rng.gen_range(0..empty_check_keys.len());
+        check_map.insert(empty_check_keys.remove(rng_index), Some(*junk));
     }
 }
 
 fn place_item_randomly(
-    item: FillerItem, checks: &Vec<Check>, check_map: &mut HashMap<&str, Option<FillerItem>>,
-    rng: &mut StdRng,
+    item: FillerItem, checks: &Vec<Check>, check_map: &mut CheckMap, rng: &mut StdRng,
 ) {
     let index = rng.gen_range(0..checks.len());
-    check_map.insert(checks.get(index).unwrap().get_name(), Some(item));
+    check_map.insert(checks.get(index).unwrap().get_name().to_owned(), Some(item));
 }
 
 fn filter_checks(
-    item: FillerItem, checks: &mut Vec<Check>, check_map: &mut HashMap<&str, Option<FillerItem>>,
+    item: FillerItem, checks: &mut Vec<Check>, check_map: &mut CheckMap,
 ) -> Vec<Check> {
     // Filter out non-empty checks
     let mut filtered_checks = checks
@@ -516,9 +444,7 @@ fn filter_dungeon_checks(item: FillerItem, eligible_checks: &mut Vec<Check>) -> 
         .collect()
 }
 
-fn exist_empty_reachable_check(
-    checks: &Vec<Check>, check_map: &HashMap<&str, Option<FillerItem>>,
-) -> bool {
+fn exist_empty_reachable_check(checks: &Vec<Check>, check_map: &mut CheckMap) -> bool {
     for check in checks {
         match check_map.get(check.get_name()).unwrap() {
             None => {
@@ -532,15 +458,13 @@ fn exist_empty_reachable_check(
 }
 
 /// Prefills a map with all checks as defined by the world graph with no values yet assigned
-fn prefill_check_map(
-    world_graph: &mut HashMap<Location, LocationNode>,
-) -> HashMap<&'static str, Option<FillerItem>> {
+pub fn prefill_check_map(world_graph: &mut WorldGraph) -> CheckMap {
     let mut check_map = HashMap::new();
 
     for (_, location_node) in world_graph {
         for check in location_node.clone().get_checks() {
             if check_map
-                .insert(check.get_name(), match check.get_quest() {
+                .insert(check.get_name().to_owned(), match check.get_quest() {
                     None => None,
                     Some(quest) => Some(quest), // Quest items are static so just set them right away
                 })
@@ -555,7 +479,7 @@ fn prefill_check_map(
 }
 
 /// This translation is probably adding unnecessary overhead, oh well
-fn build_progress_from_items(items: &Vec<FillerItem>, settings: &Settings) -> Progress {
+fn build_progress_from_items(items: &Pool, settings: &Settings) -> Progress {
     let mut progress = Progress::new(settings.clone());
     for item in items {
         progress.add_item(*item);
@@ -565,14 +489,11 @@ fn build_progress_from_items(items: &Vec<FillerItem>, settings: &Settings) -> Pr
 }
 
 fn verify_all_locations_accessible(
-    world_graph: &mut HashMap<Location, LocationNode>, progression_pool: &Vec<FillerItem>,
+    world_graph: &mut WorldGraph, check_map: &mut CheckMap, progression_pool: &mut Pool,
     settings: &Settings,
 ) {
     info!("Verifying all locations accessible...");
-
-    let mut check_map = prefill_check_map(world_graph);
-
-    let reachable_checks = assumed_search(world_graph, progression_pool, &mut check_map, settings); //find_reachable_checks(loc_map, &everything, &mut check_map); //
+    let reachable_checks = assumed_search(world_graph, progression_pool, check_map, settings); //find_reachable_checks(loc_map, &everything, &mut check_map); //
 
     /**
      * 384 In-Logic Checks
@@ -601,8 +522,8 @@ fn verify_all_locations_accessible(
     if reachable_checks.len() != IN_LOGIC_CHECKS + PROGRESSION_EVENTS {
         let reachable_check_names: Vec<&str> =
             reachable_checks.iter().map(|c| c.get_name()).collect();
-        for (check, _) in &check_map {
-            if !reachable_check_names.contains(check) {
+        for (check, _) in check_map {
+            if !reachable_check_names.contains(&check.as_str()) {
                 info!("Unreachable Check: {}", check);
             }
         }
@@ -616,8 +537,8 @@ fn verify_all_locations_accessible(
 }
 
 /// Find all checks reachable with the given Progress
-fn find_reachable_checks(
-    loc_map: &mut HashMap<Location, LocationNode>, progress: &Progress,
+pub(crate) fn find_reachable_checks(
+    world_graph: &mut WorldGraph, progress: &Progress,
 ) -> Vec<Check> {
     let start_node = Location::RavioShop;
     let mut loc_queue: Queue<Location> = Queue::from(vec![start_node]);
@@ -630,7 +551,7 @@ fn find_reachable_checks(
         let location = loc_queue.dequeue().unwrap();
 
         // Grab the location from the map, verify it is defined
-        let location_node = match loc_map.get_mut(&location) {
+        let location_node = match world_graph.get_mut(&location) {
             Some(loc) => loc,
             None => {
                 fail!("Location Undefined: {:?}", location);
@@ -657,9 +578,8 @@ fn find_reachable_checks(
     reachable_checks
 }
 
-fn get_items_from_reachable_checks(
-    reachable_checks: &Vec<Check>, check_map: &mut HashMap<&str, Option<FillerItem>>,
-    settings: &Settings,
+pub(crate) fn get_items_from_reachable_checks(
+    reachable_checks: &Vec<Check>, check_map: &mut CheckMap, settings: &Settings,
 ) -> Progress {
     let mut progress = Progress::new(settings.clone());
 
@@ -698,28 +618,26 @@ fn get_items_from_reachable_checks(
 /// * `check_map` - A map representing all checks and items assigned to them
 /// * `settings` - Game settings
 fn assumed_fill(
-    mut world_graph: &mut HashMap<Location, LocationNode>, mut rng: &mut StdRng,
-    items_owned: &mut Vec<FillerItem>, mut check_map: &mut HashMap<&str, Option<FillerItem>>,
-    settings: &Settings,
+    world_graph: &mut WorldGraph, rng: &mut StdRng, items_owned: &mut Pool,
+    check_map: &mut CheckMap, settings: &Settings,
 ) {
     info!("Placing Progression Items...");
 
-    let mut reachable_checks =
-        assumed_search(&mut world_graph, &items_owned, &mut check_map, settings);
+    let mut reachable_checks = assumed_search(world_graph, items_owned, check_map, settings);
 
-    while exist_empty_reachable_check(&reachable_checks, &check_map) && !items_owned.is_empty() {
+    while exist_empty_reachable_check(&reachable_checks, check_map) && !items_owned.is_empty() {
         let item = items_owned.remove(0);
 
         //
-        reachable_checks = assumed_search(&mut world_graph, &items_owned, &mut check_map, settings);
+        reachable_checks = assumed_search(world_graph, items_owned, check_map, settings);
 
-        let filtered_checks = filter_checks(item, &mut reachable_checks, &mut check_map);
+        let filtered_checks = filter_checks(item, &mut reachable_checks, check_map);
 
         if filtered_checks.len() == 0 {
             info!("No reachable checks found to place: {:?}", item);
         }
 
-        place_item_randomly(item, &filtered_checks, &mut check_map, &mut rng);
+        place_item_randomly(item, &filtered_checks, check_map, rng);
     }
 }
 
@@ -733,14 +651,14 @@ fn assumed_fill(
 /// all such items have been exhausted.
 ///
 fn assumed_search(
-    loc_map: &mut HashMap<Location, LocationNode>, items_owned: &Vec<FillerItem>,
-    mut check_map: &mut HashMap<&str, Option<FillerItem>>, settings: &Settings,
+    world_graph: &mut WorldGraph, items_owned: &mut Pool, mut check_map: &mut CheckMap,
+    settings: &Settings,
 ) -> Vec<Check> {
     let mut considered_items = build_progress_from_items(&items_owned.clone(), settings);
     let mut reachable_checks: Vec<Check>;
 
     loop {
-        reachable_checks = find_reachable_checks(loc_map, &considered_items);
+        reachable_checks = find_reachable_checks(world_graph, &considered_items);
         let reachable_items =
             get_items_from_reachable_checks(&reachable_checks, &mut check_map, settings);
 
@@ -757,468 +675,3 @@ fn assumed_search(
 
     reachable_checks
 }
-
-fn calculate_metrics(
-    world_graph: &mut HashMap<Location, LocationNode>,
-    check_map: &mut HashMap<&str, Option<FillerItem>>, settings: &Settings, rng: &mut StdRng,
-) -> Metrics {
-    println!();
-    info!("Calculating Metrics...");
-
-    let playthrough = sphere_search(world_graph, check_map, settings);
-
-    let hints = generate_hints(world_graph, check_map, settings, rng);
-
-    Metrics::new(playthrough.len(), playthrough, hints)
-}
-
-/// Sphere Search
-fn sphere_search<'a>(
-    world_graph: &mut HashMap<Location, LocationNode>,
-    mut check_map: &mut HashMap<&str, Option<FillerItem>>, settings: &Settings,
-) -> BTreeMap<String, BTreeMap<&'static str, &'static str>> {
-    info!("Generating Playthrough...");
-
-    let mut progress = Progress::new(settings.clone());
-    let mut reachable_checks: Vec<Check>;
-    let mut spheres = BTreeMap::new();
-    let mut sphere_num = 0;
-
-    loop {
-        reachable_checks = find_reachable_checks(world_graph, &progress);
-        let reachable_items =
-            get_items_from_reachable_checks(&reachable_checks, &mut check_map, settings);
-
-        let new_items = reachable_items.difference(&progress);
-
-        if new_items.is_empty() {
-            break;
-        }
-
-        for new_item in &new_items {
-            progress.add_item(*new_item);
-        }
-
-        let mut sphere = BTreeMap::new();
-        for reachable_check in reachable_checks {
-            let filler_item = check_map.get(reachable_check.get_name()).unwrap().unwrap();
-            if new_items.contains(&filler_item) && filler_item.is_progression() {
-                sphere.insert(reachable_check.get_name(), filler_item.as_str());
-            }
-        }
-        if sphere.is_empty() {
-            continue; // hide spheres with only minor progression items
-        }
-
-        spheres.insert(format!("Sphere {:02}", sphere_num), sphere);
-        sphere_num += 1;
-    }
-
-    spheres
-}
-
-/// Generates Always, Path, and Sometimes Hints based on settings
-fn generate_hints(
-    world_graph: &mut HashMap<Location, LocationNode>,
-    check_map: &mut HashMap<&str, Option<FillerItem>>, settings: &Settings, rng: &mut StdRng,
-) -> Hints {
-    info!("Generating Hints...");
-
-    const NUM_TOTAL_HINTS: usize = 27;
-    let mut taken_checks: Vec<&'static str> = Vec::new();
-
-    let always_hints = generate_always_hints(&mut taken_checks, check_map, settings);
-    let path_hints = generate_path_hints(&mut taken_checks, world_graph, check_map, settings, rng);
-
-    let num_sometimes_hints = NUM_TOTAL_HINTS - always_hints.len() - path_hints.len();
-    let sometimes_hints =
-        generate_sometimes_hints(num_sometimes_hints, &mut taken_checks, check_map, settings, rng);
-
-    let bow_of_light_hint = generate_bow_of_light_hint(world_graph, check_map);
-
-    Hints { path_hints, always_hints, sometimes_hints, bow_of_light_hint }
-}
-
-/// Generates the Bow of Light Hint
-fn generate_bow_of_light_hint(
-    world_graph: &mut HashMap<Location, LocationNode>,
-    check_map: &mut HashMap<&str, Option<FillerItem>>,
-) -> Vec<&'static str> {
-    for (_, location_node) in world_graph {
-        for check in location_node.clone().get_checks() {
-            if BowOfLight.eq(&check_map.get(check.get_name()).unwrap().unwrap()) {
-                return vec![check.get_location_info().unwrap().region()];
-            }
-        }
-    }
-
-    panic!("Failed to generate Bow of Light Hint");
-}
-
-/**
- * Always Hints
- * Generates hints for checks that should always be hinted, depending on settings.
- */
-fn generate_always_hints(
-    taken_checks: &mut Vec<&'static str>, check_map: &mut HashMap<&str, Option<FillerItem>>,
-    settings: &Settings,
-) -> HashMap<&'static str, &'static str> {
-    let mut always_checks =
-        vec!["Master Sword Pedestal", "Great Rupee Fairy", "Blacksmith (Lorule)", "Bouldering Guy"];
-
-    // todo
-    // if settings.logic.nice_mode {
-    //     always_checks.extend(vec![" 30 Maiamai", " 40 Maiamai", " 50 Maiamai"]);
-    // }
-
-    if !settings.logic.minigames_excluded {
-        always_checks.extend(vec!["Octoball Derby", "Treacherous Tower Intermediate"]);
-    }
-
-    let mut always_hints = HashMap::new();
-    for check_name in always_checks {
-        taken_checks.push(check_name);
-        let filler_item = check_map.get(check_name).unwrap().unwrap();
-        always_hints.insert(check_name, item_to_str(&convert(filler_item).unwrap()));
-    }
-
-    always_hints
-}
-
-/**
- * Sometimes Hints
- * Generates hints for checks that are only "sometimes" hinted, depending on settings. The checks
- * that get hinted are chosen randomly.
- */
-fn generate_sometimes_hints(
-    num_sometimes_hints: usize, taken_checks: &mut Vec<&'static str>,
-    check_map: &mut HashMap<&str, Option<FillerItem>>, settings: &Settings, rng: &mut StdRng,
-) -> HashMap<&'static str, &'static str> {
-    let mut sometimes_checks = vec![
-        "Bee Guy (2)",
-        "Behind Ice Gimos",
-        "Bird Lover",
-        "Blacksmith",
-        "Blacksmith Cave",
-        "Cucco Treasure Dungeon",
-        "Death Mountain Treasure Dungeon",
-        "Donkey Cave Pegs",
-        "Eastern Ruins Peg Circle",
-        "Eastern Ruins Treasure Dungeon",
-        "Fire Cave Pillar",
-        "Floating Island",
-        "Graveyard Ledge Cave",
-        "Ice Gimos Fight",
-        "Ice Rod Cave",
-        "Irene",
-        "Ku's Domain Fight",
-        "Lorule Field Treasure Dungeon",
-        "Milk Bar Owner",
-        "Misery Mire Ledge",
-        "Misery Mire Treasure Dungeon",
-        "Osfala",
-        "Philosopher's Cave",
-        "Queen Oren",
-        "Rosso",
-        "Rosso Rocks",
-        "Shady Guy",
-        "Spectacle Rock",
-        "Southern Ruins Treasure Dungeon",
-        "Street Merchant (Right)",
-        "Thief Girl Cave",
-        "Waterfall Cave",
-        "Wildlife Clearing Stump",
-        "Woman",
-        "Zelda",
-        "Zora's River Treasure Dungeon",
-        "[DP] (2F) Under Rock (Ball Room)",
-        "[DP] (2F) Under Rock (Left)",
-        "[DP] (2F) Under Rock (Right)",
-        "[EP] (1F) Escape Chest",
-        "[HC] Battlement",
-        "[HC] West Wing",
-        "[HG] (3F) Fire Bubbles",
-        "[HG] (2F) Fire Ring",
-        "[IR] (B2) Long Merge Chest",
-        "[IR] (B4) Southeast Chest (Fall)",
-        "[LC] (3F) Ball Trial (Puzzle)",
-        "[LC] (3F) Bomb Trial (Behind Rock)",
-        "[LC] (4F) Hookshot Trial (Eyes)",
-        "[LC] (4F) Lamp Trial",
-        "[PD] (2F) Big Chest (Hidden)",
-        "[PD] (B1) Big Chest (Switches)",
-        "[SP] (B1) Big Chest (Secret)",
-        "[SW] (B1) Big Chest (Eyes)",
-        "[SW] (B1) South Chest",
-        "[T'H] (B2) Eyegores",
-        "[T'H] (B3) Big Chest (Hidden)",
-        "[TH] (8F) Fairy Room",
-        "[TR] (B1) Big Chest (Center)",
-        "[TR] (1F) Defeat Flamolas",
-    ];
-
-    // Maiamai Madness
-    if settings.logic.maiamai_madness {
-        sometimes_checks.extend(vec![
-            "[Mai] Blacksmith Tornado Tile",
-            "[Mai] Buried in the Desert",
-            "[Mai] Buried near Desert Palace",
-            "[Mai] Cucco Treasure Dungeon Big Rock",
-            "[Mai] Dark Ruins South Area Wall",
-            "[Mai] Death Mountain East Ledge Rock",
-            "[Mai] Eastern Ruins Big Rock",
-            "[Mai] Hyrule Castle Tornado Tile",
-            "[Mai] Hyrule Hotfoot Big Rock",
-            "[Mai] Hyrule Rupee Rush Wall",
-            "[Mai] Island Tornado Tile",
-            "[Mai] Kakariko Sand",
-            "[Mai] Ku's Domain Water",
-            "[Mai] Lorule Death Mountain East Skull",
-            "[Mai] Lorule Death Mountain West Big Rock",
-            "[Mai] Lorule Fortune-Teller Big Rock",
-            "[Mai] Lorule Graveyard Peninsula Tree",
-            "[Mai] Lorule Lake Big Rock",
-            "[Mai] Lorule Lake Skull",
-            "[Mai] Lorule Rupee Rush Wall",
-            "[Mai] Rosso's Ore Mine Rock",
-            "[Mai] Skull Woods Big Rock",
-            "[Mai] Southern Ruins Big Rock",
-            "[Mai] Southern Ruins Bomb Cave",
-        ]);
-    }
-
-    // Nice Mode
-    // todo
-    // if settings.logic.nice_mode {
-    //     sometimes_checks.extend(vec![" 20 Maiamai"]);
-    // }
-
-    // Minigames
-    if !settings.logic.minigames_excluded {
-        sometimes_checks.extend(vec![
-            "Dodge the Cuccos",
-            "Rupee Rush (Hyrule)",
-            "Rupee Rush (Lorule)",
-            "Hyrule Hotfoot (First Race)",
-        ]);
-    }
-
-    sometimes_checks.retain(|check| !taken_checks.contains(check));
-
-    let mut sometimes_hints = HashMap::new();
-    let mut sometimes_hint_count = 0;
-    loop {
-        if sometimes_hint_count >= num_sometimes_hints {
-            break;
-        }
-
-        if sometimes_checks.is_empty() {
-            debug!("Ran out of possible Sometimes Hints");
-            break;
-        }
-
-        let selected_hint = sometimes_checks.remove(rng.gen_range(0..sometimes_checks.len()));
-        let filler_item = check_map.get(selected_hint).unwrap().unwrap();
-        sometimes_hints.insert(selected_hint, item_to_str(&convert(filler_item).unwrap()));
-
-        sometimes_hint_count += 1;
-    }
-
-    sometimes_hints
-}
-
-/**
- * Path Hints
- *
- * Generates up to 7 Path Hints for each Boss guarding a Sage Portrait.
- *
- * A "Path Hint" is a hint that specifies the location of a "Path Item" that is required to reach
- * and defeat a certain Boss, according the chosen Logic Mode and Settings.
- */
-fn generate_path_hints(
-    taken_checks: &mut Vec<&'static str>, world_graph: &mut HashMap<Location, LocationNode>,
-    check_map: &mut HashMap<&str, Option<FillerItem>>, settings: &Settings, rng: &mut StdRng,
-) -> Vec<String> {
-    let mut bosses_and_prize_locations: Vec<(FillerItem, &str)> = vec![
-        (Yuga, "Eastern Palace Prize"),
-        (Margomill, "House of Gales Prize"),
-        (Moldorm, "Tower of Hera Prize"),
-        (ZeldasThrone, "Hyrule Castle Prize"),
-        (GemesaurKing, "Dark Palace Prize"),
-        (Arrghus, "Swamp Palace Prize"),
-        (Knucklemaster, "Skull Woods Prize"),
-        (Stalblind, "Thieves' Hideout Prize"),
-        (Grinexx, "Turtle Rock Prize"),
-        (Zaganaga, "Desert Palace Prize"),
-        (Dharkstare, "Ice Ruins Prize"),
-    ];
-
-    bosses_and_prize_locations = shuffle(bosses_and_prize_locations, rng);
-
-    let mut chosen_path_checks: Vec<(Check, FillerItem)> = Vec::new();
-    let mut backup_path_checks: Vec<(Check, FillerItem)> = Vec::new();
-    let mut path_hints = Vec::new();
-    let mut extra_paths_needed = 0;
-
-    for (boss, prize_loc) in bosses_and_prize_locations {
-        if is_sage(convert(check_map.get(prize_loc).unwrap().unwrap()).unwrap()) {
-            if let Some((chosen_path_check, backups)) =
-                get_path_checks(boss, world_graph, check_map, settings, rng, &taken_checks)
-            {
-                // Debug
-                // println!(
-                //     "\nChosen Path: {} ({}) --------------> {}",
-                //     check_map.get(chosen_path_check.get_name()).unwrap().unwrap().as_str(),
-                //     chosen_path_check.get_name(),
-                //     boss.as_str()
-                // );
-                // println!("Backups:");
-                // for backup in &backups {
-                //     println!(
-                //         "{: <30} ({})",
-                //         backup.get_name(),
-                //         check_map.get(backup.get_name()).unwrap().unwrap().as_str(),
-                //     );
-                // }
-
-                taken_checks.push(chosen_path_check.get_name());
-                chosen_path_checks.push((chosen_path_check, boss));
-                backup_path_checks.extend(backups.iter().map(|&check| (check, boss)));
-            } else {
-                debug!("No Paths possible for: {}", boss.as_str());
-
-                extra_paths_needed += 1;
-            }
-        }
-    }
-
-    // Add extra paths if some bosses didn't have any path items
-    let mut i = 0;
-    loop {
-        if i >= extra_paths_needed {
-            break;
-        }
-
-        if backup_path_checks.is_empty() {
-            debug!("Ran out of potential path checks");
-            break;
-        }
-
-        let (backup_check, backup_boss) =
-            backup_path_checks.remove(rng.gen_range(0..backup_path_checks.len()));
-
-        // Prevent reusing existing check
-        if taken_checks.contains(&backup_check.get_name()) {
-            continue;
-        }
-
-        chosen_path_checks.push((backup_check, backup_boss));
-        taken_checks.push(backup_check.get_name());
-
-        i += 1;
-    }
-
-    // Format
-    for (check, boss) in &chosen_path_checks {
-        path_hints.push(format!(
-            "It says here that {} is on the path to {}.",
-            check.get_location_info().unwrap().region(),
-            boss.as_str()
-        ));
-    }
-
-    path_hints
-}
-
-/**
- * Get Path Checks
- * Determines the possible Path Check locations for a given Boss, if any. One Path Check is chosen
- * and returned to become the Path Hint for this boss, while the others are also returned to be used
- * as backups in case extra hints are needed.
- */
-fn get_path_checks<'a>(
-    boss: FillerItem, world_graph: &mut HashMap<Location, LocationNode>,
-    mut check_map: &mut HashMap<&str, Option<FillerItem>>, settings: &Settings, rng: &mut StdRng,
-    taken_path_checks: &Vec<&'static str>,
-) -> Option<(Check, Vec<Check>)> {
-    let mut progress = Progress::new(settings.clone());
-    let mut reachable_checks: Vec<Check>;
-    let mut path_checks = Vec::new();
-
-    let mut potential_path_checks: HashSet<Check> = HashSet::new();
-
-    // Find candidate Path Checks with a modified sphere search
-    loop {
-        reachable_checks = find_reachable_checks(world_graph, &progress);
-        potential_path_checks.extend(&reachable_checks);
-        let reachable_items =
-            get_items_from_reachable_checks(&reachable_checks, &mut check_map, settings);
-
-        let new_items = reachable_items.difference(&progress);
-
-        if new_items.is_empty() {
-            fail!("No possible path to defeat {}", boss.as_str());
-        }
-
-        for new_item in &new_items {
-            progress.add_item(*new_item);
-        }
-
-        if progress.has(boss) {
-            break;
-        }
-    }
-
-    // Limit potential paths to locations with valid Path Items that haven't yet been taken
-    potential_path_checks.retain(|check| {
-        !taken_path_checks.contains(&check.get_name())
-            && POSSIBLE_PATH_ITEMS.contains(&check_map.get(check.get_name()).unwrap().unwrap())
-    });
-
-    // Test candidate items to see if Boss can be defeated without them
-    for check in potential_path_checks {
-        // Reset Progression
-        progress = Progress::new(settings.clone());
-
-        loop {
-            reachable_checks = find_reachable_checks(world_graph, &progress);
-
-            // Remove Potential Path Location
-            reachable_checks.retain(|c| check.ne(c));
-
-            let reachable_items =
-                get_items_from_reachable_checks(&reachable_checks, &mut check_map, settings);
-
-            let new_items = reachable_items.difference(&progress);
-
-            if new_items.is_empty() {
-                if !progress.has(boss) {
-                    // Boss couldn't be reached without the item on this check, therefore it's path
-                    path_checks.push(check);
-                }
-                break;
-            }
-
-            for new_item in &new_items {
-                progress.add_item(*new_item);
-            }
-        }
-    }
-
-    if path_checks.is_empty() {
-        None
-    } else {
-        let chosen_path_hint = path_checks.remove(rng.gen_range(0..path_checks.len()));
-        Some((chosen_path_hint, path_checks))
-    }
-}
-
-const POSSIBLE_PATH_ITEMS: [FillerItem; 48] = [
-    Bow01, Bow02, Boomerang01, Boomerang02, Hookshot01, Hookshot02, Bombs01, Bombs02, FireRod01,
-    FireRod02, IceRod01, IceRod02, Hammer01, Hammer02, SandRod01, SandRod02, TornadoRod01,
-    TornadoRod02, Bell, StaminaScroll, PegasusBoots, Flippers, HylianShield, SmoothGem,
-    //LetterInABottle,
-    PremiumMilk, HintGlasses, GreatSpin, Bottle01, Bottle02, Bottle03, Bottle04, Bottle05, Lamp01,
-    Lamp02, Sword01, Sword02, Sword03, Sword04, Glove01, Glove02, Net01, Net02, Mail01, Mail02,
-    OreYellow, OreGreen, OreBlue, OreRed,
-];

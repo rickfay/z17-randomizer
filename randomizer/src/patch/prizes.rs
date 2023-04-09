@@ -24,7 +24,7 @@ pub(crate) fn patch_dungeon_prizes(
     patch_flowchart(patcher, &prizes);
     patch_msbf_files(patcher, &prizes);
     patch_dungeon_prize_actors(patcher, &prizes);
-    patch_prize_byaml(patcher, &prizes, settings);
+    patch_prize_byaml(patcher, settings, &prizes);
 }
 
 /// Adds entries to the FlowChart for the MSBF files related to each Portrait
@@ -175,18 +175,18 @@ pub(crate) fn patch_actor_profile(
 }
 
 /// Patches the BYAML files to shuffle Dungeon Prizes
-fn patch_prize_byaml(patcher: &mut Patcher, prizes: &DungeonPrizes, settings: &Settings) {
-    patch_eastern(patcher, prizes.ep_prize, settings);
-    patch_gales(patcher, prizes.hg_prize, settings);
-    patch_hera(patcher, prizes.th_prize, settings);
-    patch_hyrule_castle(patcher, prizes.hc_prize, settings);
-    patch_dark(patcher, prizes.pd_prize, settings);
-    patch_swamp(patcher, prizes.sp_prize, settings);
-    patch_skull(patcher, prizes.sw_prize, settings);
-    patch_thieves(patcher, prizes.tt_prize, settings);
-    patch_turtle(patcher, prizes.tr_prize, settings);
-    patch_desert(patcher, prizes.dp_prize, settings);
-    patch_ice(patcher, prizes.ir_prize, settings);
+fn patch_prize_byaml(patcher: &mut Patcher, settings: &Settings, prizes: &DungeonPrizes) {
+    patch_eastern(patcher, prizes.ep_prize);
+    patch_gales(patcher, prizes.hg_prize);
+    patch_hera(patcher, prizes.th_prize);
+    patch_hyrule_castle(patcher, prizes.hc_prize);
+    patch_dark(patcher, prizes.pd_prize);
+    patch_swamp(patcher, prizes.sp_prize);
+    patch_skull(patcher, prizes.sw_prize);
+    patch_thieves(patcher, prizes.tt_prize);
+    patch_turtle(patcher, prizes.tr_prize);
+    patch_desert(patcher, prizes.dp_prize);
+    patch_ice(patcher, prizes.ir_prize);
 
     patch_checks_unlocked_by_prizes(patcher, settings);
 }
@@ -365,7 +365,7 @@ fn patch_rosso(patcher: &mut Patcher, settings: &Settings) {
 }
 
 /// Eastern Palace
-fn patch_eastern(patcher: &mut Patcher, prize: Item, _: &Settings) {
+fn patch_eastern(patcher: &mut Patcher, prize: Item) {
     let data = PrizePatchData::get(prize);
     let outside_hyrule_castle = Dest::new(FieldLight, 18, 5);
 
@@ -418,11 +418,18 @@ fn patch_eastern(patcher: &mut Patcher, prize: Item, _: &Settings) {
 
     // Outside Hyrule Castle
     patcher.modify_objs(FieldLight, 18, &[
-        disable(200), // Sahasrahla
+        // Sahasrahla
+        call(200, |obj| {
+            obj.set_rotate(0.0, 0.0, 0.0);
+            obj.set_translate(0.0, 0.0, 13.5);
+            obj.arg.3 = 2;
+            obj.set_active_flag(Flag::Event(1));
+            obj.enable();
+        }),
         disable(208), // Textbox trigger
         disable(264), // lgt_NpcSoldier_Field1B_04_broke - idk what this is, but now it's nothing
         disable(529), // AreaSwitchCube
-        enable(502),  // Sahasrahla
+        disable(502), // Sahasrahla
     ]);
 
     // patcher.modify_system(FieldLight, 18, &[call(199, |obj| {
@@ -431,7 +438,7 @@ fn patch_eastern(patcher: &mut Patcher, prize: Item, _: &Settings) {
 }
 
 /// House of Gales
-fn patch_gales(patcher: &mut Patcher, prize: Item, _: &Settings) {
+fn patch_gales(patcher: &mut Patcher, prize: Item) {
     // Debug stuff
     // patcher.modify_objs(DungeonWind, 3, &[
     //     disable(436), // Margomill
@@ -508,7 +515,7 @@ fn patch_gales(patcher: &mut Patcher, prize: Item, _: &Settings) {
 }
 
 /// Tower of Hera
-fn patch_hera(patcher: &mut Patcher, prize: Item, _: &Settings) {
+fn patch_hera(patcher: &mut Patcher, prize: Item) {
     // Debug stuff
     // patcher.modify_objs(DungeonHera, 1, &[
     //     disable(737), // Moldorm
@@ -579,7 +586,7 @@ fn patch_hera(patcher: &mut Patcher, prize: Item, _: &Settings) {
 }
 
 /// Hyrule Castle
-fn patch_hyrule_castle(patcher: &mut Patcher, prize: Item, _: &Settings) {
+fn patch_hyrule_castle(patcher: &mut Patcher, prize: Item) {
     // Convert Zelda herself into the dungeon prize
     const UNQ_ZELDA: u16 = 23;
     modify_dungeon_reward(
@@ -599,7 +606,7 @@ fn patch_hyrule_castle(patcher: &mut Patcher, prize: Item, _: &Settings) {
 }
 
 /// Dark Palace
-fn patch_dark(patcher: &mut Patcher, prize: Item, _: &Settings) {
+fn patch_dark(patcher: &mut Patcher, prize: Item) {
     // Debug stuff
     // patcher.modify_objs(DungeonDark, 1, &[
     //     disable(118), // Gemesaur
@@ -676,7 +683,7 @@ fn patch_dark(patcher: &mut Patcher, prize: Item, _: &Settings) {
 }
 
 /// Swamp Palace
-fn patch_swamp(patcher: &mut Patcher, prize: Item, _: &Settings) {
+fn patch_swamp(patcher: &mut Patcher, prize: Item) {
     if prize == SageOren {
         return;
     }
@@ -685,7 +692,7 @@ fn patch_swamp(patcher: &mut Patcher, prize: Item, _: &Settings) {
 }
 
 /// Skull Woods
-fn patch_skull(patcher: &mut Patcher, prize: Item, _: &Settings) {
+fn patch_skull(patcher: &mut Patcher, prize: Item) {
     if prize == SageSeres {
         return;
     }
@@ -694,7 +701,7 @@ fn patch_skull(patcher: &mut Patcher, prize: Item, _: &Settings) {
 }
 
 /// Thieves' Hideout
-fn patch_thieves(patcher: &mut Patcher, prize: Item, _: &Settings) {
+fn patch_thieves(patcher: &mut Patcher, prize: Item) {
     if prize == SageOsfala {
         return;
     }
@@ -703,7 +710,7 @@ fn patch_thieves(patcher: &mut Patcher, prize: Item, _: &Settings) {
 }
 
 /// Turtle Rock
-fn patch_turtle(patcher: &mut Patcher, prize: Item, _: &Settings) {
+fn patch_turtle(patcher: &mut Patcher, prize: Item) {
     // Debug stuff
     // patcher.modify_objs(DungeonKame, 3, &[
     //     disable(8), // Grinexx
@@ -769,7 +776,7 @@ fn patch_turtle(patcher: &mut Patcher, prize: Item, _: &Settings) {
 }
 
 /// Desert Palace
-fn patch_desert(patcher: &mut Patcher, prize: Item, _: &Settings) {
+fn patch_desert(patcher: &mut Patcher, prize: Item) {
     // Debug stuff
     // patcher.modify_objs(FieldDark, 31, &[
     //     disable(67), // Zaganaga
@@ -793,7 +800,7 @@ fn patch_desert(patcher: &mut Patcher, prize: Item, _: &Settings) {
 }
 
 /// Ice Ruins
-fn patch_ice(patcher: &mut Patcher, prize: Item, _: &Settings) {
+fn patch_ice(patcher: &mut Patcher, prize: Item) {
     // Debug stuff
     // patcher.modify_system(DungeonIce, 1, &[
     //     call(68, |obj| {

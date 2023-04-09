@@ -95,21 +95,23 @@ pub fn patch_byaml_files(patcher: &mut Patcher, settings: &Settings) -> Result<(
 
     do_dev_stuff(patcher, settings);
     patch_big_problem_chests(patcher, settings);
-    patch_blacksmith_hyrule(patcher, settings);
-    patch_castles(patcher, settings);
-    patch_chamber_of_sages(patcher, settings);
-    patch_dark_maze(patcher, settings);
-    patch_kus_domain(patcher, settings);
-    patch_master_sword(patcher, settings);
+    patch_blacksmith_hyrule(patcher);
+    patch_castles(patcher);
+    patch_chamber_of_sages(patcher);
+    patch_dark_maze(patcher);
+    patch_kus_domain(patcher);
+    patch_master_sword(patcher);
     patch_softlock_prevention(patcher, settings);
-    patch_thief_girl_cave(patcher, settings);
+    patch_thief_girl_cave(patcher);
     patch_treasure_dungeons(patcher, settings);
-    patch_zora(patcher, settings);
+    patch_zora(patcher);
+    patch_hint_ghosts_overworld(patcher);
+    // patch_hint_ghosts_dungeons(patcher);
 
     patch_nice_mode(patcher, settings);
     patch_big_bomb_flower_skip(patcher, settings);
     patch_no_progression_enemies(patcher, settings);
-    // patch_open_lost_woods(patcher, settings);
+    patch_open_lost_woods(patcher);
 
     patcher.modify_objs(FieldLight, 18, &[disable(529)]);
 
@@ -555,9 +557,18 @@ pub fn patch_byaml_files(patcher: &mut Patcher, settings: &Settings) -> Result<(
     Ok(())
 }
 
-#[allow(unused)]
-fn patch_open_lost_woods(patcher: &mut Patcher, _settings: &Settings) {
+fn patch_open_lost_woods(patcher: &mut Patcher) {
     patcher.modify_objs(FieldLight, 38, &[
+        // Allow entry to maze without All Pendants Flag (375) set
+        redirect(259, Dest::new(FieldLight, 38, 5)),
+        // 1st Fork - Enable all Loading Zones
+        clear_active_args(137), // North
+        clear_active_args(138), // West
+        clear_active_args(139), // East
+        // 2nd Fork - Enable all Loading Zones
+        clear_active_args(168), // North
+        clear_active_args(91),  // West
+        clear_active_args(89),  // South
         // 1st Poes
         disable(132),
         disable(133),
@@ -571,7 +582,7 @@ fn patch_open_lost_woods(patcher: &mut Patcher, _settings: &Settings) {
 }
 
 // Hyrule Blacksmith
-fn patch_blacksmith_hyrule(patcher: &mut Patcher, _settings: &Settings) {
+fn patch_blacksmith_hyrule(patcher: &mut Patcher) {
     patcher.modify_objs(IndoorLight, 19, &[
         // Make PackageSword a Chest
         call(12, |obj| {
@@ -594,14 +605,14 @@ fn patch_blacksmith_hyrule(patcher: &mut Patcher, _settings: &Settings) {
 }
 
 // Chamber of Sages
-fn patch_chamber_of_sages(patcher: &mut Patcher, _settings: &Settings) {
+fn patch_chamber_of_sages(patcher: &mut Patcher) {
     patcher.modify_objs(CaveDark, 10, &[
         set_46_args(74, Flag::Event(0)), // Staircase
     ]);
 }
 
 // Ku's Domain
-fn patch_kus_domain(patcher: &mut Patcher, _settings: &Settings) {
+fn patch_kus_domain(patcher: &mut Patcher) {
     patcher.modify_objs(FieldDark, 7, &[
         call(55, |obj| {
             obj.set_typ(4); // changed to chest automatically, set typ here
@@ -623,14 +634,38 @@ fn patch_treasure_dungeons(patcher: &mut Patcher, settings: &Settings) {
 }
 
 // Zora
-fn patch_zora(patcher: &mut Patcher, _settings: &Settings) {
+fn patch_zora(patcher: &mut Patcher) {
     // Lake Hylia
     patcher.modify_objs(FieldLight, 35, &[
         enable(151), // Zora outside House of Gales
     ]);
 }
 
-fn patch_castles(patcher: &mut Patcher, _settings: &Settings) {
+// Enable All Overworld Hint Ghosts
+fn patch_hint_ghosts_overworld(patcher: &mut Patcher) {
+    patcher.modify_objs(FieldLight, 14, &[enable(126)]); // Witch's House
+    patcher.modify_objs(FieldLight, 16, &[enable(407)]); // Shady Guy (Kakariko)
+    patcher.modify_objs(FieldLight, 17, &[enable(96)]); // Behind Blacksmith
+    patcher.modify_objs(FieldDark, 35, &[enable(205)]); // Bullied Turtle
+}
+
+// Hide All Dungeon Hint Ghosts
+fn patch_hint_ghosts_dungeons(patcher: &mut Patcher) {
+    // Eastern
+    patcher.modify_objs(DungeonEast, 1, &[
+        disable(251),
+        disable(252),
+        disable(253),
+        disable(254),
+        disable(255),
+        disable(256),
+        disable(257),
+    ]);
+
+    // todo the rest
+}
+
+fn patch_castles(patcher: &mut Patcher) {
     let green_pendant_flag = prize_flag(PendantCourage);
     let yuga_defeated = Flag::Event(420); // Set after Yuga 2 defeated
     let hc_31 = Flag::Course(31); // Also set after Yuga 2 defeated
@@ -744,7 +779,7 @@ fn patch_castles(patcher: &mut Patcher, _settings: &Settings) {
     ]);
 }
 
-fn patch_master_sword(patcher: &mut Patcher, _settings: &Settings) {
+fn patch_master_sword(patcher: &mut Patcher) {
     // Lost Woods Maze - Skip directly to Master Sword
     patcher.modify_objs(FieldLight, 38, &[redirect(134, Dest::new(FieldLight, 34, 0))]);
 
@@ -756,7 +791,7 @@ fn patch_master_sword(patcher: &mut Patcher, _settings: &Settings) {
     })]);
 }
 
-fn patch_dark_maze(patcher: &mut Patcher, _settings: &Settings) {
+fn patch_dark_maze(patcher: &mut Patcher) {
     // Remove dialog
     patcher.modify_objs(FieldDark, 20, &[
         disable(63),  // AreaEventTalk
@@ -772,7 +807,7 @@ fn patch_dark_maze(patcher: &mut Patcher, _settings: &Settings) {
     ]);
 }
 
-fn patch_thief_girl_cave(patcher: &mut Patcher, _settings: &Settings) {
+fn patch_thief_girl_cave(patcher: &mut Patcher) {
     patcher.modify_objs(CaveDark, 15, &[
         // Thief Girl w/ Mask
         call(8, move |obj| {
@@ -792,13 +827,14 @@ fn patch_big_problem_chests(patcher: &mut Patcher, settings: &Settings) {
         return;
     }
 
-    const BIG_PROBLEM_CHESTS: [(Id, u16, u16); 20] = [
+    const BIG_PROBLEM_CHESTS: [(Id, u16, u16); 21] = [
         (FieldLight, 3, 303),  // Death Mountain West Ledge
         (FieldLight, 34, 71),  // Master Sword Pedestal
         (FieldLight, 35, 155), // Lake Hylia Ledge
         (FieldLight, 33, 320), // Southern Ruins Ledge
         // (FieldLight, 1, 133),  // Lost Woods Big Rock
         (AttractionLight, 2, 33), // Southern Ruins Treasure Dungeon
+        (DungeonEast, 2, 52),     // Eastern 2F 4 Switches
         (DungeonDark, 2, 127),    // Dark 1F Fall from 2F
         (DungeonDark, 3, 269),    // Dark 2F East
         (DungeonWater, 1, 170),   // Swamp 1F West Room

@@ -1,4 +1,5 @@
 use {
+    crate::{patch::Patcher, Settings},
     log::info,
     std::{
         fmt::{self, Debug, Formatter},
@@ -72,8 +73,6 @@ pub enum World {
 //         }
 //     };
 // }
-
-use crate::{patch::Patcher, Settings};
 
 pub mod dungeons {
     pub const WORLD: super::World = super::World::Dungeons;
@@ -253,29 +252,16 @@ macro_rules! subregion {
             #[inline]
             pub fn patch(patcher: &mut Patcher, layout: &crate::Layout, settings: &$crate::Settings) -> crate::Result<()> {
                 $(use crate::patch::Patch;
-                $(if $crate::settings_check!($($settings $where)?)(settings) {
-                    crate::patch!($variant $props).apply(
-                        patcher,
-                        layout
-                            .get(&crate::LocationInfo::new(SUBREGION, $key))
-                            .unwrap_or_else(|| unreachable!(stringify!($key))),
-                        settings,
-                    )?;
-                })*)?
+                $(crate::patch!($variant $props).apply(
+                    patcher,
+                    layout
+                        .get(&crate::LocationInfo::new(SUBREGION, $key))
+                        .unwrap_or_else(|| unreachable!(stringify!($key))),
+                    settings,
+                )?;)*)?
                 Ok(())
             }
         }
-    };
-}
-
-#[doc(hidden)]
-#[macro_export]
-macro_rules! settings_check {
-    () => {
-        |_: &$crate::settings::settings::Settings| true
-    };
-    ($settings:ident $check:expr) => {
-        |$settings: &$crate::settings::settings::Settings| $check
     };
 }
 
@@ -287,6 +273,13 @@ macro_rules! patch {
     };
     (Chest($stage:literal[$unq:literal])) => {
         Patch::Chest { course: COURSE, stage: $stage - 1, unq: $unq }
+    };
+    (Chest[$($stage:literal[$unq:literal],)+]) => {
+        Patch::Multi(vec![
+            $(
+                Patch::Chest { course: COURSE, stage: $stage - 1, unq: $unq },
+            )+
+        ])
     };
     (BigChest($course:ident $stage:literal[$unq:literal])) => {
         Patch::BigChest { course: albw::course::Id::$course, stage: $stage - 1, unq: $unq }

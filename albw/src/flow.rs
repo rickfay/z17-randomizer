@@ -351,6 +351,12 @@ impl<'flow, 'input> StepMut<'flow, 'input> {
         }
     }
 
+    fn set_arg1(&mut self, value: u8) {
+        unsafe {
+            *self.flow.steps.get_mut(self.index).unwrap().get_unchecked_mut(0x1) = value;
+        }
+    }
+
     fn set_value(&mut self, value: u32) {
         unsafe {
             self.flow
@@ -408,8 +414,16 @@ impl<'flow, 'input> BranchMut<'flow, 'input> {
         self.0.set_kind(kind);
     }
 
+    pub fn set_arg1(&mut self, value: u8) {
+        self.0.set_arg1(value);
+    }
+
     pub fn set_value(&mut self, value: u32) {
         self.0.set_value(value);
+    }
+
+    pub fn set_command(&mut self, command: u16) {
+        self.0.set_command(command);
     }
 
     pub fn set_branch<N>(&mut self, index: u16, to: N) -> Result<()>
@@ -444,6 +458,10 @@ pub struct ActionMut<'flow, 'input>(StepMut<'flow, 'input>);
 impl<'flow, 'input> ActionMut<'flow, 'input> {
     pub fn set_kind(&mut self, kind: u16) {
         self.0.set_kind(kind);
+    }
+
+    pub fn set_arg1(&mut self, value: u8) {
+        self.0.set_arg1(value);
     }
 
     pub fn set_value(&mut self, value: u32) {

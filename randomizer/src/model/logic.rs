@@ -1,4 +1,7 @@
-use crate::{model::progress::Progress, settings::logic_mode::LogicMode::*};
+use {
+    crate::{model::progress::Progress, settings::logic_mode::LogicMode::*},
+    std::fmt::{Debug, Formatter},
+};
 
 // TODO I'd eventually like to externalize the logic, both for organization purposes and to allow users to write custom logic. But this is fine for now.
 
@@ -50,6 +53,12 @@ impl Logic {
             adv_glitched: accessible(),
             hell: accessible(),
         }
+    }
+}
+
+impl Debug for Logic {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str("[logic Logic]") // todo
     }
 }
 

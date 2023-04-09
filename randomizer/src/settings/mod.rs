@@ -1,4 +1,5 @@
 pub mod entrance_shuffle_setting;
+pub mod hint_settings;
 pub mod logic;
 pub mod logic_mode;
 pub mod pedestal_setting;

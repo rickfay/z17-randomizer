@@ -1,7 +1,9 @@
 //! A library for reading data from a The Legend of Zelda: A Link Between Worlds ROM.
 
 use {
-    crate::{actor_profile::ActorProfiles, language::Load, scene::SceneMeta},
+    crate::{
+        actor_profile::ActorProfiles, course::Id::LanguageBoot, language::Load, scene::SceneMeta,
+    },
     language::FlowChart,
     log::info,
     path_absolutize::*,
@@ -22,6 +24,7 @@ pub use {
     language::Language,
     scene::{Scene, Stage},
 };
+
 pub mod actor_profile;
 pub mod actors;
 pub mod course;
@@ -217,12 +220,18 @@ impl Game {
         Ok(Scene::new(stage, actors))
     }
 
-    pub(crate) fn scene_meta(&self, course: course::Id) -> Result<SceneMeta> {
+    pub(crate) fn scene_meta(&self, course: course::Id) -> Option<SceneMeta> {
+        if LanguageBoot.eq(&course) {
+            return None;
+        }
+
         let mut romfs = self.romfs.borrow_mut();
         let stage_meta = romfs
-            .read(format!("World/Byaml/{}_course.byaml", course.as_str()))?
-            .try_map(|data| byaml::from_bytes(&data))?;
-        Ok(SceneMeta::new(stage_meta))
+            .read(format!("World/Byaml/{}_course.byaml", course.as_str()))
+            .unwrap()
+            .try_map(|data| byaml::from_bytes(&data))
+            .unwrap();
+        Some(SceneMeta::new(stage_meta))
     }
 
     pub(crate) fn stage(&self, course: course::Id, stage: u16) -> Result<Stage> {

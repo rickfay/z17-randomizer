@@ -1,9 +1,13 @@
 use {
     super::Patcher,
-    crate::{Result, Settings},
+    crate::{settings::hint_settings::HintGhostPrice, Result, Settings},
     albw::Item,
     log::info,
 };
+
+/*
+ * TODO - Want to rewrite this entire subsystem
+ */
 
 macro_rules! apply {
     ($patcher:expr, $($course:ident/$name:ident {
@@ -62,6 +66,9 @@ macro_rules! action {
     };
     ($command:tt value($value:expr)) => {
         $command.set_value($value);
+    };
+    ($command:tt arg1($value:expr)) => {
+        $command.set_arg1($value);
     };
     ($command:tt command($new_command:expr)) => {
         $command.set_command($new_command);
@@ -147,21 +154,68 @@ fn patch_castle_connection(patcher: &mut Patcher, _settings: &Settings) -> Resul
     Ok(())
 }
 
+fn patch_hint_ghosts(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
+    let price = match settings.logic.hint_ghost_price {
+        HintGhostPrice::Free => 0,
+        HintGhostPrice::Price(price) => price,
+        HintGhostPrice::Random(_, _) => {
+            unimplemented!("Random Ghost Hint Prices are not yet implemented!")
+        }
+    };
+
+    let negative_price = (-1 * price as i32) as u32;
+
+    apply!(patcher,
+        Boot/HintGhost {
+            [11] => 17, // Skip 13 - "The Hint Ghost is studying its book."
+
+            [15] each [arg1(6), value(1), command(50),], // Show Rupee Counter (instead of Play Coin Counter)
+            [16] each [arg1(6), value(0), command(50),], // Hide Rupee Counter (instead of Play Coin Counter)
+            [24] each [arg1(6), value(0), command(50),], // Hide Rupee Counter (instead of Play Coin Counter)
+
+            // Rupee count check (instead of Play Coins)
+            [6 into_branch] each [
+                value(price),
+                command(6),
+            ],
+
+            // Charge Rupees instead of Play Coins
+            [9] each [
+                value(negative_price),
+                command(37),
+                => 26, // 31 // skip animation
+            ],
+            [19 into_start] => 22, // Skip 29, 35
+            [22] => 38, // Skip 23
+            [38] => 24, // Skip 21, 20 - "The Hint Ghost goes back to its book."
+        },
+    );
+
+    Ok(())
+}
+
 pub fn apply(patcher: &mut Patcher, free: Item, settings: &Settings) -> Result<()> {
     info!("Patching Flow Charts...");
 
     patch_lorule_castle_requirements(patcher, settings)?;
     patch_castle_connection(patcher, settings)?;
+    patch_hint_ghosts(patcher, settings)?;
 
     // Debugging
     // patcher
-    //     .flow(albw::course::Id::FieldLight)?
-    //     .get_mut(stringify!(FieldLight_1B_Impa))
+    //     .flow(albw::course::Id::CaveDark)?
+    //     .get_mut(stringify!(FieldDark_00_GoldenBeeShop))
     //     .ok_or_else(|| crate::Error::game("File not found."))??
     //     .get()
     //     .debug();
 
     apply!(patcher,
+
+        // Sahasrahla
+        FieldLight/FieldLight_1B_Sahasrahla {
+            [14 into_start] => 22,
+            [22 into_text] => None,
+        },
 
         // Runaway Item Seller
         Boot/FieldLight_33_Douguya {

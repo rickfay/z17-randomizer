@@ -21,6 +21,10 @@ impl Progress {
         Self { items: HashSet::new(), settings }
     }
 
+    pub fn get_items(&self) -> &HashSet<FillerItem> {
+        &self.items
+    }
+
     pub fn get_settings(&self) -> &Settings {
         &self.settings
     }

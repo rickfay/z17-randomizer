@@ -11,8 +11,12 @@ winres = "0.1"
 
 [dependencies]
 albw = { path = "../albw" }
+byteorder = "1.4.3"
 crc = "3.0.1"
+formatx = "0.2.1"
 fs_extra = "1.3.0"
+json_comments = "0.2.1"
+lazy_static = "1.4.0"
 linked-hash-map = "0.5.4"
 log = "0.4.14"
 queue = "0.3.2-final"

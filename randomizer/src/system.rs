@@ -1,12 +1,12 @@
 use {
-    crate::{constants::CONFIG_FILE_NAME, fail},
+    crate::{constants::CONFIG_FILE_NAME, fail, Settings},
+    json_comments::StripComments,
     log::info,
     serde::{de::DeserializeOwned, Deserialize, Serialize},
     std::{
         error::Error as StdError,
         fmt::{self, Display, Formatter},
         fs, io,
-        marker::PhantomData,
         path::{Path, PathBuf},
     },
 };
@@ -45,48 +45,40 @@ impl From<io::Error> for Error {
     }
 }
 
-/// An abstraction over platform-specific functionality.
-#[derive(Debug)]
-pub struct System<P> {
-    config: PathBuf,
-    presets: PhantomData<P>,
-}
+pub struct System;
 
-impl<P> System<P> {
-    pub fn new() -> Result<Self>
-    where
-        P: Serialize,
-    {
-        Ok(Self { config: PathBuf::from(""), presets: PhantomData })
+impl System {
+    pub fn load_preset(name: &str) -> Result<Settings> {
+        let file = PathBuf::from("presets").join(format!("{}.json", name));
+        info!("Loading preset from:            {}\n", file.display());
+        Self::load_json(file)
     }
 
-    pub fn preset(&self, name: &str) -> Result<P>
-    where
-        P: DeserializeOwned,
-    {
-        let path = self.config.join("presets").join(format!("{}.json", name));
-        info!("Loading preset from:            {}\n", path.display());
-        serde_json::from_slice(&fs::read(path)?).map_err(Error::new)
-    }
-
-    pub fn load_config(&self) -> Result<Paths> {
-        let file = self.config.join(CONFIG_FILE_NAME);
+    pub fn load_config<T: DeserializeOwned>() -> Result<T> {
+        let file = PathBuf::from(CONFIG_FILE_NAME);
         if file.exists() {
-            Ok(serde_json::from_slice::<Paths>(&fs::read(file)?).map_err(Error::new)?)
+            Self::load_json(file)
         } else {
             fail!("No config file found at {}", file.to_path_buf().display());
         }
+    }
+
+    fn load_json<T: DeserializeOwned>(file: PathBuf) -> Result<T> {
+        let file = fs::read_to_string(file)?;
+        let stripped = StripComments::new(file.as_bytes());
+        let paths = serde_json::from_reader(stripped).map_err(Error::new)?;
+        Ok(paths)
     }
 }
 
 /// Paths to the game ROM and output directories.
 #[derive(Debug, Serialize, Deserialize)]
-pub struct Paths {
+pub struct UserConfig {
     rom: PathBuf,
     output: PathBuf,
 }
 
-impl Paths {
+impl UserConfig {
     /// Generates new paths with the specified ROM and output directory.
     pub fn new(rom: PathBuf, output: PathBuf) -> Self {
         Self { rom, output }

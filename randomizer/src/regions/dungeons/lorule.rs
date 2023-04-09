@@ -4,7 +4,7 @@ crate::region! {
     castle {
         locations: [
             "[LC] (1F) Ledge": RupeeR @Chest(1[714]),
-            "[LC] (1F) Center": KeySmall @Chest(1[723]),
+            "[LC] (1F) Center": KeySmall @Chest[1[723],1[1586],], // Two actors representing one chest, idfk
             "[LC] (2F) Near Torches": RupeeR @Chest(1[994]),
             "[LC] (2F) Hidden Path": RupeeSilver @Chest(1[995]),
             "[LC] (2F) Ledge": LiverYellow @Chest(1[717]),

@@ -16,11 +16,13 @@ use {
     std::collections::HashMap,
 };
 
+pub type WorldGraph = HashMap<Location, LocationNode>;
+
 /// Build the World Graph
-pub fn build_world_graph() -> HashMap<Location, LocationNode> {
+pub fn build_world_graph() -> WorldGraph {
     info!("Building World Graph...");
 
-    let mut world: HashMap<Location, LocationNode> = HashMap::new();
+    let mut world = WorldGraph::new();
 
     world.extend(hyrule());
     world.extend(lorule());

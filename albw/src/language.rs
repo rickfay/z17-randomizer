@@ -93,6 +93,10 @@ impl Language {
         self.archive.get_mut().open(name)
     }
 
+    pub fn update(&mut self, file: File<Vec<u8>>) -> Result<()> {
+        self.archive.get_mut().update(file.into_bytes())
+    }
+
     pub fn flow_inject(&mut self, name: &str, file: File<Box<[u8]>>) -> Result<()> {
         self.flow.insert(String::from(name));
         self.archive.get_mut().add(file)

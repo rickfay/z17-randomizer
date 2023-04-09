@@ -1,7 +1,7 @@
 use {
     crate::{
         patch::{util::*, DungeonPrizes},
-        Patcher, Settings,
+        Patcher,
     },
     albw::{
         course::{Id, Id::*},
@@ -41,14 +41,14 @@ impl Icon {
     pub const PORTAL: i32 = 22;
 }
 
-pub fn patch_maps(patcher: &mut Patcher, prizes: &DungeonPrizes, settings: &Settings) {
+pub fn patch_maps(patcher: &mut Patcher, prizes: &DungeonPrizes) {
     info!("Patching Maps...");
-    patch_hyrule_maps(patcher, prizes, settings);
-    patch_lorule_maps(patcher, prizes, settings);
+    patch_hyrule_maps(patcher, prizes);
+    patch_lorule_maps(patcher, prizes);
     add_compass_chests(patcher);
 }
 
-fn patch_hyrule_maps(patcher: &mut Patcher, prizes: &DungeonPrizes, _: &Settings) {
+fn patch_hyrule_maps(patcher: &mut Patcher, prizes: &DungeonPrizes) {
     const HYRULE_MAPS: [Id; 4] = [AttractionLight, CaveLight, FieldLight, IndoorLight];
 
     for map in HYRULE_MAPS {
@@ -65,7 +65,7 @@ fn patch_hyrule_maps(patcher: &mut Patcher, prizes: &DungeonPrizes, _: &Settings
     }
 }
 
-fn patch_lorule_maps(patcher: &mut Patcher, prizes: &DungeonPrizes, _: &Settings) {
+fn patch_lorule_maps(patcher: &mut Patcher, prizes: &DungeonPrizes) {
     const LORULE_MAPS: [Id; 7] =
         [AttractionDark, CaveDark, EnemyAttackS, EnemyAttackM, EnemyAttackL, FieldDark, IndoorDark];
 

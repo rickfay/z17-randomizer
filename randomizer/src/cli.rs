@@ -4,16 +4,49 @@ use {
             logic::Logic, logic_mode::LogicMode, pedestal_setting::PedestalSetting,
             settings::Options,
         },
-        system, Settings,
+        Settings,
     },
     log::info,
     std::{
-        io::{stdin, stdout, Write},
+        io::{stdin, stdout, Read, Write},
         str::FromStr,
     },
 };
 
-pub fn seed_settings_ui() -> Settings {
+/**
+ * Shuts down the program in a controlled fashion:
+ * - Displays an error message (optional)
+ * - Pauses execution of the CLI
+ * - Terminates with exit code 1.
+ */
+#[macro_export]
+macro_rules! fail {
+    (target: $target:expr, $($arg:tt)+) => ({
+        log::error!(target: $target, $($arg)+);
+        crate::cli::pause();
+        std::process::exit(1);
+    });
+    ($($arg:tt)+) => ({
+        log::error!($($arg)+);
+        crate::cli::pause();
+        std::process::exit(1);
+    });
+    () => ({
+        crate::cli::pause();
+        std::process::exit(1);
+    });
+}
+
+/// Pauses program execution
+pub fn pause() {
+    let mut stdout = stdout();
+    stdout.write(b"\nPress Enter to continue...\n").unwrap();
+    stdout.flush().unwrap();
+    stdin().read(&mut [0]).unwrap();
+}
+
+/// Prompt the user for Seed Settings on the CLI
+pub fn get_seed_settings() -> Settings {
     info!("No preset has been specified. Seed Settings UI will be used instead.\n");
     println!("\n--- Seed Settings ---");
 
@@ -105,7 +138,7 @@ pub fn seed_settings_ui() -> Settings {
 
     let minigames_excluded = prompt_bool(
         "Exclude Minigames",
-        "Excludes the following: Octoball Derby, Cucco Ranch, Hyrule Hotfoot, Treacherous Tower, and both Rupee Rushes",
+        "Excludes the following: Octoball Derby, Dodge the Cuccos, Hyrule Hotfoot, Treacherous Tower, and both Rupee Rushes",
     );
 
     let skip_big_bomb_flower = prompt_bool(
@@ -255,24 +288,6 @@ fn prompt_bool(title: &str, description: &str) -> bool {
             break false;
         } else {
             eprintln!("\nPlease enter either 'y' or 'n'");
-        }
-    }
-}
-
-pub fn prompt_until<F>(prompt: &str, until: F, error: &str) -> system::Result<String>
-where
-    F: Fn(&str) -> bool,
-{
-    loop {
-        print!("{}: ", prompt);
-        stdout().flush()?;
-        let mut input = String::new();
-        stdin().read_line(&mut input)?;
-        input = input.trim().to_string();
-        if until(&input) {
-            break Ok(input);
-        } else {
-            eprintln!("{}", error);
         }
     }
 }
