@@ -14,7 +14,7 @@ use {
     serde::Serialize,
     std::{collections::HashMap, fs, iter, path::Path},
     tempfile::tempdir,
-    try_insert_ext::*,
+    try_insert_ext::EntryInsertExt,
 };
 
 mod code;

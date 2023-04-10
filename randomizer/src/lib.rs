@@ -7,7 +7,6 @@ use {
         Game,
         Item::{self, *},
     },
-    linked_hash_map::LinkedHashMap,
     log::{debug, error, info},
     model::filler_item::{convert, FillerItem},
     patch::Patcher,
@@ -214,7 +213,7 @@ impl Layout {
     }
 }
 
-pub type World = LinkedHashMap<&'static str, BTreeMap<&'static str, Item>>;
+pub type World = BTreeMap<&'static str, BTreeMap<&'static str, Item>>;
 
 fn serialize_world<S>(region: &World, ser: S) -> Result<S::Ok, S::Error>
 where
@@ -500,7 +499,7 @@ fn align_json_values(json: &mut String) {
 #[derive(Serialize)]
 pub struct SeedInfo<'s> {
     pub seed: u32,
-    pub settings: &'s Settings, // use Rc<> ?
+    pub settings: &'s Settings,
     pub layout: Layout,
     pub metrics: Metrics,
     pub hints: Hints,
@@ -593,25 +592,25 @@ fn calculate_seed_info<'s>(
     Ok(SeedInfo { seed, settings, layout, metrics, hints })
 }
 
-fn patch_seed(
-    seed_info: &SeedInfo, paths: &UserConfig, no_patch: bool, no_spoiler: bool,
+pub fn patch_seed(
+    seed_info: &SeedInfo, user_config: &UserConfig, no_patch: bool, no_spoiler: bool,
 ) -> Result<()> {
     println!();
 
     if !no_patch {
         info!("Starting Patch Process...");
 
-        let game = Game::load(paths.rom())?;
+        let game = Game::load(user_config.rom())?;
         let mut patcher = Patcher::new(game)?;
 
         info!("ROM Loaded.\n");
 
         regions::patch(&mut patcher, &seed_info.layout, &seed_info.settings)?;
         let patches = patcher.prepare(seed_info)?;
-        patches.dump(paths.output())?;
+        patches.dump(user_config.output())?;
     }
     if !no_spoiler {
-        let path = paths.output().join(format!("{:0>10}_spoiler.json", seed_info.seed));
+        let path = user_config.output().join(format!("{:0>10}_spoiler.json", seed_info.seed));
         info!("Writing Spoiler Log to:         {}", &path.absolutize()?.display());
 
         //let spoiler = Spoiler::from(seed_info);

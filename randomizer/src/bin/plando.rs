@@ -2,8 +2,7 @@ use {
     albw::Item::*,
     log::{error, info, LevelFilter},
     randomizer::{
-        cli,
-        regions,
+        cli, fail, regions,
         settings::{
             entrance_shuffle_setting::EntranceShuffleSetting,
             hint_settings::HintGhostPrice::*,
@@ -12,13 +11,12 @@ use {
             pedestal_setting::PedestalSetting,
             settings::{Exclude, Exclusion, Options, Settings},
         },
-        Layout, LocationInfo,
+        system::{System, UserConfig},
+        Layout, LocationInfo, SeedInfo,
     },
     simplelog::SimpleLogger,
     structopt::StructOpt,
 };
-use randomizer::fail;
-use randomizer::system::{System, UserConfig};
 
 #[derive(Debug, StructOpt)]
 struct Opt {
@@ -48,12 +46,17 @@ fn main() {
                 Full Error: {}\n", error);
     });
 
-    const PLANDO_SEED: u32 = 0;
-    let settings = plando_settings();
-    settings.log_settings();
-    let layout = build_layout();
+    let seed_info = SeedInfo {
+        seed: 0,
+        settings: plando_settings(),
+        layout: build_layout(),
+        metrics: Default::default(),
+        hints: Default::default(),
+    };
 
-    match randomizer::generate_seed(PLANDO_SEED, &settings, &user_config, args.no_patch, args.no_spoiler) {
+    seed_info.settings.log_settings();
+
+    match randomizer::patch_seed(&seed_info, &user_config, args.no_patch, args.no_spoiler) {
         Ok(_) => {
             println!();
             info!("Successfully Generated ALBW Plandomizer Seed");
@@ -67,8 +70,8 @@ fn main() {
     cli::pause();
 }
 
-fn plando_settings() -> Settings {
-    Settings {
+fn plando_settings<'s>() -> &'s Settings {
+    &Settings {
         dev_mode: true,
         logic: Logic {
             logic_mode: LogicMode::Normal,
