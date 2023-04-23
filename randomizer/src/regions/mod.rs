@@ -1,5 +1,5 @@
 use {
-    crate::{patch::Patcher, Settings},
+    crate::{hints::hint_color::HintColor, patch::Patcher, Settings},
     log::info,
     std::{
         fmt::{self, Debug, Formatter},
@@ -9,6 +9,7 @@ use {
 
 pub struct Subregion {
     name: &'static str,
+    color: HintColor,
     world: World,
     id: &'static str,
 }
@@ -16,6 +17,10 @@ pub struct Subregion {
 impl Subregion {
     pub fn name(&self) -> &'static str {
         self.name
+    }
+
+    pub fn name_colorized(&self) -> String {
+        self.color.format(&self.name)
     }
 
     pub fn world(&self) -> World {
@@ -198,6 +203,7 @@ macro_rules! region {
     (
         course: $course:ident,
         name: $name:literal,
+        color: $color:ident,
         $start:ident $start_props:tt,
         $($id:ident $props:tt,)*
     ) => {
@@ -218,6 +224,7 @@ macro_rules! region {
         }
 
         pub const NAME: &str = $name;
+        pub const COLOR: crate::hints::hint_color::HintColor = crate::hints::hint_color::HintColor::$color;
         #[allow(unused)]
         pub const COURSE: albw::course::Id = albw::course::Id::$course;
     };
@@ -244,6 +251,7 @@ macro_rules! subregion {
 
             pub const SUBREGION: &Subregion = &Subregion {
                 name: super::NAME,
+                color: super::COLOR,
                 world: super::super::WORLD,
                 id: stringify!($id),
             };

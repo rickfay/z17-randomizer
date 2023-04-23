@@ -1,6 +1,7 @@
 crate::region! {
     course: DungeonKame,
     name: "Turtle Rock",
+    color: Purple,
     rock {
         locations: [
             "[TR] (1F) Center": Compass @Chest(1[115]),

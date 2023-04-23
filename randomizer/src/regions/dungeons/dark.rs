@@ -1,6 +1,7 @@
 crate::region! {
     course: DungeonDark,
     name: "Dark Palace",
+    color: Green,
     palace {
         locations: [
             "[PD] (1F) Right Pit": RupeeB @Chest(2[23]),

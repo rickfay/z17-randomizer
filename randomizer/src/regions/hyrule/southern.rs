@@ -1,6 +1,7 @@
 crate::region! {
     course: FieldLight,
     name: "Southern Ruins",
+    color: Name,
     ruins {
         locations: [
             "Runaway Item Seller": RupeeSilver @Event(Boot/FieldLight_33_Douguya[0x49]),

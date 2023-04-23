@@ -1,6 +1,7 @@
 crate::region! {
     course: DungeonHagure,
     name: "Thieves' Hideout",
+    color: Beige,
     hideout {
         locations: [
             "[T'H] (B1) Jail Cell": RupeePurple @Chest(1[1323]),

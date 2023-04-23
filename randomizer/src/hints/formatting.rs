@@ -46,12 +46,14 @@ fn utf16_str(v: &[u16]) -> String {
     String::from_utf16(v).unwrap()
 }
 
+#[allow(unused)]
 pub(crate) fn big(text: &str) -> String {
     let prefix = String::from_utf16(&[0xE, 0x0, 0x2, 0x2, 0x64, 0xE, 0x0, 0x2, 0x2, 0x82]).unwrap();
     let suffix = String::from_utf16(&[0xE, 0x0, 0x2, 0x2, 0x64]).unwrap();
     format!("{}{}{}", prefix, text, suffix)
 }
 
+#[allow(unused)]
 pub(crate) fn troll() -> String {
     purple(SYMBOL_RAVIO.as_str())
 }

@@ -1,6 +1,7 @@
 crate::region! {
     course: FieldDark,
     name: "Misery Mire",
+    color: Name,
     mire {
         locations: [
             "Misery Mire Ledge": HeartPiece @Heart(31[82]),

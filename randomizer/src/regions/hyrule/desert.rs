@@ -1,6 +1,7 @@
 crate::region! {
     course: FieldLight,
     name: "Desert of Mystery Region",
+    color: Name,
     mystery {
         locations: [
             "[Mai] Buried in the Desert": Maiamai @Maiamai(31[67]),

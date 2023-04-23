@@ -1,6 +1,7 @@
 crate::region! {
     course: DungeonIce,
     name: "Ice Ruins",
+    color: Attention,
     ruins {
         locations: [
             "[IR] (1F) Hidden Chest": RupeeGold @Chest(1[1048]),

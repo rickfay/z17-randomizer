@@ -1,6 +1,7 @@
 crate::region! {
     course: DungeonGanon,
     name: "Lorule Castle",
+    color: Purple,
     castle {
         locations: [
             "[LC] (1F) Ledge": RupeeR @Chest(1[714]),

@@ -16,6 +16,9 @@ use {
     serde::{Serialize, Serializer},
     std::collections::{HashMap, HashSet},
 };
+pub mod formatting;
+pub mod hint_color;
+mod hints;
 
 /// Generates Always, Path, and Sometimes Hints based on settings
 pub fn generate_hints(
@@ -360,11 +363,19 @@ pub struct PathHint {
 }
 
 impl PathHint {
-    pub fn to_hint_str(&self) -> String {
+    pub fn to_str(&self) -> String {
         format!(
             "It says here that {} is on the path to {}.",
             self.check.get_location_info().unwrap().region(),
             self.goal.as_str()
+        )
+    }
+
+    pub fn to_hint(&self) -> String {
+        format!(
+            "It says here that {}\nis on the path to {}.",
+            &self.check.get_location_info().unwrap().region_colorized(),
+            &self.goal.as_str_colorized()
         )
     }
 }
@@ -375,8 +386,7 @@ impl Serialize for PathHint {
         S: Serializer,
     {
         // todo I don't really like this...
-        serializer
-            .serialize_str(format!("{} [{}]", self.to_hint_str(), self.ghost.as_str()).as_str())
+        serializer.serialize_str(format!("{} [{}]", self.to_str(), self.ghost.as_str()).as_str())
     }
 }
 

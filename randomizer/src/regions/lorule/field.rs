@@ -1,6 +1,7 @@
 crate::region! {
     course: FieldDark,
     name: "Central Lorule",
+    color: Name,
     main {
         locations: [
             "Big Bomb Flower Cave": RupeeSilver @Chest(CaveDark 2[4]),

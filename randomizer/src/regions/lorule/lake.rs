@@ -1,6 +1,7 @@
 crate::region! {
     course: FieldDark,
     name: "Turtle Rock Region",
+    color: Name,
     lorule {
         locations: [
             "Lorule Lake Chest": RupeeSilver @Chest(28[53]),

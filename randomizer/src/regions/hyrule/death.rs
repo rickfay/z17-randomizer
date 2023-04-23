@@ -1,6 +1,7 @@
 crate::region! {
     course: FieldLight,
     name: "Death Mountain",
+    color: Name,
     mountain {
         locations: [
             "Bouldering Guy": ItemBottle @Event(FieldLight_05_Climber[0x06]),

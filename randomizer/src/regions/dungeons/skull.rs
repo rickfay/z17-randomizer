@@ -1,6 +1,7 @@
 crate::region! {
     course: DungeonDokuro,
     name: "Skull Woods",
+    color: Blue,
     woods {
         locations: [
             "[SW] (B1) Gibdo Room (Lower)": Compass @Chest(1[100]),

@@ -1,6 +1,7 @@
 use {
     crate::{
-        patch::messages::{formatting::*, hint_ghosts::HintGhost, msbt::load_msbt},
+        hints::formatting::*,
+        patch::messages::{hint_ghosts::HintGhost, msbt::load_msbt},
         LocationInfo, Patcher, Result, SeedInfo,
     },
     albw::{
@@ -11,10 +12,7 @@ use {
     std::collections::HashMap,
 };
 
-#[allow(unused)]
-mod formatting;
 mod hint_ghosts;
-mod hints;
 mod msbt;
 
 /// Patch MSBT Message Files
@@ -205,7 +203,7 @@ fn patch_hint_ghosts(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> 
         let entry = msbt_hint_map
             .entry((hint_ghost.course, hint_ghost.msbt_file))
             .or_insert_with(|| HashMap::new());
-        entry.insert(hint_ghost.msg_label, path_hint.to_hint_str());
+        entry.insert(hint_ghost.msg_label, path_hint.to_hint());
     }
 
     // Update the MSBT Files with the generated Hints

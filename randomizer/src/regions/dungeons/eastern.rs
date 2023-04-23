@@ -1,6 +1,7 @@
 crate::region! {
     course: DungeonEast,
     name: "Eastern Palace",
+    color: Green,
     palace {
         locations: [
             "[EP] (1F) Merge Chest": RupeeSilver @Chest(1[244]),

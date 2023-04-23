@@ -1,6 +1,7 @@
 crate::region! {
     course: FieldLight,
     name: "Lake Hylia",
+    color: Name,
     hylia {
         locations: [
             " 10 Maiamai": ItemBowLv2 @None(),

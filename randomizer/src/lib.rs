@@ -124,6 +124,10 @@ impl LocationInfo {
         self.subregion.name()
     }
 
+    pub fn region_colorized(&self) -> String {
+        self.subregion.name_colorized()
+    }
+
     pub fn name(&self) -> &'static str {
         self.name
     }

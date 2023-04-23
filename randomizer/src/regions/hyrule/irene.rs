@@ -1,6 +1,7 @@
 crate::region! {
     course: FieldLight,
     name: "Irene the Witch",
+    color: Name,
     witch {
         locations: [
             "Irene": ItemBell @Event[
