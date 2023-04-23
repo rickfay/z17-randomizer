@@ -48,7 +48,7 @@ fn main() {
 
     let seed_info = SeedInfo {
         seed: 0,
-        settings: plando_settings(),
+        settings: &plando_settings(),
         layout: build_layout(),
         metrics: Default::default(),
         hints: Default::default(),
@@ -70,8 +70,8 @@ fn main() {
     cli::pause();
 }
 
-fn plando_settings<'s>() -> &'s Settings {
-    &Settings {
+fn plando_settings() -> Settings {
+    Settings {
         dev_mode: true,
         logic: Logic {
             logic_mode: LogicMode::Normal,

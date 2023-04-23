@@ -492,6 +492,10 @@ fn verify_all_locations_accessible(
     world_graph: &mut WorldGraph, check_map: &mut CheckMap, progression_pool: &mut Pool,
     settings: &Settings,
 ) {
+    if NoLogic.eq(&settings.logic.logic_mode) {
+        return; // Skip this check on No Logic
+    }
+
     info!("Verifying all locations accessible...");
     let reachable_checks = assumed_search(world_graph, progression_pool, check_map, settings); //find_reachable_checks(loc_map, &everything, &mut check_map); //
 
@@ -519,7 +523,10 @@ fn verify_all_locations_accessible(
     /// "Progression Events" (non-item checks that are still progression)
     const PROGRESSION_EVENTS: usize = 33;
 
-    if reachable_checks.len() != IN_LOGIC_CHECKS + PROGRESSION_EVENTS {
+    /// Hint Ghosts (Overworld)
+    const HINT_GHOSTS_OW: usize = 58;
+
+    if reachable_checks.len() != IN_LOGIC_CHECKS + PROGRESSION_EVENTS + HINT_GHOSTS_OW {
         let reachable_check_names: Vec<&str> =
             reachable_checks.iter().map(|c| c.get_name()).collect();
         for (check, _) in check_map {

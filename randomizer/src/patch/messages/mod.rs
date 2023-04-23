@@ -1,17 +1,14 @@
 use {
     crate::{
-        patch::messages::{
-            formatting::*, hint_ghosts::HintGhost, hints::JOKE_HINTS, msbt::load_msbt,
-        },
+        patch::messages::{formatting::*, hint_ghosts::HintGhost, msbt::load_msbt},
         LocationInfo, Patcher, Result, SeedInfo,
     },
     albw::{
-        course::{Id, Id::*},
+        course::Id::*,
         Item::{PendantPower, PendantWisdom},
     },
-    formatx::formatx,
     log::info,
-    std::collections::{HashMap, HashSet},
+    std::collections::HashMap,
 };
 
 #[allow(unused)]
@@ -24,15 +21,16 @@ mod msbt;
 pub fn patch_messages(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
     info!("Patching MSBT Files...");
 
-    // debug(patcher, FieldDark, "HintGhostDark");
+    // debug(patcher, CaveDark, "Cave");
 
     // patch_file_select(patcher)?;
     // patch_ravio(patcher)?;
+    patch_great_rupee_fairy(patcher)?;
+
     // patch_street_merchant(patcher, seed_info)?;
     // patch_sahasrahla(patcher, seed_info)?;
     patch_general_hint_ghosts(patcher, seed_info)?;
-    // patch_hint_ghosts(patcher, seed_info)?; // todo add ghosts into world graph
-    // patch_hint_ghost_light(patcher)?;
+    patch_hint_ghosts(patcher, seed_info)?;
 
     Ok(())
 }
@@ -77,6 +75,17 @@ fn patch_ravio(patcher: &mut Patcher) -> Result<()> {
     );
     ravio_shop.set("lgt_RentalKeeper_Field_2C_03", format!("stuff and things"));
     patcher.update(ravio_shop.dump())?;
+
+    Ok(())
+}
+
+fn patch_great_rupee_fairy(patcher: &mut Patcher) -> Result<()> {
+    let mut grf = load_msbt(patcher, CaveDark, "Cave").unwrap();
+    grf.set("CaveDark29_LuckyFairy_00", format!("Throw Rupees into the fountain?\n{}", *CHOICE_2));
+    grf.set("CaveDark29_LuckyFairy_01", "Throw 3000".to_owned());
+    grf.set("CaveDark29_LuckyFairy_02", "Don't throw any".to_owned());
+    grf.set("CaveDark29_LuckyFairy_03", "1234567".to_owned()); // shorten string so file matches OG size
+    patcher.update(grf.dump())?;
 
     Ok(())
 }
@@ -179,7 +188,6 @@ fn patch_general_hint_ghosts(patcher: &mut Patcher, seed_info: &SeedInfo) -> Res
     Ok(())
 }
 
-#[allow(unused)]
 fn patch_hint_ghosts(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
     if seed_info.hints.path_hints.is_empty() {
         info!("No Ghost Hints generated.");
@@ -187,27 +195,13 @@ fn patch_hint_ghosts(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> 
         info!("Patching Hint Ghosts...");
     }
 
-    let mut taken_ghosts = HashSet::new();
-
     // Organize Hints by the MSBT File they need to update
-    let mut msbt_hint_map: HashMap<(Id, &str), HashMap<&str, String>> = HashMap::new();
+    let mut msbt_hint_map = HashMap::new();
     for path_hint in &seed_info.hints.path_hints {
         // Make mutable copy of hint for processing
         let path_hint = &mut path_hint.clone();
 
-        // Choose a Ghost to place the hint on
-        let mut chosen_ghost;
-        loop {
-            chosen_ghost = path_hint.hint_locations.remove(0);
-            if taken_ghosts.contains(&chosen_ghost) {
-                taken_ghosts.insert(chosen_ghost);
-                break;
-            } else if path_hint.hint_locations.is_empty() {
-                panic!("Ran out of available Hint Ghosts");
-            }
-        }
-
-        let hint_ghost = HintGhost::from(chosen_ghost);
+        let hint_ghost = HintGhost::from(path_hint.ghost);
         let entry = msbt_hint_map
             .entry((hint_ghost.course, hint_ghost.msbt_file))
             .or_insert_with(|| HashMap::new());
@@ -222,40 +216,6 @@ fn patch_hint_ghosts(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> 
         }
         patcher.update(msbt_file.dump())?;
     }
-
-    Ok(())
-}
-
-#[allow(unused)]
-fn patch_hint_ghost_light(patcher: &mut Patcher) -> Result<()> {
-    // let mut hint_ghost_light = load_msbt(patcher, FieldLight, "HintGhostLight")?;
-    let mut lost_woods = load_msbt(patcher, FieldLight, "FieldLight_00")?;
-
-    lost_woods.set(
-        "lgt_MayoinoHintObake_Msg4",
-        format!(
-            r#"It says here that the
-{} has the
-{}. {}"#,
-            name("Master Sword Pedestal"),
-            name("Silver Arrows"),
-            troll()
-        ),
-    );
-
-    lost_woods.set(
-        "lgt_MayoinoHintObake_Msg8",
-        format!(
-            r#"It says here that you need {}
-to beat the game. {}"#,
-            name("Items"),
-            troll()
-        ),
-    );
-
-    lost_woods.set("lgt_MayoinoHintObake_Msg6", formatx!(JOKE_HINTS[0], troll()).unwrap());
-
-    patcher.update(lost_woods.dump())?;
 
     Ok(())
 }

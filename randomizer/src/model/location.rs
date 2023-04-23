@@ -97,6 +97,8 @@ pub enum Location {
     LoruleBellTravel,
     LoruleCastleField,
     ThievesTownItemShop,
+    VeteranThiefsHouse,
+    FortunesChoiceLorule,
     BigBombFlowerShop,
     BigBombFlowerField,
     LoruleGraveyard,
@@ -118,6 +120,7 @@ pub enum Location {
     Desert,
     DesertFairyLedge, // todo
     DesertFairyCave,  // todo
+    DesertCenterLedge,
     DesertSouthWestLedge,
     DesertPalaceWeatherVane,
     DesertPalaceMidwayLedge,
@@ -136,7 +139,11 @@ pub enum Location {
     LoruleLakesideItemShop,
 
     DarkRuins,
-    DarkRuinsWeatherVane,
+    DarkMazeEntrance,
+    DarkMazeHalfway,
+    DarkMazeJail1,
+    DarkMazeJail2,
+    DarkPalaceWeatherVane,
     DarkRuinsShallowWater,
     HinoxCaveWater,
     HinoxCaveShallowWater,

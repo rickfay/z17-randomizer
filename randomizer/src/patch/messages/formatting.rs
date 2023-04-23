@@ -4,6 +4,8 @@ use lazy_static::lazy_static;
 lazy_static! {
     pub(crate) static ref SYMBOL_A_BUTTON: String = String::from_utf16(&[0xE000, 0x002E]).unwrap();
     pub(crate) static ref SYMBOL_B_BUTTON: String = unimplemented!();
+    pub(crate) static ref SYMBOL_X_BUTTON: String = unimplemented!();
+    pub(crate) static ref SYMBOL_Y_BUTTON: String = unimplemented!();
     pub(crate) static ref SYMBOL_RAVIO: String = String::from_utf16(&[0xE05E]).unwrap();
     pub(crate) static ref SYMBOL_BOMBS: String = String::from_utf16(&[0xE06D]).unwrap();
     pub(crate) static ref SYMBOL_FIRE_ROD: String = String::from_utf16(&[0xE06E]).unwrap();

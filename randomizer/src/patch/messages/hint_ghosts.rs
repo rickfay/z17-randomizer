@@ -28,8 +28,13 @@ macro_rules! hint_ghost_from {
 }
 
 hint_ghost_from! {
+    // Lost Woods
+    HintGhostLostWoodsMaze1 => FieldLight, "FieldLight_00", "lgt_MayoinoHintObake_Msg4";
+    HintGhostLostWoodsMaze2 => FieldLight, "FieldLight_00", "lgt_MayoinoHintObake_Msg8";
+    HintGhostLostWoodsMaze3 => FieldLight, "FieldLight_00", "lgt_MayoinoHintObake_Msg6";
+
     // Hyrule
-    HintGhostLostWoods0 => FieldLight, "HintGhostLight", "HintGhost_FieldLight_00_000";
+    HintGhostLostWoods => FieldLight, "HintGhostLight", "HintGhost_FieldLight_00_000";
     HintGhostSpectacleRock => FieldLight, "HintGhostLight", "HintGhost_FieldLight_03_002";
     HintGhostTowerOfHeraOutside => FieldLight, "HintGhostLight", "HintGhost_FieldLight_03_003";
     HintGhostFloatingIsland => FieldLight, "HintGhostLight", "HintGhost_FieldLight_05_004";
@@ -63,20 +68,15 @@ hint_ghost_from! {
     HintGhostHyruleCastleRocks => FieldLight, "HintGhostLight", "HintGhost_FieldLight_14_032";
     HintGhostWitchsHouse => FieldLight, "HintGhostLight", "HintGhost_FieldLight_14_033";
 
-    // Lost Woods
-    HintGhostLostWoods1 => FieldLight, "FieldLight_00", "lgt_MayoinoHintObake_Msg4";
-    HintGhostLostWoods2 => FieldLight, "FieldLight_00", "lgt_MayoinoHintObake_Msg8";
-    HintGhostLostWoods3 => FieldLight, "FieldLight_00", "lgt_MayoinoHintObake_Msg6";
-
     // Lorule
     HintGhostSkullWoodsCuccos => FieldDark, "HintGhostDark", "HintGhost_FieldDark_02_001";
     HintGhostTreacherousTower => FieldDark, "HintGhostDark", "HintGhost_FieldDark_03_002";
     HintGhostIceRuinsOutside => FieldDark, "HintGhostDark", "HintGhost_FieldDark_07_003";
     HintGhostLoruleGraveyard => FieldDark, "HintGhostDark", "HintGhost_FieldDark_14_004";
-    HintGhostKusDomain => FieldDark, "HintGhostDark", "HintGhost_FieldDark_16_005";
+    HintGhostDarkRuinsNorth => FieldDark, "HintGhostDark", "HintGhost_FieldDark_16_005";
     HintGhostSkullWoodsSouth => FieldDark, "HintGhostDark", "HintGhost_FieldDark_18_006";
     HintGhostFortunesChoice => IndoorDark, "HintGhostDark", "HintGhost_FieldDark_18_007";
-    HintGhostVeteransHouse => IndoorDark, "HintGhostDark", "HintGhost_FieldDark_18_008";
+    HintGhostVeteranThief => IndoorDark, "HintGhostDark", "HintGhost_FieldDark_18_008";
     HintGhostFortuneTellerLorule => FieldDark, "HintGhostDark", "HintGhost_FieldDark_1A_009";
     HintGhostDarkMaze => FieldDark, "HintGhostDark", "HintGhost_FieldDark_1E_010";
     HintGhostRupeeRushLorule => FieldDark, "HintGhostDark", "HintGhost_FieldDark_28_011";

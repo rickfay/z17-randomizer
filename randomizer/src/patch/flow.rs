@@ -204,10 +204,12 @@ pub fn apply(patcher: &mut Patcher, free: Item, settings: &Settings) -> Result<(
     // Debugging
     // patcher
     //     .flow(albw::course::Id::CaveDark)?
-    //     .get_mut(stringify!(FieldDark_00_GoldenBeeShop))
+    //     .get_mut(stringify!(Cave))
     //     .ok_or_else(|| crate::Error::game("File not found."))??
     //     .get()
     //     .debug();
+    // info!("Finished");
+    // std::process::exit(0);
 
     apply!(patcher,
 
@@ -324,26 +326,33 @@ pub fn apply(patcher: &mut Patcher, free: Item, settings: &Settings) -> Result<(
 
         // Great Rupee Fairy
         CaveDark/Cave {
-            // CaveDark29_LuckyFairy_00
-            // 5 start
-            // 46
-            // 35 checks 948 Flag to see if we've already gotten reward
-            // 45
-            [45] => 47, // Skip Would you like to throw text
+
+            /*
+             Change options:
+             - "Throw 50" => "Throw 3000"
+             - "Throw 200" => "Don't throw any"
+             - Remove third option (done by changing [6]'s message text)
+            */
+            [8 into_branch] each [
+                count(2),
+                switch [
+                    [0] => 47, // "Throw 3000" option will appear to throw 10 Reds
+                    [1] => 9, // "Don't throw any" option is now second
+                ],
+            ],
+
             [47 into_branch] each [ // 47 checks that we have enough rupees
                 value(3000),
             ],
+
             // 44 deposits 200 rupees as 10x Red Rupees
             [44] => 43,
-            // 43 deposits 50 rupees as 10x Blue Rupees
-            [43] => 25,
-            // 25 Checks if 3000 have been deposited
-            [27 convert_into_action] each [
-                => 44, // create loop, depositing 200 then 50 until we hit 3000
-            ],
-            [32 convert_into_action] each [ // remove dialog
-                command(0), // clear command
-                => 36, // skip to item get
+
+            // Deduct 2800 rupees so the player has effectively given 3000
+            [43] each [
+                value(0xFFFFF510), // Negative 2800
+                command(37),
+                => 41,
             ],
         },
 

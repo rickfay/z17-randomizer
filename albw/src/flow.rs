@@ -422,8 +422,19 @@ impl<'flow, 'input> BranchMut<'flow, 'input> {
         self.0.set_value(value);
     }
 
+    pub fn set_next<N>(&mut self, next: N)
+    where
+        N: Into<Next>,
+    {
+        self.0.set_next(next);
+    }
+
     pub fn set_command(&mut self, command: u16) {
         self.0.set_command(command);
+    }
+
+    pub fn set_count(&mut self, count: u16) {
+        self.0.set_count(count);
     }
 
     pub fn set_branch<N>(&mut self, index: u16, to: N) -> Result<()>

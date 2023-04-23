@@ -23,11 +23,14 @@ pub fn generate_hints(
 ) -> Hints {
     info!("Generating Hints...");
 
-    const NUM_TOTAL_HINTS: usize = 28;
+    const NUM_TOTAL_HINTS: usize = 29;
     let mut taken_checks: Vec<&'static str> = Vec::new();
+    let mut taken_ghosts: Vec<FillerItem> = Vec::new();
 
     let always_hints = generate_always_hints(settings, check_map, &mut taken_checks);
-    let path_hints = generate_path_hints(settings, rng, world_graph, check_map, &mut taken_checks);
+    let path_hints = generate_path_hints(
+        settings, rng, world_graph, check_map, &mut taken_checks, &mut taken_ghosts,
+    );
 
     let num_sometimes_hints = NUM_TOTAL_HINTS - always_hints.len() - path_hints.len();
     let sometimes_hints =
@@ -235,7 +238,7 @@ fn generate_sometimes_hints(
  */
 fn generate_path_hints(
     settings: &Settings, rng: &mut StdRng, world_graph: &mut WorldGraph, check_map: &mut CheckMap,
-    taken_checks: &mut Vec<&'static str>,
+    taken_checks: &mut Vec<&'static str>, taken_ghosts: &mut Vec<FillerItem>,
 ) -> Vec<PathHint> {
     let mut bosses_and_prize_locations: Vec<(FillerItem, &str)> = vec![
         (Yuga, "Eastern Palace Prize"),
@@ -254,69 +257,106 @@ fn generate_path_hints(
     bosses_and_prize_locations = shuffle(rng, bosses_and_prize_locations);
 
     let mut chosen_paths: Vec<PathHint> = Vec::new();
-    let mut backup_paths: Vec<PathHint> = Vec::new();
-    let mut path_hints = Vec::new();
+    let mut backup_paths: Vec<PotentialPathHint> = Vec::new();
     let mut extra_paths_needed = 0;
 
-    for (boss, prize_loc) in bosses_and_prize_locations {
+    for (goal, prize_loc) in bosses_and_prize_locations {
         if is_sage(convert(check_map.get(prize_loc).unwrap().unwrap()).unwrap()) {
             let mut potential_paths =
-                get_path_checks(settings, rng, world_graph, check_map, &taken_checks, boss);
-            if !potential_paths.is_empty() {
-                let chosen_path = potential_paths.remove(rng.gen_range(0..potential_paths.len()));
-
-                taken_checks.push(chosen_path.check.get_name());
+                get_potential_path_hints(settings, rng, world_graph, check_map, taken_checks, goal);
+            if let Some(chosen_path) =
+                choose_path_hint(&mut potential_paths, taken_checks, taken_ghosts, rng)
+            {
                 chosen_paths.push(chosen_path);
                 backup_paths.extend(potential_paths);
             } else {
-                debug!("No Paths possible for: {}", boss.as_str());
-
+                debug!("No Path Hints possible for Goal: {}", goal.as_str());
                 extra_paths_needed += 1;
             }
         }
     }
 
     // Add extra paths if some bosses didn't have any path items
-    let mut i = 0;
-    loop {
-        if i >= extra_paths_needed {
-            break;
+    if extra_paths_needed > 0 {
+        backup_paths = shuffle(rng, backup_paths);
+        let mut i = 0;
+        loop {
+            if i >= extra_paths_needed || backup_paths.is_empty() {
+                break;
+            }
+
+            if let Some(backup_path) =
+                choose_path_hint(&mut backup_paths, taken_checks, taken_ghosts, rng)
+            {
+                chosen_paths.push(backup_path);
+                i += 1;
+            }
+        }
+    }
+
+    chosen_paths
+}
+
+fn choose_path_hint(
+    potential_paths: &mut Vec<PotentialPathHint>, taken_checks: &mut Vec<&'static str>,
+    taken_ghosts: &mut Vec<FillerItem>, rng: &mut StdRng,
+) -> Option<PathHint> {
+    let mut chosen_path;
+    let mut chosen_ghost;
+    'outer: loop {
+        if potential_paths.is_empty() {
+            debug!("No more potential paths");
+            return None;
         }
 
-        if backup_paths.is_empty() {
-            debug!("Ran out of potential path checks");
-            break;
-        }
-
-        let backup_path = backup_paths.remove(rng.gen_range(0..backup_paths.len()));
+        chosen_path = potential_paths.remove(rng.gen_range(0..potential_paths.len()));
 
         // Prevent reusing existing check
-        if taken_checks.contains(&backup_path.check.get_name()) {
+        if taken_checks.contains(&chosen_path.check.get_name()) {
             continue;
         }
 
-        taken_checks.push(backup_path.check.get_name());
-        chosen_paths.push(backup_path);
+        loop {
+            if chosen_path.ghosts.is_empty() {
+                debug!("No available Ghosts to give Hint: {:?}", chosen_path);
+                continue 'outer;
+            }
 
-        i += 1;
+            chosen_ghost = chosen_path.ghosts.remove(rng.gen_range(0..chosen_path.ghosts.len()));
+            if !taken_ghosts.contains(&chosen_ghost) {
+                break;
+            }
+        }
+
+        taken_checks.push(chosen_path.check.get_name());
+        taken_ghosts.push(chosen_ghost);
+
+        break;
     }
 
-    // Format
-    for chosen_path in chosen_paths {
-        path_hints.push(chosen_path);
-    }
-
-    path_hints
+    Some(PathHint { goal: chosen_path.goal, check: chosen_path.check, ghost: chosen_ghost })
 }
 
+/// Struct containing information about a possible Hint and where it could be placed
+#[derive(Debug, Clone)]
+pub struct PotentialPathHint {
+    /// Goal this Path Hint leads to
+    pub goal: FillerItem,
+    /// Specific location Check containing the Path Item
+    pub check: Check,
+    /// Hint Ghosts that will could potentially give out this hint
+    pub ghosts: Vec<FillerItem>,
+}
+
+/// Path Hint
 #[derive(Debug, Clone)]
 pub struct PathHint {
     /// Goal this Path Hint leads to
     pub goal: FillerItem,
     /// Specific location Check containing the Path Item
     pub check: Check,
-    /// A list of possible Hint Locations where this hint could be placed
-    pub hint_locations: Vec<FillerItem>,
+    /// Hint Ghost that will give out this hint
+    pub ghost: FillerItem,
 }
 
 impl PathHint {
@@ -334,23 +374,20 @@ impl Serialize for PathHint {
     where
         S: Serializer,
     {
-        serializer.serialize_str(self.to_hint_str().as_str())
+        // todo I don't really like this...
+        serializer
+            .serialize_str(format!("{} [{}]", self.to_hint_str(), self.ghost.as_str()).as_str())
     }
 }
 
-/**
- * Get Path Checks
- * Determines the possible Path Check locations for a given Boss, if any. One Path Check is chosen
- * and returned to become the Path Hint for this boss, while the others are also returned to be used
- * as backups in case extra hints are needed.
- */
-fn get_path_checks<'a>(
+/// Determines the possible Path Hints for a given goal, if any exist.
+fn get_potential_path_hints(
     settings: &Settings, rng: &mut StdRng, world_graph: &mut WorldGraph, check_map: &mut CheckMap,
-    taken_checks: &Vec<&'static str>, goal: FillerItem,
-) -> Vec<PathHint> {
+    taken_checks: &mut Vec<&str>, goal: FillerItem,
+) -> Vec<PotentialPathHint> {
     let mut progress = Progress::new(settings.clone());
     let mut reachable_checks: Vec<Check>;
-    let mut potential_paths: Vec<PathHint> = Vec::new();
+    let mut potential_paths: Vec<PotentialPathHint> = Vec::new();
 
     let mut potential_path_checks: HashSet<Check> = HashSet::new();
 
@@ -364,15 +401,15 @@ fn get_path_checks<'a>(
         let new_items = reachable_items.difference(&progress);
 
         if new_items.is_empty() {
-            fail!("No possible path to defeat {}", goal.as_str());
+            if progress.has(goal) {
+                break; // success
+            } else {
+                fail!("No possible path to reach Goal: {}", goal.as_str());
+            }
         }
 
         for new_item in &new_items {
             progress.add_item(*new_item);
-        }
-
-        if progress.has(goal) {
-            break;
         }
     }
 
@@ -412,7 +449,7 @@ fn get_path_checks<'a>(
                             .collect::<_>(),
                     );
 
-                    potential_paths.push(PathHint { goal, check, hint_locations });
+                    potential_paths.push(PotentialPathHint { goal, check, ghosts: hint_locations });
                 }
                 break;
             }
