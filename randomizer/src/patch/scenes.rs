@@ -105,6 +105,7 @@ pub fn patch_byaml_files(patcher: &mut Patcher, settings: &Settings) -> Result<(
     patch_thief_girl_cave(patcher);
     patch_treasure_dungeons(patcher, settings);
     patch_zora(patcher);
+    patch_swamp_palace(patcher);
     patch_hint_ghosts_overworld(patcher);
     // patch_hint_ghosts_dungeons(patcher);
 
@@ -639,6 +640,13 @@ fn patch_zora(patcher: &mut Patcher) {
     patcher.modify_objs(FieldLight, 35, &[
         enable(151), // Zora outside House of Gales
     ]);
+}
+
+// Swamp Palace
+fn patch_swamp_palace(patcher: &mut Patcher) {
+    patcher.modify_objs(DungeonWater, 2, &[call(633, |obj| {
+        obj.clp = 3; // Fix the impossible Rupee
+    })]);
 }
 
 // Enable All Overworld Hint Ghosts
