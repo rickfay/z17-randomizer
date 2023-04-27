@@ -12,7 +12,7 @@ use {
             settings::{Exclude, Exclusion, Options, Settings},
         },
         system::{System, UserConfig},
-        Layout, LocationInfo, SeedInfo,
+        Layout, LocationInfo, SeedHash, SeedInfo,
     },
     simplelog::SimpleLogger,
     structopt::StructOpt,
@@ -46,9 +46,13 @@ fn main() {
                 Full Error: {}\n", error);
     });
 
+    let seed = 0;
+    let settings = &plando_settings();
+
     let seed_info = SeedInfo {
-        seed: 0,
-        settings: &plando_settings(),
+        seed,
+        hash: SeedHash::new(seed, settings),
+        settings,
         layout: build_layout(),
         metrics: Default::default(),
         hints: Default::default(),

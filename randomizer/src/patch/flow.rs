@@ -1,7 +1,7 @@
 use {
     super::Patcher,
     crate::{settings::hint_settings::HintGhostPrice, Result, Settings},
-    albw::Item,
+    albw::{course::Id, Item},
     log::info,
 };
 
@@ -194,24 +194,58 @@ fn patch_hint_ghosts(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
     Ok(())
 }
 
+fn patch_final_boss(patcher: &mut Patcher) -> Result<()> {
+    apply!(patcher,
+        DungeonBoss/Ganon {
+            [69] => 72, // Skip 1st Zelda text
+        },
+    );
+
+    Ok(())
+}
+
+/// Dev debugging, prints the contents of an MSBF file in a format for spreadsheets. Don't leave this on.
+#[allow(unused)]
+#[deprecated]
+fn debug<C>(patcher: &mut Patcher, course: C, file_name: &str) -> Result<()>
+where
+    C: Into<Option<Id>>,
+{
+    let course = course.into();
+
+    if let Some(file) = patcher.flow(course.clone())?.get_mut(file_name) {
+        file?.get().debug();
+    } else {
+        crate::fail!(
+            "File not found: US{}.szs -> World/Flow/{}.msbf",
+            if course.is_some() {
+                "_English/".to_owned() + course.unwrap().as_str()
+            } else {
+                "/RegionBoot".to_owned()
+            },
+            file_name
+        );
+    };
+
+    info!("Finished MSBF Debug");
+    std::process::exit(0);
+}
+
 pub fn apply(patcher: &mut Patcher, free: Item, settings: &Settings) -> Result<()> {
     info!("Patching Flow Charts...");
 
+    // debug(patcher, Id::FieldLight, "FieldLight_WarpEvent")?;
+
     patch_lorule_castle_requirements(patcher, settings)?;
     patch_castle_connection(patcher, settings)?;
+    patch_final_boss(patcher)?;
     patch_hint_ghosts(patcher, settings)?;
 
-    // Debugging
-    // patcher
-    //     .flow(albw::course::Id::CaveDark)?
-    //     .get_mut(stringify!(Cave))
-    //     .ok_or_else(|| crate::Error::game("File not found."))??
-    //     .get()
-    //     .debug();
-    // info!("Finished");
-    // std::process::exit(0);
-
     apply!(patcher,
+
+        // Irene Bell Text
+        FieldLight/FieldLight_WarpEvent { [0 into_start] => None, },
+        FieldDark/FieldLight_WarpEvent  { [0 into_start] => None, },
 
         // Sahasrahla
         FieldLight/FieldLight_1B_Sahasrahla {

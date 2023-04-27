@@ -1,48 +1,57 @@
+#![allow(non_upper_case_globals)]
+
 use lazy_static::lazy_static;
 
-// Symbols
+// Font Symbols - See US/MessageFont.bffnt for mapping and character, glyph, and offset info.
 lazy_static! {
-    pub(crate) static ref SYMBOL_A_BUTTON: String = String::from_utf16(&[0xE000, 0x002E]).unwrap();
-    pub(crate) static ref SYMBOL_B_BUTTON: String = unimplemented!();
-    pub(crate) static ref SYMBOL_X_BUTTON: String = unimplemented!();
-    pub(crate) static ref SYMBOL_Y_BUTTON: String = unimplemented!();
-    pub(crate) static ref SYMBOL_RAVIO: String = String::from_utf16(&[0xE05E]).unwrap();
-    pub(crate) static ref SYMBOL_BOMBS: String = String::from_utf16(&[0xE06D]).unwrap();
-    pub(crate) static ref SYMBOL_FIRE_ROD: String = String::from_utf16(&[0xE06E]).unwrap();
-    pub(crate) static ref SYMBOL_BOW: String = String::from_utf16(&[0xE06C]).unwrap();
+    pub(crate) static ref A_BUTTON: String = utf16(&[0xE000]);
+    pub(crate) static ref B_BUTTON: String = utf16(&[0xE001]);
+    pub(crate) static ref X_BUTTON: String = utf16(&[0xE002]);
+    pub(crate) static ref Y_BUTTON: String = utf16(&[0xE003]);
+    pub(crate) static ref L_BUTTON: String = utf16(&[0xE004]);
+    pub(crate) static ref R_BUTTON: String = utf16(&[0xE005]);
+    pub(crate) static ref DPAD: String = utf16(&[0xE006]);
+    pub(crate) static ref DIAMOND: String = utf16(&[0xE016]);
+    pub(crate) static ref HEART: String = utf16(&[0xE017]);
+    pub(crate) static ref ARROW_R: String = utf16(&[0xE019]);
+    pub(crate) static ref ARROW_D: String = utf16(&[0xE01C]);
+    pub(crate) static ref CAROT_L: String = utf16(&[0xE036]);
+    pub(crate) static ref CAROT_R: String = utf16(&[0xE037]);
+    pub(crate) static ref PLUS: String = utf16(&[0xE045]);
+    pub(crate) static ref MINUS: String = utf16(&[0xE046]);
+    pub(crate) static ref RAVIO: String = utf16(&[0xE05E]);
+    pub(crate) static ref e: String = utf16(&[0xE06A]);
+    pub(crate) static ref BOW: String = utf16(&[0xE06C]);
+    pub(crate) static ref BOMBS: String = utf16(&[0xE06D]);
+    pub(crate) static ref FIRE_ROD: String = utf16(&[0xE06E]);
+    pub(crate) static ref DPAD_D: String = utf16(&[0xE07A]);
+    pub(crate) static ref DPAD_R: String = utf16(&[0xE07C]);
+    pub(crate) static ref BANG: String = utf16(&[0xFF01]);
+    pub(crate) static ref QUESTION: String = utf16(&[0xFF1F]);
+    pub(crate) static ref TILDE: String = utf16(&[0xFF5E]);
 }
 
 // Controls - Special purpose strings
 lazy_static! {
-    pub(crate) static ref CHOICE_2: String =
-        String::from_utf16(&[0xE, 0x1, 0x6, 0x2, 0xCD02]).unwrap();
-    pub(crate) static ref CHOICE_3: String =
-        String::from_utf16(&[0xE, 0x1, 0x6, 0x2, 0xCD03]).unwrap();
-    pub(crate) static ref CHOICE_4: String =
-        String::from_utf16(&[0xE, 0x1, 0x6, 0x2, 0xCD04]).unwrap();
-    pub(crate) static ref PRICE: String = utf16_str(&[0xE, 0x1, 0x5, 0x6, 0x0, 0xFFFF, 0xCD01]);
+    pub(crate) static ref CHOICE_2: String = utf16(&[0xE, 0x1, 0x6, 0x2, 0xCD02]);
+    pub(crate) static ref CHOICE_3: String = utf16(&[0xE, 0x1, 0x6, 0x2, 0xCD03]);
+    pub(crate) static ref CHOICE_4: String = utf16(&[0xE, 0x1, 0x6, 0x2, 0xCD04]);
+    pub(crate) static ref PRICE: String = utf16(&[0xE, 0x1, 0x5, 0x6, 0x0, 0xFFFF, 0xCD01]);
 }
 
 // Referenced Strings
 lazy_static! {
-    pub(crate) static ref PLAYER_NAME: String = String::from_utf16(&[0xE, 0x1, 0x0, 0x0]).unwrap();
-    pub(crate) static ref SAHASRAHLA: String =
-        String::from_utf16(&[0xE, 0x2, 0x0, 0x2, 0x0109]).unwrap();
-    pub(crate) static ref HOUSE_OF_GALES: String =
-        String::from_utf16(&[0xE, 0x2, 0x1, 0x4, 0x0101, 0xCD00]).unwrap();
-    pub(crate) static ref TOWER_OF_HERA: String =
-        String::from_utf16(&[0xE, 0x2, 0x1, 0x4, 0x0102, 0xCD00]).unwrap();
-    pub(crate) static ref KAKARIKO_VILLAGE: String =
-        String::from_utf16(&[0xE, 0x2, 0x1, 0x4, 0x010D, 0xCD2E]).unwrap();
-    pub(crate) static ref TORNADO_ROD: String =
-        String::from_utf16(&[0xE, 0x2, 0x2, 0x4, 0x0102, 0xCD00]).unwrap();
-    pub(crate) static ref PENDANT_OF_COURAGE: String =
-        String::from_utf16(&[0xE, 0x2, 0x2, 0x4, 0x0123, 0xCD00]).unwrap();
-    pub(crate) static ref MASTER_SWORD: String =
-        String::from_utf16(&[0xE, 0x2, 0x2, 0x4, 0x012C, 0xCD00]).unwrap();
+    pub(crate) static ref PLAYER_NAME: String = utf16(&[0xE, 0x1, 0x0, 0x0]);
+    pub(crate) static ref SAHASRAHLA: String = utf16(&[0xE, 0x2, 0x0, 0x2, 0x0109]);
+    pub(crate) static ref HOUSE_OF_GALES: String = utf16(&[0xE, 0x2, 0x1, 0x4, 0x0101, 0xCD00]);
+    pub(crate) static ref TOWER_OF_HERA: String = utf16(&[0xE, 0x2, 0x1, 0x4, 0x0102, 0xCD00]);
+    pub(crate) static ref KAKARIKO_VILLAGE: String = utf16(&[0xE, 0x2, 0x1, 0x4, 0x010D, 0xCD2E]);
+    pub(crate) static ref TORNADO_ROD: String = utf16(&[0xE, 0x2, 0x2, 0x4, 0x0102, 0xCD00]);
+    pub(crate) static ref PENDANT_OF_COURAGE: String = utf16(&[0xE, 0x2, 0x2, 0x4, 0x0123, 0xCD00]);
+    pub(crate) static ref MASTER_SWORD: String = utf16(&[0xE, 0x2, 0x2, 0x4, 0x012C, 0xCD00]);
 }
 
-fn utf16_str(v: &[u16]) -> String {
+fn utf16(v: &[u16]) -> String {
     String::from_utf16(v).unwrap()
 }
 
@@ -55,7 +64,7 @@ pub(crate) fn big(text: &str) -> String {
 
 #[allow(unused)]
 pub(crate) fn troll() -> String {
-    purple(SYMBOL_RAVIO.as_str())
+    purple(RAVIO.as_str())
 }
 
 /// Black Color: 0x262626FF

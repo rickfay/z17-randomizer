@@ -3,8 +3,7 @@ use {
         convert, fail,
         filler::{find_reachable_checks, get_items_from_reachable_checks},
         filler_util::shuffle,
-        item_to_str,
-        model::{check::Check, progress::Progress, Hints},
+        model::{check::Check, progress::Progress},
         patch::util::is_sage,
         world::WorldGraph,
         CheckMap,
@@ -12,13 +11,175 @@ use {
         Settings,
     },
     log::{debug, info},
-    rand::{rngs::StdRng, Rng},
-    serde::{Serialize, Serializer},
-    std::collections::{HashMap, HashSet},
+    rand::{rngs::StdRng, seq::IteratorRandom, Rng},
+    serde::{ser::SerializeStruct, Serialize, Serializer},
+    std::collections::HashSet,
 };
+
 pub mod formatting;
 pub mod hint_color;
 mod hints;
+
+#[derive(Default, Debug, Clone, Serialize)]
+pub struct Hints {
+    pub path_hints: Vec<PathHint>,
+    pub always_hints: Vec<LocationHint>,
+    pub sometimes_hints: Vec<LocationHint>,
+    pub bow_of_light_hint: Option<BowOfLightHint>,
+}
+
+/// Basic functionality for all in-game hints.
+pub(crate) trait Hint: Serialize {
+    fn get_hint(&self) -> String;
+    fn get_hint_spoiler(&self) -> String;
+}
+
+/// A [`Hint`] that exposes the item at a certain location
+#[derive(Debug, Clone)]
+pub struct LocationHint {
+    /// The hinted item
+    pub item: FillerItem,
+
+    /// The specific [`Check`] containing the hinted item.
+    pub check: Check,
+
+    /// List of Hint Ghosts that are guaranteed to be logically reachable before the hinted item.
+    pub logical_ghosts: Vec<FillerItem>,
+
+    /// Hint Ghosts that will give out this hint. <br />
+    /// Only one of these is guaranteed to be from `logical_ghosts`, the other(s) are placed completely at random.
+    pub ghosts: Vec<FillerItem>,
+}
+
+impl LocationHint {
+    pub(crate) fn choose_ghost(
+        &mut self, rng: &mut StdRng, taken_ghosts: &mut Vec<FillerItem>,
+    ) -> Result<(), &'static str> {
+        match self
+            .logical_ghosts
+            .iter()
+            .filter(|ghost| !taken_ghosts.contains(&ghost))
+            .choose_stable(rng)
+        {
+            None => Err("No Ghosts available to place this hint"),
+            Some(ghost) => {
+                self.ghosts.push(*ghost);
+                taken_ghosts.push(*ghost);
+                Ok(())
+            }
+        }
+    }
+}
+
+impl Hint for LocationHint {
+    fn get_hint(&self) -> String {
+        format!(
+            "It says here that {}\nhas the {}.",
+            formatting::name(&self.check.get_location_info().unwrap().name()),
+            formatting::name(&self.item.as_str_colorized())
+        )
+    }
+
+    fn get_hint_spoiler(&self) -> String {
+        format!(
+            "It says here that {} has the {}.",
+            &self.check.get_location_info().unwrap().name(),
+            &self.item.as_str()
+        )
+    }
+}
+
+impl Serialize for LocationHint {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut ser = serializer.serialize_struct("LocationHint", 2)?;
+        ser.serialize_field("hint", &self.get_hint_spoiler())?;
+        ser.serialize_field("ghosts", &self.ghosts)?;
+        ser.end()
+    }
+}
+
+/// A [`Hint`] that tells where an item needed to reach a specific `gaol` is located.
+#[derive(Debug, Clone)]
+pub struct PathHint {
+    /// The specific [`Check`] containing the hinted item.
+    pub check: Check,
+
+    /// The goal that this hint leads to.
+    pub goal: FillerItem,
+
+    /// List of Hint Ghosts that are guaranteed to be logically reachable before the hinted item.
+    pub logical_ghosts: Vec<FillerItem>,
+
+    /// Hint Ghosts that will give out this hint. <br />
+    /// Only one of these is guaranteed to be from `logical_ghosts`, the other(s) are placed completely at random.
+    pub ghosts: Vec<FillerItem>,
+}
+
+impl Hint for PathHint {
+    fn get_hint(&self) -> String {
+        format!(
+            "It says here that {}\nis on the path to {}.",
+            &self.check.get_location_info().unwrap().region_colorized(),
+            &self.goal.as_str_colorized()
+        )
+    }
+
+    fn get_hint_spoiler(&self) -> String {
+        format!(
+            "It says here that {} is on the path to {}.",
+            self.check.get_location_info().unwrap().region(),
+            self.goal.as_str()
+        )
+    }
+}
+
+impl Serialize for PathHint {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut ser = serializer.serialize_struct("PathHint", 2)?;
+        ser.serialize_field("hint", &self.get_hint_spoiler())?;
+        ser.serialize_field("ghosts", &self.ghosts)?;
+        ser.end()
+    }
+}
+
+/// A [`Hint`] specifically for the Bow of Light.
+#[derive(Debug, Clone)]
+pub struct BowOfLightHint {
+    /// The specific [`Check`] containing the Bow of Light.
+    pub check: Check,
+}
+
+impl Hint for BowOfLightHint {
+    fn get_hint(&self) -> String {
+        format!(
+            "Did you find the {}\nin {}?",
+            formatting::name("Bow of Light"),
+            &self.check.get_location_info().unwrap().region_colorized(),
+        )
+    }
+
+    fn get_hint_spoiler(&self) -> String {
+        format!(
+            "Did you find the Bow of Light in {}?",
+            &self.check.get_location_info().unwrap().region()
+        )
+    }
+}
+
+impl Serialize for BowOfLightHint {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_str(&self.get_hint_spoiler())
+    }
+}
 
 /// Generates Always, Path, and Sometimes Hints based on settings
 pub fn generate_hints(
@@ -30,29 +191,77 @@ pub fn generate_hints(
     let mut taken_checks: Vec<&'static str> = Vec::new();
     let mut taken_ghosts: Vec<FillerItem> = Vec::new();
 
-    let always_hints = generate_always_hints(settings, check_map, &mut taken_checks);
-    let path_hints = generate_path_hints(
+    let mut always_hints = generate_always_hints(
+        settings, world_graph, check_map, &mut taken_checks, &mut taken_ghosts, rng,
+    );
+    let mut path_hints = generate_path_hints(
         settings, rng, world_graph, check_map, &mut taken_checks, &mut taken_ghosts,
     );
 
     let num_sometimes_hints = NUM_TOTAL_HINTS - always_hints.len() - path_hints.len();
-    let sometimes_hints =
-        generate_sometimes_hints(settings, rng, check_map, num_sometimes_hints, &mut taken_checks);
+    let mut sometimes_hints = generate_sometimes_hints(
+        settings, world_graph, rng, check_map, num_sometimes_hints, &mut taken_checks,
+        &mut taken_ghosts,
+    );
 
-    let bow_of_light_hint = generate_bow_of_light_hint(world_graph, check_map);
+    duplicate_hints(
+        &mut taken_ghosts, &mut always_hints, &mut path_hints, &mut sometimes_hints,
+        NUM_TOTAL_HINTS, rng,
+    );
+
+    let bow_of_light_hint = Some(generate_bow_of_light_hint(world_graph, check_map));
 
     Hints { path_hints, always_hints, sometimes_hints, bow_of_light_hint }
+}
+
+fn duplicate_hints(
+    taken_ghosts: &mut Vec<FillerItem>, always_hints: &mut Vec<LocationHint>,
+    path_hints: &mut Vec<PathHint>, sometimes_hints: &mut Vec<LocationHint>,
+    num_total_hints: usize, rng: &mut StdRng,
+) {
+    assert_eq!(
+        taken_ghosts.len(),
+        num_total_hints,
+        "Only {} of the expected {} hint ghosts were taken",
+        taken_ghosts.len(),
+        num_total_hints
+    );
+    let hint_count = always_hints.len() + path_hints.len() + sometimes_hints.len();
+    assert_eq!(
+        hint_count, num_total_hints,
+        "Only {} of the expected {} hints were actually created",
+        hint_count, num_total_hints
+    );
+
+    // todo probably don't need to duplicate this
+
+    let mut ghosts = FillerItem::get_all_ghosts();
+    ghosts.retain(|ghost| !taken_ghosts.contains(ghost));
+
+    for hint in always_hints {
+        hint.ghosts.push(ghosts.remove(rng.gen_range(0..ghosts.len())));
+    }
+
+    for hint in path_hints {
+        hint.ghosts.push(ghosts.remove(rng.gen_range(0..ghosts.len())));
+    }
+
+    for hint in sometimes_hints {
+        hint.ghosts.push(ghosts.remove(rng.gen_range(0..ghosts.len())));
+    }
+
+    assert_eq!(ghosts.len(), 0, "There were leftover Hint Ghosts: {:?}", ghosts);
 }
 
 /// Generates the Bow of Light Hint
 /// todo need a generic "find where item be at" function
 fn generate_bow_of_light_hint(
     world_graph: &mut WorldGraph, check_map: &mut CheckMap,
-) -> Vec<&'static str> {
+) -> BowOfLightHint {
     for (_, location_node) in world_graph {
-        for check in location_node.clone().get_checks() {
+        for &check in location_node.clone().get_checks() {
             if BowOfLight.eq(&check_map.get(check.get_name()).unwrap().unwrap()) {
-                return vec![check.get_location_info().unwrap().region()];
+                return BowOfLightHint { check };
             }
         }
     }
@@ -65,8 +274,9 @@ fn generate_bow_of_light_hint(
  * Generates hints for checks that should always be hinted, depending on settings.
  */
 fn generate_always_hints(
-    settings: &Settings, check_map: &mut CheckMap, taken_checks: &mut Vec<&'static str>,
-) -> HashMap<&'static str, &'static str> {
+    settings: &Settings, world_graph: &mut WorldGraph, check_map: &mut CheckMap,
+    taken_checks: &mut Vec<&'static str>, taken_ghosts: &mut Vec<FillerItem>, rng: &mut StdRng,
+) -> Vec<LocationHint> {
     let mut always_checks =
         vec!["Master Sword Pedestal", "Great Rupee Fairy", "Blacksmith (Lorule)", "Bouldering Guy"];
 
@@ -79,14 +289,54 @@ fn generate_always_hints(
         always_checks.extend(vec!["Octoball Derby", "Treacherous Tower Intermediate"]);
     }
 
-    let mut always_hints = HashMap::new();
+    let mut always_hints = Vec::new();
     for check_name in always_checks {
+        let mut location_hint =
+            generate_location_hint(check_name, settings, world_graph, check_map);
+        if location_hint.choose_ghost(rng, taken_ghosts).is_err() {
+            continue;
+        }
+        always_hints.push(location_hint);
         taken_checks.push(check_name);
-        let filler_item = check_map.get(check_name).unwrap().unwrap();
-        always_hints.insert(check_name, item_to_str(&convert(filler_item).unwrap()));
     }
 
     always_hints
+}
+
+fn generate_location_hint(
+    check_name: &'static str, settings: &Settings, world_graph: &mut WorldGraph,
+    check_map: &mut CheckMap,
+) -> LocationHint {
+    // fixme this sucks
+    let mut check = None;
+    'outer: for (_, loc_node) in world_graph.clone() {
+        for c in loc_node.get_checks().clone() {
+            if check_name.eq(c.get_name()) {
+                check = Some(c);
+                break 'outer;
+            }
+        }
+    }
+
+    let (item, check) = if let Some(check) = check {
+        (check_map.get(check.get_name()).unwrap().unwrap(), check)
+    } else {
+        fail!("Failed to lookup Check from check_name: {}", check_name);
+    };
+
+    let logical_ghosts = find_checks_before_goal(settings, world_graph, check_map, item)
+        .iter()
+        .filter_map(|check| {
+            if let Some(quest) = check.get_quest() {
+                if quest.is_hint_ghost() {
+                    return Some(quest);
+                }
+            };
+            return None;
+        })
+        .collect::<Vec<_>>();
+
+    LocationHint { item, check, logical_ghosts, ghosts: vec![] }
 }
 
 /**
@@ -95,9 +345,10 @@ fn generate_always_hints(
  * that get hinted are chosen randomly.
  */
 fn generate_sometimes_hints(
-    settings: &Settings, rng: &mut StdRng, check_map: &mut CheckMap, num_sometimes_hints: usize,
-    taken_checks: &mut Vec<&'static str>,
-) -> HashMap<&'static str, &'static str> {
+    settings: &Settings, world_graph: &mut WorldGraph, rng: &mut StdRng, check_map: &mut CheckMap,
+    num_sometimes_hints: usize, taken_checks: &mut Vec<&'static str>,
+    taken_ghosts: &mut Vec<FillerItem>,
+) -> Vec<LocationHint> {
     let mut sometimes_checks = vec![
         "Bee Guy (2)",
         "Behind Ice Gimos",
@@ -209,7 +460,7 @@ fn generate_sometimes_hints(
 
     sometimes_checks.retain(|check| !taken_checks.contains(check));
 
-    let mut sometimes_hints = HashMap::new();
+    let mut sometimes_hints = Vec::new();
     let mut sometimes_hint_count = 0;
     loop {
         if sometimes_hint_count >= num_sometimes_hints {
@@ -222,8 +473,12 @@ fn generate_sometimes_hints(
         }
 
         let selected_hint = sometimes_checks.remove(rng.gen_range(0..sometimes_checks.len()));
-        let filler_item = check_map.get(selected_hint).unwrap().unwrap();
-        sometimes_hints.insert(selected_hint, item_to_str(&convert(filler_item).unwrap()));
+        let mut location_hint =
+            generate_location_hint(selected_hint, settings, world_graph, check_map);
+        if location_hint.choose_ghost(rng, taken_ghosts).is_err() {
+            continue;
+        }
+        sometimes_hints.push(location_hint);
 
         sometimes_hint_count += 1;
     }
@@ -260,7 +515,7 @@ fn generate_path_hints(
     bosses_and_prize_locations = shuffle(rng, bosses_and_prize_locations);
 
     let mut chosen_paths: Vec<PathHint> = Vec::new();
-    let mut backup_paths: Vec<PotentialPathHint> = Vec::new();
+    let mut backup_paths: Vec<PathHint> = Vec::new();
     let mut extra_paths_needed = 0;
 
     for (goal, prize_loc) in bosses_and_prize_locations {
@@ -282,9 +537,9 @@ fn generate_path_hints(
     // Add extra paths if some bosses didn't have any path items
     if extra_paths_needed > 0 {
         backup_paths = shuffle(rng, backup_paths);
-        let mut i = 0;
+        let mut extra_paths_added = 0;
         loop {
-            if i >= extra_paths_needed || backup_paths.is_empty() {
+            if extra_paths_added >= extra_paths_needed || backup_paths.is_empty() {
                 break;
             }
 
@@ -292,7 +547,7 @@ fn generate_path_hints(
                 choose_path_hint(&mut backup_paths, taken_checks, taken_ghosts, rng)
             {
                 chosen_paths.push(backup_path);
-                i += 1;
+                extra_paths_added += 1;
             }
         }
     }
@@ -301,104 +556,40 @@ fn generate_path_hints(
 }
 
 fn choose_path_hint(
-    potential_paths: &mut Vec<PotentialPathHint>, taken_checks: &mut Vec<&'static str>,
+    potential_paths: &mut Vec<PathHint>, taken_checks: &mut Vec<&'static str>,
     taken_ghosts: &mut Vec<FillerItem>, rng: &mut StdRng,
 ) -> Option<PathHint> {
-    let mut chosen_path;
-    let mut chosen_ghost;
-    'outer: loop {
-        if potential_paths.is_empty() {
-            debug!("No more potential paths");
-            return None;
-        }
+    potential_paths.retain(|path| !taken_checks.contains(&path.check.get_name()));
 
-        chosen_path = potential_paths.remove(rng.gen_range(0..potential_paths.len()));
-
-        // Prevent reusing existing check
-        if taken_checks.contains(&chosen_path.check.get_name()) {
-            continue;
-        }
-
-        loop {
-            if chosen_path.ghosts.is_empty() {
-                debug!("No available Ghosts to give Hint: {:?}", chosen_path);
-                continue 'outer;
+    for chosen_path in potential_paths {
+        // Choose a random Ghost for this hint of the ones not already taken
+        match chosen_path
+            .logical_ghosts
+            .iter()
+            .filter(|&ghost| !taken_ghosts.contains(ghost))
+            .choose_stable(rng)
+        {
+            None => {
+                info!("No available Ghosts to give Hint: {:?}", chosen_path);
             }
-
-            chosen_ghost = chosen_path.ghosts.remove(rng.gen_range(0..chosen_path.ghosts.len()));
-            if !taken_ghosts.contains(&chosen_ghost) {
-                break;
+            Some(chosen_ghost) => {
+                chosen_path.ghosts.push(*chosen_ghost);
+                taken_checks.push(chosen_path.check.get_name());
+                taken_ghosts.push(*chosen_ghost);
+                return Some(chosen_path.clone());
             }
         }
-
-        taken_checks.push(chosen_path.check.get_name());
-        taken_ghosts.push(chosen_ghost);
-
-        break;
     }
 
-    Some(PathHint { goal: chosen_path.goal, check: chosen_path.check, ghost: chosen_ghost })
+    return None;
 }
 
-/// Struct containing information about a possible Hint and where it could be placed
-#[derive(Debug, Clone)]
-pub struct PotentialPathHint {
-    /// Goal this Path Hint leads to
-    pub goal: FillerItem,
-    /// Specific location Check containing the Path Item
-    pub check: Check,
-    /// Hint Ghosts that will could potentially give out this hint
-    pub ghosts: Vec<FillerItem>,
-}
-
-/// Path Hint
-#[derive(Debug, Clone)]
-pub struct PathHint {
-    /// Goal this Path Hint leads to
-    pub goal: FillerItem,
-    /// Specific location Check containing the Path Item
-    pub check: Check,
-    /// Hint Ghost that will give out this hint
-    pub ghost: FillerItem,
-}
-
-impl PathHint {
-    pub fn to_str(&self) -> String {
-        format!(
-            "It says here that {} is on the path to {}.",
-            self.check.get_location_info().unwrap().region(),
-            self.goal.as_str()
-        )
-    }
-
-    pub fn to_hint(&self) -> String {
-        format!(
-            "It says here that {}\nis on the path to {}.",
-            &self.check.get_location_info().unwrap().region_colorized(),
-            &self.goal.as_str_colorized()
-        )
-    }
-}
-
-impl Serialize for PathHint {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        // todo I don't really like this...
-        serializer.serialize_str(format!("{} [{}]", self.to_str(), self.ghost.as_str()).as_str())
-    }
-}
-
-/// Determines the possible Path Hints for a given goal, if any exist.
-fn get_potential_path_hints(
-    settings: &Settings, rng: &mut StdRng, world_graph: &mut WorldGraph, check_map: &mut CheckMap,
-    taken_checks: &mut Vec<&str>, goal: FillerItem,
-) -> Vec<PotentialPathHint> {
+/// Finds all checks available before a given Quest Goal using a modified Sphere Search.
+fn find_checks_before_goal(
+    settings: &Settings, world_graph: &mut WorldGraph, check_map: &mut CheckMap, goal: FillerItem,
+) -> HashSet<Check> {
     let mut progress = Progress::new(settings.clone());
     let mut reachable_checks: Vec<Check>;
-    let mut potential_paths: Vec<PotentialPathHint> = Vec::new();
-
     let mut potential_path_checks: HashSet<Check> = HashSet::new();
 
     // Find candidate Path Checks with a modified sphere search
@@ -410,18 +601,27 @@ fn get_potential_path_hints(
 
         let new_items = reachable_items.difference(&progress);
 
-        if new_items.is_empty() {
-            if progress.has(goal) {
-                break; // success
-            } else {
-                fail!("No possible path to reach Goal: {}", goal.as_str());
-            }
+        if reachable_items.has(goal) || new_items.is_empty() {
+            break;
         }
 
         for new_item in &new_items {
             progress.add_item(*new_item);
         }
     }
+
+    potential_path_checks
+}
+
+/// Determines the possible Path Hints for a given goal, if any exist. Paths are returned in a random order.
+fn get_potential_path_hints(
+    settings: &Settings, rng: &mut StdRng, world_graph: &mut WorldGraph, check_map: &mut CheckMap,
+    taken_checks: &mut Vec<&str>, goal: FillerItem,
+) -> Vec<PathHint> {
+    let mut reachable_checks: Vec<Check>;
+    let mut potential_paths: Vec<PathHint> = Vec::new();
+
+    let mut potential_path_checks = find_checks_before_goal(settings, world_graph, check_map, goal);
 
     // Limit potential paths to locations with valid Path Items that haven't yet been taken
     potential_path_checks.retain(|check| {
@@ -432,7 +632,7 @@ fn get_potential_path_hints(
     // Test candidate items to see if Boss can be defeated without them
     for check in potential_path_checks {
         // Reset Progression
-        progress = Progress::new(settings.clone());
+        let mut progress = Progress::new(settings.clone());
 
         loop {
             reachable_checks = find_reachable_checks(world_graph, &progress);
@@ -459,7 +659,12 @@ fn get_potential_path_hints(
                             .collect::<_>(),
                     );
 
-                    potential_paths.push(PotentialPathHint { goal, check, ghosts: hint_locations });
+                    potential_paths.push(PathHint {
+                        goal,
+                        check,
+                        ghosts: vec![],
+                        logical_ghosts: hint_locations,
+                    });
                 }
                 break;
             }
@@ -470,7 +675,7 @@ fn get_potential_path_hints(
         }
     }
 
-    potential_paths
+    shuffle(rng, potential_paths)
 }
 
 const POSSIBLE_PATH_ITEMS: [FillerItem; 48] = [

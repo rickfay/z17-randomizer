@@ -568,7 +568,7 @@ pub(crate) fn find_reachable_checks(
         // Iterate over the location's checks
         for check in location_node.clone().get_checks() {
             if check.can_access(progress) {
-                reachable_checks.push(check);
+                reachable_checks.push(*check);
             }
         }
 

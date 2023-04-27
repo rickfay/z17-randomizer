@@ -1,6 +1,9 @@
 use {
     crate::{
-        metrics::Metrics, model::Hints, patch::msbf::MsbfKey, settings::settings::Settings,
+        hints::{formatting::*, Hints},
+        metrics::Metrics,
+        patch::msbf::MsbfKey,
+        settings::settings::Settings,
         system::UserConfig,
     },
     albw::{
@@ -15,10 +18,12 @@ use {
     regions::Subregion,
     serde::{ser::SerializeMap, Serialize, Serializer},
     std::{
-        collections::{BTreeMap, HashMap},
+        collections::{hash_map::DefaultHasher, BTreeMap, HashMap},
         error::Error as StdError,
         fs::File,
+        hash::{Hash, Hasher},
         io::{self, Write},
+        ops::Deref,
     },
 };
 
@@ -101,9 +106,6 @@ pub enum ErrorKind {
     Game,
     Io,
 }
-
-#[derive(Debug)]
-pub struct Hash(u32);
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Hash)]
 pub struct LocationInfo {
@@ -503,6 +505,7 @@ fn align_json_values(json: &mut String) {
 #[derive(Serialize)]
 pub struct SeedInfo<'s> {
     pub seed: u32,
+    pub hash: SeedHash,
     pub settings: &'s Settings,
     pub layout: Layout,
     pub metrics: Metrics,
@@ -510,19 +513,76 @@ pub struct SeedInfo<'s> {
 }
 
 /// Main entry point to generate one ALBWR Seed.
-///
-/// Randomization happens in phases:
-/// - Seed Calculation - Details of the seed (randomized item placements, hints, etc.)
-/// - Seed Patching    - Taking values from the first step and generating an actual game patch
-/// - Post-Processing  - Spoiler Log and/or UI response generation
 pub fn generate_seed(
     seed: u32, settings: &Settings, user_config: &UserConfig, no_patch: bool, no_spoiler: bool,
 ) -> Result<()> {
     validate_settings(settings)?;
+
     let rng = &mut StdRng::seed_from_u64(seed as u64);
-    let seed_info = &calculate_seed_info(seed, settings, rng)?;
+    let hash = SeedHash::new(seed, settings);
+
+    info!("Hash:                           {}\n", hash.text_hash);
+    settings.log_settings();
+
+    let seed_info = &calculate_seed_info(seed, settings, hash, rng)?;
     patch_seed(seed_info, user_config, no_patch, no_spoiler)?;
+
     Ok(())
+}
+
+/// A hash used in-game to quickly verify that two players are playing the same seed.
+///
+/// The hash is calculated as `u64`, truncated to `u16` (5 digits), then converted to a Symbolic form that can be
+/// displayed in-game as well as in the spoiler log.
+pub struct SeedHash {
+    item_hash: String,
+    text_hash: String,
+}
+
+impl SeedHash {
+    pub fn new(seed: u32, settings: &Settings) -> Self {
+        // Calculate underlying Hash
+        let mut hasher = DefaultHasher::new();
+        (seed, settings).hash(&mut hasher);
+        let mut hash = hasher.finish() % 100_000;
+
+        // Convert to Item Hash
+        let hash_item_lut: Vec<(&String, &str)> = vec![
+            (A_BUTTON.deref(), "(A)"),
+            (B_BUTTON.deref(), "(B)"),
+            (X_BUTTON.deref(), "(X)"),
+            (Y_BUTTON.deref(), "(Y)"),
+            (L_BUTTON.deref(), "(L)"),
+            (R_BUTTON.deref(), "(R)"),
+            (RAVIO.deref(), "(Ravio)"),
+            (BOW.deref(), "(Bow)"),
+            (BOMBS.deref(), "(Bombs)"),
+            (FIRE_ROD.deref(), "(Fire Rod)"),
+        ];
+
+        const HASH_LEN: usize = 5;
+        let mut digit = Vec::with_capacity(HASH_LEN);
+        for _ in 0..HASH_LEN {
+            digit.push(hash_item_lut.get((hash % 10) as usize).unwrap());
+            hash /= 10;
+        }
+
+        let item_hash =
+            format!("{} {} {} {} {}", digit[4].0, digit[3].0, digit[2].0, digit[1].0, digit[0].0);
+        let text_hash =
+            format!("{} {} {} {} {}", digit[4].1, digit[3].1, digit[2].1, digit[1].1, digit[0].1);
+
+        Self { item_hash, text_hash }
+    }
+}
+
+impl Serialize for SeedHash {
+    fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_str(self.text_hash.as_str())
+    }
 }
 
 /// Validates the Settings to make sure the user hasn't made incompatible selections
@@ -569,7 +629,7 @@ fn validate_settings(settings: &Settings) -> Result<()> {
 pub type CheckMap = HashMap<String, Option<FillerItem>>;
 
 fn calculate_seed_info<'s>(
-    seed: u32, settings: &'s Settings, rng: &mut StdRng,
+    seed: u32, settings: &'s Settings, hash: SeedHash, rng: &mut StdRng,
 ) -> Result<SeedInfo<'s>> {
     println!();
     info!("Calculating Seed Info...");
@@ -593,7 +653,7 @@ fn calculate_seed_info<'s>(
     let metrics = metrics::calculate_metrics(world_graph, check_map, settings);
     let hints = hints::generate_hints(world_graph, check_map, settings, rng);
 
-    Ok(SeedInfo { seed, settings, layout, metrics, hints })
+    Ok(SeedInfo { seed, hash, settings, layout, metrics, hints })
 }
 
 pub fn patch_seed(

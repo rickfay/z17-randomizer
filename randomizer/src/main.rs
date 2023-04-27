@@ -1,5 +1,5 @@
 use {
-    log::info,
+    log::{error, info},
     randomizer::{
         cli,
         constants::VERSION,
@@ -76,7 +76,8 @@ fn main() {
                 info!("Successfully Generated ALBWR Seed: {}", seed);
                 break;
             }
-            Err(_) => {
+            Err(err) => {
+                error!("{:?}", err);
                 if x < MAX_RETRIES {
                     if !seeded {
                         info!("Seed was not completable (this is normal). Retrying...\n");

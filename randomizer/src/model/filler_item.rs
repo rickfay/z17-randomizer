@@ -1,11 +1,11 @@
 use {
     crate::{hints::hint_color::HintColor::*, item_to_str},
     albw::{Item, Item::*},
-    serde::{Deserialize, Serialize},
+    serde::{Deserialize, Serialize, Serializer},
     FillerItem::*,
 };
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Deserialize)]
 pub enum FillerItem {
     Empty,
 
@@ -540,6 +540,69 @@ pub enum FillerItem {
 }
 
 impl FillerItem {
+    pub(crate) fn get_all_ghosts() -> Vec<Self> {
+        vec![
+            HintGhostLostWoodsMaze1,
+            HintGhostLostWoodsMaze2,
+            HintGhostLostWoodsMaze3,
+            HintGhostLostWoods,
+            HintGhostSpectacleRock,
+            HintGhostTowerOfHeraOutside,
+            HintGhostFloatingIsland,
+            HintGhostFireCave,
+            HintGhostMoldormCave,
+            HintGhostZorasDomain,
+            HintGhostFortuneTellerHyrule,
+            HintGhostSanctuary,
+            HintGhostGraveyardHyrule,
+            HintGhostWaterfallCave,
+            HintGhostWell,
+            HintGhostShadyGuy,
+            HintGhostStylishWoman,
+            HintGhostBlacksmithCave,
+            HintGhostEasternRuinsPegs,
+            HintGhostEasternRuinsCave,
+            HintGhostEasternRuinsEntrance,
+            HintGhostRupeeRushHyrule,
+            HintGhostCuccos,
+            HintGhostSouthBridge,
+            HintGhostSouthernRuins,
+            HintGhostHouseOfGalesIsland,
+            HintGhostHyruleHotfoot,
+            HintGhostLetter,
+            HintGhostStreetPassTree,
+            HintGhostBlacksmithBehind,
+            HintGhostGraveyardLedge,
+            HintGhostDesertEast,
+            HintGhostDesertCenter,
+            HintGhostDesertSouthWest,
+            HintGhostHyruleCastleRocks,
+            HintGhostWitchsHouse,
+            HintGhostSkullWoodsCuccos,
+            HintGhostTreacherousTower,
+            HintGhostIceRuinsOutside,
+            HintGhostLoruleGraveyard,
+            HintGhostDarkRuinsNorth,
+            HintGhostSkullWoodsSouth,
+            HintGhostFortunesChoice,
+            HintGhostVeteranThief,
+            HintGhostFortuneTellerLorule,
+            HintGhostDarkMaze,
+            HintGhostRupeeRushLorule,
+            HintGhostGreatRupeeFairy,
+            HintGhostOctoballDerby,
+            HintGhostVacantHouse,
+            HintGhostMiseryMireLedge,
+            HintGhostSwampPalaceOutsideLeft,
+            HintGhostTurtleBullied,
+            HintGhostTurtleWall,
+            HintGhostTurtleRockOutside,
+            HintGhostDarkPalaceOutside,
+            HintGhostSwampPalaceOutsideRight,
+            HintGhostMiseryMireBridge,
+        ]
+    }
+
     pub fn is_hint_ghost(self) -> bool {
         match self {
             HintGhostLostWoodsMaze1
@@ -1155,6 +1218,15 @@ impl FillerItem {
             _ => Name,
         }
         .format(Self::as_str(*self))
+    }
+}
+
+impl Serialize for FillerItem {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_str(self.as_str())
     }
 }
 

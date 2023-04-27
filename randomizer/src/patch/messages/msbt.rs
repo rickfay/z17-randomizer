@@ -32,9 +32,9 @@ impl MsbtFile {
 
     /// Looks up the message specified by `label` and sets it to `value`
     /// Appends a null terminator `\0` to the end of value.
-    pub(crate) fn set(&mut self, label: &str, value: String) {
+    pub(crate) fn set(&mut self, label: &str, value: &str) {
         if let Some(item_index) = self.get_item_index(label) {
-            let _ = std::mem::replace(&mut self.txt2.messages[item_index], value + "\0");
+            let _ = std::mem::replace(&mut self.txt2.messages[item_index], format!("{}\0", value));
         }
     }
 
