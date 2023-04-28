@@ -20,7 +20,7 @@ macro_rules! hint_ghost_from {
             fn from(value: FillerItem) -> Self {
                 match value {
                     $($ghost => Self { course: $course, msbt_file: $msbt_file, msg_label: $msg_label },)+
-                    _ => crate::fail!("\"{:?}\" is not a Hint Ghost", value),
+                    _ => macros::fail!("\"{:?}\" is not a Hint Ghost", value),
                 }
             }
         }

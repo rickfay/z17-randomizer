@@ -1,7 +1,7 @@
 use {
-    crate::settings::{
-        entrance_shuffle_setting::EntranceShuffleSetting, hint_settings::HintGhostPrice,
-        logic_mode::LogicMode, pedestal_setting::PedestalSetting,
+    crate::{
+        entrance_shuffle_setting::EntranceShuffleSetting, logic_mode::LogicMode,
+        pedestal_setting::PedestalSetting,
     },
     serde::{Deserialize, Serialize},
 };
@@ -15,15 +15,15 @@ pub struct Logic {
     pub logic_mode: LogicMode,
 
     /// Randomizes the Pendants and Portraits between Hyrule and Lorule dungeons
-    #[serde(default = "crate::settings::r#true")]
+    #[serde(default = "crate::r#true")]
     pub randomize_dungeon_prizes: bool,
 
     /// The number of Portraits needed to trigger the Hilda cutscene to open Lorule Castle
-    #[serde(default = "crate::settings::seven")]
+    #[serde(default = "crate::seven")]
     pub lc_requirement: u8,
 
     /// The number of Portraits needed to fight Yuga Ganon
-    #[serde(default = "crate::settings::seven", skip_serializing)]
+    #[serde(default = "crate::seven", skip_serializing)]
     pub yuganon_requirement: u8,
 
     /// Configure which Pendants are required to reach the Master Sword Pedestal
@@ -111,13 +111,6 @@ pub struct Logic {
     pub weather_vanes_activated: bool,
 
     /// Price of Hints from Hint Ghosts
-    ///
-    /// Defaults to 50 Rupees if not set.
-    ///
-    /// Possible values: [`Free`], [`Random`], or an integer between 0 and 9999.
-    ///
-    /// [`Free`]: HintGhostPrice::Free
-    /// [`Random`]: HintGhostPrice::Random
-    #[serde(default)]
-    pub hint_ghost_price: HintGhostPrice,
+    #[serde(default = "crate::fifty")]
+    pub hint_ghost_price: u16,
 }

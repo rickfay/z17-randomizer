@@ -1,11 +1,11 @@
 use {
     crate::{
         filler_util::shuffle,
-        settings::logic_mode::LogicMode,
         FillerItem::{self, *},
         Settings,
     },
     rand::rngs::StdRng,
+    settings::logic_mode::LogicMode,
 };
 
 pub type Pool = Vec<FillerItem>;

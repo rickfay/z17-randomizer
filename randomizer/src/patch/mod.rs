@@ -1,6 +1,6 @@
 use {
     self::code::Code,
-    crate::{fail, patch::util::*, Error, ItemExt, Result, SeedInfo, Settings},
+    crate::{patch::util::*, Error, ItemExt, Result, SeedInfo, Settings},
     albw::{
         course::{Id, Id::*},
         demo::Timed,
@@ -10,6 +10,7 @@ use {
     },
     fs_extra::dir::CopyOptions,
     log::{debug, error, info},
+    macros::fail,
     path_absolutize::*,
     serde::Serialize,
     std::{collections::HashMap, fs, iter, path::Path},

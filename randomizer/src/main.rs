@@ -1,12 +1,11 @@
 use {
     log::{error, info},
+    macros::fail,
     randomizer::{
-        cli,
         constants::VERSION,
-        fail,
-        settings::settings::Settings,
         system::{System, UserConfig},
     },
+    settings::Settings,
     simplelog::{LevelFilter, SimpleLogger},
     structopt::StructOpt,
 };
@@ -47,7 +46,12 @@ fn main() {
                 }),
             )
         } else {
-            ("<None>", cli::get_seed_settings())
+            (
+                "<None>",
+                cli::get_seed_settings().unwrap_or_else(|err| {
+                    fail!("Failed to create Settings: {}", err);
+                }),
+            )
         };
     settings.logic.yuganon_requirement = settings.logic.lc_requirement; // FIXME Temporary: Force Yuganon Requirement to be equal to LC Requirement
 

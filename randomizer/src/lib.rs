@@ -3,7 +3,6 @@ use {
         hints::{formatting::*, Hints},
         metrics::Metrics,
         patch::msbf::MsbfKey,
-        settings::settings::Settings,
         system::UserConfig,
     },
     albw::{
@@ -11,12 +10,14 @@ use {
         Item::{self, *},
     },
     log::{debug, error, info},
+    macros::fail,
     model::filler_item::{convert, FillerItem},
     patch::Patcher,
     path_absolutize::*,
     rand::{rngs::StdRng, SeedableRng},
     regions::Subregion,
     serde::{ser::SerializeMap, Serialize, Serializer},
+    settings::Settings,
     std::{
         collections::{hash_map::DefaultHasher, BTreeMap, HashMap},
         error::Error as StdError,
@@ -27,7 +28,6 @@ use {
     },
 };
 
-pub mod cli;
 pub mod constants;
 mod entrance_rando;
 mod filler;
@@ -39,7 +39,6 @@ mod metrics;
 pub mod model;
 mod patch;
 pub mod regions;
-pub mod settings;
 pub mod system;
 #[rustfmt::skip]
 mod world;

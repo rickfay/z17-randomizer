@@ -1,9 +1,8 @@
 use {
     crate::{
-        convert, fail,
+        convert,
         item_pools::{get_maiamai_pool, Pool},
         model::{check::Check, location::Location, progress::Progress},
-        settings::logic_mode::LogicMode::*,
         world::WorldGraph,
         CheckMap,
         FillerItem::{self, *},
@@ -11,8 +10,10 @@ use {
     },
     albw::Item,
     log::{error, info},
+    macros::fail,
     queue::Queue,
     rand::{prelude::StdRng, Rng},
+    settings::logic_mode::LogicMode::*,
     std::collections::{HashMap, HashSet},
 };
 

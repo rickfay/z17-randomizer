@@ -1,6 +1,5 @@
 use {
     crate::{
-        fail,
         patch::{util::*, DungeonPrizes},
         ItemExt, MsbfKey, Patcher, Settings,
     },
@@ -14,6 +13,7 @@ use {
         Item::{self, *},
     },
     log::info,
+    macros::fail,
     std::collections::HashMap,
 };
 

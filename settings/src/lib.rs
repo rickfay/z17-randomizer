@@ -1,9 +1,5 @@
 use {
-    crate::{
-        regions,
-        settings::{logic::Logic, logic_mode::LogicMode::*},
-        LocationInfo,
-    },
+    crate::{logic::Logic, logic_mode::LogicMode::*},
     log::info,
     serde::{Deserialize, Serialize},
     std::{
@@ -12,11 +8,16 @@ use {
     },
 };
 
+pub mod entrance_shuffle_setting;
+pub mod logic;
+pub mod logic_mode;
+pub mod pedestal_setting;
+
 /// Logic and behavior settings.
 #[derive(Clone, Debug, Default, Deserialize, Hash, Serialize)]
 #[serde(default)]
 pub struct Settings {
-    #[serde(skip_serializing_if = "crate::settings::is_false")]
+    #[serde(skip_serializing_if = "is_false")]
     pub dev_mode: bool,
     pub logic: Logic,
     pub options: Options,
@@ -26,19 +27,6 @@ pub struct Settings {
 }
 
 impl Settings {
-    pub fn is_excluded(&self, location: &LocationInfo) -> bool {
-        let world = match location.world() {
-            regions::World::Hyrule => &self.exclude.hyrule,
-            regions::World::Lorule => &self.exclude.lorule,
-            regions::World::Dungeons => &self.exclude.dungeons,
-        };
-        world
-            .0
-            .get(location.region())
-            .map(|region| region.contains(location.name()))
-            .unwrap_or(false)
-    }
-
     pub fn log_settings(&self) {
         let Settings { logic, options, .. } = self;
 
@@ -233,4 +221,17 @@ impl Hash for World {
 
 pub fn open_default() -> Settings {
     Settings { ..Default::default() }
+}
+
+pub(crate) const fn is_false(b: &bool) -> bool {
+    *b == false
+}
+pub(crate) const fn seven() -> u8 {
+    7
+}
+pub(crate) const fn fifty() -> u16 {
+    50
+}
+pub(crate) const fn r#true() -> bool {
+    true
 }

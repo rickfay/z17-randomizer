@@ -1,7 +1,8 @@
 use {
-    crate::{constants::CONFIG_FILE_NAME, fail, Settings},
+    crate::{constants::CONFIG_FILE_NAME, Settings},
     json_comments::StripComments,
     log::info,
+    macros::fail,
     serde::{de::DeserializeOwned, Deserialize, Serialize},
     std::{
         error::Error as StdError,

@@ -1,8 +1,9 @@
 use {
     super::Patcher,
-    crate::{settings::hint_settings::HintGhostPrice, Result, Settings},
+    crate::Result,
     albw::{course::Id, Item},
     log::info,
+    settings::Settings,
 };
 
 /*
@@ -155,14 +156,7 @@ fn patch_castle_connection(patcher: &mut Patcher, _settings: &Settings) -> Resul
 }
 
 fn patch_hint_ghosts(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
-    let price = match settings.logic.hint_ghost_price {
-        HintGhostPrice::Free => 0,
-        HintGhostPrice::Price(price) => price,
-        HintGhostPrice::Random(_, _) => {
-            unimplemented!("Random Ghost Hint Prices are not yet implemented!")
-        }
-    };
-
+    let price = settings.logic.hint_ghost_price as u32;
     let negative_price = (-1 * price as i32) as u32;
 
     apply!(patcher,
@@ -216,7 +210,7 @@ where
     if let Some(file) = patcher.flow(course.clone())?.get_mut(file_name) {
         file?.get().debug();
     } else {
-        crate::fail!(
+        macros::fail!(
             "File not found: US{}.szs -> World/Flow/{}.msbf",
             if course.is_some() {
                 "_English/".to_owned() + course.unwrap().as_str()

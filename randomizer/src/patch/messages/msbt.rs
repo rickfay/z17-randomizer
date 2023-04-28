@@ -184,6 +184,7 @@ struct MsbtFileHeader {
 }
 
 /// Header for blocks found in MSBT / MSBP files
+///
 /// Reference: https://github.com/Kinnay/Nintendo-File-Formats/wiki/LMS-File-Format#block-header
 #[derive(Default)]
 struct BlockHeader {

@@ -1,6 +1,6 @@
 use {
     crate::{
-        convert, fail,
+        convert,
         filler::{find_reachable_checks, get_items_from_reachable_checks},
         filler_util::shuffle,
         model::{check::Check, progress::Progress},
@@ -11,6 +11,7 @@ use {
         Settings,
     },
     log::{debug, info},
+    macros::fail,
     rand::{rngs::StdRng, seq::IteratorRandom, Rng},
     serde::{ser::SerializeStruct, Serialize, Serializer},
     std::collections::HashSet,

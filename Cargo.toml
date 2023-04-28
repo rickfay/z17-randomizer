@@ -1,5 +1,5 @@
 [workspace]
-members = ["albw", "randomizer", "bytey", "bytey-macro"]
+members = ["albw", "bytey", "bytey-macro", "cli", "jack", "macros", "randomizer", "settings"]
 
 [profile.release]
 codegen-units = 1

@@ -1,5 +1,6 @@
 use {
-    crate::{model::progress::Progress, settings::logic_mode::LogicMode::*},
+    crate::model::progress::Progress,
+    settings::logic_mode::LogicMode::*,
     std::fmt::{Debug, Formatter},
 };
 

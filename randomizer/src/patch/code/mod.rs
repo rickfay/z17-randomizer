@@ -1,13 +1,12 @@
 use {
     super::Patcher,
-    crate::{
-        patch::util::prize_flag, settings::pedestal_setting::PedestalSetting::*, Result, Settings,
-    },
+    crate::{patch::util::prize_flag, Result, Settings},
     albw::{
         ExHeader,
         Item::{self, *},
     },
     arm::*,
+    settings::pedestal_setting::PedestalSetting::*,
     std::{
         collections::HashMap,
         fs::{self, File},

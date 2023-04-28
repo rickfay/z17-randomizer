@@ -1,41 +1,13 @@
 use {
-    crate::{
-        settings::{
-            logic::Logic, logic_mode::LogicMode, pedestal_setting::PedestalSetting,
-            settings::Options,
-        },
-        Settings,
-    },
     log::info,
+    settings::{
+        logic::Logic, logic_mode::LogicMode, pedestal_setting::PedestalSetting, Options, Settings,
+    },
     std::{
         io::{stdin, stdout, Read, Write},
         str::FromStr,
     },
 };
-
-/**
- * Shuts down the program in a controlled fashion:
- * - Displays an error message (optional)
- * - Pauses execution of the CLI
- * - Terminates with exit code 1.
- */
-#[macro_export]
-macro_rules! fail {
-    (target: $target:expr, $($arg:tt)+) => ({
-        log::error!(target: $target, $($arg)+);
-        crate::cli::pause();
-        std::process::exit(1);
-    });
-    ($($arg:tt)+) => ({
-        log::error!($($arg)+);
-        crate::cli::pause();
-        std::process::exit(1);
-    });
-    () => ({
-        crate::cli::pause();
-        std::process::exit(1);
-    });
-}
 
 /// Pauses program execution
 pub fn pause() {
@@ -46,7 +18,7 @@ pub fn pause() {
 }
 
 /// Prompt the user for Seed Settings on the CLI
-pub fn get_seed_settings() -> Settings {
+pub fn get_seed_settings() -> Result<Settings, String> {
     info!("No preset has been specified. Seed Settings UI will be used instead.\n");
     println!("\n--- Seed Settings ---");
 
@@ -65,7 +37,7 @@ pub fn get_seed_settings() -> Settings {
     );
     //let yuganon_requirement = prompt_u8_in_range("Choose how many Portraits are needed to fight Yuganon:", 0, 7);
 
-    let ped_requirement = PedestalSetting::from(prompt_u8_in_range(
+    let ped_requirement = PedestalSetting::try_from(prompt_u8_in_range(
         "Pedestal Requirement",
         "Choose which Pendants are required to reach the Master Sword Pedestal:\n\
         [2] Vanilla  - Only the Pendants of Power and Wisdom are required\n\
@@ -73,7 +45,7 @@ pub fn get_seed_settings() -> Settings {
         [4] Standard - All Pendants are required\n",
         2,
         4,
-    ));
+    ))?;
 
     let nice_mode = prompt_bool(
         "Shuffle Nice Items",
@@ -187,7 +159,7 @@ pub fn get_seed_settings() -> Settings {
     println!();
     info!("Starting seed generation...\n");
 
-    Settings {
+    Ok(Settings {
         logic: Logic {
             logic_mode,
             randomize_dungeon_prizes,
@@ -216,11 +188,11 @@ pub fn get_seed_settings() -> Settings {
         },
         options: Options { chest_size_matches_contents, ..Default::default() },
         ..Default::default()
-    }
+    })
 }
 
 #[rustfmt::skip]
-fn prompt_logic_mode() -> LogicMode {
+pub fn prompt_logic_mode() -> LogicMode {
     print!("\n[Logic Mode]\n");
     print!("[1] Normal        - Standard gameplay, no tricky item use or glitches. If unsure, choose this.\n");
     print!("[2] Hard          - Adds tricks that aren't technically glitches. Lamp + Net considered as weapons. No glitches.\n");
@@ -252,7 +224,7 @@ fn prompt_logic_mode() -> LogicMode {
     }
 }
 
-fn prompt_u8_in_range(title: &str, description: &str, range_start: u8, range_end: u8) -> u8 {
+pub fn prompt_u8_in_range(title: &str, description: &str, range_start: u8, range_end: u8) -> u8 {
     print!("\n[{}]\n{}", title, description);
     loop {
         print!("\nEnter a number ({}-{}): ", range_start, range_end);
@@ -274,7 +246,7 @@ fn prompt_u8_in_range(title: &str, description: &str, range_start: u8, range_end
     }
 }
 
-fn prompt_bool(title: &str, description: &str) -> bool {
+pub fn prompt_bool(title: &str, description: &str) -> bool {
     loop {
         print!("\n[{}]\n{}\nEnable? (y/n): ", title, description);
         stdout().flush().unwrap();

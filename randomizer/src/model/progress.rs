@@ -4,9 +4,8 @@ use {
             get_gold_rupee_pool, get_maiamai_pool, get_purple_rupee_pool, get_silver_rupee_pool,
         },
         model::filler_item::{FillerItem, FillerItem::*},
-        settings::pedestal_setting::PedestalSetting,
-        Settings,
     },
+    settings::{pedestal_setting::PedestalSetting, Settings},
     std::collections::HashSet,
 };
 

@@ -1,6 +1,6 @@
 use {
     super::Patcher,
-    crate::{fail, patch::util::*, settings::logic_mode::LogicMode, Result, Settings},
+    crate::{patch::util::*, Result},
     albw::{
         course,
         course::{Id, Id::*},
@@ -8,6 +8,8 @@ use {
         Item::*,
     },
     log::info,
+    macros::fail,
+    settings::{logic_mode::LogicMode, Settings},
 };
 
 macro_rules! apply {

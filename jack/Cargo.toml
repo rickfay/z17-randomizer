@@ -1,0 +1,12 @@
+[package]
+name = "jack"
+version = "0.3.0"
+authors = ["Rick Fay <rickwithanh@gmail.com>"]
+edition = "2021"
+license = "GPL-2.0-or-later"
+
+[dependencies]
+cli = { path = "../cli" }
+log = "0.4.17"
+macros = { path = "../macros" }
+yaz0 = "0.3.0"
