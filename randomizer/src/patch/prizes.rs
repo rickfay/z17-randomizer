@@ -4,7 +4,6 @@ use {
         ItemExt, MsbfKey, Patcher, Settings,
     },
     albw::{
-        actor_profile::ActorProfiles,
         byaml,
         course::{Id, Id::*},
         language::FlowChart,
@@ -147,31 +146,6 @@ fn patch_dungeon_prize_actors(patcher: &mut Patcher, prizes: &DungeonPrizes) {
     if is_pendant(prizes.tr_prize) {
         patcher.scene(DungeonKame, 2).unwrap().actors_mut().add(chest_small).unwrap();
     }
-}
-
-/// TODO
-/// This reads and modifies Byaml files from the ActorProfile successfully, but fails to repackage
-/// them for some reason.
-///
-/// Interrogating the data at all such as with the contains() function also corrupts the archive,
-/// even if no changes are made.
-///
-/// Unknown why this happens, needs investigating.
-#[allow(unused)]
-pub(crate) fn patch_actor_profile(
-    patcher: &mut Patcher, prizes: &DungeonPrizes,
-) -> Option<ActorProfiles> {
-    //info!("Patching Actor Profiles...");
-
-    //let mut actor_profiles = patcher.game.actor_profile().unwrap();
-
-    //info!("Has Impa: {}", actor_profiles.contains("ObjPictureInpa"));
-
-    //let mut impa = actor_profiles.get_actor_profile("ObjPictureInpa");
-    //impa.get_mut().collision.get_mut(0).unwrap().scale = Scale { x: 1.0, y: 1.0, z: 1.0 };
-
-    //Some(actor_profiles)
-    None
 }
 
 /// Patches the BYAML files to shuffle Dungeon Prizes

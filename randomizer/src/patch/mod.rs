@@ -338,9 +338,11 @@ impl Patcher {
         //self.scene(course::Id::DungeonWater, 2)?.actors_mut().add(fresco_arrow.clone())?;
         //self.scene(course::Id::IndoorLight, 0)?.actors_mut().add(fresco_arrow.clone())?;
 
+        // just testin'
+        // let sarc = jack::open_szs(&self.game, "Archive/ActorProfile.szs");
+
         let prizes = get_dungeon_prizes(&seed_info.layout);
         let free = self.rentals[8];
-        let actor_profile = prizes::patch_actor_profile(&mut self, &prizes);
         flow::apply(&mut self, free, seed_info.settings)?;
         messages::patch_messages(&mut self, seed_info)?;
         prizes::patch_dungeon_prizes(&mut self, &prizes, seed_info.settings);
@@ -385,9 +387,6 @@ impl Patcher {
         }
         for cutscene in cutscenes(&game, seed_info.settings) {
             romfs.add(cutscene?);
-        }
-        if let Some(actor_profile) = actor_profile {
-            romfs.add(actor_profile.into_archive());
         }
         Ok(Patches { game, code, romfs })
     }

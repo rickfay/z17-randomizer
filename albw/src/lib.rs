@@ -1,9 +1,7 @@
 //! A library for reading data from a The Legend of Zelda: A Link Between Worlds ROM.
 
 use {
-    crate::{
-        actor_profile::ActorProfiles, course::Id::LanguageBoot, language::Load, scene::SceneMeta,
-    },
+    crate::{course::Id::LanguageBoot, language::Load, scene::SceneMeta},
     language::FlowChart,
     log::info,
     path_absolutize::*,
@@ -165,6 +163,11 @@ impl Game {
         Item::iter().zip(self.get_item.get().iter().cloned())
     }
 
+    pub fn open(&self, filename: &str) -> Vec<u8> {
+        let file = self.romfs.borrow_mut().read(filename).unwrap();
+        Vec::from(file.get().clone())
+    }
+
     fn get_item_actor(&self, name: &str) -> Result<Actor> {
         self.romfs.borrow_mut().read(format!("World/GetItem/{}.bch", name))
     }
@@ -181,12 +184,6 @@ impl Game {
 
     pub fn common(&mut self) -> Result<Actors> {
         Ok(Actors::new(self.romfs.borrow_mut().read("Archive/ActorCommon.szs")?.map(Sarc::from)))
-    }
-
-    pub fn actor_profile(&mut self) -> Result<ActorProfiles> {
-        Ok(ActorProfiles::new(
-            self.romfs.borrow_mut().read("Archive/ActorProfile.szs")?.map(Sarc::from),
-        ))
     }
 
     pub fn course(&self, id: course::Id) -> Course {

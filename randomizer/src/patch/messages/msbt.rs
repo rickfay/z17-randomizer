@@ -362,9 +362,5 @@ pub(crate) fn load_msbt(patcher: &mut Patcher, course: Id, file: &str) -> Result
 /// Standard Hash Function used by MSBT/MSBP files for lookups
 /// https://github.com/Kinnay/Nintendo-File-Formats/wiki/LMS-File-Format#hash-table-slot
 fn calc_hash(label: String, num_slots: u32) -> u32 {
-    let mut hash: u32 = 0;
-    for char in label.chars() {
-        hash = (u128::from(hash) * 0x492u128) as u32 + (char as u32);
-    }
-    ((hash & 0xFFFFFFFF) % num_slots) as u32
+    label.chars().fold(0u32, |hash, char| hash.wrapping_mul(0x492) + (char as u32)) % num_slots
 }

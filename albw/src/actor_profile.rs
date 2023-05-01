@@ -3,8 +3,6 @@ use {
     serde::{Deserialize, Serialize},
 };
 
-// TODO.... make this work..
-
 pub struct ActorProfiles {
     archive: File<Sarc>,
 }
