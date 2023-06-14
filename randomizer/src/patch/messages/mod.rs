@@ -1,35 +1,46 @@
 use {
     crate::{
         hints::{formatting::*, Hint},
-        patch::messages::{hint_ghosts::HintGhost, msbt::load_msbt},
-        LocationInfo, Patcher, Result, SeedInfo,
+        patch::messages::hint_ghosts::HintGhost,
+        LocationInfo, Result, SeedInfo,
     },
     albw::{
         course::Id::*,
         Item::{PendantPower, PendantWisdom},
     },
+    jack::{lms::msbt::MsbtFile, rom::fs::US_English, sead::SzsFile, JackFile},
     log::info,
-    std::collections::HashMap,
+    macros::fail,
+    patcher::Patcher,
+    std::{collections::HashMap, io::Error},
 };
 
 mod hint_ghosts;
-mod msbt;
 
 /// Patch MSBT Message Files
 pub fn patch_messages(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
     info!("Patching MSBT Files...");
 
-    // debug(patcher, FieldLight, "Field");
+    let mut cave_dark = patcher.get::<SzsFile>(US_English::CAVE_DARK)?;
+    let mut dungeon_boss = patcher.get::<SzsFile>(US_English::DUNGEON_BOSS)?;
+    let mut field_dark = patcher.get::<SzsFile>(US_English::FIELD_DARK)?;
+    let mut field_light = patcher.get::<SzsFile>(US_English::FIELD_LIGHT)?;
+    let mut indoor_dark = patcher.get::<SzsFile>(US_English::INDOOR_DARK)?;
+    let mut language_boot = patcher.get::<SzsFile>(US_English::LANGUAGE_BOOT)?;
 
-    patch_file_select(patcher, seed_info)?;
+    // debug(&mut patcher.game, "US_English/FieldLight.szs", "US_English/Field.msbt")?;
+
+    patch_file_select(&mut language_boot, seed_info)?;
     // patch_ravio(patcher)?;
-    patch_great_rupee_fairy(patcher)?;
+    patch_great_rupee_fairy(&mut cave_dark)?;
 
     // patch_street_merchant(patcher, seed_info)?;
-    patch_sahasrahla(patcher, seed_info)?;
-    patch_general_hint_ghosts(patcher, seed_info)?;
-    patch_hint_ghosts(patcher, seed_info)?;
-    patch_bow_of_light(patcher, seed_info)?;
+    patch_sahasrahla(&mut field_light, seed_info)?;
+    patch_general_hint_ghosts(&mut language_boot, seed_info)?;
+    patch_hint_ghosts(&mut field_dark, &mut field_light, &mut indoor_dark, seed_info)?;
+    patch_bow_of_light(&mut dungeon_boss, seed_info)?;
+
+    // todo not actually doing anything with the SARC files here now
 
     Ok(())
 }
@@ -37,20 +48,25 @@ pub fn patch_messages(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()>
 /// Prints out all String Values and their indexed Label Keys for a given MSBT File
 #[allow(unused)]
 #[deprecated]
-fn debug(patcher: &mut Patcher, course: albw::course::Id, file: &str) {
-    load_msbt(patcher, course, file).unwrap().debug();
-    info!("Early Debug Exit");
+fn debug(patcher: &mut Patcher, archive_name: &str, filename: &str) -> Result<(), Error> {
+    let mut archive = patcher.get::<SzsFile>(archive_name)?;
+    archive.open::<MsbtFile>(filename)?.debug();
+    info!("Success! Stopping...");
     std::process::exit(0);
 }
 
-fn patch_file_select(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
-    let mut file_select_b = load_msbt(patcher, LanguageBoot, "Mn_FileSelectB").unwrap();
+fn patch_file_select(
+    language_boot: &mut JackFile<SzsFile>, seed_info: &SeedInfo,
+) -> Result<(), Error> {
+    let mut file_select_b = language_boot.open::<MsbtFile>("US_English/Mn_FileSelectB.msbt")?;
+
     file_select_b.set("HeadLineText_00", &seed_info.hash.item_hash);
     file_select_b.set("HeadLineText_01", &seed_info.hash.item_hash);
     file_select_b.set("HeadLineText_10", &seed_info.hash.item_hash);
-    patcher.update(file_select_b.dump())?;
 
-    // let mut file_select_t = load_msbt(patcher, LanguageBoot, "Mn_FileSelectT").unwrap();
+    language_boot.update(file_select_b);
+
+    // let mut file_select_t = msbt::load(patcher, LanguageBoot, "Mn_FileSelectT").unwrap();
     // file_select_t.set("T_FileNumber_00", format!("Hash: {:0>5}", seed_info.hash));
     // file_select_t.set("T_FileNumber_Hard_00", format!("Hash: {:0>5}", seed_info.hash));
     // patcher.update(file_select_t.dump())?;
@@ -59,8 +75,8 @@ fn patch_file_select(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> 
 }
 
 #[allow(unused)]
-fn patch_ravio(patcher: &mut Patcher) -> Result<()> {
-    let mut ravio_shop = load_msbt(patcher, IndoorLight, "FieldLight_2C").unwrap();
+fn patch_ravio(indoor_light: &mut JackFile<SzsFile>, patcher: &mut Patcher) -> Result<()> {
+    let mut ravio_shop = indoor_light.open::<MsbtFile>("US_English/FieldLight_2C.msbt")?;
 
     ravio_shop.set(
         "lgt_NpcRental_08",
@@ -70,24 +86,27 @@ fn patch_ravio(patcher: &mut Patcher) -> Result<()> {
         ),
     );
     ravio_shop.set("lgt_RentalKeeper_Field_2C_03", &format!("stuff and things"));
-    patcher.update(ravio_shop.dump())?;
+
+    indoor_light.update(ravio_shop);
 
     Ok(())
 }
 
-fn patch_great_rupee_fairy(patcher: &mut Patcher) -> Result<()> {
-    let mut grf = load_msbt(patcher, CaveDark, "Cave").unwrap();
+fn patch_great_rupee_fairy(cave_dark: &mut JackFile<SzsFile>) -> Result<()> {
+    let mut grf = cave_dark.open::<MsbtFile>("US_English/Cave.msbt")?;
+
     grf.set("CaveDark29_LuckyFairy_00", &format!("Throw Rupees into the fountain?\n{}", *CHOICE_2));
     grf.set("CaveDark29_LuckyFairy_01", "Throw 3000");
     grf.set("CaveDark29_LuckyFairy_02", "Don't throw any");
     grf.set("CaveDark29_LuckyFairy_03", "1234567"); // shorten string so file matches OG size
-    patcher.update(grf.dump())?;
+
+    cave_dark.update(grf);
 
     Ok(())
 }
 
 #[allow(unused)]
-fn patch_street_merchant(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
+fn patch_street_merchant(field_light: &mut JackFile<SzsFile>, seed_info: &SeedInfo) -> Result<()> {
     let item_left = seed_info
         .layout
         .get(&LocationInfo::new(
@@ -105,7 +124,8 @@ fn patch_street_merchant(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<
         .unwrap()
         .as_str();
 
-    let mut street_merchant = load_msbt(patcher, FieldLight, "FieldLight_18").unwrap();
+    let mut street_merchant = field_light.open::<MsbtFile>("US_English/FieldLight_18.msbt")?;
+
     street_merchant.set(
         "lgt_NpcStand_BottleEmpty_00_select",
         &format!(
@@ -139,18 +159,19 @@ fn patch_street_merchant(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<
         ),
     );
 
-    patcher.update(street_merchant.dump())?;
+    field_light.update(street_merchant);
 
     Ok(())
 }
 
 /// Sahasrahla gives out the locations of the Red & Blue Pendants
 #[allow(unused)]
-fn patch_sahasrahla(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
+fn patch_sahasrahla(field_light: &mut JackFile<SzsFile>, seed_info: &SeedInfo) -> Result<()> {
     let (pow_region, _) = seed_info.layout.find_single(PendantWisdom).unwrap();
     let (pop_region, _) = seed_info.layout.find_single(PendantPower).unwrap();
 
-    let mut sahasrahla = load_msbt(patcher, FieldLight, "FieldLight_1B")?;
+    let mut sahasrahla = field_light.open::<MsbtFile>("US_English/FieldLight_1B.msbt")?;
+
     sahasrahla.set(
         "lgt_NpcSahasrahla_Field1B_08",
         &format!(
@@ -166,25 +187,33 @@ fn patch_sahasrahla(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
         ),
     );
 
-    patcher.update(sahasrahla.dump())?;
+    field_light.update(sahasrahla);
 
     Ok(())
 }
 
-fn patch_general_hint_ghosts(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
+fn patch_general_hint_ghosts(
+    language_boot: &mut JackFile<SzsFile>, seed_info: &SeedInfo,
+) -> Result<()> {
     let price = seed_info.settings.logic.hint_ghost_price.to_string();
 
-    let mut hint_ghost = load_msbt(patcher, LanguageBoot, "HintGhost")?;
+    let mut hint_ghost = language_boot.open::<MsbtFile>("US_English/HintGhost.msbt")?;
+
     hint_ghost.set(
         "HintGhost_02_select",
         &format!("Buy a {} for {}?{}", blue("Ghost Hint"), attention(price.as_str()), *CHOICE_2),
     );
     hint_ghost.set("HintGhost_02_select_00", "Buy");
-    patcher.update(hint_ghost.dump())?;
+
+    language_boot.update(hint_ghost);
+
     Ok(())
 }
 
-fn patch_hint_ghosts(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
+fn patch_hint_ghosts(
+    field_dark: &mut JackFile<SzsFile>, field_light: &mut JackFile<SzsFile>,
+    indoor_dark: &mut JackFile<SzsFile>, seed_info: &SeedInfo,
+) -> Result<()> {
     if seed_info.hints.path_hints.is_empty() {
         info!("No Ghost Hints generated.");
     } else {
@@ -237,21 +266,28 @@ fn patch_hint_ghosts(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> 
     }
 
     // Update the MSBT Files with the generated Hints
-    for ((course, msbt_file), labels) in msbt_hint_map {
-        let mut msbt_file = load_msbt(patcher, course, msbt_file)?;
+    for ((course, msbt_filename), labels) in msbt_hint_map {
+        let course = match course {
+            IndoorDark => &mut *indoor_dark,
+            FieldDark => &mut *field_dark,
+            FieldLight => &mut *field_light,
+            _ => fail!("No overworld Hint Ghosts in Course: {}", course.as_str()),
+        };
+
+        let mut msbt_file = course.open::<MsbtFile>(&msbt_filename)?;
         for (label, hint) in labels {
             msbt_file.set(label, &hint);
         }
-        patcher.update(msbt_file.dump())?;
+
+        course.update(msbt_file);
     }
 
     Ok(())
 }
 
-fn patch_bow_of_light(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
-    let mut msbt = load_msbt(patcher, DungeonBoss, "Ganon")?;
-    msbt.set("gnn_yumiya_020", &seed_info.hints.bow_of_light_hint.as_ref().unwrap().get_hint());
-    patcher.update(msbt.dump())?;
-
+fn patch_bow_of_light(dungeon_boss: &mut JackFile<SzsFile>, seed_info: &SeedInfo) -> Result<()> {
+    let mut ganon = dungeon_boss.open::<MsbtFile>("US_English/Ganon.msbt")?;
+    ganon.set("gnn_yumiya_020", &seed_info.hints.bow_of_light_hint.as_ref().unwrap().get_hint());
+    dungeon_boss.update(ganon);
     Ok(())
 }

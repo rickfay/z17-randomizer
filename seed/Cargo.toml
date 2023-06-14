@@ -1,0 +1,13 @@
+[package]
+name = "seed"
+version = "0.3.0"
+authors = ["Rick Fay <rickwithanh@gmail.com>"]
+edition = "2021"
+license = "GPL-2.0-or-later"
+
+[dependencies]
+jack = { path = "../jack" }
+log = "0.4.17"
+macros = { path = "../macros" }
+serde = { version = "1.0.152", features = ["derive"] }
+rand = { version = "0.8.5", features = ["std_rng"] }

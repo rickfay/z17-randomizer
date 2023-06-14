@@ -1,0 +1,13 @@
+[package]
+name = "patcher"
+version = "0.3.0"
+authors = ["Rick Fay <rickwithanh@gmail.com>"]
+edition = "2021"
+license = "GPL-2.0-or-later"
+
+[dependencies]
+cli = { path = "../cli" }
+log = "0.4.17"
+jack = { path = "../jack" }
+macros = { path = "../macros" }
+seed = { path = "../seed" }

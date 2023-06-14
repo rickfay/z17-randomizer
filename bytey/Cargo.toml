@@ -1,7 +1,7 @@
 [package]
 name = "bytey"
 version = "0.1.1"
-authors = ["Kevin Marsolais <kevin@kevinmarsolais.co>", "Rick Fay <rickwithanh@gmail.com>"]
+authors = ["Kevin Marsolais <kevin@kevinmarsolais.co>"]
 edition = "2021"
 
 [dependencies]

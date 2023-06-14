@@ -1,3 +1,13 @@
+use std::io::{stdin, stdout, Read, Write};
+
+/// Pauses program execution
+pub fn pause() {
+    let mut stdout = stdout();
+    stdout.write(b"\nPress Enter to continue...\n").unwrap();
+    stdout.flush().unwrap();
+    stdin().read(&mut [0]).unwrap();
+}
+
 /**
  * Shuts down the program in a controlled fashion:
  * - Displays an error message (optional)
@@ -8,16 +18,16 @@
 macro_rules! fail {
     (target: $target:expr, $($arg:tt)+) => ({
         log::error!(target: $target, $($arg)+);
-        cli::pause();
+        macros::fail::pause();
         std::process::exit(1);
     });
     ($($arg:tt)+) => ({
         log::error!($($arg)+);
-        cli::pause();
+        macros::fail::pause();
         std::process::exit(1);
     });
     () => ({
-        cli::pause();
+        macros::fail::pause();
         std::process::exit(1);
     });
 }

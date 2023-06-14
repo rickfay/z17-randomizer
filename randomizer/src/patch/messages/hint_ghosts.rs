@@ -6,7 +6,7 @@ use {
 #[derive(Eq, PartialEq, Hash)]
 pub(crate) struct HintGhost<'hg> {
     pub(crate) course: Id,
-    pub(crate) msbt_file: &'hg str,
+    pub(crate) msbt_file: String,
     pub(crate) msg_label: &'hg str,
 }
 
@@ -19,7 +19,11 @@ macro_rules! hint_ghost_from {
         impl<'hg> From<FillerItem> for HintGhost<'hg> {
             fn from(value: FillerItem) -> Self {
                 match value {
-                    $($ghost => Self { course: $course, msbt_file: $msbt_file, msg_label: $msg_label },)+
+                    $($ghost => Self {
+                        course: $course,
+                        msbt_file: format!("US_English/{}.msbt", $msbt_file),
+                        msg_label: $msg_label,
+                    },)+
                     _ => macros::fail!("\"{:?}\" is not a Hint Ghost", value),
                 }
             }

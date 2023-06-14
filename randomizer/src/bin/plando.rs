@@ -1,16 +1,17 @@
 use {
     albw::Item::*,
+    cli,
     log::{error, info, LevelFilter},
+    macros::fail,
+    r#mod::{
+        entrance_shuffle_setting::EntranceShuffleSetting,
+        logic::{self, Logic},
+        logic_mode::LogicMode,
+        pedestal_setting::PedestalSetting,
+        Exclude, Exclusion, Options, Settings,
+    },
     randomizer::{
-        cli, fail, regions,
-        settings::{
-            entrance_shuffle_setting::EntranceShuffleSetting,
-            hint_settings::HintGhostPrice::*,
-            logic::Logic,
-            logic_mode::LogicMode,
-            pedestal_setting::PedestalSetting,
-            settings::{Exclude, Exclusion, Options, Settings},
-        },
+        regions,
         system::{System, UserConfig},
         Layout, LocationInfo, SeedHash, SeedInfo,
     },
@@ -108,7 +109,7 @@ fn plando_settings() -> Settings {
             dark_rooms_lampless: false,
             swordless_mode: false,
 
-            hint_ghost_price: Price(1),
+            hint_ghost_price: 25,
         },
         options: Options { chest_size_matches_contents: true, night_mode: true },
         exclusions: Exclusion { 0: Default::default() },

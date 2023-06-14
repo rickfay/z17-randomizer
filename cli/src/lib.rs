@@ -1,21 +1,14 @@
 use {
     log::info,
-    settings::{
-        logic::Logic, logic_mode::LogicMode, pedestal_setting::PedestalSetting, Options, Settings,
+    seed::settings::{
+        logic::LogicSettings, logic_mode::LogicMode, pedestal_setting::PedestalSetting, Options,
+        Settings,
     },
     std::{
         io::{stdin, stdout, Read, Write},
         str::FromStr,
     },
 };
-
-/// Pauses program execution
-pub fn pause() {
-    let mut stdout = stdout();
-    stdout.write(b"\nPress Enter to continue...\n").unwrap();
-    stdout.flush().unwrap();
-    stdin().read(&mut [0]).unwrap();
-}
 
 /// Prompt the user for Seed Settings on the CLI
 pub fn get_seed_settings() -> Result<Settings, String> {
@@ -160,7 +153,7 @@ pub fn get_seed_settings() -> Result<Settings, String> {
     info!("Starting seed generation...\n");
 
     Ok(Settings {
-        logic: Logic {
+        logic: LogicSettings {
             logic_mode,
             randomize_dungeon_prizes,
             lc_requirement,

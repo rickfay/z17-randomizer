@@ -1,7 +1,6 @@
 //! A library for reading data from a The Legend of Zelda: A Link Between Worlds ROM.
 
 use {
-    crate::{course::Id::LanguageBoot, language::Load, scene::SceneMeta},
     language::FlowChart,
     log::info,
     path_absolutize::*,
@@ -18,9 +17,7 @@ pub use {
     course::Course,
     demo::Demo,
     files::{byaml, exheader::ExHeader, romfs::RomFs, sarc::Sarc, Cxi, File, IntoBytes},
-    item::{GetItem, Item},
     language::Language,
-    scene::{Scene, Stage},
 };
 
 pub mod actor_profile;
@@ -29,9 +26,7 @@ pub mod course;
 pub mod demo;
 mod files;
 pub mod flow;
-pub mod item;
 pub mod language;
-pub mod scene;
 
 pub type Result<T, E = Error> = ::std::result::Result<T, E>;
 
@@ -99,7 +94,6 @@ pub struct Game {
     romfs: RefCell<RomFs<fs::File>>,
     flow_chart: File<FlowChart>,
     get_item: File<Vec<GetItem>>,
-    message: File<Load>,
 }
 
 impl Game {
@@ -127,11 +121,7 @@ impl Game {
                 .get()
                 .read("World/Byaml/GetItem.byaml")?
                 .try_map(|data| byaml::from_bytes(&data))?;
-            let message = region_boot
-                .get()
-                .read("World/Byaml/Message.byaml")?
-                .try_map(|data| byaml::from_bytes(&data))?;
-            Ok(Self { id, exheader, romfs: RefCell::new(romfs), flow_chart, get_item, message })
+            Ok(Self { id, exheader, romfs: RefCell::new(romfs), flow_chart, get_item })
         } else {
             Err(Error::new("Invalid ROM ID."))
         }
@@ -168,7 +158,7 @@ impl Game {
         Vec::from(file.get().clone())
     }
 
-    fn get_item_actor(&self, name: &str) -> Result<Actor> {
+    pub fn get_item_actor(&self, name: &str) -> Result<Actor> {
         self.romfs.borrow_mut().read(format!("World/GetItem/{}.bch", name))
     }
 
@@ -243,23 +233,7 @@ impl Game {
 
 const US_ID: u64 = 0x00040000000EC300;
 
-#[macro_export]
-macro_rules! string_constants {
-    (
-        $(#[$attr:meta])*
-        $type:ident {
-            $($variant:ident,)+
-        }
-    ) => {
-        $(#[$attr])*
-        pub struct $type;
 
-        $(#[$attr])*
-        impl $type {
-            $(pub const $variant: &'static str = stringify!($variant);)+
-        }
-    }
-}
 
 #[doc(hidden)]
 #[macro_export]

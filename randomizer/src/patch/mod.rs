@@ -1,13 +1,7 @@
+
 use {
     self::code::Code,
     crate::{patch::util::*, Error, ItemExt, Result, SeedInfo, Settings},
-    albw::{
-        course::{Id, Id::*},
-        demo::Timed,
-        flow::FlowMut,
-        scene::{Arg, Obj, Rail, SceneMeta},
-        Demo, File, Game, IntoBytes, Item, Language, Scene,
-    },
     fs_extra::dir::CopyOptions,
     log::{debug, error, info},
     macros::fail,
@@ -17,12 +11,15 @@ use {
     tempfile::tempdir,
     try_insert_ext::EntryInsertExt,
 };
+use jack::byaml::course::CourseId;
+use jack::byaml::course::CourseId::*;
+use jack::byaml::stage::{Arg, Obj, Rail};
+use jack::item::Item;
 
 mod code;
 mod flow;
 mod maps;
 mod messages;
-pub mod msbf;
 mod prizes;
 mod scenes;
 pub mod util;
@@ -135,71 +132,6 @@ impl Patcher {
                     .unwrap(),
             );
         }
-    }
-
-    fn load_course(game: &mut Game, course: Id) -> Course {
-        game.course(course)
-            .language()
-            .map(|load| Course {
-                language: load,
-                scenes: Default::default(),
-                scene_meta: game.course(course).scene_meta(),
-            })
-            .unwrap()
-    }
-
-    fn course(&mut self, course: Id) -> Result<&mut Course> {
-        let Self { game, ref mut courses, .. } = self;
-        Ok(courses.entry(course).or_insert(Self::load_course(game, course)))
-    }
-
-    fn scene(&mut self, course: Id, stage: u16) -> Result<&mut Scene> {
-        let Self { game, ref mut courses, .. } = self;
-        courses
-            .entry(course)
-            .or_insert(Self::load_course(game, course))
-            .scenes
-            .entry(stage)
-            .or_try_insert_with(|| game.course(course).scene(stage))
-            .map_err(Into::into)
-    }
-
-    fn scene_meta(&mut self, course: Id) -> &mut SceneMeta {
-        let Self { game, ref mut courses, .. } = self;
-        let Course { ref mut scene_meta, .. } =
-            courses.entry(course).or_insert(Self::load_course(game, course));
-        scene_meta.as_mut().unwrap()
-    }
-
-    fn update(&mut self, (course, file): (Id, File<Vec<u8>>)) -> Result<()> {
-        self.language(course)?.update(file)?;
-        Ok(())
-    }
-
-    fn inject_msbf(&mut self, course: Id, msbf: Option<&(&str, File<Box<[u8]>>)>) -> Result<()> {
-        if let Some((msbf_key, msbf_file)) = msbf {
-            self.language(course)?.flow_inject(msbf_key, msbf_file.clone())?;
-        }
-
-        Ok(())
-    }
-
-    fn language<C>(&mut self, course: C) -> Result<&mut Language>
-    where
-        C: Into<Option<Id>>,
-    {
-        Ok(if let Some(course) = course.into() {
-            &mut self.course(course)?.language
-        } else {
-            &mut self.boot
-        })
-    }
-
-    fn flow<C>(&mut self, course: C) -> Result<albw::language::LoadedMut<FlowMut>>
-    where
-        C: Into<Option<Id>>,
-    {
-        Ok(self.language(course)?.flow_mut())
     }
 
     fn parse_args(&mut self, course: Id, stage: u16, unq: u16) -> &mut Arg {
@@ -344,7 +276,7 @@ impl Patcher {
         let prizes = get_dungeon_prizes(&seed_info.layout);
         let free = self.rentals[8];
         flow::apply(&mut self, free, seed_info.settings)?;
-        messages::patch_messages(&mut self, seed_info)?;
+        //messages::patch_messages(&mut self, seed_info)?; // todo
         prizes::patch_dungeon_prizes(&mut self, &prizes, seed_info.settings);
         maps::patch_maps(&mut self, &prizes);
         scenes::patch_byaml_files(&mut self, seed_info.settings)?;

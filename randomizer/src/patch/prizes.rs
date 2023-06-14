@@ -3,18 +3,16 @@ use {
         patch::{util::*, DungeonPrizes},
         ItemExt, MsbfKey, Patcher, Settings,
     },
-    albw::{
-        byaml,
-        course::{Id, Id::*},
-        language::FlowChart,
-        scene::{Arg, Dest, Flag, Obj, Point, Rail, Transform, Vec3},
-        Actor, File,
-        Item::{self, *},
-    },
     log::info,
     macros::fail,
     std::collections::HashMap,
 };
+use jack::byaml::course::CourseId::{self, *};
+use jack::byaml::{Dest, Flag, Transform, Vec3};
+use jack::byaml::stage::{Arg, Obj, Point, Rail};
+use jack::item::Item::{self, *};
+use jack::JackFile;
+use jack::lms::msbf::MsbfFile;
 
 pub(crate) fn patch_dungeon_prizes(
     patcher: &mut Patcher, prizes: &DungeonPrizes, settings: &Settings,
@@ -71,7 +69,7 @@ fn patch_flowchart(patcher: &mut Patcher, prizes: &DungeonPrizes) {
 /// Get msbf event files and inject them into scenes
 #[rustfmt::skip]
 fn patch_msbf_files(patcher: &mut Patcher, prizes: &DungeonPrizes) {
-    let prize_msbf_map: HashMap<Item, (&str, File<Box<[u8]>>)> = HashMap::from([
+    let prize_msbf_map: HashMap<Item, (&str, JackFile<MsbfFile>)> = HashMap::from([
         (SageGulley, (MsbfKey::Dark, patcher.language(DungeonDark).unwrap().flow().extract("World/Flow/Dark.msbf").unwrap())),
         (SageOren, (MsbfKey::Water, patcher.language(DungeonWater).unwrap().flow().extract("World/Flow/Water.msbf").unwrap())),
         (SageSeres, (MsbfKey::Dokuro, patcher.language(FieldDark).unwrap().flow().extract("World/Flow/Dokuro.msbf").unwrap())),
@@ -126,26 +124,12 @@ fn patch_dungeon_prize_actors(patcher: &mut Patcher, prizes: &DungeonPrizes) {
     patcher.scene(FieldDark, 30).unwrap().actors_mut().add(actor_map.get(&prizes.dp_prize).unwrap().clone()).unwrap();
     patcher.scene(DungeonIce, 0).unwrap().actors_mut().add(actor_map.get(&prizes.ir_prize).unwrap().clone()).unwrap();
 
-    // Inject Small Chests into scenes that don't have them for Pendants
-    // TODO Remove after Pendants can be redirected
-    let chest_small = patcher.scene(DungeonHera, 0).unwrap().actors().get_actor_bch("TreasureBoxS").unwrap();
+    //
     if is_pendant(prizes.sp_prize) {
         let warp_tile = patcher.scene(DungeonHera, 0).unwrap().actors().get_actor_bch("WarpTile").unwrap();
         patcher.scene(DungeonWater, 2).unwrap().actors_mut().add(warp_tile).unwrap();
-        patcher.scene(DungeonWater, 2).unwrap().actors_mut().add(chest_small.clone()).unwrap();
     }
-    if is_pendant(prizes.sw_prize) {
-        patcher.scene(FieldDark, 0).unwrap().actors_mut().add(chest_small.clone()).unwrap();
-    }
-    if is_pendant(prizes.tt_prize) {
-        patcher.scene(IndoorDark, 14).unwrap().actors_mut().add(chest_small.clone()).unwrap();
-    }
-    if is_pendant(prizes.dp_prize) {
-        patcher.scene(FieldDark, 30).unwrap().actors_mut().add(chest_small.clone()).unwrap();
-    }
-    if is_pendant(prizes.tr_prize) {
-        patcher.scene(DungeonKame, 2).unwrap().actors_mut().add(chest_small).unwrap();
-    }
+
 }
 
 /// Patches the BYAML files to shuffle Dungeon Prizes

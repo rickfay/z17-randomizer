@@ -6,10 +6,13 @@ edition = "2021"
 license = "GPL-2.0-or-later"
 
 [dependencies]
-albw = { path = "../albw" }
+bytey = { path = "../bytey" }
 byteorder = "1.4.3"
-cli = { path = "../cli" }
+data-encoding = "2.3.3"
+lazy_static = "1.4.0"
 log = "0.4.17"
 macros = { path = "../macros" }
-serde = "1.0.160"
+serde = { version = "1.0.160", features = ["derive"] }
+regex = "1.7.1"
+ring = "0.17.0-alpha.11"
 yaz0 = "0.3.0"
