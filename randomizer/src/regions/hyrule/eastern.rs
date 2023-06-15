@@ -1,6 +1,7 @@
 crate::region! {
     course: FieldLight,
     name: "Eastern Ruins",
+    color: Name,
     ruins {
         locations: [
             "Bird Lover": ItemBottle @Event(FieldLight_2D_UnderBridgeStranger[0x2A]),

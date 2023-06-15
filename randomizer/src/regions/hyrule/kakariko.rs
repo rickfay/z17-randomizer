@@ -1,6 +1,7 @@
 crate::region! {
     course: FieldLight,
     name: "Kakariko Village",
+    color: Name,
     village {
         locations: [
             "Bee Guy (1)": ItemInsectNet @Event(IndoorLight/FieldLight_18_InsectNet[0xB]),

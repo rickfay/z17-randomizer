@@ -1,6 +1,7 @@
 crate::region! {
     course: FieldDark,
     name: "Dark Ruins",
+    color: Name,
     ruins {
         locations: [
             "Dark Ruins Lakeview Chest": RupeeSilver @Chest(35[228]),

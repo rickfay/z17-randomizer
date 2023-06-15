@@ -4,8 +4,9 @@ use {
             get_gold_rupee_pool, get_maiamai_pool, get_purple_rupee_pool, get_silver_rupee_pool,
         },
         model::filler_item::{FillerItem, FillerItem::*},
-        settings::pedestal_setting::PedestalSetting,
-        Settings,
+    },
+    settings::{
+        hyrule_castle_setting::HyruleCastleSetting, pedestal_setting::PedestalSetting, Settings,
     },
     std::collections::HashSet,
 };
@@ -19,6 +20,10 @@ pub struct Progress {
 impl Progress {
     pub fn new(settings: Settings) -> Self {
         Self { items: HashSet::new(), settings }
+    }
+
+    pub fn get_items(&self) -> &HashSet<FillerItem> {
+        &self.items
     }
 
     pub fn get_settings(&self) -> &Settings {
@@ -657,6 +662,10 @@ impl Progress {
 
     pub fn has_pendant_of_courage(&self) -> bool {
         self.has_both(PendantOfCourage01, PendantOfCourage02)
+    }
+
+    pub fn hc_is_open(&self) -> bool {
+        self.settings.logic.hyrule_castle_setting != HyruleCastleSetting::Closed
     }
 
     pub fn has_required_pendants(&self) -> bool {

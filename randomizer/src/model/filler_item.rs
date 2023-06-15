@@ -1,11 +1,11 @@
 use {
-    crate::item_to_str,
+    crate::{hints::hint_color::HintColor::*, item_to_str},
     albw::{Item, Item::*},
-    serde::{Deserialize, Serialize},
+    serde::{Deserialize, Serialize, Serializer},
     FillerItem::*,
 };
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Deserialize)]
 pub enum FillerItem {
     Empty,
 
@@ -475,9 +475,198 @@ pub enum FillerItem {
     LcLampTrial,
     LcHookTrial,
     Triforce,
+
+    // Hyrule Overworld Hint Ghosts (36) -----------------------------------------------------------
+    HintGhostLostWoodsMaze1,
+    HintGhostLostWoodsMaze2,
+    HintGhostLostWoodsMaze3,
+    HintGhostLostWoods,
+    HintGhostSpectacleRock,
+    HintGhostTowerOfHeraOutside,
+    HintGhostFloatingIsland,
+    HintGhostFireCave,
+    HintGhostMoldormCave,
+    HintGhostZorasDomain,
+    HintGhostFortuneTellerHyrule,
+    HintGhostSanctuary,
+    HintGhostGraveyardHyrule,
+    HintGhostWaterfallCave,
+    HintGhostWell,
+    HintGhostShadyGuy,
+    HintGhostStylishWoman,
+    HintGhostBlacksmithCave,
+    HintGhostEasternRuinsPegs,
+    HintGhostEasternRuinsCave,
+    HintGhostEasternRuinsEntrance,
+    HintGhostRupeeRushHyrule,
+    HintGhostCuccos,
+    HintGhostSouthBridge,
+    HintGhostSouthernRuins,
+    HintGhostHouseOfGalesIsland,
+    HintGhostHyruleHotfoot,
+    HintGhostLetter,
+    HintGhostStreetPassTree,
+    HintGhostBlacksmithBehind,
+    HintGhostGraveyardLedge,
+    HintGhostDesertEast,
+    HintGhostDesertCenter,
+    HintGhostDesertSouthWest,
+    HintGhostHyruleCastleRocks,
+    HintGhostWitchsHouse,
+
+    // Lorule Overworld Hint Ghosts (20) -----------------------------------------------------------
+    HintGhostSkullWoodsCuccos,
+    HintGhostTreacherousTower,
+    HintGhostIceRuinsOutside,
+    HintGhostLoruleGraveyard,
+    HintGhostDarkRuinsNorth,
+    HintGhostSkullWoodsSouth,
+    HintGhostFortunesChoice,
+    HintGhostVeteranThief,
+    HintGhostFortuneTellerLorule,
+    HintGhostDarkMaze,
+    HintGhostRupeeRushLorule,
+    HintGhostGreatRupeeFairy,
+    HintGhostOctoballDerby,
+    HintGhostVacantHouse,
+    HintGhostMiseryMireLedge,
+    HintGhostSwampPalaceOutsideLeft,
+    HintGhostTurtleBullied,
+    HintGhostTurtleWall,
+    HintGhostTurtleRockOutside,
+    HintGhostDarkPalaceOutside,
+    HintGhostSwampPalaceOutsideRight,
+    HintGhostMiseryMireBridge,
 }
 
 impl FillerItem {
+    pub(crate) fn get_all_ghosts() -> Vec<Self> {
+        vec![
+            HintGhostLostWoodsMaze1,
+            HintGhostLostWoodsMaze2,
+            HintGhostLostWoodsMaze3,
+            HintGhostLostWoods,
+            HintGhostSpectacleRock,
+            HintGhostTowerOfHeraOutside,
+            HintGhostFloatingIsland,
+            HintGhostFireCave,
+            HintGhostMoldormCave,
+            HintGhostZorasDomain,
+            HintGhostFortuneTellerHyrule,
+            HintGhostSanctuary,
+            HintGhostGraveyardHyrule,
+            HintGhostWaterfallCave,
+            HintGhostWell,
+            HintGhostShadyGuy,
+            HintGhostStylishWoman,
+            HintGhostBlacksmithCave,
+            HintGhostEasternRuinsPegs,
+            HintGhostEasternRuinsCave,
+            HintGhostEasternRuinsEntrance,
+            HintGhostRupeeRushHyrule,
+            HintGhostCuccos,
+            HintGhostSouthBridge,
+            HintGhostSouthernRuins,
+            HintGhostHouseOfGalesIsland,
+            HintGhostHyruleHotfoot,
+            HintGhostLetter,
+            HintGhostStreetPassTree,
+            HintGhostBlacksmithBehind,
+            HintGhostGraveyardLedge,
+            HintGhostDesertEast,
+            HintGhostDesertCenter,
+            HintGhostDesertSouthWest,
+            HintGhostHyruleCastleRocks,
+            HintGhostWitchsHouse,
+            HintGhostSkullWoodsCuccos,
+            HintGhostTreacherousTower,
+            HintGhostIceRuinsOutside,
+            HintGhostLoruleGraveyard,
+            HintGhostDarkRuinsNorth,
+            HintGhostSkullWoodsSouth,
+            HintGhostFortunesChoice,
+            HintGhostVeteranThief,
+            HintGhostFortuneTellerLorule,
+            HintGhostDarkMaze,
+            HintGhostRupeeRushLorule,
+            HintGhostGreatRupeeFairy,
+            HintGhostOctoballDerby,
+            HintGhostVacantHouse,
+            HintGhostMiseryMireLedge,
+            HintGhostSwampPalaceOutsideLeft,
+            HintGhostTurtleBullied,
+            HintGhostTurtleWall,
+            HintGhostTurtleRockOutside,
+            HintGhostDarkPalaceOutside,
+            HintGhostSwampPalaceOutsideRight,
+            HintGhostMiseryMireBridge,
+        ]
+    }
+
+    pub fn is_hint_ghost(self) -> bool {
+        match self {
+            HintGhostLostWoodsMaze1
+            | HintGhostLostWoodsMaze2
+            | HintGhostLostWoodsMaze3
+            | HintGhostLostWoods
+            | HintGhostSpectacleRock
+            | HintGhostTowerOfHeraOutside
+            | HintGhostFloatingIsland
+            | HintGhostFireCave
+            | HintGhostMoldormCave
+            | HintGhostZorasDomain
+            | HintGhostFortuneTellerHyrule
+            | HintGhostSanctuary
+            | HintGhostGraveyardHyrule
+            | HintGhostWaterfallCave
+            | HintGhostWell
+            | HintGhostShadyGuy
+            | HintGhostStylishWoman
+            | HintGhostBlacksmithCave
+            | HintGhostEasternRuinsPegs
+            | HintGhostEasternRuinsCave
+            | HintGhostEasternRuinsEntrance
+            | HintGhostRupeeRushHyrule
+            | HintGhostCuccos
+            | HintGhostSouthBridge
+            | HintGhostSouthernRuins
+            | HintGhostHouseOfGalesIsland
+            | HintGhostHyruleHotfoot
+            | HintGhostLetter
+            | HintGhostStreetPassTree
+            | HintGhostBlacksmithBehind
+            | HintGhostGraveyardLedge
+            | HintGhostDesertEast
+            | HintGhostDesertCenter
+            | HintGhostDesertSouthWest
+            | HintGhostHyruleCastleRocks
+            | HintGhostWitchsHouse
+            | HintGhostSkullWoodsCuccos
+            | HintGhostTreacherousTower
+            | HintGhostIceRuinsOutside
+            | HintGhostLoruleGraveyard
+            | HintGhostDarkRuinsNorth
+            | HintGhostSkullWoodsSouth
+            | HintGhostFortunesChoice
+            | HintGhostVeteranThief
+            | HintGhostFortuneTellerLorule
+            | HintGhostDarkMaze
+            | HintGhostRupeeRushLorule
+            | HintGhostGreatRupeeFairy
+            | HintGhostOctoballDerby
+            | HintGhostVacantHouse
+            | HintGhostMiseryMireLedge
+            | HintGhostSwampPalaceOutsideLeft
+            | HintGhostTurtleBullied
+            | HintGhostTurtleWall
+            | HintGhostTurtleRockOutside
+            | HintGhostDarkPalaceOutside
+            | HintGhostSwampPalaceOutsideRight
+            | HintGhostMiseryMireBridge => true,
+            _ => false,
+        }
+    }
+
     pub fn is_progression(self) -> bool {
         match self {
             // Empty |
@@ -949,8 +1138,95 @@ impl FillerItem {
             LcLampTrial => "Lamp Trial Complete",
             LcHookTrial => "Hook Trial Complete",
             Triforce => "Triforce",
+
+            HintGhostLostWoodsMaze1 => "Lost Woods Maze Ghost 1",
+            HintGhostLostWoodsMaze2 => "Lost Woods Maze Ghost 2",
+            HintGhostLostWoodsMaze3 => "Lost Woods Maze Ghost 3",
+            HintGhostLostWoods => "Lost Woods Ghost",
+            HintGhostSpectacleRock => "Spectacle Rock Ghost",
+            HintGhostTowerOfHeraOutside => "Outside Tower of Hera Ghost",
+            HintGhostFloatingIsland => "Floating Island Ghost",
+            HintGhostFireCave => "Fire Cave Ghost",
+            HintGhostMoldormCave => "Moldorm Cave Ghost",
+            HintGhostZorasDomain => "Zora's Domain Ghost",
+            HintGhostFortuneTellerHyrule => "Hyrule Fortune-Teller Ghost",
+            HintGhostSanctuary => "Sanctuary Ghost",
+            HintGhostGraveyardHyrule => "Hyrule Graveyard Ghost",
+            HintGhostWaterfallCave => "Waterfall Cave Ghost",
+            HintGhostWell => "Kakariko Well Ghost",
+            HintGhostShadyGuy => "Shady Guy Ghost",
+            HintGhostStylishWoman => "Stylish Woman Ghost",
+            HintGhostBlacksmithCave => "Blacksmith Cave Ghost",
+            HintGhostEasternRuinsPegs => "Eastern Ruins Pegs Ghost",
+            HintGhostEasternRuinsCave => "Eastern Ruins Cave Ghost",
+            HintGhostEasternRuinsEntrance => "Eastern Ruins Entrance Ghost",
+            HintGhostRupeeRushHyrule => "Hyrule Rupee Rush Ghost",
+            HintGhostCuccos => "Dodge the Cuccos Ghost",
+            HintGhostSouthBridge => "Southern Bridge Ghost",
+            HintGhostSouthernRuins => "Southern Ruins Ghost",
+            HintGhostHouseOfGalesIsland => "House of Gales Island Ghost",
+            HintGhostHyruleHotfoot => "Hyrule Hotfoot Ghost",
+            HintGhostLetter => "Letter in a Bottle Ghost",
+            HintGhostStreetPassTree => "StreetPass Tree Ghost",
+            HintGhostBlacksmithBehind => "Behind Blacksmith Ghost",
+            HintGhostGraveyardLedge => "Graveyard Ledge Ghost",
+            HintGhostDesertEast => "Desert East Ghost",
+            HintGhostDesertCenter => "Desert Center Ghost",
+            HintGhostDesertSouthWest => "Desert South West Ghost",
+            HintGhostHyruleCastleRocks => "Hyrule Castle Rocks Ghost",
+            HintGhostWitchsHouse => "Witch's House Ghost",
+
+            HintGhostSkullWoodsCuccos => "Skull Woods Cuccos Ghost",
+            HintGhostTreacherousTower => "Treacherous Tower Ghost",
+            HintGhostIceRuinsOutside => "Ice Ruins Outside Ghost",
+            HintGhostLoruleGraveyard => "Lorule Graveyard Ghost",
+            HintGhostDarkRuinsNorth => "Dark Ruins North Ghost",
+            HintGhostSkullWoodsSouth => "Skull Woods South Ghost",
+            HintGhostFortunesChoice => "Fortune's Choice Ghost",
+            HintGhostVeteranThief => "Veteran Thief Ghost",
+            HintGhostFortuneTellerLorule => "Lorule Fortune-Teller Ghost",
+            HintGhostDarkMaze => "Dark Maze Ghost",
+            HintGhostRupeeRushLorule => "Lorule Rupee Rush Ghost",
+            HintGhostGreatRupeeFairy => "Great Rupee Fairy Ghost",
+            HintGhostOctoballDerby => "Octoball Derby Ghost",
+            HintGhostVacantHouse => "Vacant House Ghost",
+            HintGhostMiseryMireLedge => "Misery Mire Ledge Ghost",
+            HintGhostSwampPalaceOutsideLeft => "Swamp Palace Outside Left Ghost",
+            HintGhostTurtleBullied => "Turtle Bullied Ghost",
+            HintGhostTurtleWall => "Turtle Wall Ghost",
+            HintGhostTurtleRockOutside => "Turtle Rock Outside Ghost",
+            HintGhostDarkPalaceOutside => "Dark Palace Outside Ghost",
+            HintGhostSwampPalaceOutsideRight => "Swamp Palace Outside Right Ghost",
+            HintGhostMiseryMireBridge => "Misery Mire Bridge Ghost",
+
             _ => item_to_str(&(convert(self).unwrap())),
         }
+    }
+
+    pub fn as_str_colorized(&self) -> String {
+        match self {
+            Yuga => Green,
+            Margomill => Blue,
+            Moldorm => Attention,
+            GemesaurKing => Green,
+            Arrghus => Beige,
+            Knucklemaster => Blue,
+            Stalblind => Beige,
+            Grinexx => Purple,
+            Zaganaga => Name,
+            Dharkstare => Attention,
+            _ => Name,
+        }
+        .format(Self::as_str(*self))
+    }
+}
+
+impl Serialize for FillerItem {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_str(self.as_str())
     }
 }
 
@@ -1161,5 +1437,65 @@ pub fn convert(fill_item: FillerItem) -> Option<Item> {
         | LcLampTrial
         | LcHookTrial
         | Triforce => None,
+
+        // Hint Ghosts don't map either
+        HintGhostLostWoodsMaze1
+        | HintGhostLostWoodsMaze2
+        | HintGhostLostWoodsMaze3
+        | HintGhostLostWoods
+        | HintGhostSpectacleRock
+        | HintGhostTowerOfHeraOutside
+        | HintGhostFloatingIsland
+        | HintGhostFireCave
+        | HintGhostMoldormCave
+        | HintGhostZorasDomain
+        | HintGhostFortuneTellerHyrule
+        | HintGhostSanctuary
+        | HintGhostGraveyardHyrule
+        | HintGhostWaterfallCave
+        | HintGhostWell
+        | HintGhostShadyGuy
+        | HintGhostStylishWoman
+        | HintGhostBlacksmithCave
+        | HintGhostEasternRuinsPegs
+        | HintGhostEasternRuinsCave
+        | HintGhostEasternRuinsEntrance
+        | HintGhostRupeeRushHyrule
+        | HintGhostCuccos
+        | HintGhostSouthBridge
+        | HintGhostSouthernRuins
+        | HintGhostHouseOfGalesIsland
+        | HintGhostHyruleHotfoot
+        | HintGhostLetter
+        | HintGhostStreetPassTree
+        | HintGhostBlacksmithBehind
+        | HintGhostGraveyardLedge
+        | HintGhostDesertEast
+        | HintGhostDesertCenter
+        | HintGhostDesertSouthWest
+        | HintGhostHyruleCastleRocks
+        | HintGhostWitchsHouse
+        | HintGhostSkullWoodsCuccos
+        | HintGhostTreacherousTower
+        | HintGhostIceRuinsOutside
+        | HintGhostLoruleGraveyard
+        | HintGhostDarkRuinsNorth
+        | HintGhostSkullWoodsSouth
+        | HintGhostFortunesChoice
+        | HintGhostVeteranThief
+        | HintGhostFortuneTellerLorule
+        | HintGhostDarkMaze
+        | HintGhostRupeeRushLorule
+        | HintGhostGreatRupeeFairy
+        | HintGhostOctoballDerby
+        | HintGhostVacantHouse
+        | HintGhostMiseryMireLedge
+        | HintGhostSwampPalaceOutsideLeft
+        | HintGhostTurtleBullied
+        | HintGhostTurtleWall
+        | HintGhostTurtleRockOutside
+        | HintGhostDarkPalaceOutside
+        | HintGhostSwampPalaceOutsideRight
+        | HintGhostMiseryMireBridge => None,
     }
 }

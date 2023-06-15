@@ -1,4 +1,5 @@
 use {
+    crate::{hints::hint_color::HintColor, patch::Patcher, Settings},
     log::info,
     std::{
         fmt::{self, Debug, Formatter},
@@ -8,6 +9,7 @@ use {
 
 pub struct Subregion {
     name: &'static str,
+    color: HintColor,
     world: World,
     id: &'static str,
 }
@@ -15,6 +17,10 @@ pub struct Subregion {
 impl Subregion {
     pub fn name(&self) -> &'static str {
         self.name
+    }
+
+    pub fn name_colorized(&self) -> String {
+        self.color.format(&self.name)
     }
 
     pub fn world(&self) -> World {
@@ -72,8 +78,6 @@ pub enum World {
 //         }
 //     };
 // }
-
-use crate::{patch::Patcher, Settings};
 
 pub mod dungeons {
     pub const WORLD: super::World = super::World::Dungeons;
@@ -199,6 +203,7 @@ macro_rules! region {
     (
         course: $course:ident,
         name: $name:literal,
+        color: $color:ident,
         $start:ident $start_props:tt,
         $($id:ident $props:tt,)*
     ) => {
@@ -219,6 +224,7 @@ macro_rules! region {
         }
 
         pub const NAME: &str = $name;
+        pub const COLOR: crate::hints::hint_color::HintColor = crate::hints::hint_color::HintColor::$color;
         #[allow(unused)]
         pub const COURSE: albw::course::Id = albw::course::Id::$course;
     };
@@ -245,6 +251,7 @@ macro_rules! subregion {
 
             pub const SUBREGION: &Subregion = &Subregion {
                 name: super::NAME,
+                color: super::COLOR,
                 world: super::super::WORLD,
                 id: stringify!($id),
             };
@@ -253,29 +260,16 @@ macro_rules! subregion {
             #[inline]
             pub fn patch(patcher: &mut Patcher, layout: &crate::Layout, settings: &$crate::Settings) -> crate::Result<()> {
                 $(use crate::patch::Patch;
-                $(if $crate::settings_check!($($settings $where)?)(settings) {
-                    crate::patch!($variant $props).apply(
-                        patcher,
-                        layout
-                            .get(&crate::LocationInfo::new(SUBREGION, $key))
-                            .unwrap_or_else(|| unreachable!(stringify!($key))),
-                        settings,
-                    )?;
-                })*)?
+                $(crate::patch!($variant $props).apply(
+                    patcher,
+                    layout
+                        .get(&crate::LocationInfo::new(SUBREGION, $key))
+                        .unwrap_or_else(|| unreachable!(stringify!($key))),
+                    settings,
+                )?;)*)?
                 Ok(())
             }
         }
-    };
-}
-
-#[doc(hidden)]
-#[macro_export]
-macro_rules! settings_check {
-    () => {
-        |_: &$crate::settings::settings::Settings| true
-    };
-    ($settings:ident $check:expr) => {
-        |$settings: &$crate::settings::settings::Settings| $check
     };
 }
 
@@ -287,6 +281,13 @@ macro_rules! patch {
     };
     (Chest($stage:literal[$unq:literal])) => {
         Patch::Chest { course: COURSE, stage: $stage - 1, unq: $unq }
+    };
+    (Chest[$($stage:literal[$unq:literal],)+]) => {
+        Patch::Multi(vec![
+            $(
+                Patch::Chest { course: COURSE, stage: $stage - 1, unq: $unq },
+            )+
+        ])
     };
     (BigChest($course:ident $stage:literal[$unq:literal])) => {
         Patch::BigChest { course: albw::course::Id::$course, stage: $stage - 1, unq: $unq }

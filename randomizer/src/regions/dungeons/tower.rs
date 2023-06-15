@@ -1,6 +1,7 @@
 crate::region! {
     course: DungeonHera,
     name: "Tower of Hera",
+    color: Attention,
     hera {
         locations: [
             "[TH] (1F) Outside": RupeePurple @Chest(1[6]),

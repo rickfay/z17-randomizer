@@ -11,8 +11,8 @@ impl LocationNode {
         Self { checks, paths }
     }
 
-    pub fn get_checks(self) -> Vec<Check> {
-        self.checks
+    pub fn get_checks(&self) -> &Vec<Check> {
+        &self.checks
     }
 
     pub fn get_paths(self) -> Vec<Path> {

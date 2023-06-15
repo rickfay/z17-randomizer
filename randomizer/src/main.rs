@@ -1,93 +1,19 @@
 use {
     log::{error, info},
-    randomizer::{cli::seed_settings_ui, constants::VERSION, fail, filler_new, pause, Seed},
+    macros::fail,
+    randomizer::{
+        constants::VERSION,
+        system::{System, UserConfig},
+    },
+    settings::Settings,
     simplelog::{LevelFilter, SimpleLogger},
-    std::panic::catch_unwind,
     structopt::StructOpt,
 };
-
-/**
- * THE LEGEND OF ZELDA: A LINK BETWEEN WORLDS RANDOMIZER
- */
-fn main() -> randomizer::Result<()> {
-    let opt = Opt::from_args();
-
-    SimpleLogger::init(LevelFilter::Info, Default::default())
-        .expect("Could not initialize logger.");
-
-    info!("Initializing ALBW Randomizer...");
-
-    let system = randomizer::system()?;
-
-    let mut preset = if let Some(ref preset) = opt.preset {
-        system.preset(&preset)?
-    } else {
-        seed_settings_ui()
-    };
-
-    // FIXME Temporary: Force Yuganon Requirement to be equal to LC Requirement
-    preset.logic.yuganon_requirement = preset.logic.lc_requirement;
-
-    const MAX_RETRIES: u16 = 100;
-    let mut result = Ok(());
-    let mut seed = opt.seed.unwrap_or_else(rand::random);
-
-    for x in 0..MAX_RETRIES {
-        let no_preset = String::from("<None>");
-        let preset_str = opt.preset.as_ref().unwrap_or(&no_preset);
-
-        info!("Attempt:                        #{}", x + 1);
-        info!("Preset:                         {}", preset_str);
-        info!("Version:                        {}", VERSION);
-
-        let spoiler = catch_unwind(|| filler_new(VERSION, &preset, seed));
-
-        if spoiler.is_ok() {
-            println!();
-            info!("All seed information has been successfully generated.");
-            println!();
-            let path_config = system.load_config().unwrap_or_else(|error| {
-                fail!("Failed to parse configuration file: config.json\n\
-                Commonly Fixed By: Replace any single backslash characters '\\' with a forward slash '/' or double backslash '\\\\'.\n\
-                Full Error: {}\n", error);
-            });
-            result = spoiler.unwrap().patch(path_config, !opt.no_patch, !opt.no_spoiler, true);
-
-            break;
-        } else if x >= MAX_RETRIES - 1 {
-            fail!("Too many retry attempts have failed. Aborting...");
-        } else {
-            info!("Seed was not completable (this is normal). Retrying...\n");
-            seed = opt.seed.unwrap_or_else(rand::random);
-        }
-    }
-
-    println!();
-
-    match result {
-        Ok(_) => info!("Successfully generated ALBW Randomizer Seed: {}", seed),
-        Err(_) => {
-            println!();
-            error!("An unknown error occurred while generating the seed D:\n");
-
-            error!("If you're seeing this error, there is likely an issue with your ROM.");
-            error!("Verify your ROM is (1) a North American copy of ALBW, and (2) decrypted.\n");
-
-            info!(
-                "For assistance, visit the #help-and-strats channel on the ALBW Randomizer Discord."
-            );
-        }
-    }
-
-    pause();
-
-    result
-}
 
 #[derive(Debug, StructOpt)]
 struct Opt {
     #[structopt(long)]
-    seed: Option<Seed>,
+    seed: Option<u32>,
 
     #[structopt(long)]
     preset: Option<String>,
@@ -97,4 +23,79 @@ struct Opt {
 
     #[structopt(long)]
     no_spoiler: bool,
+}
+
+/**
+ * THE LEGEND OF ZELDA: A LINK BETWEEN WORLDS RANDOMIZER
+ */
+fn main() {
+    let opt = Opt::from_args();
+
+    SimpleLogger::init(LevelFilter::Info, Default::default())
+        .expect("Could not initialize logger.");
+
+    info!("Initializing ALBW Randomizer...");
+
+    // Get Settings, either from a preset or the CLI
+    let (preset_name, mut settings): (&str, Settings) =
+        if let Some(preset_name) = opt.preset.as_ref() {
+            (
+                preset_name,
+                System::load_preset(preset_name).unwrap_or_else(|_| {
+                    fail!("Failed to load preset: {}", preset_name);
+                }),
+            )
+        } else {
+            (
+                "<None>",
+                cli::get_seed_settings().unwrap_or_else(|err| {
+                    fail!("Failed to create Settings: {}", err);
+                }),
+            )
+        };
+    settings.logic.yuganon_requirement = settings.logic.lc_requirement; // FIXME Temporary: Force Yuganon Requirement to be equal to LC Requirement
+
+    // Determine Seed
+    let (seeded, mut seed): (bool, u32) =
+        if let Some(seed) = opt.seed { (true, seed) } else { (false, rand::random()) };
+
+    // Load User Config
+    let user_config: UserConfig = System::load_config().unwrap_or_else(|error| {
+        fail!("Failed to parse configuration file: config.json\n\
+                Commonly Fixed By: Replace any single backslash characters '\\' with a forward slash '/' or double backslash '\\\\'.\n\
+                Full Error: {}\n", error);
+    });
+
+    // Generate Seed in a retryable manner
+    const MAX_RETRIES: u16 = 100;
+    for x in 0..MAX_RETRIES {
+        info!("Attempt:                        #{}", x + 1);
+        info!("Preset:                         {}", preset_name);
+        info!("Version:                        {}", VERSION);
+
+        match randomizer::generate_seed(seed, &settings, &user_config, opt.no_patch, opt.no_spoiler)
+        {
+            Ok(_) => {
+                println!();
+                info!("Successfully Generated ALBWR Seed: {}", seed);
+                break;
+            }
+            Err(err) => {
+                error!("{:?}", err);
+                if x < MAX_RETRIES {
+                    if !seeded {
+                        info!("Seed was not completable (this is normal). Retrying...\n");
+                        seed = rand::random();
+                    } else {
+                        fail!("Couldn't generate Seed: \"{}\" with the given settings.", seed);
+                    }
+                } else {
+                    fail!("Too many retry attempts have failed. Aborting...");
+                }
+            }
+        }
+    }
+
+    println!();
+    cli::pause();
 }

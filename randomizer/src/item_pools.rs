@@ -1,12 +1,14 @@
 use {
     crate::{
         filler_util::shuffle,
-        settings::logic_mode::LogicMode,
         FillerItem::{self, *},
         Settings,
     },
     rand::rngs::StdRng,
+    settings::logic_mode::LogicMode,
 };
+
+pub type Pool = Vec<FillerItem>;
 
 /**
  * Builds the Progression and Junk item pools according to the settings<br /><br />
@@ -14,9 +16,7 @@ use {
  * The total number of items returned between both pools should match the total number of locations
  * in the world graph, including locations that statically set their contents.
  */
-pub(crate) fn get_item_pools(
-    settings: &Settings, rng: &mut StdRng,
-) -> (Vec<FillerItem>, Vec<FillerItem>) {
+pub(crate) fn get_item_pools(settings: &Settings, rng: &mut StdRng) -> (Pool, Pool) {
     let mut progression_items = get_base_progression_pool();
     let dungeon_prizes = get_dungeon_prize_pool();
     let big_keys = get_big_key_pool();
@@ -39,9 +39,9 @@ pub(crate) fn get_item_pools(
 
     (
         shuffle_order_progression_pools(
-            settings, rng, dungeon_prizes, big_keys, small_keys, compasses, progression_items,
+            rng, dungeon_prizes, big_keys, small_keys, compasses, progression_items,
         ),
-        shuffle(junk_pool, rng),
+        shuffle(rng, junk_pool),
     )
 }
 
@@ -54,17 +54,16 @@ pub(crate) fn get_item_pools(
  * - All other progression
  */
 fn shuffle_order_progression_pools(
-    _settings: &Settings, rng: &mut StdRng, dungeon_prizes: Vec<FillerItem>,
-    big_keys: Vec<FillerItem>, small_keys: Vec<FillerItem>, compasses: Vec<FillerItem>,
-    progression: Vec<FillerItem>,
-) -> Vec<FillerItem> {
+    rng: &mut StdRng, dungeon_prizes: Vec<FillerItem>, big_keys: Vec<FillerItem>,
+    small_keys: Vec<FillerItem>, compasses: Vec<FillerItem>, progression: Vec<FillerItem>,
+) -> Pool {
     let mut progression_pool;
 
-    progression_pool = shuffle(dungeon_prizes, rng);
-    progression_pool.extend(shuffle(big_keys, rng));
-    progression_pool.extend(shuffle(small_keys, rng));
-    progression_pool.extend(shuffle(compasses, rng));
-    progression_pool.extend(shuffle(progression, rng));
+    progression_pool = shuffle(rng, dungeon_prizes);
+    progression_pool.extend(shuffle(rng, big_keys));
+    progression_pool.extend(shuffle(rng, small_keys));
+    progression_pool.extend(shuffle(rng, compasses));
+    progression_pool.extend(shuffle(rng, progression));
 
     progression_pool
 }
@@ -172,14 +171,12 @@ fn get_base_junk_pool() -> Vec<FillerItem> {
         MonsterTail, MonsterTail, MonsterTail, MonsterTail, // 3 Monster Horns
         MonsterHorn, MonsterHorn, MonsterHorn, // 12 Monster Guts
         MonsterGuts, MonsterGuts, MonsterGuts, MonsterGuts, MonsterGuts, MonsterGuts, MonsterGuts,
-        MonsterGuts, MonsterGuts, MonsterGuts, MonsterGuts, MonsterGuts,
-        // Heart Pieces
+        MonsterGuts, MonsterGuts, MonsterGuts, MonsterGuts, MonsterGuts, // Heart Pieces
         HeartPiece01, HeartPiece02, HeartPiece03, HeartPiece04, HeartPiece05, HeartPiece06,
         HeartPiece07, HeartPiece08, HeartPiece09, HeartPiece10, HeartPiece11, HeartPiece12,
         HeartPiece13, HeartPiece14, HeartPiece15, HeartPiece16, HeartPiece17, HeartPiece18,
         HeartPiece19, HeartPiece20, HeartPiece21, HeartPiece22, HeartPiece23, HeartPiece24,
-        HeartPiece25, HeartPiece26, HeartPiece27, HeartPiece28,
-        // Heart Containers
+        HeartPiece25, HeartPiece26, HeartPiece27, HeartPiece28, // Heart Containers
         HeartContainer01, HeartContainer02, HeartContainer03, HeartContainer04, HeartContainer05,
         HeartContainer06, HeartContainer07, HeartContainer08, HeartContainer09,
         HeartContainer10,

@@ -1,75 +1,47 @@
 use {
     crate::{
-        filler::fill_stuff,
-        model::metrics::Metrics,
+        hints::{formatting::*, Hints},
+        metrics::Metrics,
         patch::msbf::MsbfKey,
-        settings::settings::Settings,
-        system::{Paths, System},
+        system::UserConfig,
     },
     albw::{
         Game,
         Item::{self, *},
     },
-    linked_hash_map::LinkedHashMap,
     log::{debug, error, info},
+    macros::fail,
     model::filler_item::{convert, FillerItem},
     patch::Patcher,
     path_absolutize::*,
+    rand::{rngs::StdRng, SeedableRng},
     regions::Subregion,
     serde::{ser::SerializeMap, Serialize, Serializer},
+    settings::Settings,
     std::{
-        collections::BTreeMap,
+        collections::{hash_map::DefaultHasher, BTreeMap, HashMap},
         error::Error as StdError,
         fs::File,
-        io::{self, stdin, stdout, Read, Write},
+        hash::{Hash, Hasher},
+        io::{self, Write},
+        ops::Deref,
     },
 };
 
-pub mod cli;
 pub mod constants;
 mod entrance_rando;
 mod filler;
 mod filler_util;
+mod hints;
 mod item_pools;
 mod legacy;
+mod metrics;
 pub mod model;
 mod patch;
 pub mod regions;
-pub mod settings;
-mod system;
+pub mod system;
 #[rustfmt::skip]
 mod world;
-
-/**
- * Shuts down the program in a controlled fashion:
- * - Displays an error message (optional)
- * - Pauses execution of the CLI
- * - Terminates with exit code 1.
- */
-#[macro_export]
-macro_rules! fail {
-    (target: $target:expr, $($arg:tt)+) => ({
-        log::error!(target: $target, $($arg)+);
-        crate::pause();
-        std::process::exit(1);
-    });
-    ($($arg:tt)+) => ({
-        log::error!($($arg)+);
-        crate::pause();
-        std::process::exit(1);
-    });
-    () => ({
-        crate::pause();
-        std::process::exit(1);
-    });
-}
-
-pub fn pause() {
-    let mut stdout = stdout();
-    stdout.write(b"\nPress Enter to continue...\n").unwrap();
-    stdout.flush().unwrap();
-    stdin().read(&mut [0]).unwrap();
-}
 
 pub type Result<T, E = Error> = core::result::Result<T, E>;
 
@@ -134,11 +106,6 @@ pub enum ErrorKind {
     Io,
 }
 
-pub type Seed = u32;
-
-#[derive(Debug)]
-pub struct Hash(u32);
-
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Hash)]
 pub struct LocationInfo {
     subregion: &'static Subregion,
@@ -156,6 +123,10 @@ impl LocationInfo {
 
     pub fn region(&self) -> &'static str {
         self.subregion.name()
+    }
+
+    pub fn region_colorized(&self) -> String {
+        self.subregion.name_colorized()
     }
 
     pub fn name(&self) -> &'static str {
@@ -200,6 +171,41 @@ impl Layout {
         self.world(node.world()).get(node.name()).and_then(|region| region.get(name).copied())
     }
 
+    #[allow(unused)]
+    fn find(&self, item: Item) -> Vec<&'static str> {
+        todo!()
+    }
+
+    /// This just highlights why we need to redo [`Layout`]
+    #[allow(unused)]
+    fn find_single(&self, find_item: Item) -> Option<(&'static str, &'static str)> {
+        for (region_name, region) in &self.hyrule {
+            for (loc_name, item) in region {
+                if find_item.eq(item) {
+                    return Some((region_name, loc_name));
+                }
+            }
+        }
+
+        for (region_name, region) in &self.lorule {
+            for (loc_name, item) in region {
+                if find_item.eq(item) {
+                    return Some((region_name, loc_name));
+                }
+            }
+        }
+
+        for (region_name, region) in &self.dungeons {
+            for (loc_name, item) in region {
+                if find_item.eq(item) {
+                    return Some((region_name, loc_name));
+                }
+            }
+        }
+
+        None
+    }
+
     pub fn set(&mut self, location: LocationInfo, item: Item) {
         let LocationInfo { subregion: node, name } = location;
         self.get_node_mut(node).insert(name, item.normalize());
@@ -212,7 +218,7 @@ impl Layout {
     }
 }
 
-pub type World = LinkedHashMap<&'static str, BTreeMap<&'static str, Item>>;
+pub type World = BTreeMap<&'static str, BTreeMap<&'static str, Item>>;
 
 fn serialize_world<S>(region: &World, ser: S) -> Result<S::Ok, S::Error>
 where
@@ -455,62 +461,8 @@ impl ItemExt for Item {
     }
 }
 
-/// A log of seed info and item placements
-#[derive(Debug, Serialize)]
-pub struct Spoiler<'settings> {
-    version: &'settings str,
-    seed: Seed,
-    settings: &'settings Settings,
-    layout: Layout,
-    metrics: Metrics,
-}
-
-impl<'settings> Spoiler<'settings> {
-    pub fn new(
-        version: &'settings str, seed: Seed, settings: &'settings Settings, layout: Layout,
-        metrics: Metrics,
-    ) -> Self {
-        Self { version, seed, settings, layout, metrics }
-    }
-
-    pub fn patch(self, paths: Paths, patch: bool, spoiler: bool, hints: bool) -> Result<()> {
-        if patch {
-            info!("Starting Patch Process...");
-
-            let game = Game::load(paths.rom())?;
-            let mut patcher = Patcher::new(game)?;
-
-            info!("ROM Loaded.\n");
-
-            regions::patch(&mut patcher, &self.layout, self.settings)?;
-            let patches = patcher.prepare(&self.layout, self.settings)?;
-            patches.dump(paths.output())?;
-        }
-        if spoiler {
-            let path = paths.output().join(format!("{:0>10}_spoiler.json", self.seed));
-            info!("Writing Spoiler Log to:         {}", &path.absolutize()?.display());
-
-            let mut serialized = serde_json::to_string_pretty(&self).unwrap();
-            align_json_values(&mut serialized);
-
-            write!(File::create(path)?, "{}", serialized)
-                .expect("Could not write the spoiler log.");
-        }
-        if hints {
-            let path = paths.output().join(format!("{:0>10}_hints.json", self.seed));
-            info!("Writing Hints to:               {}", &path.absolutize()?.display());
-
-            let mut serialized = serde_json::to_string_pretty(&self.metrics.get_hints()).unwrap();
-            align_json_values(&mut serialized);
-
-            write!(File::create(path)?, "{}", serialized).expect("Could not write the hints file.");
-        }
-        Ok(())
-    }
-}
-
 /// Align JSON Key-Values for readability
-/// Fuck it I can't find a decent library for this so we're doing it manually
+/// Can't find a decent library for this, so we're doing it manually
 fn align_json_values(json: &mut String) {
     const KEY_ALIGNMENT: usize = 56;
     let mut index_colon = 0;
@@ -549,20 +501,187 @@ fn align_json_values(json: &mut String) {
     }
 }
 
-/// Gets the system object for the platform.
-pub fn system() -> system::Result<System<Settings>> {
-    System::new()
+#[derive(Serialize)]
+pub struct SeedInfo<'s> {
+    pub seed: u32,
+    pub hash: SeedHash,
+    pub settings: &'s Settings,
+    pub layout: Layout,
+    pub metrics: Metrics,
+    pub hints: Hints,
 }
 
-pub fn filler_new<'a>(version: &'a str, settings: &'a Settings, seed: Seed) -> Spoiler<'a> {
-    // New Filler
-    let filled: (Vec<(LocationInfo, Item)>, Metrics) = fill_stuff(settings, seed);
+/// Main entry point to generate one ALBWR Seed.
+pub fn generate_seed(
+    seed: u32, settings: &Settings, user_config: &UserConfig, no_patch: bool, no_spoiler: bool,
+) -> Result<()> {
+    validate_settings(settings)?;
+
+    let rng = &mut StdRng::seed_from_u64(seed as u64);
+    let hash = SeedHash::new(seed, settings);
+
+    info!("Hash:                           {}\n", hash.text_hash);
+    settings.log_settings();
+
+    let seed_info = &calculate_seed_info(seed, settings, hash, rng)?;
+    patch_seed(seed_info, user_config, no_patch, no_spoiler)?;
+
+    Ok(())
+}
+
+/// A hash used in-game to quickly verify that two players are playing the same seed.
+///
+/// The hash is calculated as `u64`, truncated to `u16` (5 digits), then converted to a Symbolic form that can be
+/// displayed in-game as well as in the spoiler log.
+pub struct SeedHash {
+    item_hash: String,
+    text_hash: String,
+}
+
+impl SeedHash {
+    pub fn new(seed: u32, settings: &Settings) -> Self {
+        // Calculate underlying Hash
+        let mut hasher = DefaultHasher::new();
+        (seed, settings).hash(&mut hasher);
+        let mut hash = hasher.finish() % 100_000;
+
+        // Convert to Item Hash
+        let hash_item_lut: Vec<(&String, &str)> = vec![
+            (A_BUTTON.deref(), "(A)"),
+            (B_BUTTON.deref(), "(B)"),
+            (X_BUTTON.deref(), "(X)"),
+            (Y_BUTTON.deref(), "(Y)"),
+            (L_BUTTON.deref(), "(L)"),
+            (R_BUTTON.deref(), "(R)"),
+            (RAVIO.deref(), "(Ravio)"),
+            (BOW.deref(), "(Bow)"),
+            (BOMBS.deref(), "(Bombs)"),
+            (FIRE_ROD.deref(), "(Fire Rod)"),
+        ];
+
+        const HASH_LEN: usize = 5;
+        let mut digit = Vec::with_capacity(HASH_LEN);
+        for _ in 0..HASH_LEN {
+            digit.push(hash_item_lut.get((hash % 10) as usize).unwrap());
+            hash /= 10;
+        }
+
+        let item_hash =
+            format!("{} {} {} {} {}", digit[4].0, digit[3].0, digit[2].0, digit[1].0, digit[0].0);
+        let text_hash =
+            format!("{} {} {} {} {}", digit[4].1, digit[3].1, digit[2].1, digit[1].1, digit[0].1);
+
+        Self { item_hash, text_hash }
+    }
+}
+
+impl Serialize for SeedHash {
+    fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_str(self.text_hash.as_str())
+    }
+}
+
+/// Validates the Settings to make sure the user hasn't made incompatible selections
+fn validate_settings(settings: &Settings) -> Result<()> {
+    // LC Requirement
+    if !(0..=7).contains(&settings.logic.lc_requirement) {
+        fail!(
+            "Invalid Lorule Castle Requirement: \"{}\" was not between 0-7, inclusive.",
+            settings.logic.lc_requirement
+        );
+    }
+
+    // Yuganon Requirement
+    // if !(0..=7).contains(&settings.logic.yuganon_requirement) {
+    //     fail!("Invalid Yuga Ganon Requirement: \"{}\" was not between 0-7, inclusive.", settings.logic.yuganon_requirement);
+    // }
+
+    if settings.logic.yuganon_requirement != settings.logic.lc_requirement {
+        fail!(
+            "Yuga Ganon Requirement: \"{}\" is different than Lorule Castle Requirement: \"{}\"\n\
+        Different values for these settings are not yet supported!",
+            settings.logic.yuganon_requirement,
+            settings.logic.lc_requirement
+        );
+    }
+
+    // Swords
+    if settings.logic.sword_in_shop && settings.logic.swordless_mode {
+        fail!("The sword_in_shop and swordless_mode settings cannot both be enabled.");
+    }
+
+    // Assured Weapons
+    if settings.logic.assured_weapon
+        && (settings.logic.sword_in_shop || settings.logic.boots_in_shop)
+    {
+        fail!(
+            "The assured_weapon setting cannot be enabled when either sword_in_shop or boots_in_shop is also enabled."
+        );
+    }
+
+    Ok(())
+}
+
+pub type CheckMap = HashMap<String, Option<FillerItem>>;
+
+fn calculate_seed_info<'s>(
+    seed: u32, settings: &'s Settings, hash: SeedHash, rng: &mut StdRng,
+) -> Result<SeedInfo<'s>> {
+    println!();
+    info!("Calculating Seed Info...");
+
+    // Build World Graph
+    let world_graph = &mut world::build_world_graph();
+    let check_map = &mut filler::prefill_check_map(world_graph);
+    let (mut progression, mut junk) = item_pools::get_item_pools(settings, rng);
+
+    // Filler Algorithm
+    let filled: Vec<(LocationInfo, Item)> = filler::fill_all_locations_reachable(
+        world_graph, check_map, &mut progression, &mut junk, settings, rng,
+    );
 
     // Build legacy Layout object
     let mut layout = Layout::default();
-    for (location_info, item) in filled.0 {
+    for (location_info, item) in filled {
         layout.set(location_info, item);
     }
 
-    Spoiler { seed, version, settings, layout, metrics: filled.1 }
+    let metrics = metrics::calculate_metrics(world_graph, check_map, settings);
+    let hints = hints::generate_hints(world_graph, check_map, settings, rng);
+
+    Ok(SeedInfo { seed, hash, settings, layout, metrics, hints })
+}
+
+pub fn patch_seed(
+    seed_info: &SeedInfo, user_config: &UserConfig, no_patch: bool, no_spoiler: bool,
+) -> Result<()> {
+    println!();
+
+    if !no_patch {
+        info!("Starting Patch Process...");
+
+        let game = Game::load(user_config.rom())?;
+        let mut patcher = Patcher::new(game)?;
+
+        info!("ROM Loaded.\n");
+
+        regions::patch(&mut patcher, &seed_info.layout, &seed_info.settings)?;
+        let patches = patcher.prepare(seed_info)?;
+        patches.dump(user_config.output())?;
+    }
+    if !no_spoiler {
+        let path = user_config.output().join(format!("{:0>10}_spoiler.json", seed_info.seed));
+        info!("Writing Spoiler Log to:         {}", &path.absolutize()?.display());
+
+        //let spoiler = Spoiler::from(seed_info);
+
+        let mut serialized = serde_json::to_string_pretty(&seed_info).unwrap();
+        align_json_values(&mut serialized);
+
+        write!(File::create(path)?, "{}", serialized).expect("Could not write the spoiler log.");
+    }
+    Ok(())
 }

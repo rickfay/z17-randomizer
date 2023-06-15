@@ -1,6 +1,7 @@
 crate::region! {
     course: DungeonWind,
     name: "House of Gales",
+    color: Blue,
     gales {
         locations: [
             "[HG] (1F) Torches": RupeeR @Chest(1[365]),

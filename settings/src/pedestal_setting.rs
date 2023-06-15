@@ -1,8 +1,5 @@
 use {
-    crate::{
-        fail,
-        settings::pedestal_setting::PedestalSetting::{Charmed, Standard, Vanilla},
-    },
+    crate::pedestal_setting::PedestalSetting::{Charmed, Standard, Vanilla},
     serde::{Deserialize, Serialize},
     std::fmt::{Display, Formatter},
 };
@@ -14,15 +11,15 @@ pub enum PedestalSetting {
     Standard,
 }
 
-impl From<u8> for PedestalSetting {
-    fn from(value: u8) -> Self {
+impl TryFrom<u8> for PedestalSetting {
+    type Error = String;
+
+    fn try_from(value: u8) -> Result<Self, Self::Error> {
         match value {
-            2 => Vanilla,
-            3 => Charmed,
-            4 => Standard,
-            _ => {
-                fail!("Invalid Pedestal Requirement: {}", value);
-            }
+            2 => Ok(Vanilla),
+            3 => Ok(Charmed),
+            4 => Ok(Standard),
+            _ => Err("Invalid Pedestal Requirement: {}".to_owned()),
         }
     }
 }

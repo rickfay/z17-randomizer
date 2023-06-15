@@ -1,7 +1,7 @@
 [package]
 name = "randomizer"
 version = "0.3.0"
-authors = ["Kevin Marsolais <kevin@kevinmarsolais.co>", "Rich Fay <therichfay@gmail.com>"]
+authors = ["Kevin Marsolais <kevin@kevinmarsolais.co>", "Rick Fay <rickwithanh@gmail.com>"]
 edition = "2021"
 license = "GPL-2.0-or-later"
 build = "../randomizer/build.rs"
@@ -11,24 +11,26 @@ winres = "0.1"
 
 [dependencies]
 albw = { path = "../albw" }
-crc = "3.0.1"
+byteorder = "1.4.3"
+cli = { path = "../cli" }
+formatx = "0.2.1"
 fs_extra = "1.3.0"
-linked-hash-map = "0.5.4"
-log = "0.4.14"
+jack = { path = "../jack" }
+json_comments = "0.2.1"
+lazy_static = "1.4.0"
+log = "0.4.17"
+macros = { path = "../macros" }
 queue = "0.3.2-final"
 path-absolutize = "3.0.14"
-rand = { version = "0.8.3", features = ["std_rng"] }
-serde = { version = "1.0.125", features = ["derive"] }
-serde_json = "1.0.81"
+rand = { version = "0.8.5", features = ["std_rng"] }
+serde = { version = "1.0.152", features = ["derive"] }
+serde_json = "1.0.93"
+settings = { path = "../settings" }
 simplelog = "0.12.0"
-structopt = "0.3.21"
-tempfile = "3.3.0"
-toml = "0.7.2"
+structopt = "0.3.26"
+tempfile = "3.4.0"
 try-insert-ext = "0.1.0"
-vec-drain-where = "1.0.1"
-
-[dev-dependencies]
-simplelog = "0.12.0"
+yaz0 = "0.3.0"
 
 [[bin]]
 name = "albw-randomizer"

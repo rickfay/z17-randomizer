@@ -16,11 +16,15 @@ use {
     std::collections::HashMap,
 };
 
+pub type WorldGraph = HashMap<Location, LocationNode>;
+
+// TODO Rewrite logic using combinators
+
 /// Build the World Graph
-pub fn build_world_graph() -> HashMap<Location, LocationNode> {
+pub fn build_world_graph() -> WorldGraph {
     info!("Building World Graph...");
 
-    let mut world: HashMap<Location, LocationNode> = HashMap::new();
+    let mut world = WorldGraph::new();
 
     world.extend(hyrule());
     world.extend(lorule());
@@ -409,6 +413,30 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                 None,
                 None,
             ),
+            ghost(HintGhostLostWoodsMaze1),
+            ghost(HintGhostLostWoodsMaze2),
+            ghost(HintGhostLostWoodsMaze3),
+            ghost(HintGhostLostWoods),
+            ghost(HintGhostMoldormCave),
+            ghost(HintGhostFortuneTellerHyrule),
+            ghost(HintGhostSanctuary),
+            ghost(HintGhostGraveyardHyrule),
+            ghost(HintGhostWell),
+            ghost(HintGhostShadyGuy),
+            ghost(HintGhostStylishWoman),
+            ghost(HintGhostBlacksmithCave),
+            ghost(HintGhostEasternRuinsEntrance),
+            ghost(HintGhostRupeeRushHyrule),
+            ghost(HintGhostCuccos),
+            ghost(HintGhostSouthBridge),
+            ghost(HintGhostSouthernRuins),
+            ghost(HintGhostHyruleHotfoot),
+            ghost(HintGhostLetter),
+            ghost(HintGhostStreetPassTree),
+            ghost(HintGhostBlacksmithBehind),
+            ghost(HintGhostGraveyardLedge),
+            ghost(HintGhostHyruleCastleRocks),
+            ghost(HintGhostWitchsHouse),
         ], vec![
             fast_travel_hyrule(),
             path_free(RavioShop),
@@ -726,6 +754,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                 None,
                 Some(|p| p.has_bombs()),
             ),
+            ghost(HintGhostEasternRuinsPegs),
         ], vec![
             fast_travel_hyrule(),
             path_free(HyruleField),
@@ -746,7 +775,9 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                  None,
             ),
         ])),
-        (EasternRuinsEastLedge, location("Eastern Ruins East Ledge", vec![], vec![
+        (EasternRuinsEastLedge, location("Eastern Ruins East Ledge", vec![
+            ghost(HintGhostEasternRuinsCave),
+        ], vec![
             fast_travel_hyrule(),
             path(EastRuinsBombCaveUpper, Some(|p| p.has_bombs()), None, None, None, None),
             path(EasternRuinsUpper, Some(|p| p.can_merge()), None, None, None, None),
@@ -796,6 +827,8 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                   None,
                   None,
             ),
+            ghost(HintGhostZorasDomain),
+            ghost(HintGhostWaterfallCave),
         ], vec![
             fast_travel_hyrule(),
             path_free(HyruleField),
@@ -859,7 +892,8 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                   None,
                   None,
                   None,
-            )
+            ),
+            ghost(HintGhostHouseOfGalesIsland),
         ], vec![
             fast_travel_hyrule(),
             path(
@@ -1004,7 +1038,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             path_free(HyruleCastleInterior),
             path(
                 HyruleCastleDungeon,
-                Some(|p| p.has_pendant_of_courage()),
+                Some(|p| p.hc_is_open() && p.has_pendant_of_courage()),
                 None,
                 None,
                 None,
@@ -1410,7 +1444,9 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             path_free(DeathThirdFloor),
             path_free(DeathTopLeftLedge),
         ])),
-        (DeathTopLeftLedge, location("Death Mountain West Top Left Ledge", vec![], vec![
+        (DeathTopLeftLedge, location("Death Mountain West Top Left Ledge", vec![
+            ghost(HintGhostSpectacleRock),
+        ], vec![
             fast_travel_hyrule(),
             path_free(AmidaCaveUpper),
             path_free(DeathThirdFloor),
@@ -1437,7 +1473,9 @@ fn hyrule() -> HashMap<Location, LocationNode> {
         (SpectacleRockCaveRight, location("Spectacle Rock Cave Right", vec![], vec![
             path_free(DeathMountainWestTop)
         ])),
-        (DeathMountainWestTop, location("Death Mountain West Top", vec![], vec![
+        (DeathMountainWestTop, location("Death Mountain West Top", vec![
+            ghost(HintGhostTowerOfHeraOutside),
+        ], vec![
             fast_travel_hyrule(),
             path_free(SpectacleRockCaveRight),
             path(TowerOfHeraFoyer, Some(|p| p.has_hammer()), None, None, None, None),
@@ -1459,7 +1497,9 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                   None,
                   None,
                   None,
-            )
+            ),
+            ghost(HintGhostFloatingIsland),
+            ghost(HintGhostFireCave),
         ], vec![
             fast_travel_hyrule(),
             path(DeathMountainWestTop, Some(|p| p.has_hookshot()), None, None, None, None),
@@ -1682,6 +1722,13 @@ fn lorule() -> HashMap<Location, LocationNode> {
                   None,
                   None,
             ),
+            ghost(HintGhostFortuneTellerLorule),
+            ghost(HintGhostRupeeRushLorule),
+            ghost(HintGhostGreatRupeeFairy),
+            ghost(HintGhostOctoballDerby),
+            ghost(HintGhostVacantHouse),
+            ghost(HintGhostSwampPalaceOutsideLeft),
+            ghost(HintGhostSwampPalaceOutsideRight),
         ], vec![
             fast_travel_lorule(),
             path(GreatRupeeFairyCave,
@@ -1741,6 +1788,18 @@ fn lorule() -> HashMap<Location, LocationNode> {
             ),
             portal_std(CuccoDungeonLedge),
             path_free(ThievesTownItemShop),
+            path_free(VeteranThiefsHouse),
+            path_free(FortunesChoiceLorule),
+        ])),
+        (VeteranThiefsHouse, location("Veteran Thief's House", vec![
+            ghost(HintGhostVeteranThief),
+        ], vec![
+            path_free(LoruleCastleField),
+        ])),
+        (FortunesChoiceLorule, location("Fortune's Choice (Lorule)", vec![
+            ghost(HintGhostFortunesChoice),
+        ], vec![
+            path_free(LoruleCastleField),
         ])),
         (ThievesTownItemShop, location("Thieves' Town Item Shop", vec![
             check_free(LocationInfo::new(regions::lorule::field::main::SUBREGION, "Thieves' Town Item Shop (1)")),
@@ -1792,6 +1851,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                   None,
                   None,
             ),
+            ghost(HintGhostLoruleGraveyard),
         ], vec![
             fast_travel_lorule(),
             path_free(LoruleSanctuaryCaveLower),
@@ -1880,11 +1940,11 @@ fn lorule() -> HashMap<Location, LocationNode> {
         ])),
         (GreatRupeeFairyCave, location("Great Rupee Fairy Cave", vec![
             check(LocationInfo::new(regions::lorule::field::main::SUBREGION, "Great Rupee Fairy"),
-                  Some(|p| p.has_rupees(3000)),
+                  Some(|p| p.has_rupees(4000)), // Actual requirement is 3000 but higher threshold helps prevent rupee grinds
                   None,
                   None,
                   None,
-                  Some(|_| true), // grind
+                  Some(|_| true), // suffer lol
             )
         ], vec![
             path_free(LoruleCastleField)
@@ -1975,7 +2035,8 @@ fn lorule() -> HashMap<Location, LocationNode> {
                   None,
                   None,
                   None,
-            )
+            ),
+            ghost(HintGhostDesertEast),
         ], vec![
             fast_travel_hyrule(),
             portal_std(MiseryMire),
@@ -1986,8 +2047,8 @@ fn lorule() -> HashMap<Location, LocationNode> {
                  Some(|p| p.can_merge() && p.has_bombs()), // Vulture Boost
                  None,
             ),
-            path(MiseryMireBridge, // todo portal-ify
-                 Some(|p| p.can_merge() && p.has_sand_rod()),
+            path(DesertCenterLedge,
+                 Some(|p| p.has_sand_rod()),
                  None,
                  None,
                  None,
@@ -2008,7 +2069,15 @@ fn lorule() -> HashMap<Location, LocationNode> {
                  None,
             ),
         ])),
-        (DesertSouthWestLedge, location("Desert South West Ledge", vec![], vec![
+        (DesertCenterLedge, location("Desert Center Ledge", vec![
+            ghost(HintGhostDesertCenter),
+        ], vec![
+            path_free(Desert),
+            portal_std(MiseryMireBridge),
+        ])),
+        (DesertSouthWestLedge, location("Desert South West Ledge", vec![
+            ghost(HintGhostDesertSouthWest),
+        ], vec![
             fast_travel_hyrule(),
             path_free(Desert),
             portal_std(MiseryMireBridge),
@@ -2061,6 +2130,8 @@ fn lorule() -> HashMap<Location, LocationNode> {
                   None,
                   None,
             ),
+            ghost(HintGhostMiseryMireLedge),
+            ghost(HintGhostMiseryMireBridge),
         ], vec![
             fast_travel_lorule(),
             path_free(SandRodDungeon),
@@ -2090,7 +2161,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
         (MiseryMireBridge, location("Misery Mire Bridge", vec![], vec![
             fast_travel_lorule(),
             path_free(MiseryMire),
-            portal_std(Desert),
+            portal_std(DesertCenterLedge),
             portal_std(DesertSouthWestLedge),
             path(MiseryMireOoB,
                  None,
@@ -2181,6 +2252,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                   None,
                   None,
             ),
+            ghost(HintGhostTurtleWall),
         ], vec![
             fast_travel_lorule(),
             portal_std(HyruleField),
@@ -2231,6 +2303,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                         None,
             ),
             check_free(LocationInfo::new(regions::lorule::lake::lorule::SUBREGION, "[Mai] Lorule Lake Water")),
+            ghost(HintGhostTurtleBullied),
         ], vec![
             fast_travel_lorule(),
             path_free(LoruleLakeNorthWest),
@@ -2251,7 +2324,9 @@ fn lorule() -> HashMap<Location, LocationNode> {
                  None,
             ),
         ])),
-        (TurtleRockWeatherVane, location("Turtle Rock Weather Vane", vec![], vec![
+        (TurtleRockWeatherVane, location("Turtle Rock Weather Vane", vec![
+            ghost(HintGhostTurtleRockOutside),
+        ], vec![
             fast_travel_lorule(),
             path(TurtleRockFrontDoor,
                  Some(|p| p.has_ice_rod() && p.can_merge()),
@@ -2289,20 +2364,6 @@ fn lorule() -> HashMap<Location, LocationNode> {
         // Dark Ruins Area
         (DarkRuins, location("Dark Ruins", vec![
             check_free(LocationInfo::new(regions::lorule::dark::ruins::SUBREGION, "Dark Ruins Lakeview Chest")),
-            check(LocationInfo::new(regions::lorule::dark::ruins::SUBREGION, "Dark Maze Chest"),
-                  Some(|p| p.can_merge() || p.has_sage_gulley()),
-                  None,
-                  None,
-                  None,
-                  None,
-            ),
-            check(LocationInfo::new(regions::lorule::dark::ruins::SUBREGION, "Dark Maze Ledge"),
-                  Some(|p| p.can_merge() || p.has_sage_gulley()),
-                  None,
-                  None,
-                  None,
-                  Some(|_| true),
-            ),
             check(LocationInfo::new(regions::lorule::dark::ruins::SUBREGION, "[Mai] Dark Ruins Waterfall"),
                   Some(|p| p.has_flippers()),
                   None,
@@ -2311,13 +2372,6 @@ fn lorule() -> HashMap<Location, LocationNode> {
                   Some(|p| p.has_boots()),
             ),
             check(LocationInfo::new(regions::lorule::dark::ruins::SUBREGION, "[Mai] Dark Maze Entrance Wall"),
-                  Some(|p| p.can_merge()),
-                  None,
-                  None,
-                  None,
-                  None,
-            ),
-            check(LocationInfo::new(regions::lorule::dark::ruins::SUBREGION, "[Mai] Dark Maze Center Wall"),
                   Some(|p| p.can_merge()),
                   None,
                   None,
@@ -2352,16 +2406,11 @@ fn lorule() -> HashMap<Location, LocationNode> {
                   None,
                   None,
             ),
+            ghost(HintGhostDarkRuinsNorth),
         ], vec![
             fast_travel_lorule(),
             portal_std(HyruleField),
-            path(DarkRuinsWeatherVane,
-                 Some(|p| (p.can_merge() && p.can_destroy_skull()) || p.has_sage_gulley()),
-                 None,
-                 None, // Dark Maze Skip implies skulls can be broken, no logical benefit
-                 None,
-                 None,
-            ),
+            path_free(DarkMazeEntrance),
             path(KusDomainSouth,
                  Some(|p| p.can_merge()),
                  None,
@@ -2385,8 +2434,68 @@ fn lorule() -> HashMap<Location, LocationNode> {
                  Some(|p| p.has_stamina_scroll()), // Bee Boost
             ),
         ])),
-        (DarkRuinsWeatherVane, location("Dark Ruins Weather Vane", vec![], vec![
-            path(DarkRuins,
+        (DarkMazeEntrance, location("Dark Maze Entrance", vec![
+            check(LocationInfo::new(regions::lorule::dark::ruins::SUBREGION, "Dark Maze Chest"),
+                  Some(|p| p.can_merge() || p.has_sage_gulley()),
+                  None,
+                  None,
+                  None,
+                  None,
+            ),
+        ], vec![
+            path_free(DarkRuins),
+            path(DarkMazeHalfway,
+                Some(|p| p.can_merge() || p.has_sage_gulley()),
+                None,
+                None,
+                None,
+                Some(|_| true), // scuffed sneak
+            ),
+            path(DarkPalaceWeatherVane,
+                Some(|p| p.has_sage_gulley()),
+                None,
+                None, // No situation where Dark Maze Skip is required, items required can break skulls and merge is required anyway
+                None,
+                None,
+            ),
+        ])),
+        (DarkMazeHalfway, location("Dark Maze Halfway", vec![
+            check_free(LocationInfo::new(regions::lorule::dark::ruins::SUBREGION, "Dark Maze Ledge")),
+            check(LocationInfo::new(regions::lorule::dark::ruins::SUBREGION, "[Mai] Dark Maze Center Wall"),
+                  Some(|p| p.can_merge()),
+                  None,
+                  None,
+                  None,
+                  None,
+            ),
+            ghost(HintGhostDarkMaze),
+        ], vec![
+            path(DarkMazeEntrance,
+                 Some(|p| p.can_merge() || p.has_sage_gulley()),
+                 None,
+                 None,
+                 None,
+                 Some(|_| true),
+            ),
+            path(DarkPalaceWeatherVane,
+                 Some(|p| p.can_destroy_skull() && (p.can_merge() || p.has_sage_gulley())),
+                 None,
+                 None, // Dark Maze Skip implies skulls can be broken, no logical benefit
+                 None,
+                 None,
+            ),
+        ])),
+        (DarkPalaceWeatherVane, location("Dark Ruins Weather Vane", vec![
+            ghost(HintGhostDarkPalaceOutside),
+        ], vec![
+            path(DarkMazeEntrance,
+                 Some(|p| p.can_merge() || p.has_sage_gulley()),
+                 None,
+                 None,
+                 None,
+                 None,
+            ),
+            path(DarkMazeHalfway,
                  Some(|p| p.can_merge() || p.has_sage_gulley()),
                  None,
                  None,
@@ -2561,6 +2670,8 @@ fn lorule() -> HashMap<Location, LocationNode> {
                   None,
                   None,
             ),
+            ghost(HintGhostSkullWoodsCuccos),
+            ghost(HintGhostSkullWoodsSouth),
         ], vec![
             fast_travel_lorule(),
             portal_std(RossoHouse),
@@ -2625,6 +2736,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                   None,
                   None,
             ),
+            ghost(HintGhostTreacherousTower),
         ], vec![
             fast_travel_lorule(),
             portal_std(DeathMountainBase),
@@ -2764,6 +2876,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                   None,
                   None,
             ),
+            ghost(HintGhostIceRuinsOutside),
         ], vec![
             fast_travel_lorule(),
             path_free(IceCaveCenter),
@@ -4663,20 +4776,6 @@ fn location(name: &'static str, checks: Vec<Check>, paths: Vec<Path>) -> Locatio
     LocationNode::new(name, checks, paths)
 }
 
-// fn logic(normal: Option<fn(&Progress) -> bool>,
-//          hard: Option<fn(&Progress) -> bool>,
-//          glitched: Option<fn(&Progress) -> bool>,
-//          adv_glitched: Option<fn(&Progress) -> bool>,
-//          hell: Option<fn(&Progress) -> bool>) -> Logic {
-//     Logic {
-//         normal,
-//         hard,
-//         glitched,
-//         adv_glitched,
-//         hell,
-//     }
-// }
-
 fn check(
     location_info: LocationInfo, normal: Option<fn(&Progress) -> bool>,
     hard: Option<fn(&Progress) -> bool>, glitched: Option<fn(&Progress) -> bool>,
@@ -4724,6 +4823,10 @@ fn check_quest(
 
 fn check_quest_free(name: &'static str, quest: FillerItem) -> Check {
     Check::new(name, Logic::free(), Some(quest), None)
+}
+
+fn ghost(ghost: FillerItem) -> Check {
+    Check::new(ghost.as_str(), Logic::free(), Some(ghost), None)
 }
 
 fn path_free(default: Location) -> Path {

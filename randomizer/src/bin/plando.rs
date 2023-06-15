@@ -2,21 +2,30 @@ use {
     albw::Item::*,
     log::{error, info, LevelFilter},
     randomizer::{
-        constants::VERSION,
-        model::metrics::Metrics,
-        pause, regions,
+        cli, fail, regions,
         settings::{
             entrance_shuffle_setting::EntranceShuffleSetting,
+            hint_settings::HintGhostPrice::*,
             logic::Logic,
             logic_mode::LogicMode,
             pedestal_setting::PedestalSetting,
             settings::{Exclude, Exclusion, Options, Settings},
         },
-        system, Layout, LocationInfo, Spoiler,
+        system::{System, UserConfig},
+        Layout, LocationInfo, SeedHash, SeedInfo,
     },
     simplelog::SimpleLogger,
     structopt::StructOpt,
 };
+
+#[derive(Debug, StructOpt)]
+struct Opt {
+    #[structopt(long)]
+    no_patch: bool,
+
+    #[structopt(long)]
+    no_spoiler: bool,
+}
 
 /**
  * PLANDOMIZER
@@ -25,48 +34,44 @@ use {
  * filler algorithm. TODO: Rework this to build Plandos from input JSON instead of hardcoding them.
  */
 fn main() {
-    let run_args: RunArgs = RunArgs::from_args();
+    let args = Opt::from_args();
     SimpleLogger::init(LevelFilter::Info, Default::default()).expect("Failed to init logger.");
 
     info!("Initializing ALBW Plandomizer...\n");
-    let result = execute_plandomizer(run_args);
 
-    match result {
+    // Load User Config
+    let user_config: UserConfig = System::load_config().unwrap_or_else(|error| {
+        fail!("Failed to parse configuration file: config.json\n\
+                Commonly Fixed By: Replace any single backslash characters '\\' with a forward slash '/' or double backslash '\\\\'.\n\
+                Full Error: {}\n", error);
+    });
+
+    let seed = 0;
+    let settings = &plando_settings();
+
+    let seed_info = SeedInfo {
+        seed,
+        hash: SeedHash::new(seed, settings),
+        settings,
+        layout: build_layout(),
+        metrics: Default::default(),
+        hints: Default::default(),
+    };
+
+    seed_info.settings.log_settings();
+
+    match randomizer::patch_seed(&seed_info, &user_config, args.no_patch, args.no_spoiler) {
         Ok(_) => {
-            info!("Plandomizer execution finished successfully :D");
+            println!();
+            info!("Successfully Generated ALBW Plandomizer Seed");
         }
         Err(err) => {
+            println!();
             error!("Plandomizer execution failed:\n{}", err.into_inner());
         }
     }
 
-    pause();
-}
-
-fn execute_plandomizer(run_args: RunArgs) -> randomizer::Result<()> {
-    const PLANDO_SEED: u32 = 0;
-    let system = system()?;
-    let settings = plando_settings();
-
-    settings.log(PLANDO_SEED);
-
-    let layout = build_layout();
-
-    info!("Successfully Built Plando Layout");
-
-    let version = format!("PLANDO - {}", VERSION);
-    let spoiler =
-        Spoiler::new(version.as_str(), PLANDO_SEED, &settings, layout, Metrics::default());
-    spoiler.patch(system.load_config()?, !run_args.no_patch, !run_args.no_spoiler, false)
-}
-
-#[derive(Debug, StructOpt)]
-struct RunArgs {
-    #[structopt(long)]
-    no_patch: bool,
-
-    #[structopt(long)]
-    no_spoiler: bool,
+    cli::pause();
 }
 
 fn plando_settings() -> Settings {
@@ -81,7 +86,7 @@ fn plando_settings() -> Settings {
 
             nice_mode: true,
             super_items: true,
-            reverse_sage_events: true,
+            reverse_sage_events: false,
             no_progression_enemies: true,
             entrance_rando: EntranceShuffleSetting::NotShuffled,
 
@@ -102,6 +107,8 @@ fn plando_settings() -> Settings {
             weather_vanes_activated: true,
             dark_rooms_lampless: false,
             swordless_mode: false,
+
+            hint_ghost_price: Price(1),
         },
         options: Options { chest_size_matches_contents: true, night_mode: true },
         exclusions: Exclusion { 0: Default::default() },
@@ -111,6 +118,8 @@ fn plando_settings() -> Settings {
 
 #[rustfmt::skip]
 fn build_layout() -> Layout {
+
+    info!("Building Item Layout from Plan...");
     let mut layout = Layout::default();
 
     //////////////////////////
@@ -120,7 +129,7 @@ fn build_layout() -> Layout {
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (1)"), RupeeGold);
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (2)"), ItemIceRodLv2);
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (3)"), ItemBombLv2);
-    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (4)"), EscapeFruit);
+    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (4)"), HintGlasses);
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (5)"), ItemBowLv2);
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (6)"), HintGlasses);
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (7)"), ItemBell);
@@ -133,18 +142,18 @@ fn build_layout() -> Layout {
     /////////////////////////////
 
     layout.set(LocationInfo::new(regions::dungeons::eastern::palace::SUBREGION, "Eastern Palace Prize"), PendantCourage);
-    layout.set(LocationInfo::new(regions::dungeons::house::gales::SUBREGION, "House of Gales Prize"), PendantWisdom);
-    layout.set(LocationInfo::new(regions::dungeons::tower::hera::SUBREGION, "Tower of Hera Prize"), PendantPower);
+    layout.set(LocationInfo::new(regions::dungeons::house::gales::SUBREGION, "House of Gales Prize"), SageRosso);
+    layout.set(LocationInfo::new(regions::dungeons::tower::hera::SUBREGION, "Tower of Hera Prize"), SageGulley);
 
-    layout.set(LocationInfo::new(regions::dungeons::hyrule::castle::SUBREGION, "Hyrule Castle Prize"), SageImpa);
+    layout.set(LocationInfo::new(regions::dungeons::hyrule::castle::SUBREGION, "Hyrule Castle Prize"), PendantCourage);
 
-    layout.set(LocationInfo::new(regions::dungeons::dark::palace::SUBREGION, "Dark Palace Prize"), SageGulley);
+    layout.set(LocationInfo::new(regions::dungeons::dark::palace::SUBREGION, "Dark Palace Prize"), PendantPower);
     layout.set(LocationInfo::new(regions::dungeons::swamp::palace::SUBREGION, "Swamp Palace Prize"), SageOren);
     layout.set(LocationInfo::new(regions::dungeons::skull::woods::SUBREGION, "Skull Woods Prize"), SageSeres);
     layout.set(LocationInfo::new(regions::dungeons::thieves::hideout::SUBREGION, "Thieves' Hideout Prize"), SageOsfala);
-    layout.set(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "Turtle Rock Prize"), PendantCourage);
-    layout.set(LocationInfo::new(regions::dungeons::desert::palace::SUBREGION, "Desert Palace Prize"), SageRosso);
-    layout.set(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "Ice Ruins Prize"), SageIrene);
+    layout.set(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "Turtle Rock Prize"), SageImpa);
+    layout.set(LocationInfo::new(regions::dungeons::desert::palace::SUBREGION, "Desert Palace Prize"), SageIrene);
+    layout.set(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "Ice Ruins Prize"), PendantWisdom);
 
     ////////////////////
     // --- Hyrule --- //
@@ -224,8 +233,8 @@ fn build_layout() -> Layout {
     layout.set(LocationInfo::new(regions::hyrule::kakariko::village::SUBREGION, "Milk Bar Owner"), LiverBlue);
     layout.set(LocationInfo::new(regions::hyrule::kakariko::village::SUBREGION, "Rupee Rush (Hyrule)"), RupeeGold);
     layout.set(LocationInfo::new(regions::hyrule::kakariko::village::SUBREGION, "Shady Guy"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::kakariko::village::SUBREGION, "Street Merchant (Left)"), SpecialMove);
-    layout.set(LocationInfo::new(regions::hyrule::kakariko::village::SUBREGION, "Street Merchant (Right)"), RupeeGold);
+    layout.set(LocationInfo::new(regions::hyrule::kakariko::village::SUBREGION, "Street Merchant (Left)"), RupeeGold);
+    layout.set(LocationInfo::new(regions::hyrule::kakariko::village::SUBREGION, "Street Merchant (Right)"), LiverYellow);
     layout.set(LocationInfo::new(regions::hyrule::kakariko::village::SUBREGION, "Stylish Woman"), RupeeGold);
     layout.set(LocationInfo::new(regions::hyrule::kakariko::village::SUBREGION, "Woman"), RupeeR);
 
@@ -601,7 +610,7 @@ fn build_layout() -> Layout {
 
     // Lorule Castle
     layout.set(LocationInfo::new(regions::dungeons::lorule::castle::SUBREGION, "[LC] (1F) Ledge"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::lorule::castle::SUBREGION, "[LC] (1F) Center"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::lorule::castle::SUBREGION, "[LC] (1F) Center"), HintGlasses);
     layout.set(LocationInfo::new(regions::dungeons::lorule::castle::SUBREGION, "[LC] (2F) Near Torches"), Compass);
     layout.set(LocationInfo::new(regions::dungeons::lorule::castle::SUBREGION, "[LC] (2F) Hidden Path"), KeySmall);
     layout.set(LocationInfo::new(regions::dungeons::lorule::castle::SUBREGION, "[LC] (2F) Ledge"), RupeeGold);
@@ -615,6 +624,8 @@ fn build_layout() -> Layout {
     layout.set(LocationInfo::new(regions::dungeons::lorule::castle::SUBREGION, "[LC] (4F) Hookshot Trial (Chest)"), RupeeGold);
     layout.set(LocationInfo::new(regions::dungeons::lorule::castle::SUBREGION, "[LC] (4F) Hookshot Trial (Eyes)"), RupeeGold);
     layout.set(LocationInfo::new(regions::dungeons::lorule::castle::SUBREGION, "Zelda"), ItemBow);
+
+    info!("Successfully Built Layout");
 
     layout
 }

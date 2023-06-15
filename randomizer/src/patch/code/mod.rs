@@ -1,13 +1,12 @@
 use {
     super::Patcher,
-    crate::{
-        patch::util::prize_flag, settings::pedestal_setting::PedestalSetting::*, Result, Settings,
-    },
+    crate::{patch::util::prize_flag, Result, Settings},
     albw::{
         ExHeader,
         Item::{self, *},
     },
     arm::*,
+    settings::pedestal_setting::PedestalSetting::*,
     std::{
         collections::HashMap,
         fs::{self, File},
@@ -161,6 +160,7 @@ pub fn create(patcher: &Patcher, settings: &Settings) -> Code {
     merchant(&mut code);
     configure_pedestal_requirements(&mut code, settings);
     night_mode(&mut code, settings);
+    show_hint_ghosts(&mut code);
 
     // fix castle barrier?
     let master_sword_flag = code.text().define([
@@ -310,6 +310,19 @@ pub fn create(patcher: &Patcher, settings: &Settings) -> Code {
     code.patch(0x344dec, [b(great_spin_fix)]);
 
     code
+}
+
+/// Show Hint Ghosts always, without the need for the Hint Glasses
+fn show_hint_ghosts(code: &mut Code) {
+    // Allowing talking to Hint Ghosts without glasses
+    code.patch(0x1cb3c8, [mov(R0, 0x1)]);
+
+    // Skip checking if Hint Glasses are taken off
+    // Do not change state to "cState_Disappear" (5) or "cState_DisappearWait" (6)
+    code.patch(0x1cb70c, [b(0x1cb74c)]);
+
+    // Set (initial?) state to "cState_Wait" (0) instead of "cState_DisappearWait" (6)
+    code.patch(0x1cbf9c, [mov(R2, 0x0), b(0x1cbfac)]);
 }
 
 fn night_mode(code: &mut Code, settings: &Settings) {

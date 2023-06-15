@@ -1,9 +1,10 @@
 use {
-    crate::{fail, patch::DungeonPrizes, regions, Layout, LocationInfo},
+    crate::{patch::DungeonPrizes, regions, Layout, LocationInfo},
     albw::{
         scene::{Dest, Flag, Obj, Rail, Vec3},
         Item::{self, *},
     },
+    macros::fail,
 };
 
 pub(crate) fn call<F>(unq: u16, action: F) -> (u16, Box<dyn Fn(&mut Obj)>)

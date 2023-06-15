@@ -1,6 +1,7 @@
 crate::region! {
     course: DungeonWater,
     name: "Swamp Palace",
+    color: Beige,
     palace {
         locations: [
             "[SP] (B1) Center": Compass @Chest(2[319]),

@@ -1,6 +1,7 @@
 crate::region! {
     course: FieldLight,
     name: "Lost Woods Region",
+    color: Name,
     woods {
         locations: [
             "Fortune-Teller": HintGlasses @Event(IndoorLight/FieldLight_11_FortuneGirl[4]),

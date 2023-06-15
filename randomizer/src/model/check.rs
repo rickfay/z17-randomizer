@@ -6,7 +6,8 @@ use {
     std::hash::{Hash, Hasher},
 };
 
-#[derive(Copy, Clone)]
+/// A specific location containing a randomized item
+#[derive(Copy, Clone, Debug)]
 pub struct Check {
     name: &'static str,
     logic: Logic,

@@ -1,9 +1,14 @@
 use {
     super::Patcher,
-    crate::{Result, Settings},
-    albw::Item,
+    crate::Result,
+    albw::{course::Id, Item},
     log::info,
+    settings::Settings,
 };
+
+/*
+ * TODO - Want to rewrite this entire subsystem
+ */
 
 macro_rules! apply {
     ($patcher:expr, $($course:ident/$name:ident {
@@ -62,6 +67,9 @@ macro_rules! action {
     };
     ($command:tt value($value:expr)) => {
         $command.set_value($value);
+    };
+    ($command:tt arg1($value:expr)) => {
+        $command.set_arg1($value);
     };
     ($command:tt command($new_command:expr)) => {
         $command.set_command($new_command);
@@ -147,21 +155,97 @@ fn patch_castle_connection(patcher: &mut Patcher, _settings: &Settings) -> Resul
     Ok(())
 }
 
+fn patch_hint_ghosts(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
+    let price = settings.logic.hint_ghost_price as u32;
+    let negative_price = (-1 * price as i32) as u32;
+
+    apply!(patcher,
+        Boot/HintGhost {
+            [11] => 17, // Skip 13 - "The Hint Ghost is studying its book."
+
+            [15] each [arg1(6), value(1), command(50),], // Show Rupee Counter (instead of Play Coin Counter)
+            [16] each [arg1(6), value(0), command(50),], // Hide Rupee Counter (instead of Play Coin Counter)
+            [24] each [arg1(6), value(0), command(50),], // Hide Rupee Counter (instead of Play Coin Counter)
+
+            // Rupee count check (instead of Play Coins)
+            [6 into_branch] each [
+                value(price),
+                command(6),
+            ],
+
+            // Charge Rupees instead of Play Coins
+            [9] each [
+                value(negative_price),
+                command(37),
+                => 26, // 31 // skip animation
+            ],
+            [19 into_start] => 22, // Skip 29, 35
+            [22] => 38, // Skip 23
+            [38] => 24, // Skip 21, 20 - "The Hint Ghost goes back to its book."
+        },
+    );
+
+    Ok(())
+}
+
+fn patch_final_boss(patcher: &mut Patcher) -> Result<()> {
+    apply!(patcher,
+        DungeonBoss/Ganon {
+            [69] => 72, // Skip 1st Zelda text
+        },
+    );
+
+    Ok(())
+}
+
+/// Dev debugging, prints the contents of an MSBF file in a format for spreadsheets. Don't leave this on.
+#[allow(unused)]
+#[deprecated]
+fn debug<C>(patcher: &mut Patcher, course: C, file_name: &str) -> Result<()>
+where
+    C: Into<Option<Id>>,
+{
+    let course = course.into();
+
+    if let Some(file) = patcher.flow(course.clone())?.get_mut(file_name) {
+        file?.get().debug();
+    } else {
+        macros::fail!(
+            "File not found: US{}.szs -> World/Flow/{}.msbf",
+            if course.is_some() {
+                "_English/".to_owned() + course.unwrap().as_str()
+            } else {
+                "/RegionBoot".to_owned()
+            },
+            file_name
+        );
+    };
+
+    info!("Finished MSBF Debug");
+    std::process::exit(0);
+}
+
 pub fn apply(patcher: &mut Patcher, free: Item, settings: &Settings) -> Result<()> {
     info!("Patching Flow Charts...");
 
+    // debug(patcher, Id::FieldLight, "FieldLight_WarpEvent")?;
+
     patch_lorule_castle_requirements(patcher, settings)?;
     patch_castle_connection(patcher, settings)?;
-
-    // Debugging
-    // patcher
-    //     .flow(albw::course::Id::FieldLight)?
-    //     .get_mut(stringify!(FieldLight_1B_Impa))
-    //     .ok_or_else(|| crate::Error::game("File not found."))??
-    //     .get()
-    //     .debug();
+    patch_final_boss(patcher)?;
+    patch_hint_ghosts(patcher, settings)?;
 
     apply!(patcher,
+
+        // Irene Bell Text
+        FieldLight/FieldLight_WarpEvent { [0 into_start] => None, },
+        FieldDark/FieldLight_WarpEvent  { [0 into_start] => None, },
+
+        // Sahasrahla
+        FieldLight/FieldLight_1B_Sahasrahla {
+            [14 into_start] => 22,
+            [22 into_text] => None,
+        },
 
         // Runaway Item Seller
         Boot/FieldLight_33_Douguya {
@@ -270,26 +354,33 @@ pub fn apply(patcher: &mut Patcher, free: Item, settings: &Settings) -> Result<(
 
         // Great Rupee Fairy
         CaveDark/Cave {
-            // CaveDark29_LuckyFairy_00
-            // 5 start
-            // 46
-            // 35 checks 948 Flag to see if we've already gotten reward
-            // 45
-            [45] => 47, // Skip Would you like to throw text
+
+            /*
+             Change options:
+             - "Throw 50" => "Throw 3000"
+             - "Throw 200" => "Don't throw any"
+             - Remove third option (done by changing [6]'s message text)
+            */
+            [8 into_branch] each [
+                count(2),
+                switch [
+                    [0] => 47, // "Throw 3000" option will appear to throw 10 Reds
+                    [1] => 9, // "Don't throw any" option is now second
+                ],
+            ],
+
             [47 into_branch] each [ // 47 checks that we have enough rupees
                 value(3000),
             ],
+
             // 44 deposits 200 rupees as 10x Red Rupees
             [44] => 43,
-            // 43 deposits 50 rupees as 10x Blue Rupees
-            [43] => 25,
-            // 25 Checks if 3000 have been deposited
-            [27 convert_into_action] each [
-                => 44, // create loop, depositing 200 then 50 until we hit 3000
-            ],
-            [32 convert_into_action] each [ // remove dialog
-                command(0), // clear command
-                => 36, // skip to item get
+
+            // Deduct 2800 rupees so the player has effectively given 3000
+            [43] each [
+                value(0xFFFFF510), // Negative 2800
+                command(37),
+                => 41,
             ],
         },
 

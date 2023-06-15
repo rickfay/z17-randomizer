@@ -23,7 +23,7 @@ impl<'a> Course<'a> {
         self.game.scene(self.id, index)
     }
 
-    pub fn scene_meta(&self) -> Result<SceneMeta> {
+    pub fn scene_meta(&self) -> Option<SceneMeta> {
         self.game.scene_meta(self.id)
     }
 
@@ -41,6 +41,7 @@ crate::int_map! {
         IndoorDark = 0x3,
         CaveLight = 0x4,
         CaveDark = 0x5,
+        LanguageBoot = 0x6, // TODO No idea if this ID is correct
         CrossBattle = 0x7,
         Demo = 0x8,
         DungeonEast = 0x9,

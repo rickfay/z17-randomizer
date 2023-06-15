@@ -1,6 +1,7 @@
 crate::region! {
     course: FieldLight,
     name: "Graveyard",
+    color: Purple,
     hyrule {
         locations: [
             "Dampe": ItemSwordLv1 @Event(FieldLight_13_Sister[0x1D]),

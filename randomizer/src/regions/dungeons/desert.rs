@@ -1,6 +1,7 @@
 crate::region! {
     course: DungeonSand,
     name: "Desert Palace",
+    color: Name,
     palace {
         locations: [
             "[DP] (1F) Entrance": RupeeB @Chest(1[78]),

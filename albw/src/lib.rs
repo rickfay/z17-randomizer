@@ -1,7 +1,7 @@
 //! A library for reading data from a The Legend of Zelda: A Link Between Worlds ROM.
 
 use {
-    crate::{actor_profile::ActorProfiles, language::Load, scene::SceneMeta},
+    crate::{course::Id::LanguageBoot, language::Load, scene::SceneMeta},
     language::FlowChart,
     log::info,
     path_absolutize::*,
@@ -22,6 +22,7 @@ pub use {
     language::Language,
     scene::{Scene, Stage},
 };
+
 pub mod actor_profile;
 pub mod actors;
 pub mod course;
@@ -162,6 +163,11 @@ impl Game {
         Item::iter().zip(self.get_item.get().iter().cloned())
     }
 
+    pub fn open(&self, filename: &str) -> Vec<u8> {
+        let file = self.romfs.borrow_mut().read(filename).unwrap();
+        Vec::from(file.get().clone())
+    }
+
     fn get_item_actor(&self, name: &str) -> Result<Actor> {
         self.romfs.borrow_mut().read(format!("World/GetItem/{}.bch", name))
     }
@@ -178,12 +184,6 @@ impl Game {
 
     pub fn common(&mut self) -> Result<Actors> {
         Ok(Actors::new(self.romfs.borrow_mut().read("Archive/ActorCommon.szs")?.map(Sarc::from)))
-    }
-
-    pub fn actor_profile(&mut self) -> Result<ActorProfiles> {
-        Ok(ActorProfiles::new(
-            self.romfs.borrow_mut().read("Archive/ActorProfile.szs")?.map(Sarc::from),
-        ))
     }
 
     pub fn course(&self, id: course::Id) -> Course {
@@ -217,12 +217,18 @@ impl Game {
         Ok(Scene::new(stage, actors))
     }
 
-    pub(crate) fn scene_meta(&self, course: course::Id) -> Result<SceneMeta> {
+    pub(crate) fn scene_meta(&self, course: course::Id) -> Option<SceneMeta> {
+        if LanguageBoot.eq(&course) {
+            return None;
+        }
+
         let mut romfs = self.romfs.borrow_mut();
         let stage_meta = romfs
-            .read(format!("World/Byaml/{}_course.byaml", course.as_str()))?
-            .try_map(|data| byaml::from_bytes(&data))?;
-        Ok(SceneMeta::new(stage_meta))
+            .read(format!("World/Byaml/{}_course.byaml", course.as_str()))
+            .unwrap()
+            .try_map(|data| byaml::from_bytes(&data))
+            .unwrap();
+        Some(SceneMeta::new(stage_meta))
     }
 
     pub(crate) fn stage(&self, course: course::Id, stage: u16) -> Result<Stage> {

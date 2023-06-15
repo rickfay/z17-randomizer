@@ -1,6 +1,7 @@
 crate::region! {
     course: FieldLight,
     name: "Zora's River",
+    color: Name,
     river {
         locations: [
             "Queen Oren": ItemMizukaki @Event(CaveLight/FieldLight_0F_Zora[0x6B]),

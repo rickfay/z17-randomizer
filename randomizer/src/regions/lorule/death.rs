@@ -1,6 +1,7 @@
 crate::region! {
     course: FieldDark,
     name: "Lorule Death Mountain",
+    color: Name,
     mountain {
         locations: [
             "Behind Ice Gimos": RupeeSilver @Chest(4[94]),

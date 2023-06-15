@@ -1,6 +1,7 @@
 crate::region! {
     course: FieldDark,
     name: "Skull Woods Region",
+    color: Name,
     overworld {
         locations: [
             "Canyon House": HeartPiece @Heart(16[124]),

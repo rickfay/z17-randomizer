@@ -1,19 +1,25 @@
 use {
-    crate::{
-        settings::{
-            logic::Logic, logic_mode::LogicMode, pedestal_setting::PedestalSetting,
-            settings::Options,
-        },
-        system, Settings,
-    },
     log::info,
+    settings::{
+        hyrule_castle_setting::HyruleCastleSetting, logic::Logic, logic_mode::LogicMode,
+        pedestal_setting::PedestalSetting, Options, Settings,
+    },
     std::{
-        io::{stdin, stdout, Write},
+        io::{stdin, stdout, Read, Write},
         str::FromStr,
     },
 };
 
-pub fn seed_settings_ui() -> Settings {
+/// Pauses program execution
+pub fn pause() {
+    let mut stdout = stdout();
+    stdout.write(b"\nPress Enter to continue...\n").unwrap();
+    stdout.flush().unwrap();
+    stdin().read(&mut [0]).unwrap();
+}
+
+/// Prompt the user for Seed Settings on the CLI
+pub fn get_seed_settings() -> Result<Settings, String> {
     info!("No preset has been specified. Seed Settings UI will be used instead.\n");
     println!("\n--- Seed Settings ---");
 
@@ -32,7 +38,7 @@ pub fn seed_settings_ui() -> Settings {
     );
     //let yuganon_requirement = prompt_u8_in_range("Choose how many Portraits are needed to fight Yuganon:", 0, 7);
 
-    let ped_requirement = PedestalSetting::from(prompt_u8_in_range(
+    let ped_requirement = PedestalSetting::try_from(prompt_u8_in_range(
         "Pedestal Requirement",
         "Choose which Pendants are required to reach the Master Sword Pedestal:\n\
         [2] Vanilla  - Only the Pendants of Power and Wisdom are required\n\
@@ -40,7 +46,16 @@ pub fn seed_settings_ui() -> Settings {
         [4] Standard - All Pendants are required\n",
         2,
         4,
-    ));
+    ))?;
+
+    let hyrule_castle_setting = HyruleCastleSetting::try_from(prompt_u8_in_range(
+        "Hyrule Castle Setting",
+        "Choose how the Dungeon portion of Hyrule Castle should be handled:\n\
+        [1] Early Lorule Castle - Completing Hyrule Castle allows early access to Lorule Castle via the Trial's Door.\n\
+        [2] Closed              - The Dungeon is closed off completely, and removed from all logic.\n",
+        1,
+        2,
+    ))?;
 
     let nice_mode = prompt_bool(
         "Shuffle Nice Items",
@@ -105,7 +120,7 @@ pub fn seed_settings_ui() -> Settings {
 
     let minigames_excluded = prompt_bool(
         "Exclude Minigames",
-        "Excludes the following: Octoball Derby, Cucco Ranch, Hyrule Hotfoot, Treacherous Tower, and both Rupee Rushes",
+        "Excludes the following: Octoball Derby, Dodge the Cuccos, Hyrule Hotfoot, Treacherous Tower, and both Rupee Rushes",
     );
 
     let skip_big_bomb_flower = prompt_bool(
@@ -151,16 +166,24 @@ pub fn seed_settings_ui() -> Settings {
         Note: Some large chests will have a reduced hitbox to prevent negative gameplay interference.",
     );
 
+    let hint_ghost_price = prompt_u16_in_range(
+        "Hint Ghost Price",
+        "Set the price of Hints from a Hint Ghost:\nRecommended Price: 30",
+        0,
+        9999,
+    );
+
     println!();
     info!("Starting seed generation...\n");
 
-    Settings {
+    Ok(Settings {
         logic: Logic {
             logic_mode,
             randomize_dungeon_prizes,
             lc_requirement,
             yuganon_requirement: lc_requirement,
             ped_requirement,
+            hyrule_castle_setting,
             nice_mode,
             super_items,
             reverse_sage_events,
@@ -179,15 +202,16 @@ pub fn seed_settings_ui() -> Settings {
             bow_of_light_in_castle,
             dark_rooms_lampless,
             swordless_mode,
+            hint_ghost_price,
             ..Default::default()
         },
         options: Options { chest_size_matches_contents, ..Default::default() },
         ..Default::default()
-    }
+    })
 }
 
 #[rustfmt::skip]
-fn prompt_logic_mode() -> LogicMode {
+pub fn prompt_logic_mode() -> LogicMode {
     print!("\n[Logic Mode]\n");
     print!("[1] Normal        - Standard gameplay, no tricky item use or glitches. If unsure, choose this.\n");
     print!("[2] Hard          - Adds tricks that aren't technically glitches. Lamp + Net considered as weapons. No glitches.\n");
@@ -219,7 +243,7 @@ fn prompt_logic_mode() -> LogicMode {
     }
 }
 
-fn prompt_u8_in_range(title: &str, description: &str, range_start: u8, range_end: u8) -> u8 {
+pub fn prompt_u8_in_range(title: &str, description: &str, range_start: u8, range_end: u8) -> u8 {
     print!("\n[{}]\n{}", title, description);
     loop {
         print!("\nEnter a number ({}-{}): ", range_start, range_end);
@@ -241,7 +265,31 @@ fn prompt_u8_in_range(title: &str, description: &str, range_start: u8, range_end
     }
 }
 
-fn prompt_bool(title: &str, description: &str) -> bool {
+pub fn prompt_u16_in_range(
+    title: &str, description: &str, range_start: u16, range_end: u16,
+) -> u16 {
+    print!("\n[{}]\n{}", title, description);
+    loop {
+        print!("\nEnter a number ({}-{}): ", range_start, range_end);
+
+        stdout().flush().unwrap();
+        let mut input = String::new();
+        stdin().read_line(&mut input).unwrap();
+
+        match u16::from_str(input.trim()) {
+            Err(_) => {}
+            Ok(result) => {
+                if (range_start..=range_end).contains(&result) {
+                    return result;
+                }
+            }
+        }
+
+        eprintln!("Invalid input.");
+    }
+}
+
+pub fn prompt_bool(title: &str, description: &str) -> bool {
     loop {
         print!("\n[{}]\n{}\nEnable? (y/n): ", title, description);
         stdout().flush().unwrap();
@@ -255,24 +303,6 @@ fn prompt_bool(title: &str, description: &str) -> bool {
             break false;
         } else {
             eprintln!("\nPlease enter either 'y' or 'n'");
-        }
-    }
-}
-
-pub fn prompt_until<F>(prompt: &str, until: F, error: &str) -> system::Result<String>
-where
-    F: Fn(&str) -> bool,
-{
-    loop {
-        print!("{}: ", prompt);
-        stdout().flush()?;
-        let mut input = String::new();
-        stdin().read_line(&mut input)?;
-        input = input.trim().to_string();
-        if until(&input) {
-            break Ok(input);
-        } else {
-            eprintln!("{}", error);
         }
     }
 }
