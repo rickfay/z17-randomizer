@@ -517,7 +517,7 @@ _These are still fairly new, and are being fine-tuned based on player feedback!!
 
 Hints in this randomizer are sold by Hint Ghosts.
 
-![Ghost Hint](docs\ghost-hint.png)
+![Ghost Hint](docs/ghost-hint.png)
 
 In the vanilla game, these specters would trade Link a small hint in exchange for a Play Coin, the 3DS system currency gained by walking around with your console. The ghosts can only be seen if the player uses the Hint Glasses.
 
@@ -604,7 +604,7 @@ These types of hints are generated last as filler to achieve the desired total a
 
 The Bow of Light is a special hint specifically for (you guessed it) the Bow of Light.
 
-![Bow of Light Hint](docs\bol-hint.png)
+![Bow of Light Hint](docs/bol-hint.png)
 
 Much like the Light Arrows in ZOOTR, the Bow of Light is required to beat the game, but since it does not lock anything else it can theoretically be placed anywhere. Unlucky Bow of Light placements have the potential to artificially extend the time it takes to beat a seed, hence this hint is created to prevent an extended "Bow of Light Hunt" at the end of a seed.
 
