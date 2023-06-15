@@ -75,15 +75,18 @@ impl LocationHint {
 impl Hint for LocationHint {
     fn get_hint(&self) -> String {
         format!(
-            "It says here that {}\nhas the {}.",
-            formatting::name(&self.check.get_location_info().unwrap().name()),
-            formatting::name(&self.item.as_str_colorized())
+            "{}\nhas the\n{}",
+            // "It says here that {}\nhas the {}.",
+            &self.check.get_location_info().unwrap().name(),
+            // formatting::name(&self.check.get_location_info().unwrap().name()),
+            &self.item.as_str_colorized() // formatting::name(&self.item.as_str_colorized())
         )
     }
 
     fn get_hint_spoiler(&self) -> String {
         format!(
-            "It says here that {} has the {}.",
+            "{} has the {}",
+            // "It says here that {} has the {}.",
             &self.check.get_location_info().unwrap().name(),
             &self.item.as_str()
         )
@@ -122,7 +125,8 @@ pub struct PathHint {
 impl Hint for PathHint {
     fn get_hint(&self) -> String {
         format!(
-            "It says here that {}\nis on the path to {}.",
+            "{}\nis on the path to\n{}",
+            // "It says here that {}\nis on the path to {}.",
             &self.check.get_location_info().unwrap().region_colorized(),
             &self.goal.as_str_colorized()
         )
@@ -130,7 +134,8 @@ impl Hint for PathHint {
 
     fn get_hint_spoiler(&self) -> String {
         format!(
-            "It says here that {} is on the path to {}.",
+            "{} is on the path to {}",
+            // "It says here that {} is on the path to {}.",
             self.check.get_location_info().unwrap().region(),
             self.goal.as_str()
         )

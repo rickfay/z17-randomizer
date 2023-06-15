@@ -9,6 +9,7 @@ use {
 };
 
 pub mod entrance_shuffle_setting;
+pub mod hyrule_castle_setting;
 pub mod logic;
 pub mod logic_mode;
 pub mod pedestal_setting;
@@ -45,6 +46,7 @@ impl Settings {
         info!("Lorule Castle Requirement:      {} Portraits", logic.lc_requirement);
         info!("Yuga Ganon Requirement:         {} Portraits", logic.yuganon_requirement);
         info!("Pedestal Requirement:           {}", logic.ped_requirement);
+        info!("Hyrule Castle Setting:          {}", logic.hyrule_castle_setting);
 
         info!("Nice Mode:                      {}", if logic.nice_mode { "ON" } else { "OFF" });
         info!(
@@ -229,8 +231,8 @@ pub(crate) const fn is_false(b: &bool) -> bool {
 pub(crate) const fn seven() -> u8 {
     7
 }
-pub(crate) const fn fifty() -> u16 {
-    50
+pub(crate) const fn thirty() -> u16 {
+    30
 }
 pub(crate) const fn r#true() -> bool {
     true

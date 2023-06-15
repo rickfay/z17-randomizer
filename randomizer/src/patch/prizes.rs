@@ -431,10 +431,6 @@ fn patch_gales(patcher: &mut Patcher, prize: Item) {
         })]);
     }
 
-    if prize == PendantWisdom {
-        return;
-    }
-
     modify_dungeon_reward(
         patcher,
         prize,
@@ -506,10 +502,6 @@ fn patch_hera(patcher: &mut Patcher, prize: Item) {
         patcher.modify_objs(DungeonHera, 1, &[call(UNQ_PRIZE, |obj| {
             obj.lnk.clear();
         })]);
-    }
-
-    if prize == PendantPower {
-        return;
     }
 
     modify_dungeon_reward(

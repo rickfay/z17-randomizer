@@ -1,7 +1,8 @@
 use {
     log::info,
     settings::{
-        logic::Logic, logic_mode::LogicMode, pedestal_setting::PedestalSetting, Options, Settings,
+        hyrule_castle_setting::HyruleCastleSetting, logic::Logic, logic_mode::LogicMode,
+        pedestal_setting::PedestalSetting, Options, Settings,
     },
     std::{
         io::{stdin, stdout, Read, Write},
@@ -45,6 +46,15 @@ pub fn get_seed_settings() -> Result<Settings, String> {
         [4] Standard - All Pendants are required\n",
         2,
         4,
+    ))?;
+
+    let hyrule_castle_setting = HyruleCastleSetting::try_from(prompt_u8_in_range(
+        "Hyrule Castle Setting",
+        "Choose how the Dungeon portion of Hyrule Castle should be handled:\n\
+        [1] Early Lorule Castle - Completing Hyrule Castle allows early access to Lorule Castle via the Trial's Door.\n\
+        [2] Closed              - The Dungeon is closed off completely, and removed from all logic.\n",
+        1,
+        2,
     ))?;
 
     let nice_mode = prompt_bool(
@@ -156,6 +166,13 @@ pub fn get_seed_settings() -> Result<Settings, String> {
         Note: Some large chests will have a reduced hitbox to prevent negative gameplay interference.",
     );
 
+    let hint_ghost_price = prompt_u16_in_range(
+        "Hint Ghost Price",
+        "Set the price of Hints from a Hint Ghost:\nRecommended Price: 30",
+        0,
+        9999,
+    );
+
     println!();
     info!("Starting seed generation...\n");
 
@@ -166,6 +183,7 @@ pub fn get_seed_settings() -> Result<Settings, String> {
             lc_requirement,
             yuganon_requirement: lc_requirement,
             ped_requirement,
+            hyrule_castle_setting,
             nice_mode,
             super_items,
             reverse_sage_events,
@@ -184,6 +202,7 @@ pub fn get_seed_settings() -> Result<Settings, String> {
             bow_of_light_in_castle,
             dark_rooms_lampless,
             swordless_mode,
+            hint_ghost_price,
             ..Default::default()
         },
         options: Options { chest_size_matches_contents, ..Default::default() },
@@ -234,6 +253,30 @@ pub fn prompt_u8_in_range(title: &str, description: &str, range_start: u8, range
         stdin().read_line(&mut input).unwrap();
 
         match u8::from_str(input.trim()) {
+            Err(_) => {}
+            Ok(result) => {
+                if (range_start..=range_end).contains(&result) {
+                    return result;
+                }
+            }
+        }
+
+        eprintln!("Invalid input.");
+    }
+}
+
+pub fn prompt_u16_in_range(
+    title: &str, description: &str, range_start: u16, range_end: u16,
+) -> u16 {
+    print!("\n[{}]\n{}", title, description);
+    loop {
+        print!("\nEnter a number ({}-{}): ", range_start, range_end);
+
+        stdout().flush().unwrap();
+        let mut input = String::new();
+        stdin().read_line(&mut input).unwrap();
+
+        match u16::from_str(input.trim()) {
             Err(_) => {}
             Ok(result) => {
                 if (range_start..=range_end).contains(&result) {

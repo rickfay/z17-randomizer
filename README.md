@@ -51,9 +51,8 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
   - **Woman**
     - Rescue the Maiamai on her roof in Kakariko and then talk to her to get a reward.
     - (Yes... that's really her name.)
-- <u>Great Rupee Fairy improvements</u>
-  - Automatically throw 3000 rupees as one ~1 minute long action.
-    - More work to do here, but this makes her much more tolerable.
+- <u>Great Rupee Fairy</u>
+  - Automatically throw 3000 rupees as one action!
 - <u>Several cutscenes shortened/reworked</u>
   - Triforce of Courage cutscene is notably skipped.
 - <u>Logic Adjustments</u>:
@@ -399,6 +398,15 @@ For Citra (emulator):
 | `Charmed`  | All three Pendants are required, but Charm may substitute for the Pendant of Courage |
 | `Standard` | All Pendants are required                                                            |
 
+`hyrule_castle_setting`
+- Choose how the Dungeon portion of Hyrule Castle should be handled:
+- Available options are:
+
+| Setting             | Description                                                                                                                                                 |
+|---------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `EarlyLoruleCastle` | Completing Hyrule Castle allows early access to Lorule Castle via the Trial's Door. Note that the Pendant of Courage is needed to enter the dungeon at all. |
+| `Closed`            | The Dungeon is closed off completely, and removed from all logic.                                                                                           |
+
 
 `nice_mode`
 - This shuffles a second progressive copy of each Ravio Item into the general item pool.
@@ -490,7 +498,17 @@ For Citra (emulator):
 
 New with version v0.3.0 is the addition of hints!
 
-These are still fairly new and work to improve them is ongoing.
+_These are still fairly new, and are being fine-tuned based on player feedback!!_
+
+### About Hint Ghosts
+
+Hints in this randomizer are sold by Hint Ghosts.
+
+In the vanilla game, these specters would trade Link a small hint in exchange for a Play Coin, the 3DS system currency gained by walking around with your console. The ghosts can only be seen if the player uses the Hint Glasses.
+
+In the randomizer, the ghosts can be seen even without the Hint Glasses, and rather than charging Link Play Coins they will instead charge a small amount of rupees (which you can customize) in exchange for a hint.
+
+Due to the overwhelming number of Hint Ghosts in the game (a whopping 132!!), **only the 58 overworld Hint Ghosts will give out these hints**, and the dungeon Hint Ghosts have been removed.
 
 ### Path Hints
 

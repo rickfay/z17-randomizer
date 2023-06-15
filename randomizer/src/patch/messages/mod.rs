@@ -80,7 +80,7 @@ fn patch_great_rupee_fairy(patcher: &mut Patcher) -> Result<()> {
     grf.set("CaveDark29_LuckyFairy_00", &format!("Throw Rupees into the fountain?\n{}", *CHOICE_2));
     grf.set("CaveDark29_LuckyFairy_01", "Throw 3000");
     grf.set("CaveDark29_LuckyFairy_02", "Don't throw any");
-    grf.set("CaveDark29_LuckyFairy_03", "1234567"); // shorten string so file matches OG size
+    grf.set("CaveDark29_LuckyFairy_03", "1234567"); // shorten string so file matches OG size FIXME
     patcher.update(grf.dump())?;
 
     Ok(())
@@ -177,7 +177,12 @@ fn patch_general_hint_ghosts(patcher: &mut Patcher, seed_info: &SeedInfo) -> Res
     let mut hint_ghost = load_msbt(patcher, LanguageBoot, "HintGhost")?;
     hint_ghost.set(
         "HintGhost_02_select",
-        &format!("Buy a {} for {}?{}", blue("Ghost Hint"), attention(price.as_str()), *CHOICE_2),
+        &format!(
+            "Buy a {} for {}?{}",
+            blue("Ghost Hint"),
+            attention(format!("{} Rupees", price.as_str()).as_str()),
+            *CHOICE_2
+        ),
     );
     hint_ghost.set("HintGhost_02_select_00", "Buy");
     patcher.update(hint_ghost.dump())?;
@@ -236,12 +241,33 @@ fn patch_hint_ghosts(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> 
         }
     }
 
+    // FIXME extremely dumb. Clear out some unused messages in Lost Woods to keep file size down.
+    let empty_msg = "\0\0".to_owned();
+    msbt_hint_map.get_mut(&(FieldLight, "FieldLight_00")).unwrap().extend(HashMap::from([
+        ("lgt_MayoinoHintObake_Msg3", empty_msg.clone()),
+        ("lgt_MayoinoHintObake_Msg5", empty_msg.clone()),
+        ("lgt_MayoinoHintObake_Msg7", empty_msg.clone()),
+        ("lgt_MayoinoHintObake_Msg9", empty_msg),
+    ]));
+
     // Update the MSBT Files with the generated Hints
     for ((course, msbt_file), labels) in msbt_hint_map {
         let mut msbt_file = load_msbt(patcher, course, msbt_file)?;
+
+        let mut og_text_size = 0;
+        let mut hint_text_size = 0;
+
         for (label, hint) in labels {
+            og_text_size += msbt_file.get(label).unwrap().len();
+            hint_text_size += hint.len();
             msbt_file.set(label, &hint);
         }
+
+        // fixme band-aid fix to verify we haven't bloated the hint text to the point where the game crashes
+        if hint_text_size > og_text_size {
+            return Err(crate::Error::io("Generated Hint text was too long."));
+        }
+
         patcher.update(msbt_file.dump())?;
     }
 

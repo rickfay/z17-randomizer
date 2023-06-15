@@ -5,7 +5,9 @@ use {
         },
         model::filler_item::{FillerItem, FillerItem::*},
     },
-    settings::{pedestal_setting::PedestalSetting, Settings},
+    settings::{
+        hyrule_castle_setting::HyruleCastleSetting, pedestal_setting::PedestalSetting, Settings,
+    },
     std::collections::HashSet,
 };
 
@@ -660,6 +662,10 @@ impl Progress {
 
     pub fn has_pendant_of_courage(&self) -> bool {
         self.has_both(PendantOfCourage01, PendantOfCourage02)
+    }
+
+    pub fn hc_is_open(&self) -> bool {
+        self.settings.logic.hyrule_castle_setting != HyruleCastleSetting::Closed
     }
 
     pub fn has_required_pendants(&self) -> bool {

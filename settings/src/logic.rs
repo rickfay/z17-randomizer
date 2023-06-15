@@ -1,6 +1,7 @@
 use {
     crate::{
-        entrance_shuffle_setting::EntranceShuffleSetting, logic_mode::LogicMode,
+        entrance_shuffle_setting::EntranceShuffleSetting,
+        hyrule_castle_setting::HyruleCastleSetting, logic_mode::LogicMode,
         pedestal_setting::PedestalSetting,
     },
     serde::{Deserialize, Serialize},
@@ -29,6 +30,10 @@ pub struct Logic {
     /// Configure which Pendants are required to reach the Master Sword Pedestal
     #[serde(default)]
     pub ped_requirement: PedestalSetting,
+
+    /// Configure how Hyrule Castle is handled by the randomizer
+    #[serde(default)]
+    pub hyrule_castle_setting: HyruleCastleSetting,
 
     /// Shuffles Nice Items into the general item pool as progressive upgrades (temporary: removes Maiamai cave)
     #[serde(default)]
@@ -111,6 +116,6 @@ pub struct Logic {
     pub weather_vanes_activated: bool,
 
     /// Price of Hints from Hint Ghosts
-    #[serde(default = "crate::fifty")]
+    #[serde(default = "crate::thirty")]
     pub hint_ghost_price: u16,
 }

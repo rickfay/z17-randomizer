@@ -1038,7 +1038,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             path_free(HyruleCastleInterior),
             path(
                 HyruleCastleDungeon,
-                Some(|p| p.has_pendant_of_courage()),
+                Some(|p| p.hc_is_open() && p.has_pendant_of_courage()),
                 None,
                 None,
                 None,
@@ -1940,11 +1940,11 @@ fn lorule() -> HashMap<Location, LocationNode> {
         ])),
         (GreatRupeeFairyCave, location("Great Rupee Fairy Cave", vec![
             check(LocationInfo::new(regions::lorule::field::main::SUBREGION, "Great Rupee Fairy"),
-                  Some(|p| p.has_rupees(3000)),
+                  Some(|p| p.has_rupees(4000)), // Actual requirement is 3000 but higher threshold helps prevent rupee grinds
                   None,
                   None,
                   None,
-                  Some(|_| true), // grind
+                  Some(|_| true), // suffer lol
             )
         ], vec![
             path_free(LoruleCastleField)
