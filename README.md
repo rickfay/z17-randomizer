@@ -21,6 +21,16 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
   - The Pendant of Courage is now a Progressive Item that will appear in *two* dungeons.
   - The first one found will be the Charm, an item that does nothing by itself
   - The Charm's vanilla location in Hyrule Castle will contain a shuffled Sage Portrait or Pendant
+- <u>New Major Settings</u>
+  - Nice Mode
+    - Shuffles a second progressive copy of every Ravio item into the pool.
+    - Collect both to get that item's Nice version.
+    - Note: For now, enabling this setting will remove the Mother Maiamai Cave from the game.
+  - Reverse Sage Events
+    - Causes checks and events related to a specific Sage to be tied to first rescuing that Sage.
+  - No Progression Enemies
+    - Removes enemies that are themselves progression, such as the small green Bomb enemies.
+    - Increases the items required to get through several dungeons.
 - <u>Hyrule Castle Complete Overhaul</u>
   - HC has been revamped and returned to its vanilla roots:
     - Pendant of Courage is required to enter the "Inside Hyrule Castle" dungeon
@@ -30,6 +40,7 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
         - Taking the Portal to Hilda's Study will automatically mark the LC Trials as complete.
       - Throne Room (Final Boss Room)
         - Yuga Ganon will not spawn unless Portrait requirements are met
+  - Option to disable the Hyrule Castle Dungeon entirely
 - <u>Custom Portrait Requirements</u>
   - Lorule Castle: Choose how many Portraits are needed to enter the dungeon's front door.
 - <u>Great Spin</u>
@@ -53,6 +64,8 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
     - (Yes... that's really her name.)
 - <u>Great Rupee Fairy</u>
   - Automatically throw 3000 rupees as one action!
+- <u>Item Hash</u>
+  - On the File Select Screen and in your spoiler log you will now find a 5 character Item Hash that you can compare with other players to be confident you are playing with the same Seed and Settings.
 - <u>Several cutscenes shortened/reworked</u>
   - Triforce of Courage cutscene is notably skipped.
 - <u>Logic Adjustments</u>:
@@ -504,6 +517,8 @@ _These are still fairly new, and are being fine-tuned based on player feedback!!
 
 Hints in this randomizer are sold by Hint Ghosts.
 
+![Ghost Hint](docs\ghost-hint.png)
+
 In the vanilla game, these specters would trade Link a small hint in exchange for a Play Coin, the 3DS system currency gained by walking around with your console. The ghosts can only be seen if the player uses the Hint Glasses.
 
 In the randomizer, the ghosts can be seen even without the Hint Glasses, and rather than charging Link Play Coins they will instead charge a small amount of rupees (which you can customize) in exchange for a hint.
@@ -589,7 +604,9 @@ These types of hints are generated last as filler to achieve the desired total a
 
 The Bow of Light is a special hint specifically for (you guessed it) the Bow of Light.
 
-Much like the Light Arrows in ZOOTR the Bow of Light is required to beat the game, but since it does not lock anything else it can theoretically be placed anywhere. Unlucky Bow of Light placements have the potential to artificially extend the time it takes to beat a seed, hence this hint is created to prevent an extended "Bow of Light Hunt" at the end of a seed.
+![Bow of Light Hint](docs\bol-hint.png)
+
+Much like the Light Arrows in ZOOTR, the Bow of Light is required to beat the game, but since it does not lock anything else it can theoretically be placed anywhere. Unlucky Bow of Light placements have the potential to artificially extend the time it takes to beat a seed, hence this hint is created to prevent an extended "Bow of Light Hunt" at the end of a seed.
 
 The Hint will give away the region where the Bow of Light has been placed.
 
@@ -727,9 +744,9 @@ It's all in the name: no logic is used to place items at all. Dungeon items are 
 
 ## Known Issues
 
+- Bow of Light crashes the game if used outside the final boss arena (on 3DS console)
 - Some item models appear too low and some even clip through the floor. If you do not see any item on the Kakariko Item Merchant, try interacting with it anyway.
 - Hyrule Castle overworld music may be missing until the player has either broken the barrier or obtained the Pendant of Courage.
-- Bow of Light crashes the game if used outside the final boss arena (on 3DS console)
 - Some text boxes will overflow
 - Mother Maiamai item text is wrong, the text reflects the slots in Ravio's Shop. The pictures are correct, use those when selecting which item to upgrade.
 - After turning in the Letter in a Bottle to the Milk Bar owner, the Letter in a Bottle will be available for collection again. It can be turned in again, but doing so can lead to some unexpected behavior. You may get some "surprise" items this way depending on what the Milk Bar owner had, but these are never part of logic.
@@ -738,14 +755,17 @@ It's all in the name: no logic is used to place items at all. Dungeon items are 
 
 - Tocapa for building the original ALBW Randomizer used as the basis for this mod
 - Gamestabled for his ASM contributions to development
-- All the Beta Testers, notably:
-  - Br00ty
-  - flora
-  - Herreteman
-  - j_im
-- The ALBW Modding community for their work creating tools that made this possible, notably:
+- The ALBW Modding community for their work creating the tools and knowledge base that made this possible, notably:
   - KillzXGaming
   - Steven Tyler Sean Herr
+- Everyone who helped test, shared thoughts or ideas, or was just generally supportive, notably:
+  - Br00ty
+  - flora
+  - grizz
+  - Herreteman
+  - j_im
+  - NesmaN88
+  - ScorelessPine
 
 ## License
 
