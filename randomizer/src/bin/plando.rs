@@ -1,18 +1,16 @@
 use {
     albw::Item::*,
     log::{error, info, LevelFilter},
+    macros::fail,
     randomizer::{
-        cli, fail, regions,
-        settings::{
-            entrance_shuffle_setting::EntranceShuffleSetting,
-            hint_settings::HintGhostPrice::*,
-            logic::Logic,
-            logic_mode::LogicMode,
-            pedestal_setting::PedestalSetting,
-            settings::{Exclude, Exclusion, Options, Settings},
-        },
+        regions,
         system::{System, UserConfig},
         Layout, LocationInfo, SeedHash, SeedInfo,
+    },
+    settings::{
+        entrance_shuffle_setting::EntranceShuffleSetting,
+        hyrule_castle_setting::HyruleCastleSetting, logic::Logic, logic_mode::LogicMode,
+        pedestal_setting::PedestalSetting, Exclude, Exclusion, Options, Settings,
     },
     simplelog::SimpleLogger,
     structopt::StructOpt,
@@ -83,6 +81,7 @@ fn plando_settings() -> Settings {
             lc_requirement: 1,
             yuganon_requirement: 1,
             ped_requirement: PedestalSetting::Standard,
+            hyrule_castle_setting: HyruleCastleSetting::EarlyLoruleCastle,
 
             nice_mode: true,
             super_items: true,
@@ -108,7 +107,7 @@ fn plando_settings() -> Settings {
             dark_rooms_lampless: false,
             swordless_mode: false,
 
-            hint_ghost_price: Price(1),
+            hint_ghost_price: 30,
         },
         options: Options { chest_size_matches_contents: true, night_mode: true },
         exclusions: Exclusion { 0: Default::default() },

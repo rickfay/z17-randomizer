@@ -58,6 +58,7 @@ impl Yaz0File<Compressed> {
 
 impl Yaz0File<Decompressed> {
     /// Performs the Compression
+    #[allow(unused)]
     pub(crate) fn compress<L>(self, level: L) -> Yaz0File<Compressed>
     where
         L: Into<Option<CompressionLevel>>,
