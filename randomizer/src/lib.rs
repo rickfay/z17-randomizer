@@ -1,5 +1,6 @@
 use {
     crate::{
+        constants::VERSION,
         hints::{formatting::*, Hints},
         metrics::Metrics,
         patch::msbf::MsbfKey,
@@ -19,7 +20,7 @@ use {
     serde::{ser::SerializeMap, Serialize, Serializer},
     settings::Settings,
     std::{
-        collections::{hash_map::DefaultHasher, BTreeMap, HashMap},
+        collections::{hash_map::DefaultHasher, BTreeMap},
         error::Error as StdError,
         fs::File,
         hash::{Hash, Hasher},
@@ -275,21 +276,21 @@ fn item_to_str(item: &Item) -> &'static str {
         ItemBow => "Bow",
         ItemBowLv2 => "Nice Bow",
         ItemShield => "Shield",
-        ItemBottle => "Bottle",
+        ItemBottle => "Empty Bottle",
         ItemStoneBeauty => "Smooth Gem",
         ItemKandelaar => "Lamp",
         ItemKandelaarLv2 => "Super Lamp",
-        ItemSwordLv1 => "Progressive Sword",
-        ItemSwordLv2 => "Progressive Sword",
+        ItemSwordLv1 => "Sword Upgrade",
+        ItemSwordLv2 => "Sword Upgrade",
         ItemSwordLv3 => "Master Sword Lv2",
         ItemSwordLv4 => "Master Sword Lv3",
-        ItemMizukaki => "Flippers",
-        RingRental => "Progressive Bracelet",
+        ItemMizukaki => "Zora's Flippers",
+        RingRental => "Bracelet Upgrade",
         RingHekiga => "Ravio's Bracelet",
         ItemBell => "Bell",
         RupeeGold => "Gold Rupee",
         RupeeSilver => "Silver Rupee",
-        PowerGlove => "Progressive Glove",
+        PowerGlove => "Strength Upgrade",
         ItemInsectNet => "Net",
         ItemInsectNetLv2 => "Super Net",
         Kinsta => "Lost Maiamai",
@@ -298,7 +299,7 @@ fn item_to_str(item: &Item) -> &'static str {
         LiverBlue => "Monster Tail",
         LiverPurple => "Monster Guts",
         LiverYellow => "Monster Horn",
-        ClothesBlue | ClothesRed => "Progressive Mail",
+        ClothesBlue | ClothesRed => "Armor Upgrade",
         HyruleShield => "Hylian Shield",
         OreYellow => "Master Ore",
         OreGreen => "Master Ore",
@@ -307,19 +308,19 @@ fn item_to_str(item: &Item) -> &'static str {
         Pouch => "Pouch",
         DashBoots => "Pegasus Boots",
         OreRed => "Master Ore",
-        MessageBottle => "Message in a Bottle",
+        MessageBottle => "Letter in a Bottle",
         MilkMatured => "Premium Milk",
         SpecialMove => "Great Spin",
-        GanbariTubo => "Stamina Scroll",
+        GanbariTubo => "Energy Potion",
         RupeePurple => "Purple Rupee",
         ItemBowLight => "Bow of Light",
         Heart => "Heart",
 
-        Empty => "Empty",
+        Empty => "Nothing",
 
         PendantPower => "Pendant of Power",
         PendantWisdom => "Pendant of Wisdom",
-        ZeldaAmulet | PendantCourage => "Progressive Pendant of Courage",
+        ZeldaAmulet | PendantCourage => "Pendant of Courage Upgrade",
 
         SageGulley => "Sage Gulley",
         SageOren => "Sage Oren",
@@ -542,7 +543,7 @@ impl SeedHash {
     pub fn new(seed: u32, settings: &Settings) -> Self {
         // Calculate underlying Hash
         let mut hasher = DefaultHasher::new();
-        (seed, settings).hash(&mut hasher);
+        (seed, settings, VERSION).hash(&mut hasher);
         let mut hash = hasher.finish() % 100_000;
 
         // Convert to Item Hash
@@ -625,7 +626,7 @@ fn validate_settings(settings: &Settings) -> Result<()> {
     Ok(())
 }
 
-pub type CheckMap = HashMap<String, Option<FillerItem>>;
+pub type CheckMap = BTreeMap<String, Option<FillerItem>>;
 
 fn calculate_seed_info<'s>(
     seed: u32, settings: &'s Settings, hash: SeedHash, rng: &mut StdRng,

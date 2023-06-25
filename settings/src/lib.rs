@@ -3,7 +3,7 @@ use {
     log::info,
     serde::{Deserialize, Serialize},
     std::{
-        collections::{HashMap, HashSet},
+        collections::{BTreeMap, BTreeSet},
         hash::{Hash, Hasher},
     },
 };
@@ -113,7 +113,7 @@ impl Settings {
             "Chest Size:                     {}",
             if options.chest_size_matches_contents { "Matches Contents" } else { "Normal" }
         );
-        info!("Hint Ghost Price:               {}", logic.hint_ghost_price);
+        info!("Hint Ghost Price:               {} Rupees", logic.hint_ghost_price);
         println!();
     }
 }
@@ -188,7 +188,7 @@ impl Exclude {
 }
 
 #[derive(Clone, Debug, Default, Deserialize, Serialize)]
-pub struct Exclusion(pub HashMap<String, HashSet<String>>);
+pub struct Exclusion(pub BTreeMap<String, BTreeSet<String>>);
 
 impl Hash for Exclusion {
     fn hash<H: Hasher>(&self, state: &mut H) {
@@ -202,7 +202,7 @@ impl Hash for Exclusion {
 }
 
 #[derive(Clone, Debug, Default, Deserialize, Serialize)]
-pub struct World(pub(crate) HashMap<String, HashSet<String>>);
+pub struct World(pub(crate) BTreeMap<String, BTreeSet<String>>);
 
 impl World {
     fn is_empty(&self) -> bool {

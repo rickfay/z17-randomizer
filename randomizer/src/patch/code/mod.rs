@@ -1,6 +1,6 @@
 use {
     super::Patcher,
-    crate::{patch::util::prize_flag, Result, Settings},
+    crate::{patch::util::prize_flag, Result, SeedInfo, Settings},
     albw::{
         ExHeader,
         Item::{self, *},
@@ -145,7 +145,7 @@ impl Ips {
     }
 }
 
-pub fn create(patcher: &Patcher, settings: &Settings) -> Code {
+pub fn create(patcher: &Patcher, seed_info: &SeedInfo) -> Code {
     let mut code = Code::new(patcher.game.exheader());
 
     // Enable Y Button
@@ -155,11 +155,11 @@ pub fn create(patcher: &Patcher, settings: &Settings) -> Code {
     code.overwrite(0x17A430, [0xFF]);
     rental_items(&mut code);
     progressive_items(&mut code);
-    bracelet(&mut code, settings);
+    bracelet(&mut code, seed_info.settings);
     ore_progress(&mut code);
     merchant(&mut code);
-    configure_pedestal_requirements(&mut code, settings);
-    night_mode(&mut code, settings);
+    configure_pedestal_requirements(&mut code, seed_info.settings);
+    night_mode(&mut code, seed_info.settings);
     show_hint_ghosts(&mut code);
 
     // fix castle barrier?
@@ -259,20 +259,16 @@ pub fn create(patcher: &Patcher, settings: &Settings) -> Code {
     // Silver and Gold Rupees
     code.patch(0x1D6DBC, [ldr(R1, (R4, 0x2E)), mov(R0, R0)]);
 
-    // Premium milk
-    let premium_milk = code.text().define([
-        ldr(R0, EVENT_FLAG_PTR),
-        mov(R2, 1),
-        ldr(R1, 0x395),
-        ldr(R0, (R0, 0)),
-        bl(FN_SET_EVENT_FLAG),
-        b(0x344F00),
-    ]);
-    code.patch(0x3455C4, [b(premium_milk)]);
+    // Premium Milk
+    if seed_info.layout.find_single(MessageBottle).is_none() {
+        // This code makes the Premium Milk work correctly when picked up without having first picked up the Letter.
+        // This patch is only applied when the Milk is shuffled in the rando instead of the Letter.
+        // If it's desired to have both shuffled at once then this code needs to be re-written.
 
-    // Do not add message bottle or premium milk to inventory
-    code.patch(0x345580, [mov(R0, 0xFF)]);
-    code.patch(0x3455C0, [mov(R0, 0xFF)]);
+        code.patch(0x3455B8, [b(0x345578)]); // Repurpose Letter In a Bottle code
+        code.patch(0x255930, [mov(R0, 0xD)]); // Give Milk instead of Letter
+        code.patch(0x345590, [mov(R1, 0x395)]); // Activate Milk flag instead of Letter flag
+    }
 
     // Pendant Redirection - Get destination coordinates from Byaml
     let redirect_pendants = code.text().define([

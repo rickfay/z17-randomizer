@@ -109,7 +109,7 @@ fn plando_settings() -> Settings {
 
             hint_ghost_price: 30,
         },
-        options: Options { chest_size_matches_contents: true, night_mode: true },
+        options: Options { chest_size_matches_contents: true, night_mode: false },
         exclusions: Exclusion { 0: Default::default() },
         exclude: Exclude::new(),
     }
@@ -126,14 +126,14 @@ fn build_layout() -> Layout {
     //////////////////////////
 
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (1)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (2)"), ItemIceRodLv2);
-    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (3)"), ItemBombLv2);
-    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (4)"), HintGlasses);
-    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (5)"), ItemBowLv2);
-    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (6)"), HintGlasses);
+    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (2)"), MessageBottle);
+    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (3)"), ItemBottle);
+    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (4)"), ItemSwordLv1);
+    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (5)"), ItemMizukaki);
+    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (6)"), RupeeG);
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (7)"), ItemBell);
-    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (8)"), ItemBoomerangLv2);
-    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (9)"), ItemFireRodLv2);
+    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (8)"), ItemHookShotLv2);
+    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Ravio (9)"), RupeeGold);
     // layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Thanks"), Item::RingHekiga);
 
     /////////////////////////////
@@ -171,7 +171,7 @@ fn build_layout() -> Layout {
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "[Mai] Tree Behind Blacksmith"), RupeeGold);
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "[Mai] Behind Link's House"), RupeeGold);
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "[Mai] Blacksmith Tornado Tile"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "[Mai] Cucco Treasure Dungeon Big Rock"), RupeeGold);
+    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "[Mai] Cucco Dungeon Big Rock"), RupeeGold);
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "[Mai] Wildlife Clearing Tree"), RupeeGold);
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "[Mai] Hyrule Castle Tree"), RupeeGold);
     layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "[Mai] Hyrule Castle Tornado Tile"), RupeeGold);
@@ -209,15 +209,15 @@ fn build_layout() -> Layout {
     layout.set(LocationInfo::new(regions::hyrule::death::mountain::SUBREGION, "Death Mountain West Highest Cave"), RupeeGold);
     layout.set(LocationInfo::new(regions::hyrule::death::mountain::SUBREGION, "Spectacle Rock"), RupeeGold);
     layout.set(LocationInfo::new(regions::hyrule::death::mountain::SUBREGION, "Fire Cave Pillar"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::death::mountain::SUBREGION, "Bouldering Guy"), HyruleShield);
+    layout.set(LocationInfo::new(regions::hyrule::death::mountain::SUBREGION, "Bouldering Guy"), ItemBottle);
     layout.set(LocationInfo::new(regions::hyrule::death::mountain::SUBREGION, "Death Mountain Treasure Dungeon"), ItemHookShotLv2);
     layout.set(LocationInfo::new(regions::hyrule::death::mountain::SUBREGION, "Floating Island"), RupeeGold);
 
-    layout.set(LocationInfo::new(regions::hyrule::death::mountain::SUBREGION, "[Mai] Death Mountain West Rock"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::death::mountain::SUBREGION, "[Mai] Death Mountain West Wall"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::death::mountain::SUBREGION, "[Mai] Death Mountain East Ledge Rock"), RupeeGold);
+    layout.set(LocationInfo::new(regions::hyrule::death::mountain::SUBREGION, "[Mai] Death Mountain Base Rock"), RupeeGold);
+    layout.set(LocationInfo::new(regions::hyrule::death::mountain::SUBREGION, "[Mai] Death Mountain West Ledge"), RupeeGold);
+    layout.set(LocationInfo::new(regions::hyrule::death::mountain::SUBREGION, "[Mai] Death Mountain East Ledge"), RupeeGold);
     layout.set(LocationInfo::new(regions::hyrule::death::mountain::SUBREGION, "[Mai] Rosso's Ore Mine Rock"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::death::mountain::SUBREGION, "[Mai] Outside Death Mountain Treasure Dungeon"), RupeeGold);
+    layout.set(LocationInfo::new(regions::hyrule::death::mountain::SUBREGION, "[Mai] Outside Hookshot Dungeon"), RupeeGold);
 
     // Kakariko
     layout.set(LocationInfo::new(regions::hyrule::kakariko::village::SUBREGION, "Bee Guy (1)"), HintGlasses);
@@ -229,7 +229,6 @@ fn build_layout() -> Layout {
     layout.set(LocationInfo::new(regions::hyrule::kakariko::village::SUBREGION, "Kakariko Jail"), RupeeGold);
     layout.set(LocationInfo::new(regions::hyrule::kakariko::village::SUBREGION, "Kakariko Well (Bottom)"), RupeeGold);
     layout.set(LocationInfo::new(regions::hyrule::kakariko::village::SUBREGION, "Kakariko Well (Top)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::kakariko::village::SUBREGION, "Milk Bar Owner"), LiverBlue);
     layout.set(LocationInfo::new(regions::hyrule::kakariko::village::SUBREGION, "Rupee Rush (Hyrule)"), RupeeGold);
     layout.set(LocationInfo::new(regions::hyrule::kakariko::village::SUBREGION, "Shady Guy"), RupeeGold);
     layout.set(LocationInfo::new(regions::hyrule::kakariko::village::SUBREGION, "Street Merchant (Left)"), RupeeGold);
@@ -304,7 +303,7 @@ fn build_layout() -> Layout {
     layout.set(LocationInfo::new(regions::hyrule::lake::hylia::SUBREGION, "Lakeside Item Shop (1)"), EscapeFruit);
     layout.set(LocationInfo::new(regions::hyrule::lake::hylia::SUBREGION, "Lakeside Item Shop (2)"), StopFruit);
     layout.set(LocationInfo::new(regions::hyrule::lake::hylia::SUBREGION, "Lakeside Item Shop (3)"), ItemShield);
-    layout.set(LocationInfo::new(regions::hyrule::lake::hylia::SUBREGION, "Southeastern Shore"), MessageBottle);
+    layout.set(LocationInfo::new(regions::hyrule::lake::hylia::SUBREGION, "Southeastern Shore"), HintGlasses);
 
     layout.set(LocationInfo::new(regions::hyrule::lake::hylia::SUBREGION, "[Mai] Hyrule Hotfoot Big Rock"), RupeeGold);
     layout.set(LocationInfo::new(regions::hyrule::lake::hylia::SUBREGION, "[Mai] Island Tornado Tile"), RupeeGold);
@@ -327,23 +326,23 @@ fn build_layout() -> Layout {
     layout.set(LocationInfo::new(regions::lorule::field::main::SUBREGION, "Swamp Cave (Left)"), ItemBowLight);
     layout.set(LocationInfo::new(regions::lorule::field::main::SUBREGION, "Swamp Cave (Middle)"), RupeeGold);
     layout.set(LocationInfo::new(regions::lorule::field::main::SUBREGION, "Swamp Cave (Right)"), LiverBlue);
-    layout.set(LocationInfo::new(regions::lorule::field::main::SUBREGION, "Thief Girl Cave"), RupeeGold);
+    layout.set(LocationInfo::new(regions::lorule::field::main::SUBREGION, "Thief Girl"), RupeeGold);
     layout.set(LocationInfo::new(regions::lorule::field::main::SUBREGION, "Lorule Field Hookshot Chest"), RupeeGold);
     layout.set(LocationInfo::new(regions::lorule::field::main::SUBREGION, "Fortune's Choice"), HeartPiece);
     layout.set(LocationInfo::new(regions::lorule::field::main::SUBREGION, "[Mai] Thieves' Town Wall"), RupeeGold);
-    layout.set(LocationInfo::new(regions::lorule::field::main::SUBREGION, "[Mai] Lorule Fortune-Teller Big Rock"), RupeeGold);
+    layout.set(LocationInfo::new(regions::lorule::field::main::SUBREGION, "[Mai] Near Lorule Fortune-Teller"), RupeeGold);
     layout.set(LocationInfo::new(regions::lorule::field::main::SUBREGION, "[Mai] Lorule Castle Wall"), RupeeGold);
     layout.set(LocationInfo::new(regions::lorule::field::main::SUBREGION, "[Mai] Lorule Castle Tree"), RupeeGold);
     layout.set(LocationInfo::new(regions::lorule::field::main::SUBREGION, "[Mai] Lorule Blacksmith Wall"), RupeeGold);
     layout.set(LocationInfo::new(regions::lorule::field::main::SUBREGION, "[Mai] Lorule Rupee Rush Wall"), RupeeGold);
-    layout.set(LocationInfo::new(regions::lorule::field::main::SUBREGION, "[Mai] Big Bomb Flower Field Grass"), RupeeGold);
+    layout.set(LocationInfo::new(regions::lorule::field::main::SUBREGION, "[Mai] Big Bomb Flower Grass"), RupeeGold);
     layout.set(LocationInfo::new(regions::lorule::field::main::SUBREGION, "[Mai] Octoball Derby Skull"), RupeeGold);
     layout.set(LocationInfo::new(regions::lorule::field::main::SUBREGION, "[Mai] Vacant House Big Rock"), RupeeGold);
     layout.set(LocationInfo::new(regions::lorule::field::main::SUBREGION, "[Mai] Behind Vacant House"), RupeeGold);
     layout.set(LocationInfo::new(regions::lorule::field::main::SUBREGION, "[Mai] Lorule Haunted Grove Wall"), RupeeGold);
-    layout.set(LocationInfo::new(regions::lorule::field::main::SUBREGION, "[Mai] Lorule Southern Ruins Pillars"), RupeeGold);
-    layout.set(LocationInfo::new(regions::lorule::field::main::SUBREGION, "[Mai] Lorule Southern Ruins Wall"), RupeeGold);
-    layout.set(LocationInfo::new(regions::lorule::field::main::SUBREGION, "[Mai] Lorule Southern Ruins Water"), RupeeGold);
+    layout.set(LocationInfo::new(regions::lorule::field::main::SUBREGION, "[Mai] Lorule S Ruins Pillars"), RupeeGold);
+    layout.set(LocationInfo::new(regions::lorule::field::main::SUBREGION, "[Mai] Lorule S Ruins Wall"), RupeeGold);
+    layout.set(LocationInfo::new(regions::lorule::field::main::SUBREGION, "[Mai] Lorule S Ruins Water"), RupeeGold);
     layout.set(LocationInfo::new(regions::lorule::field::main::SUBREGION, "[Mai] Thieves' Town Tree"), RupeeGold);
 
     // Thieves' Town Shop
@@ -375,19 +374,19 @@ fn build_layout() -> Layout {
     layout.set(LocationInfo::new(regions::lorule::skull::overworld::SUBREGION, "[Mai] Skull Woods Skull"), RupeeGold);
 
     // Lorule Death Mountain
-    layout.set(LocationInfo::new(regions::lorule::death::mountain::SUBREGION, "Lorule Death Mountain East Ledge"), RupeeGold);
+    layout.set(LocationInfo::new(regions::lorule::death::mountain::SUBREGION, "Lorule Mountain E Ledge"), RupeeGold);
     layout.set(LocationInfo::new(regions::lorule::death::mountain::SUBREGION, "Behind Ice Gimos"), ItemFireRodLv2);
-    layout.set(LocationInfo::new(regions::lorule::death::mountain::SUBREGION, "Lorule Death Mountain West Ledge"), RupeeGold);
+    layout.set(LocationInfo::new(regions::lorule::death::mountain::SUBREGION, "Lorule Mountain W Ledge"), RupeeGold);
     layout.set(LocationInfo::new(regions::lorule::death::mountain::SUBREGION, "Ice Gimos Fight"), RupeeGold);
     layout.set(LocationInfo::new(regions::lorule::death::mountain::SUBREGION, "Treacherous Tower Intermediate"), RupeeGold);
     layout.set(LocationInfo::new(regions::lorule::death::mountain::SUBREGION, "Treacherous Tower Advanced (1)"), RupeeGold);
     layout.set(LocationInfo::new(regions::lorule::death::mountain::SUBREGION, "Treacherous Tower Advanced (2)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::lorule::death::mountain::SUBREGION, "[Mai] Lorule Death Mountain West Skull"), RupeeGold);
-    layout.set(LocationInfo::new(regions::lorule::death::mountain::SUBREGION, "[Mai] Lorule Death Mountain West Big Rock"), RupeeGold);
-    layout.set(LocationInfo::new(regions::lorule::death::mountain::SUBREGION, "[Mai] Lorule Death Mountain East Skull"), RupeeGold);
-    layout.set(LocationInfo::new(regions::lorule::death::mountain::SUBREGION, "[Mai] Lorule Death Mountain East Wall"), RupeeGold);
+    layout.set(LocationInfo::new(regions::lorule::death::mountain::SUBREGION, "[Mai] Lorule Mountain W Skull"), RupeeGold);
+    layout.set(LocationInfo::new(regions::lorule::death::mountain::SUBREGION, "[Mai] Lorule Mountain W Big Rock"), RupeeGold);
+    layout.set(LocationInfo::new(regions::lorule::death::mountain::SUBREGION, "[Mai] Lorule Mountain E Skull"), RupeeGold);
+    layout.set(LocationInfo::new(regions::lorule::death::mountain::SUBREGION, "[Mai] Lorule Mountain E Wall"), RupeeGold);
     layout.set(LocationInfo::new(regions::lorule::death::mountain::SUBREGION, "[Mai] Outside Ice Ruins"), RupeeGold);
-    layout.set(LocationInfo::new(regions::lorule::death::mountain::SUBREGION, "[Mai] Lorule Death Mountain East Big Rock"), RupeeGold);
+    layout.set(LocationInfo::new(regions::lorule::death::mountain::SUBREGION, "[Mai] Lorule Mountain E Big Rock"), RupeeGold);
 
     // Dark Ruins
     layout.set(LocationInfo::new(regions::lorule::dark::ruins::SUBREGION, "Dark Ruins Lakeview Chest"), RupeeGold);
@@ -449,7 +448,7 @@ fn build_layout() -> Layout {
     layout.set(LocationInfo::new(regions::dungeons::graveyards::lorule::SUBREGION, "[LS] Lower Chest"), RupeeGold);
     layout.set(LocationInfo::new(regions::dungeons::graveyards::lorule::SUBREGION, "[LS] Upper Chest"), RupeeGold);
     layout.set(LocationInfo::new(regions::dungeons::graveyards::lorule::SUBREGION, "[Mai] Lorule Graveyard Big Rock"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::graveyards::lorule::SUBREGION, "[Mai] Lorule Graveyard Peninsula Tree"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::graveyards::lorule::SUBREGION, "[Mai] Lorule Graveyard Tree"), RupeeGold);
     layout.set(LocationInfo::new(regions::dungeons::graveyards::lorule::SUBREGION, "[Mai] Lorule Graveyard Wall"), RupeeGold);
 
     //////////////////////
@@ -475,8 +474,8 @@ fn build_layout() -> Layout {
     layout.set(LocationInfo::new(regions::dungeons::house::gales::SUBREGION, "[HG] (1F) Torches"), Compass);
     layout.set(LocationInfo::new(regions::dungeons::house::gales::SUBREGION, "[HG] (1F) Switch Room"), KeySmall);
     layout.set(LocationInfo::new(regions::dungeons::house::gales::SUBREGION, "[HG] (1F) Fire Bubbles"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::house::gales::SUBREGION, "[HG] (1F) Blue Bari Room"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::house::gales::SUBREGION, "[HG] (1F) Blue Bari Room (Bottom Left)"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::house::gales::SUBREGION, "[HG] (1F) West Room"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::house::gales::SUBREGION, "[HG] (1F) West Room Secret"), RupeeGold);
     layout.set(LocationInfo::new(regions::dungeons::house::gales::SUBREGION, "[HG] (2F) Big Chest"), KeyBoss);
     layout.set(LocationInfo::new(regions::dungeons::house::gales::SUBREGION, "[HG] (2F) Narrow Ledge"), RupeeGold);
     layout.set(LocationInfo::new(regions::dungeons::house::gales::SUBREGION, "[HG] (2F) Fire Ring"), KeySmall);
@@ -593,7 +592,7 @@ fn build_layout() -> Layout {
     // Turtle Rock
     layout.set(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "[TR] (1F) Center"), RupeeGold);
     layout.set(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "[TR] (1F) Grate Chest"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "[TR] (1F) Portal Room (Northwest)"), KeySmall);
+    layout.set(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "[TR] (1F) Portal Room NW"), KeySmall);
     layout.set(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "[TR] (1F) Northeast Ledge"), KeySmall);
     layout.set(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "[TR] (1F) Southeast Chest"), RupeeGold);
     layout.set(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "[TR] (1F) Defeat Flamolas"), RupeeGold);
@@ -615,13 +614,13 @@ fn build_layout() -> Layout {
     layout.set(LocationInfo::new(regions::dungeons::lorule::castle::SUBREGION, "[LC] (2F) Ledge"), RupeeGold);
     layout.set(LocationInfo::new(regions::dungeons::lorule::castle::SUBREGION, "[LC] (4F) Center"), RupeeGold);
     layout.set(LocationInfo::new(regions::dungeons::lorule::castle::SUBREGION, "[LC] (4F) Hidden Path"), ItemBowLight);
-    layout.set(LocationInfo::new(regions::dungeons::lorule::castle::SUBREGION, "[LC] (3F) Bomb Trial (Chest)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::lorule::castle::SUBREGION, "[LC] (3F) Bomb Trial (Behind Rock)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::lorule::castle::SUBREGION, "[LC] (3F) Ball Trial (Chest)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::lorule::castle::SUBREGION, "[LC] (3F) Ball Trial (Puzzle)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::lorule::castle::SUBREGION, "[LC] (4F) Lamp Trial"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::lorule::castle::SUBREGION, "[LC] (4F) Hookshot Trial (Chest)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::lorule::castle::SUBREGION, "[LC] (4F) Hookshot Trial (Eyes)"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::lorule::castle::SUBREGION, "[LC] (3F) Bomb Trial Center Chest"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::lorule::castle::SUBREGION, "[LC] (3F) Big Bomb Flower Chest"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::lorule::castle::SUBREGION, "[LC] (3F) Merge Trial Free Chest"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::lorule::castle::SUBREGION, "[LC] (3F) Spike Ball Chest"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::lorule::castle::SUBREGION, "[LC] (4F) Lamp Trial Chest"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::lorule::castle::SUBREGION, "[LC] (4F) Lava Switch Chest"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::lorule::castle::SUBREGION, "[LC] (4F) Eyeball Chest"), RupeeGold);
     layout.set(LocationInfo::new(regions::dungeons::lorule::castle::SUBREGION, "Zelda"), ItemBow);
 
     info!("Successfully Built Layout");

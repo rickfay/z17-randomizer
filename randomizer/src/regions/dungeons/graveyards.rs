@@ -24,7 +24,7 @@ crate::region! {
             "[LS] Lower Chest": RupeeB @Chest(AttractionDark 2[45]),
             "[LS] Upper Chest": RupeeR @Chest(AttractionDark 2[32]),
             "[Mai] Lorule Graveyard Big Rock": Maiamai @Maiamai(FieldDark 11[80]),
-            "[Mai] Lorule Graveyard Peninsula Tree": Maiamai @Maiamai(FieldDark 19[67]),
+            "[Mai] Lorule Graveyard Tree": Maiamai @Maiamai(FieldDark 19[67]),
             "[Mai] Lorule Graveyard Wall": Maiamai @Maiamai(FieldDark 12[96]),
         ],
     },

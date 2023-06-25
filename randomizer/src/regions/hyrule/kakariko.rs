@@ -13,7 +13,6 @@ crate::region! {
             "Kakariko Jail": RupeeSilver @Chest(IndoorLight 3[3]),
             "Kakariko Well (Bottom)": RupeeR @Chest(CaveLight 4[6]),
             "Kakariko Well (Top)": HeartPiece @Heart(CaveLight 4[8]),
-            "Milk Bar Owner": MilkMatured @Event(IndoorLight/FieldLight_18_MilkbarMaster[5]),
             "Rupee Rush (Hyrule)": HeartPiece @Event(FieldLight_28_Minigame[0x26]),
             "Shady Guy": ItemRentalHookShot @Event(FieldLight_18_Touzoku[0x12]),
             "Street Merchant (Left)": ItemBottle @Shop(Merchant(0)),

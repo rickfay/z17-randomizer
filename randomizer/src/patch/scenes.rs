@@ -4,7 +4,7 @@ use {
     albw::{
         course,
         course::{Id, Id::*},
-        scene::{Dest, Flag, Obj, Vec3},
+        scene::{Arg, Dest, Flag, Obj, Transform, Vec3},
         Item::*,
     },
     log::info,
@@ -102,6 +102,7 @@ pub fn patch_byaml_files(patcher: &mut Patcher, settings: &Settings) -> Result<(
     patch_chamber_of_sages(patcher);
     patch_dark_maze(patcher);
     patch_kus_domain(patcher);
+    patch_letter_in_a_bottle(patcher);
     patch_master_sword(patcher);
     patch_softlock_prevention(patcher, settings);
     patch_thief_girl_cave(patcher);
@@ -110,6 +111,7 @@ pub fn patch_byaml_files(patcher: &mut Patcher, settings: &Settings) -> Result<(
     patch_swamp_palace(patcher);
     patch_hint_ghosts_overworld(patcher);
     patch_hint_ghosts_dungeons(patcher);
+    patch_ghost_into_hildas_study(patcher);
 
     patch_nice_mode(patcher, settings);
     patch_big_bomb_flower_skip(patcher, settings);
@@ -562,6 +564,10 @@ pub fn patch_byaml_files(patcher: &mut Patcher, settings: &Settings) -> Result<(
 }
 
 fn patch_open_lost_woods(patcher: &mut Patcher) {
+    patcher.modify_objs(FieldLight, 1, &[
+        disable(34), // Keep Lost Woods Maze from disappearing after getting Pedestal
+    ]);
+
     patcher.modify_objs(FieldLight, 38, &[
         // Allow entry to maze without All Pendants Flag (375) set
         redirect(259, Dest::new(FieldLight, 38, 5)),
@@ -848,6 +854,26 @@ fn patch_hint_ghosts_dungeons(patcher: &mut Patcher) {
     ]);
 }
 
+fn patch_ghost_into_hildas_study(patcher: &mut Patcher) {
+    patcher.add_obj(IndoorDark, 5, Obj {
+        arg: Arg(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.0),
+        clp: 1,
+        flg: (0, 0, 0, 0),
+        id: 235,
+        lnk: vec![],
+        nme: Some("HintGhostDark/HintGhost_FieldDark_2C_014".to_owned()),
+        ril: vec![],
+        ser: Some(14),
+        srt: Transform {
+            scale: Vec3::UNIT,
+            rotate: Vec3 { x: 0.0, y: 0.0, z: 0.0 },
+            translate: Vec3 { x: 67.0, y: 0.0, z: -14.5 },
+        },
+        typ: 3,
+        unq: 48,
+    });
+}
+
 fn patch_castles(patcher: &mut Patcher, settings: &Settings) {
     let green_pendant_flag = prize_flag(PendantCourage);
     let yuga_defeated = Flag::Event(420); // Set after Yuga 2 defeated
@@ -973,6 +999,16 @@ fn patch_castles(patcher: &mut Patcher, settings: &Settings) {
         clear_enable_flag(43), // NpcAttention1
         clear_enable_flag(48), // ObjPictureZelda
     ]);
+}
+
+// Change Letter in a Bottle to a Heart Piece object
+fn patch_letter_in_a_bottle(patcher: &mut Patcher) {
+    patcher.modify_objs(FieldLight, 36, &[call(38, |obj| {
+        obj.clear_disable_flag();
+        obj.set_inactive_flag(Flag::Event(916));
+        obj.set_id(99);
+        obj.set_typ(1);
+    })]);
 }
 
 fn patch_master_sword(patcher: &mut Patcher) {
@@ -1183,6 +1219,7 @@ fn do_dev_stuff(patcher: &mut Patcher, settings: &Settings) {
     patcher.modify_objs(IndoorLight, 1, &[call(24, |obj| {
         obj.redirect(Dest::new(
             FieldLight, 27, 5,  // No Redirect
+            // FieldLight, 4, 3,
             // FieldLight, 18, 10, // Hyrule Castle Front Door
             // CaveLight, 7, 0, // Zora's Domain
             // IndoorLight, 15, 0, // Osfala Portrait

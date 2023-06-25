@@ -12,9 +12,9 @@ use {
     log::{error, info},
     macros::fail,
     queue::Queue,
-    rand::{prelude::StdRng, Rng},
+    rand::{rngs::StdRng, Rng},
     settings::logic_mode::LogicMode::*,
-    std::collections::{HashMap, HashSet},
+    std::collections::{BTreeMap, HashSet},
 };
 
 /// Fill Seed such that All Locations are Reachable
@@ -53,7 +53,6 @@ fn preplace_items(
     }
 
     // Place un-randomized items
-    place_static(check_map, progression, LetterInABottle, "Southeastern Shore");
     place_static(check_map, progression, RupeeSilver40, "Hyrule Hotfoot (Second Race)");
     place_static(check_map, progression, RupeeSilver41, "[TR] (1F) Under Center");
     place_static(check_map, progression, RupeeGold09, "[TR] (B1) Under Center");
@@ -367,16 +366,18 @@ fn fill_junk(check_map: &mut CheckMap, rng: &mut StdRng, junk_items: &mut Pool) 
     }
 
     for junk in junk_items {
-        let rng_index = rng.gen_range(0..empty_check_keys.len());
-        check_map.insert(empty_check_keys.remove(rng_index), Some(*junk));
+        check_map
+            .insert(empty_check_keys.remove(rng.gen_range(0..empty_check_keys.len())), Some(*junk));
     }
 }
 
 fn place_item_randomly(
     item: FillerItem, checks: &Vec<Check>, check_map: &mut CheckMap, rng: &mut StdRng,
 ) {
-    let index = rng.gen_range(0..checks.len());
-    check_map.insert(checks.get(index).unwrap().get_name().to_owned(), Some(item));
+    check_map.insert(
+        checks.get(rng.gen_range(0..checks.len())).unwrap().get_name().to_owned(),
+        Some(item),
+    );
 }
 
 fn filter_checks(
@@ -460,7 +461,7 @@ fn exist_empty_reachable_check(checks: &Vec<Check>, check_map: &mut CheckMap) ->
 
 /// Prefills a map with all checks as defined by the world graph with no values yet assigned
 pub fn prefill_check_map(world_graph: &mut WorldGraph) -> CheckMap {
-    let mut check_map = HashMap::new();
+    let mut check_map = BTreeMap::new();
 
     for (_, location_node) in world_graph {
         for check in location_node.clone().get_checks() {
@@ -503,13 +504,14 @@ fn verify_all_locations_accessible(
     /**
      * 384 In-Logic Checks
      *
-     * - 254 Standard Checks
+     * - 253 Standard Checks
      * - 100 Maiamai
      * - 11 Dungeon Prizes
-     * - 19 Statically Placed Items:
+     * - 20 Statically Placed Items:
      *     - 12x Shop Items (not including 9,999 items)
      *     - 3x Obscure Gold/Silver Rupees
      *     - Mysterious Man
+     *     - Bouldering Guy Bottle
      *     - TODO: Letter in a Bottle
      *     - TODO: Hyrule Hotfoot Second Race
      *     - TODO: Fortune's Choice

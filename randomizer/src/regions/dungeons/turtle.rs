@@ -6,7 +6,7 @@ crate::region! {
         locations: [
             "[TR] (1F) Center": Compass @Chest(1[115]),
             "[TR] (1F) Grate Chest": RupeePurple @Chest(1[58]),
-            "[TR] (1F) Portal Room (Northwest)": KeySmall @Key(1[153]),
+            "[TR] (1F) Portal Room NW": KeySmall @Key(1[153]),
             "[TR] (1F) Northeast Ledge": KeySmall @Key(1[243]),
             "[TR] (1F) Southeast Chest": RupeePurple @Chest(1[173]),
             "[TR] (1F) Defeat Flamolas": RupeeSilver @Chest(1[220]),

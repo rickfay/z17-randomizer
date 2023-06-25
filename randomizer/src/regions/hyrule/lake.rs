@@ -20,7 +20,7 @@ crate::region! {
             "Lakeside Item Shop (1)": EscapeFruit @None(),
             "Lakeside Item Shop (2)": StopFruit @None(),
             "Lakeside Item Shop (3)": ItemShield @None(),
-            "Southeastern Shore": MessageBottle @None(),
+            "Southeastern Shore": MessageBottle @Heart(36[38]),
             "[Mai] Hyrule Hotfoot Big Rock": Maiamai @Maiamai(36[31]),
             "[Mai] Island Tornado Tile": Maiamai @Maiamai(35[130]),
             "[Mai] Lake Hylia SE Wall": Maiamai @Maiamai(40[24]),

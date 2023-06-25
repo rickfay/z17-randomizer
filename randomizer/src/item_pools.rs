@@ -4,7 +4,7 @@ use {
         FillerItem::{self, *},
         Settings,
     },
-    rand::rngs::StdRng,
+    rand::{rngs::StdRng, Rng},
     settings::logic_mode::LogicMode,
 };
 
@@ -23,6 +23,9 @@ pub(crate) fn get_item_pools(settings: &Settings, rng: &mut StdRng) -> (Pool, Po
     let small_keys = get_small_key_pool();
     let compasses = get_compass_pool();
     let mut junk_pool = get_base_junk_pool();
+
+    // Choose either Letter in a Bottle or Premium Milk to include in the seed
+    progression_items.push(choose_trade_item(rng));
 
     // Remove the Bee Badge from Hell Logic to keep Bee Boosting viable
     match settings.logic.logic_mode {
@@ -68,22 +71,22 @@ fn shuffle_order_progression_pools(
     progression_pool
 }
 
+/// Randomly chooses one trade item to include in the seed.
+/// - If [`LetterInABottle`] is chosen, it must be turned in at the Milk Bar to get the [`PremiumMilk`].
+/// - If [`PremiumMilk`] is chosen, the Milk Bar is irrelevant and there simply is no [`LetterInABottle`] in the seed.
+fn choose_trade_item(rng: &mut StdRng) -> FillerItem {
+    [LetterInABottle, PremiumMilk][rng.gen_range(0..2)]
+}
+
 fn get_base_progression_pool() -> Vec<FillerItem> {
     let mut progression_pool = vec![
-        GreatSpin, // Y Button Items
-        Lamp01, Lamp02, Bow01, Bow02, Boomerang01, Boomerang02, Hookshot01, Hookshot02, Hammer01,
-        Hammer02, Bombs01, Bombs02, FireRod01, FireRod02, IceRod01, IceRod02, TornadoRod01,
-        TornadoRod02, SandRod01, SandRod02, Net01, Net02, HintGlasses, // 5 Bottles
-        Bottle01, Bottle02, Bottle03, Bottle04, Bottle05, RaviosBracelet01, RaviosBracelet02, Bell,
-        StaminaScroll, BowOfLight, PegasusBoots, Flippers, HylianShield, SmoothGem, PremiumMilk,
-        LetterInABottle, Pouch, // 2 Gloves
-        Glove01, Glove02, // 2 Mails
-        Mail01, Mail02, // 4 Master Ore
-        OreYellow, OreGreen, OreBlue, OreRed, // Shop Items
-        ScootFruit01, ScootFruit02, FoulFruit01, FoulFruit02, Shield01, Shield02, Shield03,
-        Shield04, GoldBee01,
-        // GoldBee02,
-        // GoldBee03,
+        GreatSpin, Lamp01, Lamp02, Bow01, Bow02, Boomerang01, Boomerang02, Hookshot01, Hookshot02,
+        Hammer01, Hammer02, Bombs01, Bombs02, FireRod01, FireRod02, IceRod01, IceRod02,
+        TornadoRod01, TornadoRod02, SandRod01, SandRod02, Net01, Net02, HintGlasses, Bottle01,
+        Bottle02, Bottle03, Bottle04, RaviosBracelet01, RaviosBracelet02, Bell, StaminaScroll,
+        BowOfLight, PegasusBoots, Flippers, HylianShield, SmoothGem, Pouch, Glove01, Glove02,
+        Mail01, Mail02, OreYellow, OreGreen, OreBlue, OreRed, ScootFruit01, ScootFruit02,
+        FoulFruit01, FoulFruit02, Shield01, Shield02, Shield03, Shield04, GoldBee01,
     ];
 
     progression_pool.extend(get_gold_rupee_pool());
@@ -178,16 +181,17 @@ fn get_base_junk_pool() -> Vec<FillerItem> {
         HeartPiece19, HeartPiece20, HeartPiece21, HeartPiece22, HeartPiece23, HeartPiece24,
         HeartPiece25, HeartPiece26, HeartPiece27, HeartPiece28, // Heart Containers
         HeartContainer01, HeartContainer02, HeartContainer03, HeartContainer04, HeartContainer05,
-        HeartContainer06, HeartContainer07, HeartContainer08, HeartContainer09,
-        HeartContainer10,
+        HeartContainer06, HeartContainer07, HeartContainer08, HeartContainer09, HeartContainer10,
         /*
          * Extra Items
          * +1 location:  Osfala in Chamber of Sages (not adding rental Sand Rod)
          * +1 location:  Blacksmith Table (not adding PackageSword)
+         * +1 location:  Bouldering Guy's Emptied Bottle
          * -2 locations: 2nd Bracelet added to pool without a vanilla location
          * -------------
-         * =0 extra items added to junk pool
+         * =1 extra items added to junk pool
          */
+        RupeeBlue,
     ]
 }
 

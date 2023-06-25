@@ -62,6 +62,12 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
   - **Woman**
     - Rescue the Maiamai on her roof in Kakariko and then talk to her to get a reward.
     - (Yes... that's really her name.)
+- <u>Bottle Trade Item Changes</u>
+  - Only one of the bottle trade items (Letter or Premium Milk) will now be randomized.
+  - If you get the Letter in a Bottle, bring it to the Milk Bar to receive Premium Milk.
+  - If you get Premium Milk, you can skip the bar and go directly to the Bouldering Guy.
+  - Bouldering Guy will empty your bottle (making it usable) AND give you a random item.
+  - All bottled items should now display correctly in the player inventory.
 - <u>Great Rupee Fairy</u>
   - Automatically throw 3000 rupees as one action!
 - <u>Item Hash</u>
@@ -604,7 +610,7 @@ These types of hints are generated last as filler to achieve the desired total a
 
 The Bow of Light is a special hint specifically for (you guessed it) the Bow of Light.
 
-![Bow of Light Hint](docs/bol-hint.png)
+**The hint is given out in Hilda's Study, from a Ghost right before entering the Final Boss arena.**
 
 Much like the Light Arrows in ZOOTR, the Bow of Light is required to beat the game, but since it does not lock anything else it can theoretically be placed anywhere. Unlucky Bow of Light placements have the potential to artificially extend the time it takes to beat a seed, hence this hint is created to prevent an extended "Bow of Light Hunt" at the end of a seed.
 

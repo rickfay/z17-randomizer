@@ -316,16 +316,20 @@ impl Patcher {
             }
         }
 
-        // let mut heart_container = self.scene(IndoorDark, 14)?.actors().get("HeartContainer")?;
-        // heart_container.rename(String::from("World/Actor/HeartPiece.bch"));
-        // self.scene(FieldLight, 16)?.actors_mut().update(heart_container.clone())?;
-
         // Add Warp Tiles to scenes for softlock prevention
         let warp_tile = self.scene(DungeonHera, 0)?.actors().get_actor_bch("WarpTile")?;
         self.scene(DungeonWind, 0)?.actors_mut().add(warp_tile.clone())?; // Gales 1F
         self.scene(FieldDark, 19)?.actors_mut().add(warp_tile.clone())?; // Dark Maze
         self.scene(DungeonWater, 1)?.actors_mut().add(warp_tile.clone())?; // Swamp Palace B1
         self.scene(DungeonDokuro, 1)?.actors_mut().add(warp_tile.clone())?; // Skull Woods B2
+
+        // Add Ravio to Hilda's Study to give out Bow of Light Hint
+        let hint_ghost = self.scene(IndoorDark, 15)?.actors().get_actor_bch("HintGhost")?;
+        self.scene(IndoorDark, 4)?.actors_mut().add(hint_ghost)?;
+
+        // Add Heart Piece actor to vanilla Letter in a Bottle area
+        let heart_piece = self.scene(FieldLight, 29)?.actors().get_actor_bch("HeartPiece")?;
+        self.scene(FieldLight, 35)?.actors_mut().add(heart_piece)?;
 
         // Debug stuff
         // let step_switch = self.scene(DungeonDark, 0)?.actors().get_actor_bch("SwitchStep")?;
@@ -361,7 +365,7 @@ impl Patcher {
             kakariko_actors.add(item_actors.get(&merchant[0]).unwrap().clone())?;
             kakariko_actors.add(item_actors.get(&merchant[2]).unwrap().clone())?;
         }
-        let code = code::create(&self, seed_info.settings);
+        let code = code::create(&self, seed_info);
         let Self { game, boot, courses, .. } = self;
         let mut romfs = Files(vec![]);
 

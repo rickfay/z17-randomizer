@@ -50,7 +50,7 @@ fn sphere_search<'a>(
         let mut sphere = BTreeMap::new();
         for reachable_check in reachable_checks {
             let filler_item = check_map.get(reachable_check.get_name()).unwrap().unwrap();
-            if new_items.contains(&filler_item) && filler_item.is_progression() {
+            if new_items.contains(&filler_item) && filler_item.include_in_sphere_search() {
                 sphere.insert(reachable_check.get_name(), filler_item.as_str());
             }
         }

@@ -14,7 +14,6 @@ use {
     macros::fail,
     rand::{rngs::StdRng, seq::IteratorRandom, Rng},
     serde::{ser::SerializeStruct, Serialize, Serializer},
-    std::collections::HashSet,
 };
 
 pub mod formatting;
@@ -74,20 +73,23 @@ impl LocationHint {
 
 impl Hint for LocationHint {
     fn get_hint(&self) -> String {
+        let article = self.item.get_article();
         format!(
-            "{}\nhas the\n{}",
-            // "It says here that {}\nhas the {}.",
+            "{}\nhas {}{}{}.",
             &self.check.get_location_info().unwrap().name(),
-            // formatting::name(&self.check.get_location_info().unwrap().name()),
-            &self.item.as_str_colorized() // formatting::name(&self.item.as_str_colorized())
+            article,
+            if article.is_empty() { "" } else { " " },
+            &self.item.as_str_colorized()
         )
     }
 
     fn get_hint_spoiler(&self) -> String {
+        let article = self.item.get_article();
         format!(
-            "{} has the {}",
-            // "It says here that {} has the {}.",
+            "{} has {}{}{}.",
             &self.check.get_location_info().unwrap().name(),
+            article,
+            if article.is_empty() { "" } else { " " },
             &self.item.as_str()
         )
     }
@@ -126,7 +128,6 @@ impl Hint for PathHint {
     fn get_hint(&self) -> String {
         format!(
             "{}\nis on the path to\n{}",
-            // "It says here that {}\nis on the path to {}.",
             &self.check.get_location_info().unwrap().region_colorized(),
             &self.goal.as_str_colorized()
         )
@@ -135,7 +136,6 @@ impl Hint for PathHint {
     fn get_hint_spoiler(&self) -> String {
         format!(
             "{} is on the path to {}",
-            // "It says here that {} is on the path to {}.",
             self.check.get_location_info().unwrap().region(),
             self.goal.as_str()
         )
@@ -374,7 +374,6 @@ fn generate_sometimes_hints(
         "Irene",
         "Ku's Domain Fight",
         "Lorule Field Treasure Dungeon",
-        "Milk Bar Owner",
         "Misery Mire Ledge",
         "Misery Mire Treasure Dungeon",
         "Osfala",
@@ -386,7 +385,7 @@ fn generate_sometimes_hints(
         "Spectacle Rock",
         "Southern Ruins Treasure Dungeon",
         "Street Merchant (Right)",
-        "Thief Girl Cave",
+        "Thief Girl",
         "Waterfall Cave",
         "Wildlife Clearing Stump",
         "Woman",
@@ -402,10 +401,10 @@ fn generate_sometimes_hints(
         "[HG] (2F) Fire Ring",
         "[IR] (B2) Long Merge Chest",
         "[IR] (B4) Southeast Chest (Fall)",
-        "[LC] (3F) Ball Trial (Puzzle)",
-        "[LC] (3F) Bomb Trial (Behind Rock)",
-        "[LC] (4F) Hookshot Trial (Eyes)",
-        "[LC] (4F) Lamp Trial",
+        "[LC] (3F) Spike Ball Chest",
+        "[LC] (3F) Big Bomb Flower Chest",
+        "[LC] (4F) Eyeball Chest",
+        "[LC] (4F) Lamp Trial Chest",
         "[PD] (2F) Big Chest (Hidden)",
         "[PD] (B1) Big Chest (Switches)",
         "[SP] (B1) Big Chest (Secret)",
@@ -424,9 +423,9 @@ fn generate_sometimes_hints(
             "[Mai] Blacksmith Tornado Tile",
             "[Mai] Buried in the Desert",
             "[Mai] Buried near Desert Palace",
-            "[Mai] Cucco Treasure Dungeon Big Rock",
+            "[Mai] Cucco Dungeon Big Rock",
             "[Mai] Dark Ruins South Area Wall",
-            "[Mai] Death Mountain East Ledge Rock",
+            "[Mai] Death Mountain East Ledge",
             "[Mai] Eastern Ruins Big Rock",
             "[Mai] Hyrule Castle Tornado Tile",
             "[Mai] Hyrule Hotfoot Big Rock",
@@ -434,10 +433,10 @@ fn generate_sometimes_hints(
             "[Mai] Island Tornado Tile",
             "[Mai] Kakariko Sand",
             "[Mai] Ku's Domain Water",
-            "[Mai] Lorule Death Mountain East Skull",
-            "[Mai] Lorule Death Mountain West Big Rock",
-            "[Mai] Lorule Fortune-Teller Big Rock",
-            "[Mai] Lorule Graveyard Peninsula Tree",
+            "[Mai] Lorule Mountain E Skull",
+            "[Mai] Lorule Mountain W Big Rock",
+            "[Mai] Near Lorule Fortune-Teller",
+            "[Mai] Lorule Graveyard Tree",
             "[Mai] Lorule Lake Big Rock",
             "[Mai] Lorule Lake Skull",
             "[Mai] Lorule Rupee Rush Wall",
@@ -508,7 +507,7 @@ fn generate_path_hints(
         (Yuga, "Eastern Palace Prize"),
         (Margomill, "House of Gales Prize"),
         (Moldorm, "Tower of Hera Prize"),
-        // (ZeldasThrone, "Hyrule Castle Prize"),
+        (ZeldasThrone, "Hyrule Castle Prize"),
         (GemesaurKing, "Dark Palace Prize"),
         (Arrghus, "Swamp Palace Prize"),
         (Knucklemaster, "Skull Woods Prize"),
@@ -528,6 +527,12 @@ fn generate_path_hints(
         if is_sage(convert(check_map.get(prize_loc).unwrap().unwrap()).unwrap()) {
             let mut potential_paths =
                 get_potential_path_hints(settings, rng, world_graph, check_map, taken_checks, goal);
+
+            // fixme slow
+            potential_paths.iter_mut().for_each(|i: &mut PathHint| {
+                i.logical_ghosts.sort_by_key(|p| p.as_str());
+            });
+
             if let Some(chosen_path) =
                 choose_path_hint(&mut potential_paths, taken_checks, taken_ghosts, rng)
             {
@@ -593,10 +598,10 @@ fn choose_path_hint(
 /// Finds all checks available before a given Quest Goal using a modified Sphere Search.
 fn find_checks_before_goal(
     settings: &Settings, world_graph: &mut WorldGraph, check_map: &mut CheckMap, goal: FillerItem,
-) -> HashSet<Check> {
+) -> Vec<Check> {
     let mut progress = Progress::new(settings.clone());
     let mut reachable_checks: Vec<Check>;
-    let mut potential_path_checks: HashSet<Check> = HashSet::new();
+    let mut potential_path_checks: Vec<Check> = Vec::new();
 
     // Find candidate Path Checks with a modified sphere search
     loop {
@@ -654,16 +659,11 @@ fn get_potential_path_hints(
             if new_items.is_empty() {
                 // Item could be Path if goal couldn't be reached without it
                 if !progress.has(goal) {
-                    let hint_locations = shuffle(
-                        rng,
-                        reachable_items
-                            .get_items()
-                            .iter()
-                            .filter_map(
-                                |&item| if item.is_hint_ghost() { Some(item) } else { None },
-                            )
-                            .collect::<_>(),
-                    );
+                    let hint_locations = reachable_items
+                        .get_items()
+                        .iter()
+                        .filter_map(|&item| if item.is_hint_ghost() { Some(item) } else { None })
+                        .collect::<_>();
 
                     potential_paths.push(PathHint {
                         goal,
@@ -687,9 +687,8 @@ fn get_potential_path_hints(
 const POSSIBLE_PATH_ITEMS: [FillerItem; 48] = [
     Bow01, Bow02, Boomerang01, Boomerang02, Hookshot01, Hookshot02, Bombs01, Bombs02, FireRod01,
     FireRod02, IceRod01, IceRod02, Hammer01, Hammer02, SandRod01, SandRod02, TornadoRod01,
-    TornadoRod02, Bell, StaminaScroll, PegasusBoots, Flippers, HylianShield,
-    SmoothGem, //LetterInABottle,
-    PremiumMilk, HintGlasses, GreatSpin, Bottle01, Bottle02, Bottle03, Bottle04, Bottle05, Lamp01,
-    Lamp02, Sword01, Sword02, Sword03, Sword04, Glove01, Glove02, Net01, Net02, Mail01, Mail02,
-    OreYellow, OreGreen, OreBlue, OreRed,
+    TornadoRod02, Bell, StaminaScroll, PegasusBoots, Flippers, HylianShield, SmoothGem,
+    LetterInABottle, PremiumMilk, HintGlasses, GreatSpin, Bottle01, Bottle02, Bottle03, Bottle04,
+    Lamp01, Lamp02, Sword01, Sword02, Sword03, Sword04, Glove01, Glove02, Net01, Net02, Mail01,
+    Mail02, OreYellow, OreGreen, OreBlue, OreRed,
 ];

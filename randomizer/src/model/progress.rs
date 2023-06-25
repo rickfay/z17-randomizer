@@ -735,6 +735,10 @@ impl Progress {
         self.has(OpenSanctuaryDoors)
     }
 
+    pub fn can_access_milk_bar(&self) -> bool {
+        self.has(AccessMilkBar)
+    }
+
     pub fn can_get_potion(&self) -> bool {
         self.has_bottle() && self.has_either(AccessPotionShop, AccessMilkBar)
     }

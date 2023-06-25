@@ -192,6 +192,7 @@ fn patch_final_boss(patcher: &mut Patcher) -> Result<()> {
     apply!(patcher,
         DungeonBoss/Ganon {
             [69] => 72, // Skip 1st Zelda text
+            [90] => 91, // Skip 2nd Zelda text
         },
     );
 
@@ -228,7 +229,7 @@ where
 pub fn apply(patcher: &mut Patcher, free: Item, settings: &Settings) -> Result<()> {
     info!("Patching Flow Charts...");
 
-    // debug(patcher, Id::FieldLight, "FieldLight_WarpEvent")?;
+    // debug(patcher, Id::FieldLight, "FieldLight_05_Climber")?;
 
     patch_lorule_castle_requirements(patcher, settings)?;
     patch_castle_connection(patcher, settings)?;
@@ -478,16 +479,22 @@ pub fn apply(patcher: &mut Patcher, free: Item, settings: &Settings) -> Result<(
             // Entry_KikoriMan3
             [0x17 into_start] => 0x23,
         },
-        // Climber
+        // Bouldering Guy
         FieldLight/FieldLight_05_Climber {
-            // FieldLight_05_Climber
             [3 into_branch] each [
-                = 0xA,
-                value(0x395),
                 switch [
-                    [0] => 4,
-                    [1] => 6,
+                    [0] => 18,
                 ],
+            ],
+            [18] => 28,
+            [30] => 52,
+            [52] => 21,
+            [21] => 51,
+            [51 convert_into_action] each [
+                arg1(6), // give out item
+                value(0x13), // Static empty bottle
+                => 6, // goto actual prize
+                = 0xB, // give out item
             ],
         },
 
@@ -558,21 +565,6 @@ pub fn apply(patcher: &mut Patcher, free: Item, settings: &Settings) -> Result<(
             [0xC convert_into_action] each [
                 = 0x1E,
                 value(0xBE8),
-            ],
-        },
-        // Bar
-        IndoorLight/FieldLight_18_MilkbarMaster {
-            // FieldLight_18_MilkbarMaster
-            [0x14 into_branch] each [ // Check message bottle flag
-                value(0x394),
-                switch [
-                    [0] => 7,
-                    [1] => 5,
-                ],
-            ],
-            [0x0B convert_into_action] each [ // Unset message bottle flag
-                = 1,
-                value(0x394),
             ],
         },
         // Zelda

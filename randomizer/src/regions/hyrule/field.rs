@@ -21,7 +21,7 @@ crate::region! {
             "Ravio (9)": ItemRentalFireRod @Shop(Ravio(4)),
             // "Thanks": RingHekiga @Event(IndoorLight/FieldLight_2C_Rental[0xED]),
             "Wildlife Clearing Stump": Pouch @Event(FieldLight_2A_BlacksmithWife[0x15]),
-            "[Mai] Cucco Treasure Dungeon Big Rock": Maiamai @Maiamai(32[59]),
+            "[Mai] Cucco Dungeon Big Rock": Maiamai @Maiamai(32[59]),
             "[Mai] Behind Link's House": Maiamai @Maiamai(27[112]),
             "[Mai] Blacksmith Tornado Tile": Maiamai @Maiamai(21[122]),
             "[Mai] Hyrule Castle Tornado Tile": Maiamai @Maiamai(18[307]),

@@ -9,7 +9,7 @@ use {
         Item::{PendantPower, PendantWisdom},
     },
     log::info,
-    std::collections::HashMap,
+    std::collections::BTreeMap,
 };
 
 mod hint_ghosts;
@@ -19,7 +19,7 @@ mod msbt;
 pub fn patch_messages(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
     info!("Patching MSBT Files...");
 
-    // debug(patcher, FieldLight, "Field");
+    // debug(patcher, FieldLight, "FieldLight_05");
 
     patch_file_select(patcher, seed_info)?;
     // patch_ravio(patcher)?;
@@ -189,15 +189,18 @@ fn patch_general_hint_ghosts(patcher: &mut Patcher, seed_info: &SeedInfo) -> Res
     Ok(())
 }
 
+const EMPTY_MSG: &str = "\0\0";
+
 fn patch_hint_ghosts(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
-    if seed_info.hints.path_hints.is_empty() {
+    if seed_info.hints.always_hints.is_empty() {
         info!("No Ghost Hints generated.");
+        return Ok(());
     } else {
         info!("Patching Hint Ghosts...");
     }
 
     // Organize Hints by the MSBT File they need to update
-    let mut msbt_hint_map = HashMap::new();
+    let mut msbt_hint_map = BTreeMap::new();
 
     // Path Hints
     for path_hint in &seed_info.hints.path_hints {
@@ -208,7 +211,7 @@ fn patch_hint_ghosts(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> 
             let hint_ghost = HintGhost::from(*ghost);
             let entry = msbt_hint_map
                 .entry((hint_ghost.course, hint_ghost.msbt_file))
-                .or_insert_with(|| HashMap::new());
+                .or_insert_with(|| BTreeMap::new());
             entry.insert(hint_ghost.msg_label, path_hint.get_hint());
         }
     }
@@ -222,7 +225,7 @@ fn patch_hint_ghosts(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> 
             let hint_ghost = HintGhost::from(*ghost);
             let entry = msbt_hint_map
                 .entry((hint_ghost.course, hint_ghost.msbt_file))
-                .or_insert_with(|| HashMap::new());
+                .or_insert_with(|| BTreeMap::new());
             entry.insert(hint_ghost.msg_label, always_hint.get_hint());
         }
     }
@@ -236,18 +239,17 @@ fn patch_hint_ghosts(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> 
             let hint_ghost = HintGhost::from(*ghost);
             let entry = msbt_hint_map
                 .entry((hint_ghost.course, hint_ghost.msbt_file))
-                .or_insert_with(|| HashMap::new());
+                .or_insert_with(|| BTreeMap::new());
             entry.insert(hint_ghost.msg_label, sometimes_hint.get_hint());
         }
     }
 
     // FIXME extremely dumb. Clear out some unused messages in Lost Woods to keep file size down.
-    let empty_msg = "\0\0".to_owned();
-    msbt_hint_map.get_mut(&(FieldLight, "FieldLight_00")).unwrap().extend(HashMap::from([
-        ("lgt_MayoinoHintObake_Msg3", empty_msg.clone()),
-        ("lgt_MayoinoHintObake_Msg5", empty_msg.clone()),
-        ("lgt_MayoinoHintObake_Msg7", empty_msg.clone()),
-        ("lgt_MayoinoHintObake_Msg9", empty_msg),
+    msbt_hint_map.get_mut(&(FieldLight, "FieldLight_00")).unwrap().extend(BTreeMap::from([
+        ("lgt_MayoinoHintObake_Msg3", EMPTY_MSG.to_owned()),
+        ("lgt_MayoinoHintObake_Msg5", EMPTY_MSG.to_owned()),
+        ("lgt_MayoinoHintObake_Msg7", EMPTY_MSG.to_owned()),
+        ("lgt_MayoinoHintObake_Msg9", EMPTY_MSG.to_owned()),
     ]));
 
     // Update the MSBT Files with the generated Hints
@@ -275,9 +277,33 @@ fn patch_hint_ghosts(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> 
 }
 
 fn patch_bow_of_light(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
-    let mut msbt = load_msbt(patcher, DungeonBoss, "Ganon")?;
-    msbt.set("gnn_yumiya_020", &seed_info.hints.bow_of_light_hint.as_ref().unwrap().get_hint());
-    patcher.update(msbt.dump())?;
+    if let Some(bow_of_light_hint) = seed_info.hints.bow_of_light_hint.as_ref() {
+        let mut msbt = load_msbt(patcher, IndoorDark, "HintGhostDark")?;
+        // Most of HintGhostDark.msbt is a duplicate of the identical file under FieldDark, but it's not used. Choosing
+        // an easily testable ghost Key to repurpose for a new Ghost in Hilda's Study.
+        msbt.set("HintGhost_FieldDark_2C_014", &bow_of_light_hint.get_hint());
+        // fixme also dumb: clear out unused messages to keep filesize down.
+        msbt.set("HintGhost_FieldDark_02_001", EMPTY_MSG);
+        msbt.set("HintGhost_FieldDark_03_002", EMPTY_MSG);
+        msbt.set("HintGhost_FieldDark_07_003", EMPTY_MSG);
+        msbt.set("HintGhost_FieldDark_14_004", EMPTY_MSG);
+        msbt.set("HintGhost_FieldDark_16_005", EMPTY_MSG);
+        msbt.set("HintGhost_FieldDark_18_006", EMPTY_MSG);
+        msbt.set("HintGhost_FieldDark_1A_009", EMPTY_MSG);
+        msbt.set("HintGhost_FieldDark_1E_010", EMPTY_MSG);
+        msbt.set("HintGhost_FieldDark_28_011", EMPTY_MSG);
+        msbt.set("HintGhost_FieldDark_29_012", EMPTY_MSG);
+        msbt.set("HintGhost_FieldDark_2A_013", EMPTY_MSG);
+        msbt.set("HintGhost_FieldDark_30_015", EMPTY_MSG);
+        msbt.set("HintGhost_FieldDark_33_016", EMPTY_MSG);
+        msbt.set("HintGhost_FieldDark_35_017", EMPTY_MSG);
+        msbt.set("HintGhost_FieldDark_35_018", EMPTY_MSG);
+        msbt.set("HintGhost_FieldDark_35_019", EMPTY_MSG);
+        msbt.set("HintGhost_FieldDark_1E_020", EMPTY_MSG);
+        msbt.set("HintGhost_FieldDark_33_021", EMPTY_MSG);
+        msbt.set("HintGhost_FieldDark_33_022", EMPTY_MSG);
+        patcher.update(msbt.dump())?;
+    }
 
     Ok(())
 }
