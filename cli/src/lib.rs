@@ -30,6 +30,15 @@ pub fn get_seed_settings() -> Result<Settings, String> {
         "This shuffles all Sage Portraits, Pendants, and the Charm among themselves.",
     );
 
+    let vanilla_charm = if randomize_dungeon_prizes {
+        prompt_bool("Vanilla Charm",
+            "Enabling this forces one of the two Pendant of Courage Upgrades to be in Zelda's Throne Room.\n\
+            Otherwise, a random Sage Portrait or Pendant will be placed in Zelda's Throne Room.",
+        )
+    } else {
+        false
+    };
+
     let lc_requirement = prompt_u8_in_range(
         "Lorule Castle Requirement",
         "Choose how many Portraits are needed to enter Lorule Castle and fight Yuganon:",
@@ -180,6 +189,7 @@ pub fn get_seed_settings() -> Result<Settings, String> {
         logic: Logic {
             logic_mode,
             randomize_dungeon_prizes,
+            vanilla_charm,
             lc_requirement,
             yuganon_requirement: lc_requirement,
             ped_requirement,

@@ -50,6 +50,9 @@ fn preplace_items(
         place_static(check_map, progression, SageImpa, "Turtle Rock Prize");
         place_static(check_map, progression, SageIrene, "Desert Palace Prize");
         place_static(check_map, progression, SageRosso, "Ice Ruins Prize");
+    } else if settings.logic.vanilla_charm {
+        // Vanilla Charm
+        place_static(check_map, progression, PendantOfCourage02, "Hyrule Castle Prize");
     }
 
     // Place un-randomized items

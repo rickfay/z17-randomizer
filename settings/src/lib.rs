@@ -43,6 +43,9 @@ impl Settings {
             "Dungeon Prizes:                 {}",
             if logic.randomize_dungeon_prizes { "Randomized" } else { "Not Randomized" }
         );
+        if logic.randomize_dungeon_prizes {
+            info!("Charm:                          {}", if logic.vanilla_charm { "Vanilla" } else { "Randomized" });
+        }
         info!("Lorule Castle Requirement:      {} Portraits", logic.lc_requirement);
         info!("Yuga Ganon Requirement:         {} Portraits", logic.yuganon_requirement);
         info!("Pedestal Requirement:           {}", logic.ped_requirement);
