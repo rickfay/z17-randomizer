@@ -1,6 +1,6 @@
 crate::region! {
     course: FieldLight,
-    name: "Desert of Mystery Region",
+    name: "Desert Region",
     color: Name,
     mystery {
         locations: [

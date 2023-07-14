@@ -64,8 +64,8 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
     - (Yes... that's really her name.)
 - <u>Bottle Trade Item Changes</u>
   - Only one of the bottle trade items (Letter or Premium Milk) will now be randomized.
-  - If you get the Letter in a Bottle, bring it to the Milk Bar to receive Premium Milk.
-  - If you get Premium Milk, you can skip the bar and go directly to the Bouldering Guy.
+    - If you get the Letter in a Bottle, bring it to the Milk Bar to receive Premium Milk.
+    - If you get Premium Milk, you can skip the bar and go directly to the Bouldering Guy.
   - Bouldering Guy will empty your bottle (making it usable) AND give you a random item.
   - All bottled items should now display correctly in the player inventory.
 - <u>Great Rupee Fairy</u>
@@ -337,8 +337,6 @@ There are two ways you can run ALBWR:
 1. Double click `albw-randomizer.exe` (or `albw-randomizer` on Linux) to start the randomizer with basic settings. The randomizer will provide a simple interface for setting game options, after which it will attempt to generate a completable seed.
    - The randomizer may make multiple attempts to generate a completable seed. This is normal, and will happen automatically.
 
-
-
 2. Use a command line interface. If you take this approach you may also specify a preset and/or seed to use for seed generation.
    - Using a preset will give you some additional options and allow you to manually configure excluded checks.
      - See the example `presets/Example.json` for more information.
@@ -445,7 +443,7 @@ For Citra (emulator):
 | Irene | Unlocks the Irene check (instead of Pendant of Courage)                  |
 | Rosso | Unlocks Rosso's House and his two checks (instead of Pendant of Courage) |
 | Oren  | Unlocks the Smooth Gem check and the Shady Guy Event                     |
-| Impa  | Unlocks the front door to Hyrule Castle                                  |
+| Impa  | Unlocks the front door to Hyrule Castle (talk to the Guard)              |
 
 `no_progression_enemies`
 - Removes Enemies from dungeons that are themselves Progression (e.g.: Bawbs, the bomb enemy).
@@ -488,7 +486,7 @@ For Citra (emulator):
 
 `skip_big_bomb_flower`
 - Skips the Big Bomb Flower by removing the 5 Big Rocks in Lorule Field.
-- This setting does not affect the Lorule Castle Bomb Trial.
+- This setting does not affect the Vacant House or the Lorule Castle Bomb Trial.
 
 `skip_trials`
 - Automatically opens the Lorule Castle Trials door.
@@ -499,7 +497,7 @@ For Citra (emulator):
 `weather_vanes_activated`
 - Begin the game with all Weather Vanes activated.
 - The logic may expect players to use the Bell to reach otherwise unreachable locations this way.
-- <u>Note</u>: Trackers do not currently support this feature.
+- <u>Note</u>: No trackers currently support this feature.
 
 `dark_rooms_lampless`
 - If enabled the logic may expect players to cross Dark Rooms without the Lamp.
@@ -508,6 +506,7 @@ For Citra (emulator):
 `swordless_mode`
 - Removes *ALL* Swords from the game.
 - [The Bug Net becomes a required item to play Dead Man's Volley against Yuga Ganon.](https://www.twitch.tv/videos/1265170513)
+- <u>Note</u>: Incompatible with the `sword_in_shop` setting.
 
 `chest_size_matches_contents`
 - All chests containing progression or unique items will become large, and others will be made small.
@@ -540,24 +539,25 @@ They can be thought of like "Way of the Hero" Hints from other Zelda randomizers
 Path Hints take the following form:
 
 ```
-It says here that [LOCATION] is on the path to [GOAL].
+It says here that [REGION] is on the path to [GOAL].
 ```
+
+(The actual text may differ slightly as things are rapidly changing)
 
 `[GOAL]`
 - Presently, goals will always be the Bosses of dungeons housing a Sage Portrait.
 
-`[LOCATION]`
+`[REGION]`
 - Refers to the specific region where the hinted `Path Item` can be found.
 - To keep locations from being arbitrarily defined, the Maiamai Map boundaries are used for (nearly) all region boundaries.
-  - <u>Exception</u>: The Overworld screens containing the Hyrule Sanctuary, Hyrule Graveyard, and Lorule Graveyard are all collectively referred to as the `Graveyard`.
+  - <u>The One Exception</u>: The screens containing the Hyrule Sanctuary, Hyrule Graveyard, Lorule Graveyard, and their associated dungeons are all collectively referred to as the `Graveyard`.
   - <u>Special Cases</u>:
     - Hyrule Hotfoot is considered part of the `Lost Woods Region`, as it is there that the reward is given out.
     - Irene can appear in multiple regions, and so she has a unique region called `Irene the Witch`.
     - Osfala's item is given out in a special region called `Chamber of the Sages`
 
-![region-map-hyrule.png](docs/region-map-hyrule.png)
 
-![region-map-lorule.png](docs/region-map-lorule.png)
+![region-names](docs/region-names.png)
 
 #### Path Items
 
@@ -750,12 +750,24 @@ It's all in the name: no logic is used to place items at all. Dungeon items are 
 
 ## Known Issues
 
-- Bow of Light crashes the game if used outside the final boss arena (on 3DS console)
-- Some item models appear too low and some even clip through the floor. If you do not see any item on the Kakariko Item Merchant, try interacting with it anyway.
-- Hyrule Castle overworld music may be missing until the player has either broken the barrier or obtained the Pendant of Courage.
-- Some text boxes will overflow
-- Mother Maiamai item text is wrong, the text reflects the slots in Ravio's Shop. The pictures are correct, use those when selecting which item to upgrade.
-- After turning in the Letter in a Bottle to the Milk Bar owner, the Letter in a Bottle will be available for collection again. It can be turned in again, but doing so can lead to some unexpected behavior. You may get some "surprise" items this way depending on what the Milk Bar owner had, but these are never part of logic.
+- ### WARNING: Bow of Light _CRASHES_ the game if used outside the final boss arena (3DS console players)
+- Freestanding Item Model Issues:
+  - The Kakariko Street Merchant's items may appear invisible for a small selection of items (they're actually clipping through the floor). They can still be interacted with and purchased (the left one always, the right one after bumping into the Shady Guy).
+  - Not all item models have their transforms applied to them (rotation, scaling, etc.) and may look slightly odd.
+  - Only the Items in Ravio's Shop and the Kakariko Street Merchant have had their models replaced -- all others will appear vanilla.
+    - Except the Letter in a Bottle's vanilla location, which will always look like a Heart Piece.
+- Music:
+  - Hyrule Castle overworld music may be missing until the player has either broken the barrier or obtained the Pendant of Courage.
+- Maiamai:
+  - Mother Maiamai item text is wrong, the text reflects the slots in Ravio's Shop. The pictures are correct, use those when selecting which item to upgrade.
+  - **Not Confirmed:** There has been a report of an elusive bug when playing Maiamai Madness that causes Mother Maiamai to not properly "bank" Maiamai that were turned in but not yet used for an upgrade. We have been unable to reproduce the issue -- if you encounter it, please let us know on the Discord!
+- Unintended Item Duplication:
+  - Players can receive the final item from Zelda multiple times if they die and restart the fight.
+  - Items from the Scared Hinox can be received multiple times if the player revisits the cave after a Save & Quit.
+- Miscellaneous:
+  - Some text boxes will overflow
+  - Players using the Pre-Activated Weather Vanes setting may encounter some Hilda dialog in the Lorule Graveyard if they visit it without completing the Hyrule Sanctuary Dungeon first.
+  - After giving the player the 3000 Rupee item, the Great Rupee Fairy herself does not actually appear to restore Link's health nor does she spawn any capturable Fairies like she does in vanilla.
 
 ## Special Thanks
 
