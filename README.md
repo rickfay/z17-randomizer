@@ -402,6 +402,12 @@ For Citra (emulator):
 `randomize_dungeon_prizes`
 - This shuffles all Sage Portraits, Pendants, and the Charm among themselves.
 
+`vanilla_charm`
+- Enabling this forces one of the two Pendant of Courage Upgrades to be in Zelda's Throne Room.
+- Otherwise, a random Sage Portrait or Pendant will be placed in Zelda's Throne Room.
+- <u>Note</u>: Has no effect unless `randomize_dungeon_prizes` is enabled.
+
+
 `lc_requirement`
 - Choose how many Portraits are needed to enter Lorule Castle and fight Yuganon
 

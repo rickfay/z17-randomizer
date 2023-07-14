@@ -3,6 +3,7 @@
   "logic": {
     "logic_mode":                  "Normal",            // "Normal", "Hard", "Glitched", "AdvGlitched", "Hell", "NoLogic"
     "randomize_dungeon_prizes":    true,                // This shuffles all Sage Portraits, Pendants, and the Charm among themselves.
+    "vanilla_charm":               false,               // Forces one of the two Pendant of Courage Upgrades to be in Zelda's Throne Room if enabled.
     "lc_requirement":              7,                   // Sage Portraits needed to enter Lorule Castle's front door
     "ped_requirement":             "Charmed",           // MS Pedestal Pendant requirement: (2) "Vanilla", (3) "Charmed", or (4) "Standard"
     "hyrule_castle_setting":       "EarlyLoruleCastle", // Hyrule Castle Dungeon setting, choose either: "EarlyLoruleCastle" or "Closed"

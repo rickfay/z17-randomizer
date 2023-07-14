@@ -19,6 +19,13 @@ pub struct Logic {
     #[serde(default = "crate::r#true")]
     pub randomize_dungeon_prizes: bool,
 
+    /// Vanilla Charm
+    /// Enabling this forces one of the two Pendant of Courage Upgrades to be in Zelda's Throne Room.
+    /// Otherwise, a random Sage Portrait or Pendant will be placed in Zelda's Throne Room.
+    /// Note: Has no effect unless `randomize_dungeon_prizes` is enabled.
+    #[serde(default)]
+    pub vanilla_charm: bool,
+
     /// The number of Portraits needed to trigger the Hilda cutscene to open Lorule Castle
     #[serde(default = "crate::seven")]
     pub lc_requirement: u8,

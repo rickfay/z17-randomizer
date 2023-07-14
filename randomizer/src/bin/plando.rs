@@ -78,6 +78,7 @@ fn plando_settings() -> Settings {
         logic: Logic {
             logic_mode: LogicMode::Normal,
             randomize_dungeon_prizes: true,
+            vanilla_charm: false,
             lc_requirement: 1,
             yuganon_requirement: 1,
             ped_requirement: PedestalSetting::Standard,
