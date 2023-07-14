@@ -1,8 +1,8 @@
-use std::{mem::MaybeUninit, ops::Range};
-
-use bytey::*;
-
-use crate::{files::align, Error, Result};
+use {
+    crate::{files::align, Error, Result},
+    bytey::*,
+    std::{mem::MaybeUninit, ops::Range},
+};
 
 type Ref<'file> = ::core::cell::Ref<'file, [u8]>;
 type RefMut<'file> = &'file mut [u8];
@@ -53,10 +53,9 @@ impl<'file, const SECTIONS: usize> MsgBn<RefMut<'file>, SECTIONS> {
 }
 
 pub fn sections<const SECTIONS: usize>(
-    file: &[u8],
-    magic: &'static [u8; 8],
+    file: &[u8], magic: &'static [u8; 8],
 ) -> Result<Sections<SECTIONS>> {
-    bytey::typedef! { struct Header<'h>: TryFromBytes<'h> [0x20] {
+    typedef! { struct Header<'h>: TryFromBytes<'h> [0x20] {
         [0] magic: &'h [u8; 8],
         [8] bom: u16 where bom == 0xFEFF,
         [0x12] size: u32,
@@ -68,7 +67,7 @@ pub fn sections<const SECTIONS: usize>(
             let mut rest = rest;
             let mut index = HEADER_LEN;
             for section_mut in sections.iter_mut() {
-                bytey::typedef! { struct SectionHeader: FromBytes<'_> [0x20] {
+                typedef! { struct SectionHeader: FromBytes<'_> [0x20] {
                     [0] magic: [u8; 4],
                     [4] size: u32,
                 }}
@@ -78,22 +77,26 @@ pub fn sections<const SECTIONS: usize>(
                 let mid = start + aligned;
                 if mid <= file.len() {
                     *section_mut = (header.magic, start..start + header.size as usize);
-                    rest = &section[aligned..];
+                    rest = &section[aligned - 0x10..];
                     index = mid;
                 } else {
                     return Err(Error::new("Ran out of data."));
                 }
             }
+
+            if index != file.len() {
+                panic!("Remaining section index {} did not match file size {}", index, file.len());
+            }
+
             Ok(sections)
         } else {
             Err(Error::new("Size did not match."))
         }
     } else {
         Err(Error::new(format!(
-                    "Error parsing file: expected magic number ({:X?}) did not match file's magic number ({:X?})",
-                    magic,
-                    header.magic,
-                )))
+            "Error parsing file: expected magic number ({:X?}) did not match file's magic number ({:X?})",
+            magic, header.magic,
+        )))
     }
 }
 

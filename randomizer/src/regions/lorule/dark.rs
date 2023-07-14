@@ -1,6 +1,7 @@
 crate::region! {
     course: FieldDark,
     name: "Dark Ruins",
+    color: Name,
     ruins {
         locations: [
             "Dark Ruins Lakeview Chest": RupeeSilver @Chest(35[228]),
@@ -12,9 +13,17 @@ crate::region! {
             "Hinox (4)": RupeeSilver @Event(CaveDark/FieldDark_17_NpcHinox [0x0A]),
             "Hinox (5)": RupeeSilver @Event(CaveDark/FieldDark_17_NpcHinox [0x11]),
             "Hinox (6)": RupeeGold @Event(CaveDark/FieldDark_17_NpcHinox [0x16]),
-        ],
-        paths: [
-            dungeons::dark::palace :- {|s| s.can_bomb() && s.can_lamp()},
+            "Ku's Domain Fight": RupeeSilver @Chest(7[55]),
+            "[Mai] Ku's Domain Water": Maiamai @Maiamai(7[12]),
+            "[Mai] Dark Ruins Waterfall": Maiamai @Maiamai(13[71]),
+            "[Mai] Outside Hinox Cave": Maiamai @Maiamai(14[56]),
+            "[Mai] Ku's Domain Grass": Maiamai @Maiamai(15[10]),
+            "[Mai] Dark Maze Entrance Wall": Maiamai @Maiamai(20[206]),
+            "[Mai] Dark Maze Center Wall": Maiamai @Maiamai(20[207]),
+            "[Mai] Atop Dark Ruins Rocks": Maiamai @Maiamai(22[25]),
+            "[Mai] Dark Ruins West Tree": Maiamai @Maiamai(28[39]),
+            "[Mai] Dark Ruins East Tree": Maiamai @Maiamai(29[57]),
+            "[Mai] Dark Ruins South Area Wall": Maiamai @Maiamai(30[35]),
         ],
     },
 }

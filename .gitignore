@@ -2,5 +2,7 @@
 /.idea/
 /test.3ds
 /generated/
-/A Link Between Worlds (USA).3ds
-/presets/Test.toml
+/*.3ds
+/presets/Test.json
+/ref/decomp/
+/release

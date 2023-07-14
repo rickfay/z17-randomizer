@@ -1,2 +1,8 @@
 [workspace]
-members = ["albw", "randomizer", "sys", "bytey", "bytey-macro", "cli"]
+members = ["albw", "bytey", "bytey-macro", "cli", "jack", "macros", "randomizer", "settings"]
+
+[profile.release]
+codegen-units = 1
+lto = true
+#opt-level = "s"
+#strip = true

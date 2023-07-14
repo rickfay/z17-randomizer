@@ -1,29 +1,31 @@
 crate::region! {
     course: FieldLight,
     name: "Lake Hylia",
+    color: Name,
     hylia {
         locations: [
-            "Torch Cave": RupeePurple @Chest(CaveLight 11[8]) :- can_light,
-            "Lake Hylia Ledge Chest": RupeeR @Chest(35[155]) :- can_merge,
-            "Bird Lover": ItemBottle @Event(FieldLight_2D_UnderBridgeStranger[0x2A]) :- can_swim,
-            "Secret Cave": RupeeGold @Chest(CaveLight 9[12]) :- can_bomb,
-            "Shore": MessageBottle @None() :- {|p| p.can_swim() || (p.glitched() && p.can_ledge_boost())},
-        ],
-        paths: [
-            island :- {|p| p.can_swim() || (p.glitched() && (p.fake_flippers() || (p.can_ice_rod() && p.can_hookshot())))},
-            hotfoot :- did_eastern,
-            lorule::lake::lorule :- can_merge,
-        ],
-    },
-    island {
-        paths: [
-            dungeons::house::gales :- can_tornado_rod,
-        ],
-    },
-    hotfoot {
-        locations: [
-            "Hyrule Hotfoot": HeartPiece @Event(FieldLight_HyruleRace[0x14]) :-
-                {|p| p.has_boots() && p.did_eastern()}, // Present after Irene Trigger
+            " 10 Maiamai": ItemBowLv2 @None(),
+            " 20 Maiamai": ItemBoomerangLv2 @None(),
+            " 30 Maiamai": ItemHookshotLv2 @None(),
+            " 40 Maiamai": ItemHammerLv2 @None(),
+            " 50 Maiamai": ItemBombLv2 @None(),
+            " 60 Maiamai": ItemFireRodLv2 @None(),
+            " 70 Maiamai": ItemIceRodLv2 @None(),
+            " 80 Maiamai": ItemTornadeRodLv2 @None(),
+            " 90 Maiamai": ItemSandRodLv2 @None(),
+            "100 Maiamai": SpecialMove @None(),
+            "Ice Rod Cave": RupeeGold @Chest(CaveLight 9[12]),
+            "Lake Hylia Dark Cave": RupeePurple @Chest(CaveLight 11[8]),
+            "Lake Hylia Ledge Chest": RupeeR @Chest(35[155]),
+            "Lakeside Item Shop (1)": EscapeFruit @None(),
+            "Lakeside Item Shop (2)": StopFruit @None(),
+            "Lakeside Item Shop (3)": ItemShield @None(),
+            "Southeastern Shore": MessageBottle @Heart(36[38]),
+            "[Mai] Hyrule Hotfoot Big Rock": Maiamai @Maiamai(36[31]),
+            "[Mai] Island Tornado Tile": Maiamai @Maiamai(35[130]),
+            "[Mai] Lake Hylia SE Wall": Maiamai @Maiamai(40[24]),
+            "[Mai] Lake Hylia Shallow Ring": Maiamai @Maiamai(35[131]),
+            "[Mai] Outside Maiamai Cave": Maiamai @Maiamai(35[129]),
         ],
     },
 }

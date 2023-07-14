@@ -1,8 +1,10 @@
 mod de;
 mod ser;
 
-pub use de::{from_bytes, Deserializer};
-pub use ser::{to_writer, Serializer};
+pub use {
+    de::{from_bytes, from_bytes_mut, Deserializer},
+    ser::{to_writer, Serializer},
+};
 
 crate::int_map! {
     Kind(u8) {

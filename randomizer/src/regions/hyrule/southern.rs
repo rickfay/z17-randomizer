@@ -1,19 +1,16 @@
 crate::region! {
     course: FieldLight,
     name: "Southern Ruins",
+    color: Name,
     ruins {
         locations: [
-            "Runaway Item Seller": RupeeSilver @Event(Boot/FieldLight_33_Douguya[0x49]) :- can_bomb,
-            "Behind Pillars": HeartPiece @Heart(33[313]) :- can_bomb,
-            "Treasure Room": RupeeSilver @Chest(AttractionLight 2[33])
-                :- {|p|
-                (p.can_lift_big() && p.can_swim() && p.can_hookshot() && p.can_boomerang())
-                || (p.glitched() && ((p.can_lift_big() || p.can_ice_rod()) && ((p.can_hookshot() && p.can_swim()) || p.nice_bombs())))
-                },
-            "Southern Ruins Ledge": RupeeSilver @Chest(33[320]) :- can_merge,
-        ],
-        paths: [
-            lorule::misery::mire :- can_merge,
+            "Runaway Item Seller": RupeeSilver @Event(Boot/FieldLight_33_Douguya[0x49]),
+            "Southern Ruins Ledge": RupeeSilver @Chest(33[320]),
+            "Southern Ruins Pillar Cave": HeartPiece @Heart(33[313]),
+            "Southern Ruins Treasure Dungeon": RupeeSilver @Chest(AttractionLight 2[33]),
+            "[Mai] Southern Ruins Bomb Cave": Maiamai @Maiamai(CaveLight 28[35]),
+            "[Mai] Southern Ruins Pillars": Maiamai @Maiamai(33[291]),
+            "[Mai] Outside Flippers Dungeon": Maiamai @Maiamai(33[290]),
         ],
     },
 }

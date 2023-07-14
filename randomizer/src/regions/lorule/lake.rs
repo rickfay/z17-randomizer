@@ -1,17 +1,19 @@
 crate::region! {
     course: FieldDark,
-    name: "Lorule Lake",
+    name: "Turtle Rock Region",
+    color: Name,
     lorule {
         locations: [
-            "Lorule Lake NW Chest": RupeeSilver @Chest(28[53]),
-        ],
-        paths: [
-            dungeons::turtle::rock :- {|p| p.can_ice_rod() && (p.can_swim() || (p.glitched() && p.fake_flippers()))},
-        ],
-    },
-    balcony {
-        locations: [
-            "Turtle Rock Left Balcony": HeartPiece @Heart(35[54]),
+            "Lorule Lake Chest": RupeeSilver @Chest(28[53]),
+            "Lorule Lakeside Item Shop (1)": Bee @None(),
+            "Lorule Lakeside Item Shop (2)": GoldenBeeForSale @None(),
+            "Lorule Lakeside Item Shop (3)": Fairy @None(),
+            "Lorule Lakeside Item Shop (3)": Shield @None(),
+            "[Mai] Lorule Lake Big Rock": Maiamai @Maiamai(35[65]),
+            "[Mai] Lorule Lake SE Wall": Maiamai @Maiamai(40[15]),
+            "[Mai] Lorule Lake Skull": Maiamai @Maiamai(36[46]),
+            "[Mai] Lorule Lake Water": Maiamai @Maiamai(35[64]),
+            "[Mai] Lorule Lake West Wall": Maiamai @Maiamai(35[63]),
         ],
     },
 }

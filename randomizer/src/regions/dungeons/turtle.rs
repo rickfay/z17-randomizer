@@ -1,29 +1,28 @@
 crate::region! {
     course: DungeonKame,
     name: "Turtle Rock",
+    color: Purple,
     rock {
         locations: [
             "[TR] (1F) Center": Compass @Chest(1[115]),
             "[TR] (1F) Grate Chest": RupeePurple @Chest(1[58]),
-            "[TR] (1F) Portal Room (Northwest)": KeySmall @Key(1[153]),
+            "[TR] (1F) Portal Room NW": KeySmall @Key(1[153]),
             "[TR] (1F) Northeast Ledge": KeySmall @Key(1[243]),
             "[TR] (1F) Southeast Chest": RupeePurple @Chest(1[173]),
             "[TR] (1F) Defeat Flamolas": RupeeSilver @Chest(1[220]),
+            "Turtle Rock Left Balcony": HeartPiece @Heart(FieldDark 35[54]),
+
+            "[TR] (1F) Under Center": RupeeSilver @SilverRupee(1[114]),
+            "[TR] (B1) Under Center": RupeeGold @GoldRupee(2[211]),
+
             "[TR] (B1) Northeast Room": KeySmall @Key(2[53]),
             "[TR] (B1) Platform": RupeeSilver @Chest(2[183]),
             "[TR] (B1) Grate Chest (Small)": RupeePurple @Chest(2[5]),
-            "[TR] (B1) Big Chest (Center)": HyruleShield @Chest(2[180]) :- {|s| s.can_hit_shielded_switch() || s.glitched()},  // Throw skull to hit switch
-            "[TR] (B1) Big Chest (Top)": KeyBoss @Chest(2[29]) :- {|s| s.small_keys(COURSE) >= 1 && (s.can_hit_shielded_switch() || s.glitched())}, // Throw skull to hit switch
-        ],
-        paths: [
-            boss :- {|s| (s.small_keys(COURSE) >= 3 && s.has_boss_key(COURSE)) || (s.glitched() && s.can_tornado_rod() && s.nice_bombs())},
-            lorule::lake::balcony,
-        ],
-    },
-    boss {
-        locations: [
+            "[TR] (B1) Big Chest (Center)": HyruleShield @BigChest(2[180]),
+            "[TR] (B1) Big Chest (Top)": KeyBoss @BigChest(2[29]),
+
             "[TR] Grinexx": HeartContainer @Heart(3[6]),
+            "Turtle Rock Prize": None @None(),
         ],
-        quest: Portrait::Impa,
     },
 }

@@ -1,18 +1,18 @@
-use std::{
-    convert::{TryFrom, TryInto},
-    fmt::{self, Display, Formatter},
-    num::NonZeroU32,
-    str,
+use {
+    super::Kind,
+    crate::{files::align, Error, Result},
+    bytey::*,
+    serde::de::{
+        self, value::BorrowedBytesDeserializer, DeserializeSeed, MapAccess, SeqAccess, Unexpected,
+        Visitor,
+    },
+    std::{
+        convert::{TryFrom, TryInto},
+        fmt::{self, Display, Formatter},
+        num::NonZeroU32,
+        str,
+    },
 };
-
-use bytey::*;
-use serde::de::{
-    self, value::BorrowedBytesDeserializer, DeserializeSeed, MapAccess, SeqAccess, Unexpected,
-    Visitor,
-};
-
-use super::Kind;
-use crate::{files::align, Error, Result};
 
 impl Error {
     fn eof() -> Self {
@@ -38,14 +38,15 @@ impl<'de> Deserializer<'de> {
         Self { source }
     }
 
+    pub fn from_bytes_mut(source: &'de mut [u8]) -> Self {
+        Self { source }
+    }
+
     fn invalid_root<V>(kind: &'static str) -> Result<V::Value>
     where
         V: Visitor<'de>,
     {
-        Err(de::Error::custom(format!(
-            "Attempted to deserialize a {}",
-            kind
-        )))
+        Err(de::Error::custom(format!("Attempted to deserialize a {}", kind)))
     }
 
     fn document(&self) -> Result<Document<'de>> {
@@ -69,11 +70,8 @@ impl<'de> de::Deserializer<'de> for Deserializer<'de> {
         V: Visitor<'de>,
     {
         if let Some(root) = NonZeroU32::new(self.document()?.root) {
-            let kind = (*self
-                .source
-                .get(root.get() as usize)
-                .ok_or_else(Error::eof)?)
-            .try_into()?;
+            let kind =
+                (*self.source.get(root.get() as usize).ok_or_else(Error::eof)?).try_into()?;
             let document = self.document()?;
             match kind {
                 Kind::Array => visitor.visit_seq(self.array(&document)?),
@@ -219,9 +217,7 @@ impl<'de> de::Deserializer<'de> for Deserializer<'de> {
     }
 
     fn deserialize_unit_struct<V>(
-        self,
-        _name: &'static str,
-        visitor: V,
+        self, _name: &'static str, visitor: V,
     ) -> Result<V::Value, Self::Error>
     where
         V: Visitor<'de>,
@@ -230,9 +226,7 @@ impl<'de> de::Deserializer<'de> for Deserializer<'de> {
     }
 
     fn deserialize_newtype_struct<V>(
-        self,
-        _name: &'static str,
-        visitor: V,
+        self, _name: &'static str, visitor: V,
     ) -> Result<V::Value, Self::Error>
     where
         V: Visitor<'de>,
@@ -256,10 +250,7 @@ impl<'de> de::Deserializer<'de> for Deserializer<'de> {
     }
 
     fn deserialize_tuple_struct<V>(
-        self,
-        _name: &'static str,
-        _len: usize,
-        visitor: V,
+        self, _name: &'static str, _len: usize, visitor: V,
     ) -> Result<V::Value, Self::Error>
     where
         V: Visitor<'de>,
@@ -276,10 +267,7 @@ impl<'de> de::Deserializer<'de> for Deserializer<'de> {
     }
 
     fn deserialize_struct<V>(
-        self,
-        _name: &'static str,
-        _fields: &'static [&'static str],
-        visitor: V,
+        self, _name: &'static str, _fields: &'static [&'static str], visitor: V,
     ) -> Result<V::Value, Self::Error>
     where
         V: Visitor<'de>,
@@ -288,10 +276,7 @@ impl<'de> de::Deserializer<'de> for Deserializer<'de> {
     }
 
     fn deserialize_enum<V>(
-        self,
-        _name: &'static str,
-        _variants: &'static [&'static str],
-        _visitor: V,
+        self, _name: &'static str, _variants: &'static [&'static str], _visitor: V,
     ) -> Result<V::Value, Self::Error>
     where
         V: Visitor<'de>,
@@ -334,22 +319,14 @@ impl<'de> Document<'de> {
         let (header, _) = Header::try_from_slice(source)?;
         let keys = Self::strings(source, header.keys)?;
         let strings = Self::strings(source, header.strings)?;
-        Ok(Self {
-            source,
-            keys,
-            strings,
-            root: header.root,
-        })
+        Ok(Self { source, keys, strings, root: header.root })
     }
 
     fn strings(source: &'de [u8], offset: u32) -> Result<Vec<&'de [u8]>> {
         if offset == 0 {
             Ok(vec![])
         } else {
-            source
-                .get(offset as usize..)
-                .ok_or_else(Error::eof)
-                .and_then(read_strings)
+            source.get(offset as usize..).ok_or_else(Error::eof).and_then(read_strings)
         }
     }
 
@@ -376,17 +353,11 @@ impl<'de> Document<'de> {
     }
 
     fn array<'doc>(&'doc self, offset: u32) -> Result<Array<'doc, 'de>> {
-        Array::from(
-            self,
-            self.source.get(offset as usize..).ok_or_else(Error::eof)?,
-        )
+        Array::from(self, self.source.get(offset as usize..).ok_or_else(Error::eof)?)
     }
 
     fn map<'doc>(&'doc self, offset: u32) -> Result<Map<'doc, 'de>> {
-        Map::from(
-            self,
-            self.source.get(offset as usize..).ok_or_else(Error::eof)?,
-        )
+        Map::from(self, self.source.get(offset as usize..).ok_or_else(Error::eof)?)
     }
 }
 
@@ -399,11 +370,7 @@ struct Node<'doc, 'de> {
 
 impl<'doc, 'de> Node<'doc, 'de> {
     fn new(document: &'doc Document<'de>, kind: Kind, value: [u8; 4]) -> Self {
-        Self {
-            document,
-            kind,
-            value,
-        }
+        Self { document, kind, value }
     }
 
     fn expect_kind(&self, expected: Kind) -> Result<()> {
@@ -595,11 +562,7 @@ impl<'doc, 'de> de::Deserializer<'de> for Node<'doc, 'de> {
     where
         V: Visitor<'de>,
     {
-        if self.is_null() {
-            visitor.visit_none()
-        } else {
-            visitor.visit_some(self)
-        }
+        if self.is_null() { visitor.visit_none() } else { visitor.visit_some(self) }
     }
 
     fn deserialize_unit<V>(self, visitor: V) -> Result<V::Value, Self::Error>
@@ -610,9 +573,7 @@ impl<'doc, 'de> de::Deserializer<'de> for Node<'doc, 'de> {
     }
 
     fn deserialize_unit_struct<V>(
-        self,
-        _name: &'static str,
-        visitor: V,
+        self, _name: &'static str, visitor: V,
     ) -> Result<V::Value, Self::Error>
     where
         V: Visitor<'de>,
@@ -621,9 +582,7 @@ impl<'doc, 'de> de::Deserializer<'de> for Node<'doc, 'de> {
     }
 
     fn deserialize_newtype_struct<V>(
-        self,
-        _name: &'static str,
-        visitor: V,
+        self, _name: &'static str, visitor: V,
     ) -> Result<V::Value, Self::Error>
     where
         V: Visitor<'de>,
@@ -646,10 +605,7 @@ impl<'doc, 'de> de::Deserializer<'de> for Node<'doc, 'de> {
     }
 
     fn deserialize_tuple_struct<V>(
-        self,
-        _name: &'static str,
-        _len: usize,
-        visitor: V,
+        self, _name: &'static str, _len: usize, visitor: V,
     ) -> Result<V::Value, Self::Error>
     where
         V: Visitor<'de>,
@@ -665,10 +621,7 @@ impl<'doc, 'de> de::Deserializer<'de> for Node<'doc, 'de> {
     }
 
     fn deserialize_struct<V>(
-        self,
-        _name: &'static str,
-        _fields: &'static [&'static str],
-        visitor: V,
+        self, _name: &'static str, _fields: &'static [&'static str], visitor: V,
     ) -> Result<V::Value, Self::Error>
     where
         V: Visitor<'de>,
@@ -677,10 +630,7 @@ impl<'doc, 'de> de::Deserializer<'de> for Node<'doc, 'de> {
     }
 
     fn deserialize_enum<V>(
-        self,
-        _name: &'static str,
-        _variants: &'static [&'static str],
-        _visitor: V,
+        self, _name: &'static str, _variants: &'static [&'static str], _visitor: V,
     ) -> Result<V::Value, Self::Error>
     where
         V: Visitor<'de>,
@@ -715,11 +665,7 @@ impl<'doc, 'de> Array<'doc, 'de> {
         let (count, rest) = header(source, Kind::Array)?;
         let (kinds, values) = split(rest, align::<4>(count) as usize)?;
         let kinds = &kinds[0..count as usize];
-        Ok(Self {
-            document,
-            kinds,
-            values,
-        })
+        Ok(Self { document, kinds, values })
     }
 }
 
@@ -737,8 +683,7 @@ impl<'doc, 'de> SeqAccess<'de> for Array<'doc, 'de> {
             let (value, values) = TryFromSlice::try_from_slice(self.values)?;
             self.kinds = kinds;
             self.values = values;
-            seed.deserialize(Node::new(self.document, kind, value))
-                .map(Some)
+            seed.deserialize(Node::new(self.document, kind, value)).map(Some)
         }
     }
 
@@ -773,8 +718,7 @@ impl<'doc, 'de> MapAccess<'de> for Map<'doc, 'de> {
         } else {
             let (key, entries) = U24::try_from_slice(self.entries)?;
             self.entries = entries;
-            seed.deserialize(BorrowedBytesDeserializer::new(self.document.key(key.0)?))
-                .map(Some)
+            seed.deserialize(BorrowedBytesDeserializer::new(self.document.key(key.0)?)).map(Some)
         }
     }
 
@@ -798,21 +742,16 @@ impl<'doc, 'de> MapAccess<'de> for Map<'doc, 'de> {
 
 impl Display for Kind {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        write!(
-            f,
-            "{:02X} [{}]",
-            *self as u8,
-            match self {
-                Kind::String => "string",
-                Kind::Array => "array",
-                Kind::Map => "map",
-                Kind::Strings => "strings",
-                Kind::Boolean => "boolean",
-                Kind::Integer => "integer",
-                Kind::Float => "float",
-                Kind::Null => "null",
-            }
-        )
+        write!(f, "{:02X} [{}]", *self as u8, match self {
+            Kind::String => "string",
+            Kind::Array => "array",
+            Kind::Map => "map",
+            Kind::Strings => "strings",
+            Kind::Boolean => "boolean",
+            Kind::Integer => "integer",
+            Kind::Float => "float",
+            Kind::Null => "null",
+        })
     }
 }
 
@@ -843,9 +782,7 @@ fn read_strings(source: &[u8]) -> Result<Vec<&[u8]>> {
         (0..count)
             .map(|_| {
                 end = offsets.next().unwrap();
-                let bytes = source
-                    .get(start as usize..end as usize)
-                    .ok_or_else(Error::eof)?;
+                let bytes = source.get(start as usize..end as usize).ok_or_else(Error::eof)?;
                 let bytes = bytes.split(|&byte| byte == 0).next().unwrap();
                 start = end;
                 Ok(bytes)
@@ -855,11 +792,7 @@ fn read_strings(source: &[u8]) -> Result<Vec<&[u8]>> {
 }
 
 fn split(slice: &[u8], mid: usize) -> Result<(&[u8], &[u8])> {
-    if mid > slice.len() {
-        Err(Error::eof())
-    } else {
-        Ok(slice.split_at(mid))
-    }
+    if mid > slice.len() { Err(Error::eof()) } else { Ok(slice.split_at(mid)) }
 }
 
 fn header(source: &[u8], kind: Kind) -> Result<(u32, &[u8])> {
@@ -890,30 +823,29 @@ where
     T::deserialize(Deserializer::from_bytes(source))
 }
 
+pub fn from_bytes_mut<'de, T>(source: &'de mut [u8]) -> Result<T>
+where
+    T: de::Deserialize<'de>,
+{
+    T::deserialize(Deserializer::from_bytes_mut(source))
+}
+
 const FALSE: [u8; 4] = [0, 0, 0, 0];
 
 #[cfg(test)]
 mod tests {
-    use std::collections::BTreeMap;
-
-    use serde::Deserialize;
-
-    use super::super::tests::data;
+    use {super::super::tests::data, serde::Deserialize, std::collections::BTreeMap};
 
     #[test]
     fn it_deserializes_array() {
-        assert_eq!(
-            super::from_bytes::<Vec<i32>>(data::ARRAY).unwrap(),
-            vec![0x01234567]
-        );
+        assert_eq!(super::from_bytes::<Vec<i32>>(data::ARRAY).unwrap(), vec![0x01234567]);
     }
 
     #[test]
     fn it_deserializes_nested_array() {
-        assert_eq!(
-            super::from_bytes::<Vec<Vec<i32>>>(data::NESTED_ARRAY).unwrap(),
-            vec![vec![0x01234567]]
-        )
+        assert_eq!(super::from_bytes::<Vec<Vec<i32>>>(data::NESTED_ARRAY).unwrap(), vec![vec![
+            0x01234567
+        ]])
     }
 
     #[test]

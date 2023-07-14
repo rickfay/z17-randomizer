@@ -49,10 +49,7 @@ pub const LEN: usize = 0x400;
 
 #[cfg(test)]
 mod tests {
-    use bytey::*;
-
-    use super::*;
-    use crate::Result;
+    use {super::*, crate::Result};
 
     fn new() -> ExHeader {
         let mut buf = [0u8; LEN];

@@ -1,40 +1,48 @@
-use std::{collections::BTreeMap, error::Error as StdError, fs, fs::File, io};
-use std::io::{stdin, stdout, Write};
-use std::path::Path;
+use {
+    crate::{
+        constants::VERSION,
+        hints::{formatting::*, Hints},
+        metrics::Metrics,
+        patch::msbf::MsbfKey,
+        system::UserConfig,
+    },
+    albw::{
+        Game,
+        Item::{self, *},
+    },
+    log::{debug, error, info},
+    macros::fail,
+    model::filler_item::{convert, FillerItem},
+    patch::Patcher,
+    path_absolutize::*,
+    rand::{rngs::StdRng, SeedableRng},
+    regions::Subregion,
+    serde::{ser::SerializeMap, Serialize, Serializer},
+    settings::Settings,
+    std::{
+        collections::{hash_map::DefaultHasher, BTreeMap},
+        error::Error as StdError,
+        fs::File,
+        hash::{Hash, Hasher},
+        io::{self, Write},
+        ops::Deref,
+    },
+};
 
-use linked_hash_map::LinkedHashMap;
-use log::{debug, info};
-use serde::{ser::SerializeMap, Serialize, Serializer};
-
-use albw::{Game, Item};
-use albw::Item::*;
-use patch::Patcher;
-use regions::Subregion;
-pub use settings::Settings;
-use state::State;
-use sys::{Paths, System};
-
-use crate::filler::fill_stuff;
-use crate::filler_item::{convert, FillerItem};
-use crate::settings::plando_settings;
-
-mod graph;
-mod patch;
-mod regions;
-pub mod settings;
-mod state;
-mod check;
-mod filler_item;
-mod loading_zone;
-mod loading_zone_pair;
-mod location;
-mod location_node;
-mod path;
-mod progress;
-mod world;
+pub mod constants;
+mod entrance_rando;
 mod filler;
-mod logic;
-pub mod logic_mode;
+mod filler_util;
+mod hints;
+mod item_pools;
+mod legacy;
+mod metrics;
+pub mod model;
+mod patch;
+pub mod regions;
+pub mod system;
+#[rustfmt::skip]
+mod world;
 
 pub type Result<T, E = Error> = core::result::Result<T, E>;
 
@@ -46,23 +54,17 @@ pub struct Error {
 
 impl Error {
     fn game<S>(err: S) -> Self
-        where
-            S: Into<Box<dyn StdError + Send + Sync + 'static>>,
+    where
+        S: Into<Box<dyn StdError + Send + Sync + 'static>>,
     {
-        Self {
-            kind: ErrorKind::Game,
-            inner: err.into(),
-        }
+        Self { kind: ErrorKind::Game, inner: err.into() }
     }
 
     fn io<S>(err: S) -> Self
-        where
-            S: Into<Box<dyn StdError + Send + Sync + 'static>>,
+    where
+        S: Into<Box<dyn StdError + Send + Sync + 'static>>,
     {
-        Self {
-            kind: ErrorKind::Io,
-            inner: err.into(),
-        }
+        Self { kind: ErrorKind::Io, inner: err.into() }
     }
 
     /// Gets the type of this error.
@@ -82,28 +84,19 @@ impl From<albw::Error> for Error {
             albw::ErrorKind::Io => ErrorKind::Io,
             albw::ErrorKind::Rom => ErrorKind::Game,
         };
-        Self {
-            kind,
-            inner: err.into_inner(),
-        }
+        Self { kind, inner: err.into_inner() }
     }
 }
 
 impl From<io::Error> for Error {
     fn from(err: io::Error) -> Self {
-        Self {
-            kind: ErrorKind::Io,
-            inner: err.into(),
-        }
+        Self { kind: ErrorKind::Io, inner: err.into() }
     }
 }
 
-impl From<sys::Error> for Error {
-    fn from(err: sys::Error) -> Self {
-        Self {
-            kind: ErrorKind::Sys,
-            inner: err.into(),
-        }
+impl From<system::Error> for Error {
+    fn from(err: system::Error) -> Self {
+        Self { kind: ErrorKind::Sys, inner: err.into() }
     }
 }
 
@@ -114,13 +107,6 @@ pub enum ErrorKind {
     Io,
 }
 
-pub type Seed = u32;
-
-#[derive(Debug)]
-pub struct Hash(u32);
-
-pub(crate) type Condition = for<'state> fn(&'state State) -> bool;
-
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Hash)]
 pub struct LocationInfo {
     subregion: &'static Subregion,
@@ -128,7 +114,7 @@ pub struct LocationInfo {
 }
 
 impl LocationInfo {
-    pub(crate) const fn new(subregion: &'static Subregion, name: &'static str) -> Self {
+    pub const fn new(subregion: &'static Subregion, name: &'static str) -> Self {
         Self { subregion, name }
     }
 
@@ -138,6 +124,10 @@ impl LocationInfo {
 
     pub fn region(&self) -> &'static str {
         self.subregion.name()
+    }
+
+    pub fn region_colorized(&self) -> String {
+        self.subregion.name_colorized()
     }
 
     pub fn name(&self) -> &'static str {
@@ -174,26 +164,51 @@ impl Layout {
     }
 
     fn get_node_mut(&mut self, node: &'static Subregion) -> &mut BTreeMap<&'static str, Item> {
-        self.world_mut(node.world())
-            .entry(node.name())
-            .or_insert_with(Default::default)
+        self.world_mut(node.world()).entry(node.name()).or_insert_with(Default::default)
     }
 
     fn get(&self, location: &LocationInfo) -> Option<Item> {
-        let LocationInfo {
-            subregion: node,
-            name,
-        } = location;
-        self.world(node.world())
-            .get(node.name())
-            .and_then(|region| region.get(name).copied())
+        let LocationInfo { subregion: node, name } = location;
+        self.world(node.world()).get(node.name()).and_then(|region| region.get(name).copied())
     }
 
-    fn set(&mut self, location: LocationInfo, item: Item) {
-        let LocationInfo {
-            subregion: node,
-            name,
-        } = location;
+    #[allow(unused)]
+    fn find(&self, item: Item) -> Vec<&'static str> {
+        todo!()
+    }
+
+    /// This just highlights why we need to redo [`Layout`]
+    #[allow(unused)]
+    fn find_single(&self, find_item: Item) -> Option<(&'static str, &'static str)> {
+        for (region_name, region) in &self.hyrule {
+            for (loc_name, item) in region {
+                if find_item.eq(item) {
+                    return Some((region_name, loc_name));
+                }
+            }
+        }
+
+        for (region_name, region) in &self.lorule {
+            for (loc_name, item) in region {
+                if find_item.eq(item) {
+                    return Some((region_name, loc_name));
+                }
+            }
+        }
+
+        for (region_name, region) in &self.dungeons {
+            for (loc_name, item) in region {
+                if find_item.eq(item) {
+                    return Some((region_name, loc_name));
+                }
+            }
+        }
+
+        None
+    }
+
+    pub fn set(&mut self, location: LocationInfo, item: Item) {
+        let LocationInfo { subregion: node, name } = location;
         self.get_node_mut(node).insert(name, item.normalize());
         debug!(
             "Placed {} in {}/{}",
@@ -204,43 +219,18 @@ impl Layout {
     }
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub enum Quest {
-    Sanctuary,
-    Pendant(Pendant),
-    Portrait(Portrait),
-}
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub enum Pendant {
-    Courage,
-    Wisdom,
-    Power,
-}
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub enum Portrait {
-    Gulley,
-    Oren,
-    Seres,
-    Osfala,
-    Rosso,
-    Irene,
-    Impa,
-}
-
-pub(crate) type World = LinkedHashMap<&'static str, BTreeMap<&'static str, Item>>;
+pub type World = BTreeMap<&'static str, BTreeMap<&'static str, Item>>;
 
 fn serialize_world<S>(region: &World, ser: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
+where
+    S: Serializer,
 {
     struct Wrap<'a>(&'a BTreeMap<&'static str, Item>);
 
     impl<'a> Serialize for Wrap<'a> {
         fn serialize<S>(&self, ser: S) -> Result<S::Ok, S::Error>
-            where
-                S: Serializer,
+        where
+            S: Serializer,
         {
             let mut map = ser.serialize_map(Some(self.0.len()))?;
             for (k, v) in self.0 {
@@ -286,27 +276,30 @@ fn item_to_str(item: &Item) -> &'static str {
         ItemBow => "Bow",
         ItemBowLv2 => "Nice Bow",
         ItemShield => "Shield",
-        ItemBottle => "Bottle",
+        ItemBottle => "Empty Bottle",
         ItemStoneBeauty => "Smooth Gem",
         ItemKandelaar => "Lamp",
         ItemKandelaarLv2 => "Super Lamp",
-        ItemSwordLv1 => "Progressive Sword",
-        ItemSwordLv2 => "Progressive Sword",
-        ItemMizukaki => "Flippers",
-        RingHekiga => "Progressive Bracelet",
+        ItemSwordLv1 => "Sword Upgrade",
+        ItemSwordLv2 => "Sword Upgrade",
+        ItemSwordLv3 => "Master Sword Lv2",
+        ItemSwordLv4 => "Master Sword Lv3",
+        ItemMizukaki => "Zora's Flippers",
+        RingRental => "Bracelet Upgrade",
+        RingHekiga => "Ravio's Bracelet",
         ItemBell => "Bell",
         RupeeGold => "Gold Rupee",
         RupeeSilver => "Silver Rupee",
-        PowerGlove => "Progressive Glove",
+        PowerGlove => "Strength Upgrade",
         ItemInsectNet => "Net",
         ItemInsectNetLv2 => "Super Net",
-        Kinsta => "Maiamai",
+        Kinsta => "Lost Maiamai",
         BadgeBee => "Bee Badge",
         HintGlasses => "Hint Glasses",
         LiverBlue => "Monster Tail",
         LiverPurple => "Monster Guts",
         LiverYellow => "Monster Horn",
-        ClothesBlue => "Progressive Mail",
+        ClothesBlue | ClothesRed => "Armor Upgrade",
         HyruleShield => "Hylian Shield",
         OreYellow => "Master Ore",
         OreGreen => "Master Ore",
@@ -315,148 +308,78 @@ fn item_to_str(item: &Item) -> &'static str {
         Pouch => "Pouch",
         DashBoots => "Pegasus Boots",
         OreRed => "Master Ore",
-        MessageBottle => "Message in a Bottle",
+        MessageBottle => "Letter in a Bottle",
         MilkMatured => "Premium Milk",
         SpecialMove => "Great Spin",
-        GanbariTubo => "Stamina Scroll",
+        GanbariTubo => "Energy Potion",
         RupeePurple => "Purple Rupee",
         ItemBowLight => "Bow of Light",
+        Heart => "Heart",
 
-        HyruleSanctuaryKey => "Hyrule Sanctuary Small Key",
-        LoruleSanctuaryKey => "Lorule Sanctuary Small Key",
+        Empty => "Nothing",
 
-        EasternKeySmall => "Eastern Palace Small Key",
-        EasternKeyBig => "Eastern Palace Big Key",
-        EasternCompass => "Eastern Palace Compass",
+        PendantPower => "Pendant of Power",
+        PendantWisdom => "Pendant of Wisdom",
+        ZeldaAmulet | PendantCourage => "Pendant of Courage Upgrade",
 
-        GalesKeySmall => "House of Gales Small Key",
-        GalesKeyBig => "House of Gales Big Key",
-        GalesCompass => "House of Gales Compass",
+        SageGulley => "Sage Gulley",
+        SageOren => "Sage Oren",
+        SageSeres => "Sage Seres",
+        SageOsfala => "Sage Osfala",
+        SageImpa => "Sage Impa",
+        SageIrene => "Sage Irene",
+        SageRosso => "Sage Rosso",
 
-        HeraKeySmall => "Tower of Hera Small Key",
-        HeraKeyBig => "Tower of Hera Big Key",
-        HeraCompass => "Tower of Hera Compass",
+        TriforceCourage => "Triforce of Courage",
 
-        DarkKeySmall => "Dark Palace Small Key",
-        DarkKeyBig => "Dark Palace Big Key",
-        DarkCompass => "Dark Palace Compass",
+        ItemPotShopRed => "Red Potion",
+        ItemPotShopBlue => "Blue Potion",
+        ItemPotShopPurple => "Purple Potion",
+        ItemPotShopYellow => "Yellow Potion",
 
-        SwampKeySmall => "Swamp Palace Small Key",
-        SwampKeyBig => "Swamp Palace Big Key",
-        SwampCompass => "Swamp Palace Compass",
+        EscapeFruit => "Scoot Fruit",
+        StopFruit => "Foul Fruit",
+        Bee => "Bee",
+        GoldenBeeForSale => "Golden Bee",
+        Fairy => "Fairy",
+        Milk => "Milk",
 
-        SkullKeySmall => "Skull Woods Small Key",
-        SkullKeyBig => "Skull Woods Big Key",
-        SkullCompass => "Skull Woods Compass",
-
-        ThievesKeySmall => "Thieves' Hideout Small Key",
-        ThievesKeyBig => "Thieves' Hideout Big Key",
-        ThievesCompass => "Thieves' Hideout Compass",
-
-        IceKeySmall => "Ice Ruins Small Key",
-        IceKeyBig => "Ice Ruins Big Key",
-        IceCompass => "Ice Ruins Compass",
-
-        DesertKeySmall => "Desert Palace Small Key",
-        DesertKeyBig => "Desert Palace Big Key",
-        DesertCompass => "Desert Palace Compass",
-
-        TurtleKeySmall => "Turtle Rock Small Key",
-        TurtleKeyBig => "Turtle Rock Big Key",
-        TurtleCompass => "Turtle Rock Compass",
-
-        LoruleCastleKeySmall => "Lorule Castle Small Key",
-        LoruleCastleCompass => "Lorule Castle Compass",
-
-        _ => unreachable!("{}", item.as_str()),
+        ItemRentalIceRod => "Rented Ice Rod",
+        ItemRentalSandRod => "Rented Sand Rod",
+        ItemRentalTornadeRod => "Rented Tornado Rod",
+        ItemRentalBomb => "Rented Bomb Rod",
+        ItemRentalFireRod => "Rented Fire Rod",
+        ItemRentalHookShot => "Rented Hookshot",
+        ItemRentalBoomerang => "Rented Boomerang",
+        ItemRentalHammer => "Rented Hammer",
+        ItemRentalBow => "Rented Bow",
+        ItemRentalShield => "Rented Shield",
+        ItemRentalSandRodFirst => "Rented Sand Rod (Osfala)",
+        PowerfulGlove => "Titan's Mitt",
+        GoldenBee => "Golden Bee",
+        PackageSword => "Captain's Sword",
     }
 }
 
 trait ItemExt {
-    fn is_dungeon(&self) -> bool;
-    fn is_progression(&self) -> bool;
-    fn is_sword(&self) -> bool;
-    fn is_super(&self) -> bool;
-    fn is_ore(&self) -> bool;
     fn normalize(self) -> Self;
+    fn goes_in_csmc_large_chest(&self) -> bool;
+    fn msbf_key(self) -> Option<&'static str>;
+
+    // fn is_dungeon(&self) -> bool;
+    // fn is_sword(&self) -> bool;
+    // fn is_super(&self) -> bool;
+    // fn is_ore(&self) -> bool;
 }
 
 impl ItemExt for Item {
-    fn is_dungeon(&self) -> bool {
-        matches!(self, Item::KeySmall | Item::KeyBoss | Item::Compass)
-    }
-
-    fn is_progression(&self) -> bool {
-        matches!(
-            self,
-            Item::KeySmall
-                | Item::KeyBoss
-                | Item::ItemStoneBeauty
-                | Item::ItemKandelaar
-                | Item::ItemSwordLv1
-                | Item::ItemSwordLv2
-                | Item::ItemMizukaki
-                | Item::ItemRentalIceRod
-                | Item::ItemRentalSandRod
-                | Item::ItemRentalTornadeRod
-                | Item::ItemRentalBomb
-                | Item::ItemRentalFireRod
-                | Item::ItemRentalHookShot
-                | Item::ItemRentalBoomerang
-                | Item::ItemRentalHammer
-                | Item::ItemRentalBow
-                | Item::ItemBottle
-                | Item::RingHekiga
-                | Item::PowerGlove
-                | Item::ItemInsectNet
-                | Item::PowerfulGlove
-                | Item::OreYellow
-                | Item::OreGreen
-                | Item::OreBlue
-                | Item::DashBoots
-                | Item::OreRed
-                | Item::MessageBottle
-                | Item::MilkMatured
-                | Item::GanbariPowerUp
-                | Item::PackageSword
-        )
-    }
-
-    fn is_sword(&self) -> bool {
-        matches!(
-            self,
-            Item::ItemSwordLv1 |
-            Item::ItemSwordLv2 |
-            Item::ItemSwordLv3 |
-            Item::ItemSwordLv4
-        )
-    }
-
-    fn is_super(&self) -> bool {
-        matches! {
-            self,
-            Item::ItemKandelaarLv2 |
-            Item::ItemInsectNetLv2
-        }
-    }
-
-    fn is_ore(&self) -> bool {
-        matches!(
-            self,
-            Item::OreYellow | Item::OreGreen | Item::OreBlue | Item::OreRed
-        )
-    }
-
     fn normalize(self) -> Self {
         match self {
-            PackageSword | ItemSwordLv1 | ItemSwordLv3 | ItemSwordLv4 => {
-                ItemSwordLv2
-            }
+            PackageSword | ItemSwordLv1 | ItemSwordLv3 | ItemSwordLv4 => ItemSwordLv2,
             ItemRentalIceRod => ItemIceRod,
             ItemRentalSandRod => ItemSandRod,
             ItemRentalTornadeRod => ItemTornadeRod,
             ItemRentalBomb => ItemBomb,
-            //Item::ItemRentalBomb => Item::ItemBombLv2,
             ItemRentalFireRod => ItemFireRod,
             ItemRentalHookShot => ItemHookShot,
             ItemRentalBoomerang => ItemBoomerang,
@@ -464,480 +387,262 @@ impl ItemExt for Item {
             ItemRentalBow => ItemBow,
             PowerfulGlove => PowerGlove,
             ClothesRed => ClothesBlue,
-            RingRental => RingHekiga,
+            // RingRental => RingHekiga,
             ItemKandelaarLv2 => ItemKandelaar,
             ItemInsectNetLv2 => ItemInsectNet,
-
-            HyruleSanctuaryKey => KeySmall,
-            LoruleSanctuaryKey => KeySmall,
-
-            EasternCompass => Compass,
-            EasternKeySmall => KeySmall,
-            EasternKeyBig => KeyBoss,
-
-            GalesCompass => Compass,
-            GalesKeySmall => KeySmall,
-            GalesKeyBig => KeyBoss,
-
-            HeraCompass => Compass,
-            HeraKeySmall => KeySmall,
-            HeraKeyBig => KeyBoss,
-
-            DarkCompass => Compass,
-            DarkKeySmall => KeySmall,
-            DarkKeyBig => KeyBoss,
-
-            SwampCompass => Compass,
-            SwampKeySmall => KeySmall,
-            SwampKeyBig => KeyBoss,
-
-            SkullCompass => Compass,
-            SkullKeySmall => KeySmall,
-            SkullKeyBig => KeyBoss,
-
-            ThievesCompass => Compass,
-            ThievesKeySmall => KeySmall,
-            ThievesKeyBig => KeyBoss,
-
-            IceCompass => Compass,
-            IceKeySmall => KeySmall,
-            IceKeyBig => KeyBoss,
-
-            DesertCompass => Compass,
-            DesertKeySmall => KeySmall,
-            DesertKeyBig => KeyBoss,
-
-            TurtleCompass => Compass,
-            TurtleKeySmall => KeySmall,
-            TurtleKeyBig => KeyBoss,
-
-            LoruleCastleCompass => Compass,
-            LoruleCastleKeySmall => KeySmall,
-
             item => item,
         }
     }
-}
 
-/// A log of seed info and item placements
-#[derive(Debug, Serialize)]
-pub struct Spoiler<'settings> {
-    seed: Seed,
-    settings: &'settings Settings,
-    layout: Layout,
-}
+    fn goes_in_csmc_large_chest(&self) -> bool {
+        matches!(
+            self,
+            // Empty |
+            KeySmall | KeyBoss |
+            // Compass |
+            // HeartContainer | HeartPiece |
+            // RupeeR | RupeeG | RupeeB | RupeeGold | RupeeSilver | RupeePurple |
+            ItemIceRod | ItemRentalIceRod | ItemIceRodLv2 |
+            ItemSandRod | ItemRentalSandRod | ItemSandRodLv2 | ItemRentalSandRodFirst |
+            ItemTornadeRod | ItemRentalTornadeRod | ItemTornadeRodLv2 |
+            ItemBomb | ItemRentalBomb | ItemBombLv2 |
+            ItemFireRod | ItemRentalFireRod | ItemFireRodLv2 |
+            ItemHookShot | ItemRentalHookShot | ItemHookShotLv2 |
+            ItemBoomerang | ItemRentalBoomerang | ItemBoomerangLv2 |
+            ItemHammer | ItemRentalHammer | ItemHammerLv2 |
+            ItemBow | ItemRentalBow | ItemBowLv2 |
+            ItemShield | ItemRentalShield | HyruleShield |
+            ItemBottle |
+            // ItemPotShopRed | ItemPotShopBlue | ItemPotShopPurple | ItemPotShopYellow | Milk |
+            ItemStoneBeauty |
+            PendantPower | PendantWisdom | PendantCourage |
+            ZeldaAmulet |
+            ItemKandelaar | ItemKandelaarLv2 |
+            ItemSwordLv1 | ItemSwordLv2 | ItemSwordLv3 | ItemSwordLv4 | PackageSword |
+            ItemMizukaki |
+            RingRental | RingHekiga |
+            ItemBell |
+            PowerGlove | PowerfulGlove |
+            ItemInsectNet | ItemInsectNetLv2 |
+            // Kinsta |
+            BadgeBee |
+            GoldenBee |
+            // Bee | Fairy | GoldenBeeForSale |
+            HintGlasses |
+            EscapeFruit |
+            StopFruit |
+            // LiverBlue | LiverPurple | LiverYellow |
+            ClothesBlue | ClothesRed |
+            OreYellow | OreGreen | OreBlue | OreRed |
+            GanbariPowerUp |
+            // GanbariTubo |
+            Pouch |
+            DashBoots |
+            MessageBottle | MilkMatured |
+            SpecialMove |
+            ItemBowLight |
+            // TriforceCourage |
+            // Heart |
+            SageGulley | SageOren | SageSeres | SageOsfala | SageImpa | SageIrene | SageRosso
+        )
+    }
 
-impl<'settings> Spoiler<'settings> {
-    pub fn patch(self, paths: Paths, patch: bool, spoiler: bool) -> Result<()> {
-        let game = Game::load(paths.rom())?;
-        let mut patcher = Patcher::new(game)?;
-        regions::patch(&mut patcher, &self.layout, self.settings)?;
-        let patches = patcher.prepare(self.settings)?;
-        if patch {
-            patches.dump(paths.output())?;
+    fn msbf_key(self) -> Option<&'static str> {
+        match self {
+            SageGulley => Some(MsbfKey::Dark),
+            SageOren => Some(MsbfKey::Water),
+            SageSeres => Some(MsbfKey::Dokuro),
+            SageOsfala => Some(MsbfKey::Hagure),
+            SageIrene => Some(MsbfKey::Sand),
+            SageRosso => Some(MsbfKey::Ice),
+            SageImpa => None, // Impa special
+            PendantPower | PendantWisdom | PendantCourage | ZeldaAmulet => None,
+            _ => fail!(),
         }
-        if spoiler {
-            let path = paths.output().join(format!("spoiler {}.json", self.seed));
-            info!("Writing spoiler to:             {}", path.display());
-
-            serde_json::to_writer_pretty(File::create(path)?, &self)
-                .expect("Could not write the spoiler log.");
-        }
-        Ok(())
     }
 }
 
-/// Gets the system object for the platform.
-pub fn system() -> sys::Result<System<Settings>> {
-    System::new()
+/// Align JSON Key-Values for readability
+/// Can't find a decent library for this, so we're doing it manually
+fn align_json_values(json: &mut String) {
+    const KEY_ALIGNMENT: usize = 56;
+    let mut index_colon = 0;
+    while index_colon < json.len() {
+        let index_colon_opt = json[index_colon..].find(":");
+        if index_colon_opt.is_none() {
+            break;
+        }
+        index_colon += index_colon_opt.unwrap();
+        if ['{', '['].contains(&json[index_colon..].chars().nth(2).unwrap()) {
+            index_colon += 1;
+            continue;
+        }
+
+        let index_prev_new_line = json[..index_colon].rfind("\n").unwrap_or_else(|| {
+            fail!("Couldn't fine new line character before index: {}", index_colon);
+        });
+        let line_length_up_to_value = index_colon - index_prev_new_line;
+
+        if KEY_ALIGNMENT < line_length_up_to_value {
+            error!("Failed to write Spoiler Log");
+            error!(
+                "JSON Key Alignment value smaller than line length up to that point: {} < {}",
+                KEY_ALIGNMENT, line_length_up_to_value
+            );
+            fail!("Problem line: {}", &json[index_prev_new_line..index_colon]);
+        }
+
+        let spaces_to_add = KEY_ALIGNMENT - line_length_up_to_value;
+
+        json.insert_str(
+            index_colon + 1,
+            (0..spaces_to_add).map(|_| " ").collect::<String>().as_str(),
+        );
+        index_colon += 1;
+    }
 }
 
-#[cfg(test)]
-pub fn test_game() -> albw::Result<Game> {
-    Game::load("../test.3ds")
+#[derive(Serialize)]
+pub struct SeedInfo<'s> {
+    pub seed: u32,
+    pub hash: SeedHash,
+    pub settings: &'s Settings,
+    pub layout: Layout,
+    pub metrics: Metrics,
+    pub hints: Hints,
 }
 
-fn prompt_until<F>(prompt: &str, until: F, error: &str) -> sys::Result<String>
+/// Main entry point to generate one ALBWR Seed.
+pub fn generate_seed(
+    seed: u32, settings: &Settings, user_config: &UserConfig, no_patch: bool, no_spoiler: bool,
+) -> Result<()> {
+    validate_settings(settings)?;
+
+    let rng = &mut StdRng::seed_from_u64(seed as u64);
+    let hash = SeedHash::new(seed, settings);
+
+    info!("Hash:                           {}\n", hash.text_hash);
+    settings.log_settings();
+
+    let seed_info = &calculate_seed_info(seed, settings, hash, rng)?;
+    patch_seed(seed_info, user_config, no_patch, no_spoiler)?;
+
+    Ok(())
+}
+
+/// A hash used in-game to quickly verify that two players are playing the same seed.
+///
+/// The hash is calculated as `u64`, truncated to `u16` (5 digits), then converted to a Symbolic form that can be
+/// displayed in-game as well as in the spoiler log.
+pub struct SeedHash {
+    item_hash: String,
+    text_hash: String,
+}
+
+impl SeedHash {
+    pub fn new(seed: u32, settings: &Settings) -> Self {
+        // Calculate underlying Hash
+        let mut hasher = DefaultHasher::new();
+        (seed, settings, VERSION).hash(&mut hasher);
+        let mut hash = hasher.finish() % 100_000;
+
+        // Convert to Item Hash
+        let hash_item_lut: Vec<(&String, &str)> = vec![
+            (A_BUTTON.deref(), "(A)"),
+            (B_BUTTON.deref(), "(B)"),
+            (X_BUTTON.deref(), "(X)"),
+            (Y_BUTTON.deref(), "(Y)"),
+            (L_BUTTON.deref(), "(L)"),
+            (R_BUTTON.deref(), "(R)"),
+            (RAVIO.deref(), "(Ravio)"),
+            (BOW.deref(), "(Bow)"),
+            (BOMBS.deref(), "(Bombs)"),
+            (FIRE_ROD.deref(), "(Fire Rod)"),
+        ];
+
+        const HASH_LEN: usize = 5;
+        let mut digit = Vec::with_capacity(HASH_LEN);
+        for _ in 0..HASH_LEN {
+            digit.push(hash_item_lut.get((hash % 10) as usize).unwrap());
+            hash /= 10;
+        }
+
+        let item_hash =
+            format!("{} {} {} {} {}", digit[4].0, digit[3].0, digit[2].0, digit[1].0, digit[0].0);
+        let text_hash =
+            format!("{} {} {} {} {}", digit[4].1, digit[3].1, digit[2].1, digit[1].1, digit[0].1);
+
+        Self { item_hash, text_hash }
+    }
+}
+
+impl Serialize for SeedHash {
+    fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
     where
-        F: Fn(&str) -> bool,
-{
-    loop {
-        print!("{}: ", prompt);
-        stdout().flush()?;
-        let mut input = String::new();
-        stdin().read_line(&mut input)?;
-        input = input.trim().to_string();
-        if until(&input) {
-            break Ok(input);
-        } else {
-            eprintln!("{}", error);
-        }
+        S: Serializer,
+    {
+        serializer.serialize_str(self.text_hash.as_str())
     }
 }
 
-fn create_paths() -> sys::Result<Paths> {
-    let rom = prompt_until(
-        "Path to ROM",
-        |rom| Game::load(&rom).is_ok(),
-        "The provided path does not point to a valid ROM.",
-    )?;
-    let output = prompt_until(
-        "Output directory",
-        |output| Path::new(output).exists() || fs::create_dir_all(&output).is_ok(),
-        "The provided path could not be created.",
-    )?;
+/// Validates the Settings to make sure the user hasn't made incompatible selections
+fn validate_settings(settings: &Settings) -> Result<()> {
+    // LC Requirement
+    if !(0..=7).contains(&settings.logic.lc_requirement) {
+        fail!(
+            "Invalid Lorule Castle Requirement: \"{}\" was not between 0-7, inclusive.",
+            settings.logic.lc_requirement
+        );
+    }
 
-    Ok(Paths::new(rom.into(), output.into()))
+    // Yuganon Requirement
+    // if !(0..=7).contains(&settings.logic.yuganon_requirement) {
+    //     fail!("Invalid Yuga Ganon Requirement: \"{}\" was not between 0-7, inclusive.", settings.logic.yuganon_requirement);
+    // }
+
+    if settings.logic.yuganon_requirement != settings.logic.lc_requirement {
+        fail!(
+            "Yuga Ganon Requirement: \"{}\" is different than Lorule Castle Requirement: \"{}\"\n\
+        Different values for these settings are not yet supported!",
+            settings.logic.yuganon_requirement,
+            settings.logic.lc_requirement
+        );
+    }
+
+    // Swords
+    if settings.logic.sword_in_shop && settings.logic.swordless_mode {
+        fail!("The sword_in_shop and swordless_mode settings cannot both be enabled.");
+    }
+
+    // Assured Weapons
+    if settings.logic.assured_weapon
+        && (settings.logic.sword_in_shop || settings.logic.boots_in_shop)
+    {
+        fail!(
+            "The assured_weapon setting cannot be enabled when either sword_in_shop or boots_in_shop is also enabled."
+        );
+    }
+
+    Ok(())
 }
 
-pub fn plando() -> Result<(), Error> {
-    info!("Start the Plando!");
+pub type CheckMap = BTreeMap<String, Option<FillerItem>>;
 
-    let system = system()?;
-    let settings = plando_settings();
-    let mut layout = Layout::default();
+fn calculate_seed_info<'s>(
+    seed: u32, settings: &'s Settings, hash: SeedHash, rng: &mut StdRng,
+) -> Result<SeedInfo<'s>> {
+    println!();
+    info!("Calculating Seed Info...");
 
-    //////////////////////
-    // --- Dungeons --- //
-    //////////////////////
+    // Build World Graph
+    let world_graph = &mut world::build_world_graph();
+    let check_map = &mut filler::prefill_check_map(world_graph);
+    let (mut progression, mut junk) = item_pools::get_item_pools(settings, rng);
 
-    // Eastern Palace
-    layout.set(LocationInfo::new(regions::dungeons::eastern::palace::SUBREGION, "[EP] (1F) Outside (East)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::eastern::palace::SUBREGION, "[EP] (1F) Near Entrance"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::eastern::floor1::SUBREGION, "[EP] (1F) Defeat Popos"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::eastern::floor1::SUBREGION, "[EP] (1F) Hidden Door"), KeySmall);
-    layout.set(LocationInfo::new(regions::dungeons::eastern::floor1::SUBREGION, "[EP] (1F) Switch Puzzle"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::eastern::floor2::SUBREGION, "[EP] (2F) Ball Room"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::eastern::floor2::SUBREGION, "[EP] (2F) Defeat Popos"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::eastern::floor2::SUBREGION, "[EP] (2F) Switch Room"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::eastern::floor2::SUBREGION, "[EP] (2F) Big Chest"), KeySmall);
-    layout.set(LocationInfo::new(regions::dungeons::eastern::boss::SUBREGION, "[EP] (3F) After Cutscene"), RingRental);
-    layout.set(LocationInfo::new(regions::dungeons::eastern::post_boss::SUBREGION, "[EP] Yuga"), ItemBell);
-    layout.set(LocationInfo::new(regions::dungeons::eastern::post_boss::SUBREGION, "[EP] (3F) Outside (North)"), KeyBoss);
-    layout.set(LocationInfo::new(regions::dungeons::eastern::post_boss::SUBREGION, "[EP] (1F) Outside (West)"), ItemInsectNetLv2);
-
-    // House of Gales
-    layout.set(LocationInfo::new(regions::dungeons::house::floor1::SUBREGION, "[HoG] (1F) Torches"), KeySmall);
-    layout.set(LocationInfo::new(regions::dungeons::house::floor1::SUBREGION, "[HoG] (1F) Switch Room"), ItemBomb);
-    layout.set(LocationInfo::new(regions::dungeons::house::floor1::SUBREGION, "[HoG] (1F) Fire Bubbles"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::house::floor1west::SUBREGION, "[HoG] (1F) Blue Bari Room"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::house::floor1west::SUBREGION, "[HoG] (1F) Blue Bari Room (Bottom Left)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::house::floor2::SUBREGION, "[HoG] (2F) Big Chest"), KeyBoss);
-    layout.set(LocationInfo::new(regions::dungeons::house::floor2::SUBREGION, "[HoG] (2F) Narrow Ledge"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::house::floor2outer::SUBREGION, "[HoG] (2F) Fire Ring"), KeySmall);
-    layout.set(LocationInfo::new(regions::dungeons::house::floor3::SUBREGION, "[HoG] (3F) Rat Room"), KeySmall);
-    layout.set(LocationInfo::new(regions::dungeons::house::floor3::SUBREGION, "[HoG] (3F) Fire Bubbles"), KeySmall);
-    layout.set(LocationInfo::new(regions::dungeons::house::boss::SUBREGION, "[HoG] Margomill"), RupeeGold);
-
-    // Tower of Hera
-    layout.set(LocationInfo::new(regions::dungeons::tower::hera::SUBREGION, "[ToH] (1F) Outside"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::tower::floor2::SUBREGION, "[ToH] (1F) Center"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::tower::floor2::SUBREGION, "[ToH] (3F) Platform"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::tower::floor4::SUBREGION, "[ToH] (5F) Red/Blue Switches"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::tower::floor4::SUBREGION, "[ToH] (6F) Left Mole"), KeySmall);
-    layout.set(LocationInfo::new(regions::dungeons::tower::floor4::SUBREGION, "[ToH] (6F) Right Mole"), KeySmall);
-    layout.set(LocationInfo::new(regions::dungeons::tower::floor7::SUBREGION, "[ToH] (7F) Outside (Ledge)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::tower::floor7::SUBREGION, "[ToH] (8F) Fairy Room"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::tower::floor7::SUBREGION, "[ToH] (11F) Big Chest"), KeyBoss);
-    layout.set(LocationInfo::new(regions::dungeons::tower::boss::SUBREGION, "[ToH] Moldorm"), RingHekiga);
-
-    // Lorule Sanctuary
-    layout.set(LocationInfo::new(regions::dungeons::graveyard::main::SUBREGION, "[LS] Entrance Chest"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::graveyard::main::SUBREGION, "[LS] Lower Chest"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::graveyard::main::SUBREGION, "[LS] Upper Chest"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::graveyard::main::SUBREGION, "[LS] Ledge"), KeySmall);
-
-    // Dark Palace
-    layout.set(LocationInfo::new(regions::dungeons::dark::palace::SUBREGION, "[PoD] (1F) Near Entrance"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::dark::palace::SUBREGION, "[PoD] (1F) Narrow Ledge"), KeySmall);
-    layout.set(LocationInfo::new(regions::dungeons::dark::floor1::SUBREGION, "[PoD] (1F) Switch Puzzle"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::dark::floor1::SUBREGION, "[PoD] (1F) Hidden Room (Upper)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::dark::floor1::SUBREGION, "[PoD] (1F) Hidden Room (Lower)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::dark::floor1::SUBREGION, "[PoD] (B1) Fall From 1F"), KeySmall);
-    layout.set(LocationInfo::new(regions::dungeons::dark::floor1::SUBREGION, "[PoD] (B1) Maze"), KeySmall);
-    layout.set(LocationInfo::new(regions::dungeons::dark::floor1::SUBREGION, "[PoD] (B1) Helmasaur Room"), KeySmall);
-    layout.set(LocationInfo::new(regions::dungeons::dark::floor1::SUBREGION, "[PoD] (B1) Helmasaur Room (Fall)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::dark::floor2::SUBREGION, "[PoD] (2F) Big Chest (Hidden)"), KeyBoss);
-    layout.set(LocationInfo::new(regions::dungeons::dark::floor2::SUBREGION, "[PoD] (2F) Alcove"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::dark::floor2::SUBREGION, "[PoD] (1F) Fall From 2F"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::dark::boss_key::SUBREGION, "[PoD] (B1) Big Chest (Switches)"), OreGreen);
-    layout.set(LocationInfo::new(regions::dungeons::dark::boss::SUBREGION, "[PoD] Gemesaur King"), RupeeGold);
-
-    // Swamp Palace
-    layout.set(LocationInfo::new(regions::dungeons::swamp::dungeon::SUBREGION, "[SP] (B1) Center"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::swamp::dungeon::SUBREGION, "[SP] (B1) Raft Room (Left)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::swamp::dungeon::SUBREGION, "[SP] (B1) Raft Room (Right)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::swamp::dungeon::SUBREGION, "[SP] (B1) Gyorm"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::swamp::dungeon::SUBREGION, "[SP] (B1) Waterfall Room"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::swamp::dungeon::SUBREGION, "[SP] (B1) Raft Room (Pillar)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::swamp::dungeon::SUBREGION, "[SP] (B1) Big Chest (Secret)"), KeySmall);
-    layout.set(LocationInfo::new(regions::dungeons::swamp::dungeon::SUBREGION, "[SP] (1F) Water Puzzle"), KeySmall);
-    layout.set(LocationInfo::new(regions::dungeons::swamp::dungeon::SUBREGION, "[SP] (1F) East Room"), KeySmall);
-    layout.set(LocationInfo::new(regions::dungeons::swamp::dungeon::SUBREGION, "[SP] (1F) West Room"), KeySmall);
-    layout.set(LocationInfo::new(regions::dungeons::swamp::dungeon::SUBREGION, "[SP] (1F) Big Chest (Fire)"), ItemSwordLv1);
-    layout.set(LocationInfo::new(regions::dungeons::swamp::boss::SUBREGION, "[SP] Arrghus"), KeyBoss);
-
-    // Skull Woods
-    layout.set(LocationInfo::new(regions::dungeons::skull::palace::SUBREGION, "[SW] (B1) Gibdo Room (Lower)"), KeySmall);
-    layout.set(LocationInfo::new(regions::dungeons::skull::palace::SUBREGION, "[SW] (B1) South Chest"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::skull::outdoors::SUBREGION, "[SW] (B1) Gibdo Room (Hole)"), KeySmall);
-    layout.set(LocationInfo::new(regions::dungeons::skull::outdoors::SUBREGION, "[SW] (B1) Grate Room"), KeySmall);
-    layout.set(LocationInfo::new(regions::dungeons::skull::basement2::SUBREGION, "[SW] (B2) Moving Platform Room"), KeyBoss);
-    layout.set(LocationInfo::new(regions::dungeons::skull::end::SUBREGION, "[SW] (B1) Big Chest (Upper)"), ItemKandelaarLv2);
-    layout.set(LocationInfo::new(regions::dungeons::skull::end::SUBREGION, "[SW] (B1) Big Chest (Eyes)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::skull::boss::SUBREGION, "[SW] Knucklemaster"), OreRed);
-
-    // Thieves' Hideout
-    layout.set(LocationInfo::new(regions::dungeons::thieves::hideout::SUBREGION, "[TH] (B1) Jail Cell"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::thieves::hideout::SUBREGION, "[TH] (B1) Grate Chest"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::thieves::hideout::SUBREGION, "[TH] (B2) Grate Chest (Fall)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::thieves::basement2::SUBREGION, "[TH] (B2) Switch Puzzle Room"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::thieves::basement2::SUBREGION, "[TH] (B2) Jail Cell"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::thieves::basement2::SUBREGION, "[TH] (B2) Eyegores"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::thieves::escape::SUBREGION, "[TH] (B1) Behind Wall"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::thieves::escape::SUBREGION, "[TH] (B1) Big Chest (Entrance)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::thieves::escape::SUBREGION, "[TH] (B3) Underwater"), KeySmall);
-    layout.set(LocationInfo::new(regions::dungeons::thieves::escape::SUBREGION, "[TH] (B3) Big Chest (Hidden)"), KeyBoss);
-    layout.set(LocationInfo::new(regions::dungeons::thieves::boss::SUBREGION, "Stalblind"), OreYellow);
-
-    // Ice Ruins
-    layout.set(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "[IR] (1F) Hidden Chest"), KeySmall);
-    layout.set(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "[IR] (B3) Grate Chest (Left)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "[IR] (B3) Grate Chest (Right)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "[IR] (B4) Ice Pillar"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "[IR] (B5) Big Chest"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::ice::basement1::SUBREGION, "[IR] (B1) East Chest"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::ice::basement1::SUBREGION, "[IR] (B1) Narrow Ledge"), KeySmall);
-    layout.set(LocationInfo::new(regions::dungeons::ice::basement2::SUBREGION, "[IR] (B1) Upper Chest"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::ice::basement2::SUBREGION, "[IR] (B3) Big Chest (Puzzle)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::ice::basement2::SUBREGION, "[IR] (B4) Switches"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::ice::basement2::SUBREGION, "[IR] (B4) Southwest Chest (Fall)"), KeySmall);
-    layout.set(LocationInfo::new(regions::dungeons::ice::basement2::SUBREGION, "[IR] (B4) Narrow Platform"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::ice::basement2::SUBREGION, "[IR] (B2) Far North"), DashBoots);
-    layout.set(LocationInfo::new(regions::dungeons::ice::basement2::SUBREGION, "[IR] (B4) Southeast Chest (Fall)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::ice::boss::SUBREGION, "[IR] Dharkstare"), KeyBoss);
-
-    // Desert Palace
-    layout.set(LocationInfo::new(regions::dungeons::desert::floor1::SUBREGION, "[DP] (1F) Entrance"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::desert::post_miniboss::SUBREGION, "[DP] (1F) Sand Room (South)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::desert::post_miniboss::SUBREGION, "[DP] (1F) Sand Switch Room"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::desert::post_miniboss::SUBREGION, "[DP] (1F) Sand Room (North)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::desert::post_miniboss::SUBREGION, "[DP] (1F) Big Chest (Behind Wall)"), KeyBoss);
-    layout.set(LocationInfo::new(regions::dungeons::desert::post_miniboss::SUBREGION, "[DP] (1F) Behind Rocks"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::desert::floor2::SUBREGION, "[DP] (2F) Under Rock (Left)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::desert::floor2::SUBREGION, "[DP] (2F) Beamos Room"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::desert::floor2::SUBREGION, "[DP] (2F) Under Rock (Right)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::desert::floor2::SUBREGION, "[DP] (2F) Under Rock (Ball Room)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::desert::floor2::SUBREGION, "[DP] (2F) Big Chest (Puzzle)"), PowerfulGlove);
-    layout.set(LocationInfo::new(regions::dungeons::desert::floor2::SUBREGION, "[DP] (2F) Red/Blue Switches"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::desert::floor2west::SUBREGION, "[DP] (2F) Leever Room"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::desert::floor3::SUBREGION, "[DP] (3F) Behind Falling Sand"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::desert::floor3::SUBREGION, "[DP] (3F) Armos Room"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::desert::boss::SUBREGION, "Zaganaga"), RupeeGold);
-
-    // Turtle Rock
-    layout.set(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "[TR] (1F) Center"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "[TR] (1F) Grate Chest"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "[TR] (1F) Portal Room (Northwest)"), KeySmall);
-    layout.set(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "[TR] (1F) Northeast Ledge"), KeySmall);
-    layout.set(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "[TR] (1F) Southeast Chest"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "[TR] (1F) Defeat Flamolas"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "[TR] (B1) Northeast Room"), KeySmall);
-    layout.set(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "[TR] (B1) Grate Chest (Small)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "[TR] (B1) Big Chest (Center)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "[TR] (B1) Platform"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::turtle::rock::SUBREGION, "[TR] (B1) Big Chest (Top)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::turtle::boss::SUBREGION, "[TR] Grinexx"), KeyBoss);
-
-    // Lorule Castle
-    layout.set(LocationInfo::new(regions::dungeons::castle::lorule::SUBREGION, "[LC] (1F) Ledge"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::castle::lorule::SUBREGION, "[LC] (1F) Center"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::castle::lorule::SUBREGION, "[LC] (2F) Near Torches"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::castle::lorule::SUBREGION, "[LC] (2F) Hidden Path"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::castle::lorule::SUBREGION, "[LC] (2F) Ledge"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::castle::floor4::SUBREGION, "[LC] (4F) Center"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::castle::floor4::SUBREGION, "[LC] (4F) Hidden Path"), ItemBowLight);
-    layout.set(LocationInfo::new(regions::dungeons::castle::bomb_trial::SUBREGION, "[LC] (3F) Bomb Trial (Chest)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::castle::bomb_trial::SUBREGION, "[LC] (3F) Bomb Trial (Behind Rock)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::castle::ball_trial::SUBREGION, "[LC] (3F) Ball Trial (Chest)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::castle::ball_trial::SUBREGION, "[LC] (3F) Ball Trial (Puzzle)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::castle::lamp_trial::SUBREGION, "[LC] (4F) Lamp Trial"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::castle::hookshot_trial::SUBREGION, "[LC] (4F) Hookshot Trial (Chest)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::castle::hookshot_trial::SUBREGION, "[LC] (4F) Hookshot Trial (Eyes)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::castle::boss::SUBREGION, "[LC] Zelda"), ItemBow);
-
-    ////////////////////
-    // --- Hyrule --- //
-    ////////////////////
-
-    // Hyrule Field
-    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Delivery"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Dampe"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Rosso Cave"), ItemInsectNet);
-    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Sanctuary Pegs"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Sanctuary Treasure Dungeon"), ItemBoomerangLv2);
-    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Behind Blacksmith"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Blacksmith Cave"), ItemSwordLv1);
-    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Blacksmith"), ItemSwordLv1);
-    layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Castle Rocks"), RupeeGold);
-    //layout.set(Location::new(regions::hyrule::field::post_sanc::SUBREGION, "Thanks"), Item::BadgeBee);
-    layout.set(LocationInfo::new(regions::hyrule::field::post_eastern::SUBREGION, "Rosso"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::field::post_eastern::SUBREGION, "Clean Rocks"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::field::post_eastern::SUBREGION, "Irene"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::field::post_eastern::SUBREGION, "Haunted Grove Tree Stump"), RupeeGold);
-
-
-    layout.set(LocationInfo::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (1)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (2)"), RingHekiga);
-    layout.set(LocationInfo::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (3)"), RingHekiga);
-    layout.set(LocationInfo::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (4)"), MilkMatured);
-    layout.set(LocationInfo::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (5)"), ItemMizukaki);
-    layout.set(LocationInfo::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (6)"), LiverBlue);
-    layout.set(LocationInfo::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (7)"), ItemSwordLv1);
-    layout.set(LocationInfo::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (8)"), ItemSwordLv1);
-    layout.set(LocationInfo::new(regions::hyrule::field::rentals::SUBREGION, "Ravio (9)"), RupeeGold);
-
-
-    layout.set(LocationInfo::new(regions::hyrule::field::rupee_rush::SUBREGION, "Rupee Rush (Hyrule)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::field::castle::SUBREGION, "Castle (Indoors)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::field::castle::SUBREGION, "Castle Balcony"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::field::sanctuary_cave::SUBREGION, "Sanctuary Cave"), RupeeGold);
-
-    // Lost Woods
-    layout.set(LocationInfo::new(regions::hyrule::lost::woods::SUBREGION, "Master Sword Pedestal"), ItemBottle);
-    layout.set(LocationInfo::new(regions::hyrule::lost::woods::SUBREGION, "Alcove"), ItemHookShot);
-    layout.set(LocationInfo::new(regions::hyrule::lost::woods::SUBREGION, "Lost Woods Big Rock Chest"), ItemIceRod);
-
-    // Death Mountain
-    layout.set(LocationInfo::new(regions::hyrule::death::mountain::SUBREGION, "First Cave"), PowerGlove);
-    layout.set(LocationInfo::new(regions::hyrule::death::mountain::SUBREGION, "Blocked Cave"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::death::mountain::SUBREGION, "Fairy Cave"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::death::upper::SUBREGION, "Death Mountain West Ledge"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::death::upper::SUBREGION, "Rock Cave (Pegs)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::death::upper::SUBREGION, "Rock Cave (Top)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::death::upper::SUBREGION, "Spectacle Rock"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::death::east::SUBREGION, "Fire Cave Pillar"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::death::east::SUBREGION, "Bouldering Guy"), HyruleShield);
-    layout.set(LocationInfo::new(regions::hyrule::death::east::SUBREGION, "Hookshot Treasure Dungeon"), ItemHookShotLv2);
-    layout.set(LocationInfo::new(regions::hyrule::death::far_island::SUBREGION, "Floating Island"), RupeeGold);
-
-    // Sanctuary
-    layout.set(LocationInfo::new(regions::hyrule::sanctuary::lobby::SUBREGION, "[HS] Entrance"), KeySmall);
-    layout.set(LocationInfo::new(regions::hyrule::sanctuary::inside::SUBREGION, "[HS] Lower Chest"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::sanctuary::inside::SUBREGION, "[HS] Upper Chest"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::sanctuary::inside::SUBREGION, "[HS] Ledge"), RupeeGold);
-
-    // Kakariko
-    layout.set(LocationInfo::new(regions::hyrule::kakariko::village::SUBREGION, "Well (Chest)"), ClothesBlue);
-    layout.set(LocationInfo::new(regions::hyrule::kakariko::village::SUBREGION, "Well (Upper)"), ClothesBlue);
-    layout.set(LocationInfo::new(regions::hyrule::kakariko::village::SUBREGION, "Jail"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::kakariko::post_sanc::SUBREGION, "Merchant (Left)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::kakariko::post_sanc::SUBREGION, "Bee Guy"), HintGlasses);
-    layout.set(LocationInfo::new(regions::hyrule::kakariko::post_sanc::SUBREGION, "Bee Guy (Golden Bee)"), ItemFireRod);
-    layout.set(LocationInfo::new(regions::hyrule::kakariko::post_sanc::SUBREGION, "Fortune Teller"), Pouch);
-    layout.set(LocationInfo::new(regions::hyrule::kakariko::post_sanc::SUBREGION, "Milk Bar Owner"), MilkMatured);
-    layout.set(LocationInfo::new(regions::hyrule::kakariko::post_sanc::SUBREGION, "Cucco Ranch"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::kakariko::shady_guy::SUBREGION, "Shady Guy"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::kakariko::shady_guy::SUBREGION, "Merchant (Right)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::kakariko::closed::SUBREGION, "Stylish Woman"), RupeeGold);
-
-    // Zora's Domain
-    layout.set(LocationInfo::new(regions::hyrule::zoras::domain::SUBREGION, "Zora's Domain Ledge Chest"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::zoras::domain::SUBREGION, "Behind Waterfall"), ItemSwordLv1);
-    layout.set(LocationInfo::new(regions::hyrule::zoras::domain::SUBREGION, "Zora Queen"), RupeeGold);
-
-    // Eastern Ruins
-    layout.set(LocationInfo::new(regions::hyrule::eastern::hill::SUBREGION, "Merge Treasure Dungeon"), ItemHammerLv2);
-    layout.set(LocationInfo::new(regions::hyrule::eastern::hill::SUBREGION, "Armos Chest"), ItemTornadeRod);
-    layout.set(LocationInfo::new(regions::hyrule::eastern::hill::SUBREGION, "Hookshot Chest"), ItemSandRod);
-    layout.set(LocationInfo::new(regions::hyrule::eastern::hill::SUBREGION, "Merge Chest"), ItemBoomerang);
-    layout.set(LocationInfo::new(regions::hyrule::eastern::hill::SUBREGION, "Cave"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::eastern::hill::SUBREGION, "Pegs (South)"), RupeeGold);
-
-    // Southern Ruins
-    layout.set(LocationInfo::new(regions::hyrule::southern::ruins::SUBREGION, "Runaway Item Seller"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::southern::ruins::SUBREGION, "Behind Pillars"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::southern::ruins::SUBREGION, "Treasure Room"), ItemHammer);
-    layout.set(LocationInfo::new(regions::hyrule::southern::ruins::SUBREGION, "Southern Ruins Ledge"), RupeeGold);
-
-    // Lake Hylia
-    layout.set(LocationInfo::new(regions::hyrule::lake::hylia::SUBREGION, "Torch Cave"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::lake::hylia::SUBREGION, "Lake Hylia Ledge Chest"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::lake::hylia::SUBREGION, "Bird Lover"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::lake::hylia::SUBREGION, "Secret Cave"), RupeeGold);
-    layout.set(LocationInfo::new(regions::hyrule::lake::hylia::SUBREGION, "Shore"), MessageBottle);
-    layout.set(LocationInfo::new(regions::hyrule::lake::hotfoot::SUBREGION, "Hyrule Hotfoot"), RupeeGold);
-
-    ////////////////////
-    // --- Lorule --- //
-    ////////////////////
-
-    // Lorule Field
-    layout.set(LocationInfo::new(regions::lorule::field::main::SUBREGION, "Boots Treasure Dungeon"), GanbariPowerUp);
-    layout.set(LocationInfo::new(regions::lorule::field::main::SUBREGION, "Vacant House"), RupeeGold);
-    layout.set(LocationInfo::new(regions::lorule::field::main::SUBREGION, "Rupee Rush (Lorule)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::lorule::field::main::SUBREGION, "Great Rupee Fairy"), RupeeGold);
-    layout.set(LocationInfo::new(regions::lorule::field::main::SUBREGION, "Big Bomb Cave"), RupeeGold);
-    layout.set(LocationInfo::new(regions::lorule::field::main::SUBREGION, "Octoball Derby"), RupeeGold);
-    layout.set(LocationInfo::new(regions::lorule::field::main::SUBREGION, "Blacksmith (Lorule)"), ItemKandelaar);
-    layout.set(LocationInfo::new(regions::lorule::field::swamp::SUBREGION, "Swamp Cave (Left)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::lorule::field::swamp::SUBREGION, "Swamp Cave (Middle)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::lorule::field::swamp::SUBREGION, "Swamp Cave (Right)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::lorule::field::thief_girl::SUBREGION, "Thief Girl Cave"), RupeeGold);
-    layout.set(LocationInfo::new(regions::lorule::field::ledge::SUBREGION, "Hookshot Ledge"), RupeeGold);
-
-    // Skull Woods (overworld)
-    layout.set(LocationInfo::new(regions::lorule::skull::woods::SUBREGION, "Canyon House"), RupeeGold);
-    layout.set(LocationInfo::new(regions::lorule::skull::woods::SUBREGION, "Cucco Shack"), RupeeGold);
-    layout.set(LocationInfo::new(regions::lorule::skull::chest::SUBREGION, "Skull Woods Outdoor Chest"), RupeeGold);
-
-    // Lorule Death Mountain
-    layout.set(LocationInfo::new(regions::lorule::death::mountain::SUBREGION, "Ledge (East)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::lorule::death::mountain::SUBREGION, "Behind Ice Gimos (East)"), ItemFireRodLv2);
-    layout.set(LocationInfo::new(regions::lorule::death::west::SUBREGION, "Ledge (West)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::lorule::death::west::SUBREGION, "Defeat Ice Gimos (West)"), RupeeGold);
-    layout.set(LocationInfo::new(regions::lorule::death::tower::SUBREGION, "Treacherous Tower (Intermediate)"), RupeeGold);
-
-    // Lorule Graveyard
-    layout.set(LocationInfo::new(regions::lorule::graveyard::cave::SUBREGION, "Philosopher's Cave Big Chest"), OreBlue);
-    layout.set(LocationInfo::new(regions::lorule::graveyard::field::SUBREGION, "Peninsula Chest"), RupeeGold);
-
-    // Dark Ruins
-    layout.set(LocationInfo::new(regions::lorule::dark::ruins::SUBREGION, "Dark Ruins Lakeview Chest"), RupeeGold);
-    layout.set(LocationInfo::new(regions::lorule::dark::ruins::SUBREGION, "Dark Maze Chest"), RupeeGold);
-    layout.set(LocationInfo::new(regions::lorule::dark::ruins::SUBREGION, "Dark Maze Ledge"), RupeeGold);
-    layout.set(LocationInfo::new(regions::lorule::dark::ruins::SUBREGION, "Hinox (1)"), RupeeG);
-    layout.set(LocationInfo::new(regions::lorule::dark::ruins::SUBREGION, "Hinox (2)"), RupeeB);
-    layout.set(LocationInfo::new(regions::lorule::dark::ruins::SUBREGION, "Hinox (3)"), RupeeR);
-    layout.set(LocationInfo::new(regions::lorule::dark::ruins::SUBREGION, "Hinox (4)"), RupeePurple);
-    layout.set(LocationInfo::new(regions::lorule::dark::ruins::SUBREGION, "Hinox (5)"), RupeeSilver);
-    layout.set(LocationInfo::new(regions::lorule::dark::ruins::SUBREGION, "Hinox (6)"), SpecialMove);
-
-    // Misery Mire
-    layout.set(LocationInfo::new(regions::lorule::misery::mire::SUBREGION, "Misery Mire Ledge"), RupeeGold);
-    layout.set(LocationInfo::new(regions::lorule::misery::mire::SUBREGION, "Sand Rod Treasure Dungeon"), ItemSandRodLv2);
-
-    // Lake Lolia
-    layout.set(LocationInfo::new(regions::lorule::lake::lorule::SUBREGION, "Lorule Lake NW Chest"), RupeeGold);
-    layout.set(LocationInfo::new(regions::lorule::lake::balcony::SUBREGION, "Turtle Rock Left Balcony"), ItemMizukaki);
-
-    let spoiler = Spoiler {
-        seed: 0,
-        settings: &settings,
-        layout,
-    };
-
-    spoiler.patch(
-        system.get_or_create_paths(create_paths)?,
-        true,
-        true,
-    )
-}
-
-pub fn filler_new(settings: &Settings, seed: Seed) -> Spoiler {
-
-    // New Filler
-    let filled: Vec<(LocationInfo, Item)> = fill_stuff(settings, seed);
+    // Filler Algorithm
+    let filled: Vec<(LocationInfo, Item)> = filler::fill_all_locations_reachable(
+        world_graph, check_map, &mut progression, &mut junk, settings, rng,
+    );
 
     // Build legacy Layout object
     let mut layout = Layout::default();
@@ -945,9 +650,39 @@ pub fn filler_new(settings: &Settings, seed: Seed) -> Spoiler {
         layout.set(location_info, item);
     }
 
-    Spoiler {
-        seed,
-        settings,
-        layout,
+    let metrics = metrics::calculate_metrics(world_graph, check_map, settings);
+    let hints = hints::generate_hints(world_graph, check_map, settings, rng);
+
+    Ok(SeedInfo { seed, hash, settings, layout, metrics, hints })
+}
+
+pub fn patch_seed(
+    seed_info: &SeedInfo, user_config: &UserConfig, no_patch: bool, no_spoiler: bool,
+) -> Result<()> {
+    println!();
+
+    if !no_patch {
+        info!("Starting Patch Process...");
+
+        let game = Game::load(user_config.rom())?;
+        let mut patcher = Patcher::new(game)?;
+
+        info!("ROM Loaded.\n");
+
+        regions::patch(&mut patcher, &seed_info.layout, &seed_info.settings)?;
+        let patches = patcher.prepare(seed_info)?;
+        patches.dump(user_config.output())?;
     }
+    if !no_spoiler {
+        let path = user_config.output().join(format!("{:0>10}_spoiler.json", seed_info.seed));
+        info!("Writing Spoiler Log to:         {}", &path.absolutize()?.display());
+
+        //let spoiler = Spoiler::from(seed_info);
+
+        let mut serialized = serde_json::to_string_pretty(&seed_info).unwrap();
+        align_json_values(&mut serialized);
+
+        write!(File::create(path)?, "{}", serialized).expect("Could not write the spoiler log.");
+    }
+    Ok(())
 }
