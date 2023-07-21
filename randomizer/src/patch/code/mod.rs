@@ -267,8 +267,8 @@ pub fn create(patcher: &Patcher, seed_info: &SeedInfo) -> Code {
 
         code.patch(0x3455B8, [b(0x345578)]); // Repurpose Letter In a Bottle code
         code.patch(0x255930, [mov(R0, 0xD)]); // Give Milk instead of Letter
-        code.patch(0x345590, [mov(R1, 0x395)]); // Activate Milk flag instead of Letter flag
     }
+    code.patch(0x345588, [b(0x34559C)]); // Skip setting Flag 916
 
     // Pendant Redirection - Get destination coordinates from Byaml
     let redirect_pendants = code.text().define([

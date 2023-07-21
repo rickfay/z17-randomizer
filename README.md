@@ -7,6 +7,14 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
 </p>
 
 ## Updates
+<details open="open">
+<summary>Version 0.3.1</summary>
+
+- Always Hint pool expanded to include most checks that are locked behind Dungeon Prizes.
+- Fix vanilla Letter in a Bottle location check to not disappear under certain conditions.
+- Minor tweaks to some location names
+
+</details>
 
 <details open="open">
 <summary>Version 0.3.0</summary>
@@ -96,7 +104,7 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
 *All changes from the unofficially released v0.1.3 have been folded into this update.*
 </details>
 
-<details open="open">
+<details>
 <summary>Version 0.1.3</summary>
 
 - Maiamai Madness

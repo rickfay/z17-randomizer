@@ -3,6 +3,7 @@ use {
     log::{error, info, LevelFilter},
     macros::fail,
     randomizer::{
+        constants::VERSION,
         regions,
         system::{System, UserConfig},
         Layout, LocationInfo, SeedHash, SeedInfo,
@@ -49,6 +50,7 @@ fn main() {
 
     let seed_info = SeedInfo {
         seed,
+        version: VERSION,
         hash: SeedHash::new(seed, settings),
         settings,
         layout: build_layout(),
@@ -497,8 +499,8 @@ fn build_layout() -> Layout {
     layout.set(LocationInfo::new(regions::dungeons::tower::hera::SUBREGION, "[TH] Moldorm"), HeartContainer);
 
     // Hyrule Castle
-    layout.set(LocationInfo::new(regions::dungeons::hyrule::castle::SUBREGION, "[HC] Battlement"), RupeeGold);
-    layout.set(LocationInfo::new(regions::dungeons::hyrule::castle::SUBREGION, "[HC] West Wing"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::hyrule::castle::SUBREGION, "Hyrule Castle Battlement"), RupeeGold);
+    layout.set(LocationInfo::new(regions::dungeons::hyrule::castle::SUBREGION, "Hyrule Castle West Wing"), RupeeGold);
 
     // Dark Palace
     layout.set(LocationInfo::new(regions::dungeons::dark::palace::SUBREGION, "[PD] (1F) Right Pit"), Compass);

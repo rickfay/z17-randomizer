@@ -1454,7 +1454,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                 "Hyrule Castle Left Room",
                 vec![check_free(LocationInfo::new(
                     regions::dungeons::hyrule::castle::SUBREGION,
-                    "[HC] West Wing",
+                    "Hyrule Castle West Wing",
                 ))],
                 vec![path_free(HyruleCastleCourtyard)],
             ),
@@ -1465,7 +1465,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                 "Hyrule Castle Roof",
                 vec![check_free(LocationInfo::new(
                     regions::dungeons::hyrule::castle::SUBREGION,
-                    "[HC] Battlement",
+                    "Hyrule Castle Battlement",
                 ))],
                 vec![
                     fast_travel_hyrule(),

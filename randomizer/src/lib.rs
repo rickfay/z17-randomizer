@@ -505,6 +505,7 @@ fn align_json_values(json: &mut String) {
 #[derive(Serialize)]
 pub struct SeedInfo<'s> {
     pub seed: u32,
+    pub version: &'static str,
     pub hash: SeedHash,
     pub settings: &'s Settings,
     pub layout: Layout,
@@ -653,7 +654,7 @@ fn calculate_seed_info<'s>(
     let metrics = metrics::calculate_metrics(world_graph, check_map, settings);
     let hints = hints::generate_hints(world_graph, check_map, settings, rng);
 
-    Ok(SeedInfo { seed, hash, settings, layout, metrics, hints })
+    Ok(SeedInfo { seed, version: VERSION, hash, settings, layout, metrics, hints })
 }
 
 pub fn patch_seed(

@@ -4,8 +4,8 @@ crate::region! {
     color: Name,
     castle {
         locations: [
-            "[HC] West Wing": RupeeB @Chest(IndoorLight 12[48]),
-            "[HC] Battlement": RupeePurple @Chest(18[224]),
+            "Hyrule Castle West Wing": RupeeB @Chest(IndoorLight 12[48]),
+            "Hyrule Castle Battlement": RupeePurple @Chest(18[224]),
             "Hyrule Castle Prize": ZeldaAmulet @None(),
         ],
     },
