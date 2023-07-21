@@ -31,7 +31,8 @@ pub fn get_seed_settings() -> Result<Settings, String> {
     );
 
     let vanilla_charm = if randomize_dungeon_prizes {
-        prompt_bool("Vanilla Charm",
+        prompt_bool(
+            "Vanilla Charm",
             "Enabling this forces one of the two Pendant of Courage Upgrades to be in Zelda's Throne Room.\n\
             Otherwise, a random Sage Portrait or Pendant will be placed in Zelda's Throne Room.",
         )
@@ -181,6 +182,10 @@ pub fn get_seed_settings() -> Result<Settings, String> {
         0,
         9999,
     );
+
+    if hint_ghost_price == 69 {
+        print!("\nNice.\n");
+    }
 
     println!();
     info!("Starting seed generation...\n");

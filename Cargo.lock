@@ -118,7 +118,7 @@ dependencies = [
 
 [[package]]
 name = "cli"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
  "log",
  "settings",
@@ -256,7 +256,7 @@ checksum = "fad582f4b9e86b6caa621cabeb0963332d92eea04729ab12892c2533951e6440"
 
 [[package]]
 name = "jack"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
  "albw",
  "byteorder",
@@ -311,7 +311,7 @@ dependencies = [
 
 [[package]]
 name = "macros"
-version = "0.3.0"
+version = "0.3.1"
 
 [[package]]
 name = "memchr"
@@ -384,9 +384,9 @@ dependencies = [
 
 [[package]]
 name = "proc-macro2"
-version = "1.0.56"
+version = "1.0.64"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2b63bdb0cd06f1f4dedf69b254734f9b45af66e4a031e42a7480257d9898b435"
+checksum = "78803b62cbf1f46fde80d7c0e803111524b9877184cfe7c3033659490ac7a7da"
 dependencies = [
  "unicode-ident",
 ]
@@ -438,7 +438,7 @@ dependencies = [
 
 [[package]]
 name = "randomizer"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
  "albw",
  "byteorder",
@@ -569,7 +569,7 @@ dependencies = [
 
 [[package]]
 name = "settings"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
  "log",
  "macros",

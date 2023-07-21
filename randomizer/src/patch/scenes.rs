@@ -1219,6 +1219,7 @@ fn do_dev_stuff(patcher: &mut Patcher, settings: &Settings) {
     patcher.modify_objs(IndoorLight, 1, &[call(24, |obj| {
         obj.redirect(Dest::new(
             FieldLight, 27, 5,  // No Redirect
+            // FieldLight, 36, 0,  // Hotfoot Area
             // FieldLight, 4, 3,
             // FieldLight, 18, 10, // Hyrule Castle Front Door
             // CaveLight, 7, 0, // Zora's Domain

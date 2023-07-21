@@ -284,12 +284,25 @@ fn generate_always_hints(
     taken_checks: &mut Vec<&'static str>, taken_ghosts: &mut Vec<FillerItem>, rng: &mut StdRng,
 ) -> Vec<LocationHint> {
     let mut always_checks =
-        vec!["Master Sword Pedestal", "Great Rupee Fairy", "Blacksmith (Lorule)", "Bouldering Guy"];
+        vec![
+            "Master Sword Pedestal",
+            "Great Rupee Fairy",
+            "Blacksmith (Lorule)",
+            "Bouldering Guy",
+            "Irene",
+            "Rosso",
+            "Osfala",
+            "Wildlife Clearing Stump"
+        ];
 
     // todo
     // if settings.logic.nice_mode {
     //     always_checks.extend(vec![" 30 Maiamai", " 40 Maiamai", " 50 Maiamai"]);
     // }
+
+    if settings.logic.reverse_sage_events {
+        always_checks.extend(vec!["Queen Oren", "Hyrule Castle Battlement"]);
+    }
 
     if !settings.logic.minigames_excluded {
         always_checks.extend(vec!["Octoball Derby", "Treacherous Tower Intermediate"]);
@@ -371,15 +384,12 @@ fn generate_sometimes_hints(
         "Graveyard Ledge Cave",
         "Ice Gimos Fight",
         "Ice Rod Cave",
-        "Irene",
         "Ku's Domain Fight",
         "Lorule Field Treasure Dungeon",
         "Misery Mire Ledge",
         "Misery Mire Treasure Dungeon",
-        "Osfala",
         "Philosopher's Cave",
         "Queen Oren",
-        "Rosso",
         "Rosso Rocks",
         "Shady Guy",
         "Spectacle Rock",
@@ -387,7 +397,6 @@ fn generate_sometimes_hints(
         "Street Merchant (Right)",
         "Thief Girl",
         "Waterfall Cave",
-        "Wildlife Clearing Stump",
         "Woman",
         "Zelda",
         "Zora's River Treasure Dungeon",
@@ -395,8 +404,8 @@ fn generate_sometimes_hints(
         "[DP] (2F) Under Rock (Left)",
         "[DP] (2F) Under Rock (Right)",
         "[EP] (1F) Escape Chest",
-        "[HC] Battlement",
-        "[HC] West Wing",
+        "Hyrule Castle Battlement",
+        "Hyrule Castle West Wing",
         "[HG] (3F) Fire Bubbles",
         "[HG] (2F) Fire Ring",
         "[IR] (B2) Long Merge Chest",
