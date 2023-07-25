@@ -32,10 +32,13 @@ impl Sarc {
             );
         }
 
-        self.files.insert(self.calculate_hash(filename), vec![SarcInnerFile {
-            filename: if named { Some(filename.to_owned()) } else { None },
-            data,
-        }]);
+        self.files.insert(
+            self.calculate_hash(filename),
+            vec![SarcInnerFile {
+                filename: if named { Some(filename.to_owned()) } else { None },
+                data,
+            }],
+        );
     }
 
     /// Gets a file with the given `filename` from within this [`Sarc`] Archive. Panics if the file does not exist.
@@ -107,16 +110,11 @@ impl Sarc {
             if files.len() == 1 {
                 self.files.remove(&filename_hash);
                 return; // success
-            } else {
-                let results = files
-                    .drain_filter(|file| {
-                        if let Some(fname) = &file.filename { filename == fname } else { false }
-                    })
-                    .collect::<Vec<_>>();
-
-                if !results.is_empty() {
-                    return; // success
-                }
+            } else if let Some(index) =
+                files.iter().position(|file| file.filename.as_deref() == Some(filename))
+            {
+                files.remove(index);
+                return; // success
             }
         }
         fail!(
