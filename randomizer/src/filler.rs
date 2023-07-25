@@ -1,20 +1,19 @@
-use {
-    crate::{
-        convert,
-        item_pools::{get_maiamai_pool, Pool},
-        model::{check::Check, location::Location, progress::Progress},
-        world::WorldGraph,
-        CheckMap,
-        FillerItem::{self, *},
-        LocationInfo, Settings,
-    },
-    albw::Item,
-    log::{error, info},
-    macros::fail,
-    queue::Queue,
-    rand::{rngs::StdRng, Rng},
-    settings::logic_mode::LogicMode::*,
-    std::collections::{BTreeMap, HashSet},
+use std::collections::{BTreeMap, HashSet};
+
+use albw::Item;
+use log::{error, info};
+use queue::Queue;
+use rand::{rngs::StdRng, Rng};
+use settings::logic_mode::LogicMode::*;
+
+use crate::{
+    convert,
+    item_pools::{get_maiamai_pool, Pool},
+    model::{check::Check, location::Location, progress::Progress},
+    world::WorldGraph,
+    CheckMap, Error,
+    FillerItem::{self, *},
+    LocationInfo, Result, Settings,
 };
 
 /// Fill Seed such that All Locations are Reachable
@@ -23,20 +22,20 @@ use {
 pub fn fill_all_locations_reachable(
     world_graph: &mut WorldGraph, check_map: &mut CheckMap, progression_pool: &mut Pool,
     junk_pool: &mut Pool, settings: &Settings, rng: &mut StdRng,
-) -> Vec<(LocationInfo, Item)> {
-    verify_all_locations_accessible(world_graph, check_map, progression_pool, settings);
-    handle_exclusions(check_map, settings, rng, junk_pool);
-    preplace_items(check_map, settings, rng, progression_pool, junk_pool);
-    assumed_fill(world_graph, rng, progression_pool, check_map, settings);
-    fill_junk(check_map, rng, junk_pool);
-    map_to_result(world_graph, check_map)
+) -> Result<Vec<(LocationInfo, Item)>> {
+    verify_all_locations_accessible(world_graph, check_map, progression_pool, settings)?;
+    handle_exclusions(check_map, settings, rng, junk_pool)?;
+    preplace_items(check_map, settings, rng, progression_pool, junk_pool)?;
+    assumed_fill(world_graph, rng, progression_pool, check_map, settings)?;
+    fill_junk(check_map, rng, junk_pool)?;
+    Ok(map_to_result(world_graph, check_map))
 }
 
 /// Place static items ahead of the randomly filled ones
 fn preplace_items(
     check_map: &mut CheckMap, settings: &Settings, rng: &mut StdRng,
     progression: &mut Vec<FillerItem>, junk: &mut Vec<FillerItem>,
-) {
+) -> Result<()> {
     // Vanilla Dungeon Prizes
     if !settings.logic.randomize_dungeon_prizes {
         place_static(check_map, progression, PendantOfCourage01, "Eastern Palace Prize");
@@ -89,8 +88,8 @@ fn preplace_items(
 
     // Super Items
     if settings.logic.super_items {
-        exclude("Treacherous Tower Advanced (1)", rng, check_map, junk);
-        exclude("Treacherous Tower Advanced (2)", rng, check_map, junk);
+        exclude("Treacherous Tower Advanced (1)", rng, check_map, junk)?;
+        exclude("Treacherous Tower Advanced (2)", rng, check_map, junk)?;
     } else {
         place_static(check_map, progression, Lamp02, "Treacherous Tower Advanced (1)");
         place_static(check_map, progression, Net02, "Treacherous Tower Advanced (2)");
@@ -98,15 +97,15 @@ fn preplace_items(
 
     // Nice Mode
     if settings.logic.nice_mode {
-        exclude(" 10 Maiamai", rng, check_map, junk);
-        exclude(" 20 Maiamai", rng, check_map, junk);
-        exclude(" 30 Maiamai", rng, check_map, junk);
-        exclude(" 40 Maiamai", rng, check_map, junk);
-        exclude(" 50 Maiamai", rng, check_map, junk);
-        exclude(" 60 Maiamai", rng, check_map, junk);
-        exclude(" 70 Maiamai", rng, check_map, junk);
-        exclude(" 80 Maiamai", rng, check_map, junk);
-        exclude(" 90 Maiamai", rng, check_map, junk);
+        exclude(" 10 Maiamai", rng, check_map, junk)?;
+        exclude(" 20 Maiamai", rng, check_map, junk)?;
+        exclude(" 30 Maiamai", rng, check_map, junk)?;
+        exclude(" 40 Maiamai", rng, check_map, junk)?;
+        exclude(" 50 Maiamai", rng, check_map, junk)?;
+        exclude(" 60 Maiamai", rng, check_map, junk)?;
+        exclude(" 70 Maiamai", rng, check_map, junk)?;
+        exclude(" 80 Maiamai", rng, check_map, junk)?;
+        exclude(" 90 Maiamai", rng, check_map, junk)?;
     } else {
         place_static(check_map, progression, Bow02, " 10 Maiamai");
         place_static(check_map, progression, Boomerang02, " 20 Maiamai");
@@ -118,7 +117,7 @@ fn preplace_items(
         place_static(check_map, progression, TornadoRod02, " 80 Maiamai");
         place_static(check_map, progression, SandRod02, " 90 Maiamai");
     }
-    exclude("100 Maiamai", rng, check_map, junk);
+    exclude("100 Maiamai", rng, check_map, junk)?;
 
     let mut shop_positions: Vec<String> = Vec::new();
     let mut bow_light_positions: Vec<String> = Vec::from(["Zelda".to_owned()]);
@@ -197,17 +196,17 @@ fn preplace_items(
 
     // Exclude Minigames
     if settings.logic.minigames_excluded {
-        exclude("Dodge the Cuccos", rng, check_map, junk);
-        exclude("Hyrule Hotfoot (First Race)", rng, check_map, junk);
-        exclude("Rupee Rush (Hyrule)", rng, check_map, junk);
-        exclude("Rupee Rush (Lorule)", rng, check_map, junk);
-        exclude("Octoball Derby", rng, check_map, junk);
-        exclude("Treacherous Tower Intermediate", rng, check_map, junk);
+        exclude("Dodge the Cuccos", rng, check_map, junk)?;
+        exclude("Hyrule Hotfoot (First Race)", rng, check_map, junk)?;
+        exclude("Rupee Rush (Hyrule)", rng, check_map, junk)?;
+        exclude("Rupee Rush (Lorule)", rng, check_map, junk)?;
+        exclude("Octoball Derby", rng, check_map, junk)?;
+        exclude("Treacherous Tower Intermediate", rng, check_map, junk)?;
 
         // For Maiamai Madness, also turn the rupee rush maiamai into random junk
         if settings.logic.maiamai_madness {
-            exclude("[Mai] Hyrule Rupee Rush Wall", rng, check_map, junk);
-            exclude("[Mai] Lorule Rupee Rush Wall", rng, check_map, junk);
+            exclude("[Mai] Hyrule Rupee Rush Wall", rng, check_map, junk)?;
+            exclude("[Mai] Lorule Rupee Rush Wall", rng, check_map, junk)?;
         }
     }
 
@@ -219,6 +218,7 @@ fn preplace_items(
             place_static(check_map, progression, maiamai_items.remove(0), &check_name);
         }
     }
+    Ok(())
 }
 
 // Statically place an item in a given location, then remove it from the item pool provided
@@ -228,22 +228,22 @@ fn place_static(check_map: &mut CheckMap, pool: &mut Pool, item: FillerItem, che
 }
 
 // Exclude a location by placing a random junk item there
-fn exclude(check_name: &str, rng: &mut StdRng, check_map: &mut CheckMap, junk: &mut Pool) {
-    if check_map
+fn exclude(
+    check_name: &str, rng: &mut StdRng, check_map: &mut CheckMap, junk: &mut Pool,
+) -> Result<()> {
+    check_map
         .insert(check_name.to_owned(), Some(junk.remove(rng.gen_range(0..junk.len()))))
-        .is_none()
-    {
-        fail!("Check not found: {}", check_name);
-    }
+        .ok_or_else(|| Error::new(format!("Check not found: {}", check_name)))
+        .map(|_| ())
 }
 
 fn handle_exclusions(
     check_map: &mut CheckMap, settings: &Settings, rng: &mut StdRng,
     junk_pool: &mut Vec<FillerItem>,
-) {
+) -> Result<()> {
     let opt = settings.exclusions.0.get("exclusions");
     if opt.is_none() {
-        return;
+        return Ok(());
     }
 
     let exclusions = opt.unwrap();
@@ -254,9 +254,10 @@ fn handle_exclusions(
             check_map.insert(exclusion.clone(), Some(junk_pool.remove(rng_index)));
         } else {
             error!("Cannot exclude \"{}\", no matching check found with that name.", exclusion);
-            fail!("Consult a spoiler log for a list of valid check names.");
+            return Err(Error::new("Consult a spoiler log for a list of valid check names."));
         }
     }
+    Ok(())
 }
 
 /// Super dirty mapping I hate it
@@ -359,7 +360,7 @@ fn is_dungeon_item(item: FillerItem) -> bool {
     )
 }
 
-fn fill_junk(check_map: &mut CheckMap, rng: &mut StdRng, junk_items: &mut Pool) {
+fn fill_junk(check_map: &mut CheckMap, rng: &mut StdRng, junk_items: &mut Pool) -> Result<()> {
     info!("Placing Junk Items...");
 
     let mut empty_check_keys = Vec::new();
@@ -370,17 +371,18 @@ fn fill_junk(check_map: &mut CheckMap, rng: &mut StdRng, junk_items: &mut Pool) 
     }
 
     if empty_check_keys.len() != junk_items.len() {
-        fail!(
+        return Err(Error::new(format!(
             "Number of empty checks: {} does not match available junk items: {}",
             empty_check_keys.len(),
             junk_items.len()
-        );
+        )));
     }
 
     for junk in junk_items {
         check_map
             .insert(empty_check_keys.remove(rng.gen_range(0..empty_check_keys.len())), Some(*junk));
     }
+    Ok(())
 }
 
 fn place_item_randomly(
@@ -392,7 +394,9 @@ fn place_item_randomly(
     );
 }
 
-fn filter_checks(item: FillerItem, checks: &[Check], check_map: &mut CheckMap) -> Vec<Check> {
+fn filter_checks(
+    item: FillerItem, checks: &[Check], check_map: &mut CheckMap,
+) -> Result<Vec<Check>> {
     // Filter out non-empty checks
     let mut filtered_checks = checks
         .iter()
@@ -406,21 +410,21 @@ fn filter_checks(item: FillerItem, checks: &[Check], check_map: &mut CheckMap) -
     } else if is_dungeon_item(item) {
         let is_keysanity = false; // No keysanity yet, hardcode to false
         if !is_keysanity {
-            filtered_checks = filter_dungeon_checks(item, &filtered_checks);
+            filtered_checks = filter_dungeon_checks(item, &filtered_checks)?;
         }
     }
 
-    filtered_checks
+    Ok(filtered_checks)
 }
 
 fn filter_dungeon_prize_checks(eligible_checks: &[Check]) -> Vec<Check> {
     eligible_checks.iter().filter(|&x| x.get_name().contains("Prize")).cloned().collect()
 }
 
-fn filter_dungeon_checks(item: FillerItem, eligible_checks: &[Check]) -> Vec<Check> {
+fn filter_dungeon_checks(item: FillerItem, eligible_checks: &[Check]) -> Result<Vec<Check>> {
     eligible_checks
         .iter()
-        .filter(|&x| {
+        .map(|x| {
             x.get_name().starts_with(match item {
                 HyruleSanctuaryKey => "[HS]",
                 LoruleSanctuaryKey => "[LS]",
@@ -446,13 +450,12 @@ fn filter_dungeon_checks(item: FillerItem, eligible_checks: &[Check]) -> Vec<Che
                 | LoruleCastleKeySmall03
                 | LoruleCastleKeySmall04
                 | LoruleCastleKeySmall05 => "[LC]",
-
                 _ => {
-                    fail!("Item {:?} is not a dungeon item", item);
+                    return Err(Error::new(format!("Item {:?} is not a dungeon item", item)));
                 }
-            })
+            });
+            Ok(*x)
         })
-        .cloned()
         .collect()
 }
 
@@ -470,18 +473,21 @@ fn exist_empty_reachable_check(checks: &Vec<Check>, check_map: &mut CheckMap) ->
 }
 
 /// Prefills a map with all checks as defined by the world graph with no values yet assigned
-pub fn prefill_check_map(world_graph: &mut WorldGraph) -> CheckMap {
+pub fn prefill_check_map(world_graph: &mut WorldGraph) -> Result<CheckMap> {
     let mut check_map = BTreeMap::new();
 
     for location_node in world_graph.values_mut() {
         for check in location_node.clone().get_checks() {
             if check_map.insert(check.get_name().to_owned(), check.get_quest()).is_some() {
-                fail!("Multiple checks have duplicate name: {}", check.get_name());
+                return Err(Error::new(format!(
+                    "Multiple checks have duplicate name: {}",
+                    check.get_name()
+                )));
             }
         }
     }
 
-    check_map
+    Ok(check_map)
 }
 
 /// This translation is probably adding unnecessary overhead, oh well
@@ -497,13 +503,13 @@ fn build_progress_from_items(items: &Pool, settings: &Settings) -> Progress {
 fn verify_all_locations_accessible(
     world_graph: &mut WorldGraph, check_map: &mut CheckMap, progression_pool: &mut Pool,
     settings: &Settings,
-) {
+) -> Result<()> {
     if NoLogic.eq(&settings.logic.logic_mode) {
-        return; // Skip this check on No Logic
+        return Ok(()); // Skip this check on No Logic
     }
 
     info!("Verifying all locations accessible...");
-    let reachable_checks = assumed_search(world_graph, progression_pool, check_map, settings); //find_reachable_checks(loc_map, &everything, &mut check_map); //
+    let reachable_checks = assumed_search(world_graph, progression_pool, check_map, settings)?; //find_reachable_checks(loc_map, &everything, &mut check_map); //
 
     /**
      * 384 In-Logic Checks
@@ -542,18 +548,19 @@ fn verify_all_locations_accessible(
             }
         }
 
-        fail!(
+        return Err(Error::new(format!(
             "Only {}/{} checks were reachable in the world graph",
             reachable_checks.len(),
             IN_LOGIC_CHECKS + PROGRESSION_EVENTS
-        );
+        )));
     }
+    Ok(())
 }
 
 /// Find all checks reachable with the given Progress
 pub(crate) fn find_reachable_checks(
     world_graph: &mut WorldGraph, progress: &Progress,
-) -> Vec<Check> {
+) -> Result<Vec<Check>> {
     let start_node = Location::RavioShop;
     let mut loc_queue: Queue<Location> = Queue::from(vec![start_node]);
     let mut visited: HashSet<Location> = HashSet::new();
@@ -568,7 +575,7 @@ pub(crate) fn find_reachable_checks(
         let location_node = match world_graph.get_mut(&location) {
             Some(loc) => loc,
             None => {
-                fail!("Location Undefined: {:?}", location);
+                return Err(Error::new(format!("Location Undefined: {:?}", location)));
             }
         };
 
@@ -589,7 +596,7 @@ pub(crate) fn find_reachable_checks(
         }
     }
 
-    reachable_checks
+    Ok(reachable_checks)
 }
 
 pub(crate) fn get_items_from_reachable_checks(
@@ -634,18 +641,18 @@ pub(crate) fn get_items_from_reachable_checks(
 fn assumed_fill(
     world_graph: &mut WorldGraph, rng: &mut StdRng, items_owned: &mut Pool,
     check_map: &mut CheckMap, settings: &Settings,
-) {
+) -> Result<()> {
     info!("Placing Progression Items...");
 
-    let mut reachable_checks = assumed_search(world_graph, items_owned, check_map, settings);
+    let mut reachable_checks = assumed_search(world_graph, items_owned, check_map, settings)?;
 
     while exist_empty_reachable_check(&reachable_checks, check_map) && !items_owned.is_empty() {
         let item = items_owned.remove(0);
 
         //
-        reachable_checks = assumed_search(world_graph, items_owned, check_map, settings);
+        reachable_checks = assumed_search(world_graph, items_owned, check_map, settings)?;
 
-        let filtered_checks = filter_checks(item, &reachable_checks, check_map);
+        let filtered_checks = filter_checks(item, &reachable_checks, check_map)?;
 
         if filtered_checks.is_empty() {
             info!("No reachable checks found to place: {:?}", item);
@@ -653,6 +660,7 @@ fn assumed_fill(
 
         place_item_randomly(item, &filtered_checks, check_map, rng);
     }
+    Ok(())
 }
 
 /// The Assumed Search algorithm.
@@ -667,12 +675,12 @@ fn assumed_fill(
 fn assumed_search(
     world_graph: &mut WorldGraph, items_owned: &mut Pool, check_map: &mut CheckMap,
     settings: &Settings,
-) -> Vec<Check> {
+) -> Result<Vec<Check>> {
     let mut considered_items = build_progress_from_items(&items_owned.clone(), settings);
     let mut reachable_checks: Vec<Check>;
 
     loop {
-        reachable_checks = find_reachable_checks(world_graph, &considered_items);
+        reachable_checks = find_reachable_checks(world_graph, &considered_items)?;
         let reachable_items =
             get_items_from_reachable_checks(&reachable_checks, check_map, settings);
 
@@ -687,5 +695,5 @@ fn assumed_search(
         }
     }
 
-    reachable_checks
+    Ok(reachable_checks)
 }

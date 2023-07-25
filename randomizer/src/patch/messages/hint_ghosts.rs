@@ -16,11 +16,13 @@ macro_rules! hint_ghost_from {
         $($ghost:ident => $course:ident, $msbt_file:literal, $msg_label:literal;)+
     ) => {
         $(#[$attr])*
-        impl<'hg> From<FillerItem> for HintGhost<'hg> {
-            fn from(value: FillerItem) -> Self {
+        impl<'hg> TryFrom<FillerItem> for HintGhost<'hg> {
+            type Error = $crate::Error;
+
+            fn try_from(value: FillerItem) -> Result<Self, Self::Error> {
                 match value {
-                    $($ghost => Self { course: $course, msbt_file: $msbt_file, msg_label: $msg_label },)+
-                    _ => macros::fail!("\"{:?}\" is not a Hint Ghost", value),
+                    $($ghost => Ok(Self { course: $course, msbt_file: $msbt_file, msg_label: $msg_label }),)+
+                    _ => Err($crate::Error::new(format!("\"{:?}\" is not a Hint Ghost", value))),
                 }
             }
         }

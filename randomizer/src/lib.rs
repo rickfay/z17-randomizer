@@ -1,32 +1,30 @@
-use {
-    crate::{
-        constants::VERSION,
-        hints::{formatting::*, Hints},
-        metrics::Metrics,
-        patch::msbf::MsbfKey,
-        system::UserConfig,
-    },
-    albw::{
-        Game,
-        Item::{self, *},
-    },
-    log::{debug, error, info},
-    macros::fail,
-    model::filler_item::{convert, FillerItem},
-    patch::Patcher,
-    path_absolutize::*,
-    rand::{rngs::StdRng, SeedableRng},
-    regions::Subregion,
-    serde::{ser::SerializeMap, Serialize, Serializer},
-    settings::Settings,
-    std::{
-        collections::{hash_map::DefaultHasher, BTreeMap},
-        error::Error as StdError,
-        fs::File,
-        hash::{Hash, Hasher},
-        io::{self, Write},
-        ops::Deref,
-    },
+use std::{
+    collections::{hash_map::DefaultHasher, BTreeMap},
+    fs::File,
+    hash::{Hash, Hasher},
+    io::{self, Write},
+    ops::Deref,
+};
+
+use albw::{
+    Game,
+    Item::{self, *},
+};
+use log::{debug, error, info};
+use model::filler_item::{convert, FillerItem};
+use patch::Patcher;
+use path_absolutize::*;
+use rand::{rngs::StdRng, SeedableRng};
+use regions::Subregion;
+use serde::{ser::SerializeMap, Serialize, Serializer};
+use settings::Settings;
+
+use crate::{
+    constants::VERSION,
+    hints::{formatting::*, Hints},
+    metrics::Metrics,
+    patch::msbf::MsbfKey,
+    system::UserConfig,
 };
 
 pub mod constants;
@@ -44,67 +42,22 @@ pub mod system;
 #[rustfmt::skip]
 mod world;
 
-pub type Result<T, E = Error> = core::result::Result<T, E>;
+pub type Result<T, E = Error> = ::std::result::Result<T, E>;
 
-#[derive(Debug)]
-pub struct Error {
-    kind: ErrorKind,
-    inner: Box<dyn StdError + Send + Sync + 'static>,
+#[derive(Debug, thiserror::Error)]
+pub enum Error {
+    #[error("{0}")]
+    Message(String),
+    #[error(transparent)]
+    Game(#[from] albw::Error),
+    #[error(transparent)]
+    Io(#[from] io::Error),
 }
 
 impl Error {
-    fn game<S>(err: S) -> Self
-    where
-        S: Into<Box<dyn StdError + Send + Sync + 'static>>,
-    {
-        Self { kind: ErrorKind::Game, inner: err.into() }
+    fn new(msg: impl Into<String>) -> Self {
+        Self::Message(msg.into())
     }
-
-    fn io<S>(err: S) -> Self
-    where
-        S: Into<Box<dyn StdError + Send + Sync + 'static>>,
-    {
-        Self { kind: ErrorKind::Io, inner: err.into() }
-    }
-
-    /// Gets the type of this error.
-    pub fn kind(&self) -> &ErrorKind {
-        &self.kind
-    }
-
-    /// Converts this error into its inner value.
-    pub fn into_inner(self) -> Box<dyn StdError + Send + Sync + 'static> {
-        self.inner
-    }
-}
-
-impl From<albw::Error> for Error {
-    fn from(err: albw::Error) -> Self {
-        let kind = match err.kind() {
-            albw::ErrorKind::Io => ErrorKind::Io,
-            albw::ErrorKind::Rom => ErrorKind::Game,
-        };
-        Self { kind, inner: err.into_inner() }
-    }
-}
-
-impl From<io::Error> for Error {
-    fn from(err: io::Error) -> Self {
-        Self { kind: ErrorKind::Io, inner: err.into() }
-    }
-}
-
-impl From<system::Error> for Error {
-    fn from(err: system::Error) -> Self {
-        Self { kind: ErrorKind::Sys, inner: err.into() }
-    }
-}
-
-#[derive(Debug)]
-pub enum ErrorKind {
-    Sys,
-    Game,
-    Io,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Hash)]
@@ -364,7 +317,7 @@ fn item_to_str(item: &Item) -> &'static str {
 trait ItemExt {
     fn normalize(self) -> Self;
     fn goes_in_csmc_large_chest(&self) -> bool;
-    fn msbf_key(self) -> Option<&'static str>;
+    fn msbf_key(self) -> Result<Option<&'static str>>;
 
     // fn is_dungeon(&self) -> bool;
     // fn is_sword(&self) -> bool;
@@ -447,24 +400,24 @@ impl ItemExt for Item {
         )
     }
 
-    fn msbf_key(self) -> Option<&'static str> {
+    fn msbf_key(self) -> Result<Option<&'static str>> {
         match self {
-            SageGulley => Some(MsbfKey::Dark),
-            SageOren => Some(MsbfKey::Water),
-            SageSeres => Some(MsbfKey::Dokuro),
-            SageOsfala => Some(MsbfKey::Hagure),
-            SageIrene => Some(MsbfKey::Sand),
-            SageRosso => Some(MsbfKey::Ice),
-            SageImpa => None, // Impa special
-            PendantPower | PendantWisdom | PendantCourage | ZeldaAmulet => None,
-            _ => fail!(),
+            SageGulley => Ok(Some(MsbfKey::Dark)),
+            SageOren => Ok(Some(MsbfKey::Water)),
+            SageSeres => Ok(Some(MsbfKey::Dokuro)),
+            SageOsfala => Ok(Some(MsbfKey::Hagure)),
+            SageIrene => Ok(Some(MsbfKey::Sand)),
+            SageRosso => Ok(Some(MsbfKey::Ice)),
+            SageImpa => Ok(None), // Impa special
+            PendantPower | PendantWisdom | PendantCourage | ZeldaAmulet => Ok(None),
+            _ => Err(Error::new("")),
         }
     }
 }
 
 /// Align JSON Key-Values for readability
 /// Can't find a decent library for this, so we're doing it manually
-fn align_json_values(json: &mut String) {
+fn align_json_values(json: &mut String) -> Result<()> {
     const KEY_ALIGNMENT: usize = 56;
     let mut index_colon = 0;
     while index_colon < json.len() {
@@ -478,9 +431,9 @@ fn align_json_values(json: &mut String) {
             continue;
         }
 
-        let index_prev_new_line = json[..index_colon].rfind('\n').unwrap_or_else(|| {
-            fail!("Couldn't fine new line character before index: {}", index_colon);
-        });
+        let index_prev_new_line = json[..index_colon].rfind('\n').ok_or_else(|| {
+            Error::new(format!("Couldn't fine new line character before index: {}", index_colon))
+        })?;
         let line_length_up_to_value = index_colon - index_prev_new_line;
 
         if KEY_ALIGNMENT < line_length_up_to_value {
@@ -489,7 +442,10 @@ fn align_json_values(json: &mut String) {
                 "JSON Key Alignment value smaller than line length up to that point: {} < {}",
                 KEY_ALIGNMENT, line_length_up_to_value
             );
-            fail!("Problem line: {}", &json[index_prev_new_line..index_colon]);
+            return Err(Error::new(format!(
+                "Problem line: {}",
+                &json[index_prev_new_line..index_colon]
+            )));
         }
 
         let spaces_to_add = KEY_ALIGNMENT - line_length_up_to_value;
@@ -500,6 +456,7 @@ fn align_json_values(json: &mut String) {
         );
         index_colon += 1;
     }
+    Ok(())
 }
 
 #[derive(Serialize)]
@@ -590,10 +547,10 @@ impl Serialize for SeedHash {
 fn validate_settings(settings: &Settings) -> Result<()> {
     // LC Requirement
     if !(0..=7).contains(&settings.logic.lc_requirement) {
-        fail!(
+        return Err(Error::new(format!(
             "Invalid Lorule Castle Requirement: \"{}\" was not between 0-7, inclusive.",
             settings.logic.lc_requirement
-        );
+        )));
     }
 
     // Yuganon Requirement
@@ -602,26 +559,27 @@ fn validate_settings(settings: &Settings) -> Result<()> {
     // }
 
     if settings.logic.yuganon_requirement != settings.logic.lc_requirement {
-        fail!(
+        return Err(Error::new(format!(
             "Yuga Ganon Requirement: \"{}\" is different than Lorule Castle Requirement: \"{}\"\n\
         Different values for these settings are not yet supported!",
-            settings.logic.yuganon_requirement,
-            settings.logic.lc_requirement
-        );
+            settings.logic.yuganon_requirement, settings.logic.lc_requirement
+        )));
     }
 
     // Swords
     if settings.logic.sword_in_shop && settings.logic.swordless_mode {
-        fail!("The sword_in_shop and swordless_mode settings cannot both be enabled.");
+        return Err(Error::new(
+            "The sword_in_shop and swordless_mode settings cannot both be enabled.",
+        ));
     }
 
     // Assured Weapons
     if settings.logic.assured_weapon
         && (settings.logic.sword_in_shop || settings.logic.boots_in_shop)
     {
-        fail!(
+        return Err(Error::new(
             "The assured_weapon setting cannot be enabled when either sword_in_shop or boots_in_shop is also enabled."
-        );
+        ));
     }
 
     Ok(())
@@ -637,13 +595,13 @@ fn calculate_seed_info<'s>(
 
     // Build World Graph
     let world_graph = &mut world::build_world_graph();
-    let check_map = &mut filler::prefill_check_map(world_graph);
+    let check_map = &mut filler::prefill_check_map(world_graph)?;
     let (mut progression, mut junk) = item_pools::get_item_pools(settings, rng);
 
     // Filler Algorithm
     let filled: Vec<(LocationInfo, Item)> = filler::fill_all_locations_reachable(
         world_graph, check_map, &mut progression, &mut junk, settings, rng,
-    );
+    )?;
 
     // Build legacy Layout object
     let mut layout = Layout::default();
@@ -651,8 +609,8 @@ fn calculate_seed_info<'s>(
         layout.set(location_info, item);
     }
 
-    let metrics = metrics::calculate_metrics(world_graph, check_map, settings);
-    let hints = hints::generate_hints(world_graph, check_map, settings, rng);
+    let metrics = metrics::calculate_metrics(world_graph, check_map, settings)?;
+    let hints = hints::generate_hints(world_graph, check_map, settings, rng)?;
 
     Ok(SeedInfo { seed, version: VERSION, hash, settings, layout, metrics, hints })
 }
@@ -665,7 +623,7 @@ pub fn patch_seed(
     if !no_patch {
         info!("Starting Patch Process...");
 
-        let game = Game::load(user_config.rom())?;
+        let game = Game::load(user_config.rom()).map_err(|err| Error::new(err.to_string()))?;
         let mut patcher = Patcher::new(game)?;
 
         info!("ROM Loaded.\n");
@@ -681,7 +639,7 @@ pub fn patch_seed(
         //let spoiler = Spoiler::from(seed_info);
 
         let mut serialized = serde_json::to_string_pretty(&seed_info).unwrap();
-        align_json_values(&mut serialized);
+        align_json_values(&mut serialized)?;
 
         write!(File::create(path)?, "{}", serialized).expect("Could not write the spoiler log.");
     }

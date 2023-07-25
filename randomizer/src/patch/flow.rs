@@ -1,10 +1,9 @@
-use {
-    super::Patcher,
-    crate::Result,
-    albw::{course::Id, Item},
-    log::info,
-    settings::Settings,
-};
+use albw::{course::Id, Item};
+use log::info;
+use settings::Settings;
+
+use super::Patcher;
+use crate::{Error, Result};
 
 /*
  * TODO - Want to rewrite this entire subsystem
@@ -19,18 +18,18 @@ macro_rules! apply {
                 .flow(course!($course))?;
             let mut flow = flow
                 .get_mut(stringify!($name))
-                .ok_or_else(|| $crate::Error::game("File not found."))??;
+                .ok_or_else(|| $crate::Error::new("File not found."))?.map_err(|err| $crate::Error::new(err.to_string()))?;
             $({
                 let step = flow.get_mut()
                     .get_mut($index)
-                    .ok_or_else(|| $crate::Error::game(format!(
+                    .ok_or_else(|| $crate::Error::new(format!(
                         "Could not find command {:02X} in '{}/{}'.",
                         $index,
                         stringify!($course),
                         stringify!($name),
                     )))?;
                 let mut step = kind!(step, $($kind)?)
-                    .ok_or_else(|| $crate::Error::game(format!(
+                    .ok_or_else(|| $crate::Error::new(format!(
                         "Step {}/{} [0x{:X}] did not match expected type '{}'",
                         stringify!($course),
                         stringify!($name),
@@ -83,7 +82,7 @@ macro_rules! action {
     ($command:tt switch [
         $([$index:literal] => $next:expr,)*
     ]) => {
-        $($command.set_branch($index, $next)?;)*
+        $($command.set_branch($index, $next).map_err(|err| $crate::Error::new(err.to_string()))?;)*
     };
     ($command:tt each [$($op:tt $rhs:tt,)+]) => {
         $(action!($command $op $rhs);)+
@@ -209,9 +208,9 @@ where
     let course = course.into();
 
     if let Some(file) = patcher.flow(course)?.get_mut(file_name) {
-        file?.get().debug();
+        file.map_err(|err| crate::Error::new(err.to_string()))?.get().debug();
     } else {
-        macros::fail!(
+        return Err(Error::new(format!(
             "File not found: US{}.szs -> World/Flow/{}.msbf",
             if course.is_some() {
                 "_English/".to_owned() + course.unwrap().as_str()
@@ -219,7 +218,7 @@ where
                 "/RegionBoot".to_owned()
             },
             file_name
-        );
+        )));
     };
 
     info!("Finished MSBF Debug");

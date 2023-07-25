@@ -1,4 +1,4 @@
-use {crate::sead::sarc::Sarc, albw::Game, std::io::Error};
+use {crate::sead::sarc::Sarc, albw::Game};
 
 mod byaml;
 pub mod sead;
@@ -24,6 +24,6 @@ pub fn open(game: &Game, filename: &str) -> Box<[u8]> {
 }
 
 /// Opens a Yaz0-compressed SARC Archive (.szs files)
-pub fn open_szs(game: &Game, filename: &str) -> Result<Sarc, Error> {
+pub fn open_szs(game: &Game, filename: &str) -> sead::Result<Sarc> {
     sead::open_szs(filename, open(game, filename))
 }

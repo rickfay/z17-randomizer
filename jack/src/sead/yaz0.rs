@@ -1,9 +1,8 @@
-use {
-    crate::{IntoBytes, JackFile, Pathed},
-    macros::fail,
-    std::{io::Cursor, marker::PhantomData},
-    yaz0::{CompressionLevel, Yaz0Archive, Yaz0Writer},
-};
+use std::{io::Cursor, marker::PhantomData};
+
+use yaz0::{CompressionLevel, Yaz0Archive, Yaz0Writer};
+
+use crate::{IntoBytes, JackFile, Pathed};
 
 pub(crate) struct Compressed;
 pub(crate) struct Decompressed;
@@ -40,19 +39,11 @@ impl<State> IntoBytes for Yaz0File<State> {
 
 impl Yaz0File<Compressed> {
     /// Perform the decompression
-    pub(crate) fn decompress(self) -> Yaz0File<Decompressed> {
+    pub(crate) fn decompress(self) -> Result<Yaz0File<Decompressed>, yaz0::Error> {
         let path = self.path.clone();
-        let mut yaz0 = match Yaz0Archive::new(Cursor::new(self.into_bytes())) {
-            Ok(yaz0) => yaz0,
-            Err(err) => fail!("{}", err),
-        };
-
-        let decompressed = match yaz0.decompress() {
-            Ok(decompressed) => decompressed,
-            Err(err) => fail!("{}", err),
-        };
-
-        Yaz0File { path, data: decompressed.into(), state: PhantomData::<Decompressed> }
+        let mut yaz0 = Yaz0Archive::new(Cursor::new(self.into_bytes()))?;
+        let decompressed = yaz0.decompress()?;
+        Ok(Yaz0File { path, data: decompressed.into(), state: PhantomData::<Decompressed> })
     }
 }
 

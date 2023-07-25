@@ -1,22 +1,22 @@
-use {
-    self::code::Code,
-    crate::{patch::util::*, Error, ItemExt, Result, SeedInfo, Settings},
-    albw::{
-        course::{Id, Id::*},
-        demo::Timed,
-        flow::FlowMut,
-        scene::{Arg, Obj, Rail, SceneMeta},
-        Demo, File, Game, IntoBytes, Item, Language, Scene,
-    },
-    fs_extra::dir::CopyOptions,
-    log::{debug, error, info},
-    macros::fail,
-    path_absolutize::*,
-    serde::Serialize,
-    std::{collections::HashMap, fs, iter, path::Path},
-    tempfile::tempdir,
-    try_insert_ext::EntryInsertExt,
+use std::{collections::HashMap, fs, iter, path::Path};
+
+use albw::{
+    course::{Id, Id::*},
+    demo::Timed,
+    flow::FlowMut,
+    scene::{Arg, Obj, Rail, SceneMeta},
+    Demo, File, Game, IntoBytes, Item, Language, Scene,
 };
+use fs_extra::dir::CopyOptions;
+use log::{debug, error, info};
+use path_absolutize::*;
+use serde::Serialize;
+use tempfile::tempdir;
+use try_insert_ext::EntryInsertExt;
+
+use crate::{patch::util::*, Error, ItemExt, Result, SeedInfo, Settings};
+
+use code::Code;
 
 mod code;
 mod flow;
@@ -83,7 +83,7 @@ impl Patcher {
                 stage
                     .get_obj_mut(*unq)
                     .ok_or_else(|| {
-                        Error::game(format!(
+                        Error::new(format!(
                             "Could not find [Objs] UNQ {} in {}{}",
                             unq,
                             id.as_str(),
@@ -104,7 +104,7 @@ impl Patcher {
                 stage
                     .get_rails_mut(*unq)
                     .ok_or_else(|| {
-                        Error::game(format!(
+                        Error::new(format!(
                             "Could not find [Rails] UNQ {} in {}{}",
                             unq,
                             id.as_str(),
@@ -125,7 +125,7 @@ impl Patcher {
                 stage
                     .get_system_mut(*unq)
                     .ok_or_else(|| {
-                        Error::game(format!(
+                        Error::new(format!(
                             "Could not find [System] UNQ {} in {}{}",
                             unq,
                             id.as_str(),
@@ -209,7 +209,7 @@ impl Patcher {
             .get_mut()
             .get_obj_mut(unq)
             .ok_or_else(|| {
-                Error::game(format!("{}{} [{}] not found", course.as_str(), stage + 1, unq))
+                Error::new(format!("{}{} [{}] not found", course.as_str(), stage + 1, unq))
             })
             .unwrap()
             .arg_mut()
@@ -225,8 +225,16 @@ impl Patcher {
         let large_chest = (34, "TreasureBoxL");
 
         let chest_data = if settings.options.chest_size_matches_contents {
-            if item.goes_in_csmc_large_chest() { large_chest } else { small_chest }
-        } else if is_big { large_chest } else { small_chest };
+            if item.goes_in_csmc_large_chest() {
+                large_chest
+            } else {
+                small_chest
+            }
+        } else if is_big {
+            large_chest
+        } else {
+            small_chest
+        };
 
         // Forcibly set ID
         self.scene(course, stage)
@@ -267,11 +275,11 @@ impl Patcher {
             Patch::Event { course, name, index } => {
                 self.flow(course)?
                     .get_mut(name)
-                    .ok_or_else(|| Error::game("File not found."))??
+                    .ok_or_else(|| Error::new("File not found."))??
                     .get_mut()
                     .get_mut(index)
                     .ok_or_else(|| {
-                        Error::game(format!(
+                        Error::new(format!(
                             "{}/{} [{}] not found",
                             course.as_ref().map(Id::as_str).unwrap_or("Boot"),
                             name,
@@ -279,7 +287,7 @@ impl Patcher {
                         ))
                     })?
                     .into_action()
-                    .ok_or_else(|| Error::game("Not an action."))?
+                    .ok_or_else(|| Error::new("Not an action."))?
                     .set_value(item as u32);
             }
             Patch::Shop(Shop::Ravio(index)) => {
@@ -347,8 +355,8 @@ impl Patcher {
         let free = self.rentals[8];
         flow::apply(&mut self, free, seed_info.settings)?;
         messages::patch_messages(&mut self, seed_info)?;
-        prizes::patch_dungeon_prizes(&mut self, &prizes, seed_info.settings);
-        maps::patch_maps(&mut self, &prizes);
+        prizes::patch_dungeon_prizes(&mut self, &prizes, seed_info.settings)?;
+        maps::patch_maps(&mut self, &prizes)?;
         scenes::patch_byaml_files(&mut self, seed_info.settings)?;
 
         {
@@ -363,7 +371,7 @@ impl Patcher {
             kakariko_actors.add(item_actors.get(&merchant[0]).unwrap().clone())?;
             kakariko_actors.add(item_actors.get(&merchant[2]).unwrap().clone())?;
         }
-        let code = code::create(&self, seed_info);
+        let code = code::create(&self, seed_info)?;
         let Self { game, boot, courses, .. } = self;
         let mut romfs = Files(vec![]);
 
@@ -456,17 +464,18 @@ impl Patches {
             self.game.id()
         );
 
-        match fs_extra::copy_items(&[moddir], path, &CopyOptions {
-            overwrite: true,
-            ..Default::default()
-        })
-        .map_err(Error::io)
+        match fs_extra::copy_items(
+            &[moddir],
+            path,
+            &CopyOptions { overwrite: true, ..Default::default() },
+        )
+        .map_err(|err| Error::new(err.to_string()))
         {
             Ok(_) => Ok(()),
-            Err(_) => {
+            Err(err) => {
                 error!("Couldn't write to:              {}", path.display());
                 error!("Please check that config.json points to a valid output destination.");
-                fail!();
+                Err(err)
             }
         }
     }

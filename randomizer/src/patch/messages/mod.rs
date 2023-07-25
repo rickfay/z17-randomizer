@@ -208,11 +208,11 @@ fn patch_hint_ghosts(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> 
         let path_hint = &mut path_hint.clone();
 
         for ghost in &path_hint.ghosts {
-            let hint_ghost = HintGhost::from(*ghost);
+            let hint_ghost = HintGhost::try_from(*ghost)?;
             let entry = msbt_hint_map
                 .entry((hint_ghost.course, hint_ghost.msbt_file))
                 .or_insert_with(BTreeMap::new);
-            entry.insert(hint_ghost.msg_label, path_hint.get_hint());
+            entry.insert(hint_ghost.msg_label, path_hint.get_hint()?);
         }
     }
 
@@ -222,11 +222,11 @@ fn patch_hint_ghosts(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> 
         let always_hint = &mut always_hint.clone();
 
         for ghost in &always_hint.ghosts {
-            let hint_ghost = HintGhost::from(*ghost);
+            let hint_ghost = HintGhost::try_from(*ghost)?;
             let entry = msbt_hint_map
                 .entry((hint_ghost.course, hint_ghost.msbt_file))
                 .or_insert_with(BTreeMap::new);
-            entry.insert(hint_ghost.msg_label, always_hint.get_hint());
+            entry.insert(hint_ghost.msg_label, always_hint.get_hint()?);
         }
     }
 
@@ -236,11 +236,11 @@ fn patch_hint_ghosts(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> 
         let sometimes_hint = &mut sometimes_hint.clone();
 
         for ghost in &sometimes_hint.ghosts {
-            let hint_ghost = HintGhost::from(*ghost);
+            let hint_ghost = HintGhost::try_from(*ghost)?;
             let entry = msbt_hint_map
                 .entry((hint_ghost.course, hint_ghost.msbt_file))
                 .or_insert_with(BTreeMap::new);
-            entry.insert(hint_ghost.msg_label, sometimes_hint.get_hint());
+            entry.insert(hint_ghost.msg_label, sometimes_hint.get_hint()?);
         }
     }
 
@@ -267,7 +267,7 @@ fn patch_hint_ghosts(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> 
 
         // fixme band-aid fix to verify we haven't bloated the hint text to the point where the game crashes
         if hint_text_size > og_text_size {
-            return Err(crate::Error::io("Generated Hint text was too long."));
+            return Err(crate::Error::new("Generated Hint text was too long."));
         }
 
         patcher.update(msbt_file.dump())?;
@@ -281,7 +281,7 @@ fn patch_bow_of_light(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()>
         let mut msbt = load_msbt(patcher, IndoorDark, "HintGhostDark")?;
         // Most of HintGhostDark.msbt is a duplicate of the identical file under FieldDark, but it's not used. Choosing
         // an easily testable ghost Key to repurpose for a new Ghost in Hilda's Study.
-        msbt.set("HintGhost_FieldDark_2C_014", &bow_of_light_hint.get_hint());
+        msbt.set("HintGhost_FieldDark_2C_014", &bow_of_light_hint.get_hint()?);
         // fixme also dumb: clear out unused messages to keep filesize down.
         msbt.set("HintGhost_FieldDark_02_001", EMPTY_MSG);
         msbt.set("HintGhost_FieldDark_03_002", EMPTY_MSG);

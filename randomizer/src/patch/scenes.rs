@@ -1,16 +1,14 @@
-use {
-    super::Patcher,
-    crate::{patch::util::*, Result},
-    albw::{
-        course,
-        course::{Id, Id::*},
-        scene::{Arg, Dest, Flag, Obj, Transform, Vec3},
-        Item::*,
-    },
-    log::info,
-    macros::fail,
-    settings::{hyrule_castle_setting::HyruleCastleSetting, logic_mode::LogicMode, Settings},
+use albw::{
+    course,
+    course::{Id, Id::*},
+    scene::{Arg, Dest, Flag, Obj, Transform, Vec3},
+    Item::*,
 };
+use log::info;
+use settings::{hyrule_castle_setting::HyruleCastleSetting, logic_mode::LogicMode, Settings};
+
+use super::Patcher;
+use crate::{patch::util::*, Result};
 
 macro_rules! apply {
     ($patcher:expr, $($course:ident $stage:literal {
@@ -20,7 +18,7 @@ macro_rules! apply {
             let stage = $patcher.scene(course::Id::$course, $stage - 1)?.stage_mut().get_mut();
             $(action!((stage
                 .get_obj_mut($unq)
-                .ok_or_else(|| $crate::Error::game("Could not find scene."))?
+                .ok_or_else(|| $crate::Error::new("Could not find scene."))?
             ).$action $value);)+
         })+
     };
@@ -34,7 +32,7 @@ macro_rules! apply_system {
             let stage = $patcher.scene(course::Id::$course, $stage - 1)?.stage_mut().get_mut();
             $(action!((stage
                 .get_system_mut($unq)
-                .ok_or_else(|| $crate::Error::game("Could not find scene."))?
+                .ok_or_else(|| $crate::Error::new("Could not find scene."))?
             ).$action $value);)+
         })+
     };
@@ -98,7 +96,7 @@ pub fn patch_byaml_files(patcher: &mut Patcher, settings: &Settings) -> Result<(
     do_dev_stuff(patcher, settings);
     patch_big_problem_chests(patcher, settings);
     patch_blacksmith_hyrule(patcher);
-    patch_castles(patcher, settings);
+    patch_castles(patcher, settings)?;
     patch_chamber_of_sages(patcher);
     patch_dark_maze(patcher);
     patch_kus_domain(patcher);
@@ -564,86 +562,106 @@ pub fn patch_byaml_files(patcher: &mut Patcher, settings: &Settings) -> Result<(
 }
 
 fn patch_open_lost_woods(patcher: &mut Patcher) {
-    patcher.modify_objs(FieldLight, 1, &[
-        disable(34), // Keep Lost Woods Maze from disappearing after getting Pedestal
-    ]);
+    patcher.modify_objs(
+        FieldLight,
+        1,
+        &[
+            disable(34), // Keep Lost Woods Maze from disappearing after getting Pedestal
+        ],
+    );
 
-    patcher.modify_objs(FieldLight, 38, &[
-        // Allow entry to maze without All Pendants Flag (375) set
-        redirect(259, Dest::new(FieldLight, 38, 5)),
-        // 1st Fork - Enable all Loading Zones
-        clear_active_args(137), // North
-        clear_active_args(138), // West
-        clear_active_args(139), // East
-        // 2nd Fork - Enable all Loading Zones
-        clear_active_args(168), // North
-        clear_active_args(91),  // West
-        clear_active_args(89),  // South
-        // 3rd Fork - Make all Loading Zones correct
-        redirect(110, Dest::new(FieldLight, 38, 6)), // West
-        redirect(111, Dest::new(FieldLight, 38, 6)), // East
-        redirect(112, Dest::new(FieldLight, 38, 6)), // North
-        // 1st Poes
-        disable(132),
-        disable(133),
-        // 2nd Poes
-        disable(170),
-        disable(185),
-        // 3rd Poes
-        disable(175),
-        disable(186),
-        // Redirect normal loading zone to Pedestal to kick player out
-        call(127, |obj| {
-            obj.redirect(Dest::new(FieldLight, 38, 0));
-            obj.set_translate(-80.25, -1.5, -200.5); // move back slightly
-        }),
-        // Repurpose Flag 375 loading zone to appear at end of maze, allowing Pedestal access
-        call(134, |obj| {
-            obj.redirect(Dest::new(FieldLight, 34, 0));
-            obj.set_translate(-80.25, -1.5, -200.0); // take position of OG loading zone
-            obj.clp = 5;
-        }),
-    ]);
+    patcher.modify_objs(
+        FieldLight,
+        38,
+        &[
+            // Allow entry to maze without All Pendants Flag (375) set
+            redirect(259, Dest::new(FieldLight, 38, 5)),
+            // 1st Fork - Enable all Loading Zones
+            clear_active_args(137), // North
+            clear_active_args(138), // West
+            clear_active_args(139), // East
+            // 2nd Fork - Enable all Loading Zones
+            clear_active_args(168), // North
+            clear_active_args(91),  // West
+            clear_active_args(89),  // South
+            // 3rd Fork - Make all Loading Zones correct
+            redirect(110, Dest::new(FieldLight, 38, 6)), // West
+            redirect(111, Dest::new(FieldLight, 38, 6)), // East
+            redirect(112, Dest::new(FieldLight, 38, 6)), // North
+            // 1st Poes
+            disable(132),
+            disable(133),
+            // 2nd Poes
+            disable(170),
+            disable(185),
+            // 3rd Poes
+            disable(175),
+            disable(186),
+            // Redirect normal loading zone to Pedestal to kick player out
+            call(127, |obj| {
+                obj.redirect(Dest::new(FieldLight, 38, 0));
+                obj.set_translate(-80.25, -1.5, -200.5); // move back slightly
+            }),
+            // Repurpose Flag 375 loading zone to appear at end of maze, allowing Pedestal access
+            call(134, |obj| {
+                obj.redirect(Dest::new(FieldLight, 34, 0));
+                obj.set_translate(-80.25, -1.5, -200.0); // take position of OG loading zone
+                obj.clp = 5;
+            }),
+        ],
+    );
 }
 
 // Hyrule Blacksmith
 fn patch_blacksmith_hyrule(patcher: &mut Patcher) {
-    patcher.modify_objs(IndoorLight, 19, &[
-        // Make PackageSword a Chest
-        call(12, |obj| {
-            obj.clear_active_args();
-            obj.set_inactive_flag(Flag::Event(26));
-            //obj.clear_disable_flag();
-            obj.set_typ(1);
-            obj.srt.translate.x = -1.957;
-            obj.srt.translate.y = 0.6;
-            obj.srt.scale = match obj.id {
-                35 => Vec3 { x: 1.00000, y: 2.00000, z: 2.22222 },
-                34 => Vec3 { x: 0.52632, y: 2.00000, z: 1.66667 },
-                _ => {
-                    fail!("PackageSword wasn't a chest")
-                }
-            }
-        }),
-        disable(19), // Map attention
-    ]);
+    patcher.modify_objs(
+        IndoorLight,
+        19,
+        &[
+            // Make PackageSword a Chest
+            call(12, |obj| {
+                obj.clear_active_args();
+                obj.set_inactive_flag(Flag::Event(26));
+                //obj.clear_disable_flag();
+                obj.set_typ(1);
+                obj.srt.translate.x = -1.957;
+                obj.srt.translate.y = 0.6;
+                obj.srt.scale = match obj.id {
+                    35 => Vec3 { x: 1.00000, y: 2.00000, z: 2.22222 },
+                    34 => Vec3 { x: 0.52632, y: 2.00000, z: 1.66667 },
+                    _ => {
+                        panic!("PackageSword wasn't a chest");
+                    }
+                };
+            }),
+            disable(19), // Map attention
+        ],
+    );
 }
 
 // Chamber of Sages
 fn patch_chamber_of_sages(patcher: &mut Patcher) {
-    patcher.modify_objs(CaveDark, 10, &[
-        set_46_args(74, Flag::Event(0)), // Staircase
-    ]);
+    patcher.modify_objs(
+        CaveDark,
+        10,
+        &[
+            set_46_args(74, Flag::Event(0)), // Staircase
+        ],
+    );
 }
 
 // Ku's Domain
 fn patch_kus_domain(patcher: &mut Patcher) {
-    patcher.modify_objs(FieldDark, 7, &[
-        call(55, |obj| {
-            obj.set_typ(4); // changed to chest automatically, set typ here
-        }),
-        disable(66), // rupee throw camera
-    ]);
+    patcher.modify_objs(
+        FieldDark,
+        7,
+        &[
+            call(55, |obj| {
+                obj.set_typ(4); // changed to chest automatically, set typ here
+            }),
+            disable(66), // rupee throw camera
+        ],
+    );
 }
 
 // Treasure Dungeons
@@ -661,16 +679,24 @@ fn patch_treasure_dungeons(patcher: &mut Patcher, settings: &Settings) {
 // Zora
 fn patch_zora(patcher: &mut Patcher) {
     // Lake Hylia
-    patcher.modify_objs(FieldLight, 35, &[
-        enable(151), // Zora outside House of Gales
-    ]);
+    patcher.modify_objs(
+        FieldLight,
+        35,
+        &[
+            enable(151), // Zora outside House of Gales
+        ],
+    );
 }
 
 // Swamp Palace
 fn patch_swamp_palace(patcher: &mut Patcher) {
-    patcher.modify_objs(DungeonWater, 2, &[call(633, |obj| {
-        obj.clp = 3; // Fix the impossible Rupee
-    })]);
+    patcher.modify_objs(
+        DungeonWater,
+        2,
+        &[call(633, |obj| {
+            obj.clp = 3; // Fix the impossible Rupee
+        })],
+    );
 }
 
 // Enable All Overworld Hint Ghosts
@@ -684,370 +710,457 @@ fn patch_hint_ghosts_overworld(patcher: &mut Patcher) {
 // Hide All Dungeon Hint Ghosts
 fn patch_hint_ghosts_dungeons(patcher: &mut Patcher) {
     // Eastern
-    patcher.modify_objs(DungeonEast, 1, &[
-        disable(251),
-        disable(252),
-        disable(253),
-        disable(254),
-        disable(255),
-        disable(256),
-        disable(257),
-    ]);
-    patcher.modify_objs(DungeonEast, 2, &[
-        disable(235),
-        disable(236),
-        disable(237),
-        disable(238),
-        disable(239),
-        disable(240),
-        disable(241),
-        disable(243),
-    ]);
+    patcher.modify_objs(
+        DungeonEast,
+        1,
+        &[
+            disable(251),
+            disable(252),
+            disable(253),
+            disable(254),
+            disable(255),
+            disable(256),
+            disable(257),
+        ],
+    );
+    patcher.modify_objs(
+        DungeonEast,
+        2,
+        &[
+            disable(235),
+            disable(236),
+            disable(237),
+            disable(238),
+            disable(239),
+            disable(240),
+            disable(241),
+            disable(243),
+        ],
+    );
     patcher.modify_objs(DungeonEast, 3, &[disable(92)]);
 
     // Gales
-    patcher.modify_objs(DungeonWind, 1, &[
-        disable(390),
-        disable(391),
-        disable(392),
-        disable(393),
-        disable(394),
-    ]);
+    patcher.modify_objs(
+        DungeonWind,
+        1,
+        &[disable(390), disable(391), disable(392), disable(393), disable(394)],
+    );
     patcher.modify_objs(DungeonWind, 2, &[disable(327), disable(328), disable(329), disable(474)]);
     patcher.modify_objs(DungeonWind, 3, &[disable(509), disable(510), disable(511), disable(512)]);
 
     // Hera
-    patcher.modify_objs(DungeonHera, 1, &[
-        disable(862),
-        disable(863),
-        disable(864),
-        disable(865),
-        disable(866),
-        disable(867),
-        disable(868),
-        disable(869),
-        disable(870),
-        disable(871),
-    ]);
+    patcher.modify_objs(
+        DungeonHera,
+        1,
+        &[
+            disable(862),
+            disable(863),
+            disable(864),
+            disable(865),
+            disable(866),
+            disable(867),
+            disable(868),
+            disable(869),
+            disable(870),
+            disable(871),
+        ],
+    );
 
     // Hyrule Castle
     patcher.modify_objs(DungeonCastle, 2, &[disable(64)]);
 
     // Dark
-    patcher.modify_objs(DungeonDark, 1, &[
-        disable(208),
-        disable(209),
-        disable(210),
-        disable(211),
-        disable(212),
-        disable(213),
-        disable(214),
-        disable(216),
-        disable(217),
-        disable(218),
-    ]);
-    patcher.modify_objs(DungeonDark, 2, &[
-        disable(170),
-        disable(171),
-        disable(172),
-        disable(173),
-        disable(174),
-        disable(175),
-        disable(176),
-        disable(177),
-        disable(204),
-    ]);
-    patcher.modify_objs(DungeonDark, 3, &[
-        disable(225),
-        disable(226),
-        disable(227),
-        disable(228),
-        disable(229),
-        disable(230),
-        disable(231),
-    ]);
+    patcher.modify_objs(
+        DungeonDark,
+        1,
+        &[
+            disable(208),
+            disable(209),
+            disable(210),
+            disable(211),
+            disable(212),
+            disable(213),
+            disable(214),
+            disable(216),
+            disable(217),
+            disable(218),
+        ],
+    );
+    patcher.modify_objs(
+        DungeonDark,
+        2,
+        &[
+            disable(170),
+            disable(171),
+            disable(172),
+            disable(173),
+            disable(174),
+            disable(175),
+            disable(176),
+            disable(177),
+            disable(204),
+        ],
+    );
+    patcher.modify_objs(
+        DungeonDark,
+        3,
+        &[
+            disable(225),
+            disable(226),
+            disable(227),
+            disable(228),
+            disable(229),
+            disable(230),
+            disable(231),
+        ],
+    );
 
     // Swamp
     patcher.modify_objs(DungeonWater, 1, &[disable(446), disable(447), disable(448), disable(449)]);
-    patcher.modify_objs(DungeonWater, 2, &[
-        disable(565),
-        disable(566),
-        disable(567),
-        disable(589),
-        disable(660),
-    ]);
+    patcher.modify_objs(
+        DungeonWater,
+        2,
+        &[disable(565), disable(566), disable(567), disable(589), disable(660)],
+    );
 
     // Skull
-    patcher.modify_objs(DungeonDokuro, 1, &[
-        disable(765),
-        disable(766),
-        disable(767),
-        disable(768),
-        disable(776),
-    ]);
+    patcher.modify_objs(
+        DungeonDokuro,
+        1,
+        &[disable(765), disable(766), disable(767), disable(768), disable(776)],
+    );
     patcher.modify_objs(DungeonDokuro, 2, &[disable(480), disable(481)]);
 
     // Thieves'
-    patcher.modify_objs(DungeonHagure, 1, &[
-        disable(1364),
-        disable(1365),
-        disable(1366),
-        disable(1367),
-        disable(1368),
-        disable(1416),
-    ]);
+    patcher.modify_objs(
+        DungeonHagure,
+        1,
+        &[disable(1364), disable(1365), disable(1366), disable(1367), disable(1368), disable(1416)],
+    );
 
     // Turtle
     patcher.modify_objs(DungeonKame, 1, &[disable(247), disable(248), disable(249), disable(250)]);
-    patcher.modify_objs(DungeonKame, 2, &[
-        disable(234),
-        disable(235),
-        disable(236),
-        disable(237),
-        disable(263),
-    ]);
+    patcher.modify_objs(
+        DungeonKame,
+        2,
+        &[disable(234), disable(235), disable(236), disable(237), disable(263)],
+    );
 
     // Desert
-    patcher.modify_objs(DungeonSand, 1, &[
-        disable(598),
-        disable(599),
-        disable(600),
-        disable(601),
-        disable(602),
-        disable(616),
-    ]);
+    patcher.modify_objs(
+        DungeonSand,
+        1,
+        &[disable(598), disable(599), disable(600), disable(601), disable(602), disable(616)],
+    );
     patcher.modify_objs(DungeonSand, 2, &[disable(668), disable(669), disable(670), disable(671)]);
     patcher.modify_objs(DungeonSand, 3, &[disable(293), disable(294)]);
 
     // Ice
-    patcher.modify_objs(DungeonIce, 1, &[
-        disable(900),
-        disable(901),
-        disable(902),
-        disable(903),
-        disable(904),
-        disable(906),
-        disable(907),
-        disable(908),
-        disable(909),
-        disable(910),
-        disable(911),
-        disable(1145),
-    ]);
+    patcher.modify_objs(
+        DungeonIce,
+        1,
+        &[
+            disable(900),
+            disable(901),
+            disable(902),
+            disable(903),
+            disable(904),
+            disable(906),
+            disable(907),
+            disable(908),
+            disable(909),
+            disable(910),
+            disable(911),
+            disable(1145),
+        ],
+    );
 
     // Lorule Castle
-    patcher.modify_objs(DungeonGanon, 1, &[
-        disable(1230),
-        disable(1232),
-        disable(1233),
-        disable(1234),
-        disable(1235),
-        disable(1236),
-        disable(1237),
-        disable(1238),
-        disable(1239),
-        disable(1241),
-        disable(1242),
-        disable(1371),
-        disable(1602),
-        disable(1607),
-    ]);
+    patcher.modify_objs(
+        DungeonGanon,
+        1,
+        &[
+            disable(1230),
+            disable(1232),
+            disable(1233),
+            disable(1234),
+            disable(1235),
+            disable(1236),
+            disable(1237),
+            disable(1238),
+            disable(1239),
+            disable(1241),
+            disable(1242),
+            disable(1371),
+            disable(1602),
+            disable(1607),
+        ],
+    );
 }
 
 fn patch_ghost_into_hildas_study(patcher: &mut Patcher) {
-    patcher.add_obj(IndoorDark, 5, Obj {
-        arg: Arg(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.0),
-        clp: 1,
-        flg: (0, 0, 0, 0),
-        id: 235,
-        lnk: vec![],
-        nme: Some("HintGhostDark/HintGhost_FieldDark_2C_014".to_owned()),
-        ril: vec![],
-        ser: Some(14),
-        srt: Transform {
-            scale: Vec3::UNIT,
-            rotate: Vec3 { x: 0.0, y: 0.0, z: 0.0 },
-            translate: Vec3 { x: 67.0, y: 0.0, z: -14.5 },
+    patcher.add_obj(
+        IndoorDark,
+        5,
+        Obj {
+            arg: Arg(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.0),
+            clp: 1,
+            flg: (0, 0, 0, 0),
+            id: 235,
+            lnk: vec![],
+            nme: Some("HintGhostDark/HintGhost_FieldDark_2C_014".to_owned()),
+            ril: vec![],
+            ser: Some(14),
+            srt: Transform {
+                scale: Vec3::UNIT,
+                rotate: Vec3 { x: 0.0, y: 0.0, z: 0.0 },
+                translate: Vec3 { x: 67.0, y: 0.0, z: -14.5 },
+            },
+            typ: 3,
+            unq: 48,
         },
-        typ: 3,
-        unq: 48,
-    });
+    );
 }
 
-fn patch_castles(patcher: &mut Patcher, settings: &Settings) {
-    let green_pendant_flag = prize_flag(PendantCourage);
+fn patch_castles(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
+    let green_pendant_flag = prize_flag(PendantCourage)?;
     let yuga_defeated = Flag::Event(420); // Set after Yuga 2 defeated
     let hc_31 = Flag::Course(31); // Also set after Yuga 2 defeated
     let hacky_flag = Flag::Event(421); // Repurposed for Curtain/Trial's Door removal
     let can_fight_yuganon_flag = Flag::Event(670); // TODO separate from LC requirement
 
     // Hyrule Castle (exterior)
-    patcher.modify_objs(FieldLight, 18, &[
-        // Barrier
-        set_46_args(165, Flag::Event(1)), // Enable Barrier from game start
-        disable(505),                     // Barrier "would you like to save?" text
-    ]);
+    patcher.modify_objs(
+        FieldLight,
+        18,
+        &[
+            // Barrier
+            set_46_args(165, Flag::Event(1)), // Enable Barrier from game start
+            disable(505),                     // Barrier "would you like to save?" text
+        ],
+    );
     match settings.logic.hyrule_castle_setting {
         HyruleCastleSetting::EarlyLoruleCastle => {
-            patcher.modify_objs(FieldLight, 18, &[
-                // Pendant of Courage opens the Hyrule Castle Dungeon
-                set_enable_flag(155, green_pendant_flag), // HC dungeon loading zone
-                set_disable_flag(393, green_pendant_flag), // HC dungeon door
-            ]);
+            patcher.modify_objs(
+                FieldLight,
+                18,
+                &[
+                    // Pendant of Courage opens the Hyrule Castle Dungeon
+                    set_enable_flag(155, green_pendant_flag), // HC dungeon loading zone
+                    set_disable_flag(393, green_pendant_flag), // HC dungeon door
+                ],
+            );
         }
         HyruleCastleSetting::Closed => {
-            patcher.modify_objs(FieldLight, 18, &[
-                // Forcibly close entrance to Hyrule Castle Dungeon
-                disable(155), // HC dungeon loading zone
-                enable(393),  // HC dungeon door
-            ]);
+            patcher.modify_objs(
+                FieldLight,
+                18,
+                &[
+                    // Forcibly close entrance to Hyrule Castle Dungeon
+                    disable(155), // HC dungeon loading zone
+                    enable(393),  // HC dungeon door
+                ],
+            );
         }
     }
 
     // 2F (there is no 1F of the dungeon)
-    patcher.modify_objs(DungeonCastle, 1, &[
-        set_disable_flag(19, hc_31), // Armos Statue
-        call(35, move |obj| {
-            // Warp
-            obj.set_active_flag(hc_31);
-            obj.set_enable_flag(hc_31);
-        }),
-    ]);
+    patcher.modify_objs(
+        DungeonCastle,
+        1,
+        &[
+            set_disable_flag(19, hc_31), // Armos Statue
+            call(35, move |obj| {
+                // Warp
+                obj.set_active_flag(hc_31);
+                obj.set_enable_flag(hc_31);
+            }),
+        ],
+    );
 
     // 4F
-    patcher.modify_objs(DungeonCastle, 7, &[
-        enable(19), // Green Soldier
-        enable(20), // Green Soldier
-        enable(21), // Red Spear Soldier
-        enable(22), // Red Spear Soldier
-    ]);
+    patcher.modify_objs(
+        DungeonCastle,
+        7,
+        &[
+            enable(19), // Green Soldier
+            enable(20), // Green Soldier
+            enable(21), // Red Spear Soldier
+            enable(22), // Red Spear Soldier
+        ],
+    );
 
     // 7F
-    patcher.modify_objs(DungeonCastle, 5, &[call(18, move |obj| {
-        // warp
-        obj.set_active_flag(hc_31);
-        obj.set_enable_flag(hc_31);
-    })]);
+    patcher.modify_objs(
+        DungeonCastle,
+        5,
+        &[call(18, move |obj| {
+            // warp
+            obj.set_active_flag(hc_31);
+            obj.set_enable_flag(hc_31);
+        })],
+    );
 
     // 8F
-    patcher.modify_objs(DungeonCastle, 6, &[
-        set_disable_flag(20, hc_31), // Rewire entrance door to stay open
-        disable(28),                 // no revisits door
-    ]);
+    patcher.modify_objs(
+        DungeonCastle,
+        6,
+        &[
+            set_disable_flag(20, hc_31), // Rewire entrance door to stay open
+            disable(28),                 // no revisits door
+        ],
+    );
 
     // Zelda's Study
-    patcher.modify_objs(IndoorLight, 7, &[
-        // No backtracking door
-        call(27, move |obj| {
-            obj.clear_enable_flag();
-            obj.set_disable_flag(yuga_defeated);
-        }),
-        set_disable_flag(26, hacky_flag), // Curtain
-        set_disable_flag(29, hacky_flag), // AreaDisableWallIn
-        // Portal
-        call(10, move |obj| {
-            obj.arg.3 = 0; // Prevent Long Portal Transition
-            obj.set_active_flag(hacky_flag); // Open Trials Door
-        }),
-        // Fairies
-        set_enable_flag(18, can_fight_yuganon_flag),
-        set_enable_flag(19, can_fight_yuganon_flag),
-        set_enable_flag(20, can_fight_yuganon_flag),
-        set_enable_flag(21, can_fight_yuganon_flag),
-        // Hearts (Painted)
-        set_disable_flag(36, can_fight_yuganon_flag),
-        set_disable_flag(41, can_fight_yuganon_flag),
-        set_disable_flag(42, can_fight_yuganon_flag),
-        set_disable_flag(43, can_fight_yuganon_flag),
-    ]);
+    patcher.modify_objs(
+        IndoorLight,
+        7,
+        &[
+            // No backtracking door
+            call(27, move |obj| {
+                obj.clear_enable_flag();
+                obj.set_disable_flag(yuga_defeated);
+            }),
+            set_disable_flag(26, hacky_flag), // Curtain
+            set_disable_flag(29, hacky_flag), // AreaDisableWallIn
+            // Portal
+            call(10, move |obj| {
+                obj.arg.3 = 0; // Prevent Long Portal Transition
+                obj.set_active_flag(hacky_flag); // Open Trials Door
+            }),
+            // Fairies
+            set_enable_flag(18, can_fight_yuganon_flag),
+            set_enable_flag(19, can_fight_yuganon_flag),
+            set_enable_flag(20, can_fight_yuganon_flag),
+            set_enable_flag(21, can_fight_yuganon_flag),
+            // Hearts (Painted)
+            set_disable_flag(36, can_fight_yuganon_flag),
+            set_disable_flag(41, can_fight_yuganon_flag),
+            set_disable_flag(42, can_fight_yuganon_flag),
+            set_disable_flag(43, can_fight_yuganon_flag),
+        ],
+    );
 
     // Hilda's Study
-    patcher.modify_objs(IndoorDark, 5, &[
-        disable(4),                                  // Trial's Door
-        disable(12),                                 // Yuga revives Ganon cutscene
-        enable(34),                                  // Throne Room Loading Zone
-        set_enable_flag(23, can_fight_yuganon_flag), // Skull (top right, controller obj)
-        set_46_args(14, hacky_flag),                 // Portal - Set Flag to remove curtain
-    ]);
+    patcher.modify_objs(
+        IndoorDark,
+        5,
+        &[
+            disable(4),                                  // Trial's Door
+            disable(12),                                 // Yuga revives Ganon cutscene
+            enable(34),                                  // Throne Room Loading Zone
+            set_enable_flag(23, can_fight_yuganon_flag), // Skull (top right, controller obj)
+            set_46_args(14, hacky_flag),                 // Portal - Set Flag to remove curtain
+        ],
+    );
 
     // Hilda's Study (system)
-    patcher.modify_system(IndoorDark, 5, &[
-        set_enable_flag(23, can_fight_yuganon_flag), // Skull (top right, controller system obj)
-        set_enable_flag(24, can_fight_yuganon_flag), // Skull (middle right)
-        set_enable_flag(25, can_fight_yuganon_flag), // Skull (bottom right)
-        set_enable_flag(41, can_fight_yuganon_flag), // Skull (bottom left)
-        set_enable_flag(46, can_fight_yuganon_flag), // Skull (middle left)
-        set_enable_flag(47, can_fight_yuganon_flag), // Skull (top left)
-    ]);
+    patcher.modify_system(
+        IndoorDark,
+        5,
+        &[
+            set_enable_flag(23, can_fight_yuganon_flag), // Skull (top right, controller system obj)
+            set_enable_flag(24, can_fight_yuganon_flag), // Skull (middle right)
+            set_enable_flag(25, can_fight_yuganon_flag), // Skull (bottom right)
+            set_enable_flag(41, can_fight_yuganon_flag), // Skull (bottom left)
+            set_enable_flag(46, can_fight_yuganon_flag), // Skull (middle left)
+            set_enable_flag(47, can_fight_yuganon_flag), // Skull (top left)
+        ],
+    );
 
     // Lorule Castle
-    patcher.modify_objs(DungeonGanon, 1, &[
-        clear_enable_flag(1193), // Respawn Trial's Skip big rock upon leaving the room
-        set_disable_flag(158, hacky_flag), // Trial's Door
-        disable(265),            // Trial's Door camera pan
-    ]);
+    patcher.modify_objs(
+        DungeonGanon,
+        1,
+        &[
+            clear_enable_flag(1193), // Respawn Trial's Skip big rock upon leaving the room
+            set_disable_flag(158, hacky_flag), // Trial's Door
+            disable(265),            // Trial's Door camera pan
+        ],
+    );
 
     // Throne Room
-    patcher.modify_objs(DungeonBoss, 1, &[
-        // fight start trigger
-        call(10, move |obj| {
-            obj.set_enable_flag(can_fight_yuganon_flag);
-            obj.set_active_flag(can_fight_yuganon_flag);
-        }),
-        clear_enable_flag(27), // Hilda
-        clear_enable_flag(41), // camera offset
-        clear_enable_flag(43), // NpcAttention1
-        clear_enable_flag(48), // ObjPictureZelda
-    ]);
+    patcher.modify_objs(
+        DungeonBoss,
+        1,
+        &[
+            // fight start trigger
+            call(10, move |obj| {
+                obj.set_enable_flag(can_fight_yuganon_flag);
+                obj.set_active_flag(can_fight_yuganon_flag);
+            }),
+            clear_enable_flag(27), // Hilda
+            clear_enable_flag(41), // camera offset
+            clear_enable_flag(43), // NpcAttention1
+            clear_enable_flag(48), // ObjPictureZelda
+        ],
+    );
+    Ok(())
 }
 
 // Change Letter in a Bottle to a Heart Piece object
 fn patch_letter_in_a_bottle(patcher: &mut Patcher) {
-    patcher.modify_objs(FieldLight, 36, &[call(38, |obj| {
-        obj.clear_disable_flag();
-        obj.set_inactive_flag(Flag::Event(916));
-        obj.set_id(99);
-        obj.set_typ(1);
-    })]);
+    patcher.modify_objs(
+        FieldLight,
+        36,
+        &[call(38, |obj| {
+            obj.clear_disable_flag();
+            obj.set_inactive_flag(Flag::Event(916));
+            obj.set_id(99);
+            obj.set_typ(1);
+        })],
+    );
 }
 
 fn patch_master_sword(patcher: &mut Patcher) {
     // Master Sword Pedestal
-    patcher.modify_objs(FieldLight, 34, &[call(71, |obj| {
-        obj.clear_active_args();
-        obj.set_inactive_flag(Flag::Course(150));
-        obj.enable();
-    })]);
+    patcher.modify_objs(
+        FieldLight,
+        34,
+        &[call(71, |obj| {
+            obj.clear_active_args();
+            obj.set_inactive_flag(Flag::Course(150));
+            obj.enable();
+        })],
+    );
 }
 
 fn patch_dark_maze(patcher: &mut Patcher) {
     // Remove dialog
-    patcher.modify_objs(FieldDark, 20, &[
-        disable(63),  // AreaEventTalk
-        disable(115), // AreaEventTalk
-        disable(116), // AreaEventTalk
-        disable(119), // AreaEventTalk
-        disable(122), // AreaEventTalk
-        disable(188), // AreaEventTalk
-        disable(195), // NpcGuardMan
-        disable(196), // NpcGuardMan
-        disable(231), // AreaEventTalk
-        disable(235), // Hilda Text
-    ]);
+    patcher.modify_objs(
+        FieldDark,
+        20,
+        &[
+            disable(63),  // AreaEventTalk
+            disable(115), // AreaEventTalk
+            disable(116), // AreaEventTalk
+            disable(119), // AreaEventTalk
+            disable(122), // AreaEventTalk
+            disable(188), // AreaEventTalk
+            disable(195), // NpcGuardMan
+            disable(196), // NpcGuardMan
+            disable(231), // AreaEventTalk
+            disable(235), // Hilda Text
+        ],
+    );
 }
 
 fn patch_thief_girl_cave(patcher: &mut Patcher) {
-    patcher.modify_objs(CaveDark, 15, &[
-        // Thief Girl w/ Mask
-        call(8, move |obj| {
-            //obj.set_enable_flag(prize_flag);
-            obj.srt.rotate.y = 0.0;
-        }),
-        //set_enable_flag(9, prize_flag), // Chest
-        disable(10), // Entrance text
-        disable(11), // AreaSwitchCube
-        disable(13), // It's a secret to everybody
-    ]);
+    patcher.modify_objs(
+        CaveDark,
+        15,
+        &[
+            // Thief Girl w/ Mask
+            call(8, move |obj| {
+                //obj.set_enable_flag(prize_flag);
+                obj.srt.rotate.y = 0.0;
+            }),
+            //set_enable_flag(9, prize_flag), // Chest
+            disable(10), // Entrance text
+            disable(11), // AreaSwitchCube
+            disable(13), // It's a secret to everybody
+        ],
+    );
 }
 
 /// Modify the hitboxes of select big chests that could negatively affect gameplay
@@ -1084,12 +1197,16 @@ fn patch_big_problem_chests(patcher: &mut Patcher, settings: &Settings) {
 
     // Change collision scaling to effectively match the small chests
     for (stage, stage_index, unq) in BIG_PROBLEM_CHESTS {
-        patcher.modify_objs(stage, stage_index, &[call(unq, |obj| {
-            if obj.id == 34 {
-                obj.srt.scale.x = 0.52632; // 0.52632 * 1.9 (actor profile) ~= 1.0
-                obj.srt.scale.z = 0.75; // 0.75 * 1.2 (actor profile) = 0.9
-            }
-        })]);
+        patcher.modify_objs(
+            stage,
+            stage_index,
+            &[call(unq, |obj| {
+                if obj.id == 34 {
+                    obj.srt.scale.x = 0.52632; // 0.52632 * 1.9 (actor profile) ~= 1.0
+                    obj.srt.scale.z = 0.75; // 0.75 * 1.2 (actor profile) = 0.9
+                }
+            })],
+        );
     }
 }
 
@@ -1107,22 +1224,32 @@ fn patch_softlock_prevention(patcher: &mut Patcher, settings: &Settings) {
         patcher.add_obj(
             FieldDark,
             20,
-            Obj::warp_tile(Flag::Event(1), 0, 66, 245, 0, 1, 19, Vec3 {
-                x: 1.0 + 2.0,
-                y: 0.5,
-                z: 23.0,
-            }),
+            Obj::warp_tile(
+                Flag::Event(1),
+                0,
+                66,
+                245,
+                0,
+                1,
+                19,
+                Vec3 { x: 1.0 + 2.0, y: 0.5, z: 23.0 },
+            ),
         );
 
         // 2nd Prison Cell softlock prevention
         patcher.add_obj(
             FieldDark,
             20,
-            Obj::warp_tile(Flag::Event(1), 0, 67, 246, 0, 1, 19, Vec3 {
-                x: -17.0 + 2.5,
-                y: 0.5,
-                z: -17.0,
-            }),
+            Obj::warp_tile(
+                Flag::Event(1),
+                0,
+                67,
+                246,
+                0,
+                1,
+                19,
+                Vec3 { x: -17.0 + 2.5, y: 0.5, z: -17.0 },
+            ),
         );
     }
 
@@ -1148,21 +1275,33 @@ fn patch_big_bomb_flower_skip(patcher: &mut Patcher, settings: &Settings) {
     }
 
     // Big Bomb Flower Field
-    patcher.modify_objs(FieldDark, 24, &[
-        disable(86), // Unlock Big Bomb Flower
-        disable(93), // Great Rupee Fairy
-    ]);
+    patcher.modify_objs(
+        FieldDark,
+        24,
+        &[
+            disable(86), // Unlock Big Bomb Flower
+            disable(93), // Great Rupee Fairy
+        ],
+    );
 
     // South of Octoball Derby
-    patcher.modify_objs(FieldDark, 32, &[
-        disable(89), // Boulder of Destiny
-    ]);
+    patcher.modify_objs(
+        FieldDark,
+        32,
+        &[
+            disable(89), // Boulder of Destiny
+        ],
+    );
 
     // Lorule Southern Ruins
-    patcher.modify_objs(FieldDark, 33, &[
-        /* Swamp Palace gets drained by setting Flag 541 */
-        disable(201), // Swamp Cave
-    ]);
+    patcher.modify_objs(
+        FieldDark,
+        33,
+        &[
+            /* Swamp Palace gets drained by setting Flag 541 */
+            disable(201), // Swamp Cave
+        ],
+    );
 }
 
 /// No Progression Enemies
@@ -1172,35 +1311,55 @@ fn patch_no_progression_enemies(patcher: &mut Patcher, settings: &Settings) {
     }
 
     // Swamp
-    patcher.modify_objs(DungeonWater, 1, &[
-        disable(451), // Bawb (west)
-        disable(452), // Bawb (east)
-    ]);
+    patcher.modify_objs(
+        DungeonWater,
+        1,
+        &[
+            disable(451), // Bawb (west)
+            disable(452), // Bawb (east)
+        ],
+    );
 
     // Skull
-    patcher.modify_objs(DungeonDokuro, 1, &[
-        disable(271), // Wall Master (North B1)
-    ]);
+    patcher.modify_objs(
+        DungeonDokuro,
+        1,
+        &[
+            disable(271), // Wall Master (North B1)
+        ],
+    );
 
     // Thieves'
-    patcher.modify_objs(DungeonHagure, 1, &[
-        disable(707),  // Bawb (center)
-        disable(1057), // Bawb (west)
-        disable(1133), // Sluggula
-    ]);
+    patcher.modify_objs(
+        DungeonHagure,
+        1,
+        &[
+            disable(707),  // Bawb (center)
+            disable(1057), // Bawb (west)
+            disable(1133), // Sluggula
+        ],
+    );
 
     // Desert
-    patcher.modify_objs(DungeonSand, 3, &[
-        disable(234), // Bawb
-        disable(240), // Bawb
-        disable(252), // Bawb
-    ]);
+    patcher.modify_objs(
+        DungeonSand,
+        3,
+        &[
+            disable(234), // Bawb
+            disable(240), // Bawb
+            disable(252), // Bawb
+        ],
+    );
 
     // Ice
-    patcher.modify_objs(DungeonIce, 1, &[
-        disable(234), // Keelon
-        disable(235), // Keelon
-    ]);
+    patcher.modify_objs(
+        DungeonIce,
+        1,
+        &[
+            disable(234), // Keelon
+            disable(235), // Keelon
+        ],
+    );
 }
 
 //noinspection ALL

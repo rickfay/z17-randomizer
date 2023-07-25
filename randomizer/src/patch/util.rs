@@ -1,11 +1,9 @@
-use {
-    crate::{patch::DungeonPrizes, regions, Layout, LocationInfo},
-    albw::{
-        scene::{Dest, Flag, Obj, Rail, Vec3},
-        Item::{self, *},
-    },
-    macros::fail,
+use albw::{
+    scene::{Dest, Flag, Obj, Rail, Vec3},
+    Item::{self, *},
 };
+
+use crate::{patch::DungeonPrizes, regions, Error, Layout, LocationInfo, Result};
 
 pub(crate) fn call<F>(unq: u16, action: F) -> (u16, Box<dyn Fn(&mut Obj)>)
 where
@@ -88,19 +86,19 @@ pub(crate) fn is_pendant(item: Item) -> bool {
     matches!(item, PendantPower | PendantWisdom | PendantCourage | ZeldaAmulet)
 }
 
-pub(crate) fn prize_flag(prize: Item) -> Flag {
+pub(crate) fn prize_flag(prize: Item) -> Result<Flag> {
     match prize {
-        PendantPower => Flag::Event(372),
-        PendantWisdom => Flag::Event(342),
-        PendantCourage => Flag::Event(251),
-        SageGulley => Flag::Event(536),
-        SageOren => Flag::Event(556),
-        SageSeres => Flag::Event(576),
-        SageOsfala => Flag::Event(596),
-        SageRosso => Flag::Event(616),
-        SageIrene => Flag::Event(636),
-        SageImpa => Flag::Event(656),
-        _ => fail!("{} is Charm or not a Dungeon Prize", prize.as_str()),
+        PendantPower => Ok(Flag::Event(372)),
+        PendantWisdom => Ok(Flag::Event(342)),
+        PendantCourage => Ok(Flag::Event(251)),
+        SageGulley => Ok(Flag::Event(536)),
+        SageOren => Ok(Flag::Event(556)),
+        SageSeres => Ok(Flag::Event(576)),
+        SageOsfala => Ok(Flag::Event(596)),
+        SageRosso => Ok(Flag::Event(616)),
+        SageIrene => Ok(Flag::Event(636)),
+        SageImpa => Ok(Flag::Event(656)),
+        _ => Err(Error::new(format!("{} is Charm or not a Dungeon Prize", prize.as_str()))),
     }
 }
 

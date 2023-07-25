@@ -1,7 +1,6 @@
 use {
     albw::Item::*,
     log::{error, info, LevelFilter},
-    macros::fail,
     randomizer::{
         constants::VERSION,
         regions,
@@ -16,6 +15,8 @@ use {
     simplelog::SimpleLogger,
     structopt::StructOpt,
 };
+
+use albw_randomizer::fail;
 
 #[derive(Debug, StructOpt)]
 struct Opt {
@@ -67,7 +68,7 @@ fn main() {
         }
         Err(err) => {
             println!();
-            error!("Plandomizer execution failed:\n{}", err.into_inner());
+            error!("Plandomizer execution failed:\n{}", err);
         }
     }
 

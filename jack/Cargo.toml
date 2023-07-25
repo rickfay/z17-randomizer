@@ -10,6 +10,6 @@ albw = { workspace = true }
 byteorder = { workspace = true }
 cli = { workspace = true }
 log = { workspace = true }
-macros = { workspace = true }
 serde = { workspace = true }
+thiserror = { workspace = true }
 yaz0 = { workspace = true }

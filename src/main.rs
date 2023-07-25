@@ -1,6 +1,5 @@
 use {
     log::{error, info},
-    macros::fail,
     randomizer::{
         constants::VERSION,
         system::{System, UserConfig},
@@ -9,6 +8,8 @@ use {
     simplelog::{LevelFilter, SimpleLogger},
     structopt::StructOpt,
 };
+
+use albw_randomizer::fail;
 
 #[derive(Debug, StructOpt)]
 struct Opt {

@@ -1,10 +1,8 @@
-use {
-    crate::{hints::hint_color::HintColor::*, item_to_str},
-    albw::{Item, Item::*},
-    macros::fail,
-    serde::{Deserialize, Serialize, Serializer},
-    FillerItem::*,
-};
+use albw::{Item, Item::*};
+use serde::{Deserialize, Serialize, Serializer};
+use FillerItem::*;
+
+use crate::{hints::hint_color::HintColor::*, item_to_str, Error, Result};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Deserialize)]
 pub enum FillerItem {
@@ -1055,21 +1053,21 @@ impl FillerItem {
         }
     }
 
-    pub fn get_article(self) -> &'static str {
+    pub fn get_article(self) -> Result<&'static str> {
         match self {
-            FillerItem::Empty => "",
+            FillerItem::Empty => Ok(""),
 
             Bow01 | Bow02 | Boomerang01 | Boomerang02 | Hookshot01 | Hookshot02 | FireRod01
             | FireRod02 | IceRod01 | IceRod02 | Hammer01 | Hammer02 | SandRod01 | SandRod02
-            | TornadoRod01 | TornadoRod02 => "the",
+            | TornadoRod01 | TornadoRod02 => Ok("the"),
 
-            Bombs01 | Bombs02 => "",
+            Bombs01 | Bombs02 => Ok(""),
 
-            Bell | StaminaScroll | BowOfLight | PegasusBoots => "the",
+            Bell | StaminaScroll | BowOfLight | PegasusBoots => Ok("the"),
 
-            Flippers => "",
+            Flippers => Ok(""),
 
-            RaviosBracelet01 | RaviosBracelet02 => "a",
+            RaviosBracelet01 | RaviosBracelet02 => Ok("a"),
 
             HylianShield
             | SmoothGem
@@ -1078,7 +1076,7 @@ impl FillerItem {
             | FillerItem::Pouch
             | BeeBadge
             | FillerItem::HintGlasses
-            | GreatSpin => "the",
+            | GreatSpin => Ok("the"),
 
             RupeeGreen | RupeeBlue | RupeeRed | RupeePurple01 | RupeePurple02 | RupeePurple03
             | RupeePurple04 | RupeePurple05 | RupeePurple06 | RupeePurple07 | RupeePurple08
@@ -1110,11 +1108,13 @@ impl FillerItem {
             | Maiamai077 | Maiamai078 | Maiamai079 | Maiamai080 | Maiamai081 | Maiamai082
             | Maiamai083 | Maiamai084 | Maiamai085 | Maiamai086 | Maiamai087 | Maiamai088
             | Maiamai089 | Maiamai090 | Maiamai091 | Maiamai092 | Maiamai093 | Maiamai094
-            | Maiamai095 | Maiamai096 | Maiamai097 | Maiamai098 | Maiamai099 | Maiamai100 => "a",
+            | Maiamai095 | Maiamai096 | Maiamai097 | Maiamai098 | Maiamai099 | Maiamai100 => {
+                Ok("a")
+            }
 
-            MonsterGuts => "some",
+            MonsterGuts => Ok("some"),
 
-            MonsterHorn | MonsterTail => "a",
+            MonsterHorn | MonsterTail => Ok("a"),
 
             HeartPiece01 | HeartPiece02 | HeartPiece03 | HeartPiece04 | HeartPiece05
             | HeartPiece06 | HeartPiece07 | HeartPiece08 | HeartPiece09 | HeartPiece10
@@ -1123,77 +1123,77 @@ impl FillerItem {
             | HeartPiece21 | HeartPiece22 | HeartPiece23 | HeartPiece24 | HeartPiece25
             | HeartPiece26 | HeartPiece27 | HeartPiece28 | HeartContainer01 | HeartContainer02
             | HeartContainer03 | HeartContainer04 | HeartContainer05 | HeartContainer06
-            | HeartContainer07 | HeartContainer08 | HeartContainer09 | HeartContainer10 => "a",
+            | HeartContainer07 | HeartContainer08 | HeartContainer09 | HeartContainer10 => Ok("a"),
 
-            Bottle01 | Bottle02 | Bottle03 | Bottle04 | Bottle05 => "an",
+            Bottle01 | Bottle02 | Bottle03 | Bottle04 | Bottle05 => Ok("an"),
 
-            Lamp01 | Lamp02 => "the",
+            Lamp01 | Lamp02 => Ok("the"),
 
-            Sword01 | Sword02 | Sword03 | Sword04 => "a",
+            Sword01 | Sword02 | Sword03 | Sword04 => Ok("a"),
 
-            Glove01 | Glove02 => "a",
+            Glove01 | Glove02 => Ok("a"),
 
-            Net01 | Net02 => "the",
+            Net01 | Net02 => Ok("the"),
 
-            Mail01 | Mail02 => "an",
+            Mail01 | Mail02 => Ok("an"),
 
             FillerItem::OreYellow
             | FillerItem::OreGreen
             | FillerItem::OreBlue
-            | FillerItem::OreRed => "some",
+            | FillerItem::OreRed => Ok("some"),
 
-            HyruleSanctuaryKey | LoruleSanctuaryKey => "the",
+            HyruleSanctuaryKey | LoruleSanctuaryKey => Ok("the"),
 
-            EasternCompass | EasternKeyBig => "the",
+            EasternCompass | EasternKeyBig => Ok("the"),
 
-            EasternKeySmall01 | EasternKeySmall02 => "an",
+            EasternKeySmall01 | EasternKeySmall02 => Ok("an"),
 
-            GalesCompass | GalesKeyBig => "the",
+            GalesCompass | GalesKeyBig => Ok("the"),
 
-            GalesKeySmall01 | GalesKeySmall02 | GalesKeySmall03 | GalesKeySmall04 => "a",
+            GalesKeySmall01 | GalesKeySmall02 | GalesKeySmall03 | GalesKeySmall04 => Ok("a"),
 
-            HeraCompass | HeraKeyBig => "the",
+            HeraCompass | HeraKeyBig => Ok("the"),
 
-            HeraKeySmall01 | HeraKeySmall02 => "a",
+            HeraKeySmall01 | HeraKeySmall02 => Ok("a"),
 
-            DarkCompass | DarkKeyBig => "the",
+            DarkCompass | DarkKeyBig => Ok("the"),
 
-            DarkKeySmall01 | DarkKeySmall02 | DarkKeySmall03 | DarkKeySmall04 => "a",
+            DarkKeySmall01 | DarkKeySmall02 | DarkKeySmall03 | DarkKeySmall04 => Ok("a"),
 
-            SwampCompass | SwampKeyBig => "the",
+            SwampCompass | SwampKeyBig => Ok("the"),
 
-            SwampKeySmall01 | SwampKeySmall02 | SwampKeySmall03 | SwampKeySmall04 => "a",
+            SwampKeySmall01 | SwampKeySmall02 | SwampKeySmall03 | SwampKeySmall04 => Ok("a"),
 
-            SkullCompass | SkullKeyBig => "the",
+            SkullCompass | SkullKeyBig => Ok("the"),
 
-            SkullKeySmall01 | SkullKeySmall02 | SkullKeySmall03 => "a",
+            SkullKeySmall01 | SkullKeySmall02 | SkullKeySmall03 => Ok("a"),
 
-            ThievesCompass | ThievesKeyBig | ThievesKeySmall => "the",
+            ThievesCompass | ThievesKeyBig | ThievesKeySmall => Ok("the"),
 
-            IceCompass | IceKeyBig => "the",
+            IceCompass | IceKeyBig => Ok("the"),
 
-            IceKeySmall01 | IceKeySmall02 | IceKeySmall03 => "an",
+            IceKeySmall01 | IceKeySmall02 | IceKeySmall03 => Ok("an"),
 
-            DesertCompass | DesertKeyBig => "the",
+            DesertCompass | DesertKeyBig => Ok("the"),
 
             DesertKeySmall01 | DesertKeySmall02 | DesertKeySmall03 | DesertKeySmall04
-            | DesertKeySmall05 => "a",
+            | DesertKeySmall05 => Ok("a"),
 
-            TurtleCompass | TurtleKeyBig => "the",
+            TurtleCompass | TurtleKeyBig => Ok("the"),
 
-            TurtleKeySmall01 | TurtleKeySmall02 | TurtleKeySmall03 => "a",
+            TurtleKeySmall01 | TurtleKeySmall02 | TurtleKeySmall03 => Ok("a"),
 
-            LoruleCastleCompass => "the",
+            LoruleCastleCompass => Ok("the"),
 
             LoruleCastleKeySmall01
             | LoruleCastleKeySmall02
             | LoruleCastleKeySmall03
             | LoruleCastleKeySmall04
-            | LoruleCastleKeySmall05 => "a",
+            | LoruleCastleKeySmall05 => Ok("a"),
 
-            PendantOfPower | PendantOfWisdom => "the",
+            PendantOfPower | PendantOfWisdom => Ok("the"),
 
-            PendantOfCourage01 | PendantOfCourage02 => "a",
+            PendantOfCourage01 | PendantOfCourage02 => Ok("a"),
 
             FillerItem::SageGulley
             | FillerItem::SageOren
@@ -1201,11 +1201,11 @@ impl FillerItem {
             | FillerItem::SageOsfala
             | FillerItem::SageRosso
             | FillerItem::SageIrene
-            | FillerItem::SageImpa => "",
+            | FillerItem::SageImpa => Ok(""),
 
             ScootFruit01 | FoulFruit01 | Shield01 | ScootFruit02 | FoulFruit02 | Shield02
             | GoldBee01 | Bee01 | GoldBee02 | Fairy01 | Shield03 | Bee02 | GoldBee03 | Fairy02
-            | Shield04 => "a",
+            | Shield04 => Ok("a"),
 
             OpenSanctuaryDoors
             | ShadyGuyTrigger
@@ -1229,11 +1229,14 @@ impl FillerItem {
             | LcBallTrial
             | LcLampTrial
             | LcHookTrial
-            | Triforce => fail!("Articles are not defined for Progression Events: {:?}", self),
+            | Triforce => Err(Error::new(format!(
+                "Articles are not defined for Progression Events: {:?}",
+                self
+            ))),
 
             Yuga | Margomill | Moldorm | ZeldasThrone | GemesaurKing | Arrghus | Knucklemaster
             | Stalblind | Grinexx | Zaganaga | Dharkstare => {
-                fail!("Articles are not defined for Goals: {:?}", self)
+                Err(Error::new(format!("Articles are not defined for Goals: {:?}", self)))
             }
 
             HintGhostLostWoodsMaze1
@@ -1294,7 +1297,7 @@ impl FillerItem {
             | HintGhostDarkPalaceOutside
             | HintGhostSwampPalaceOutsideRight
             | HintGhostMiseryMireBridge => {
-                fail!("Articles are not defined for Hint Ghosts: {:?}", self)
+                Err(Error::new(format!("Articles are not defined for Hint Ghosts: {:?}", self)))
             }
         }
     }

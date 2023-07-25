@@ -1,30 +1,30 @@
-use {
-    crate::{
-        filler,
-        model::{check::Check, progress::Progress},
-        world::WorldGraph,
-        CheckMap, Settings,
-    },
-    log::info,
-    serde::Serialize,
-    std::collections::BTreeMap,
+use std::collections::BTreeMap;
+
+use log::info;
+use serde::Serialize;
+
+use crate::{
+    filler,
+    model::{check::Check, progress::Progress},
+    world::WorldGraph,
+    CheckMap, Result, Settings,
 };
 
 /// Perform any post-generation analysis for a seed here
 pub fn calculate_metrics(
     world_graph: &mut WorldGraph, check_map: &mut CheckMap, settings: &Settings,
-) -> Metrics {
+) -> Result<Metrics> {
     info!("Calculating Metrics...");
 
-    let playthrough = sphere_search(world_graph, check_map, settings);
+    let playthrough = sphere_search(world_graph, check_map, settings)?;
 
-    Metrics { spheres: playthrough.len(), playthrough }
+    Ok(Metrics { spheres: playthrough.len(), playthrough })
 }
 
 /// Sphere Search
 fn sphere_search(
     world_graph: &mut WorldGraph, check_map: &mut CheckMap, settings: &Settings,
-) -> BTreeMap<String, BTreeMap<&'static str, &'static str>> {
+) -> Result<BTreeMap<String, BTreeMap<&'static str, &'static str>>> {
     info!("Generating Playthrough...");
 
     let mut progress = Progress::new(settings.clone());
@@ -33,7 +33,7 @@ fn sphere_search(
     let mut sphere_num = 0;
 
     loop {
-        reachable_checks = filler::find_reachable_checks(world_graph, &progress);
+        reachable_checks = filler::find_reachable_checks(world_graph, &progress)?;
         let reachable_items =
             filler::get_items_from_reachable_checks(&reachable_checks, check_map, settings);
 
@@ -62,7 +62,7 @@ fn sphere_search(
         sphere_num += 1;
     }
 
-    spheres
+    Ok(spheres)
 }
 
 #[derive(Default, Debug, Clone, Serialize)]

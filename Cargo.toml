@@ -12,12 +12,12 @@ license = "GPL-2.0-or-later"
 albw = { workspace = true }
 cli = { workspace = true }
 log = { workspace = true }
-macros = { workspace = true }
 rand = { workspace = true }
 randomizer = { path = "./randomizer" }
 settings = { workspace = true }
 simplelog = "0.12.0"
 structopt = "0.3.26"
+thiserror = { workspace = true }
 
 [build-dependencies]
 winres = "0.1"
@@ -33,7 +33,6 @@ members = [
     "bytey-macro",
     "cli",
     "jack",
-    "macros",
     "randomizer",
     "settings",
 ]
@@ -45,12 +44,12 @@ bytey = { path = "./bytey" }
 cli = { path = "./cli" }
 jack = { path = "./jack" }
 log = "0.4.17"
-macros = { path = "./macros" }
 path-absolutize = "3.0.14"
 rand = { version = "0.8.5", features = ["std_rng"] }
 serde = { version = "1.0.152", features = ["derive"] }
 serde_json = "1.0.93"
 settings = { path = "./settings" }
+thiserror = "1.0.44"
 yaz0 = "0.3.0"
 
 [profile.release]

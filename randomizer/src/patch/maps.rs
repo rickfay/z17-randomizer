@@ -1,14 +1,13 @@
-use {
-    crate::{
-        patch::{util::*, DungeonPrizes},
-        Patcher,
-    },
-    albw::{
-        course::{Id, Id::*},
-        scene::{Flag, Icn, IcnArgs, StageMeta},
-        Item,
-    },
-    log::info,
+use albw::{
+    course::{Id, Id::*},
+    scene::{Flag, Icn, IcnArgs, StageMeta},
+    Item,
+};
+use log::info;
+
+use crate::{
+    patch::{util::*, DungeonPrizes},
+    Patcher, Result,
 };
 
 #[non_exhaustive]
@@ -27,28 +26,29 @@ impl Icon {
     pub const WARP_POINT: i32 = 8;
     pub const PROPELLER: i32 = 9; // Gales
     pub const VALVE: i32 = 10; // Swamp
-    // pub const ELEVEN: i32 = 11; // ?
-    // pub const TWELVE: i32 = 12; // ?
-    // pub const THIRTEEN: i32 = 13; // ?
-    // pub const FOURTEEN: i32 = 14; // ?
-    // pub const FIFTEEN: i32 = 15; // ?
-    // pub const SIXTEEN: i32 = 16; // ?
-    // pub const SEVENTEEN: i32 = 17; // ?
-    // pub const EIGHTEEN: i32 = 18; // ?
-    // pub const NINETEEN: i32 = 19; // ?
+                               // pub const ELEVEN: i32 = 11; // ?
+                               // pub const TWELVE: i32 = 12; // ?
+                               // pub const THIRTEEN: i32 = 13; // ?
+                               // pub const FOURTEEN: i32 = 14; // ?
+                               // pub const FIFTEEN: i32 = 15; // ?
+                               // pub const SIXTEEN: i32 = 16; // ?
+                               // pub const SEVENTEEN: i32 = 17; // ?
+                               // pub const EIGHTEEN: i32 = 18; // ?
+                               // pub const NINETEEN: i32 = 19; // ?
     pub const DESTINATION: i32 = 20; // Red X
     pub const SAVE_POINT: i32 = 21; // Weather Vane
     pub const PORTAL: i32 = 22;
 }
 
-pub fn patch_maps(patcher: &mut Patcher, prizes: &DungeonPrizes) {
+pub fn patch_maps(patcher: &mut Patcher, prizes: &DungeonPrizes) -> Result<()> {
     info!("Patching Maps...");
-    patch_hyrule_maps(patcher, prizes);
-    patch_lorule_maps(patcher, prizes);
+    patch_hyrule_maps(patcher, prizes)?;
+    patch_lorule_maps(patcher, prizes)?;
     add_compass_chests(patcher);
+    Ok(())
 }
 
-fn patch_hyrule_maps(patcher: &mut Patcher, prizes: &DungeonPrizes) {
+fn patch_hyrule_maps(patcher: &mut Patcher, prizes: &DungeonPrizes) -> Result<()> {
     const HYRULE_MAPS: [Id; 4] = [AttractionLight, CaveLight, FieldLight, IndoorLight];
 
     for map in HYRULE_MAPS {
@@ -58,43 +58,46 @@ fn patch_hyrule_maps(patcher: &mut Patcher, prizes: &DungeonPrizes) {
         disable_icn(stage_meta, 17); // Sahasrahla
         disable_icn(stage_meta, 22); // Blacksmith
 
-        mark_by_prize(stage_meta, prizes.ep_prize, 21); // Eastern
-        mark_by_prize(stage_meta, prizes.hg_prize, 39); // Gales
-        mark_by_prize(stage_meta, prizes.th_prize, 6); // Hera
-        mark_by_prize(stage_meta, prizes.hc_prize, 19); // Hyrule Castle
+        mark_by_prize(stage_meta, prizes.ep_prize, 21)?; // Eastern
+        mark_by_prize(stage_meta, prizes.hg_prize, 39)?; // Gales
+        mark_by_prize(stage_meta, prizes.th_prize, 6)?; // Hera
+        mark_by_prize(stage_meta, prizes.hc_prize, 19)?; // Hyrule Castle
     }
+    Ok(())
 }
 
-fn patch_lorule_maps(patcher: &mut Patcher, prizes: &DungeonPrizes) {
+fn patch_lorule_maps(patcher: &mut Patcher, prizes: &DungeonPrizes) -> Result<()> {
     const LORULE_MAPS: [Id; 7] =
         [AttractionDark, CaveDark, EnemyAttackS, EnemyAttackM, EnemyAttackL, FieldDark, IndoorDark];
 
     for map in LORULE_MAPS {
         let stage_meta = patcher.scene_meta(map).stage_meta_mut().get_mut();
 
-        mark_by_prize(stage_meta, prizes.pd_prize, 22); // Dark
-        mark_by_prize(stage_meta, prizes.sp_prize, 40); // Swamp
-        mark_by_prize(stage_meta, prizes.sw_prize, 1); // Skull
-        mark_by_prize(stage_meta, prizes.tt_prize, 16); // Thieves'
-        mark_by_prize(stage_meta, prizes.tr_prize, 43); // Turtle
-        mark_by_prize(stage_meta, prizes.dp_prize, 30); // Desert
-        mark_by_prize(stage_meta, prizes.ir_prize, 10); // Ice
+        mark_by_prize(stage_meta, prizes.pd_prize, 22)?; // Dark
+        mark_by_prize(stage_meta, prizes.sp_prize, 40)?; // Swamp
+        mark_by_prize(stage_meta, prizes.sw_prize, 1)?; // Skull
+        mark_by_prize(stage_meta, prizes.tt_prize, 16)?; // Thieves'
+        mark_by_prize(stage_meta, prizes.tr_prize, 43)?; // Turtle
+        mark_by_prize(stage_meta, prizes.dp_prize, 30)?; // Desert
+        mark_by_prize(stage_meta, prizes.ir_prize, 10)?; // Ice
 
         // Lorule Castle
         let icn = stage_meta.icn.get_mut(20).unwrap();
         icn.enable_on(Flag::Event(670));
         icn.clear_disabled();
     }
+    Ok(())
 }
 
-fn mark_by_prize(stage_meta: &mut StageMeta, prize: Item, icn_index: usize) {
+fn mark_by_prize(stage_meta: &mut StageMeta, prize: Item, icn_index: usize) -> Result<()> {
     let icn = stage_meta.icn.get_mut(icn_index).unwrap();
     if is_sage(prize) {
         icn.enable();
-        icn.disable_on(prize_flag(prize));
+        icn.disable_on(prize_flag(prize)?);
     } else {
         icn.disable();
     }
+    Ok(())
 }
 
 fn disable_icn(stage_meta: &mut StageMeta, icn_index: usize) {

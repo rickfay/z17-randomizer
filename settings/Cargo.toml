@@ -6,7 +6,6 @@ edition = "2021"
 license = "GPL-2.0-or-later"
 
 [dependencies]
-macros = { workspace = true }
 log = { workspace = true }
 rand = { workspace = true }
 serde = { workspace = true }

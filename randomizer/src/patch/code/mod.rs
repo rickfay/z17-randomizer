@@ -1,19 +1,19 @@
-use {
-    super::Patcher,
-    crate::{patch::util::prize_flag, Result, SeedInfo, Settings},
-    albw::{
-        ExHeader,
-        Item::{self, *},
-    },
-    arm::*,
-    settings::pedestal_setting::PedestalSetting::*,
-    std::{
-        collections::HashMap,
-        fs::{self, File},
-        io::prelude::*,
-        path::Path,
-    },
+use std::{
+    collections::HashMap,
+    fs::{self, File},
+    io::prelude::*,
+    path::Path,
 };
+
+use albw::{
+    ExHeader,
+    Item::{self, *},
+};
+use arm::*;
+use settings::pedestal_setting::PedestalSetting::*;
+
+use super::Patcher;
+use crate::{patch::util::prize_flag, Result, SeedInfo, Settings};
 
 mod arm;
 
@@ -145,7 +145,7 @@ impl Ips {
     }
 }
 
-pub fn create(patcher: &Patcher, seed_info: &SeedInfo) -> Code {
+pub fn create(patcher: &Patcher, seed_info: &SeedInfo) -> Result<Code> {
     let mut code = Code::new(patcher.game.exheader());
 
     // Enable Y Button
@@ -158,7 +158,7 @@ pub fn create(patcher: &Patcher, seed_info: &SeedInfo) -> Code {
     bracelet(&mut code, seed_info.settings);
     ore_progress(&mut code);
     merchant(&mut code);
-    configure_pedestal_requirements(&mut code, seed_info.settings);
+    configure_pedestal_requirements(&mut code, seed_info.settings)?;
     night_mode(&mut code, seed_info.settings);
     show_hint_ghosts(&mut code);
 
@@ -288,7 +288,7 @@ pub fn create(patcher: &Patcher, seed_info: &SeedInfo) -> Code {
     let set_courage_flag = code.text().define([
         ldr(R0, EVENT_FLAG_PTR),
         mov(R2, 1),
-        ldr(R1, prize_flag(PendantCourage).get_value() as u32),
+        ldr(R1, prize_flag(PendantCourage)?.get_value() as u32),
         ldr(R0, (R0, 0)),
         bl(FN_SET_EVENT_FLAG),
         b(0x344F00),
@@ -305,7 +305,7 @@ pub fn create(patcher: &Patcher, seed_info: &SeedInfo) -> Code {
     ]);
     code.patch(0x344dec, [b(great_spin_fix)]);
 
-    code
+    Ok(code)
 }
 
 /// Show Hint Ghosts always, without the need for the Hint Glasses
@@ -328,7 +328,7 @@ fn night_mode(code: &mut Code, settings: &Settings) {
     }
 }
 
-fn configure_pedestal_requirements(code: &mut Code, settings: &Settings) {
+fn configure_pedestal_requirements(code: &mut Code, settings: &Settings) -> Result<()> {
     const FLAG_PEDESTAL: u32 = 375;
     const RETURN_LABEL: u32 = 0x1439c8;
 
@@ -338,14 +338,14 @@ fn configure_pedestal_requirements(code: &mut Code, settings: &Settings) {
                 // Power
                 ldr(R0, EVENT_FLAG_PTR),
                 ldr(R0, (R0, 0x0)),
-                ldr(R1, prize_flag(PendantPower).get_value() as u32),
+                ldr(R1, prize_flag(PendantPower)?.get_value() as u32),
                 bl(FN_GET_EVENT_FLAG),
                 cmp(R0, 0x0),
                 b(RETURN_LABEL).eq(),
                 // Wisdom
                 ldr(R0, EVENT_FLAG_PTR),
                 ldr(R0, (R0, 0x0)),
-                ldr(R1, prize_flag(PendantWisdom).get_value() as u32),
+                ldr(R1, prize_flag(PendantWisdom)?.get_value() as u32),
                 bl(FN_GET_EVENT_FLAG),
                 cmp(R0, 0x0),
                 b(RETURN_LABEL).eq(),
@@ -363,14 +363,14 @@ fn configure_pedestal_requirements(code: &mut Code, settings: &Settings) {
                 // Power
                 ldr(R0, EVENT_FLAG_PTR),
                 ldr(R0, (R0, 0x0)),
-                ldr(R1, prize_flag(PendantPower).get_value() as u32),
+                ldr(R1, prize_flag(PendantPower)?.get_value() as u32),
                 bl(FN_GET_EVENT_FLAG),
                 cmp(R0, 0x0),
                 b(RETURN_LABEL).eq(),
                 // Wisdom
                 ldr(R0, EVENT_FLAG_PTR),
                 ldr(R0, (R0, 0x0)),
-                ldr(R1, prize_flag(PendantWisdom).get_value() as u32),
+                ldr(R1, prize_flag(PendantWisdom)?.get_value() as u32),
                 bl(FN_GET_EVENT_FLAG),
                 cmp(R0, 0x0),
                 b(RETURN_LABEL).eq(),
@@ -395,21 +395,21 @@ fn configure_pedestal_requirements(code: &mut Code, settings: &Settings) {
                 // Power
                 ldr(R0, EVENT_FLAG_PTR),
                 ldr(R0, (R0, 0x0)),
-                ldr(R1, prize_flag(PendantPower).get_value() as u32),
+                ldr(R1, prize_flag(PendantPower)?.get_value() as u32),
                 bl(FN_GET_EVENT_FLAG),
                 cmp(R0, 0x0),
                 b(RETURN_LABEL).eq(),
                 // Wisdom
                 ldr(R0, EVENT_FLAG_PTR),
                 ldr(R0, (R0, 0x0)),
-                ldr(R1, prize_flag(PendantWisdom).get_value() as u32),
+                ldr(R1, prize_flag(PendantWisdom)?.get_value() as u32),
                 bl(FN_GET_EVENT_FLAG),
                 cmp(R0, 0x0),
                 b(RETURN_LABEL).eq(),
                 // Courage
                 ldr(R0, EVENT_FLAG_PTR),
                 ldr(R0, (R0, 0x0)),
-                ldr(R1, prize_flag(PendantCourage).get_value() as u32),
+                ldr(R1, prize_flag(PendantCourage)?.get_value() as u32),
                 bl(FN_GET_EVENT_FLAG),
                 cmp(R0, 0x0),
                 b(RETURN_LABEL).eq(),
@@ -424,6 +424,7 @@ fn configure_pedestal_requirements(code: &mut Code, settings: &Settings) {
         }
     };
     code.patch(0x143968, [b(ped_instructions)]);
+    Ok(())
 }
 
 fn merchant(code: &mut Code) {
