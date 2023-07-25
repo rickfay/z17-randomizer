@@ -1,5 +1,3 @@
-#![feature(drain_filter)]
-
 use {crate::sead::sarc::Sarc, albw::Game, std::io::Error};
 
 mod byaml;
