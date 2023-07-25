@@ -58,10 +58,8 @@ impl Sarc {
                                 false
                             }
                         })
-                        .expect(&format!(
-                            "File with hash collision did not have matching filename: {}",
-                            filename
-                        ))
+                        .unwrap_or_else(|| panic!("File with hash collision did not have matching filename: {}",
+                            filename))
                         .data
                         .clone(),
                 )
@@ -87,10 +85,8 @@ impl Sarc {
                             false
                         }
                     })
-                    .expect(&format!(
-                        "File with hash collision did not have matching filename: {}",
-                        filename
-                    ))
+                    .unwrap_or_else(|| panic!("File with hash collision did not have matching filename: {}",
+                        filename))
                     .data = data;
             }
         } else {
@@ -195,13 +191,13 @@ impl Sarc {
             let end = offset_to_data + entry.file_end as usize;
             let data = Vec::from(&bytes[start..end]);
 
-            let file = SarcInnerFile { filename, data: data.into() };
+            let file = SarcInnerFile { filename, data };
 
-            if files.contains_key(&filename_hash) {
+            if let std::collections::btree_map::Entry::Vacant(e) = files.entry(filename_hash) {
+                e.insert(vec![file]);
+            } else {
                 let hashed_files = files.get_mut(&filename_hash).unwrap();
                 hashed_files.push(file);
-            } else {
-                files.insert(filename_hash, vec![file]);
             }
         }
 
@@ -293,7 +289,7 @@ impl IntoBytes for Sarc {
                     // pad to 4 byte alignment
                     let padding_amt = 4 - (filename.len() % 4);
                     if padding_amt < 4 {
-                        filename += &std::iter::repeat("\0").take(padding_amt).collect::<String>();
+                        filename += &"\0".repeat(padding_amt);
                     }
 
                     sfnt.extend_from_slice(filename.as_bytes());
@@ -349,7 +345,7 @@ struct SarcInnerFile {
 fn align(data: Vec<u8>, alignment: usize, value: u8) -> Vec<u8> {
     let padding_amt = alignment - (data.len() % alignment);
     if padding_amt < alignment {
-        let mut data = data.clone();
+        let mut data = data;
         data.resize(data.len() + padding_amt, value);
         data
     } else {
