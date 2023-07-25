@@ -226,9 +226,7 @@ impl Patcher {
 
         let chest_data = if settings.options.chest_size_matches_contents {
             if item.goes_in_csmc_large_chest() { large_chest } else { small_chest }
-        } else {
-            if is_big { large_chest } else { small_chest }
-        };
+        } else if is_big { large_chest } else { small_chest };
 
         // Forcibly set ID
         self.scene(course, stage)
@@ -321,7 +319,7 @@ impl Patcher {
         self.scene(DungeonWind, 0)?.actors_mut().add(warp_tile.clone())?; // Gales 1F
         self.scene(FieldDark, 19)?.actors_mut().add(warp_tile.clone())?; // Dark Maze
         self.scene(DungeonWater, 1)?.actors_mut().add(warp_tile.clone())?; // Swamp Palace B1
-        self.scene(DungeonDokuro, 1)?.actors_mut().add(warp_tile.clone())?; // Skull Woods B2
+        self.scene(DungeonDokuro, 1)?.actors_mut().add(warp_tile)?; // Skull Woods B2
 
         // Add Ravio to Hilda's Study to give out Bow of Light Hint
         let hint_ghost = self.scene(IndoorDark, 15)?.actors().get_actor_bch("HintGhost")?;

@@ -215,7 +215,7 @@ pub fn create(patcher: &Patcher, seed_info: &SeedInfo) -> Code {
         let actor = actor_names
             .get(rental)
             .copied()
-            .expect(&*format!("Could not find actor name for {}", rental.as_str()));
+            .unwrap_or_else(|| panic!("Could not find actor name for {}", rental.as_str()));
         code.text().define([
             ldr(R1, actor),
             str_(R4, (R0, actor_offset)),

@@ -78,17 +78,14 @@ pub(crate) fn remove_collision(unq: u16) -> (u16, Box<dyn Fn(&mut Obj)>) {
 }
 
 pub fn is_sage(item: Item) -> bool {
-    match item {
-        SageGulley | SageOren | SageSeres | SageOsfala | SageImpa | SageIrene | SageRosso => true,
-        _ => false,
-    }
+    matches!(
+        item,
+        SageGulley | SageOren | SageSeres | SageOsfala | SageImpa | SageIrene | SageRosso
+    )
 }
 
 pub(crate) fn is_pendant(item: Item) -> bool {
-    match item {
-        PendantPower | PendantWisdom | PendantCourage | ZeldaAmulet => true,
-        _ => false,
-    }
+    matches!(item, PendantPower | PendantWisdom | PendantCourage | ZeldaAmulet)
 }
 
 pub(crate) fn prize_flag(prize: Item) -> Flag {

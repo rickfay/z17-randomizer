@@ -58,7 +58,7 @@ impl LocationHint {
         match self
             .logical_ghosts
             .iter()
-            .filter(|ghost| !taken_ghosts.contains(&ghost))
+            .filter(|ghost| !taken_ghosts.contains(ghost))
             .choose_stable(rng)
         {
             None => Err("No Ghosts available to place this hint"),
@@ -206,7 +206,7 @@ pub fn generate_hints(
 
     let num_sometimes_hints = NUM_TOTAL_HINTS - always_hints.len() - path_hints.len();
     let mut sometimes_hints = generate_sometimes_hints(
-        settings, world_graph, rng, check_map, num_sometimes_hints, &mut taken_checks,
+        settings, world_graph, rng, check_map, num_sometimes_hints, &taken_checks,
         &mut taken_ghosts,
     );
 
@@ -264,7 +264,7 @@ fn duplicate_hints(
 fn generate_bow_of_light_hint(
     world_graph: &mut WorldGraph, check_map: &mut CheckMap,
 ) -> BowOfLightHint {
-    for (_, location_node) in world_graph {
+    for location_node in world_graph.values_mut() {
         for &check in location_node.clone().get_checks() {
             if BowOfLight.eq(&check_map.get(check.get_name()).unwrap().unwrap()) {
                 return BowOfLightHint { check };
@@ -283,17 +283,10 @@ fn generate_always_hints(
     settings: &Settings, world_graph: &mut WorldGraph, check_map: &mut CheckMap,
     taken_checks: &mut Vec<&'static str>, taken_ghosts: &mut Vec<FillerItem>, rng: &mut StdRng,
 ) -> Vec<LocationHint> {
-    let mut always_checks =
-        vec![
-            "Master Sword Pedestal",
-            "Great Rupee Fairy",
-            "Blacksmith (Lorule)",
-            "Bouldering Guy",
-            "Irene",
-            "Rosso",
-            "Osfala",
-            "Wildlife Clearing Stump"
-        ];
+    let mut always_checks = vec![
+        "Master Sword Pedestal", "Great Rupee Fairy", "Blacksmith (Lorule)", "Bouldering Guy",
+        "Irene", "Rosso", "Osfala", "Wildlife Clearing Stump",
+    ];
 
     // todo
     // if settings.logic.nice_mode {
@@ -351,7 +344,7 @@ fn generate_location_hint(
                     return Some(quest);
                 }
             };
-            return None;
+            None
         })
         .collect::<Vec<_>>();
 
@@ -365,8 +358,7 @@ fn generate_location_hint(
  */
 fn generate_sometimes_hints(
     settings: &Settings, world_graph: &mut WorldGraph, rng: &mut StdRng, check_map: &mut CheckMap,
-    num_sometimes_hints: usize, taken_checks: &mut Vec<&'static str>,
-    taken_ghosts: &mut Vec<FillerItem>,
+    num_sometimes_hints: usize, taken_checks: &[&'static str], taken_ghosts: &mut Vec<FillerItem>,
 ) -> Vec<LocationHint> {
     let mut sometimes_checks = vec![
         "Bee Guy (2)",
@@ -601,7 +593,7 @@ fn choose_path_hint(
         }
     }
 
-    return None;
+    None
 }
 
 /// Finds all checks available before a given Quest Goal using a modified Sphere Search.
@@ -636,7 +628,7 @@ fn find_checks_before_goal(
 /// Determines the possible Path Hints for a given goal, if any exist. Paths are returned in a random order.
 fn get_potential_path_hints(
     settings: &Settings, rng: &mut StdRng, world_graph: &mut WorldGraph, check_map: &mut CheckMap,
-    taken_checks: &mut Vec<&str>, goal: FillerItem,
+    taken_checks: &[&str], goal: FillerItem,
 ) -> Vec<PathHint> {
     let mut reachable_checks: Vec<Check>;
     let mut potential_paths: Vec<PathHint> = Vec::new();

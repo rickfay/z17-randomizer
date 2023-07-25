@@ -468,7 +468,7 @@ fn align_json_values(json: &mut String) {
     const KEY_ALIGNMENT: usize = 56;
     let mut index_colon = 0;
     while index_colon < json.len() {
-        let index_colon_opt = json[index_colon..].find(":");
+        let index_colon_opt = json[index_colon..].find(':');
         if index_colon_opt.is_none() {
             break;
         }
@@ -478,7 +478,7 @@ fn align_json_values(json: &mut String) {
             continue;
         }
 
-        let index_prev_new_line = json[..index_colon].rfind("\n").unwrap_or_else(|| {
+        let index_prev_new_line = json[..index_colon].rfind('\n').unwrap_or_else(|| {
             fail!("Couldn't fine new line character before index: {}", index_colon);
         });
         let line_length_up_to_value = index_colon - index_prev_new_line;
@@ -670,7 +670,7 @@ pub fn patch_seed(
 
         info!("ROM Loaded.\n");
 
-        regions::patch(&mut patcher, &seed_info.layout, &seed_info.settings)?;
+        regions::patch(&mut patcher, &seed_info.layout, seed_info.settings)?;
         let patches = patcher.prepare(seed_info)?;
         patches.dump(user_config.output())?;
     }

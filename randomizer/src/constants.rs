@@ -3,5 +3,5 @@
  */
 
 /// Build Version
-pub const VERSION: &'static str = "v0.3.1";
-pub const CONFIG_FILE_NAME: &'static str = "config.json";
+pub const VERSION: &str = "v0.3.1";
+pub const CONFIG_FILE_NAME: &str = "config.json";

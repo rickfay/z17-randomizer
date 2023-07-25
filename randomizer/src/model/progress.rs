@@ -38,7 +38,7 @@ impl Progress {
         let mut new_items: HashSet<FillerItem> = HashSet::new();
 
         for item in &self.items {
-            if !other.items.contains(&item) {
+            if !other.items.contains(item) {
                 new_items.insert(*item);
             }
         }

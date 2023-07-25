@@ -22,7 +22,7 @@ pub fn calculate_metrics(
 }
 
 /// Sphere Search
-fn sphere_search<'a>(
+fn sphere_search(
     world_graph: &mut WorldGraph, check_map: &mut CheckMap, settings: &Settings,
 ) -> BTreeMap<String, BTreeMap<&'static str, &'static str>> {
     info!("Generating Playthrough...");

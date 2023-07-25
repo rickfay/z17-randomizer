@@ -20,7 +20,7 @@ impl Subregion {
     }
 
     pub fn name_colorized(&self) -> String {
-        self.color.format(&self.name)
+        self.color.format(self.name)
     }
 
     pub fn world(&self) -> World {
@@ -209,22 +209,22 @@ macro_rules! region {
     ) => {
 
         #[inline]
-        pub fn patch(patcher: &mut crate::patch::Patcher, layout: &crate::Layout, settings: &$crate::Settings) -> crate::Result<()> {
+        pub fn patch(patcher: &mut $crate::patch::Patcher, layout: &$crate::Layout, settings: &$crate::Settings) -> $crate::Result<()> {
             $start::patch(patcher, layout, settings)?;
             $($id::patch(patcher, layout, settings)?;)*
             Ok(())
         }
 
-        crate::subregion!($start $start_props);
-        $(crate::subregion!($id $props);)*
+        $crate::subregion!($start $start_props);
+        $($crate::subregion!($id $props);)*
 
         #[allow(unused)]
-        pub(crate) fn start() -> &'static crate::regions::Subregion {
+        pub(crate) fn start() -> &'static $crate::regions::Subregion {
             $start::SUBREGION
         }
 
         pub const NAME: &str = $name;
-        pub const COLOR: crate::hints::hint_color::HintColor = crate::hints::hint_color::HintColor::$color;
+        pub const COLOR: $crate::hints::hint_color::HintColor = $crate::hints::hint_color::HintColor::$color;
         #[allow(unused)]
         pub const COURSE: albw::course::Id = albw::course::Id::$course;
     };
@@ -245,7 +245,7 @@ macro_rules! subregion {
     }) => {
         pub mod $id {
 
-            use crate::{patch::Patcher, regions::Subregion};
+            use $crate::{patch::Patcher, regions::Subregion};
 
             pub use super::COURSE;
 
@@ -258,12 +258,12 @@ macro_rules! subregion {
 
             #[allow(unused)]
             #[inline]
-            pub fn patch(patcher: &mut Patcher, layout: &crate::Layout, settings: &$crate::Settings) -> crate::Result<()> {
-                $(use crate::patch::Patch;
-                $(crate::patch!($variant $props).apply(
+            pub fn patch(patcher: &mut Patcher, layout: &$crate::Layout, settings: &$crate::Settings) -> $crate::Result<()> {
+                $(use $crate::patch::Patch;
+                $($crate::patch!($variant $props).apply(
                     patcher,
                     layout
-                        .get(&crate::LocationInfo::new(SUBREGION, $key))
+                        .get(&$crate::LocationInfo::new(SUBREGION, $key))
                         .unwrap_or_else(|| unreachable!(stringify!($key))),
                     settings,
                 )?;)*)?
@@ -342,7 +342,7 @@ macro_rules! patch {
         Patch::GoldRupee { course: COURSE, scene: $scene - 1, unq: $unq }
     };
     (Shop($variant:ident$($args:tt)?)) => {
-        Patch::Shop(crate::patch::Shop::$variant $($args)?)
+        Patch::Shop($crate::patch::Shop::$variant $($args)?)
     };
     (None()) => {
         Patch::None

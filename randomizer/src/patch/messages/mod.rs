@@ -69,7 +69,7 @@ fn patch_ravio(patcher: &mut Patcher) -> Result<()> {
             name("for free")
         ),
     );
-    ravio_shop.set("lgt_RentalKeeper_Field_2C_03", &format!("stuff and things"));
+    ravio_shop.set("lgt_RentalKeeper_Field_2C_03", "stuff and things");
     patcher.update(ravio_shop.dump())?;
 
     Ok(())
@@ -211,7 +211,7 @@ fn patch_hint_ghosts(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> 
             let hint_ghost = HintGhost::from(*ghost);
             let entry = msbt_hint_map
                 .entry((hint_ghost.course, hint_ghost.msbt_file))
-                .or_insert_with(|| BTreeMap::new());
+                .or_insert_with(BTreeMap::new);
             entry.insert(hint_ghost.msg_label, path_hint.get_hint());
         }
     }
@@ -225,7 +225,7 @@ fn patch_hint_ghosts(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> 
             let hint_ghost = HintGhost::from(*ghost);
             let entry = msbt_hint_map
                 .entry((hint_ghost.course, hint_ghost.msbt_file))
-                .or_insert_with(|| BTreeMap::new());
+                .or_insert_with(BTreeMap::new);
             entry.insert(hint_ghost.msg_label, always_hint.get_hint());
         }
     }
@@ -239,7 +239,7 @@ fn patch_hint_ghosts(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> 
             let hint_ghost = HintGhost::from(*ghost);
             let entry = msbt_hint_map
                 .entry((hint_ghost.course, hint_ghost.msbt_file))
-                .or_insert_with(|| BTreeMap::new());
+                .or_insert_with(BTreeMap::new);
             entry.insert(hint_ghost.msg_label, sometimes_hint.get_hint());
         }
     }
