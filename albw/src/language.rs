@@ -36,7 +36,7 @@ pub struct Load(pub BTreeMap<String, Vec<String>>);
 
 impl Load {
     pub fn boot(&self) -> Result<&[String]> {
-        Ok(&self.0.get("Boot").ok_or_else(|| Error::new("Boot key not found."))?)
+        Ok(self.0.get("Boot").ok_or_else(|| Error::new("Boot key not found."))?)
     }
 
     pub fn course(&self, id: course::Id) -> Option<&[String]> {
@@ -44,7 +44,7 @@ impl Load {
     }
 
     pub fn add_entry(&mut self, id: &str, entry: &str) {
-        let load_entry = self.0.entry(String::from(id)).or_insert_with(|| Vec::new());
+        let load_entry = self.0.entry(String::from(id)).or_insert_with(Vec::new);
 
         // Manually check for dupe - Choosing not to switch to a HashSet to minimize file changes
         if !load_entry.contains(&String::from(entry)) {
@@ -54,8 +54,8 @@ impl Load {
 
     pub fn remove_entry(&mut self, id: &str, entry: &str) {
         let thing = self.0.get_mut(id);
-        if thing.is_some() {
-            thing.unwrap().retain(|x| *x != String::from(entry));
+        if let Some(thing) = thing {
+            thing.retain(|x| x != entry);
         }
     }
 }

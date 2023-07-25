@@ -12,10 +12,8 @@ use {
 
 /// Pauses program execution
 pub fn pause() {
-    let mut stdout = stdout();
-    stdout.write(b"\nPress Enter to continue...\n").unwrap();
-    stdout.flush().unwrap();
-    stdin().read(&mut [0]).unwrap();
+    println!("\nPress Enter to continue...");
+    stdin().read_exact(&mut [0]).unwrap();
 }
 
 /// Prompt the user for Seed Settings on the CLI
@@ -227,13 +225,13 @@ pub fn get_seed_settings() -> Result<Settings, String> {
 
 #[rustfmt::skip]
 pub fn prompt_logic_mode() -> LogicMode {
-    print!("\n[Logic Mode]\n");
-    print!("[1] Normal        - Standard gameplay, no tricky item use or glitches. If unsure, choose this.\n");
-    print!("[2] Hard          - Adds tricks that aren't technically glitches. Lamp + Net considered as weapons. No glitches.\n");
-    print!("[3] Glitched      - Includes the above plus a selection of easy-to-learn glitches.\n");
-    print!("[4] Adv. Glitched - Includes the above plus \"advanced\" glitches that may be a challenge to master.\n");
-    print!("[5] Hell          - Includes every known RTA-viable glitch, including the insane ones. Don't choose this.\n");
-    print!("[6] No Logic      - Items are placed with no logic at all. Seeds are likely to not be completable.\n");
+    println!("\n[Logic Mode]");
+    println!("[1] Normal        - Standard gameplay, no tricky item use or glitches. If unsure, choose this.");
+    println!("[2] Hard          - Adds tricks that aren't technically glitches. Lamp + Net considered as weapons. No glitches.");
+    println!("[3] Glitched      - Includes the above plus a selection of easy-to-learn glitches.");
+    println!("[4] Adv. Glitched - Includes the above plus \"advanced\" glitches that may be a challenge to master.");
+    println!("[5] Hell          - Includes every known RTA-viable glitch, including the insane ones. Don't choose this.");
+    println!("[6] No Logic      - Items are placed with no logic at all. Seeds are likely to not be completable.");
 
     loop {
         print!("\nEnter a number (1-6): ");

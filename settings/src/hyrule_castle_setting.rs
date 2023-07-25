@@ -5,11 +5,12 @@ use {
 };
 
 /// Choose how the randomizer handles the Dungeon portion of Hyrule Castle
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Deserialize, Serialize)]
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq, Deserialize, Serialize)]
 pub enum HyruleCastleSetting {
     /// Allows early access to Lorule Castle via the Portal + Trial's Door.
     EarlyLoruleCastle,
     /// Closes Hyrule Castle completely, denying all access and removing it from logic
+    #[default]
     Closed,
 }
 
@@ -37,17 +38,15 @@ impl TryFrom<&str> for HyruleCastleSetting {
     }
 }
 
-impl Default for HyruleCastleSetting {
-    fn default() -> Self {
-        Closed
-    }
-}
-
 impl Display for HyruleCastleSetting {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", match self {
-            EarlyLoruleCastle => "Early Lorule Castle",
-            Closed => "Closed",
-        })
+        write!(
+            f,
+            "{}",
+            match self {
+                EarlyLoruleCastle => "Early Lorule Castle",
+                Closed => "Closed",
+            }
+        )
     }
 }

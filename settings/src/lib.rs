@@ -31,14 +31,17 @@ impl Settings {
     pub fn log_settings(&self) {
         let Settings { logic, options, .. } = self;
 
-        info!("Logic Mode:                     {}", match logic.logic_mode {
-            Normal => "Normal",
-            Hard => "Hard",
-            Glitched => "Glitched",
-            AdvGlitched => "Adv. Glitched",
-            Hell => "Hell - Did you really mean to choose this?",
-            NoLogic => "No Logic",
-        });
+        info!(
+            "Logic Mode:                     {}",
+            match logic.logic_mode {
+                Normal => "Normal",
+                Hard => "Hard",
+                Glitched => "Glitched",
+                AdvGlitched => "Adv. Glitched",
+                Hell => "Hell - Did you really mean to choose this?",
+                NoLogic => "No Logic",
+            }
+        );
         info!(
             "Dungeon Prizes:                 {}",
             if logic.randomize_dungeon_prizes { "Randomized" } else { "Not Randomized" }
@@ -232,14 +235,17 @@ pub fn open_default() -> Settings {
 }
 
 pub(crate) const fn is_false(b: &bool) -> bool {
-    *b == false
+    !(*b)
 }
+
 pub(crate) const fn seven() -> u8 {
     7
 }
+
 pub(crate) const fn thirty() -> u16 {
     30
 }
+
 pub(crate) const fn r#true() -> bool {
     true
 }

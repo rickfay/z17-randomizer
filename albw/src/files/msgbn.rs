@@ -18,7 +18,7 @@ pub struct MsgBn<T, const SECTIONS: usize> {
 
 impl<'file, const SECTIONS: usize> MsgBn<Ref<'file>, SECTIONS> {
     pub fn try_read(file: Ref<'file>, magic: &'static [u8; 8]) -> Result<Self> {
-        let sections = sections::<SECTIONS>(&*file, magic)?;
+        let sections = sections::<SECTIONS>(&file, magic)?;
         Ok(Self { file, sections })
     }
 
@@ -43,7 +43,7 @@ impl<'file, const SECTIONS: usize> MsgBn<RefMut<'file>, SECTIONS> {
         if let Some(section) = self
             .sections
             .iter()
-            .find_map(|(section_magic, section)| (magic == section_magic).then(|| section))
+            .find_map(|(section_magic, section)| (magic == section_magic).then_some(section))
         {
             unsafe { Some(self.file.get_unchecked_mut(section.clone())) }
         } else {
