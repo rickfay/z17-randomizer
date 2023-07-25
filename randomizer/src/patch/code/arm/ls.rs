@@ -37,7 +37,7 @@ impl AddressingMode {
 impl From<(Register, i32)> for AddressingMode {
     fn from(parameter: (Register, i32)) -> Self {
         let (rn, offset) = parameter;
-        Self { rn, plus: offset >= 0, offset: Offset::Immediate(offset.abs() as u32) }
+        Self { rn, plus: offset >= 0, offset: Offset::Immediate(offset.unsigned_abs()) }
     }
 }
 

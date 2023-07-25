@@ -113,7 +113,7 @@ fn plando_settings() -> Settings {
             hint_ghost_price: 30,
         },
         options: Options { chest_size_matches_contents: true, night_mode: false },
-        exclusions: Exclusion { 0: Default::default() },
+        exclusions: Exclusion(Default::default()),
         exclude: Exclude::new(),
     }
 }

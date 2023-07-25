@@ -60,7 +60,7 @@ impl System {
         if file.exists() {
             Self::load_json(file)
         } else {
-            fail!("No config file found at {}", file.to_path_buf().display());
+            fail!("No config file found at {}", file.display());
         }
     }
 

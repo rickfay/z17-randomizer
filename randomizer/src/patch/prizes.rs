@@ -20,10 +20,10 @@ pub(crate) fn patch_dungeon_prizes(
     patcher: &mut Patcher, prizes: &DungeonPrizes, settings: &Settings,
 ) {
     info!("Patching Dungeon Prizes...");
-    patch_flowchart(patcher, &prizes);
-    patch_msbf_files(patcher, &prizes);
-    patch_dungeon_prize_actors(patcher, &prizes);
-    patch_prize_byaml(patcher, settings, &prizes);
+    patch_flowchart(patcher, prizes);
+    patch_msbf_files(patcher, prizes);
+    patch_dungeon_prize_actors(patcher, prizes);
+    patch_prize_byaml(patcher, settings, prizes);
 }
 
 /// Adds entries to the FlowChart for the MSBF files related to each Portrait
@@ -448,39 +448,37 @@ fn patch_gales(patcher: &mut Patcher, prize: Item) {
     ]);
 
     // Gulley will fall down on his own, other Sages need to be put on a Rail to appear
-    if is_sage(prize) {
-        if prize != SageGulley {
-            patcher.modify_objs(DungeonWind, 3, &[add_rail(UNQ_PRIZE, (12, 0))]);
+    if is_sage(prize) && prize != SageGulley {
+        patcher.modify_objs(DungeonWind, 3, &[add_rail(UNQ_PRIZE, (12, 0))]);
 
-            let (end_y, end_z) = if prize == SageImpa { (2.0, -47.0) } else { (0.0, -46.5) };
-            patcher.add_rail(DungeonWind, 3, Rail {
-                arg: (0, 0, 0, 0, 0.0, 0.0),
-                pnt: vec![
-                    Point {
-                        arg: (0, 0, 0, 0, 0.0, 0.0),
-                        ctl: [0.0, end_y, end_z - 15.0, 0.0, end_y, end_z - 15.0],
-                        lnk: vec![],
-                        srt: Transform {
-                            scale: Vec3::UNIT,
-                            rotate: Vec3 { x: 330.0, y: 0.0, z: 0.0 },
-                            translate: Vec3 { x: 0.0, y: end_y, z: end_z - 15.0 },
-                        },
+        let (end_y, end_z) = if prize == SageImpa { (2.0, -47.0) } else { (0.0, -46.5) };
+        patcher.add_rail(DungeonWind, 3, Rail {
+            arg: (0, 0, 0, 0, 0.0, 0.0),
+            pnt: vec![
+                Point {
+                    arg: (0, 0, 0, 0, 0.0, 0.0),
+                    ctl: [0.0, end_y, end_z - 15.0, 0.0, end_y, end_z - 15.0],
+                    lnk: vec![],
+                    srt: Transform {
+                        scale: Vec3::UNIT,
+                        rotate: Vec3 { x: 330.0, y: 0.0, z: 0.0 },
+                        translate: Vec3 { x: 0.0, y: end_y, z: end_z - 15.0 },
                     },
-                    Point {
-                        arg: (0, 0, 0, 0, 0.0, 0.0),
-                        ctl: [0.0, end_y, end_z, 0.0, end_y, end_z],
-                        lnk: vec![],
-                        srt: Transform {
-                            scale: Vec3::UNIT,
-                            rotate: Vec3 { x: 330.0, y: 0.0, z: 0.0 },
-                            translate: Vec3 { x: 0.0, y: end_y, z: end_z },
-                        },
+                },
+                Point {
+                    arg: (0, 0, 0, 0, 0.0, 0.0),
+                    ctl: [0.0, end_y, end_z, 0.0, end_y, end_z],
+                    lnk: vec![],
+                    srt: Transform {
+                        scale: Vec3::UNIT,
+                        rotate: Vec3 { x: 330.0, y: 0.0, z: 0.0 },
+                        translate: Vec3 { x: 0.0, y: end_y, z: end_z },
                     },
-                ],
-                rng: false,
-                unq: 12,
-            });
-        }
+                },
+            ],
+            rng: false,
+            unq: 12,
+        });
     }
 }
 
@@ -515,39 +513,37 @@ fn patch_hera(patcher: &mut Patcher, prize: Item) {
     );
 
     // Gulley will fall down on his own, other Sages need to be put on a Rail to appear
-    if is_sage(prize) {
-        if prize != SageGulley {
-            patcher.modify_objs(DungeonHera, 1, &[add_rail(UNQ_PRIZE, (56, 0))]);
+    if is_sage(prize) && prize != SageGulley {
+        patcher.modify_objs(DungeonHera, 1, &[add_rail(UNQ_PRIZE, (56, 0))]);
 
-            let (end_y, end_z) = if prize == SageImpa { (103.0, -6.0) } else { (101.0, -5.5) };
-            patcher.add_rail(DungeonHera, 1, Rail {
-                arg: (0, 0, 0, 0, 0.0, 0.0),
-                pnt: vec![
-                    Point {
-                        arg: (0, 0, 0, 0, 0.0, 0.0),
-                        ctl: [0.0, end_y, end_z - 15.0, 0.0, end_y, end_z - 15.0],
-                        lnk: vec![],
-                        srt: Transform {
-                            scale: Vec3::UNIT,
-                            rotate: Vec3 { x: 330.0, y: 0.0, z: 0.0 },
-                            translate: Vec3 { x: 0.0, y: end_y, z: end_z - 15.0 },
-                        },
+        let (end_y, end_z) = if prize == SageImpa { (103.0, -6.0) } else { (101.0, -5.5) };
+        patcher.add_rail(DungeonHera, 1, Rail {
+            arg: (0, 0, 0, 0, 0.0, 0.0),
+            pnt: vec![
+                Point {
+                    arg: (0, 0, 0, 0, 0.0, 0.0),
+                    ctl: [0.0, end_y, end_z - 15.0, 0.0, end_y, end_z - 15.0],
+                    lnk: vec![],
+                    srt: Transform {
+                        scale: Vec3::UNIT,
+                        rotate: Vec3 { x: 330.0, y: 0.0, z: 0.0 },
+                        translate: Vec3 { x: 0.0, y: end_y, z: end_z - 15.0 },
                     },
-                    Point {
-                        arg: (0, 0, 0, 0, 0.0, 0.0),
-                        ctl: [0.0, end_y, end_z, 0.0, end_y, end_z],
-                        lnk: vec![],
-                        srt: Transform {
-                            scale: Vec3::UNIT,
-                            rotate: Vec3 { x: 330.0, y: 0.0, z: 0.0 },
-                            translate: Vec3 { x: 0.0, y: end_y, z: end_z },
-                        },
+                },
+                Point {
+                    arg: (0, 0, 0, 0, 0.0, 0.0),
+                    ctl: [0.0, end_y, end_z, 0.0, end_y, end_z],
+                    lnk: vec![],
+                    srt: Transform {
+                        scale: Vec3::UNIT,
+                        rotate: Vec3 { x: 330.0, y: 0.0, z: 0.0 },
+                        translate: Vec3 { x: 0.0, y: end_y, z: end_z },
                     },
-                ],
-                rng: false,
-                unq: 56,
-            });
-        }
+                },
+            ],
+            rng: false,
+            unq: 56,
+        });
     }
 }
 
@@ -603,12 +599,12 @@ fn patch_dark(patcher: &mut Patcher, prize: Item) {
             pnt: vec![
                 Point {
                     arg: (0, 0, 0, 0, 0.0, 0.0),
-                    ctl: [0.0, 6.7700896, -48.9483577, 0.0, 6.7700896, -48.9483577],
+                    ctl: [0.0, 6.7700896, -48.948_357, 0.0, 6.7700896, -48.948_357],
                     lnk: vec![],
                     srt: Transform {
                         scale: Vec3 { x: 1.0, y: 1.0, z: 1.0 },
                         rotate: Vec3 { x: 335.99999945441, y: 0.0, z: 0.0 },
-                        translate: Vec3 { x: 0.0, y: 6.7700896, z: -48.9483577 },
+                        translate: Vec3 { x: 0.0, y: 6.7700896, z: -48.948_357 },
                     },
                 },
                 Point {
@@ -729,7 +725,7 @@ fn patch_turtle(patcher: &mut Patcher, prize: Item) {
             let rails_len = rail.pnt.len();
             rail.pnt.get_mut(rails_len - 1).unwrap().srt.translate.y += DY;
 
-            let mut p = rail.pnt.get(rail.pnt.len() - 1).unwrap().clone();
+            let mut p = rail.pnt.last().unwrap().clone();
             p.srt.translate.z += DZ;
             rail.pnt.push(p);
         };

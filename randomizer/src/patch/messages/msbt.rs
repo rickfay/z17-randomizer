@@ -48,12 +48,7 @@ impl MsbtFile {
         let hash = calc_hash(String::from(key), self.lbl1.num_slots) as usize;
         let hash_table_slot = self.lbl1.hash_table.get(hash).unwrap();
 
-        return if let Some(label) = hash_table_slot.labels.iter().find(|&label| label.label.eq(key))
-        {
-            Some(label.item_index as usize)
-        } else {
-            None
-        };
+        return hash_table_slot.labels.iter().find(|&label| label.label.eq(key)).map(|label| label.item_index as usize);
     }
 
     #[allow(unused)]
@@ -156,7 +151,7 @@ impl MsbtFile {
         msbt_file.extend_from_slice(&atr1_block);
         msbt_file.extend_from_slice(&txt2_block);
 
-        (self.course, File::new(self.filename.clone(), Vec::from(msbt_file)))
+        (self.course, File::new(self.filename.clone(), msbt_file))
     }
 }
 
@@ -272,7 +267,7 @@ struct Txt2Block {
 pub(crate) fn load_msbt(patcher: &mut Patcher, course: Id, file: &str) -> Result<MsbtFile> {
     let filename = format!("US_English/{}.msbt", file);
     let mut file =
-        patcher.language(course.clone()).unwrap().flow().extract(filename.as_str()).unwrap();
+        patcher.language(course).unwrap().flow().extract(filename.as_str()).unwrap();
 
     let raw = file.get_mut();
 
