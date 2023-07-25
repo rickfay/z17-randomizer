@@ -1,3 +1,31 @@
+[package]
+name = "albw-randomizer"
+version = "0.3.1"
+authors = [
+    "Kevin Marsolais <kevin@kevinmarsolais.co>",
+    "Rick Fay <rickwithanh@gmail.com>",
+]
+edition = "2021"
+license = "GPL-2.0-or-later"
+
+[dependencies]
+albw = { workspace = true }
+cli = { workspace = true }
+log = { workspace = true }
+macros = { workspace = true }
+rand = { workspace = true }
+randomizer = { path = "./randomizer" }
+settings = { workspace = true }
+simplelog = "0.12.0"
+structopt = "0.3.26"
+
+[build-dependencies]
+winres = "0.1"
+
+[[bin]]
+name = "albw-plandomizer"
+path = "./src/bin/plando.rs"
+
 [workspace]
 members = [
     "albw",
