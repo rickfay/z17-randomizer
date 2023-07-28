@@ -47,7 +47,7 @@ impl<'input> FromFile for Flow<'input> {
         let flw = msgbn.get(FLW3).ok_or_else(|| Error::new("No FLW3"))?;
 
         // Line 4: header, which contains the step and branch count
-        let (step_ct, branch_ct, index) = get_flw(&*flw)?;
+        let (step_ct, branch_ct, index) = get_flw(&flw)?;
 
         let (header, body) = Ref::map_split(flw, |flw| flw.split_at(0x10));
         let (steps, branches) = Ref::map_split(body, |body| body.split_at(index));
@@ -183,7 +183,11 @@ pub struct FlowMut<'input> {
 
 impl<'input> FlowMut<'input> {
     pub fn get_mut<'s>(&'s mut self, index: u16) -> Option<StepMut<'s, 'input>> {
-        if self.steps.get_mut(index).is_some() { Some(StepMut { flow: self, index }) } else { None }
+        if self.steps.get_mut(index).is_some() {
+            Some(StepMut { flow: self, index })
+        } else {
+            None
+        }
     }
 
     pub fn debug(&self) {
@@ -210,7 +214,7 @@ impl<'input> FlowMut<'input> {
 
         println!("index,kind,arg1,arg2,arg3,value,next,command,count,branch,+0,+1,notes");
         let mut step: Inner;
-        for i in 0..(&self.steps.inner.len() / STEP_LEN) {
+        for i in 0..(self.steps.inner.len() / STEP_LEN) {
             step = unsafe {
                 Inner::from_slice_unchecked(
                     &self.steps.inner[(i * STEP_LEN)..((i * STEP_LEN) + STEP_LEN)],
@@ -255,7 +259,7 @@ impl<'input> FromFile for FlowMut<'input> {
     {
         let msgbn = MsgBn::<RefMut<'input>, 2>::try_read(input, MSGFLWBN)?;
         let flw = msgbn.into_section(FLW3).ok_or_else(|| Error::new("No FLW3"))?;
-        let (step_ct, branch_ct, index) = get_flw(&flw)?;
+        let (step_ct, branch_ct, index) = get_flw(flw)?;
 
         let (header, body) = flw.split_at_mut(0x10);
         let (steps, branches) = body.split_at_mut(index);
@@ -569,7 +573,7 @@ impl<'input, const SIZE: usize> List<Ref<'input>, SIZE> {
         (0..self.count).map(move |index| {
             let index = index as usize;
             Ref::map(Ref::clone(&self.inner), |inner| unsafe {
-                let start = SIZE * index as usize;
+                let start = SIZE * index;
                 let ptr = inner.get_unchecked(start..start + SIZE).as_ptr() as *const [u8; SIZE];
                 &*ptr
             })
@@ -616,7 +620,7 @@ fn get_flw(flw: &[u8]) -> Result<(u16, u16, usize)> {
 }
 
 fn next(index: u16) -> Next {
-    (index != 0xFFFF).then(|| index)
+    (index != 0xFFFF).then_some(index)
 }
 
 const MSGFLWBN: &[u8; 8] = b"MsgFlwBn";

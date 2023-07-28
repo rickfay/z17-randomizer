@@ -332,22 +332,7 @@ impl Obj {
     ) -> Self {
         let (arg4, arg6) = activation_flag.into_pair();
         Self {
-            arg: Arg {
-                0: spawn,
-                1: arg1,
-                2: 0,
-                3: 0,
-                4: arg4,
-                5: 0,
-                6: arg6,
-                7: 0,
-                8: 0,
-                9: 0,
-                10: scene,
-                11: scene_index,
-                12: 0,
-                13: 0.0,
-            },
+            arg: Arg(spawn, arg1, 0, 0, arg4, 0, arg6, 0, 0, 0, scene, scene_index, 0, 0.0),
             clp,
             flg: (0, 0, 0, 0),
             id,
@@ -696,12 +681,7 @@ pub struct Point {
 
 impl Clone for Point {
     fn clone(&self) -> Self {
-        Self {
-            arg: self.arg.clone(),
-            ctl: self.ctl.clone(),
-            lnk: self.lnk.clone(),
-            srt: self.srt.clone(),
-        }
+        Self { arg: self.arg, ctl: self.ctl, lnk: self.lnk.clone(), srt: self.srt }
     }
 }
 

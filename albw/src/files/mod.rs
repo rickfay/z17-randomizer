@@ -8,7 +8,7 @@ use {
     serde::Serialize,
     std::{
         fs,
-        io::{prelude::*, stdin, stdout, BufReader},
+        io::{prelude::*, stdin, BufReader},
         path::Path,
         process::exit,
     },
@@ -49,10 +49,8 @@ where
 
 // FIXME unnecssary duplicate
 fn pause() {
-    let mut stdout = stdout();
-    stdout.write(b"\nPress Enter to continue...").unwrap();
-    stdout.flush().unwrap();
-    stdin().read(&mut [0]).unwrap();
+    print!("\nPress Enter to continue...");
+    stdin().read_exact(&mut [0]).unwrap();
 }
 
 impl Cxi<fs::File> {
@@ -251,7 +249,11 @@ pub trait FromFile {
 }
 
 fn cmp_id(left: u64, right: u64) -> Result<()> {
-    if left == right { Ok(()) } else { Err(Error::new("IDs did not match.")) }
+    if left == right {
+        Ok(())
+    } else {
+        Err(Error::new("IDs did not match."))
+    }
 }
 
 fn from_media_units(media_units: u32) -> u32 {

@@ -281,7 +281,7 @@ where
     }
 
     fn position(&mut self) -> Result<u32> {
-        check_offset(self.writer.seek(SeekFrom::Current(0)).map_err(|err| Error(err.to_string()))?)
+        check_offset(self.writer.stream_position().map_err(|err| Error(err.to_string()))?)
     }
 
     fn write(&mut self, bytes: &[u8]) -> Result<()> {

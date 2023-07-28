@@ -4,10 +4,11 @@ use {
     std::fmt::{Display, Formatter},
 };
 
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Deserialize, Serialize)]
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq, Deserialize, Serialize)]
 pub enum PedestalSetting {
     Vanilla,
     Charmed,
+    #[default]
     Standard,
 }
 
@@ -24,18 +25,16 @@ impl TryFrom<u8> for PedestalSetting {
     }
 }
 
-impl Default for PedestalSetting {
-    fn default() -> Self {
-        Standard
-    }
-}
-
 impl Display for PedestalSetting {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", match self {
-            Vanilla => "Vanilla: Power + Wisdom",
-            Charmed => "Charmed: Power + Wisdom + Charm",
-            Standard => "Standard: Power + Wisdom + Courage",
-        })
+        write!(
+            f,
+            "{}",
+            match self {
+                Vanilla => "Vanilla: Power + Wisdom",
+                Charmed => "Charmed: Power + Wisdom + Charm",
+                Standard => "Standard: Power + Wisdom + Courage",
+            }
+        )
     }
 }

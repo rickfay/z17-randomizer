@@ -410,7 +410,7 @@ fn compress(data: &[u8]) -> Box<[u8]> {
     buf.extend_from_slice(&len.to_be_bytes());
     buf.extend_from_slice(&[0; 8]);
     let mut chunks = data.chunks_exact(8);
-    while let Some(chunk) = chunks.next() {
+    for chunk in chunks.by_ref() {
         buf.push(0xFF);
         buf.extend_from_slice(chunk);
     }

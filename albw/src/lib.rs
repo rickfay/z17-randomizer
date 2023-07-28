@@ -300,7 +300,7 @@ macro_rules! int_map {
         }
 
         impl ::core::convert::TryFrom<$repr> for $type {
-            type Error = crate::Error;
+            type Error = $crate::Error;
 
             fn try_from(value: $repr) -> ::core::result::Result<Self, Self::Error> {
                 match value {
