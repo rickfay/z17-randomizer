@@ -1,6 +1,6 @@
 [package]
 name = "randomizer"
-version = "0.3.1"
+version = "0.3.2"
 authors = ["Kevin Marsolais <kevin@kevinmarsolais.co>", "Rick Fay <rickwithanh@gmail.com>"]
 edition = "2021"
 license = "GPL-2.0-or-later"

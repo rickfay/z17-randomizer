@@ -118,7 +118,7 @@ dependencies = [
 
 [[package]]
 name = "cli"
-version = "0.3.1"
+version = "0.3.2"
 dependencies = [
  "log",
  "settings",
@@ -256,7 +256,7 @@ checksum = "fad582f4b9e86b6caa621cabeb0963332d92eea04729ab12892c2533951e6440"
 
 [[package]]
 name = "jack"
-version = "0.3.1"
+version = "0.3.2"
 dependencies = [
  "albw",
  "byteorder",
@@ -311,7 +311,7 @@ dependencies = [
 
 [[package]]
 name = "macros"
-version = "0.3.1"
+version = "0.3.2"
 
 [[package]]
 name = "memchr"
@@ -438,7 +438,7 @@ dependencies = [
 
 [[package]]
 name = "randomizer"
-version = "0.3.1"
+version = "0.3.2"
 dependencies = [
  "albw",
  "byteorder",
@@ -569,7 +569,7 @@ dependencies = [
 
 [[package]]
 name = "settings"
-version = "0.3.1"
+version = "0.3.2"
 dependencies = [
  "log",
  "macros",
