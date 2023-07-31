@@ -91,7 +91,7 @@ fn patch_street_merchant(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<
     let item_left = seed_info
         .layout
         .get(&LocationInfo::new(
-            crate::regions::hyrule::kakariko::village::SUBREGION,
+            crate::regions::hyrule::kakariko::village::AREA,
             "Street Merchant (Left)",
         ))
         .unwrap()
@@ -99,7 +99,7 @@ fn patch_street_merchant(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<
     let item_right = seed_info
         .layout
         .get(&LocationInfo::new(
-            crate::regions::hyrule::kakariko::village::SUBREGION,
+            crate::regions::hyrule::kakariko::village::AREA,
             "Street Merchant (Right)",
         ))
         .unwrap()

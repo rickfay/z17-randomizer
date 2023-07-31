@@ -1,20 +1,20 @@
-use {
-    crate::{hints::hint_color::HintColor, patch::Patcher, Settings},
-    log::info,
-    std::{
-        fmt::{self, Debug, Formatter},
-        hash::{Hash, Hasher},
-    },
+use std::{
+    fmt::{self, Debug, Formatter},
+    hash::{Hash, Hasher},
 };
 
-pub struct Subregion {
+use log::info;
+
+use crate::{hints::hint_color::HintColor, patch::Patcher, Settings};
+
+pub struct AreaInfo {
     name: &'static str,
     color: HintColor,
-    world: World,
+    group: Group,
     id: &'static str,
 }
 
-impl Subregion {
+impl AreaInfo {
     pub fn name(&self) -> &'static str {
         self.name
     }
@@ -23,39 +23,41 @@ impl Subregion {
         self.color.format(self.name)
     }
 
-    pub fn world(&self) -> World {
-        self.world
+    pub fn world(&self) -> Group {
+        self.group
     }
 }
 
-impl Debug for Subregion {
+impl Debug for AreaInfo {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        f.debug_struct("Subregion")
+        f.debug_struct("AreaInfo")
             .field("name", &self.name)
-            .field("world", &self.world)
+            .field("world", &self.group)
             .field("id", &self.id)
             .finish()
     }
 }
 
-impl Eq for Subregion {}
+impl Eq for AreaInfo {}
 
-impl PartialEq for Subregion {
+impl PartialEq for AreaInfo {
     fn eq(&self, other: &Self) -> bool {
-        self.world == other.world && self.name == other.name && self.id == other.id
+        self.group == other.group && self.name == other.name && self.id == other.id
     }
 }
 
-impl Hash for Subregion {
+impl Hash for AreaInfo {
     fn hash<H: Hasher>(&self, state: &mut H) {
-        self.world.hash(state);
+        self.group.hash(state);
         self.name.hash(state);
         self.id.hash(state);
     }
 }
 
+pub type Area = &'static AreaInfo;
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Hash)]
-pub enum World {
+pub enum Group {
     Hyrule,
     Lorule,
     Dungeons,
@@ -80,7 +82,6 @@ pub enum World {
 // }
 
 pub mod dungeons {
-    pub const WORLD: super::World = super::World::Dungeons;
     pub mod dark;
     pub mod desert;
     pub mod eastern;
@@ -94,9 +95,11 @@ pub mod dungeons {
     pub mod thieves;
     pub mod tower;
     pub mod turtle;
+
+    pub const GROUP: super::Group = super::Group::Dungeons;
 }
+
 pub mod hyrule {
-    pub const WORLD: super::World = super::World::Hyrule;
     pub mod death;
     pub mod desert;
     pub mod eastern;
@@ -107,9 +110,11 @@ pub mod hyrule {
     pub mod lost;
     pub mod southern;
     pub mod zora;
+
+    pub const GROUP: super::Group = super::Group::Hyrule;
 }
+
 pub mod lorule {
-    pub const WORLD: super::World = super::World::Lorule;
     pub mod chamber;
     pub mod dark;
     pub mod death;
@@ -117,6 +122,8 @@ pub mod lorule {
     pub mod lake;
     pub mod misery;
     pub mod skull;
+
+    pub const GROUP: super::Group = super::Group::Lorule;
 }
 
 pub(crate) fn patch(
@@ -207,7 +214,6 @@ macro_rules! region {
         $start:ident $start_props:tt,
         $($id:ident $props:tt,)*
     ) => {
-
         #[inline]
         pub fn patch(patcher: &mut $crate::patch::Patcher, layout: &$crate::Layout, settings: &$crate::Settings) -> $crate::Result<()> {
             $start::patch(patcher, layout, settings)?;
@@ -215,12 +221,12 @@ macro_rules! region {
             Ok(())
         }
 
-        $crate::subregion!($start $start_props);
-        $($crate::subregion!($id $props);)*
+        $crate::area!($start $start_props);
+        $($crate::area!($id $props);)*
 
         #[allow(unused)]
-        pub(crate) fn start() -> &'static $crate::regions::Subregion {
-            $start::SUBREGION
+        pub(crate) fn start() -> $crate::regions::Area {
+            $start::AREA
         }
 
         pub const NAME: &str = $name;
@@ -232,7 +238,7 @@ macro_rules! region {
 
 #[doc(hidden)]
 #[macro_export]
-macro_rules! subregion {
+macro_rules! area {
     ($id:ident {
         $(locations: [
             $($key:literal: $item:ident @$variant:ident $props:tt $(:- $condition:tt)?
@@ -244,15 +250,14 @@ macro_rules! subregion {
         $(quest: $kind:ident$(::$qvariant:ident)?,)?
     }) => {
         pub mod $id {
-
-            use $crate::{patch::Patcher, regions::Subregion};
+            use $crate::{patch::Patcher, regions::{Area, AreaInfo}};
 
             pub use super::COURSE;
 
-            pub const SUBREGION: &Subregion = &Subregion {
+            pub const AREA: Area = &AreaInfo {
                 name: super::NAME,
                 color: super::COLOR,
-                world: super::super::WORLD,
+                group: super::super::GROUP,
                 id: stringify!($id),
             };
 
@@ -263,7 +268,7 @@ macro_rules! subregion {
                 $($crate::patch!($variant $props).apply(
                     patcher,
                     layout
-                        .get(&$crate::LocationInfo::new(SUBREGION, $key))
+                        .get(&$crate::LocationInfo::new(AREA, $key))
                         .unwrap_or_else(|| unreachable!(stringify!($key))),
                     settings,
                 )?;)*)?
