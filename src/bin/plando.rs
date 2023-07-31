@@ -3,10 +3,12 @@ use game::{
     Item::*,
 };
 use log::{error, info, LevelFilter};
-use modd::{
-    entrance_shuffle_setting::EntranceShuffleSetting, hyrule_castle_setting::HyruleCastleSetting,
-    logic::Logic, logic_mode::LogicMode, pedestal_setting::PedestalSetting, Exclude, Exclusion,
-    Options, Settings,
+use modd::settings::{
+    entrance_shuffle::EntranceShuffle,
+    hyrule_castle::HyruleCastle,
+    logic::{Logic, LogicMode},
+    pedestal::Pedestal,
+    Exclude, Exclusion, Options, Settings,
 };
 use randomizer::{
     constants::VERSION,
@@ -84,14 +86,14 @@ fn plando_settings() -> Settings {
             vanilla_charm: false,
             lc_requirement: 1,
             yuganon_requirement: 1,
-            ped_requirement: PedestalSetting::Standard,
-            hyrule_castle_setting: HyruleCastleSetting::EarlyLoruleCastle,
+            ped_requirement: Pedestal::Standard,
+            hyrule_castle_setting: HyruleCastle::EarlyLoruleCastle,
 
             nice_mode: true,
             super_items: true,
             reverse_sage_events: false,
             no_progression_enemies: true,
-            entrance_rando: EntranceShuffleSetting::NotShuffled,
+            entrance_rando: EntranceShuffle::NotShuffled,
 
             start_with_merge: true,
             bell_in_shop: false,

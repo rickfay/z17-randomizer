@@ -2,7 +2,7 @@ use std::collections::{BTreeMap, HashSet};
 
 use game::Item;
 use log::{error, info};
-use modd::{logic_mode::LogicMode::*, Settings};
+use modd::settings::{logic::LogicMode::*, Settings};
 use queue::Queue;
 use rand::{rngs::StdRng, Rng};
 

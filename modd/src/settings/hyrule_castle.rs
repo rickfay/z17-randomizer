@@ -1,12 +1,12 @@
-use {
-    crate::hyrule_castle_setting::HyruleCastleSetting::*,
-    serde::{Deserialize, Serialize},
-    std::fmt::{Display, Formatter},
-};
+use std::fmt::{Display, Formatter};
+
+use serde::{Deserialize, Serialize};
+
+use HyruleCastle::*;
 
 /// Choose how the randomizer handles the Dungeon portion of Hyrule Castle
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq, Deserialize, Serialize)]
-pub enum HyruleCastleSetting {
+pub enum HyruleCastle {
     /// Allows early access to Lorule Castle via the Portal + Trial's Door.
     EarlyLoruleCastle,
     /// Closes Hyrule Castle completely, denying all access and removing it from logic
@@ -14,7 +14,7 @@ pub enum HyruleCastleSetting {
     Closed,
 }
 
-impl TryFrom<u8> for HyruleCastleSetting {
+impl TryFrom<u8> for HyruleCastle {
     type Error = String;
 
     fn try_from(value: u8) -> Result<Self, Self::Error> {
@@ -26,7 +26,7 @@ impl TryFrom<u8> for HyruleCastleSetting {
     }
 }
 
-impl TryFrom<&str> for HyruleCastleSetting {
+impl TryFrom<&str> for HyruleCastle {
     type Error = String;
 
     fn try_from(value: &str) -> Result<Self, Self::Error> {
@@ -38,7 +38,7 @@ impl TryFrom<&str> for HyruleCastleSetting {
     }
 }
 
-impl Display for HyruleCastleSetting {
+impl Display for HyruleCastle {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(
             f,

@@ -1,8 +1,6 @@
 use std::collections::HashSet;
 
-use modd::{
-    hyrule_castle_setting::HyruleCastleSetting, pedestal_setting::PedestalSetting, Settings,
-};
+use modd::settings::{hyrule_castle::HyruleCastle, pedestal::Pedestal, Settings};
 
 use crate::{
     item_pools::{
@@ -673,16 +671,16 @@ impl Progress {
     }
 
     pub fn hc_is_open(&self) -> bool {
-        self.settings.logic.hyrule_castle_setting != HyruleCastleSetting::Closed
+        self.settings.logic.hyrule_castle_setting != HyruleCastle::Closed
     }
 
     pub fn has_required_pendants(&self) -> bool {
         self.has(PendantOfWisdom)
             && self.has(PendantOfPower)
             && match self.settings.logic.ped_requirement {
-                PedestalSetting::Vanilla => true,
-                PedestalSetting::Charmed => self.has_charm(),
-                PedestalSetting::Standard => self.has_pendant_of_courage(),
+                Pedestal::Vanilla => true,
+                Pedestal::Charmed => self.has_charm(),
+                Pedestal::Standard => self.has_pendant_of_courage(),
             }
     }
 

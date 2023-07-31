@@ -1,6 +1,6 @@
 use game::{Course::*, Item::*};
 use log::info;
-use modd::{hyrule_castle_setting::HyruleCastleSetting, logic_mode::LogicMode, Settings};
+use modd::settings::{hyrule_castle::HyruleCastle, logic::LogicMode, Settings};
 use rom::scene::{Arg, Dest, Flag, Obj, Transform, Vec3};
 
 use super::Patcher;
@@ -936,7 +936,7 @@ fn patch_castles(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
         ],
     );
     match settings.logic.hyrule_castle_setting {
-        HyruleCastleSetting::EarlyLoruleCastle => {
+        HyruleCastle::EarlyLoruleCastle => {
             patcher.modify_objs(
                 FieldLight,
                 18,
@@ -947,7 +947,7 @@ fn patch_castles(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
                 ],
             );
         }
-        HyruleCastleSetting::Closed => {
+        HyruleCastle::Closed => {
             patcher.modify_objs(
                 FieldLight,
                 18,

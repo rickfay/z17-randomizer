@@ -1,18 +1,18 @@
-use {
-    crate::pedestal_setting::PedestalSetting::{Charmed, Standard, Vanilla},
-    serde::{Deserialize, Serialize},
-    std::fmt::{Display, Formatter},
-};
+use std::fmt::{Display, Formatter};
+
+use serde::{Deserialize, Serialize};
+
+use Pedestal::{Charmed, Standard, Vanilla};
 
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq, Deserialize, Serialize)]
-pub enum PedestalSetting {
+pub enum Pedestal {
     Vanilla,
     Charmed,
     #[default]
     Standard,
 }
 
-impl TryFrom<u8> for PedestalSetting {
+impl TryFrom<u8> for Pedestal {
     type Error = String;
 
     fn try_from(value: u8) -> Result<Self, Self::Error> {
@@ -25,7 +25,7 @@ impl TryFrom<u8> for PedestalSetting {
     }
 }
 
-impl Display for PedestalSetting {
+impl Display for Pedestal {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(
             f,

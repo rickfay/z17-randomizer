@@ -7,7 +7,7 @@ use std::{
 
 use arm::*;
 use game::Item::{self, *};
-use modd::{pedestal_setting::PedestalSetting::*, Settings};
+use modd::settings::{pedestal::Pedestal::*, Settings};
 use rom::ExHeader;
 
 use super::Patcher;

@@ -1,4 +1,4 @@
-use modd::{logic_mode::LogicMode, Settings};
+use modd::settings::{logic::LogicMode, Settings};
 use rand::{rngs::StdRng, Rng};
 
 use crate::{

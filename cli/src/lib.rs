@@ -4,9 +4,11 @@ use std::{
 };
 
 use log::info;
-use modd::{
-    hyrule_castle_setting::HyruleCastleSetting, logic::Logic, logic_mode::LogicMode,
-    pedestal_setting::PedestalSetting, Options, Settings,
+use modd::settings::{
+    hyrule_castle::HyruleCastle,
+    logic::{Logic, LogicMode},
+    pedestal::Pedestal,
+    Options, Settings,
 };
 
 /// Pauses program execution
@@ -45,7 +47,7 @@ pub fn get_seed_settings() -> Result<Settings, String> {
     );
     //let yuganon_requirement = prompt_u8_in_range("Choose how many Portraits are needed to fight Yuganon:", 0, 7);
 
-    let ped_requirement = PedestalSetting::try_from(prompt_u8_in_range(
+    let ped_requirement = Pedestal::try_from(prompt_u8_in_range(
         "Pedestal Requirement",
         "Choose which Pendants are required to reach the Master Sword Pedestal:\n\
         [2] Vanilla  - Only the Pendants of Power and Wisdom are required\n\
@@ -55,7 +57,7 @@ pub fn get_seed_settings() -> Result<Settings, String> {
         4,
     ))?;
 
-    let hyrule_castle_setting = HyruleCastleSetting::try_from(prompt_u8_in_range(
+    let hyrule_castle_setting = HyruleCastle::try_from(prompt_u8_in_range(
         "Hyrule Castle Setting",
         "Choose how the Dungeon portion of Hyrule Castle should be handled:\n\
         [1] Early Lorule Castle - Completing Hyrule Castle allows early access to Lorule Castle via the Trial's Door.\n\
