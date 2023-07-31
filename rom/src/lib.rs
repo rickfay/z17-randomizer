@@ -1,18 +1,19 @@
 //! A library for reading data from a The Legend of Zelda: A Link Between Worlds ROM.
 
-use {
-    crate::{course::Id::LanguageBoot, language::Load, scene::SceneMeta},
-    language::FlowChart,
-    log::info,
-    path_absolutize::*,
-    std::{
-        cell::RefCell,
-        error::Error as StdError,
-        fmt::{self, Display, Formatter},
-        fs, io,
-        path::Path,
-    },
+use std::{
+    cell::RefCell,
+    error::Error as StdError,
+    fmt::{self, Display, Formatter},
+    fs, io,
+    path::Path,
 };
+
+use language::FlowChart;
+use log::info;
+use path_absolutize::*;
+
+use crate::{course::Id::LanguageBoot, language::Load, scene::SceneMeta};
+
 pub use {
     actors::{Actor, Actors},
     course::Course,
@@ -93,7 +94,7 @@ pub enum ErrorKind {
 /// Game info, loaded from a ROM
 #[derive(Debug)]
 #[allow(dead_code)]
-pub struct Game {
+pub struct Rom {
     id: u64,
     exheader: ExHeader,
     romfs: RefCell<RomFs<fs::File>>,
@@ -102,7 +103,7 @@ pub struct Game {
     message: File<Load>,
 }
 
-impl Game {
+impl Rom {
     /// Loads the game from a ROM.
     ///
     /// Fails if the ROM is invalid for any reason, including general

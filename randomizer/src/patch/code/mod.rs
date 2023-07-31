@@ -1,19 +1,19 @@
-use {
-    super::Patcher,
-    crate::{patch::util::prize_flag, Result, SeedInfo, Settings},
-    albw::{
-        ExHeader,
-        Item::{self, *},
-    },
-    arm::*,
-    settings::pedestal_setting::PedestalSetting::*,
-    std::{
-        collections::HashMap,
-        fs::{self, File},
-        io::prelude::*,
-        path::Path,
-    },
+use std::{
+    collections::HashMap,
+    fs::{self, File},
+    io::Write,
+    path::Path,
 };
+
+use arm::*;
+use rom::{
+    ExHeader,
+    Item::{self, *},
+};
+use settings::pedestal_setting::PedestalSetting::*;
+
+use super::Patcher;
+use crate::{patch::util::prize_flag, Result, SeedInfo, Settings};
 
 mod arm;
 

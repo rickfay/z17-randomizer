@@ -1,10 +1,9 @@
-use {
-    super::Patcher,
-    crate::Result,
-    albw::{course::Id, Item},
-    log::info,
-    settings::Settings,
-};
+use log::info;
+use rom::{course::Id, Item};
+use settings::Settings;
+
+use super::Patcher;
+use crate::Result;
 
 /*
  * TODO - Want to rewrite this entire subsystem
@@ -57,7 +56,7 @@ macro_rules! course {
         None
     };
     ($course:ident) => {
-        ::albw::course::Id::$course
+        ::rom::course::Id::$course
     };
 }
 

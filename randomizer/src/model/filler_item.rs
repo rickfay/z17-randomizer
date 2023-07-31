@@ -1,10 +1,10 @@
-use {
-    crate::{hints::hint_color::HintColor::*, item_to_str},
-    albw::{Item, Item::*},
-    macros::fail,
-    serde::{Deserialize, Serialize, Serializer},
-    FillerItem::*,
-};
+use macros::fail;
+use rom::{Item, Item::*};
+use serde::{Deserialize, Serialize, Serializer};
+
+use crate::{hints::hint_color::HintColor::*, item_to_str, Result};
+
+use FillerItem::*;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Deserialize)]
 pub enum FillerItem {

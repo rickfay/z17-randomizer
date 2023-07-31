@@ -1,21 +1,19 @@
-use {
-    albw::Item::*,
-    log::{error, info, LevelFilter},
-    macros::fail,
-    randomizer::{
-        constants::VERSION,
-        regions,
-        system::{System, UserConfig},
-        Layout, LocationInfo, SeedHash, SeedInfo,
-    },
-    settings::{
-        entrance_shuffle_setting::EntranceShuffleSetting,
-        hyrule_castle_setting::HyruleCastleSetting, logic::Logic, logic_mode::LogicMode,
-        pedestal_setting::PedestalSetting, Exclude, Exclusion, Options, Settings,
-    },
-    simplelog::SimpleLogger,
-    structopt::StructOpt,
+use log::{error, info, LevelFilter};
+use macros::fail;
+use randomizer::{
+    constants::VERSION,
+    regions,
+    system::{System, UserConfig},
+    Layout, LocationInfo, SeedHash, SeedInfo,
 };
+use rom::Item::*;
+use settings::{
+    entrance_shuffle_setting::EntranceShuffleSetting, hyrule_castle_setting::HyruleCastleSetting,
+    logic::Logic, logic_mode::LogicMode, pedestal_setting::PedestalSetting, Exclude, Exclusion,
+    Options, Settings,
+};
+use simplelog::SimpleLogger;
+use structopt::StructOpt;
 
 #[derive(Debug, StructOpt)]
 struct Opt {

@@ -1,5 +1,5 @@
 use {
-    crate::{actors::Actor, int_map, scene::Vec3, Error, Game, Result},
+    crate::{actors::Actor, int_map, scene::Vec3, Error, Result, Rom},
     once_cell::sync::Lazy,
     regex::Regex,
     serde::{Deserialize, Serialize},
@@ -285,7 +285,7 @@ pub struct GetItem(
 );
 
 impl GetItem {
-    pub fn actor(&self, game: &Game) -> Option<Actor> {
+    pub fn actor(&self, game: &Rom) -> Option<Actor> {
         if self.1.is_empty() {
             None
         } else {

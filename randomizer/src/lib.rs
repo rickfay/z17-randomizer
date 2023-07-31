@@ -1,3 +1,4 @@
+/*
 use {
     crate::{
         constants::VERSION,
@@ -19,14 +20,36 @@ use {
     regions::Subregion,
     serde::{ser::SerializeMap, Serialize, Serializer},
     settings::Settings,
-    std::{
-        collections::{hash_map::DefaultHasher, BTreeMap},
-        error::Error as StdError,
-        fs::File,
-        hash::{Hash, Hasher},
-        io::{self, Write},
-        ops::Deref,
-    },
+    */
+use std::{
+    collections::{hash_map::DefaultHasher, BTreeMap},
+    error::Error as StdError,
+    fs::File,
+    hash::{Hash, Hasher},
+    io::{self, Write},
+    ops::Deref,
+};
+
+use log::{debug, error, info};
+use macros::fail;
+use model::filler_item::{convert, FillerItem};
+use patch::Patcher;
+use path_absolutize::*;
+use rand::{rngs::StdRng, SeedableRng};
+use regions::Subregion;
+use rom::{
+    Item::{self, *},
+    Rom,
+};
+use serde::{ser::SerializeMap, Serialize, Serializer};
+use settings::Settings;
+
+use crate::{
+    constants::VERSION,
+    hints::{formatting::*, Hints},
+    metrics::Metrics,
+    patch::msbf::MsbfKey,
+    system::UserConfig,
 };
 
 pub mod constants;
@@ -78,11 +101,11 @@ impl Error {
     }
 }
 
-impl From<albw::Error> for Error {
-    fn from(err: albw::Error) -> Self {
+impl From<rom::Error> for Error {
+    fn from(err: rom::Error) -> Self {
         let kind = match err.kind() {
-            albw::ErrorKind::Io => ErrorKind::Io,
-            albw::ErrorKind::Rom => ErrorKind::Game,
+            rom::ErrorKind::Io => ErrorKind::Io,
+            rom::ErrorKind::Rom => ErrorKind::Game,
         };
         Self { kind, inner: err.into_inner() }
     }
@@ -665,7 +688,7 @@ pub fn patch_seed(
     if !no_patch {
         info!("Starting Patch Process...");
 
-        let game = Game::load(user_config.rom())?;
+        let game = Rom::load(user_config.rom())?;
         let mut patcher = Patcher::new(game)?;
 
         info!("ROM Loaded.\n");

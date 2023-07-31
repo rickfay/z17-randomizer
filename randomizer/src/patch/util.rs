@@ -1,11 +1,11 @@
-use {
-    crate::{patch::DungeonPrizes, regions, Layout, LocationInfo},
-    albw::{
-        scene::{Dest, Flag, Obj, Rail, Vec3},
-        Item::{self, *},
-    },
-    macros::fail,
+use macros::fail;
+use rom::{
+    scene::{Dest, Flag, Obj, Rail, Vec3},
+    Item::{self, *},
 };
+
+use super::DungeonPrizes;
+use crate::{regions, Layout, LocationInfo};
 
 pub(crate) fn call<F>(unq: u16, action: F) -> (u16, Box<dyn Fn(&mut Obj)>)
 where

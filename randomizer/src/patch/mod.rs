@@ -1,22 +1,23 @@
-use {
-    self::code::Code,
-    crate::{patch::util::*, Error, ItemExt, Result, SeedInfo, Settings},
-    albw::{
-        course::{Id, Id::*},
-        demo::Timed,
-        flow::FlowMut,
-        scene::{Arg, Obj, Rail, SceneMeta},
-        Demo, File, Game, IntoBytes, Item, Language, Scene,
-    },
-    fs_extra::dir::CopyOptions,
-    log::{debug, error, info},
-    macros::fail,
-    path_absolutize::*,
-    serde::Serialize,
-    std::{collections::HashMap, fs, iter, path::Path},
-    tempfile::tempdir,
-    try_insert_ext::EntryInsertExt,
+use std::{collections::HashMap, fs, iter, path::Path};
+
+use fs_extra::dir::CopyOptions;
+use log::{debug, error, info};
+use macros::fail;
+use path_absolutize::*;
+use rom::{
+    course::{Id, Id::*},
+    demo::Timed,
+    flow::FlowMut,
+    scene::{Arg, Obj, Rail, SceneMeta},
+    Demo, File, IntoBytes, Item, Language, Rom, Scene,
 };
+use serde::Serialize;
+use tempfile::tempdir;
+use try_insert_ext::EntryInsertExt;
+
+use crate::{patch::util::*, Error, ItemExt, Result, SeedInfo, Settings};
+
+use code::Code;
 
 mod code;
 mod flow;
@@ -44,7 +45,7 @@ pub struct DungeonPrizes {
 
 #[derive(Debug)]
 pub struct Patcher {
-    game: Game,
+    game: Rom,
     boot: Language,
     rentals: [Item; 9],
     merchant: [Item; 3],
@@ -52,7 +53,7 @@ pub struct Patcher {
 }
 
 impl Patcher {
-    pub fn new(game: Game) -> Result<Self> {
+    pub fn new(game: Rom) -> Result<Self> {
         let boot = game.boot()?;
         Ok(Self {
             game,
@@ -137,7 +138,7 @@ impl Patcher {
         }
     }
 
-    fn load_course(game: &mut Game, course: Id) -> Course {
+    fn load_course(game: &mut Rom, course: Id) -> Course {
         game.course(course)
             .language()
             .map(|load| Course {
@@ -195,7 +196,7 @@ impl Patcher {
         })
     }
 
-    fn flow<C>(&mut self, course: C) -> Result<albw::language::LoadedMut<FlowMut>>
+    fn flow<C>(&mut self, course: C) -> Result<rom::language::LoadedMut<FlowMut>>
     where
         C: Into<Option<Id>>,
     {
@@ -225,8 +226,16 @@ impl Patcher {
         let large_chest = (34, "TreasureBoxL");
 
         let chest_data = if settings.options.chest_size_matches_contents {
-            if item.goes_in_csmc_large_chest() { large_chest } else { small_chest }
-        } else if is_big { large_chest } else { small_chest };
+            if item.goes_in_csmc_large_chest() {
+                large_chest
+            } else {
+                small_chest
+            }
+        } else if is_big {
+            large_chest
+        } else {
+            small_chest
+        };
 
         // Forcibly set ID
         self.scene(course, stage)
@@ -430,7 +439,7 @@ pub enum Shop {
 
 #[derive(Debug)]
 pub struct Patches {
-    game: Game,
+    game: Rom,
     code: Code,
     romfs: Files,
 }
@@ -456,10 +465,11 @@ impl Patches {
             self.game.id()
         );
 
-        match fs_extra::copy_items(&[moddir], path, &CopyOptions {
-            overwrite: true,
-            ..Default::default()
-        })
+        match fs_extra::copy_items(
+            &[moddir],
+            path,
+            &CopyOptions { overwrite: true, ..Default::default() },
+        )
         .map_err(Error::io)
         {
             Ok(_) => Ok(()),
@@ -493,7 +503,7 @@ impl Files {
 
 /// Removes extraneous events from all important cutscenes.
 fn cutscenes<'game>(
-    game: &'game Game, settings: &Settings,
+    game: &'game Rom, settings: &Settings,
 ) -> impl Iterator<Item = Result<File<Demo>>> + 'game {
     info!("Patching Cutscenes...");
     let Settings { logic, options, .. } = settings.clone();
