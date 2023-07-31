@@ -6,10 +6,10 @@ edition = "2021"
 license = "GPL-2.0-or-later"
 
 [dependencies]
-albw = { workspace = true }
 byteorder = { workspace = true }
 cli = { workspace = true }
 log = { workspace = true }
+rom = { workspace = true }
 serde = { workspace = true }
 thiserror = { workspace = true }
 yaz0 = { workspace = true }

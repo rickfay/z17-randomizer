@@ -1,20 +1,18 @@
-use {
-    albw::Item::*,
-    log::{error, info, LevelFilter},
-    randomizer::{
-        constants::VERSION,
-        regions,
-        system::{System, UserConfig},
-        Layout, LocationKey, SeedHash, SeedInfo,
-    },
-    settings::{
-        entrance_shuffle_setting::EntranceShuffleSetting,
-        hyrule_castle_setting::HyruleCastleSetting, logic::Logic, logic_mode::LogicMode,
-        pedestal_setting::PedestalSetting, Exclude, Exclusion, Options, Settings,
-    },
-    simplelog::SimpleLogger,
-    structopt::StructOpt,
+use log::{error, info, LevelFilter};
+use randomizer::{
+    constants::VERSION,
+    regions,
+    system::{System, UserConfig},
+    Layout, LocationKey, SeedHash, SeedInfo,
 };
+use rom::Item::*;
+use settings::{
+    entrance_shuffle_setting::EntranceShuffleSetting, hyrule_castle_setting::HyruleCastleSetting,
+    logic::Logic, logic_mode::LogicMode, pedestal_setting::PedestalSetting, Exclude, Exclusion,
+    Options, Settings,
+};
+use simplelog::SimpleLogger;
+use structopt::StructOpt;
 
 use albw_randomizer::fail;
 

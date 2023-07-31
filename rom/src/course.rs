@@ -1,17 +1,17 @@
 use crate::{
     language::Language,
     scene::{Scene, Stage},
-    Game, Result, SceneMeta,
+    Result, Rom, SceneMeta,
 };
 
 #[derive(Debug)]
 pub struct Course<'a> {
-    game: &'a Game,
+    game: &'a Rom,
     id: Id,
 }
 
 impl<'a> Course<'a> {
-    pub(crate) fn new(game: &'a Game, id: Id) -> Self {
+    pub(crate) fn new(game: &'a Rom, id: Id) -> Self {
         Self { game, id }
     }
 

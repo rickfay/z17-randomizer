@@ -12,31 +12,14 @@ dependencies = [
 ]
 
 [[package]]
-name = "albw"
-version = "0.1.1"
-dependencies = [
- "bytey",
- "csv",
- "data-encoding",
- "log",
- "once_cell",
- "path-absolutize",
- "regex",
- "ring",
- "serde",
- "serde_repr",
- "yaz0",
-]
-
-[[package]]
 name = "albw-randomizer"
 version = "0.3.1"
 dependencies = [
- "albw",
  "cli",
  "log",
  "rand",
  "randomizer",
+ "rom",
  "settings",
  "simplelog",
  "structopt",
@@ -245,10 +228,10 @@ checksum = "fad582f4b9e86b6caa621cabeb0963332d92eea04729ab12892c2533951e6440"
 name = "jack"
 version = "0.3.1"
 dependencies = [
- "albw",
  "byteorder",
  "cli",
  "log",
+ "rom",
  "serde",
  "thiserror",
  "yaz0",
@@ -423,7 +406,6 @@ dependencies = [
 name = "randomizer"
 version = "0.3.1"
 dependencies = [
- "albw",
  "byteorder",
  "cli",
  "fs_extra",
@@ -433,6 +415,7 @@ dependencies = [
  "path-absolutize",
  "queue",
  "rand",
+ "rom",
  "serde",
  "serde_json",
  "settings",
@@ -480,6 +463,23 @@ dependencies = [
  "untrusted",
  "web-sys",
  "winapi",
+]
+
+[[package]]
+name = "rom"
+version = "0.1.1"
+dependencies = [
+ "bytey",
+ "csv",
+ "data-encoding",
+ "log",
+ "once_cell",
+ "path-absolutize",
+ "regex",
+ "ring",
+ "serde",
+ "serde_repr",
+ "yaz0",
 ]
 
 [[package]]

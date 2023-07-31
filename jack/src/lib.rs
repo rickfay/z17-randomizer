@@ -1,4 +1,6 @@
-use {crate::sead::sarc::Sarc, albw::Game};
+use rom::Rom;
+
+use sead::sarc::Sarc;
 
 mod byaml;
 pub mod sead;
@@ -19,11 +21,11 @@ pub trait IntoBytes {
 }
 
 /// Opens an arbitrary file from the RomFS
-pub fn open(game: &Game, filename: &str) -> Box<[u8]> {
+pub fn open(game: &Rom, filename: &str) -> Box<[u8]> {
     game.open(filename).into()
 }
 
 /// Opens a Yaz0-compressed SARC Archive (.szs files)
-pub fn open_szs(game: &Game, filename: &str) -> sead::Result<Sarc> {
+pub fn open_szs(game: &Rom, filename: &str) -> sead::Result<Sarc> {
     sead::open_szs(filename, open(game, filename))
 }

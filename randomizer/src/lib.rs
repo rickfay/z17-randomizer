@@ -6,16 +6,16 @@ use std::{
     ops::Deref,
 };
 
-use albw::{
-    Game,
-    Item::{self, *},
-};
 use log::{debug, error, info};
 use model::filler_item::{convert, FillerItem};
 use patch::Patcher;
 use path_absolutize::*;
 use rand::{rngs::StdRng, SeedableRng};
 use regions::Area;
+use rom::{
+    Item::{self, *},
+    Rom,
+};
 use serde::{ser::SerializeMap, Serialize, Serializer};
 use settings::Settings;
 
@@ -49,7 +49,7 @@ pub enum Error {
     #[error("{0}")]
     Message(String),
     #[error(transparent)]
-    Game(#[from] albw::Error),
+    Rom(#[from] rom::Error),
     #[error(transparent)]
     Io(#[from] io::Error),
 }
@@ -623,7 +623,7 @@ pub fn patch_seed(
     if !no_patch {
         info!("Starting Patch Process...");
 
-        let game = Game::load(user_config.rom()).map_err(|err| Error::new(err.to_string()))?;
+        let game = Rom::load(user_config.rom()).map_err(|err| Error::new(err.to_string()))?;
         let mut patcher = Patcher::new(game)?;
 
         info!("ROM Loaded.\n");

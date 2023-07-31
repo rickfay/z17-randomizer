@@ -1,7 +1,6 @@
-use {
-    crate::FillerItem::{self, *},
-    albw::course::{Id, Id::*},
-};
+use rom::course::{Id, Id::*};
+
+use crate::FillerItem::{self, *};
 
 #[derive(Eq, PartialEq, Hash)]
 pub(crate) struct HintGhost<'hg> {

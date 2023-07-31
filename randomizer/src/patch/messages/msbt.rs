@@ -1,9 +1,9 @@
-use {
-    crate::{Patcher, Result},
-    albw::{course::Id, File},
-    byteorder::{ByteOrder, LittleEndian},
-    std::str::from_utf8,
-};
+use std::str::from_utf8;
+
+use byteorder::{ByteOrder, LittleEndian};
+use rom::{course::Id, File};
+
+use crate::{Patcher, Result};
 
 /// MSBT File
 ///
@@ -48,7 +48,11 @@ impl MsbtFile {
         let hash = calc_hash(String::from(key), self.lbl1.num_slots) as usize;
         let hash_table_slot = self.lbl1.hash_table.get(hash).unwrap();
 
-        return hash_table_slot.labels.iter().find(|&label| label.label.eq(key)).map(|label| label.item_index as usize);
+        return hash_table_slot
+            .labels
+            .iter()
+            .find(|&label| label.label.eq(key))
+            .map(|label| label.item_index as usize);
     }
 
     #[allow(unused)]
@@ -266,8 +270,7 @@ struct Txt2Block {
 /// Load MSBT File
 pub(crate) fn load_msbt(patcher: &mut Patcher, course: Id, file: &str) -> Result<MsbtFile> {
     let filename = format!("US_English/{}.msbt", file);
-    let mut file =
-        patcher.language(course).unwrap().flow().extract(filename.as_str()).unwrap();
+    let mut file = patcher.language(course).unwrap().flow().extract(filename.as_str()).unwrap();
 
     let raw = file.get_mut();
 

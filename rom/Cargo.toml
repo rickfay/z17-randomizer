@@ -1,5 +1,5 @@
 [package]
-name = "albw"
+name = "rom"
 version = "0.1.1"
 authors = [
     "Kevin Marsolais <kevin@kevinmarsolais.co>",

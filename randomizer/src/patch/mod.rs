@@ -1,15 +1,15 @@
 use std::{collections::HashMap, fs, iter, path::Path};
 
-use albw::{
+use fs_extra::dir::CopyOptions;
+use log::{debug, error, info};
+use path_absolutize::*;
+use rom::{
     course::{Id, Id::*},
     demo::Timed,
     flow::FlowMut,
     scene::{Arg, Obj, Rail, SceneMeta},
-    Demo, File, Game, IntoBytes, Item, Language, Scene,
+    Demo, File, IntoBytes, Item, Language, Rom, Scene,
 };
-use fs_extra::dir::CopyOptions;
-use log::{debug, error, info};
-use path_absolutize::*;
 use serde::Serialize;
 use tempfile::tempdir;
 use try_insert_ext::EntryInsertExt;
@@ -48,7 +48,7 @@ pub struct DungeonPrizes {
 
 #[derive(Debug)]
 pub struct Patcher {
-    game: Game,
+    game: Rom,
     boot: Language,
     rentals: [Item; 9],
     merchant: [Item; 3],
@@ -56,7 +56,7 @@ pub struct Patcher {
 }
 
 impl Patcher {
-    pub fn new(game: Game) -> Result<Self> {
+    pub fn new(game: Rom) -> Result<Self> {
         let boot = game.boot()?;
         Ok(Self {
             game,
@@ -141,7 +141,7 @@ impl Patcher {
         }
     }
 
-    fn load_course(game: &mut Game, course: Id) -> Course {
+    fn load_course(game: &mut Rom, course: Id) -> Course {
         game.course(course)
             .language()
             .map(|load| Course {
@@ -199,7 +199,7 @@ impl Patcher {
         })
     }
 
-    fn flow<C>(&mut self, course: C) -> Result<albw::language::LoadedMut<FlowMut>>
+    fn flow<C>(&mut self, course: C) -> Result<rom::language::LoadedMut<FlowMut>>
     where
         C: Into<Option<Id>>,
     {
@@ -429,7 +429,7 @@ pub struct Course {
 
 #[derive(Debug)]
 pub struct Patches {
-    game: Game,
+    game: Rom,
     code: Code,
     romfs: Files,
 }
@@ -493,7 +493,7 @@ impl Files {
 
 /// Removes extraneous events from all important cutscenes.
 fn cutscenes<'game>(
-    game: &'game Game, settings: &Settings,
+    game: &'game Rom, settings: &Settings,
 ) -> impl Iterator<Item = Result<File<Demo>>> + 'game {
     info!("Patching Cutscenes...");
     let Settings { logic, options, .. } = settings.clone();

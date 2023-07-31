@@ -5,11 +5,11 @@ use std::{
     path::Path,
 };
 
-use albw::{
+use arm::*;
+use rom::{
     ExHeader,
     Item::{self, *},
 };
-use arm::*;
 use settings::pedestal_setting::PedestalSetting::*;
 
 use super::Patcher;

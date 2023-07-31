@@ -1,9 +1,10 @@
-use {
-    crate::model::location::{Location, Location::*},
-    albw::course::{Id, Id::*},
-    std::collections::HashMap,
-    LoadingZoneId::*,
-};
+use std::collections::HashMap;
+
+use rom::course::{Id, Id::*};
+
+use crate::model::location::{Location, Location::*};
+
+use LoadingZoneId::*;
 
 /**
 

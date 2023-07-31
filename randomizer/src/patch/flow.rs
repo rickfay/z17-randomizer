@@ -1,5 +1,5 @@
-use albw::{course::Id, Item};
 use log::info;
+use rom::{course::Id, Item};
 use settings::Settings;
 
 use super::Patcher;
@@ -56,7 +56,7 @@ macro_rules! course {
         None
     };
     ($course:ident) => {
-        ::albw::course::Id::$course
+        ::rom::course::Id::$course
     };
 }
 

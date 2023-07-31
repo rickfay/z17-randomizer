@@ -1,15 +1,15 @@
-use {
-    crate::{
-        hints::{formatting::*, Hint},
-        patch::messages::{hint_ghosts::HintGhost, msbt::load_msbt},
-        LocationKey, Patcher, Result, SeedInfo,
-    },
-    albw::{
-        course::Id::*,
-        Item::{PendantPower, PendantWisdom},
-    },
-    log::info,
-    std::collections::BTreeMap,
+use std::collections::BTreeMap;
+
+use log::info;
+use rom::{
+    course::Id::*,
+    Item::{PendantPower, PendantWisdom},
+};
+
+use crate::{
+    hints::{formatting::*, Hint},
+    patch::messages::{hint_ghosts::HintGhost, msbt::load_msbt},
+    LocationKey, Patcher, Result, SeedInfo,
 };
 
 mod hint_ghosts;
@@ -37,7 +37,7 @@ pub fn patch_messages(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()>
 /// Prints out all String Values and their indexed Label Keys for a given MSBT File
 #[allow(unused)]
 #[deprecated]
-fn debug(patcher: &mut Patcher, course: albw::course::Id, file: &str) {
+fn debug(patcher: &mut Patcher, course: rom::course::Id, file: &str) {
     load_msbt(patcher, course, file).unwrap().debug();
     info!("Early Debug Exit");
     std::process::exit(0);
