@@ -1,7 +1,7 @@
 use {
     crate::{
         model::{logic::Logic, progress::Progress},
-        FillerItem, LocationInfo,
+        FillerItem, LocationKey,
     },
     std::hash::{Hash, Hasher},
 };
@@ -12,13 +12,13 @@ pub struct Check {
     name: &'static str,
     logic: Logic,
     quest: Option<FillerItem>,
-    location_info: Option<LocationInfo>,
+    location_info: Option<LocationKey>,
 }
 
 impl Check {
     pub fn new(
         name: &'static str, logic: Logic, quest: Option<FillerItem>,
-        location_info: Option<LocationInfo>,
+        location_info: Option<LocationKey>,
     ) -> Self {
         Self { name, logic, quest, location_info }
     }
@@ -31,7 +31,7 @@ impl Check {
         self.quest
     }
 
-    pub fn get_location_info(self) -> Option<LocationInfo> {
+    pub fn get_location_info(self) -> Option<LocationKey> {
         self.location_info
     }
 

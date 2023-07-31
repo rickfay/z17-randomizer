@@ -13,7 +13,7 @@ use crate::{
     world::WorldGraph,
     CheckMap, Error,
     FillerItem::{self, *},
-    LocationInfo, Result, Settings,
+    LocationKey, Result, Settings,
 };
 
 /// Fill Seed such that All Locations are Reachable
@@ -22,7 +22,7 @@ use crate::{
 pub fn fill_all_locations_reachable(
     world_graph: &mut WorldGraph, check_map: &mut CheckMap, progression_pool: &mut Pool,
     junk_pool: &mut Pool, settings: &Settings, rng: &mut StdRng,
-) -> Result<Vec<(LocationInfo, Item)>> {
+) -> Result<Vec<(LocationKey, Item)>> {
     verify_all_locations_accessible(world_graph, check_map, progression_pool, settings)?;
     handle_exclusions(check_map, settings, rng, junk_pool)?;
     preplace_items(check_map, settings, rng, progression_pool, junk_pool)?;
@@ -263,8 +263,8 @@ fn handle_exclusions(
 /// Super dirty mapping I hate it
 fn map_to_result(
     world_graph: &mut WorldGraph, check_map: &mut CheckMap,
-) -> Vec<(LocationInfo, Item)> {
-    let mut result: Vec<(LocationInfo, Item)> = Vec::new();
+) -> Vec<(LocationKey, Item)> {
+    let mut result: Vec<(LocationKey, Item)> = Vec::new();
     for location_node in world_graph.values_mut() {
         for check in location_node.clone().get_checks() {
             if let Some(loc_info) = check.get_location_info() {

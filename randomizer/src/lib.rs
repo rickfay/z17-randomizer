@@ -61,12 +61,12 @@ impl Error {
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Hash)]
-pub struct LocationInfo {
+pub struct LocationKey {
     area: Area,
     name: &'static str,
 }
 
-impl LocationInfo {
+impl LocationKey {
     pub const fn new(area: Area, name: &'static str) -> Self {
         Self { area, name }
     }
@@ -120,8 +120,8 @@ impl Layout {
         self.world_mut(area.world()).entry(area.name()).or_insert_with(Default::default)
     }
 
-    fn get(&self, location: &LocationInfo) -> Option<Item> {
-        let LocationInfo { area, name } = location;
+    fn get(&self, key: &LocationKey) -> Option<Item> {
+        let LocationKey { area, name } = key;
         self.world(area.world()).get(area.name()).and_then(|region| region.get(name).copied())
     }
 
@@ -160,8 +160,8 @@ impl Layout {
         None
     }
 
-    pub fn set(&mut self, location: LocationInfo, item: Item) {
-        let LocationInfo { area: node, name } = location;
+    pub fn set(&mut self, location: LocationKey, item: Item) {
+        let LocationKey { area: node, name } = location;
         self.get_area_mut(node).insert(name, item.normalize());
         debug!(
             "Placed {} in {}/{}",
@@ -599,7 +599,7 @@ fn calculate_seed_info<'s>(
     let (mut progression, mut junk) = item_pools::get_item_pools(settings, rng);
 
     // Filler Algorithm
-    let filled: Vec<(LocationInfo, Item)> = filler::fill_all_locations_reachable(
+    let filled: Vec<(LocationKey, Item)> = filler::fill_all_locations_reachable(
         world_graph, check_map, &mut progression, &mut junk, settings, rng,
     )?;
 
@@ -628,7 +628,7 @@ pub fn patch_seed(
 
         info!("ROM Loaded.\n");
 
-        regions::patch(&mut patcher, &seed_info.layout, seed_info.settings)?;
+        patcher.patch_locations(&seed_info.layout, seed_info.settings)?;
         let patches = patcher.prepare(seed_info)?;
         patches.dump(user_config.output())?;
     }

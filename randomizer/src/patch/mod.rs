@@ -14,7 +14,11 @@ use serde::Serialize;
 use tempfile::tempdir;
 use try_insert_ext::EntryInsertExt;
 
-use crate::{patch::util::*, Error, ItemExt, Result, SeedInfo, Settings};
+use crate::{
+    patch::util::*,
+    regions::{self, Location, Shop},
+    Error, ItemExt, Layout, Result, SeedInfo, Settings,
+};
 
 use code::Code;
 
@@ -255,24 +259,38 @@ impl Patcher {
         Ok(())
     }
 
-    fn apply(&mut self, patch: Patch, item: Item, settings: &Settings) -> Result<()> {
-        match patch {
-            Patch::Chest { course, stage, unq } => {
+    pub fn patch_locations(&mut self, layout: &Layout, settings: &Settings) -> Result<()> {
+        let regions = regions::dungeons::regions()
+            .chain(regions::hyrule::regions())
+            .chain(regions::lorule::regions());
+        for locations in regions {
+            for (key, location) in locations {
+                if let Some(item) = layout.get(&key) {
+                    self.apply(location, item, settings)?;
+                }
+            }
+        }
+        Ok(())
+    }
+
+    fn apply(&mut self, location: Location, item: Item, settings: &Settings) -> Result<()> {
+        match location {
+            Location::Chest { course, stage, unq } => {
                 self.prep_chest(item, course, stage, unq, false, settings)?;
             }
-            Patch::BigChest { course, stage, unq } => {
+            Location::BigChest { course, stage, unq } => {
                 self.prep_chest(item, course, stage, unq, true, settings)?;
             }
-            Patch::Heart { course, scene, unq }
-            | Patch::Key { course, scene, unq }
-            | Patch::SilverRupee { course, scene, unq }
-            | Patch::GoldRupee { course, scene, unq } => {
+            Location::Heart { course, scene, unq }
+            | Location::Key { course, scene, unq }
+            | Location::SilverRupee { course, scene, unq }
+            | Location::GoldRupee { course, scene, unq } => {
                 self.parse_args(course, scene, unq).1 = item as i32;
             }
-            Patch::Maiamai { course, scene, unq } => {
+            Location::Maiamai { course, scene, unq } => {
                 self.parse_args(course, scene, unq).2 = item as i32;
             }
-            Patch::Event { course, name, index } => {
+            Location::Event { course, name, index } => {
                 self.flow(course)?
                     .get_mut(name)
                     .ok_or_else(|| Error::new("File not found."))??
@@ -290,18 +308,18 @@ impl Patcher {
                     .ok_or_else(|| Error::new("Not an action."))?
                     .set_value(item as u32);
             }
-            Patch::Shop(Shop::Ravio(index)) => {
+            Location::Shop(Shop::Ravio(index)) => {
                 self.rentals[index as usize] = item;
             }
-            Patch::Shop(Shop::Merchant(index)) => {
+            Location::Shop(Shop::Merchant(index)) => {
                 self.merchant[index as usize] = item;
             }
-            Patch::Multi(patches) => {
+            Location::Multi(patches) => {
                 for patch in patches {
                     self.apply(patch, item, settings)?;
                 }
             }
-            Patch::None => {}
+            Location::None => {}
         }
         Ok(())
     }
@@ -407,33 +425,6 @@ pub struct Course {
     language: Language,
     scenes: HashMap<u16, Scene>,
     scene_meta: Option<SceneMeta>,
-}
-
-#[derive(Clone, Debug)]
-pub enum Patch {
-    Chest { course: Id, stage: u16, unq: u16 },
-    BigChest { course: Id, stage: u16, unq: u16 },
-    Event { course: Option<Id>, name: &'static str, index: u16 },
-    Heart { course: Id, scene: u16, unq: u16 },
-    Key { course: Id, scene: u16, unq: u16 },
-    Maiamai { course: Id, scene: u16, unq: u16 },
-    SilverRupee { course: Id, scene: u16, unq: u16 },
-    GoldRupee { course: Id, scene: u16, unq: u16 },
-    Shop(Shop),
-    Multi(Vec<Patch>),
-    None, // Workaround until everything is shufflable
-}
-
-impl Patch {
-    pub fn apply(self, patcher: &mut Patcher, item: Item, settings: &Settings) -> Result<()> {
-        patcher.apply(self, item, settings)
-    }
-}
-
-#[derive(Clone, Debug)]
-pub enum Shop {
-    Ravio(u8),
-    Merchant(u8),
 }
 
 #[derive(Debug)]

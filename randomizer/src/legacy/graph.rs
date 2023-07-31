@@ -1,15 +1,15 @@
-use crate::{regions::Area, LocationInfo};
+use crate::{regions::Area, LocationKey};
 
 pub trait Graph {}
 
 #[derive(Clone, Debug)]
 pub enum Node {
-    Location(LocationInfo),
+    Location(LocationKey),
     Path(Area),
 }
 
-impl From<LocationInfo> for Node {
-    fn from(location: LocationInfo) -> Self {
+impl From<LocationKey> for Node {
+    fn from(location: LocationKey) -> Self {
         Self::Location(location)
     }
 }

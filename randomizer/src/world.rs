@@ -10,7 +10,7 @@ use {
         },
         regions,
         FillerItem::{self, *},
-        LocationInfo,
+        LocationKey,
     },
     log::info,
     std::collections::HashMap,
@@ -57,22 +57,22 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             location(
                 "Ravio's Shop",
                 vec![
-                    check_free(LocationInfo::new(regions::hyrule::field::main::AREA, "Ravio (1)")),
-                    check_free(LocationInfo::new(regions::hyrule::field::main::AREA, "Ravio (2)")),
-                    check_free(LocationInfo::new(regions::hyrule::field::main::AREA, "Ravio (3)")),
-                    check_free(LocationInfo::new(regions::hyrule::field::main::AREA, "Ravio (4)")),
-                    check_free(LocationInfo::new(regions::hyrule::field::main::AREA, "Ravio (5)")),
+                    check_free(LocationKey::new(regions::hyrule::field::main::AREA, "Ravio (1)")),
+                    check_free(LocationKey::new(regions::hyrule::field::main::AREA, "Ravio (2)")),
+                    check_free(LocationKey::new(regions::hyrule::field::main::AREA, "Ravio (3)")),
+                    check_free(LocationKey::new(regions::hyrule::field::main::AREA, "Ravio (4)")),
+                    check_free(LocationKey::new(regions::hyrule::field::main::AREA, "Ravio (5)")),
                     check(
-                        LocationInfo::new(regions::hyrule::field::main::AREA, "Ravio (6)"),
+                        LocationKey::new(regions::hyrule::field::main::AREA, "Ravio (6)"),
                         Some(|p| p.has_sage_osfala()),
                         None,
                         None,
                         None,
                         None,
                     ),
-                    check_free(LocationInfo::new(regions::hyrule::field::main::AREA, "Ravio (7)")),
-                    check_free(LocationInfo::new(regions::hyrule::field::main::AREA, "Ravio (8)")),
-                    check_free(LocationInfo::new(regions::hyrule::field::main::AREA, "Ravio (9)")),
+                    check_free(LocationKey::new(regions::hyrule::field::main::AREA, "Ravio (7)")),
+                    check_free(LocationKey::new(regions::hyrule::field::main::AREA, "Ravio (8)")),
+                    check_free(LocationKey::new(regions::hyrule::field::main::AREA, "Ravio (9)")),
                 ],
                 vec![
                     path_free(HyruleField),
@@ -85,7 +85,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             location(
                 "Chamber of Sages",
                 vec![check(
-                    LocationInfo::new(regions::lorule::chamber::sages::AREA, "Osfala"),
+                    LocationKey::new(regions::lorule::chamber::sages::AREA, "Osfala"),
                     Some(|p| p.has_sage_osfala()),
                     None,
                     None,
@@ -115,12 +115,12 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             location(
                 "Hyrule Field",
                 vec![
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::graveyards::hyrule::AREA,
                         "Dampe",
                     )),
                     check(
-                        LocationInfo::new(regions::hyrule::irene::witch::AREA, "Irene"),
+                        LocationKey::new(regions::hyrule::irene::witch::AREA, "Irene"),
                         Some(|p| {
                             if p.is_rse() {
                                 p.has_sage_irene()
@@ -134,7 +134,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::graveyards::hyrule::AREA,
                             "Sanctuary Pegs",
                         ),
@@ -145,7 +145,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(regions::hyrule::field::main::AREA, "Behind Blacksmith"),
+                        LocationKey::new(regions::hyrule::field::main::AREA, "Behind Blacksmith"),
                         Some(|p| p.can_merge()),
                         None,
                         Some(|p| p.has_fire_rod() || p.has_nice_bombs()),
@@ -153,10 +153,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                         Some(|_| true), // Bee Boosting
                     ),
                     check(
-                        LocationInfo::new(
-                            regions::hyrule::field::main::AREA,
-                            "Hyrule Castle Rocks",
-                        ),
+                        LocationKey::new(regions::hyrule::field::main::AREA, "Hyrule Castle Rocks"),
                         Some(|p| p.has_power_glove()),
                         None,
                         None,
@@ -164,7 +161,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::hyrule::field::main::AREA,
                             "Wildlife Clearing Stump",
                         ),
@@ -175,7 +172,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::hyrule::southern::ruins::AREA,
                             "Southern Ruins Ledge",
                         ),
@@ -187,7 +184,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                     ),
                     // Lake Hylia
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::hyrule::lake::hylia::AREA,
                             "Lake Hylia Ledge Chest",
                         ),
@@ -198,7 +195,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(regions::hyrule::lake::hylia::AREA, "Southeastern Shore"),
+                        LocationKey::new(regions::hyrule::lake::hylia::AREA, "Southeastern Shore"),
                         Some(|p| p.has_flippers()),
                         None,
                         Some(|p| p.has_fire_rod() || p.has_nice_bombs()),
@@ -206,7 +203,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                         Some(|_| true), // Bee Boosting
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::hyrule::lost::woods::AREA,
                             "Hyrule Hotfoot (First Race)",
                         ),
@@ -217,7 +214,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::hyrule::lost::woods::AREA,
                             "Hyrule Hotfoot (Second Race)",
                         ),
@@ -228,7 +225,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                         Some(|_| true), // Can just walk it
                     ),
                     check(
-                        LocationInfo::new(regions::hyrule::eastern::ruins::AREA, "Bird Lover"),
+                        LocationKey::new(regions::hyrule::eastern::ruins::AREA, "Bird Lover"),
                         Some(|p| p.has_flippers()),
                         None,
                         None,
@@ -236,12 +233,12 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     // Kakariko Village
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::hyrule::kakariko::village::AREA,
                         "Street Merchant (Left)",
                     )),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::hyrule::kakariko::village::AREA,
                             "Street Merchant (Right)",
                         ),
@@ -252,27 +249,27 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(regions::hyrule::kakariko::village::AREA, "Shady Guy"),
+                        LocationKey::new(regions::hyrule::kakariko::village::AREA, "Shady Guy"),
                         Some(|p| p.has_shady_guy_trigger() && (p.can_merge() || p.has_boots())),
                         None,
                         None,
                         None,
                         None,
                     ),
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::hyrule::kakariko::village::AREA,
                         "Dodge the Cuccos",
                     )),
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::hyrule::kakariko::village::AREA,
                         "Rupee Rush (Hyrule)",
                     )),
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::hyrule::kakariko::village::AREA,
                         "[Mai] Kakariko Bush",
                     )),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::hyrule::lost::woods::AREA,
                             "[Mai] Lost Woods Path Rock",
                         ),
@@ -286,7 +283,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::hyrule::lost::woods::AREA,
                             "[Mai] Fortune-Teller Tent",
                         ),
@@ -297,7 +294,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::hyrule::kakariko::village::AREA,
                             "[Mai] Woman's Roof Rock",
                         ),
@@ -318,7 +315,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                     ),
                     // Eastern Ruins
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::hyrule::eastern::ruins::AREA,
                             "Eastern Ruins Peg Circle",
                         ),
@@ -330,7 +327,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                     ),
                     // Maiamai
                     check(
-                        LocationInfo::new(regions::hyrule::lost::woods::AREA, "[Mai] Rosso Wall"),
+                        LocationKey::new(regions::hyrule::lost::woods::AREA, "[Mai] Rosso Wall"),
                         Some(|p| p.can_merge()),
                         None,
                         None,
@@ -338,7 +335,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(regions::hyrule::lost::woods::AREA, "[Mai] Small Pond"),
+                        LocationKey::new(regions::hyrule::lost::woods::AREA, "[Mai] Small Pond"),
                         Some(|p| p.has_flippers()),
                         None,
                         None,
@@ -346,7 +343,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::graveyards::hyrule::AREA,
                             "[Mai] Sanctuary Wall",
                         ),
@@ -357,7 +354,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::hyrule::field::main::AREA,
                             "[Mai] Tree Behind Blacksmith",
                         ),
@@ -368,7 +365,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::hyrule::lost::woods::AREA,
                             "[Mai] Lost Woods Tree",
                         ),
@@ -379,7 +376,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::hyrule::field::main::AREA,
                             "[Mai] Hyrule Castle Tree",
                         ),
@@ -390,7 +387,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::hyrule::field::main::AREA,
                             "[Mai] Hyrule Castle Tornado Tile",
                         ),
@@ -401,7 +398,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::hyrule::zora::river::AREA,
                             "[Mai] Under Wooden Bridge",
                         ),
@@ -412,7 +409,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                         Some(|p| p.has_boots()), // bee boost fake flippers
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::hyrule::eastern::ruins::AREA,
                             "[Mai] Eastern Ruins Wall",
                         ),
@@ -423,7 +420,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::hyrule::eastern::ruins::AREA,
                             "[Mai] Eastern Ruins Yellow Tree",
                         ),
@@ -434,7 +431,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::hyrule::eastern::ruins::AREA,
                             "[Mai] Eastern Ruins Green Tree",
                         ),
@@ -445,7 +442,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::hyrule::eastern::ruins::AREA,
                             "[Mai] Eastern Ruins Big Rock",
                         ),
@@ -456,7 +453,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::hyrule::field::main::AREA,
                             "[Mai] Blacksmith Tornado Tile",
                         ),
@@ -467,7 +464,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::hyrule::eastern::ruins::AREA,
                             "[Mai] Atop Eastern Rocks",
                         ),
@@ -478,7 +475,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::hyrule::kakariko::village::AREA,
                             "[Mai] Hyrule Rupee Rush Wall",
                         ),
@@ -489,7 +486,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::hyrule::kakariko::village::AREA,
                             "[Mai] Cucco Ranch Tree",
                         ),
@@ -500,7 +497,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::hyrule::field::main::AREA,
                             "[Mai] Wildlife Clearing Tree",
                         ),
@@ -511,7 +508,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::hyrule::field::main::AREA,
                             "[Mai] Tree West of Link's House",
                         ),
@@ -522,7 +519,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::hyrule::field::main::AREA,
                             "[Mai] Behind Link's House",
                         ),
@@ -533,7 +530,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::hyrule::eastern::ruins::AREA,
                             "[Mai] Southern Bridge River",
                         ),
@@ -544,7 +541,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                         Some(|p| p.has_boots()), // bee boost fake flippers
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::hyrule::southern::ruins::AREA,
                             "[Mai] Southern Ruins Pillars",
                         ),
@@ -555,7 +552,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::hyrule::southern::ruins::AREA,
                             "[Mai] Outside Flippers Dungeon",
                         ),
@@ -566,7 +563,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::hyrule::lake::hylia::AREA,
                             "[Mai] Outside Maiamai Cave",
                         ),
@@ -577,7 +574,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::hyrule::lake::hylia::AREA,
                             "[Mai] Lake Hylia SE Wall",
                         ),
@@ -588,7 +585,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::hyrule::lake::hylia::AREA,
                             "[Mai] Hyrule Hotfoot Big Rock",
                         ),
@@ -599,7 +596,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::hyrule::desert::mystery::AREA,
                             "[Mai] Southern Ruins Big Rock",
                         ),
@@ -610,7 +607,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::hyrule::lake::hylia::AREA,
                             "[Mai] Lake Hylia Shallow Ring",
                         ),
@@ -829,43 +826,43 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             location(
                 "Mother Maiamai Cave",
                 vec![
-                    check_unreachable(LocationInfo::new(
+                    check_unreachable(LocationKey::new(
                         regions::hyrule::lake::hylia::AREA,
                         " 10 Maiamai",
                     )),
-                    check_unreachable(LocationInfo::new(
+                    check_unreachable(LocationKey::new(
                         regions::hyrule::lake::hylia::AREA,
                         " 20 Maiamai",
                     )),
-                    check_unreachable(LocationInfo::new(
+                    check_unreachable(LocationKey::new(
                         regions::hyrule::lake::hylia::AREA,
                         " 30 Maiamai",
                     )),
-                    check_unreachable(LocationInfo::new(
+                    check_unreachable(LocationKey::new(
                         regions::hyrule::lake::hylia::AREA,
                         " 40 Maiamai",
                     )),
-                    check_unreachable(LocationInfo::new(
+                    check_unreachable(LocationKey::new(
                         regions::hyrule::lake::hylia::AREA,
                         " 50 Maiamai",
                     )),
-                    check_unreachable(LocationInfo::new(
+                    check_unreachable(LocationKey::new(
                         regions::hyrule::lake::hylia::AREA,
                         " 60 Maiamai",
                     )),
-                    check_unreachable(LocationInfo::new(
+                    check_unreachable(LocationKey::new(
                         regions::hyrule::lake::hylia::AREA,
                         " 70 Maiamai",
                     )),
-                    check_unreachable(LocationInfo::new(
+                    check_unreachable(LocationKey::new(
                         regions::hyrule::lake::hylia::AREA,
                         " 80 Maiamai",
                     )),
-                    check_unreachable(LocationInfo::new(
+                    check_unreachable(LocationKey::new(
                         regions::hyrule::lake::hylia::AREA,
                         " 90 Maiamai",
                     )),
-                    check_unreachable(LocationInfo::new(
+                    check_unreachable(LocationKey::new(
                         regions::hyrule::lake::hylia::AREA,
                         "100 Maiamai",
                     )),
@@ -878,7 +875,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             location(
                 "Woman's House",
                 vec![check(
-                    LocationInfo::new(regions::hyrule::kakariko::village::AREA, "Woman"),
+                    LocationKey::new(regions::hyrule::kakariko::village::AREA, "Woman"),
                     Some(|p| p.has_woman_roof_maiamai()),
                     None,
                     None,
@@ -901,7 +898,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             location(
                 "Cucco House Rear",
                 vec![check(
-                    LocationInfo::new(
+                    LocationKey::new(
                         regions::hyrule::kakariko::village::AREA,
                         "[Mai] Kakariko Sand",
                     ),
@@ -919,7 +916,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             location(
                 "Waterfall Ledge",
                 vec![check(
-                    LocationInfo::new(
+                    LocationKey::new(
                         regions::hyrule::zora::river::AREA,
                         "[Mai] Waterfall Ledge Wall",
                     ),
@@ -948,7 +945,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             location(
                 "Cucco Dungeon Ledge",
                 vec![check(
-                    LocationInfo::new(
+                    LocationKey::new(
                         regions::hyrule::field::main::AREA,
                         "[Mai] Cucco Dungeon Big Rock",
                     ),
@@ -970,7 +967,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             CuccoDungeon,
             location(
                 "Cucco Treasure Dungeon",
-                vec![check_free(LocationInfo::new(
+                vec![check_free(LocationKey::new(
                     regions::hyrule::field::main::AREA,
                     "Cucco Treasure Dungeon",
                 ))],
@@ -984,7 +981,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                 vec![
                     check_quest_free("Access Potion Shop", AccessPotionShop),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::hyrule::zora::river::AREA,
                             "[Mai] Inside Witch's House",
                         ),
@@ -1003,12 +1000,12 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             location(
                 "Eastern Ruins Upper",
                 vec![
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::hyrule::eastern::ruins::AREA,
                         "Eastern Ruins Armos Chest",
                     )),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::hyrule::eastern::ruins::AREA,
                             "Eastern Ruins Hookshot Chest",
                         ),
@@ -1019,7 +1016,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::hyrule::eastern::ruins::AREA,
                             "Eastern Ruins Merge Chest",
                         ),
@@ -1074,7 +1071,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             location(
                 "Zora's Domain",
                 vec![check(
-                    LocationInfo::new(regions::hyrule::zora::river::AREA, "Queen Oren"),
+                    LocationKey::new(regions::hyrule::zora::river::AREA, "Queen Oren"),
                     Some(|p| p.has_smooth_gem() && (!p.is_rse() || p.has_sage_oren())),
                     None,
                     None,
@@ -1099,10 +1096,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
-                            regions::hyrule::zora::river::AREA,
-                            "Zora's Domain Ledge",
-                        ),
+                        LocationKey::new(regions::hyrule::zora::river::AREA, "Zora's Domain Ledge"),
                         Some(|p| p.can_merge()),
                         None,
                         None,
@@ -1110,7 +1104,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::hyrule::zora::river::AREA,
                             "[Mai] Zora's Domain Water",
                         ),
@@ -1121,7 +1115,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::hyrule::zora::river::AREA,
                             "[Mai] Zora's Domain South Wall",
                         ),
@@ -1166,7 +1160,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             WaterfallCave,
             location(
                 "Waterfall Cave",
-                vec![check_free(LocationInfo::new(
+                vec![check_free(LocationKey::new(
                     regions::hyrule::zora::river::AREA,
                     "Waterfall Cave",
                 ))],
@@ -1178,7 +1172,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             location(
                 "Eastern Ruins Treasure Dungeon",
                 vec![check(
-                    LocationInfo::new(
+                    LocationKey::new(
                         regions::hyrule::eastern::ruins::AREA,
                         "Eastern Ruins Treasure Dungeon",
                     ),
@@ -1196,7 +1190,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             location(
                 "Eastern Ruins Bomb Cave Upper",
                 vec![check(
-                    LocationInfo::new(regions::hyrule::eastern::ruins::AREA, "Eastern Ruins Cave"),
+                    LocationKey::new(regions::hyrule::eastern::ruins::AREA, "Eastern Ruins Cave"),
                     Some(|p| p.can_merge()),
                     None,
                     None,
@@ -1226,7 +1220,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                 "House of Gales Island",
                 vec![
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::hyrule::lake::hylia::AREA,
                             "[Mai] Island Tornado Tile",
                         ),
@@ -1258,7 +1252,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                 "Rosso's House",
                 vec![
                     check(
-                        LocationInfo::new(regions::hyrule::lost::woods::AREA, "Rosso"),
+                        LocationKey::new(regions::hyrule::lost::woods::AREA, "Rosso"),
                         Some(|p| {
                             if p.is_rse() {
                                 p.has_sage_rosso()
@@ -1272,7 +1266,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(regions::hyrule::lost::woods::AREA, "Rosso Rocks"),
+                        LocationKey::new(regions::hyrule::lost::woods::AREA, "Rosso Rocks"),
                         Some(|p| {
                             p.has_power_glove()
                                 && if p.is_rse() {
@@ -1297,7 +1291,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             RossoCave,
             location(
                 "Rosso Cave",
-                vec![check_free(LocationInfo::new(
+                vec![check_free(LocationKey::new(
                     regions::hyrule::lost::woods::AREA,
                     "Rosso Cave",
                 ))],
@@ -1309,7 +1303,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             location(
                 "Zora's River Treasure Dungeon",
                 vec![check(
-                    LocationInfo::new(
+                    LocationKey::new(
                         regions::hyrule::zora::river::AREA,
                         "Zora's River Treasure Dungeon",
                     ),
@@ -1327,7 +1321,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             location(
                 "Graveyard Ledge",
                 vec![check(
-                    LocationInfo::new(
+                    LocationKey::new(
                         regions::dungeons::graveyards::hyrule::AREA,
                         "[Mai] Hyrule Graveyard Wall",
                     ),
@@ -1349,7 +1343,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             GraveyardLedgeCave,
             location(
                 "Graveyard Ledge Cave",
-                vec![check_free(LocationInfo::new(
+                vec![check_free(LocationKey::new(
                     regions::dungeons::graveyards::hyrule::AREA,
                     "Graveyard Ledge Cave",
                 ))],
@@ -1361,12 +1355,12 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             location(
                 "Blacksmith's House (Hyrule)",
                 vec![
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::hyrule::field::main::AREA,
                         "Blacksmith Table",
                     )),
                     check(
-                        LocationInfo::new(regions::hyrule::field::main::AREA, "Blacksmith"),
+                        LocationKey::new(regions::hyrule::field::main::AREA, "Blacksmith"),
                         Some(|p| p.has_master_ore(2)),
                         None,
                         None,
@@ -1382,7 +1376,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             BlacksmithCave,
             location(
                 "Blacksmith Cave",
-                vec![check_free(LocationInfo::new(
+                vec![check_free(LocationKey::new(
                     regions::hyrule::field::main::AREA,
                     "Blacksmith Cave",
                 ))],
@@ -1423,7 +1417,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             location(
                 "Hyrule Castle Interior",
                 vec![
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::hyrule::castle::AREA,
                         "Hyrule Castle Prize",
                     )),
@@ -1440,7 +1434,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             HyruleCastleLeftRoom,
             location(
                 "Hyrule Castle Left Room",
-                vec![check_free(LocationInfo::new(
+                vec![check_free(LocationKey::new(
                     regions::dungeons::hyrule::castle::AREA,
                     "Hyrule Castle West Wing",
                 ))],
@@ -1451,7 +1445,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             HyruleCastleRoof,
             location(
                 "Hyrule Castle Roof",
-                vec![check_free(LocationInfo::new(
+                vec![check_free(LocationKey::new(
                     regions::dungeons::hyrule::castle::AREA,
                     "Hyrule Castle Battlement",
                 ))],
@@ -1477,7 +1471,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                 "Lost Woods",
                 vec![
                     check(
-                        LocationInfo::new(regions::hyrule::lost::woods::AREA, "Lost Woods Alcove"),
+                        LocationKey::new(regions::hyrule::lost::woods::AREA, "Lost Woods Alcove"),
                         Some(|p| p.can_merge()),
                         None,
                         Some(|p| {
@@ -1488,7 +1482,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                         Some(|p| p.has_boomerang() || (p.not_nice_mode() && p.has_hookshot())), // Use Crow to escape
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::hyrule::lost::woods::AREA,
                             "Lost Woods Big Rock Chest",
                         ),
@@ -1498,12 +1492,12 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                         None,
                         Some(|p| p.has_boomerang() || (p.not_nice_mode() && p.has_hookshot())), // Use Crow to escape
                     ),
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::hyrule::lost::woods::AREA,
                         "[Mai] Lost Woods Bush",
                     )),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::hyrule::lost::woods::AREA,
                             "[Mai] Lost Woods Rock",
                         ),
@@ -1532,7 +1526,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             MasterSwordArea,
             location(
                 "Master Sword Area",
-                vec![check_free(LocationInfo::new(
+                vec![check_free(LocationKey::new(
                     regions::hyrule::lost::woods::AREA,
                     "Master Sword Pedestal",
                 ))],
@@ -1543,7 +1537,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             FortuneTeller,
             location(
                 "Fortune-Teller (Hyrule)",
-                vec![check_free(LocationInfo::new(
+                vec![check_free(LocationKey::new(
                     regions::hyrule::lost::woods::AREA,
                     "Fortune-Teller",
                 ))],
@@ -1555,7 +1549,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             location(
                 "Kakariko Jail Cell",
                 vec![check(
-                    LocationInfo::new(regions::hyrule::kakariko::village::AREA, "Kakariko Jail"),
+                    LocationKey::new(regions::hyrule::kakariko::village::AREA, "Kakariko Jail"),
                     Some(|p| p.can_merge()),
                     None,
                     None,
@@ -1569,7 +1563,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             WellUpper,
             location(
                 "Kakariko Well Upper",
-                vec![check_free(LocationInfo::new(
+                vec![check_free(LocationKey::new(
                     regions::hyrule::kakariko::village::AREA,
                     "Kakariko Well (Top)",
                 ))],
@@ -1580,7 +1574,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             WellLower,
             location(
                 "Kakariko Well Lower",
-                vec![check_free(LocationInfo::new(
+                vec![check_free(LocationKey::new(
                     regions::hyrule::kakariko::village::AREA,
                     "Kakariko Well (Bottom)",
                 ))],
@@ -1592,7 +1586,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             location(
                 "Stylish Woman's House",
                 vec![
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::hyrule::kakariko::village::AREA,
                         "Stylish Woman",
                     )),
@@ -1615,7 +1609,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                 "Bee Guy's House",
                 vec![
                     check(
-                        LocationInfo::new(regions::hyrule::kakariko::village::AREA, "Bee Guy (1)"),
+                        LocationKey::new(regions::hyrule::kakariko::village::AREA, "Bee Guy (1)"),
                         Some(|p| p.has_bottle()),
                         None,
                         None,
@@ -1623,7 +1617,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(regions::hyrule::kakariko::village::AREA, "Bee Guy (2)"),
+                        LocationKey::new(regions::hyrule::kakariko::village::AREA, "Bee Guy (2)"),
                         Some(|p| p.has_bottle() && p.has_gold_bee()),
                         None,
                         None,
@@ -1639,15 +1633,15 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             location(
                 "Kakariko Item Shop",
                 vec![
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::hyrule::kakariko::village::AREA,
                         "Kakariko Item Shop (1)",
                     )),
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::hyrule::kakariko::village::AREA,
                         "Kakariko Item Shop (2)",
                     )),
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::hyrule::kakariko::village::AREA,
                         "Kakariko Item Shop (3)",
                     )),
@@ -1660,15 +1654,15 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             location(
                 "Lakeside Item Shop",
                 vec![
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::hyrule::lake::hylia::AREA,
                         "Lakeside Item Shop (1)",
                     )),
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::hyrule::lake::hylia::AREA,
                         "Lakeside Item Shop (2)",
                     )),
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::hyrule::lake::hylia::AREA,
                         "Lakeside Item Shop (3)",
                     )),
@@ -1681,10 +1675,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             location(
                 "Runaway Item-Seller Cave",
                 vec![check(
-                    LocationInfo::new(
-                        regions::hyrule::southern::ruins::AREA,
-                        "Runaway Item Seller",
-                    ),
+                    LocationKey::new(regions::hyrule::southern::ruins::AREA, "Runaway Item Seller"),
                     Some(|p| p.has_scoot_fruit()),
                     None,
                     None,
@@ -1699,7 +1690,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             location(
                 "Southern Ruins Treasure Dungeon",
                 vec![check(
-                    LocationInfo::new(
+                    LocationKey::new(
                         regions::hyrule::southern::ruins::AREA,
                         "Southern Ruins Treasure Dungeon",
                     ),
@@ -1721,7 +1712,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             location(
                 "Southern Ruins Bomb Cave",
                 vec![check(
-                    LocationInfo::new(
+                    LocationKey::new(
                         regions::hyrule::southern::ruins::AREA,
                         "[Mai] Southern Ruins Bomb Cave",
                     ),
@@ -1738,7 +1729,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             SouthernRuinsPillars,
             location(
                 "Southern Ruins Pillars",
-                vec![check_free(LocationInfo::new(
+                vec![check_free(LocationKey::new(
                     regions::hyrule::southern::ruins::AREA,
                     "Southern Ruins Pillar Cave",
                 ))],
@@ -1750,7 +1741,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             location(
                 "Lake Hylia Dark Cave",
                 vec![check(
-                    LocationInfo::new(regions::hyrule::lake::hylia::AREA, "Lake Hylia Dark Cave"),
+                    LocationKey::new(regions::hyrule::lake::hylia::AREA, "Lake Hylia Dark Cave"),
                     Some(|p| p.has_fire_source()),
                     None,
                     None,
@@ -1764,7 +1755,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             IceRodCave,
             location(
                 "Ice Rod Cave",
-                vec![check_free(LocationInfo::new(
+                vec![check_free(LocationKey::new(
                     regions::hyrule::lake::hylia::AREA,
                     "Ice Rod Cave",
                 ))],
@@ -1794,12 +1785,12 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             location(
                 "Sanctuary",
                 vec![
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::graveyards::hyrule::AREA,
                         "[HS] Entrance",
                     )),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::graveyards::hyrule::AREA,
                             "[HS] Lower Chest",
                         ),
@@ -1810,7 +1801,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::graveyards::hyrule::AREA,
                             "[HS] Upper Chest",
                         ),
@@ -1821,10 +1812,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
-                            regions::dungeons::graveyards::hyrule::AREA,
-                            "[HS] Ledge",
-                        ),
+                        LocationKey::new(regions::dungeons::graveyards::hyrule::AREA, "[HS] Ledge"),
                         Some(|p| {
                             p.can_merge() && (p.has_lamp() || (p.has_fire_rod() && p.lampless()))
                         }),
@@ -1892,7 +1880,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             location(
                 "Moldorm Ledge",
                 vec![check(
-                    LocationInfo::new(regions::hyrule::lost::woods::AREA, "[Mai] Moldorm Ledge"),
+                    LocationKey::new(regions::hyrule::lost::woods::AREA, "[Mai] Moldorm Ledge"),
                     Some(|p| p.can_merge()),
                     None,
                     None,
@@ -1907,7 +1895,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             location(
                 "Death Mountain Base",
                 vec![check(
-                    LocationInfo::new(
+                    LocationKey::new(
                         regions::hyrule::death::mountain::AREA,
                         "[Mai] Death Mountain Base Rock",
                     ),
@@ -1939,7 +1927,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             DeathBombCave,
             location(
                 "Death Mountain Blocked Cave",
-                vec![check_free(LocationInfo::new(
+                vec![check_free(LocationKey::new(
                     regions::hyrule::death::mountain::AREA,
                     "Death Mountain Blocked Cave",
                 ))],
@@ -1950,7 +1938,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             DeathWeatherVaneCaveLeft,
             location(
                 "Death Mountain Cave Left of Weather Vane",
-                vec![check_free(LocationInfo::new(
+                vec![check_free(LocationKey::new(
                     regions::hyrule::death::mountain::AREA,
                     "Death Mountain Open Cave",
                 ))],
@@ -1962,7 +1950,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             location(
                 "Death Mountain Fairy Cave",
                 vec![check(
-                    LocationInfo::new(
+                    LocationKey::new(
                         regions::hyrule::death::mountain::AREA,
                         "Death Mountain Fairy Cave",
                     ),
@@ -1998,7 +1986,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             location(
                 "Donkey Cave Upper",
                 vec![check(
-                    LocationInfo::new(regions::hyrule::death::mountain::AREA, "Donkey Cave Pegs"),
+                    LocationKey::new(regions::hyrule::death::mountain::AREA, "Donkey Cave Pegs"),
                     Some(|p| p.has_hammer()),
                     None,
                     None,
@@ -2024,12 +2012,12 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             location(
                 "Death Mountain West Ledge",
                 vec![
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::hyrule::death::mountain::AREA,
                         "Death Mountain West Ledge",
                     )),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::hyrule::death::mountain::AREA,
                             "[Mai] Death Mountain West Ledge",
                         ),
@@ -2106,7 +2094,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             AmidaCaveUpper,
             location(
                 "Amida Cave Upper",
-                vec![check_free(LocationInfo::new(
+                vec![check_free(LocationKey::new(
                     regions::hyrule::death::mountain::AREA,
                     "Death Mountain West Highest Cave",
                 ))],
@@ -2142,7 +2130,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             SpectacleRock,
             location(
                 "Spectacle Rock",
-                vec![check_free(LocationInfo::new(
+                vec![check_free(LocationKey::new(
                     regions::hyrule::death::mountain::AREA,
                     "Spectacle Rock",
                 ))],
@@ -2194,7 +2182,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                 "Death Mountain East Top",
                 vec![
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::hyrule::death::mountain::AREA,
                             "[Mai] Outside Hookshot Dungeon",
                         ),
@@ -2236,7 +2224,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             location(
                 "Death Mountain Treasure Dungeon",
                 vec![check(
-                    LocationInfo::new(
+                    LocationKey::new(
                         regions::hyrule::death::mountain::AREA,
                         "Death Mountain Treasure Dungeon",
                     ),
@@ -2262,7 +2250,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             location(
                 "Fire Cave Center",
                 vec![check(
-                    LocationInfo::new(regions::hyrule::death::mountain::AREA, "Fire Cave Pillar"),
+                    LocationKey::new(regions::hyrule::death::mountain::AREA, "Fire Cave Pillar"),
                     Some(|p| p.can_merge() && p.has_hammer()),
                     None,
                     None,
@@ -2314,7 +2302,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             location(
                 "Bouldering Guy Bottom Ledge",
                 vec![check(
-                    LocationInfo::new(
+                    LocationKey::new(
                         regions::hyrule::death::mountain::AREA,
                         "[Mai] Death Mountain East Ledge",
                     ),
@@ -2333,7 +2321,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                 "Bouldering Guy Right Ledge",
                 vec![
                     check(
-                        LocationInfo::new(regions::hyrule::death::mountain::AREA, "Bouldering Guy"),
+                        LocationKey::new(regions::hyrule::death::mountain::AREA, "Bouldering Guy"),
                         Some(|p| {
                             p.has_premium_milk()
                                 || (p.has_letter_in_a_bottle() && p.can_access_milk_bar())
@@ -2369,7 +2357,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             location(
                 "Rosso's Ore Mine",
                 vec![check(
-                    LocationInfo::new(
+                    LocationKey::new(
                         regions::hyrule::death::mountain::AREA,
                         "[Mai] Rosso's Ore Mine Rock",
                     ),
@@ -2390,7 +2378,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             FloatingIslandHyrule,
             location(
                 "Hyrule Floating Island",
-                vec![check_free(LocationInfo::new(
+                vec![check_free(LocationKey::new(
                     regions::hyrule::death::mountain::AREA,
                     "Floating Island",
                 ))],
@@ -2427,21 +2415,21 @@ fn lorule() -> HashMap<Location, LocationNode> {
             location(
                 "Lorule Castle Field",
                 vec![
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::lorule::field::main::AREA,
                         "Rupee Rush (Lorule)",
                     )),
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::lorule::field::main::AREA,
                         "Octoball Derby",
                     )),
                     check_quest_free("Access Hilda Barrier", AccessLoruleCastleField),
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::lorule::field::main::AREA,
                         "Fortune's Choice",
                     )),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::lorule::field::main::AREA,
                             "[Mai] Lorule Castle Wall",
                         ),
@@ -2452,7 +2440,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::lorule::field::main::AREA,
                             "[Mai] Lorule Castle Tree",
                         ),
@@ -2463,7 +2451,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::lorule::field::main::AREA,
                             "[Mai] Thieves' Town Wall",
                         ),
@@ -2474,7 +2462,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::lorule::field::main::AREA,
                             "[Mai] Near Lorule Fortune-Teller",
                         ),
@@ -2485,7 +2473,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::lorule::field::main::AREA,
                             "[Mai] Lorule Blacksmith Wall",
                         ),
@@ -2496,7 +2484,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::lorule::field::main::AREA,
                             "[Mai] Lorule Rupee Rush Wall",
                         ),
@@ -2507,7 +2495,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::lorule::field::main::AREA,
                             "[Mai] Octoball Derby Skull",
                         ),
@@ -2518,7 +2506,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::lorule::field::main::AREA,
                             "[Mai] Vacant House Big Rock",
                         ),
@@ -2529,7 +2517,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::lorule::field::main::AREA,
                             "[Mai] Behind Vacant House",
                         ),
@@ -2540,7 +2528,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::lorule::field::main::AREA,
                             "[Mai] Lorule S Ruins Pillars",
                         ),
@@ -2551,7 +2539,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::lorule::field::main::AREA,
                             "[Mai] Lorule S Ruins Wall",
                         ),
@@ -2562,7 +2550,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::lorule::field::main::AREA,
                             "[Mai] Lorule S Ruins Water",
                         ),
@@ -2573,7 +2561,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::lorule::field::main::AREA,
                             "[Mai] Thieves' Town Tree",
                         ),
@@ -2670,19 +2658,19 @@ fn lorule() -> HashMap<Location, LocationNode> {
             location(
                 "Thieves' Town Item Shop",
                 vec![
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::lorule::field::main::AREA,
                         "Thieves' Town Item Shop (1)",
                     )),
-                    check_unreachable(LocationInfo::new(
+                    check_unreachable(LocationKey::new(
                         regions::lorule::field::main::AREA,
                         "Thieves' Town Item Shop (2)",
                     )),
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::lorule::field::main::AREA,
                         "Thieves' Town Item Shop (3)",
                     )),
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::lorule::field::main::AREA,
                         "Thieves' Town Item Shop (4)",
                     )),
@@ -2704,7 +2692,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                 "Big Bomb Flower Field",
                 vec![
                     check_quest_free("Obtain Big Bomb Flower", BigBombFlower),
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::lorule::field::main::AREA,
                         "[Mai] Big Bomb Flower Grass",
                     )),
@@ -2721,12 +2709,12 @@ fn lorule() -> HashMap<Location, LocationNode> {
             location(
                 "Lorule Graveyard",
                 vec![
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::graveyards::lorule::AREA,
                         "Graveyard Peninsula",
                     )),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::graveyards::lorule::AREA,
                             "[Mai] Lorule Graveyard Big Rock",
                         ),
@@ -2737,7 +2725,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::graveyards::lorule::AREA,
                             "[Mai] Lorule Graveyard Wall",
                         ),
@@ -2748,7 +2736,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::graveyards::lorule::AREA,
                             "[Mai] Lorule Graveyard Tree",
                         ),
@@ -2797,7 +2785,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                 "Lorule Sanctuary",
                 vec![
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::graveyards::lorule::AREA,
                             "[LS] Entrance Chest",
                         ),
@@ -2808,7 +2796,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::graveyards::lorule::AREA,
                             "[LS] Lower Chest",
                         ),
@@ -2819,7 +2807,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::graveyards::lorule::AREA,
                             "[LS] Upper Chest",
                         ),
@@ -2830,10 +2818,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
-                            regions::dungeons::graveyards::lorule::AREA,
-                            "[LS] Ledge",
-                        ),
+                        LocationKey::new(regions::dungeons::graveyards::lorule::AREA, "[LS] Ledge"),
                         Some(|p| {
                             p.can_merge() && (p.has_lamp() || (p.has_fire_rod() && p.lampless()))
                         }),
@@ -2873,7 +2858,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
             location(
                 "Philosopher's Cave Upper",
                 vec![check(
-                    LocationInfo::new(
+                    LocationKey::new(
                         regions::dungeons::graveyards::lorule::AREA,
                         "Philosopher's Cave",
                     ),
@@ -2891,7 +2876,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
             location(
                 "Great Rupee Fairy Cave",
                 vec![check(
-                    LocationInfo::new(regions::lorule::field::main::AREA, "Great Rupee Fairy"),
+                    LocationKey::new(regions::lorule::field::main::AREA, "Great Rupee Fairy"),
                     Some(|p| p.has_rupees(4000)), // Actual requirement is 3000 but higher threshold helps prevent rupee grinds
                     None,
                     None,
@@ -2906,7 +2891,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
             location(
                 "Lorule Blacksmith",
                 vec![check(
-                    LocationInfo::new(regions::lorule::field::main::AREA, "Blacksmith (Lorule)"),
+                    LocationKey::new(regions::lorule::field::main::AREA, "Blacksmith (Lorule)"),
                     Some(|p| {
                         p.has_master_ore(4)
                             && p.can_access_hyrule_blacksmith()
@@ -2925,7 +2910,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
             location(
                 "Lorule Field Treasure Dungeon",
                 vec![check(
-                    LocationInfo::new(
+                    LocationKey::new(
                         regions::lorule::field::main::AREA,
                         "Lorule Field Treasure Dungeon",
                     ),
@@ -2946,7 +2931,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
             VacantHouseTop,
             location(
                 "Vacant House (Top)",
-                vec![check_free(LocationInfo::new(
+                vec![check_free(LocationKey::new(
                     regions::lorule::field::main::AREA,
                     "Vacant House",
                 ))],
@@ -2965,7 +2950,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
             location(
                 "Thief Girl",
                 vec![check(
-                    LocationInfo::new(regions::lorule::field::main::AREA, "Thief Girl"),
+                    LocationKey::new(regions::lorule::field::main::AREA, "Thief Girl"),
                     Some(|p| p.has_sage_osfala()),
                     None,
                     None,
@@ -2980,15 +2965,15 @@ fn lorule() -> HashMap<Location, LocationNode> {
             location(
                 "Swamp Cave",
                 vec![
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::lorule::field::main::AREA,
                         "Swamp Cave (Left)",
                     )),
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::lorule::field::main::AREA,
                         "Swamp Cave (Middle)",
                     )),
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::lorule::field::main::AREA,
                         "Swamp Cave (Right)",
                     )),
@@ -3000,7 +2985,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
             BigBombCave,
             location(
                 "Haunted Grove Big Bomb Cave",
-                vec![check_free(LocationInfo::new(
+                vec![check_free(LocationKey::new(
                     regions::lorule::field::main::AREA,
                     "Big Bomb Flower Cave",
                 ))],
@@ -3013,7 +2998,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                 "Haunted Grove Upper Ledge",
                 vec![
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::lorule::field::main::AREA,
                             "Lorule Field Hookshot Chest",
                         ),
@@ -3024,7 +3009,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::lorule::field::main::AREA,
                             "[Mai] Lorule Haunted Grove Wall",
                         ),
@@ -3045,7 +3030,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                 "Desert",
                 vec![
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::hyrule::desert::mystery::AREA,
                             "[Mai] Buried in the Desert",
                         ),
@@ -3124,7 +3109,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
             location(
                 "Desert Palace Weather Vane",
                 vec![check(
-                    LocationInfo::new(
+                    LocationKey::new(
                         regions::hyrule::desert::mystery::AREA,
                         "[Mai] Buried near Desert Palace",
                     ),
@@ -3147,7 +3132,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                 "Misery Mire",
                 vec![
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::lorule::misery::mire::AREA,
                             "[Mai] Misery Mire Wall",
                         ),
@@ -3158,7 +3143,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::lorule::misery::mire::AREA,
                             "[Mai] Misery Mire Water",
                         ),
@@ -3169,7 +3154,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::lorule::misery::mire::AREA,
                             "[Mai] Misery Mire Big Rock",
                         ),
@@ -3254,7 +3239,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
             location(
                 "Misery Mire Treasure Dungeon",
                 vec![check(
-                    LocationInfo::new(
+                    LocationKey::new(
                         regions::lorule::misery::mire::AREA,
                         "Misery Mire Treasure Dungeon",
                     ),
@@ -3271,7 +3256,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
             MiseryMireLedge,
             location(
                 "Misery Mire Ledge",
-                vec![check_free(LocationInfo::new(
+                vec![check_free(LocationKey::new(
                     regions::lorule::misery::mire::AREA,
                     "Misery Mire Ledge",
                 ))],
@@ -3285,7 +3270,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                 "Lorule Lake East",
                 vec![
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::lorule::lake::lorule::AREA,
                             "[Mai] Lorule Lake SE Wall",
                         ),
@@ -3296,7 +3281,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::lorule::lake::lorule::AREA,
                             "[Mai] Lorule Lake Skull",
                         ),
@@ -3343,12 +3328,12 @@ fn lorule() -> HashMap<Location, LocationNode> {
                         None,
                         None,
                     ),
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::lorule::lake::lorule::AREA,
                         "Lorule Lake Chest",
                     )),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::lorule::lake::lorule::AREA,
                             "[Mai] Lorule Lake West Wall",
                         ),
@@ -3376,7 +3361,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                 vec![
                     check_quest_free("Turtle (flipped)", TurtleFlipped),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::lorule::lake::lorule::AREA,
                             "[Mai] Lorule Lake Big Rock",
                         ),
@@ -3398,19 +3383,19 @@ fn lorule() -> HashMap<Location, LocationNode> {
             location(
                 "Lorule Lakeside Item Shop",
                 vec![
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::lorule::lake::lorule::AREA,
                         "Lorule Lakeside Item Shop (1)",
                     )),
-                    check_unreachable(LocationInfo::new(
+                    check_unreachable(LocationKey::new(
                         regions::lorule::lake::lorule::AREA,
                         "Lorule Lakeside Item Shop (2)",
                     )),
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::lorule::lake::lorule::AREA,
                         "Lorule Lakeside Item Shop (3)",
                     )),
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::lorule::lake::lorule::AREA,
                         "Lorule Lakeside Item Shop (4)",
                     )),
@@ -3433,7 +3418,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                         None,
                         None,
                     ),
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::lorule::lake::lorule::AREA,
                         "[Mai] Lorule Lake Water",
                     )),
@@ -3508,12 +3493,12 @@ fn lorule() -> HashMap<Location, LocationNode> {
             location(
                 "Dark Ruins",
                 vec![
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::lorule::dark::ruins::AREA,
                         "Dark Ruins Lakeview Chest",
                     )),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::lorule::dark::ruins::AREA,
                             "[Mai] Dark Ruins Waterfall",
                         ),
@@ -3524,7 +3509,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                         Some(|p| p.has_boots()),
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::lorule::dark::ruins::AREA,
                             "[Mai] Dark Maze Entrance Wall",
                         ),
@@ -3535,7 +3520,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::lorule::dark::ruins::AREA,
                             "[Mai] Atop Dark Ruins Rocks",
                         ),
@@ -3546,7 +3531,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::lorule::dark::ruins::AREA,
                             "[Mai] Dark Ruins West Tree",
                         ),
@@ -3557,7 +3542,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::lorule::dark::ruins::AREA,
                             "[Mai] Dark Ruins East Tree",
                         ),
@@ -3568,7 +3553,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::lorule::dark::ruins::AREA,
                             "[Mai] Dark Ruins South Area Wall",
                         ),
@@ -3612,7 +3597,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
             location(
                 "Dark Maze Entrance",
                 vec![check(
-                    LocationInfo::new(regions::lorule::dark::ruins::AREA, "Dark Maze Chest"),
+                    LocationKey::new(regions::lorule::dark::ruins::AREA, "Dark Maze Chest"),
                     Some(|p| p.can_merge() || p.has_sage_gulley()),
                     None,
                     None,
@@ -3645,12 +3630,12 @@ fn lorule() -> HashMap<Location, LocationNode> {
             location(
                 "Dark Maze Halfway",
                 vec![
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::lorule::dark::ruins::AREA,
                         "Dark Maze Ledge",
                     )),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::lorule::dark::ruins::AREA,
                             "[Mai] Dark Maze Center Wall",
                         ),
@@ -3734,10 +3719,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
             location(
                 "Ku's Domain South",
                 vec![check(
-                    LocationInfo::new(
-                        regions::lorule::dark::ruins::AREA,
-                        "[Mai] Ku's Domain Grass",
-                    ),
+                    LocationKey::new(regions::lorule::dark::ruins::AREA, "[Mai] Ku's Domain Grass"),
                     Some(|p| p.can_merge() && p.can_cut_grass()),
                     None,
                     None,
@@ -3781,7 +3763,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                 "Ku's Domain",
                 vec![
                     check(
-                        LocationInfo::new(regions::lorule::dark::ruins::AREA, "Ku's Domain Fight"),
+                        LocationKey::new(regions::lorule::dark::ruins::AREA, "Ku's Domain Fight"),
                         Some(|p| {
                             p.has_bow()
                                 || p.has_bombs()
@@ -3795,7 +3777,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::lorule::dark::ruins::AREA,
                             "[Mai] Ku's Domain Water",
                         ),
@@ -3815,7 +3797,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                 "Hinox Cave Water",
                 vec![
                     // This location assumes the player is already swimming, real or fake
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::lorule::dark::ruins::AREA,
                         "[Mai] Outside Hinox Cave",
                     )),
@@ -3841,12 +3823,12 @@ fn lorule() -> HashMap<Location, LocationNode> {
             location(
                 "Hinox Cave",
                 vec![
-                    check_free(LocationInfo::new(regions::lorule::dark::ruins::AREA, "Hinox (1)")),
-                    check_free(LocationInfo::new(regions::lorule::dark::ruins::AREA, "Hinox (2)")),
-                    check_free(LocationInfo::new(regions::lorule::dark::ruins::AREA, "Hinox (3)")),
-                    check_free(LocationInfo::new(regions::lorule::dark::ruins::AREA, "Hinox (4)")),
-                    check_free(LocationInfo::new(regions::lorule::dark::ruins::AREA, "Hinox (5)")),
-                    check_free(LocationInfo::new(regions::lorule::dark::ruins::AREA, "Hinox (6)")),
+                    check_free(LocationKey::new(regions::lorule::dark::ruins::AREA, "Hinox (1)")),
+                    check_free(LocationKey::new(regions::lorule::dark::ruins::AREA, "Hinox (2)")),
+                    check_free(LocationKey::new(regions::lorule::dark::ruins::AREA, "Hinox (3)")),
+                    check_free(LocationKey::new(regions::lorule::dark::ruins::AREA, "Hinox (4)")),
+                    check_free(LocationKey::new(regions::lorule::dark::ruins::AREA, "Hinox (5)")),
+                    check_free(LocationKey::new(regions::lorule::dark::ruins::AREA, "Hinox (6)")),
                 ],
                 vec![path_free(HinoxCaveShallowWater)],
             ),
@@ -3858,19 +3840,19 @@ fn lorule() -> HashMap<Location, LocationNode> {
                 "Skull Woods (Overworld)",
                 vec![
                     check(
-                        LocationInfo::new(regions::lorule::skull::overworld::AREA, "Canyon House"),
+                        LocationKey::new(regions::lorule::skull::overworld::AREA, "Canyon House"),
                         Some(|p| p.can_merge()),
                         None,
                         None,
                         Some(|p| p.has_boomerang() || (p.not_nice_mode() && p.has_hookshot())), // portal clip through house
                         None,
                     ),
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::lorule::skull::overworld::AREA,
                         "Destroyed House",
                     )),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::lorule::skull::overworld::AREA,
                             "[Mai] Skull Woods Grass",
                         ),
@@ -3881,7 +3863,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::lorule::skull::overworld::AREA,
                             "[Mai] Skull Woods Skull",
                         ),
@@ -3892,7 +3874,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::lorule::skull::overworld::AREA,
                             "[Mai] Skull Woods Shack Tree",
                         ),
@@ -3902,12 +3884,12 @@ fn lorule() -> HashMap<Location, LocationNode> {
                         None,
                         None,
                     ),
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::lorule::skull::overworld::AREA,
                         "[Mai] Skull Woods Bush",
                     )),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::lorule::skull::overworld::AREA,
                             "[Mai] Skull Woods Big Rock",
                         ),
@@ -3918,7 +3900,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::lorule::skull::overworld::AREA,
                             "[Mai] Skull Woods Entrance Wall",
                         ),
@@ -3929,7 +3911,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::lorule::skull::overworld::AREA,
                             "[Mai] Skull Woods Dry Pond",
                         ),
@@ -3940,7 +3922,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::lorule::skull::overworld::AREA,
                             "[Mai] Canyon House Wall",
                         ),
@@ -3967,7 +3949,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
             location(
                 "Mysterious Man Cave",
                 vec![check(
-                    LocationInfo::new(regions::lorule::skull::overworld::AREA, "Mysterious Man"),
+                    LocationKey::new(regions::lorule::skull::overworld::AREA, "Mysterious Man"),
                     Some(|p| p.has_bottle()),
                     None,
                     None,
@@ -3984,10 +3966,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                 "Lorule Death Mountain West",
                 vec![
                     check(
-                        LocationInfo::new(
-                            regions::lorule::death::mountain::AREA,
-                            "Ice Gimos Fight",
-                        ),
+                        LocationKey::new(regions::lorule::death::mountain::AREA, "Ice Gimos Fight"),
                         Some(|p| p.can_defeat_margomill()),
                         None,
                         None,
@@ -3995,7 +3974,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::lorule::death::mountain::AREA,
                             "Lorule Mountain W Ledge",
                         ),
@@ -4006,7 +3985,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                         Some(|p| p.has_bombs()),
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::lorule::death::mountain::AREA,
                             "Treacherous Tower Intermediate",
                         ),
@@ -4023,16 +4002,16 @@ fn lorule() -> HashMap<Location, LocationNode> {
                         None,
                         None,
                     ),
-                    check_unreachable(LocationInfo::new(
+                    check_unreachable(LocationKey::new(
                         regions::lorule::death::mountain::AREA,
                         "Treacherous Tower Advanced (1)",
                     )),
-                    check_unreachable(LocationInfo::new(
+                    check_unreachable(LocationKey::new(
                         regions::lorule::death::mountain::AREA,
                         "Treacherous Tower Advanced (2)",
                     )),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::lorule::death::mountain::AREA,
                             "[Mai] Lorule Mountain W Skull",
                         ),
@@ -4043,7 +4022,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::lorule::death::mountain::AREA,
                             "[Mai] Lorule Mountain W Big Rock",
                         ),
@@ -4054,7 +4033,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                         Some(|p| p.has_titans_mitt() && p.has_bombs()),
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::lorule::death::mountain::AREA,
                             "[Mai] Lorule Mountain E Big Rock",
                         ),
@@ -4088,7 +4067,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
             location(
                 "Rosso's Ore Mine Lorule",
                 vec![check(
-                    LocationInfo::new(
+                    LocationKey::new(
                         regions::lorule::death::mountain::AREA,
                         "[Mai] Lorule Mountain E Wall",
                     ),
@@ -4203,7 +4182,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
             location(
                 "Lorule Death Mountain East Upper Ledge",
                 vec![check(
-                    LocationInfo::new(
+                    LocationKey::new(
                         regions::lorule::death::mountain::AREA,
                         "Lorule Mountain E Ledge",
                     ),
@@ -4225,7 +4204,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
             location(
                 "Lorule Death Mountain East Lower Ledge",
                 vec![check(
-                    LocationInfo::new(
+                    LocationKey::new(
                         regions::lorule::death::mountain::AREA,
                         "[Mai] Lorule Mountain E Skull",
                     ),
@@ -4244,7 +4223,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                 "Lorule Death Mountain East Top",
                 vec![
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::lorule::death::mountain::AREA,
                             "Behind Ice Gimos",
                         ),
@@ -4255,7 +4234,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::lorule::death::mountain::AREA,
                             "[Mai] Outside Ice Ruins",
                         ),
@@ -4285,7 +4264,7 @@ fn eastern_palace() -> HashMap<Location, LocationNode> {
             location(
                 "Eastern Palace",
                 vec![check(
-                    LocationInfo::new(
+                    LocationKey::new(
                         regions::dungeons::eastern::palace::AREA,
                         "[EP] (1F) Merge Chest",
                     ),
@@ -4314,7 +4293,7 @@ fn eastern_palace() -> HashMap<Location, LocationNode> {
                 "Eastern Palace 1F",
                 vec![
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::eastern::palace::AREA,
                             "[EP] (1F) Left Door Chest",
                         ),
@@ -4325,7 +4304,7 @@ fn eastern_palace() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::eastern::palace::AREA,
                             "[EP] (1F) Popo Room",
                         ),
@@ -4336,7 +4315,7 @@ fn eastern_palace() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::eastern::palace::AREA,
                             "[EP] (1F) Secret Room",
                         ),
@@ -4347,7 +4326,7 @@ fn eastern_palace() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::eastern::palace::AREA,
                             "[EP] (1F) Switch Room",
                         ),
@@ -4409,7 +4388,7 @@ fn eastern_palace() -> HashMap<Location, LocationNode> {
                 "Eastern Palace 2F",
                 vec![
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::eastern::palace::AREA,
                             "[EP] (2F) Defeat Popos",
                         ),
@@ -4419,12 +4398,12 @@ fn eastern_palace() -> HashMap<Location, LocationNode> {
                         None,
                         None,
                     ),
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::eastern::palace::AREA,
                         "[EP] (2F) Ball Room",
                     )),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::eastern::palace::AREA,
                             "[EP] (2F) Switch Room",
                         ),
@@ -4435,7 +4414,7 @@ fn eastern_palace() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::eastern::palace::AREA,
                             "[EP] (2F) Big Chest",
                         ),
@@ -4496,15 +4475,15 @@ fn eastern_palace() -> HashMap<Location, LocationNode> {
             location(
                 "Eastern Palace Post Yuga",
                 vec![
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::eastern::palace::AREA,
                         "[EP] Yuga (1)",
                     )),
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::eastern::palace::AREA,
                         "[EP] Yuga (2)",
                     )),
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::eastern::palace::AREA,
                         "Eastern Palace Prize",
                     )),
@@ -4521,11 +4500,11 @@ fn eastern_palace() -> HashMap<Location, LocationNode> {
             location(
                 "Eastern Palace Escape",
                 vec![
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::eastern::palace::AREA,
                         "[EP] (3F) Escape Chest",
                     )),
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::eastern::palace::AREA,
                         "[EP] (1F) Escape Chest",
                     )),
@@ -4559,7 +4538,7 @@ fn house_of_gales() -> HashMap<Location, LocationNode> {
                 "House of Gales East 1F",
                 vec![
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::house::gales::AREA,
                             "[HG] (1F) Torches",
                         ),
@@ -4570,7 +4549,7 @@ fn house_of_gales() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::house::gales::AREA,
                             "[HG] (1F) Switch Room",
                         ),
@@ -4581,7 +4560,7 @@ fn house_of_gales() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::house::gales::AREA,
                             "[HG] (1F) Fire Bubbles",
                         ),
@@ -4610,12 +4589,12 @@ fn house_of_gales() -> HashMap<Location, LocationNode> {
             location(
                 "House of Gales West 1F",
                 vec![
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::house::gales::AREA,
                         "[HG] (1F) West Room",
                     )),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::house::gales::AREA,
                             "[HG] (1F) West Room Secret",
                         ),
@@ -4645,7 +4624,7 @@ fn house_of_gales() -> HashMap<Location, LocationNode> {
                 "House of Gales 2F",
                 vec![
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::house::gales::AREA,
                             "[HG] (2F) Narrow Ledge",
                         ),
@@ -4655,12 +4634,12 @@ fn house_of_gales() -> HashMap<Location, LocationNode> {
                         None,
                         None,
                     ),
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::house::gales::AREA,
                         "[HG] (2F) Big Chest",
                     )),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::house::gales::AREA,
                             "[HG] (2F) Fire Ring",
                         ),
@@ -4700,7 +4679,7 @@ fn house_of_gales() -> HashMap<Location, LocationNode> {
                 "House of Gales 3F",
                 vec![
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::house::gales::AREA,
                             "[HG] (3F) Fire Bubbles",
                         ),
@@ -4711,7 +4690,7 @@ fn house_of_gales() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::house::gales::AREA,
                             "[HG] (3F) Rat Room",
                         ),
@@ -4755,11 +4734,11 @@ fn house_of_gales() -> HashMap<Location, LocationNode> {
             location(
                 "Margomill Defeated",
                 vec![
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::house::gales::AREA,
                         "[HG] Margomill",
                     )),
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::house::gales::AREA,
                         "House of Gales Prize",
                     )),
@@ -4791,10 +4770,7 @@ fn tower_of_hera() -> HashMap<Location, LocationNode> {
                 "Tower of Hera Bottom",
                 vec![
                     check(
-                        LocationInfo::new(
-                            regions::dungeons::tower::hera::AREA,
-                            "[TH] (1F) Outside",
-                        ),
+                        LocationKey::new(regions::dungeons::tower::hera::AREA, "[TH] (1F) Outside"),
                         Some(|p| p.can_merge()),
                         None,
                         None,
@@ -4802,7 +4778,7 @@ fn tower_of_hera() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(regions::dungeons::tower::hera::AREA, "[TH] (1F) Center"),
+                        LocationKey::new(regions::dungeons::tower::hera::AREA, "[TH] (1F) Center"),
                         Some(|p| p.can_merge()),
                         None,
                         None,
@@ -4810,7 +4786,7 @@ fn tower_of_hera() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::tower::hera::AREA,
                             "[TH] (3F) Platform",
                         ),
@@ -4839,15 +4815,15 @@ fn tower_of_hera() -> HashMap<Location, LocationNode> {
             location(
                 "Tower of Hera Middle",
                 vec![
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::tower::hera::AREA,
                         "[TH] (5F) Red/Blue Switches",
                     )),
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::tower::hera::AREA,
                         "[TH] (6F) Right Mole",
                     )),
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::tower::hera::AREA,
                         "[TH] (6F) Left Mole",
                     )),
@@ -4870,15 +4846,15 @@ fn tower_of_hera() -> HashMap<Location, LocationNode> {
             location(
                 "Tower of Hera Top",
                 vec![
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::tower::hera::AREA,
                         "[TH] (7F) Outside (Ledge)",
                     )),
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::tower::hera::AREA,
                         "[TH] (8F) Fairy Room",
                     )),
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::tower::hera::AREA,
                         "[TH] (11F) Big Chest",
                     )),
@@ -4909,11 +4885,11 @@ fn tower_of_hera() -> HashMap<Location, LocationNode> {
             location(
                 "Tower of Hera Post Boss",
                 vec![
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::tower::hera::AREA,
                         "[TH] Moldorm",
                     )),
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::tower::hera::AREA,
                         "Tower of Hera Prize",
                     )),
@@ -5011,12 +4987,12 @@ fn dark_palace() -> HashMap<Location, LocationNode> {
             location(
                 "Dark Palace Second Room",
                 vec![
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::dark::palace::AREA,
                         "[PD] (1F) Right Pit",
                     )),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::dark::palace::AREA,
                             "[PD] (1F) Left Pit",
                         ),
@@ -5038,32 +5014,32 @@ fn dark_palace() -> HashMap<Location, LocationNode> {
             location(
                 "Dark Palace",
                 vec![
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::dark::palace::AREA,
                         "[PD] (1F) Switch Puzzle",
                     )),
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::dark::palace::AREA,
                         "[PD] (1F) Hidden Room (Upper)",
                     )),
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::dark::palace::AREA,
                         "[PD] (1F) Hidden Room (Lower)",
                     )),
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::dark::palace::AREA,
                         "[PD] (B1) Fall From 1F",
                     )),
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::dark::palace::AREA,
                         "[PD] (B1) Helmasaur Room",
                     )),
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::dark::palace::AREA,
                         "[PD] (B1) Helmasaur Room (Fall)",
                     )),
                     check(
-                        LocationInfo::new(regions::dungeons::dark::palace::AREA, "[PD] (B1) Maze"),
+                        LocationKey::new(regions::dungeons::dark::palace::AREA, "[PD] (B1) Maze"),
                         Some(|p| p.can_merge()),
                         None,
                         None,
@@ -5089,30 +5065,27 @@ fn dark_palace() -> HashMap<Location, LocationNode> {
             location(
                 "Dark Palace Locked Doors",
                 vec![
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::dark::palace::AREA,
                         "[PD] (1F) Fall From 2F",
                     )),
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::dark::palace::AREA,
                         "[PD] (2F) Big Chest (Hidden)",
                     )),
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::dark::palace::AREA,
                         "[PD] (2F) South Hidden Room",
                     )),
                     check(
-                        LocationInfo::new(
-                            regions::dungeons::dark::palace::AREA,
-                            "[PD] (2F) Alcove",
-                        ),
+                        LocationKey::new(regions::dungeons::dark::palace::AREA, "[PD] (2F) Alcove"),
                         Some(|p| p.can_merge()),
                         None,
                         None,
                         None,
                         None,
                     ),
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::dark::palace::AREA,
                         "[PD] (B1) Big Chest (Switches)",
                     )),
@@ -5150,11 +5123,11 @@ fn dark_palace() -> HashMap<Location, LocationNode> {
             location(
                 "Dark Palace After Boss",
                 vec![
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::dark::palace::AREA,
                         "[PD] Gemesaur King",
                     )),
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::dark::palace::AREA,
                         "Dark Palace Prize",
                     )),
@@ -5237,32 +5210,32 @@ fn swamp_palace() -> HashMap<Location, LocationNode> {
             location(
                 "Swamp Palace",
                 vec![
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::swamp::palace::AREA,
                         "[SP] (B1) Center",
                     )),
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::swamp::palace::AREA,
                         "[SP] (B1) Waterfall Room",
                     )),
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::swamp::palace::AREA,
                         "[SP] (B1) Raft Room (Pillar)",
                     )),
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::swamp::palace::AREA,
                         "[SP] (B1) Raft Room (Right)",
                     )),
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::swamp::palace::AREA,
                         "[SP] (B1) Raft Room (Left)",
                     )),
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::swamp::palace::AREA,
                         "[SP] (B1) Gyorm",
                     )),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::swamp::palace::AREA,
                             "[SP] (B1) Big Chest (Secret)",
                         ),
@@ -5281,7 +5254,7 @@ fn swamp_palace() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::swamp::palace::AREA,
                             "[SP] (1F) West Room",
                         ),
@@ -5296,7 +5269,7 @@ fn swamp_palace() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::swamp::palace::AREA,
                             "[SP] (1F) East Room",
                         ),
@@ -5311,7 +5284,7 @@ fn swamp_palace() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::swamp::palace::AREA,
                             "[SP] (1F) Water Puzzle",
                         ),
@@ -5326,7 +5299,7 @@ fn swamp_palace() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::swamp::palace::AREA,
                             "[SP] (1F) Big Chest (Fire)",
                         ),
@@ -5372,11 +5345,11 @@ fn swamp_palace() -> HashMap<Location, LocationNode> {
             location(
                 "Swamp Palace Post Boss",
                 vec![
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::swamp::palace::AREA,
                         "[SP] Arrghus",
                     )),
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::swamp::palace::AREA,
                         "Swamp Palace Prize",
                     )),
@@ -5414,16 +5387,16 @@ fn skull_woods() -> HashMap<Location, LocationNode> {
             location(
                 "Skull Woods",
                 vec![
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::skull::woods::AREA,
                         "[SW] (B1) South Chest",
                     )),
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::skull::woods::AREA,
                         "[SW] (B1) Gibdo Room (Lower)",
                     )),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::skull::woods::AREA,
                             "[SW] (B1) Gibdo Room (Hole)",
                         ),
@@ -5434,7 +5407,7 @@ fn skull_woods() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::skull::woods::AREA,
                             "[SW] (B1) Grate Room",
                         ),
@@ -5494,7 +5467,7 @@ fn skull_woods() -> HashMap<Location, LocationNode> {
             SkullWoodsElevatorHallway,
             location(
                 "Skull Woods Elevator Hallway",
-                vec![check_free(LocationInfo::new(
+                vec![check_free(LocationKey::new(
                     regions::dungeons::skull::woods::AREA,
                     "[SW] (B2) Moving Platform Room",
                 ))],
@@ -5542,7 +5515,7 @@ fn skull_woods() -> HashMap<Location, LocationNode> {
             location(
                 "Skull Woods Boss Room",
                 vec![check(
-                    LocationInfo::new(regions::dungeons::skull::woods::AREA, "[SW] Knucklemaster"),
+                    LocationKey::new(regions::dungeons::skull::woods::AREA, "[SW] Knucklemaster"),
                     Some(|p| p.can_defeat_knucklemaster()),
                     None,
                     None,
@@ -5574,7 +5547,7 @@ fn skull_woods() -> HashMap<Location, LocationNode> {
             location(
                 "Skull Woods Seres Grove",
                 vec![
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::skull::woods::AREA,
                         "Skull Woods Prize",
                     )),
@@ -5600,7 +5573,7 @@ fn skull_woods() -> HashMap<Location, LocationNode> {
                 "Skull Woods East B1 North",
                 vec![
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::skull::woods::AREA,
                             "[SW] (B1) Big Chest (Eyes)",
                         ),
@@ -5674,7 +5647,7 @@ fn skull_woods() -> HashMap<Location, LocationNode> {
                 "Skull Woods East B1 South Ledges",
                 vec![
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::skull::woods::AREA,
                             "[SW] (B1) Big Chest (Upper)",
                         ),
@@ -5702,7 +5675,7 @@ fn skull_woods() -> HashMap<Location, LocationNode> {
             location(
                 "Skull Woods Outdoor Area 3",
                 vec![
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::skull::woods::AREA,
                         "Skull Woods Outdoor Chest",
                     )), // Do not use [SW] prefix
@@ -5726,12 +5699,12 @@ fn thieves_hideout() -> HashMap<Location, LocationNode> {
                 "Thieves' Hideout",
                 vec![
                     /* B1 */
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::thieves::hideout::AREA,
                         "[T'H] (B1) Grate Chest",
                     )),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::thieves::hideout::AREA,
                             "[T'H] (B1) Jail Cell",
                         ),
@@ -5756,7 +5729,7 @@ fn thieves_hideout() -> HashMap<Location, LocationNode> {
                     ),
                     /* B2 */
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::thieves::hideout::AREA,
                             "[T'H] (B2) Grate Chest (Fall)",
                         ),
@@ -5782,7 +5755,7 @@ fn thieves_hideout() -> HashMap<Location, LocationNode> {
                         Some(|p| p.has_bombs()),
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::thieves::hideout::AREA,
                             "[T'H] (B2) Jail Cell",
                         ),
@@ -5793,7 +5766,7 @@ fn thieves_hideout() -> HashMap<Location, LocationNode> {
                         Some(|p| p.hell_thieves_statue_clip() && p.has_tornado_rod()), // reach from B3 Out of Bounds
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::thieves::hideout::AREA,
                             "[T'H] (B2) Switch Puzzle Room",
                         ),
@@ -5804,7 +5777,7 @@ fn thieves_hideout() -> HashMap<Location, LocationNode> {
                         Some(|p| p.hell_thieves_statue_clip()),
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::thieves::hideout::AREA,
                             "[T'H] (B2) Eyegores",
                         ),
@@ -5851,7 +5824,7 @@ fn thieves_hideout() -> HashMap<Location, LocationNode> {
                         Some(|p| p.hell_thieves_statue_clip() && p.has_tornado_rod()),
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::thieves::hideout::AREA,
                             "[T'H] (B3) Underwater",
                         ),
@@ -5862,7 +5835,7 @@ fn thieves_hideout() -> HashMap<Location, LocationNode> {
                         Some(|p| p.hell_thieves_statue_clip() && p.has_tornado_rod()),
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::thieves::hideout::AREA,
                             "[T'H] (B3) Big Chest (Hidden)",
                         ),
@@ -5873,7 +5846,7 @@ fn thieves_hideout() -> HashMap<Location, LocationNode> {
                         Some(|p| p.hell_thieves_statue_clip() && p.has_tornado_rod()),
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::thieves::hideout::AREA,
                             "[T'H] (B1) Behind Wall",
                         ),
@@ -5888,7 +5861,7 @@ fn thieves_hideout() -> HashMap<Location, LocationNode> {
                         }),
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::thieves::hideout::AREA,
                             "[T'H] (B1) Big Chest (Entrance)",
                         ),
@@ -5944,11 +5917,11 @@ fn thieves_hideout() -> HashMap<Location, LocationNode> {
             location(
                 "Thieves' Hideout Post Boss",
                 vec![
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::thieves::hideout::AREA,
                         "Stalblind",
                     )),
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::thieves::hideout::AREA,
                         "Thieves' Hideout Prize",
                     )),
@@ -5980,28 +5953,28 @@ fn ice_ruins() -> HashMap<Location, LocationNode> {
             location(
                 "Ice Ruins",
                 vec![
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::ice::ruins::AREA,
                         "[IR] (1F) Hidden Chest",
                     )),
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::ice::ruins::AREA,
                         "[IR] (B4) Ice Pillar",
                     )),
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::ice::ruins::AREA,
                         "[IR] (B3) Grate Chest (Left)",
                     )),
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::ice::ruins::AREA,
                         "[IR] (B3) Grate Chest (Right)",
                     )),
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::ice::ruins::AREA,
                         "[IR] (B5) Big Chest",
                     )),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::ice::ruins::AREA,
                             "[IR] (B1) Narrow Ledge",
                         ),
@@ -6012,7 +5985,7 @@ fn ice_ruins() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::ice::ruins::AREA,
                             "[IR] (B1) East Chest",
                         ),
@@ -6023,7 +5996,7 @@ fn ice_ruins() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::ice::ruins::AREA,
                             "[IR] (B1) Upper Chest",
                         ),
@@ -6034,7 +6007,7 @@ fn ice_ruins() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::ice::ruins::AREA,
                             "[IR] (B2) Long Merge Chest",
                         ),
@@ -6045,7 +6018,7 @@ fn ice_ruins() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::ice::ruins::AREA,
                             "[IR] (B3) Big Chest (Puzzle)",
                         ),
@@ -6056,10 +6029,7 @@ fn ice_ruins() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
-                            regions::dungeons::ice::ruins::AREA,
-                            "[IR] (B4) Switches",
-                        ),
+                        LocationKey::new(regions::dungeons::ice::ruins::AREA, "[IR] (B4) Switches"),
                         Some(|p| {
                             p.has_ice_keys(2)
                                 && p.can_merge()
@@ -6078,7 +6048,7 @@ fn ice_ruins() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::ice::ruins::AREA,
                             "[IR] (B4) Southwest Chest (Fall)",
                         ),
@@ -6089,7 +6059,7 @@ fn ice_ruins() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::ice::ruins::AREA,
                             "[IR] (B4) Narrow Platform",
                         ),
@@ -6100,7 +6070,7 @@ fn ice_ruins() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::ice::ruins::AREA,
                             "[IR] (B4) Southeast Chest (Fall)",
                         ),
@@ -6144,11 +6114,11 @@ fn ice_ruins() -> HashMap<Location, LocationNode> {
             location(
                 "Ice Ruins Post Boss",
                 vec![
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::ice::ruins::AREA,
                         "[IR] Dharkstare",
                     )),
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::ice::ruins::AREA,
                         "Ice Ruins Prize",
                     )),
@@ -6168,10 +6138,7 @@ fn desert_palace() -> HashMap<Location, LocationNode> {
             location(
                 "Desert Palace Entrance",
                 vec![check(
-                    LocationInfo::new(
-                        regions::dungeons::desert::palace::AREA,
-                        "[DP] (1F) Entrance",
-                    ),
+                    LocationKey::new(regions::dungeons::desert::palace::AREA, "[DP] (1F) Entrance"),
                     Some(|p| p.has_sand_rod() && p.can_merge()),
                     None,
                     None,
@@ -6196,20 +6163,20 @@ fn desert_palace() -> HashMap<Location, LocationNode> {
             location(
                 "Desert Palace 1F",
                 vec![
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::desert::palace::AREA,
                         "[DP] (1F) Sand Switch Room",
                     )),
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::desert::palace::AREA,
                         "[DP] (1F) Sand Room (North)",
                     )),
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::desert::palace::AREA,
                         "[DP] (1F) Sand Room (South)",
                     )),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::desert::palace::AREA,
                             "[DP] (1F) Behind Rocks",
                         ),
@@ -6220,7 +6187,7 @@ fn desert_palace() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::desert::palace::AREA,
                             "[DP] (1F) Big Chest (Behind Wall)",
                         ),
@@ -6270,7 +6237,7 @@ fn desert_palace() -> HashMap<Location, LocationNode> {
                 "Desert Palace 2F",
                 vec![
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::desert::palace::AREA,
                             "[DP] (2F) Under Rock (Left)",
                         ),
@@ -6281,7 +6248,7 @@ fn desert_palace() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::desert::palace::AREA,
                             "[DP] (2F) Under Rock (Right)",
                         ),
@@ -6292,7 +6259,7 @@ fn desert_palace() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::desert::palace::AREA,
                             "[DP] (2F) Under Rock (Ball Room)",
                         ),
@@ -6302,16 +6269,16 @@ fn desert_palace() -> HashMap<Location, LocationNode> {
                         None,
                         None,
                     ),
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::desert::palace::AREA,
                         "[DP] (2F) Beamos Room",
                     )),
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::desert::palace::AREA,
                         "[DP] (2F) Red/Blue Switches",
                     )),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::desert::palace::AREA,
                             "[DP] (2F) Big Chest (Puzzle)",
                         ),
@@ -6322,7 +6289,7 @@ fn desert_palace() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::desert::palace::AREA,
                             "[DP] (2F) Leever Room",
                         ),
@@ -6359,12 +6326,12 @@ fn desert_palace() -> HashMap<Location, LocationNode> {
             location(
                 "Desert Palace 3F",
                 vec![
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::desert::palace::AREA,
                         "[DP] (3F) Behind Falling Sand",
                     )),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::desert::palace::AREA,
                             "[DP] (3F) Armos Room",
                         ),
@@ -6439,11 +6406,11 @@ fn desert_palace() -> HashMap<Location, LocationNode> {
             location(
                 "Misery Mire Reward Basket",
                 vec![
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::desert::palace::AREA,
                         "Zaganaga",
                     )), // Do not use [DP] prefix
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::desert::palace::AREA,
                         "Desert Palace Prize",
                     )),
@@ -6474,12 +6441,12 @@ fn turtle_rock() -> HashMap<Location, LocationNode> {
             location(
                 "Turtle Rock Main",
                 vec![
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::turtle::rock::AREA,
                         "[TR] (1F) Center",
                     )),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::turtle::rock::AREA,
                             "[TR] (1F) Northeast Ledge",
                         ),
@@ -6490,7 +6457,7 @@ fn turtle_rock() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::turtle::rock::AREA,
                             "[TR] (1F) Southeast Chest",
                         ),
@@ -6501,7 +6468,7 @@ fn turtle_rock() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::turtle::rock::AREA,
                             "[TR] (1F) Defeat Flamolas",
                         ),
@@ -6512,7 +6479,7 @@ fn turtle_rock() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::turtle::rock::AREA,
                             "[TR] (1F) Portal Room NW",
                         ),
@@ -6523,7 +6490,7 @@ fn turtle_rock() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::turtle::rock::AREA,
                             "[TR] (1F) Grate Chest",
                         ),
@@ -6533,12 +6500,12 @@ fn turtle_rock() -> HashMap<Location, LocationNode> {
                         None,
                         None,
                     ),
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::turtle::rock::AREA,
                         "[TR] (B1) Northeast Room",
                     )),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::turtle::rock::AREA,
                             "[TR] (B1) Grate Chest (Small)",
                         ),
@@ -6549,7 +6516,7 @@ fn turtle_rock() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::turtle::rock::AREA,
                             "[TR] (B1) Big Chest (Top)",
                         ),
@@ -6562,7 +6529,7 @@ fn turtle_rock() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::turtle::rock::AREA,
                             "[TR] (B1) Big Chest (Center)",
                         ),
@@ -6573,7 +6540,7 @@ fn turtle_rock() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::turtle::rock::AREA,
                             "[TR] (B1) Platform",
                         ),
@@ -6583,11 +6550,11 @@ fn turtle_rock() -> HashMap<Location, LocationNode> {
                         None,
                         None,
                     ),
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::turtle::rock::AREA,
                         "[TR] (1F) Under Center",
                     )),
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::turtle::rock::AREA,
                         "[TR] (B1) Under Center",
                     )),
@@ -6637,7 +6604,7 @@ fn turtle_rock() -> HashMap<Location, LocationNode> {
             location(
                 "Turtle Rock Left Balcony",
                 vec![
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::turtle::rock::AREA,
                         "Turtle Rock Left Balcony",
                     )), // Do not use [TR] prefix
@@ -6684,11 +6651,11 @@ fn turtle_rock() -> HashMap<Location, LocationNode> {
             location(
                 "Turtle Rock Post Boss",
                 vec![
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::turtle::rock::AREA,
                         "[TR] Grinexx",
                     )),
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::turtle::rock::AREA,
                         "Turtle Rock Prize",
                     )),
@@ -6727,7 +6694,7 @@ fn lorule_castle() -> HashMap<Location, LocationNode> {
             LoruleCastleEastLedge1F,
             location(
                 "Lorule Castle East Ledge 1F",
-                vec![check_free(LocationInfo::new(
+                vec![check_free(LocationKey::new(
                     regions::dungeons::lorule::castle::AREA,
                     "[LC] (1F) Ledge",
                 ))],
@@ -6738,7 +6705,7 @@ fn lorule_castle() -> HashMap<Location, LocationNode> {
             LoruleCastleCenter1F,
             location(
                 "Lorule Castle 1F Center",
-                vec![check_free(LocationInfo::new(
+                vec![check_free(LocationKey::new(
                     regions::dungeons::lorule::castle::AREA,
                     "[LC] (1F) Center",
                 ))],
@@ -6760,12 +6727,12 @@ fn lorule_castle() -> HashMap<Location, LocationNode> {
             location(
                 "Lorule Castle 2F 3F",
                 vec![
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::lorule::castle::AREA,
                         "[LC] (2F) Near Torches",
                     )),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::lorule::castle::AREA,
                             "[LC] (2F) Hidden Path",
                         ),
@@ -6776,7 +6743,7 @@ fn lorule_castle() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::lorule::castle::AREA,
                             "[LC] (2F) Ledge",
                         ),
@@ -6787,7 +6754,7 @@ fn lorule_castle() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::lorule::castle::AREA,
                             "[LC] (3F) Bomb Trial Center Chest",
                         ),
@@ -6798,7 +6765,7 @@ fn lorule_castle() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::lorule::castle::AREA,
                             "[LC] (3F) Big Bomb Flower Chest",
                         ),
@@ -6808,7 +6775,7 @@ fn lorule_castle() -> HashMap<Location, LocationNode> {
                         None,
                         None,
                     ),
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::lorule::castle::AREA,
                         "[LC] (3F) Merge Trial Free Chest",
                     )),
@@ -6822,7 +6789,7 @@ fn lorule_castle() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::lorule::castle::AREA,
                             "[LC] (3F) Spike Ball Chest",
                         ),
@@ -6877,7 +6844,7 @@ fn lorule_castle() -> HashMap<Location, LocationNode> {
                 "Lorule Castle 4F 5F",
                 vec![
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::lorule::castle::AREA,
                             "[LC] (4F) Lamp Trial Chest",
                         ),
@@ -6897,7 +6864,7 @@ fn lorule_castle() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::lorule::castle::AREA,
                             "[LC] (4F) Eyeball Chest",
                         ),
@@ -6908,7 +6875,7 @@ fn lorule_castle() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::lorule::castle::AREA,
                             "[LC] (4F) Lava Switch Chest",
                         ),
@@ -6927,12 +6894,12 @@ fn lorule_castle() -> HashMap<Location, LocationNode> {
                         None,
                         None,
                     ),
-                    check_free(LocationInfo::new(
+                    check_free(LocationKey::new(
                         regions::dungeons::lorule::castle::AREA,
                         "[LC] (4F) Center",
                     )),
                     check(
-                        LocationInfo::new(
+                        LocationKey::new(
                             regions::dungeons::lorule::castle::AREA,
                             "[LC] (4F) Hidden Path",
                         ),
@@ -6959,7 +6926,7 @@ fn lorule_castle() -> HashMap<Location, LocationNode> {
             location(
                 "Throne Room",
                 vec![check(
-                    LocationInfo::new(regions::dungeons::lorule::castle::AREA, "Zelda"),
+                    LocationKey::new(regions::dungeons::lorule::castle::AREA, "Zelda"),
                     Some(|p| {
                         p.has_yuganon_requirement()
                             && (p.has_sword() || (p.swordless_mode() && p.has_net()))
@@ -7001,7 +6968,7 @@ fn location(name: &'static str, checks: Vec<Check>, paths: Vec<Path>) -> Locatio
 }
 
 fn check(
-    location_info: LocationInfo, normal: Option<fn(&Progress) -> bool>,
+    location_info: LocationKey, normal: Option<fn(&Progress) -> bool>,
     hard: Option<fn(&Progress) -> bool>, glitched: Option<fn(&Progress) -> bool>,
     adv_glitched: Option<fn(&Progress) -> bool>, hell: Option<fn(&Progress) -> bool>,
 ) -> Check {
@@ -7013,11 +6980,11 @@ fn check(
     )
 }
 
-fn check_free(location_info: LocationInfo) -> Check {
+fn check_free(location_info: LocationKey) -> Check {
     Check::new(location_info.name, Logic::free(), None, Some(location_info))
 }
 
-fn check_unreachable(location_info: LocationInfo) -> Check {
+fn check_unreachable(location_info: LocationKey) -> Check {
     Check::new(
         location_info.name,
         Logic { normal: None, hard: None, glitched: None, adv_glitched: None, hell: None },

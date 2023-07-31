@@ -3,9 +3,9 @@ use std::{
     hash::{Hash, Hasher},
 };
 
-use log::info;
+use albw::course::Id;
 
-use crate::{hints::hint_color::HintColor, patch::Patcher, Settings};
+use crate::hints::hint_color::HintColor;
 
 pub struct AreaInfo {
     name: &'static str,
@@ -63,146 +63,26 @@ pub enum Group {
     Dungeons,
 }
 
-// macro_rules! regions {
-//     ($($world:ident($variant:ident) {
-//         $($region:ident;)+
-//     })+) => {
-//         use crate::patch::Patcher;
-//
-//         $(pub(crate) mod $world {
-//             pub const WORLD: super::World = super::World::$variant;
-//             $(pub(crate) mod $region;)+
-//         })+
-//
-//         pub(crate) fn patch(patcher: &mut Patcher, layout: &crate::Layout, settings: &$crate::Settings) -> crate::Result<()> {
-//             $($($world::$region::patch(patcher, layout, settings)?;)+)+
-//             Ok(())
-//         }
-//     };
-// }
+macro_rules! regions {
+    ($($group:ident($variant:ident) {
+        $($region:ident;)+
+    })+) => {
+        $(pub mod $group {
+            use crate::LocationKey;
+            use super::Location;
 
-pub mod dungeons {
-    pub mod dark;
-    pub mod desert;
-    pub mod eastern;
-    pub mod graveyards;
-    pub mod house;
-    pub mod hyrule;
-    pub mod ice;
-    pub mod lorule;
-    pub mod skull;
-    pub mod swamp;
-    pub mod thieves;
-    pub mod tower;
-    pub mod turtle;
+            $(pub mod $region;)+
 
-    pub const GROUP: super::Group = super::Group::Dungeons;
+            pub fn regions() -> impl Iterator<Item = Box<dyn Iterator<Item = (LocationKey, Location)>>> {
+                [
+                    $(Box::new($region::locations()) as Box<_>,)+
+                ].into_iter()
+            }
+
+            pub const GROUP: super::Group = super::Group::$variant;
+        })+
+    };
 }
-
-pub mod hyrule {
-    pub mod death;
-    pub mod desert;
-    pub mod eastern;
-    pub mod field;
-    pub mod irene;
-    pub mod kakariko;
-    pub mod lake;
-    pub mod lost;
-    pub mod southern;
-    pub mod zora;
-
-    pub const GROUP: super::Group = super::Group::Hyrule;
-}
-
-pub mod lorule {
-    pub mod chamber;
-    pub mod dark;
-    pub mod death;
-    pub mod field;
-    pub mod lake;
-    pub mod misery;
-    pub mod skull;
-
-    pub const GROUP: super::Group = super::Group::Lorule;
-}
-
-pub(crate) fn patch(
-    patcher: &mut Patcher, layout: &crate::Layout, settings: &Settings,
-) -> crate::Result<()> {
-    info!("Patching Randomized Checks...");
-
-    // todo unravel this
-    dungeons::dark::patch(patcher, layout, settings)?;
-    dungeons::desert::patch(patcher, layout, settings)?;
-    dungeons::eastern::patch(patcher, layout, settings)?;
-    dungeons::graveyards::patch(patcher, layout, settings)?;
-    dungeons::house::patch(patcher, layout, settings)?;
-    dungeons::hyrule::patch(patcher, layout, settings)?;
-    dungeons::ice::patch(patcher, layout, settings)?;
-    dungeons::lorule::patch(patcher, layout, settings)?;
-    dungeons::skull::patch(patcher, layout, settings)?;
-    dungeons::swamp::patch(patcher, layout, settings)?;
-    dungeons::thieves::patch(patcher, layout, settings)?;
-    dungeons::tower::patch(patcher, layout, settings)?;
-    dungeons::turtle::patch(patcher, layout, settings)?;
-    hyrule::death::patch(patcher, layout, settings)?;
-    hyrule::desert::patch(patcher, layout, settings)?;
-    hyrule::eastern::patch(patcher, layout, settings)?;
-    hyrule::field::patch(patcher, layout, settings)?;
-    hyrule::irene::patch(patcher, layout, settings)?;
-    hyrule::kakariko::patch(patcher, layout, settings)?;
-    hyrule::lake::patch(patcher, layout, settings)?;
-    hyrule::lost::patch(patcher, layout, settings)?;
-    hyrule::southern::patch(patcher, layout, settings)?;
-    hyrule::zora::patch(patcher, layout, settings)?;
-    lorule::chamber::patch(patcher, layout, settings)?;
-    lorule::dark::patch(patcher, layout, settings)?;
-    lorule::death::patch(patcher, layout, settings)?;
-    lorule::field::patch(patcher, layout, settings)?;
-    lorule::lake::patch(patcher, layout, settings)?;
-    lorule::misery::patch(patcher, layout, settings)?;
-    lorule::skull::patch(patcher, layout, settings)?;
-    Ok(())
-}
-
-// regions! {
-//     dungeons(Dungeons) {
-//         dark;
-//         desert;
-//         eastern;
-//         graveyards;
-//         house;
-//         hyrule;
-//         ice;
-//         lorule;
-//         skull;
-//         swamp;
-//         thieves;
-//         tower;
-//         turtle;
-//     }
-//     hyrule(Hyrule) {
-//         death;
-//         desert;
-//         eastern;
-//         field;
-//         irene;
-//         kakariko;
-//         lake;
-//         lost;
-//         southern;
-//         zora;
-//     }
-//     lorule(Lorule) {
-//         chamber;
-//         dark;
-//         death;
-//         field;
-//         lake;
-//         misery;
-//         skull;
-//     }
-// }
 
 #[doc(hidden)]
 #[macro_export]
@@ -215,10 +95,9 @@ macro_rules! region {
         $($id:ident $props:tt,)*
     ) => {
         #[inline]
-        pub fn patch(patcher: &mut $crate::patch::Patcher, layout: &$crate::Layout, settings: &$crate::Settings) -> $crate::Result<()> {
-            $start::patch(patcher, layout, settings)?;
-            $($id::patch(patcher, layout, settings)?;)*
-            Ok(())
+        pub fn locations() -> impl Iterator<Item=($crate::LocationKey, $crate::regions::Location)> {
+            $start::locations()
+                $(.chain($id::locations()))*
         }
 
         $crate::area!($start $start_props);
@@ -250,7 +129,7 @@ macro_rules! area {
         $(quest: $kind:ident$(::$qvariant:ident)?,)?
     }) => {
         pub mod $id {
-            use $crate::{patch::Patcher, regions::{Area, AreaInfo}};
+            use $crate::{regions::{Area, AreaInfo, Location}, LocationKey};
 
             pub use super::COURSE;
 
@@ -263,16 +142,16 @@ macro_rules! area {
 
             #[allow(unused)]
             #[inline]
-            pub fn patch(patcher: &mut Patcher, layout: &$crate::Layout, settings: &$crate::Settings) -> $crate::Result<()> {
-                $(use $crate::patch::Patch;
-                $($crate::patch!($variant $props).apply(
-                    patcher,
-                    layout
-                        .get(&$crate::LocationInfo::new(AREA, $key))
-                        .unwrap_or_else(|| unreachable!(stringify!($key))),
-                    settings,
-                )?;)*)?
-                Ok(())
+            pub fn locations() -> impl Iterator<Item = (LocationKey, Location)> {
+                [
+                    $($((
+                        LocationKey {
+                            area: AREA,
+                            name: $key,
+                        },
+                        $crate::location!($variant $props),
+                    ),)*)?
+                ].into_iter()
             }
         }
     };
@@ -280,76 +159,136 @@ macro_rules! area {
 
 #[doc(hidden)]
 #[macro_export]
-macro_rules! patch {
+macro_rules! location {
     (Chest($course:ident $stage:literal[$unq:literal])) => {
-        Patch::Chest { course: albw::course::Id::$course, stage: $stage - 1, unq: $unq }
+        Location::Chest { course: albw::course::Id::$course, stage: $stage - 1, unq: $unq }
     };
     (Chest($stage:literal[$unq:literal])) => {
-        Patch::Chest { course: COURSE, stage: $stage - 1, unq: $unq }
+        Location::Chest { course: COURSE, stage: $stage - 1, unq: $unq }
     };
     (Chest[$($stage:literal[$unq:literal],)+]) => {
-        Patch::Multi(vec![
+        Location::Multi(vec![
             $(
-                Patch::Chest { course: COURSE, stage: $stage - 1, unq: $unq },
+                Location::Chest { course: COURSE, stage: $stage - 1, unq: $unq },
             )+
         ])
     };
     (BigChest($course:ident $stage:literal[$unq:literal])) => {
-        Patch::BigChest { course: albw::course::Id::$course, stage: $stage - 1, unq: $unq }
+        Location::BigChest { course: albw::course::Id::$course, stage: $stage - 1, unq: $unq }
     };
     (BigChest($stage:literal[$unq:literal])) => {
-        Patch::BigChest { course: COURSE, stage: $stage - 1, unq: $unq }
+        Location::BigChest { course: COURSE, stage: $stage - 1, unq: $unq }
     };
     (Event($name:ident[$index:literal])) => {
-        Patch::Event { course: Some(COURSE), name: stringify!($name), index: $index }
+        Location::Event { course: Some(COURSE), name: stringify!($name), index: $index }
     };
     (Event(Boot/$name:ident[$index:literal])) => {
-        Patch::Event { course: None, name: stringify!($name), index: $index }
+        Location::Event { course: None, name: stringify!($name), index: $index }
     };
     (Event($course:ident/$name:ident[$index:literal])) => {
-        Patch::Event { course: Some(albw::course::Id::$course), name: stringify!($name), index: $index }
+        Location::Event { course: Some(albw::course::Id::$course), name: stringify!($name), index: $index }
     };
     (Event[$($name:ident[$index:literal],)+]) => {
-        Patch::Multi(vec![
+        Location::Multi(vec![
             $(
-                Patch::Event { course: Some(COURSE), name: stringify!($name), index: $index },
+                Location::Event { course: Some(COURSE), name: stringify!($name), index: $index },
             )+
         ])
     };
     (Heart($course:ident $scene:literal[$unq:literal])) => {
-        Patch::Heart { course: albw::course::Id::$course, scene: $scene - 1, unq: $unq }
+        Location::Heart { course: albw::course::Id::$course, scene: $scene - 1, unq: $unq }
     };
     (Heart($scene:literal[$unq:literal])) => {
-        Patch::Heart { course: COURSE, scene: $scene - 1, unq: $unq }
+        Location::Heart { course: COURSE, scene: $scene - 1, unq: $unq }
     };
     (Key($course:ident $scene:literal[$unq:literal])) => {
-        Patch::Key { course: albw::course::Id::$course, scene: $scene - 1, unq: $unq }
+        Location::Key { course: albw::course::Id::$course, scene: $scene - 1, unq: $unq }
     };
     (Key($scene:literal[$unq:literal])) => {
-        Patch::Key { course: COURSE, scene: $scene - 1, unq: $unq }
+        Location::Key { course: COURSE, scene: $scene - 1, unq: $unq }
     };
     (Maiamai($course:ident $scene:literal[$unq:literal])) => {
-        Patch::Maiamai { course: albw::course::Id::$course, scene: $scene - 1, unq: $unq }
+        Location::Maiamai { course: albw::course::Id::$course, scene: $scene - 1, unq: $unq }
     };
     (Maiamai($scene:literal[$unq:literal])) => {
-        Patch::Maiamai { course: COURSE, scene: $scene - 1, unq: $unq }
+        Location::Maiamai { course: COURSE, scene: $scene - 1, unq: $unq }
     };
     (SilverRupee($course:ident $scene:literal[$unq:literal])) => {
-        Patch::SilverRupee { course: albw::course::Id::$course, scene: $scene - 1, unq: $unq }
+        Location::SilverRupee { course: albw::course::Id::$course, scene: $scene - 1, unq: $unq }
     };
     (SilverRupee($scene:literal[$unq:literal])) => {
-        Patch::SilverRupee { course: COURSE, scene: $scene - 1, unq: $unq }
+        Location::SilverRupee { course: COURSE, scene: $scene - 1, unq: $unq }
     };
     (GoldRupee($course:ident $scene:literal[$unq:literal])) => {
-        Patch::GoldRupee { course: albw::course::Id::$course, scene: $scene - 1, unq: $unq }
+        Location::GoldRupee { course: albw::course::Id::$course, scene: $scene - 1, unq: $unq }
     };
     (GoldRupee($scene:literal[$unq:literal])) => {
-        Patch::GoldRupee { course: COURSE, scene: $scene - 1, unq: $unq }
+        Location::GoldRupee { course: COURSE, scene: $scene - 1, unq: $unq }
     };
     (Shop($variant:ident$($args:tt)?)) => {
-        Patch::Shop($crate::patch::Shop::$variant $($args)?)
+        Location::Shop($crate::regions::Shop::$variant $($args)?)
     };
     (None()) => {
-        Patch::None
+        Location::None
     }
+}
+
+regions! {
+    dungeons(Dungeons) {
+        dark;
+        desert;
+        eastern;
+        graveyards;
+        house;
+        hyrule;
+        ice;
+        lorule;
+        skull;
+        swamp;
+        thieves;
+        tower;
+        turtle;
+    }
+    hyrule(Hyrule) {
+        death;
+        desert;
+        eastern;
+        field;
+        irene;
+        kakariko;
+        lake;
+        lost;
+        southern;
+        zora;
+    }
+    lorule(Lorule) {
+        chamber;
+        dark;
+        death;
+        field;
+        lake;
+        misery;
+        skull;
+    }
+}
+
+#[derive(Clone, Debug)]
+pub enum Location {
+    Chest { course: Id, stage: u16, unq: u16 },
+    BigChest { course: Id, stage: u16, unq: u16 },
+    Event { course: Option<Id>, name: &'static str, index: u16 },
+    Heart { course: Id, scene: u16, unq: u16 },
+    Key { course: Id, scene: u16, unq: u16 },
+    Maiamai { course: Id, scene: u16, unq: u16 },
+    SilverRupee { course: Id, scene: u16, unq: u16 },
+    GoldRupee { course: Id, scene: u16, unq: u16 },
+    Shop(Shop),
+    Multi(Vec<Location>),
+    None, // Workaround until everything is shufflable
+}
+
+#[derive(Clone, Debug)]
+pub enum Shop {
+    Ravio(u8),
+    Merchant(u8),
 }

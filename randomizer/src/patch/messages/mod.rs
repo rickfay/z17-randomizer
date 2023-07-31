@@ -2,7 +2,7 @@ use {
     crate::{
         hints::{formatting::*, Hint},
         patch::messages::{hint_ghosts::HintGhost, msbt::load_msbt},
-        LocationInfo, Patcher, Result, SeedInfo,
+        LocationKey, Patcher, Result, SeedInfo,
     },
     albw::{
         course::Id::*,
@@ -90,7 +90,7 @@ fn patch_great_rupee_fairy(patcher: &mut Patcher) -> Result<()> {
 fn patch_street_merchant(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
     let item_left = seed_info
         .layout
-        .get(&LocationInfo::new(
+        .get(&LocationKey::new(
             crate::regions::hyrule::kakariko::village::AREA,
             "Street Merchant (Left)",
         ))
@@ -98,7 +98,7 @@ fn patch_street_merchant(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<
         .as_str();
     let item_right = seed_info
         .layout
-        .get(&LocationInfo::new(
+        .get(&LocationKey::new(
             crate::regions::hyrule::kakariko::village::AREA,
             "Street Merchant (Right)",
         ))
