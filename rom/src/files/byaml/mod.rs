@@ -1,3 +1,7 @@
+use bytey::TryFromBytes;
+use serde_repr::{Deserialize_repr, Serialize_repr};
+use strum::FromRepr;
+
 mod de;
 mod ser;
 
@@ -6,16 +10,50 @@ pub use {
     ser::{to_writer, Serializer},
 };
 
-crate::int_map! {
-    Kind(u8) {
-        String = 0xA0,
-        Array = 0xC0,
-        Map = 0xC1,
-        Strings = 0xC2,
-        Boolean = 0xD0,
-        Integer = 0xD1,
-        Float = 0xD2,
-        Null = 0xFF,
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    FromRepr,
+    Deserialize_repr,
+    Serialize_repr,
+)]
+#[repr(u8)]
+enum Kind {
+    String = 0xA0,
+    Array = 0xC0,
+    Map = 0xC1,
+    Strings = 0xC2,
+    Boolean = 0xD0,
+    Integer = 0xD1,
+    Float = 0xD2,
+    Null = 0xFF,
+}
+
+impl<'by> TryFromBytes<'by> for Kind {
+    const SIZE: usize = <u8 as ::bytey::FromBytes>::SIZE;
+    type Bytes = <u8 as ::bytey::FromBytes<'by>>::Bytes;
+
+    fn try_from_bytes(bytes: &'_ Self::Bytes) -> ::bytey::Result<Self> {
+        match <u8 as ::bytey::FromBytes>::from_bytes(bytes) {
+            0xA0 => Ok(Self::String),
+            0xC0 => Ok(Self::Array),
+            0xC1 => Ok(Self::Map),
+            0xC2 => Ok(Self::Strings),
+            0xD0 => Ok(Self::Boolean),
+            0xD1 => Ok(Self::Integer),
+            0xD2 => Ok(Self::Float),
+            0xFF => Ok(Self::Null),
+            value => Err(::bytey::Error::new(
+                ::bytey::ErrorKind::InvalidData,
+                format!("Unrecognized value for type {}: {}", stringify!($type), value),
+            )),
+        }
     }
 }
 

@@ -6,10 +6,8 @@ use std::{
 };
 
 use arm::*;
-use rom::{
-    ExHeader,
-    Item::{self, *},
-};
+use game::Item::{self, *};
+use rom::ExHeader;
 use settings::pedestal_setting::PedestalSetting::*;
 
 use super::Patcher;
@@ -215,7 +213,7 @@ pub fn create(patcher: &Patcher, seed_info: &SeedInfo) -> Result<Code> {
         let actor = actor_names
             .get(rental)
             .copied()
-            .unwrap_or_else(|| panic!("Could not find actor name for {}", rental.as_str()));
+            .unwrap_or_else(|| panic!("Could not find actor name for {}", rental.as_ref()));
         code.text().define([
             ldr(R1, actor),
             str_(R4, (R0, actor_offset)),

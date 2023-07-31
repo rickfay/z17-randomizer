@@ -6,16 +6,14 @@ use std::{
     ops::Deref,
 };
 
+use game::Item::{self, *};
 use log::{debug, error, info};
 use model::filler_item::{convert, FillerItem};
 use patch::Patcher;
 use path_absolutize::*;
 use rand::{rngs::StdRng, SeedableRng};
 use regions::Area;
-use rom::{
-    Item::{self, *},
-    Rom,
-};
+use rom::Rom;
 use serde::{ser::SerializeMap, Serialize, Serializer};
 use settings::Settings;
 
@@ -165,7 +163,7 @@ impl Layout {
         self.get_area_mut(node).insert(name, item.normalize());
         debug!(
             "Placed {} in {}/{}",
-            item.normalize().as_str(),
+            item.normalize().as_ref(),
             location.area.name(),
             location.name
         );

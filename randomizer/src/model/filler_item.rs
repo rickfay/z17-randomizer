@@ -1,4 +1,4 @@
-use rom::{Item, Item::*};
+use game::{Item, Item::*};
 use serde::{Deserialize, Serialize, Serializer};
 
 use crate::{hints::hint_color::HintColor::*, item_to_str, Error, Result};

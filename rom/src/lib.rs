@@ -8,9 +8,11 @@ use std::{
     path::Path,
 };
 
+use game::Item;
 use language::FlowChart;
 use log::info;
 use path_absolutize::*;
+use strum::IntoEnumIterator;
 
 use crate::{course::Id::LanguageBoot, language::Load, scene::SceneMeta};
 
@@ -19,7 +21,7 @@ pub use {
     course::Course,
     demo::Demo,
     files::{byaml, exheader::ExHeader, romfs::RomFs, sarc::Sarc, Cxi, File, IntoBytes},
-    item::{GetItem, Item},
+    get_item::GetItem,
     language::Language,
     scene::{Scene, Stage},
 };
@@ -30,7 +32,7 @@ pub mod course;
 pub mod demo;
 mod files;
 pub mod flow;
-pub mod item;
+pub mod get_item;
 pub mod language;
 pub mod scene;
 
@@ -203,13 +205,13 @@ impl Rom {
         let archive = self
             .romfs
             .borrow_mut()
-            .read(format!("US_English/{}.szs", course.as_str()))?
+            .read(format!("US_English/{}.szs", course.as_ref()))?
             .map(Sarc::from);
         Ok(Language::new(flow, archive))
     }
 
     pub(crate) fn scene(&self, course: course::Id, stage: u16) -> Result<Scene> {
-        let name = format!("{}{}", course.as_str(), stage + 1);
+        let name = format!("{}{}", course.as_ref(), stage + 1);
         let mut romfs = self.romfs.borrow_mut();
         let stage = romfs
             .read(format!("World/Byaml/{}_stage.byaml", name))?
@@ -225,7 +227,7 @@ impl Rom {
 
         let mut romfs = self.romfs.borrow_mut();
         let stage_meta = romfs
-            .read(format!("World/Byaml/{}_course.byaml", course.as_str()))
+            .read(format!("World/Byaml/{}_course.byaml", course.as_ref()))
             .unwrap()
             .try_map(|data| byaml::from_bytes(&data))
             .unwrap();
@@ -236,7 +238,7 @@ impl Rom {
         byaml::from_bytes(
             self.romfs
                 .borrow_mut()
-                .read(format!("World/Byaml/{}{}_stage.byaml", course.as_str(), stage + 1))?
+                .read(format!("World/Byaml/{}{}_stage.byaml", course.as_ref(), stage + 1))?
                 .get(),
         )
     }
@@ -260,78 +262,4 @@ macro_rules! string_constants {
             $(pub const $variant: &'static str = stringify!($variant);)+
         }
     }
-}
-
-#[doc(hidden)]
-#[macro_export]
-macro_rules! int_map {
-    (
-        $(#[$attr:meta])*
-        $type:ident($repr:ident) {
-            $(
-                $(#[$attr_element:meta])*
-                $variant:ident = $value:literal,
-            )+
-        }
-    ) => {
-        $(#[$attr])*
-        #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, ::serde_repr::Deserialize_repr, ::serde_repr::Serialize_repr)]
-        #[repr($repr)]
-        pub enum $type {
-            $(
-                $(#[$attr_element])*
-                $variant = $value,
-            )+
-        }
-
-        impl $type {
-            /// Iterates over all the variants of this enum.
-            #[allow(unused)]
-            pub fn iter() -> impl Iterator<Item = Self> {
-                [$(Self::$variant,)+][..].into_iter().copied()
-            }
-
-            /// Returns the stringified name of the variant.
-            #[allow(unused)]
-            pub fn as_str(&self) -> &'static str {
-                match self {
-                    $(Self::$variant => stringify!($variant),)+
-                }
-            }
-        }
-
-        impl ::core::convert::TryFrom<$repr> for $type {
-            type Error = $crate::Error;
-
-            fn try_from(value: $repr) -> ::core::result::Result<Self, Self::Error> {
-                match value {
-                    $($value => Ok(Self::$variant),)+
-                    value => Err($crate::Error::new(format!(
-                        "Unrecognized value for type {}: {}",
-                        stringify!($type),
-                        value
-                    ))),
-                }
-            }
-        }
-
-        impl<'by> ::bytey::TryFromBytes<'by> for $type {
-            const SIZE: usize = <$repr as ::bytey::FromBytes>::SIZE;
-            type Bytes = <$repr as ::bytey::FromBytes<'by>>::Bytes;
-
-            fn try_from_bytes(bytes: &'_ Self::Bytes) -> ::bytey::Result<Self> {
-                match <$repr as ::bytey::FromBytes>::from_bytes(bytes) {
-                    $($value => Ok(Self::$variant),)+
-                    value => Err(::bytey::Error::new(
-                        ::bytey::ErrorKind::InvalidData,
-                        format!(
-                            "Unrecognized value for type {}: {}",
-                            stringify!($type),
-                            value
-                        )
-                    )),
-                }
-            }
-        }
-    };
 }

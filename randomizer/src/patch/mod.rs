@@ -1,6 +1,7 @@
 use std::{collections::HashMap, fs, iter, path::Path};
 
 use fs_extra::dir::CopyOptions;
+use game::Item;
 use log::{debug, error, info};
 use path_absolutize::*;
 use rom::{
@@ -8,7 +9,7 @@ use rom::{
     demo::Timed,
     flow::FlowMut,
     scene::{Arg, Obj, Rail, SceneMeta},
-    Demo, File, IntoBytes, Item, Language, Rom, Scene,
+    Demo, File, IntoBytes, Language, Rom, Scene,
 };
 use serde::Serialize;
 use tempfile::tempdir;
@@ -90,7 +91,7 @@ impl Patcher {
                         Error::new(format!(
                             "Could not find [Objs] UNQ {} in {}{}",
                             unq,
-                            id.as_str(),
+                            id.as_ref(),
                             stage_index
                         ))
                     })
@@ -111,7 +112,7 @@ impl Patcher {
                         Error::new(format!(
                             "Could not find [Rails] UNQ {} in {}{}",
                             unq,
-                            id.as_str(),
+                            id.as_ref(),
                             stage_index
                         ))
                     })
@@ -132,7 +133,7 @@ impl Patcher {
                         Error::new(format!(
                             "Could not find [System] UNQ {} in {}{}",
                             unq,
-                            id.as_str(),
+                            id.as_ref(),
                             stage_index
                         ))
                     })
@@ -213,7 +214,7 @@ impl Patcher {
             .get_mut()
             .get_obj_mut(unq)
             .ok_or_else(|| {
-                Error::new(format!("{}{} [{}] not found", course.as_str(), stage + 1, unq))
+                Error::new(format!("{}{} [{}] not found", course.as_ref(), stage + 1, unq))
             })
             .unwrap()
             .arg_mut()
@@ -251,7 +252,7 @@ impl Patcher {
 
         // Add Actor if scene doesn't already have it
         if !self.scene(course, stage).unwrap().actors().contains(chest_data.1) {
-            debug!("Adding {} to {}{}", chest_data.1, course.as_str(), stage + 1);
+            debug!("Adding {} to {}{}", chest_data.1, course.as_ref(), stage + 1);
             let actor = self.scene(DungeonHera, 0)?.actors().get_actor_bch(chest_data.1)?;
             self.scene(course, stage).unwrap().actors_mut().add(actor)?;
         }
@@ -299,7 +300,7 @@ impl Patcher {
                     .ok_or_else(|| {
                         Error::new(format!(
                             "{}/{} [{}] not found",
-                            course.as_ref().map(Id::as_str).unwrap_or("Boot"),
+                            course.as_ref().map(AsRef::as_ref).unwrap_or("Boot"),
                             name,
                             index
                         ))
@@ -329,7 +330,7 @@ impl Patcher {
         let mut item_actors = HashMap::new();
 
         for (item, get_item) in self.game.match_items_to_get_items() {
-            if Item::SpecialMove.as_str().eq(&get_item.0) {
+            if Item::SpecialMove.as_ref().eq(&get_item.0) {
                 // fixme hacky and gross
                 let mut actor = common_archive.get_actor_bch("SwordD")?.clone();
                 actor.rename(String::from("World/Actor/SwordD.bch"));

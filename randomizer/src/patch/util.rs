@@ -1,7 +1,5 @@
-use rom::{
-    scene::{Dest, Flag, Obj, Rail, Vec3},
-    Item::{self, *},
-};
+use game::Item::{self, *};
+use rom::scene::{Dest, Flag, Obj, Rail, Vec3};
 
 use crate::{patch::DungeonPrizes, regions, Error, Layout, LocationKey, Result};
 
@@ -98,7 +96,7 @@ pub(crate) fn prize_flag(prize: Item) -> Result<Flag> {
         SageRosso => Ok(Flag::Event(616)),
         SageIrene => Ok(Flag::Event(636)),
         SageImpa => Ok(Flag::Event(656)),
-        _ => Err(Error::new(format!("{} is Charm or not a Dungeon Prize", prize.as_str()))),
+        _ => Err(Error::new(format!("{} is Charm or not a Dungeon Prize", prize.as_ref()))),
     }
 }
 

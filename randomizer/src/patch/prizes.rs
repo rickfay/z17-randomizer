@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+use game::Item::{self, *};
 use log::info;
 use rom::{
     byaml,
@@ -7,7 +8,6 @@ use rom::{
     language::FlowChart,
     scene::{Arg, Dest, Flag, Obj, Point, Rail, Transform, Vec3},
     Actor, File,
-    Item::{self, *},
 };
 
 use crate::{
@@ -59,7 +59,7 @@ fn patch_flowchart(patcher: &mut Patcher, prizes: &DungeonPrizes) -> Result<()> 
     // Add msbf for dungeon prize
     for (new_msbf, course) in &dungeon_msbf_mapping {
         if new_msbf.is_some() {
-            flow_chart.get_mut().load_mut().add_entry(course.as_str(), new_msbf.unwrap());
+            flow_chart.get_mut().load_mut().add_entry(course.as_ref(), new_msbf.unwrap());
         }
     }
 
@@ -932,7 +932,7 @@ impl PrizePatchData {
             PendantWisdom => Ok(Self::new(173, Flag::Event(342), 0.0, 1, 0, 0)),
             PendantCourage => Ok(Self::new(173, Flag::Course(500), 0.0, 2, 0, 0)),
             ZeldaAmulet => Ok(Self::new(173, Flag::Course(501), 0.0, 2, 0, 0)),
-            _ => Err(Error::new(format!("\"{}\" is not a dungeon prize.", prize.as_str()))),
+            _ => Err(Error::new(format!("\"{}\" is not a dungeon prize.", prize.as_ref()))),
         }
     }
 }
@@ -948,7 +948,7 @@ fn reroute_sage_warp(patcher: &mut Patcher, prize: Item, dest: Dest) -> Result<(
         SageIrene => Ok(Some(70)),
         SageImpa => Ok(Some(68)),
         PendantPower | PendantWisdom | PendantCourage | ZeldaAmulet => Ok(None),
-        _ => Err(Error::new(format!("\"{}\" is not a dungeon prize.", prize.as_str()))),
+        _ => Err(Error::new(format!("\"{}\" is not a dungeon prize.", prize.as_ref()))),
     }?;
 
     // Reroute

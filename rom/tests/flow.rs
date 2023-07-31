@@ -1,4 +1,5 @@
 use rom::{course, Language, Result};
+use strum::IntoEnumIterator;
 
 mod common;
 

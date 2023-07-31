@@ -40,7 +40,7 @@ impl Load {
     }
 
     pub fn course(&self, id: course::Id) -> Option<&[String]> {
-        self.0.get(id.as_str()).map(AsRef::as_ref)
+        self.0.get(id.as_ref()).map(AsRef::as_ref)
     }
 
     pub fn add_entry(&mut self, id: &str, entry: &str) {

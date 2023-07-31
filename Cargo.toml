@@ -10,6 +10,7 @@ license = "GPL-2.0-or-later"
 
 [dependencies]
 cli = { workspace = true }
+game = { workspace = true }
 log = { workspace = true }
 rand = { workspace = true }
 randomizer = { path = "./randomizer" }
@@ -31,6 +32,7 @@ members = [
     "bytey",
     "bytey-macro",
     "cli",
+    "game",
     "jack",
     "randomizer",
     "rom",
@@ -41,6 +43,7 @@ members = [
 byteorder = "1.4.3"
 bytey = { path = "./bytey" }
 cli = { path = "./cli" }
+game = { path = "./game" }
 jack = { path = "./jack" }
 log = "0.4.17"
 path-absolutize = "3.0.14"
@@ -48,7 +51,9 @@ rand = { version = "0.8.5", features = ["std_rng"] }
 rom = { path = "./rom" }
 serde = { version = "1.0.152", features = ["derive"] }
 serde_json = "1.0.93"
+serde_repr = "0.1.16"
 settings = { path = "./settings" }
+strum = { version = "0.25.0", features = ["derive"] }
 thiserror = "1.0.44"
 yaz0 = "0.3.0"
 

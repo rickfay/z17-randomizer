@@ -1,5 +1,6 @@
+use game::Item;
 use log::info;
-use rom::{course::Id, Item};
+use rom::course::Id;
 use settings::Settings;
 
 use super::Patcher;
@@ -213,7 +214,7 @@ where
         return Err(Error::new(format!(
             "File not found: US{}.szs -> World/Flow/{}.msbf",
             if course.is_some() {
-                "_English/".to_owned() + course.unwrap().as_str()
+                "_English/".to_owned() + course.unwrap().as_ref()
             } else {
                 "/RegionBoot".to_owned()
             },

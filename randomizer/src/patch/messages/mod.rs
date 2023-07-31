@@ -1,10 +1,8 @@
 use std::collections::BTreeMap;
 
+use game::Item::{PendantPower, PendantWisdom};
 use log::info;
-use rom::{
-    course::Id::*,
-    Item::{PendantPower, PendantWisdom},
-};
+use rom::course::Id::*;
 
 use crate::{
     hints::{formatting::*, Hint},
@@ -94,23 +92,21 @@ fn patch_street_merchant(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<
             crate::regions::hyrule::kakariko::village::AREA,
             "Street Merchant (Left)",
         ))
-        .unwrap()
-        .as_str();
+        .unwrap();
     let item_right = seed_info
         .layout
         .get(&LocationKey::new(
             crate::regions::hyrule::kakariko::village::AREA,
             "Street Merchant (Right)",
         ))
-        .unwrap()
-        .as_str();
+        .unwrap();
 
     let mut street_merchant = load_msbt(patcher, FieldLight, "FieldLight_18").unwrap();
     street_merchant.set(
         "lgt_NpcStand_BottleEmpty_00_select",
         &format!(
             "That's a {}.\nUseful for a bunch of things.\nHow about {}?{}",
-            name(item_left),
+            name(item_left.as_ref()),
             *PRICE,
             *CHOICE_2
         ),
@@ -122,7 +118,7 @@ fn patch_street_merchant(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<
             "Ah, yes! A {} \n\
         of remarkable quality. Smooth as silk!\n\
         And for you? Only {}!{}",
-            name(item_right),
+            name(item_right.as_ref()),
             *PRICE,
             *CHOICE_2
         ),
@@ -135,7 +131,7 @@ fn patch_street_merchant(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<
         smooth, smooth {}.\n\
         Oh it's so VERY smooth! I shouldn't\n\
         have let it go at such a bargain.",
-            name(item_right)
+            name(item_right.as_ref())
         ),
     );
 
