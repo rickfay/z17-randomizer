@@ -1,5 +1,5 @@
 use {
-    crate::{course, files::IntoBytes, Error, Result},
+    crate::{files::IntoBytes, Error, Result},
     serde::{
         de::{Error as _, SeqAccess, Visitor},
         ser::SerializeSeq,
@@ -208,7 +208,7 @@ impl Serialize for Timed<Command> {
 /// A cutscene command.
 #[derive(Debug, Eq, PartialEq)]
 pub enum Command {
-    Finish { course: course::Id, scene: u16, index: u16 },
+    Finish { course: game::Course, scene: u16, index: u16 },
     SetEventFlag(u16),
     Other { name: Vec<u8>, args: Vec<Box<[u8]>> },
 }
@@ -222,7 +222,7 @@ impl From<Finish> for Command {
 /// The 'Finish' command.
 #[derive(Debug)]
 pub struct Finish {
-    course: course::Id,
+    course: game::Course,
     scene: u16,
     index: u16,
 }
@@ -255,7 +255,7 @@ mod tests {
             event,
             Some(Row(Some(Timed {
                 timestamp: 0,
-                value: Command::Finish { course: course::Id::FieldLight, scene: 1, index: 2 },
+                value: Command::Finish { course: game::Course::FieldLight, scene: 1, index: 2 },
             }))),
         );
         Ok(())

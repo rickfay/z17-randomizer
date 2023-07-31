@@ -1,6 +1,5 @@
 use {
     crate::{
-        course,
         files::{sarc::Sarc, FromFile},
         flow::{Flow, FlowMut},
         Error, File, Result,
@@ -39,7 +38,7 @@ impl Load {
         Ok(self.0.get("Boot").ok_or_else(|| Error::new("Boot key not found."))?)
     }
 
-    pub fn course(&self, id: course::Id) -> Option<&[String]> {
+    pub fn course(&self, id: game::Course) -> Option<&[String]> {
         self.0.get(id.as_ref()).map(AsRef::as_ref)
     }
 

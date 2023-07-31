@@ -1,9 +1,6 @@
-use game::Item;
+use game::{Course::*, Item};
 use log::info;
-use rom::{
-    course::{Id, Id::*},
-    scene::{Flag, Icn, IcnArgs, StageMeta},
-};
+use rom::scene::{Flag, Icn, IcnArgs, StageMeta};
 
 use crate::{
     patch::{util::*, DungeonPrizes},
@@ -49,7 +46,7 @@ pub fn patch_maps(patcher: &mut Patcher, prizes: &DungeonPrizes) -> Result<()> {
 }
 
 fn patch_hyrule_maps(patcher: &mut Patcher, prizes: &DungeonPrizes) -> Result<()> {
-    const HYRULE_MAPS: [Id; 4] = [AttractionLight, CaveLight, FieldLight, IndoorLight];
+    const HYRULE_MAPS: [game::Course; 4] = [AttractionLight, CaveLight, FieldLight, IndoorLight];
 
     for map in HYRULE_MAPS {
         let stage_meta = patcher.scene_meta(map).stage_meta_mut().get_mut();
@@ -67,7 +64,7 @@ fn patch_hyrule_maps(patcher: &mut Patcher, prizes: &DungeonPrizes) -> Result<()
 }
 
 fn patch_lorule_maps(patcher: &mut Patcher, prizes: &DungeonPrizes) -> Result<()> {
-    const LORULE_MAPS: [Id; 7] =
+    const LORULE_MAPS: [game::Course; 7] =
         [AttractionDark, CaveDark, EnemyAttackS, EnemyAttackM, EnemyAttackL, FieldDark, IndoorDark];
 
     for map in LORULE_MAPS {

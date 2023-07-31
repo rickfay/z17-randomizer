@@ -1,11 +1,10 @@
 use std::{collections::HashMap, fs, iter, path::Path};
 
 use fs_extra::dir::CopyOptions;
-use game::Item;
+use game::{Course::*, Item};
 use log::{debug, error, info};
 use path_absolutize::*;
 use rom::{
-    course::{Id, Id::*},
     demo::Timed,
     flow::FlowMut,
     scene::{Arg, Obj, Rail, SceneMeta},
@@ -53,7 +52,7 @@ pub struct Patcher {
     boot: Language,
     rentals: [Item; 9],
     merchant: [Item; 3],
-    courses: HashMap<Id, Course>,
+    courses: HashMap<game::Course, Course>,
 }
 
 impl Patcher {
@@ -68,20 +67,22 @@ impl Patcher {
         })
     }
 
-    fn add_obj(&mut self, id: Id, stage_index: u16, obj: Obj) {
+    fn add_obj(&mut self, id: game::Course, stage_index: u16, obj: Obj) {
         self.scene(id, stage_index - 1).unwrap().stage_mut().get_mut().add_obj(obj);
     }
 
-    fn add_rail(&mut self, id: Id, stage_index: u16, rail: Rail) {
+    fn add_rail(&mut self, id: game::Course, stage_index: u16, rail: Rail) {
         self.scene(id, stage_index - 1).unwrap().stage_mut().get_mut().add_rail(rail);
     }
 
     #[allow(unused)]
-    fn add_system(&mut self, id: Id, stage_index: u16, obj: Obj) {
+    fn add_system(&mut self, id: game::Course, stage_index: u16, obj: Obj) {
         self.scene(id, stage_index - 1).unwrap().stage_mut().get_mut().add_system(obj);
     }
 
-    fn modify_objs(&mut self, id: Id, stage_index: u16, actions: &[(u16, Box<dyn Fn(&mut Obj)>)]) {
+    fn modify_objs(
+        &mut self, id: game::Course, stage_index: u16, actions: &[(u16, Box<dyn Fn(&mut Obj)>)],
+    ) {
         let stage = self.scene(id, stage_index - 1).unwrap().stage_mut().get_mut();
         for (unq, action) in actions {
             action(
@@ -101,7 +102,7 @@ impl Patcher {
     }
 
     fn modify_rails(
-        &mut self, id: Id, stage_index: u16, actions: &[(u16, Box<dyn Fn(&mut Rail)>)],
+        &mut self, id: game::Course, stage_index: u16, actions: &[(u16, Box<dyn Fn(&mut Rail)>)],
     ) {
         let stage = self.scene(id, stage_index - 1).unwrap().stage_mut().get_mut();
         for (unq, action) in actions {
@@ -122,7 +123,7 @@ impl Patcher {
     }
 
     fn modify_system(
-        &mut self, id: Id, stage_index: u16, actions: &[(u16, Box<dyn Fn(&mut Obj)>)],
+        &mut self, id: game::Course, stage_index: u16, actions: &[(u16, Box<dyn Fn(&mut Obj)>)],
     ) {
         let stage = self.scene(id, stage_index - 1).unwrap().stage_mut().get_mut();
         for (unq, action) in actions {
@@ -142,7 +143,7 @@ impl Patcher {
         }
     }
 
-    fn load_course(game: &mut Rom, course: Id) -> Course {
+    fn load_course(game: &mut Rom, course: game::Course) -> Course {
         game.course(course)
             .language()
             .map(|load| Course {
@@ -153,12 +154,12 @@ impl Patcher {
             .unwrap()
     }
 
-    fn course(&mut self, course: Id) -> Result<&mut Course> {
+    fn course(&mut self, course: game::Course) -> Result<&mut Course> {
         let Self { game, ref mut courses, .. } = self;
         Ok(courses.entry(course).or_insert(Self::load_course(game, course)))
     }
 
-    fn scene(&mut self, course: Id, stage: u16) -> Result<&mut Scene> {
+    fn scene(&mut self, course: game::Course, stage: u16) -> Result<&mut Scene> {
         let Self { game, ref mut courses, .. } = self;
         courses
             .entry(course)
@@ -169,19 +170,21 @@ impl Patcher {
             .map_err(Into::into)
     }
 
-    fn scene_meta(&mut self, course: Id) -> &mut SceneMeta {
+    fn scene_meta(&mut self, course: game::Course) -> &mut SceneMeta {
         let Self { game, ref mut courses, .. } = self;
         let Course { ref mut scene_meta, .. } =
             courses.entry(course).or_insert(Self::load_course(game, course));
         scene_meta.as_mut().unwrap()
     }
 
-    fn update(&mut self, (course, file): (Id, File<Vec<u8>>)) -> Result<()> {
+    fn update(&mut self, (course, file): (game::Course, File<Vec<u8>>)) -> Result<()> {
         self.language(course)?.update(file)?;
         Ok(())
     }
 
-    fn inject_msbf(&mut self, course: Id, msbf: Option<&(&str, File<Box<[u8]>>)>) -> Result<()> {
+    fn inject_msbf(
+        &mut self, course: game::Course, msbf: Option<&(&str, File<Box<[u8]>>)>,
+    ) -> Result<()> {
         if let Some((msbf_key, msbf_file)) = msbf {
             self.language(course)?.flow_inject(msbf_key, msbf_file.clone())?;
         }
@@ -191,7 +194,7 @@ impl Patcher {
 
     fn language<C>(&mut self, course: C) -> Result<&mut Language>
     where
-        C: Into<Option<Id>>,
+        C: Into<Option<game::Course>>,
     {
         Ok(if let Some(course) = course.into() {
             &mut self.course(course)?.language
@@ -202,12 +205,12 @@ impl Patcher {
 
     fn flow<C>(&mut self, course: C) -> Result<rom::language::LoadedMut<FlowMut>>
     where
-        C: Into<Option<Id>>,
+        C: Into<Option<game::Course>>,
     {
         Ok(self.language(course)?.flow_mut())
     }
 
-    fn parse_args(&mut self, course: Id, stage: u16, unq: u16) -> &mut Arg {
+    fn parse_args(&mut self, course: game::Course, stage: u16, unq: u16) -> &mut Arg {
         self.scene(course, stage)
             .unwrap()
             .stage_mut()
@@ -221,7 +224,8 @@ impl Patcher {
     }
 
     fn prep_chest(
-        &mut self, item: Item, course: Id, stage: u16, unq: u16, is_big: bool, settings: &Settings,
+        &mut self, item: Item, course: game::Course, stage: u16, unq: u16, is_big: bool,
+        settings: &Settings,
     ) -> Result<()> {
         // Set contents
         self.parse_args(course, stage, unq).0 = item as i32;

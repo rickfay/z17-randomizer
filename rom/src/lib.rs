@@ -8,13 +8,13 @@ use std::{
     path::Path,
 };
 
-use game::Item;
+use game::{Course::LanguageBoot, Item};
 use language::FlowChart;
 use log::info;
 use path_absolutize::*;
 use strum::IntoEnumIterator;
 
-use crate::{course::Id::LanguageBoot, language::Load, scene::SceneMeta};
+use crate::{language::Load, scene::SceneMeta};
 
 pub use {
     actors::{Actor, Actors},
@@ -189,7 +189,7 @@ impl Rom {
         Ok(Actors::new(self.romfs.borrow_mut().read("Archive/ActorCommon.szs")?.map(Sarc::from)))
     }
 
-    pub fn course(&self, id: course::Id) -> Course {
+    pub fn course(&self, id: game::Course) -> Course {
         Course::new(self, id)
     }
 
@@ -200,7 +200,7 @@ impl Rom {
             .try_map(Demo::try_read)
     }
 
-    pub fn language(&self, course: course::Id) -> Result<Language> {
+    pub fn language(&self, course: game::Course) -> Result<Language> {
         let flow = self.flow_chart.get().load().course(course).unwrap_or_default().iter().cloned();
         let archive = self
             .romfs
@@ -210,7 +210,7 @@ impl Rom {
         Ok(Language::new(flow, archive))
     }
 
-    pub(crate) fn scene(&self, course: course::Id, stage: u16) -> Result<Scene> {
+    pub(crate) fn scene(&self, course: game::Course, stage: u16) -> Result<Scene> {
         let name = format!("{}{}", course.as_ref(), stage + 1);
         let mut romfs = self.romfs.borrow_mut();
         let stage = romfs
@@ -220,7 +220,7 @@ impl Rom {
         Ok(Scene::new(stage, actors))
     }
 
-    pub(crate) fn scene_meta(&self, course: course::Id) -> Option<SceneMeta> {
+    pub(crate) fn scene_meta(&self, course: game::Course) -> Option<SceneMeta> {
         if LanguageBoot.eq(&course) {
             return None;
         }
@@ -234,7 +234,7 @@ impl Rom {
         Some(SceneMeta::new(stage_meta))
     }
 
-    pub(crate) fn stage(&self, course: course::Id, stage: u16) -> Result<Stage> {
+    pub(crate) fn stage(&self, course: game::Course, stage: u16) -> Result<Stage> {
         byaml::from_bytes(
             self.romfs
                 .borrow_mut()

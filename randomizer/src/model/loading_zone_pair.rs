@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use rom::course::{Id, Id::*};
+use game::Course::*;
 
 use crate::model::location::{Location, Location::*};
 
@@ -23,7 +23,7 @@ pub struct LoadingZone {
 
     unq: u16,
 
-    scene: Id,
+    scene: game::Course,
     scene_id: u16,
     spawn: u16,
 

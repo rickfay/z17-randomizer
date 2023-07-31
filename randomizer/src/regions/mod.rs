@@ -3,8 +3,6 @@ use std::{
     hash::{Hash, Hasher},
 };
 
-use rom::course::Id;
-
 use crate::hints::hint_color::HintColor;
 
 pub struct AreaInfo {
@@ -111,7 +109,7 @@ macro_rules! region {
         pub const NAME: &str = $name;
         pub const COLOR: $crate::hints::hint_color::HintColor = $crate::hints::hint_color::HintColor::$color;
         #[allow(unused)]
-        pub const COURSE: ::rom::course::Id = ::rom::course::Id::$course;
+        pub const COURSE: ::game::Course = ::game::Course::$course;
     };
 }
 
@@ -161,7 +159,7 @@ macro_rules! area {
 #[macro_export]
 macro_rules! location {
     (Chest($course:ident $stage:literal[$unq:literal])) => {
-        Location::Chest { course: ::rom::course::Id::$course, stage: $stage - 1, unq: $unq }
+        Location::Chest { course: ::game::Course::$course, stage: $stage - 1, unq: $unq }
     };
     (Chest($stage:literal[$unq:literal])) => {
         Location::Chest { course: COURSE, stage: $stage - 1, unq: $unq }
@@ -174,7 +172,7 @@ macro_rules! location {
         ])
     };
     (BigChest($course:ident $stage:literal[$unq:literal])) => {
-        Location::BigChest { course: ::rom::course::Id::$course, stage: $stage - 1, unq: $unq }
+        Location::BigChest { course: ::game::Course::$course, stage: $stage - 1, unq: $unq }
     };
     (BigChest($stage:literal[$unq:literal])) => {
         Location::BigChest { course: COURSE, stage: $stage - 1, unq: $unq }
@@ -186,7 +184,7 @@ macro_rules! location {
         Location::Event { course: None, name: stringify!($name), index: $index }
     };
     (Event($course:ident/$name:ident[$index:literal])) => {
-        Location::Event { course: Some(::rom::course::Id::$course), name: stringify!($name), index: $index }
+        Location::Event { course: Some(::game::Course::$course), name: stringify!($name), index: $index }
     };
     (Event[$($name:ident[$index:literal],)+]) => {
         Location::Multi(vec![
@@ -196,31 +194,31 @@ macro_rules! location {
         ])
     };
     (Heart($course:ident $scene:literal[$unq:literal])) => {
-        Location::Heart { course: ::rom::course::Id::$course, scene: $scene - 1, unq: $unq }
+        Location::Heart { course: ::game::Course::$course, scene: $scene - 1, unq: $unq }
     };
     (Heart($scene:literal[$unq:literal])) => {
         Location::Heart { course: COURSE, scene: $scene - 1, unq: $unq }
     };
     (Key($course:ident $scene:literal[$unq:literal])) => {
-        Location::Key { course: ::rom::course::Id::$course, scene: $scene - 1, unq: $unq }
+        Location::Key { course: ::game::Course::$course, scene: $scene - 1, unq: $unq }
     };
     (Key($scene:literal[$unq:literal])) => {
         Location::Key { course: COURSE, scene: $scene - 1, unq: $unq }
     };
     (Maiamai($course:ident $scene:literal[$unq:literal])) => {
-        Location::Maiamai { course: ::rom::course::Id::$course, scene: $scene - 1, unq: $unq }
+        Location::Maiamai { course: ::game::Course::$course, scene: $scene - 1, unq: $unq }
     };
     (Maiamai($scene:literal[$unq:literal])) => {
         Location::Maiamai { course: COURSE, scene: $scene - 1, unq: $unq }
     };
     (SilverRupee($course:ident $scene:literal[$unq:literal])) => {
-        Location::SilverRupee { course: ::rom::course::Id::$course, scene: $scene - 1, unq: $unq }
+        Location::SilverRupee { course: ::game::Course::$course, scene: $scene - 1, unq: $unq }
     };
     (SilverRupee($scene:literal[$unq:literal])) => {
         Location::SilverRupee { course: COURSE, scene: $scene - 1, unq: $unq }
     };
     (GoldRupee($course:ident $scene:literal[$unq:literal])) => {
-        Location::GoldRupee { course: ::rom::course::Id::$course, scene: $scene - 1, unq: $unq }
+        Location::GoldRupee { course: ::game::Course::$course, scene: $scene - 1, unq: $unq }
     };
     (GoldRupee($scene:literal[$unq:literal])) => {
         Location::GoldRupee { course: COURSE, scene: $scene - 1, unq: $unq }
@@ -274,14 +272,14 @@ regions! {
 
 #[derive(Clone, Debug)]
 pub enum Location {
-    Chest { course: Id, stage: u16, unq: u16 },
-    BigChest { course: Id, stage: u16, unq: u16 },
-    Event { course: Option<Id>, name: &'static str, index: u16 },
-    Heart { course: Id, scene: u16, unq: u16 },
-    Key { course: Id, scene: u16, unq: u16 },
-    Maiamai { course: Id, scene: u16, unq: u16 },
-    SilverRupee { course: Id, scene: u16, unq: u16 },
-    GoldRupee { course: Id, scene: u16, unq: u16 },
+    Chest { course: game::Course, stage: u16, unq: u16 },
+    BigChest { course: game::Course, stage: u16, unq: u16 },
+    Event { course: Option<game::Course>, name: &'static str, index: u16 },
+    Heart { course: game::Course, scene: u16, unq: u16 },
+    Key { course: game::Course, scene: u16, unq: u16 },
+    Maiamai { course: game::Course, scene: u16, unq: u16 },
+    SilverRupee { course: game::Course, scene: u16, unq: u16 },
+    GoldRupee { course: game::Course, scene: u16, unq: u16 },
     Shop(Shop),
     Multi(Vec<Location>),
     None, // Workaround until everything is shufflable

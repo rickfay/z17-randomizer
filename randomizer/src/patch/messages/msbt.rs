@@ -1,7 +1,7 @@
 use std::str::from_utf8;
 
 use byteorder::{ByteOrder, LittleEndian};
-use rom::{course::Id, File};
+use rom::File;
 
 use crate::{Patcher, Result};
 
@@ -12,7 +12,7 @@ use crate::{Patcher, Result};
 /// Reference: https://github.com/Kinnay/Nintendo-File-Formats/wiki/MSBT-File-Format
 pub(crate) struct MsbtFile {
     filename: String,
-    course: Id,
+    course: game::Course,
     lbl1: Lbl1Block,
     #[allow(unused)]
     atr1: Atr1Block,
@@ -72,7 +72,7 @@ impl MsbtFile {
     }
 
     /// Builds a valid `.msbt` file and dumps it as a [`File<Vec<u8>>`]
-    pub(crate) fn dump(&self) -> (Id, File<Vec<u8>>) {
+    pub(crate) fn dump(&self) -> (game::Course, File<Vec<u8>>) {
         // LBL1 BLOCK
         let mut hash_table_buffer = Vec::new();
         let mut labels_buffer = Vec::new();
@@ -268,7 +268,9 @@ struct Txt2Block {
 }
 
 /// Load MSBT File
-pub(crate) fn load_msbt(patcher: &mut Patcher, course: Id, file: &str) -> Result<MsbtFile> {
+pub(crate) fn load_msbt(
+    patcher: &mut Patcher, course: game::Course, file: &str,
+) -> Result<MsbtFile> {
     let filename = format!("US_English/{}.msbt", file);
     let mut file = patcher.language(course).unwrap().flow().extract(filename.as_str()).unwrap();
 

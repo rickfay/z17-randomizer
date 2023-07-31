@@ -1,10 +1,6 @@
-use game::Item::*;
+use game::{Course::*, Item::*};
 use log::info;
-use rom::{
-    course,
-    course::{Id, Id::*},
-    scene::{Arg, Dest, Flag, Obj, Transform, Vec3},
-};
+use rom::scene::{Arg, Dest, Flag, Obj, Transform, Vec3};
 use settings::{hyrule_castle_setting::HyruleCastleSetting, logic_mode::LogicMode, Settings};
 
 use super::Patcher;
@@ -15,7 +11,7 @@ macro_rules! apply {
         $([$unq:literal].$action:ident $value:tt,)+
     },)+) => {
         $({
-            let stage = $patcher.scene(course::Id::$course, $stage - 1)?.stage_mut().get_mut();
+            let stage = $patcher.scene(::game::Course::$course, $stage - 1)?.stage_mut().get_mut();
             $(action!((stage
                 .get_obj_mut($unq)
                 .ok_or_else(|| $crate::Error::new("Could not find scene."))?
@@ -29,7 +25,7 @@ macro_rules! apply_system {
         $([$unq:literal].$action:ident $value:tt,)+
     },)+) => {
         $({
-            let stage = $patcher.scene(course::Id::$course, $stage - 1)?.stage_mut().get_mut();
+            let stage = $patcher.scene(::game::Course::$course, $stage - 1)?.stage_mut().get_mut();
             $(action!((stage
                 .get_system_mut($unq)
                 .ok_or_else(|| $crate::Error::new("Could not find scene."))?
@@ -1169,7 +1165,7 @@ fn patch_big_problem_chests(patcher: &mut Patcher, settings: &Settings) {
         return;
     }
 
-    const BIG_PROBLEM_CHESTS: [(Id, u16, u16); 21] = [
+    const BIG_PROBLEM_CHESTS: [(game::Course, u16, u16); 21] = [
         (FieldLight, 3, 303),  // Death Mountain West Ledge
         (FieldLight, 34, 71),  // Master Sword Pedestal
         (FieldLight, 35, 155), // Lake Hylia Ledge

@@ -1,4 +1,4 @@
-use rom::{course, Language, Result};
+use rom::{Language, Result};
 use strum::IntoEnumIterator;
 
 mod common;
@@ -16,7 +16,7 @@ fn iterate(language: Language) -> Result<()> {
 fn it_works() -> Result<()> {
     let game = common::load()?;
     iterate(game.boot()?)?;
-    for course in course::Id::iter() {
+    for course in game::Course::iter() {
         iterate(game.course(course).language()?)?;
     }
     Ok(())
