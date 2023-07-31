@@ -1,4 +1,5 @@
 use log::{debug, info};
+use modd::Settings;
 use rand::{rngs::StdRng, seq::IteratorRandom, Rng};
 use serde::{
     ser::{self, SerializeStruct},
@@ -14,7 +15,7 @@ use crate::{
     world::WorldGraph,
     CheckMap, Error,
     FillerItem::{self, *},
-    Result, Settings,
+    Result,
 };
 
 use self::hint_color::HintColor;

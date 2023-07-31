@@ -7,11 +7,11 @@ use std::{
 
 use arm::*;
 use game::Item::{self, *};
+use modd::{pedestal_setting::PedestalSetting::*, Settings};
 use rom::ExHeader;
-use settings::pedestal_setting::PedestalSetting::*;
 
 use super::Patcher;
-use crate::{patch::util::prize_flag, Result, SeedInfo, Settings};
+use crate::{patch::util::prize_flag, Result, SeedInfo};
 
 mod arm;
 

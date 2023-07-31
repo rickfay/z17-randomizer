@@ -7,6 +7,7 @@ use game::{
     Item,
 };
 use log::{debug, error, info};
+use modd::Settings;
 use path_absolutize::*;
 use rom::{
     demo::Timed,
@@ -18,7 +19,7 @@ use serde::Serialize;
 use tempfile::tempdir;
 use try_insert_ext::EntryInsertExt;
 
-use crate::{patch::util::*, Error, ItemExt, Layout, Result, SeedInfo, Settings};
+use crate::{patch::util::*, Error, ItemExt, Layout, Result, SeedInfo};
 
 use code::Code;
 

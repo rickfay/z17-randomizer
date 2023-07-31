@@ -1,13 +1,14 @@
 use std::collections::BTreeMap;
 
 use log::info;
+use modd::Settings;
 use serde::Serialize;
 
 use crate::{
     filler,
     model::{check::Check, progress::Progress},
     world::WorldGraph,
-    CheckMap, Result, Settings,
+    CheckMap, Result,
 };
 
 /// Perform any post-generation analysis for a seed here

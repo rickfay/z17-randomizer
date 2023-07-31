@@ -1,10 +1,10 @@
 use {
     log::{error, info},
+    modd::Settings,
     randomizer::{
         constants::VERSION,
         system::{System, UserConfig},
     },
-    settings::Settings,
     simplelog::{LevelFilter, SimpleLogger},
     structopt::StructOpt,
 };

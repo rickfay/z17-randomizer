@@ -1,7 +1,7 @@
 use game::{Course::*, Item::*};
 use log::info;
+use modd::{hyrule_castle_setting::HyruleCastleSetting, logic_mode::LogicMode, Settings};
 use rom::scene::{Arg, Dest, Flag, Obj, Transform, Vec3};
-use settings::{hyrule_castle_setting::HyruleCastleSetting, logic_mode::LogicMode, Settings};
 
 use super::Patcher;
 use crate::{patch::util::*, Result};

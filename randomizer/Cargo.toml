@@ -16,13 +16,13 @@ game = { workspace = true }
 json_comments = "0.2.1"
 lazy_static = "1.4.0"
 log = { workspace = true }
+modd = { workspace = true }
 queue = "0.3.2-final"
 path-absolutize = { workspace = true }
 rand = { workspace = true }
 rom = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
-settings = { workspace = true }
 tempfile = "3.4.0"
 thiserror = { workspace = true }
 try-insert-ext = "0.1.0"
