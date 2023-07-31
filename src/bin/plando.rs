@@ -3,17 +3,20 @@ use game::{
     Item::*,
 };
 use log::{error, info, LevelFilter};
-use modd::settings::{
-    entrance_shuffle::EntranceShuffle,
-    hyrule_castle::HyruleCastle,
-    logic::{Logic, LogicMode},
-    pedestal::Pedestal,
-    Exclude, Exclusion, Options, Settings,
+use modd::{
+    settings::{
+        entrance_shuffle::EntranceShuffle,
+        hyrule_castle::HyruleCastle,
+        logic::{Logic, LogicMode},
+        pedestal::Pedestal,
+        Exclude, Exclusion, Options, Settings,
+    },
+    Layout,
 };
 use randomizer::{
     constants::VERSION,
     system::{System, UserConfig},
-    Layout, SeedHash, SeedInfo,
+    SeedHash, SeedInfo,
 };
 use simplelog::SimpleLogger;
 use structopt::StructOpt;

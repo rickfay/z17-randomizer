@@ -5,6 +5,7 @@ use game::{
     Item::{self, *},
 };
 use log::info;
+use modd::{ItemExt, MsbfKey};
 use rom::{
     byaml,
     language::FlowChart,
@@ -14,7 +15,7 @@ use rom::{
 
 use crate::{
     patch::{util::*, DungeonPrizes},
-    Error, ItemExt, MsbfKey, Patcher, Result, Settings,
+    Error, Patcher, Result, Settings,
 };
 
 pub(crate) fn patch_dungeon_prizes(
@@ -75,13 +76,13 @@ fn patch_flowchart(patcher: &mut Patcher, prizes: &DungeonPrizes) -> Result<()> 
 #[rustfmt::skip]
 fn patch_msbf_files(patcher: &mut Patcher, prizes: &DungeonPrizes) {
     let prize_msbf_map: HashMap<Item, (&str, File<Box<[u8]>>)> = HashMap::from([
-        (SageGulley, (MsbfKey::Dark, patcher.language(DungeonDark).unwrap().flow().extract("World/Flow/Dark.msbf").unwrap())),
-        (SageOren, (MsbfKey::Water, patcher.language(DungeonWater).unwrap().flow().extract("World/Flow/Water.msbf").unwrap())),
-        (SageSeres, (MsbfKey::Dokuro, patcher.language(FieldDark).unwrap().flow().extract("World/Flow/Dokuro.msbf").unwrap())),
-        (SageOsfala, (MsbfKey::Hagure, patcher.language(IndoorDark).unwrap().flow().extract("World/Flow/Hagure.msbf").unwrap())),
+        (SageGulley, (MsbfKey::Dark.as_ref(), patcher.language(DungeonDark).unwrap().flow().extract("World/Flow/Dark.msbf").unwrap())),
+        (SageOren, (MsbfKey::Water.as_ref(), patcher.language(DungeonWater).unwrap().flow().extract("World/Flow/Water.msbf").unwrap())),
+        (SageSeres, (MsbfKey::Dokuro.as_ref(), patcher.language(FieldDark).unwrap().flow().extract("World/Flow/Dokuro.msbf").unwrap())),
+        (SageOsfala, (MsbfKey::Hagure.as_ref(), patcher.language(IndoorDark).unwrap().flow().extract("World/Flow/Hagure.msbf").unwrap())),
         /* No Impa */
-        (SageIrene, (MsbfKey::Sand, patcher.language(FieldDark).unwrap().flow().extract("World/Flow/Sand.msbf").unwrap())),
-        (SageRosso, (MsbfKey::Ice, patcher.language(DungeonIce).unwrap().flow().extract("World/Flow/Ice.msbf").unwrap())),
+        (SageIrene, (MsbfKey::Sand.as_ref(), patcher.language(FieldDark).unwrap().flow().extract("World/Flow/Sand.msbf").unwrap())),
+        (SageRosso, (MsbfKey::Ice.as_ref(), patcher.language(DungeonIce).unwrap().flow().extract("World/Flow/Ice.msbf").unwrap())),
     ]);
 
     patcher.inject_msbf(DungeonEast, prize_msbf_map.get(&prizes.ep_prize)).unwrap();

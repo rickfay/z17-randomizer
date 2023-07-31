@@ -7,7 +7,7 @@ use game::{
     Item,
 };
 use log::{debug, error, info};
-use modd::Settings;
+use modd::{ItemExt, Settings};
 use path_absolutize::*;
 use rom::{
     demo::Timed,
@@ -19,7 +19,7 @@ use serde::Serialize;
 use tempfile::tempdir;
 use try_insert_ext::EntryInsertExt;
 
-use crate::{patch::util::*, Error, ItemExt, Layout, Result, SeedInfo};
+use crate::{patch::util::*, Error, Layout, Result, SeedInfo};
 
 use code::Code;
 
@@ -27,7 +27,6 @@ mod code;
 mod flow;
 mod maps;
 mod messages;
-pub mod msbf;
 mod prizes;
 mod scenes;
 pub mod util;

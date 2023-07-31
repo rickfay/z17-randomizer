@@ -1,7 +1,8 @@
 use game::{Item, Item::*};
+use modd::item_to_str;
 use serde::{Deserialize, Serialize, Serializer};
 
-use crate::{hints::hint_color::HintColor::*, item_to_str, Error, Result};
+use crate::{hints::hint_color::HintColor::*, Error, Result};
 
 use FillerItem::*;
 
