@@ -1,4 +1,4 @@
-use crate::{regions::Area, LocationKey};
+use game::world::{Area, LocationKey};
 
 pub trait Graph {}
 

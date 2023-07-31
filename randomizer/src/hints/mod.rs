@@ -17,6 +17,8 @@ use crate::{
     Result, Settings,
 };
 
+use self::hint_color::HintColor;
+
 pub mod formatting;
 pub mod hint_color;
 mod hints;
@@ -77,7 +79,7 @@ impl Hint for LocationHint {
         let article = self.item.get_article()?;
         Ok(format!(
             "{}\nhas {}{}{}.",
-            &self.check.get_location_info().unwrap().name(),
+            &self.check.get_location_info().unwrap().name,
             article,
             if article.is_empty() { "" } else { " " },
             &self.item.as_str_colorized()
@@ -88,7 +90,7 @@ impl Hint for LocationHint {
         let article = self.item.get_article()?;
         Ok(format!(
             "{} has {}{}{}.",
-            &self.check.get_location_info().unwrap().name(),
+            &self.check.get_location_info().unwrap().name,
             article,
             if article.is_empty() { "" } else { " " },
             &self.item.as_str()
@@ -129,7 +131,7 @@ impl Hint for PathHint {
     fn get_hint(&self) -> Result<String> {
         Ok(format!(
             "{}\nis on the path to\n{}",
-            &self.check.get_location_info().unwrap().region_colorized(),
+            &HintColor::Name.format(self.check.get_location_info().unwrap().region()),
             &self.goal.as_str_colorized()
         ))
     }
@@ -167,7 +169,7 @@ impl Hint for BowOfLightHint {
         Ok(format!(
             "Did you find the {}\nin {}?",
             formatting::name("Bow of Light"),
-            &self.check.get_location_info().unwrap().region_colorized(),
+            &HintColor::Name.format(self.check.get_location_info().unwrap().region()),
         ))
     }
 

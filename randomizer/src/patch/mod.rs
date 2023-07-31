@@ -1,7 +1,11 @@
 use std::{collections::HashMap, fs, iter, path::Path};
 
 use fs_extra::dir::CopyOptions;
-use game::{Course::*, Item};
+use game::{
+    world::{self, Location, Shop},
+    Course::*,
+    Item,
+};
 use log::{debug, error, info};
 use path_absolutize::*;
 use rom::{
@@ -14,11 +18,7 @@ use serde::Serialize;
 use tempfile::tempdir;
 use try_insert_ext::EntryInsertExt;
 
-use crate::{
-    patch::util::*,
-    regions::{self, Location, Shop},
-    Error, ItemExt, Layout, Result, SeedInfo, Settings,
-};
+use crate::{patch::util::*, Error, ItemExt, Layout, Result, SeedInfo, Settings};
 
 use code::Code;
 
@@ -265,9 +265,9 @@ impl Patcher {
     }
 
     pub fn patch_locations(&mut self, layout: &Layout, settings: &Settings) -> Result<()> {
-        let regions = regions::dungeons::regions()
-            .chain(regions::hyrule::regions())
-            .chain(regions::lorule::regions());
+        let regions = world::dungeons::regions()
+            .chain(world::hyrule::regions())
+            .chain(world::lorule::regions());
         for locations in regions {
             for (key, location) in locations {
                 if let Some(item) = layout.get(&key) {

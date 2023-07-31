@@ -6,13 +6,15 @@ use std::{
     ops::Deref,
 };
 
-use game::Item::{self, *};
+use game::{
+    world::{Area, Group as GroupId, LocationKey},
+    Item::{self, *},
+};
 use log::{debug, error, info};
 use model::filler_item::{convert, FillerItem};
 use patch::Patcher;
 use path_absolutize::*;
 use rand::{rngs::StdRng, SeedableRng};
-use regions::Area;
 use rom::Rom;
 use serde::{ser::SerializeMap, Serialize, Serializer};
 use settings::Settings;
@@ -35,7 +37,6 @@ mod legacy;
 mod metrics;
 pub mod model;
 mod patch;
-pub mod regions;
 pub mod system;
 #[rustfmt::skip]
 mod world;
@@ -58,69 +59,41 @@ impl Error {
     }
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq, Hash)]
-pub struct LocationKey {
-    area: Area,
-    name: &'static str,
-}
-
-impl LocationKey {
-    pub const fn new(area: Area, name: &'static str) -> Self {
-        Self { area, name }
-    }
-
-    pub fn world(&self) -> regions::Group {
-        self.area.world()
-    }
-
-    pub fn region(&self) -> &'static str {
-        self.area.name()
-    }
-
-    pub fn region_colorized(&self) -> String {
-        self.area.name_colorized()
-    }
-
-    pub fn name(&self) -> &'static str {
-        self.name
-    }
-}
-
 /// A world layout for the patcher.
 #[derive(Clone, Debug, Default, Serialize)]
 pub struct Layout {
     #[serde(rename = "Hyrule", serialize_with = "serialize_world")]
-    hyrule: World,
+    hyrule: Group,
     #[serde(rename = "Lorule", serialize_with = "serialize_world")]
-    lorule: World,
+    lorule: Group,
     #[serde(rename = "Dungeons", serialize_with = "serialize_world")]
-    dungeons: World,
+    dungeons: Group,
 }
 
 impl Layout {
-    fn world(&self, id: regions::Group) -> &World {
+    fn group(&self, id: GroupId) -> &Group {
         match id {
-            regions::Group::Hyrule => &self.hyrule,
-            regions::Group::Lorule => &self.lorule,
-            regions::Group::Dungeons => &self.dungeons,
+            GroupId::Hyrule => &self.hyrule,
+            GroupId::Lorule => &self.lorule,
+            GroupId::Dungeons => &self.dungeons,
         }
     }
 
-    fn world_mut(&mut self, id: regions::Group) -> &mut World {
+    fn group_mut(&mut self, id: GroupId) -> &mut Group {
         match id {
-            regions::Group::Hyrule => &mut self.hyrule,
-            regions::Group::Lorule => &mut self.lorule,
-            regions::Group::Dungeons => &mut self.dungeons,
+            GroupId::Hyrule => &mut self.hyrule,
+            GroupId::Lorule => &mut self.lorule,
+            GroupId::Dungeons => &mut self.dungeons,
         }
     }
 
     fn get_area_mut(&mut self, area: Area) -> &mut BTreeMap<&'static str, Item> {
-        self.world_mut(area.world()).entry(area.name()).or_insert_with(Default::default)
+        self.group_mut(area.group()).entry(area.name()).or_insert_with(Default::default)
     }
 
     fn get(&self, key: &LocationKey) -> Option<Item> {
         let LocationKey { area, name } = key;
-        self.world(area.world()).get(area.name()).and_then(|region| region.get(name).copied())
+        self.group(area.group()).get(area.name()).and_then(|region| region.get(name).copied())
     }
 
     #[allow(unused)]
@@ -170,9 +143,9 @@ impl Layout {
     }
 }
 
-pub type World = BTreeMap<&'static str, BTreeMap<&'static str, Item>>;
+pub type Group = BTreeMap<&'static str, BTreeMap<&'static str, Item>>;
 
-fn serialize_world<S>(region: &World, ser: S) -> Result<S::Ok, S::Error>
+fn serialize_world<S>(region: &Group, ser: S) -> Result<S::Ok, S::Error>
 where
     S: Serializer,
 {

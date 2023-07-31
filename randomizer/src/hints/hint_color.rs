@@ -1,6 +1,7 @@
 use {crate::hints::formatting::*, HintColor::*};
 
 /// The color to use when displaying a particular piece of hinted text.
+#[allow(dead_code)]
 pub enum HintColor {
     Black,
     Gray,
