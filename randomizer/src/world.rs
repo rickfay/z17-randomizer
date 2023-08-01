@@ -1,7 +1,8 @@
 use std::collections::HashMap;
 
-use game::world as game_world;
+use game::world::{self as game_world, LocationKey};
 use log::info;
+use modd::filler_item::FillerItem::{self, *};
 
 use crate::{
     legacy::path::Path,
@@ -12,8 +13,6 @@ use crate::{
         logic::Logic,
         progress::Progress,
     },
-    FillerItem::{self, *},
-    LocationKey,
 };
 
 pub type WorldGraph = HashMap<Location, LocationNode>;

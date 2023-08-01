@@ -11,13 +11,9 @@ use modd::{
         pedestal::Pedestal,
         Exclude, Exclusion, Options, Settings,
     },
-    Layout,
+    Layout, Mod,
 };
-use randomizer::{
-    constants::VERSION,
-    system::{System, UserConfig},
-    SeedHash, SeedInfo,
-};
+use randomizer::system::{System, UserConfig};
 use simplelog::SimpleLogger;
 use structopt::StructOpt;
 
@@ -51,22 +47,18 @@ fn main() {
                 Full Error: {}\n", error);
     });
 
-    let seed = 0;
-    let settings = &plando_settings();
+    let settings = plando_settings();
+    settings.log_settings();
 
-    let seed_info = SeedInfo {
-        seed,
-        version: VERSION,
-        hash: SeedHash::new(seed, settings),
+    let mod_ = Mod {
+        name: "".into(),
+        hash: None,
         settings,
         layout: build_layout(),
-        metrics: Default::default(),
         hints: Default::default(),
     };
 
-    seed_info.settings.log_settings();
-
-    match randomizer::patch_seed(&seed_info, &user_config, args.no_patch, args.no_spoiler) {
+    match randomizer::patch::patch(&mod_, &user_config, args.no_patch, args.no_spoiler) {
         Ok(_) => {
             println!();
             info!("Successfully Generated ALBW Plandomizer Seed");

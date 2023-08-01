@@ -74,8 +74,13 @@ fn main() {
         info!("Preset:                         {}", preset_name);
         info!("Version:                        {}", VERSION);
 
-        match randomizer::generate_seed(seed, &settings, &user_config, opt.no_patch, opt.no_spoiler)
-        {
+        match randomizer::generate_seed(
+            seed,
+            settings.clone(),
+            &user_config,
+            opt.no_patch,
+            opt.no_spoiler,
+        ) {
             Ok(_) => {
                 println!();
                 info!("Successfully Generated ALBWR Seed: {}", seed);

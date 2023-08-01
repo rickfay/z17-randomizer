@@ -440,7 +440,6 @@ dependencies = [
  "fs_extra",
  "game",
  "json_comments",
- "lazy_static",
  "log",
  "modd",
  "path-absolutize",

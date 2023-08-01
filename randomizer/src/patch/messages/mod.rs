@@ -6,31 +6,31 @@ use game::{
     Item::{PendantPower, PendantWisdom},
 };
 use log::info;
+use modd::{hints::formatting::*, Mod};
 
 use crate::{
-    hints::{formatting::*, Hint},
     patch::messages::{hint_ghosts::HintGhost, msbt::load_msbt},
-    LocationKey, Patcher, Result, SeedInfo,
+    Error, LocationKey, Patcher, Result,
 };
 
 mod hint_ghosts;
 mod msbt;
 
 /// Patch MSBT Message Files
-pub fn patch_messages(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
+pub fn patch_messages(patcher: &mut Patcher, mod_: &Mod) -> Result<()> {
     info!("Patching MSBT Files...");
 
     // debug(patcher, FieldLight, "FieldLight_05");
 
-    patch_file_select(patcher, seed_info)?;
+    patch_file_select(patcher, mod_)?;
     // patch_ravio(patcher)?;
     patch_great_rupee_fairy(patcher)?;
 
     // patch_street_merchant(patcher, seed_info)?;
-    patch_sahasrahla(patcher, seed_info)?;
-    patch_general_hint_ghosts(patcher, seed_info)?;
-    patch_hint_ghosts(patcher, seed_info)?;
-    patch_bow_of_light(patcher, seed_info)?;
+    patch_sahasrahla(patcher, mod_)?;
+    patch_general_hint_ghosts(patcher, mod_)?;
+    patch_hint_ghosts(patcher, mod_)?;
+    patch_bow_of_light(patcher, mod_)?;
 
     Ok(())
 }
@@ -44,12 +44,14 @@ fn debug(patcher: &mut Patcher, course: game::Course, file: &str) {
     std::process::exit(0);
 }
 
-fn patch_file_select(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
-    let mut file_select_b = load_msbt(patcher, LanguageBoot, "Mn_FileSelectB").unwrap();
-    file_select_b.set("HeadLineText_00", &seed_info.hash.item_hash);
-    file_select_b.set("HeadLineText_01", &seed_info.hash.item_hash);
-    file_select_b.set("HeadLineText_10", &seed_info.hash.item_hash);
-    patcher.update(file_select_b.dump())?;
+fn patch_file_select(patcher: &mut Patcher, mod_: &Mod) -> Result<()> {
+    if let Some(ref hash) = mod_.hash {
+        let mut file_select_b = load_msbt(patcher, LanguageBoot, "Mn_FileSelectB").unwrap();
+        file_select_b.set("HeadLineText_00", hash);
+        file_select_b.set("HeadLineText_01", hash);
+        file_select_b.set("HeadLineText_10", hash);
+        patcher.update(file_select_b.dump())?;
+    }
 
     // let mut file_select_t = load_msbt(patcher, LanguageBoot, "Mn_FileSelectT").unwrap();
     // file_select_t.set("T_FileNumber_00", format!("Hash: {:0>5}", seed_info.hash));
@@ -78,7 +80,10 @@ fn patch_ravio(patcher: &mut Patcher) -> Result<()> {
 
 fn patch_great_rupee_fairy(patcher: &mut Patcher) -> Result<()> {
     let mut grf = load_msbt(patcher, CaveDark, "Cave").unwrap();
-    grf.set("CaveDark29_LuckyFairy_00", &format!("Throw Rupees into the fountain?\n{}", *CHOICE_2));
+    grf.set(
+        "CaveDark29_LuckyFairy_00",
+        &format!("Throw Rupees into the fountain?\n{}", choice_2()),
+    );
     grf.set("CaveDark29_LuckyFairy_01", "Throw 3000");
     grf.set("CaveDark29_LuckyFairy_02", "Don't throw any");
     grf.set("CaveDark29_LuckyFairy_03", "1234567"); // shorten string so file matches OG size FIXME
@@ -88,12 +93,12 @@ fn patch_great_rupee_fairy(patcher: &mut Patcher) -> Result<()> {
 }
 
 #[allow(unused)]
-fn patch_street_merchant(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
-    let item_left = seed_info
+fn patch_street_merchant(patcher: &mut Patcher, mod_: &Mod) -> Result<()> {
+    let item_left = mod_
         .layout
         .get(&LocationKey::new(world::hyrule::kakariko::village::AREA, "Street Merchant (Left)"))
         .unwrap();
-    let item_right = seed_info
+    let item_right = mod_
         .layout
         .get(&LocationKey::new(world::hyrule::kakariko::village::AREA, "Street Merchant (Right)"))
         .unwrap();
@@ -104,8 +109,8 @@ fn patch_street_merchant(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<
         &format!(
             "That's a {}.\nUseful for a bunch of things.\nHow about {}?{}",
             name(item_left.as_ref()),
-            *PRICE,
-            *CHOICE_2
+            price(),
+            choice_2()
         ),
     );
 
@@ -116,8 +121,8 @@ fn patch_street_merchant(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<
         of remarkable quality. Smooth as silk!\n\
         And for you? Only {}!{}",
             name(item_right.as_ref()),
-            *PRICE,
-            *CHOICE_2
+            price(),
+            choice_2()
         ),
     );
     street_merchant.set(
@@ -139,9 +144,9 @@ fn patch_street_merchant(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<
 
 /// Sahasrahla gives out the locations of the Red & Blue Pendants
 #[allow(unused)]
-fn patch_sahasrahla(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
-    let (pow_region, _) = seed_info.layout.find_single(PendantWisdom).unwrap();
-    let (pop_region, _) = seed_info.layout.find_single(PendantPower).unwrap();
+fn patch_sahasrahla(patcher: &mut Patcher, mod_: &Mod) -> Result<()> {
+    let (pow_region, _) = mod_.layout.find_single(PendantWisdom).unwrap();
+    let (pop_region, _) = mod_.layout.find_single(PendantPower).unwrap();
 
     let mut sahasrahla = load_msbt(patcher, FieldLight, "FieldLight_1B")?;
     sahasrahla.set(
@@ -164,8 +169,8 @@ fn patch_sahasrahla(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
     Ok(())
 }
 
-fn patch_general_hint_ghosts(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
-    let price = seed_info.settings.logic.hint_ghost_price.to_string();
+fn patch_general_hint_ghosts(patcher: &mut Patcher, mod_: &Mod) -> Result<()> {
+    let price = mod_.settings.logic.hint_ghost_price.to_string();
 
     let mut hint_ghost = load_msbt(patcher, LanguageBoot, "HintGhost")?;
     hint_ghost.set(
@@ -174,7 +179,7 @@ fn patch_general_hint_ghosts(patcher: &mut Patcher, seed_info: &SeedInfo) -> Res
             "Buy a {} for {}?{}",
             blue("Ghost Hint"),
             attention(format!("{} Rupees", price.as_str()).as_str()),
-            *CHOICE_2
+            choice_2()
         ),
     );
     hint_ghost.set("HintGhost_02_select_00", "Buy");
@@ -184,8 +189,8 @@ fn patch_general_hint_ghosts(patcher: &mut Patcher, seed_info: &SeedInfo) -> Res
 
 const EMPTY_MSG: &str = "\0\0";
 
-fn patch_hint_ghosts(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
-    if seed_info.hints.always_hints.is_empty() {
+fn patch_hint_ghosts(patcher: &mut Patcher, mod_: &Mod) -> Result<()> {
+    if mod_.hints.always_hints.is_empty() {
         info!("No Ghost Hints generated.");
         return Ok(());
     } else {
@@ -196,44 +201,53 @@ fn patch_hint_ghosts(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> 
     let mut msbt_hint_map = BTreeMap::new();
 
     // Path Hints
-    for path_hint in &seed_info.hints.path_hints {
+    for path_hint in &mod_.hints.path_hints {
         // Make mutable copy of hint for processing
-        let path_hint = &mut path_hint.clone();
+        //let path_hint = &mut path_hint.clone();
 
-        for ghost in &path_hint.ghosts {
+        for ghost in path_hint.ghosts() {
             let hint_ghost = HintGhost::try_from(*ghost)?;
             let entry = msbt_hint_map
                 .entry((hint_ghost.course, hint_ghost.msbt_file))
                 .or_insert_with(BTreeMap::new);
-            entry.insert(hint_ghost.msg_label, path_hint.get_hint()?);
+            entry.insert(
+                hint_ghost.msg_label,
+                path_hint.get_hint().ok_or_else(|| Error::new("Could not get hint"))?,
+            );
         }
     }
 
     // Always Hints
-    for always_hint in &seed_info.hints.always_hints {
+    for always_hint in &mod_.hints.always_hints {
         // Make mutable copy of hint for processing
-        let always_hint = &mut always_hint.clone();
+        //let always_hint = &mut always_hint.clone();
 
-        for ghost in &always_hint.ghosts {
+        for ghost in always_hint.ghosts() {
             let hint_ghost = HintGhost::try_from(*ghost)?;
             let entry = msbt_hint_map
                 .entry((hint_ghost.course, hint_ghost.msbt_file))
                 .or_insert_with(BTreeMap::new);
-            entry.insert(hint_ghost.msg_label, always_hint.get_hint()?);
+            entry.insert(
+                hint_ghost.msg_label,
+                always_hint.get_hint().ok_or_else(|| Error::new("Could not get hint"))?,
+            );
         }
     }
 
     // Sometimes Hints
-    for sometimes_hint in &seed_info.hints.sometimes_hints {
+    for sometimes_hint in &mod_.hints.sometimes_hints {
         // Make mutable copy of hint for processing
-        let sometimes_hint = &mut sometimes_hint.clone();
+        //let sometimes_hint = &mut sometimes_hint.clone();
 
-        for ghost in &sometimes_hint.ghosts {
+        for ghost in sometimes_hint.ghosts() {
             let hint_ghost = HintGhost::try_from(*ghost)?;
             let entry = msbt_hint_map
                 .entry((hint_ghost.course, hint_ghost.msbt_file))
                 .or_insert_with(BTreeMap::new);
-            entry.insert(hint_ghost.msg_label, sometimes_hint.get_hint()?);
+            entry.insert(
+                hint_ghost.msg_label,
+                sometimes_hint.get_hint().ok_or_else(|| Error::new("Could not get hint"))?,
+            );
         }
     }
 
@@ -269,12 +283,15 @@ fn patch_hint_ghosts(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> 
     Ok(())
 }
 
-fn patch_bow_of_light(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
-    if let Some(bow_of_light_hint) = seed_info.hints.bow_of_light_hint.as_ref() {
+fn patch_bow_of_light(patcher: &mut Patcher, mod_: &Mod) -> Result<()> {
+    if let Some(bow_of_light_hint) = mod_.hints.bow_of_light_hint.as_ref() {
         let mut msbt = load_msbt(patcher, IndoorDark, "HintGhostDark")?;
         // Most of HintGhostDark.msbt is a duplicate of the identical file under FieldDark, but it's not used. Choosing
         // an easily testable ghost Key to repurpose for a new Ghost in Hilda's Study.
-        msbt.set("HintGhost_FieldDark_2C_014", &bow_of_light_hint.get_hint()?);
+        msbt.set(
+            "HintGhost_FieldDark_2C_014",
+            &bow_of_light_hint.get_hint().ok_or_else(|| Error::new("Could not get hint"))?,
+        );
         // fixme also dumb: clear out unused messages to keep filesize down.
         msbt.set("HintGhost_FieldDark_02_001", EMPTY_MSG);
         msbt.set("HintGhost_FieldDark_03_002", EMPTY_MSG);

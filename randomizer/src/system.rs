@@ -7,9 +7,10 @@ use std::{
 
 use json_comments::StripComments;
 use log::info;
+use modd::Settings;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
-use crate::{constants::CONFIG_FILE_NAME, Settings};
+use crate::constants::CONFIG_FILE_NAME;
 
 pub type Result<T, E = Error> = std::result::Result<T, E>;
 

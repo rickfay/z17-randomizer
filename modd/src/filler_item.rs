@@ -1,8 +1,7 @@
 use game::{Item, Item::*};
-use modd::item_to_str;
 use serde::{Deserialize, Serialize, Serializer};
 
-use crate::{hints::hint_color::HintColor::*, Error, Result};
+use crate::{hints::HintColor::*, item_to_str, Error, Result};
 
 use FillerItem::*;
 
@@ -541,7 +540,7 @@ pub enum FillerItem {
 }
 
 impl FillerItem {
-    pub(crate) fn get_all_ghosts() -> Vec<Self> {
+    pub fn get_all_ghosts() -> Vec<Self> {
         vec![
             HintGhostLostWoodsMaze1,
             HintGhostLostWoodsMaze2,

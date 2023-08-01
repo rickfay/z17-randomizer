@@ -1,12 +1,12 @@
 use std::collections::HashSet;
 
-use modd::settings::{hyrule_castle::HyruleCastle, pedestal::Pedestal, Settings};
+use modd::{
+    filler_item::FillerItem::{self, *},
+    settings::{hyrule_castle::HyruleCastle, pedestal::Pedestal, Settings},
+};
 
-use crate::{
-    item_pools::{
-        get_gold_rupee_pool, get_maiamai_pool, get_purple_rupee_pool, get_silver_rupee_pool,
-    },
-    model::filler_item::{FillerItem, FillerItem::*},
+use crate::item_pools::{
+    get_gold_rupee_pool, get_maiamai_pool, get_purple_rupee_pool, get_silver_rupee_pool,
 };
 
 #[derive(Clone)]

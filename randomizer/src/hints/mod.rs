@@ -1,10 +1,9 @@
 use log::{debug, info};
-use modd::Settings;
-use rand::{rngs::StdRng, seq::IteratorRandom, Rng};
-use serde::{
-    ser::{self, SerializeStruct},
-    Serialize, Serializer,
+use modd::{
+    hints::{formatting, Hint, HintColor, Hints},
+    Settings,
 };
+use rand::{rngs::StdRng, seq::IteratorRandom, Rng};
 
 use crate::{
     convert,
@@ -18,25 +17,7 @@ use crate::{
     Result,
 };
 
-use self::hint_color::HintColor;
-
-pub mod formatting;
-pub mod hint_color;
-mod hints;
-
-#[derive(Default, Debug, Clone, Serialize)]
-pub struct Hints {
-    pub path_hints: Vec<PathHint>,
-    pub always_hints: Vec<LocationHint>,
-    pub sometimes_hints: Vec<LocationHint>,
-    pub bow_of_light_hint: Option<BowOfLightHint>,
-}
-
-/// Basic functionality for all in-game hints.
-pub(crate) trait Hint: Serialize {
-    fn get_hint(&self) -> Result<String>;
-    fn get_hint_spoiler(&self) -> Result<String>;
-}
+mod text;
 
 /// A [`Hint`] that exposes the item at a certain location
 #[derive(Debug, Clone)]
@@ -76,9 +57,9 @@ impl LocationHint {
 }
 
 impl Hint for LocationHint {
-    fn get_hint(&self) -> Result<String> {
-        let article = self.item.get_article()?;
-        Ok(format!(
+    fn get_hint(&self) -> Option<String> {
+        let article = self.item.get_article().ok()?;
+        Some(format!(
             "{}\nhas {}{}{}.",
             &self.check.get_location_info().unwrap().name,
             article,
@@ -87,9 +68,9 @@ impl Hint for LocationHint {
         ))
     }
 
-    fn get_hint_spoiler(&self) -> Result<String> {
-        let article = self.item.get_article()?;
-        Ok(format!(
+    fn get_hint_spoiler(&self) -> Option<String> {
+        let article = self.item.get_article().ok()?;
+        Some(format!(
             "{} has {}{}{}.",
             &self.check.get_location_info().unwrap().name,
             article,
@@ -97,17 +78,9 @@ impl Hint for LocationHint {
             &self.item.as_str()
         ))
     }
-}
 
-impl Serialize for LocationHint {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        let mut ser = serializer.serialize_struct("LocationHint", 2)?;
-        ser.serialize_field("hint", &self.get_hint_spoiler().map_err(ser::Error::custom)?)?;
-        ser.serialize_field("ghosts", &self.ghosts)?;
-        ser.end()
+    fn ghosts(&self) -> &[FillerItem] {
+        &self.ghosts
     }
 }
 
@@ -129,32 +102,24 @@ pub struct PathHint {
 }
 
 impl Hint for PathHint {
-    fn get_hint(&self) -> Result<String> {
-        Ok(format!(
+    fn get_hint(&self) -> Option<String> {
+        Some(format!(
             "{}\nis on the path to\n{}",
             &HintColor::Name.format(self.check.get_location_info().unwrap().region()),
             &self.goal.as_str_colorized()
         ))
     }
 
-    fn get_hint_spoiler(&self) -> Result<String> {
-        Ok(format!(
+    fn get_hint_spoiler(&self) -> Option<String> {
+        Some(format!(
             "{} is on the path to {}",
             self.check.get_location_info().unwrap().region(),
             self.goal.as_str()
         ))
     }
-}
 
-impl Serialize for PathHint {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        let mut ser = serializer.serialize_struct("PathHint", 2)?;
-        ser.serialize_field("hint", &self.get_hint_spoiler().map_err(ser::Error::custom)?)?;
-        ser.serialize_field("ghosts", &self.ghosts)?;
-        ser.end()
+    fn ghosts(&self) -> &[FillerItem] {
+        &self.ghosts
     }
 }
 
@@ -166,28 +131,23 @@ pub struct BowOfLightHint {
 }
 
 impl Hint for BowOfLightHint {
-    fn get_hint(&self) -> Result<String> {
-        Ok(format!(
+    fn get_hint(&self) -> Option<String> {
+        Some(format!(
             "Did you find the {}\nin {}?",
             formatting::name("Bow of Light"),
             &HintColor::Name.format(self.check.get_location_info().unwrap().region()),
         ))
     }
 
-    fn get_hint_spoiler(&self) -> Result<String> {
-        Ok(format!(
+    fn get_hint_spoiler(&self) -> Option<String> {
+        Some(format!(
             "Did you find the Bow of Light in {}?",
             &self.check.get_location_info().unwrap().region()
         ))
     }
-}
 
-impl Serialize for BowOfLightHint {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        serializer.serialize_str(&self.get_hint_spoiler().map_err(ser::Error::custom)?)
+    fn ghosts(&self) -> &[FillerItem] {
+        &[]
     }
 }
 
@@ -201,29 +161,26 @@ pub fn generate_hints(
     let mut taken_checks: Vec<&'static str> = Vec::new();
     let mut taken_ghosts: Vec<FillerItem> = Vec::new();
 
-    let mut always_hints = generate_always_hints(
+    let always_hints = generate_always_hints(
         settings, world_graph, check_map, &mut taken_checks, &mut taken_ghosts, rng,
     )?;
-    let mut path_hints = generate_path_hints(
+    let path_hints = generate_path_hints(
         settings, rng, world_graph, check_map, &mut taken_checks, &mut taken_ghosts,
     )?;
 
     let num_sometimes_hints = NUM_TOTAL_HINTS - always_hints.len() - path_hints.len();
-    let mut sometimes_hints = generate_sometimes_hints(
+    let sometimes_hints = generate_sometimes_hints(
         settings, world_graph, rng, check_map, num_sometimes_hints, &taken_checks,
         &mut taken_ghosts,
     )?;
 
-    duplicate_hints(
-        &mut taken_ghosts, &mut always_hints, &mut path_hints, &mut sometimes_hints,
-        NUM_TOTAL_HINTS, rng,
-    );
-
-    let bow_of_light_hint = Some(generate_bow_of_light_hint(world_graph, check_map));
+    let bow_of_light_hint =
+        Some(Box::new(generate_bow_of_light_hint(world_graph, check_map)) as Box<_>);
 
     Ok(Hints { path_hints, always_hints, sometimes_hints, bow_of_light_hint })
 }
 
+#[allow(unused)]
 fn duplicate_hints(
     taken_ghosts: &mut Vec<FillerItem>, always_hints: &mut Vec<LocationHint>,
     path_hints: &mut Vec<PathHint>, sometimes_hints: &mut Vec<LocationHint>,
@@ -286,7 +243,7 @@ fn generate_bow_of_light_hint(
 fn generate_always_hints(
     settings: &Settings, world_graph: &mut WorldGraph, check_map: &mut CheckMap,
     taken_checks: &mut Vec<&'static str>, taken_ghosts: &mut Vec<FillerItem>, rng: &mut StdRng,
-) -> Result<Vec<LocationHint>> {
+) -> Result<Vec<Box<dyn Hint>>> {
     let mut always_checks = vec![
         "Master Sword Pedestal", "Great Rupee Fairy", "Blacksmith (Lorule)", "Bouldering Guy",
         "Irene", "Rosso", "Osfala", "Wildlife Clearing Stump",
@@ -312,7 +269,7 @@ fn generate_always_hints(
         if location_hint.choose_ghost(rng, taken_ghosts).is_err() {
             continue;
         }
-        always_hints.push(location_hint);
+        always_hints.push(Box::new(location_hint) as Box<_>);
         taken_checks.push(check_name);
     }
 
@@ -363,7 +320,7 @@ fn generate_location_hint(
 fn generate_sometimes_hints(
     settings: &Settings, world_graph: &mut WorldGraph, rng: &mut StdRng, check_map: &mut CheckMap,
     num_sometimes_hints: usize, taken_checks: &[&'static str], taken_ghosts: &mut Vec<FillerItem>,
-) -> Result<Vec<LocationHint>> {
+) -> Result<Vec<Box<dyn Hint>>> {
     let mut sometimes_checks = vec![
         "Bee Guy (2)",
         "Behind Ice Gimos",
@@ -488,7 +445,7 @@ fn generate_sometimes_hints(
         if location_hint.choose_ghost(rng, taken_ghosts).is_err() {
             continue;
         }
-        sometimes_hints.push(location_hint);
+        sometimes_hints.push(Box::new(location_hint) as Box<_>);
 
         sometimes_hint_count += 1;
     }
@@ -507,7 +464,7 @@ fn generate_sometimes_hints(
 fn generate_path_hints(
     settings: &Settings, rng: &mut StdRng, world_graph: &mut WorldGraph, check_map: &mut CheckMap,
     taken_checks: &mut Vec<&'static str>, taken_ghosts: &mut Vec<FillerItem>,
-) -> Result<Vec<PathHint>> {
+) -> Result<Vec<Box<dyn Hint>>> {
     let mut bosses_and_prize_locations: Vec<(FillerItem, &str)> = vec![
         (Yuga, "Eastern Palace Prize"),
         (Margomill, "House of Gales Prize"),
@@ -524,8 +481,8 @@ fn generate_path_hints(
 
     bosses_and_prize_locations = shuffle(rng, bosses_and_prize_locations);
 
-    let mut chosen_paths: Vec<PathHint> = Vec::new();
-    let mut backup_paths: Vec<PathHint> = Vec::new();
+    let mut chosen_paths = Vec::new();
+    let mut backup_paths = Vec::new();
     let mut extra_paths_needed = 0;
 
     for (goal, prize_loc) in bosses_and_prize_locations {
@@ -542,7 +499,7 @@ fn generate_path_hints(
             if let Some(chosen_path) =
                 choose_path_hint(&mut potential_paths, taken_checks, taken_ghosts, rng)
             {
-                chosen_paths.push(chosen_path);
+                chosen_paths.push(Box::new(chosen_path) as Box<_>);
                 backup_paths.extend(potential_paths);
             } else {
                 debug!("No Path Hints possible for Goal: {}", goal.as_str());
@@ -563,7 +520,7 @@ fn generate_path_hints(
             if let Some(backup_path) =
                 choose_path_hint(&mut backup_paths, taken_checks, taken_ghosts, rng)
             {
-                chosen_paths.push(backup_path);
+                chosen_paths.push(Box::new(backup_path) as Box<_>);
                 extra_paths_added += 1;
             }
         }

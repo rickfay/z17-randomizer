@@ -1,8 +1,11 @@
 use std::collections::{BTreeMap, HashSet};
 
-use game::Item;
+use game::{world::LocationKey, Item};
 use log::{error, info};
-use modd::settings::{logic::LogicMode::*, Settings};
+use modd::{
+    filler_item::FillerItem::{self, *},
+    settings::{logic::LogicMode::*, Settings},
+};
 use queue::Queue;
 use rand::{rngs::StdRng, Rng};
 
@@ -11,9 +14,7 @@ use crate::{
     item_pools::{get_maiamai_pool, Pool},
     model::{check::Check, location::Location, progress::Progress},
     world::WorldGraph,
-    CheckMap, Error,
-    FillerItem::{self, *},
-    LocationKey, Result,
+    CheckMap, Error, Result,
 };
 
 /// Fill Seed such that All Locations are Reachable

@@ -6,11 +6,14 @@ use game::{
 };
 use log::debug;
 use serde::{ser::SerializeMap, Serialize, Serializer};
-
-pub mod settings;
-
-pub use settings::Settings;
 use strum::AsRefStr;
+
+use hints::Hints;
+pub use settings::Settings;
+
+pub mod filler_item;
+pub mod hints;
+pub mod settings;
 
 pub type Result<T, E = Error> = ::std::result::Result<T, E>;
 
@@ -25,6 +28,16 @@ impl Error {
         Self::Message(msg.into())
     }
 }
+
+#[derive(Debug, Serialize)]
+pub struct Mod {
+    pub name: String,
+    pub hash: Option<String>,
+    pub settings: Settings,
+    pub layout: Layout,
+    pub hints: Hints,
+}
+
 /// A world layout for the patcher.
 #[derive(Clone, Debug, Default, Serialize)]
 pub struct Layout {

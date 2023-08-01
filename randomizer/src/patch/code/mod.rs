@@ -7,11 +7,14 @@ use std::{
 
 use arm::*;
 use game::Item::{self, *};
-use modd::settings::{pedestal::Pedestal::*, Settings};
+use modd::{
+    settings::{pedestal::Pedestal::*, Settings},
+    Mod,
+};
 use rom::ExHeader;
 
 use super::Patcher;
-use crate::{patch::util::prize_flag, Result, SeedInfo};
+use crate::{patch::util::prize_flag, Result};
 
 mod arm;
 
@@ -143,7 +146,7 @@ impl Ips {
     }
 }
 
-pub fn create(patcher: &Patcher, seed_info: &SeedInfo) -> Result<Code> {
+pub fn create(patcher: &Patcher, mod_: &Mod) -> Result<Code> {
     let mut code = Code::new(patcher.game.exheader());
 
     // Enable Y Button
@@ -153,11 +156,11 @@ pub fn create(patcher: &Patcher, seed_info: &SeedInfo) -> Result<Code> {
     code.overwrite(0x17A430, [0xFF]);
     rental_items(&mut code);
     progressive_items(&mut code);
-    bracelet(&mut code, seed_info.settings);
+    bracelet(&mut code, &mod_.settings);
     ore_progress(&mut code);
     merchant(&mut code);
-    configure_pedestal_requirements(&mut code, seed_info.settings)?;
-    night_mode(&mut code, seed_info.settings);
+    configure_pedestal_requirements(&mut code, &mod_.settings)?;
+    night_mode(&mut code, &mod_.settings);
     show_hint_ghosts(&mut code);
 
     // fix castle barrier?
@@ -258,7 +261,7 @@ pub fn create(patcher: &Patcher, seed_info: &SeedInfo) -> Result<Code> {
     code.patch(0x1D6DBC, [ldr(R1, (R4, 0x2E)), mov(R0, R0)]);
 
     // Premium Milk
-    if seed_info.layout.find_single(MessageBottle).is_none() {
+    if mod_.layout.find_single(MessageBottle).is_none() {
         // This code makes the Premium Milk work correctly when picked up without having first picked up the Letter.
         // This patch is only applied when the Milk is shuffled in the rando instead of the Letter.
         // If it's desired to have both shuffled at once then this code needs to be re-written.

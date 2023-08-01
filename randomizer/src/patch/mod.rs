@@ -1,4 +1,4 @@
-use std::{collections::HashMap, fs, iter, path::Path};
+use std::{collections::HashMap, fs, io::Write, iter, path::Path};
 
 use fs_extra::dir::CopyOptions;
 use game::{
@@ -7,7 +7,7 @@ use game::{
     Item,
 };
 use log::{debug, error, info};
-use modd::{ItemExt, Settings};
+use modd::{ItemExt, Mod, Settings};
 use path_absolutize::*;
 use rom::{
     demo::Timed,
@@ -19,7 +19,7 @@ use serde::Serialize;
 use tempfile::tempdir;
 use try_insert_ext::EntryInsertExt;
 
-use crate::{patch::util::*, Error, Layout, Result, SeedInfo};
+use crate::{patch::util::*, system::UserConfig, Error, Layout, Result};
 
 use code::Code;
 
@@ -329,7 +329,7 @@ impl Patcher {
         Ok(())
     }
 
-    pub fn prepare(mut self, seed_info: &SeedInfo) -> Result<Patches> {
+    pub fn prepare(mut self, mod_: &Mod) -> Result<Patches> {
         let common_archive = self.game.common()?;
         let mut item_actors = HashMap::new();
 
@@ -374,13 +374,13 @@ impl Patcher {
         // just testin'
         // let sarc = jack::open_szs(&self.game, "Archive/ActorProfile.szs");
 
-        let prizes = get_dungeon_prizes(&seed_info.layout);
+        let prizes = get_dungeon_prizes(&mod_.layout);
         let free = self.rentals[8];
-        flow::apply(&mut self, free, seed_info.settings)?;
-        messages::patch_messages(&mut self, seed_info)?;
-        prizes::patch_dungeon_prizes(&mut self, &prizes, seed_info.settings)?;
+        flow::apply(&mut self, free, &mod_.settings)?;
+        messages::patch_messages(&mut self, mod_)?;
+        prizes::patch_dungeon_prizes(&mut self, &prizes, &mod_.settings)?;
         maps::patch_maps(&mut self, &prizes)?;
-        scenes::patch_byaml_files(&mut self, seed_info.settings)?;
+        scenes::patch_byaml_files(&mut self, &mod_.settings)?;
 
         {
             let Self { ref rentals, ref merchant, ref mut courses, .. } = self;
@@ -394,7 +394,7 @@ impl Patcher {
             kakariko_actors.add(item_actors.get(&merchant[0]).unwrap().clone())?;
             kakariko_actors.add(item_actors.get(&merchant[2]).unwrap().clone())?;
         }
-        let code = code::create(&self, seed_info)?;
+        let code = code::create(&self, mod_)?;
         let Self { game, boot, courses, .. } = self;
         let mut romfs = Files(vec![]);
 
@@ -418,7 +418,7 @@ impl Patcher {
                 romfs.add_serialize(stage);
             }
         }
-        for cutscene in cutscenes(&game, seed_info.settings) {
+        for cutscene in cutscenes(&game, &mod_.settings) {
             romfs.add(cutscene?);
         }
         Ok(Patches { game, code, romfs })
@@ -658,4 +658,78 @@ fn truncate_cutscene(mut demo: Demo) -> Demo {
     demo.retain(Timed::is_known);
     demo.finish_mut().set_timestamp(0);
     demo
+}
+
+pub fn patch(mod_: &Mod, user_config: &UserConfig, no_patch: bool, no_spoiler: bool) -> Result<()> {
+    println!();
+
+    if !no_patch {
+        info!("Starting Patch Process...");
+
+        let game = Rom::load(user_config.rom()).map_err(|err| Error::new(err.to_string()))?;
+        let mut patcher = Patcher::new(game)?;
+
+        info!("ROM Loaded.\n");
+
+        patcher.patch_locations(&mod_.layout, &mod_.settings)?;
+        let patches = patcher.prepare(mod_)?;
+        patches.dump(user_config.output())?;
+    }
+    if !no_spoiler {
+        let path = user_config.output().join(format!("{}_spoiler.json", mod_.name));
+        info!("Writing Spoiler Log to:         {}", &path.absolutize()?.display());
+
+        //let spoiler = Spoiler::from(seed_info);
+
+        let mut serialized = serde_json::to_string_pretty(&mod_).unwrap();
+        align_json_values(&mut serialized)?;
+
+        write!(fs::File::create(path)?, "{}", serialized)
+            .expect("Could not write the spoiler log.");
+    }
+    Ok(())
+}
+
+/// Align JSON Key-Values for readability
+/// Can't find a decent library for this, so we're doing it manually
+fn align_json_values(json: &mut String) -> Result<()> {
+    const KEY_ALIGNMENT: usize = 56;
+    let mut index_colon = 0;
+    while index_colon < json.len() {
+        let index_colon_opt = json[index_colon..].find(':');
+        if index_colon_opt.is_none() {
+            break;
+        }
+        index_colon += index_colon_opt.unwrap();
+        if ['{', '['].contains(&json[index_colon..].chars().nth(2).unwrap()) {
+            index_colon += 1;
+            continue;
+        }
+
+        let index_prev_new_line = json[..index_colon].rfind('\n').ok_or_else(|| {
+            Error::new(format!("Couldn't fine new line character before index: {}", index_colon))
+        })?;
+        let line_length_up_to_value = index_colon - index_prev_new_line;
+
+        if KEY_ALIGNMENT < line_length_up_to_value {
+            error!("Failed to write Spoiler Log");
+            error!(
+                "JSON Key Alignment value smaller than line length up to that point: {} < {}",
+                KEY_ALIGNMENT, line_length_up_to_value
+            );
+            return Err(Error::new(format!(
+                "Problem line: {}",
+                &json[index_prev_new_line..index_colon]
+            )));
+        }
+
+        let spaces_to_add = KEY_ALIGNMENT - line_length_up_to_value;
+
+        json.insert_str(
+            index_colon + 1,
+            (0..spaces_to_add).map(|_| " ").collect::<String>().as_str(),
+        );
+        index_colon += 1;
+    }
+    Ok(())
 }
