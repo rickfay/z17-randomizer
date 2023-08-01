@@ -13,7 +13,7 @@ use game::{
     Item,
 };
 use log::{debug, error, info};
-use modd::{ItemExt, Layout, Mod, Settings};
+use modd::{ItemExt, Items, Mod, Settings};
 use path_absolutize::*;
 use rom::{
     demo::Timed,
@@ -294,7 +294,7 @@ impl Patcher {
         Ok(())
     }
 
-    pub fn patch_locations(&mut self, layout: &Layout, settings: &Settings) -> Result<()> {
+    pub fn patch_locations(&mut self, layout: &Items, settings: &Settings) -> Result<()> {
         let regions = world::dungeons::regions()
             .chain(world::hyrule::regions())
             .chain(world::lorule::regions());
@@ -404,7 +404,7 @@ impl Patcher {
         // just testin'
         // let sarc = jack::open_szs(&self.game, "Archive/ActorProfile.szs");
 
-        let prizes = get_dungeon_prizes(&mod_.layout);
+        let prizes = get_dungeon_prizes(&mod_.items);
         let free = self.rentals[8];
         flow::apply(&mut self, free, &mod_.settings)?;
         messages::patch_messages(&mut self, mod_)?;
@@ -701,7 +701,7 @@ pub fn patch(mod_: &Mod, user_config: &UserConfig, no_patch: bool, no_spoiler: b
 
         info!("ROM Loaded.\n");
 
-        patcher.patch_locations(&mod_.layout, &mod_.settings)?;
+        patcher.patch_locations(&mod_.items, &mod_.settings)?;
         let patches = patcher.prepare(mod_)?;
         patches.dump(user_config.output())?;
     }

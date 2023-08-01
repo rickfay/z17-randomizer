@@ -261,7 +261,7 @@ pub fn create(patcher: &Patcher, mod_: &Mod) -> Result<Code> {
     code.patch(0x1D6DBC, [ldr(R1, (R4, 0x2E)), mov(R0, R0)]);
 
     // Premium Milk
-    if mod_.layout.find_single(MessageBottle).is_none() {
+    if mod_.items.find_single(MessageBottle).is_none() {
         // This code makes the Premium Milk work correctly when picked up without having first picked up the Letter.
         // This patch is only applied when the Milk is shuffled in the rando instead of the Letter.
         // If it's desired to have both shuffled at once then this code needs to be re-written.

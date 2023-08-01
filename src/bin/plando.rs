@@ -8,7 +8,7 @@ use modd::{
         pedestal::Pedestal,
         Exclude, Exclusion, Options, Settings,
     },
-    Layout, Mod,
+    Items, Mod,
 };
 use patcher::system::{System, UserConfig};
 use simplelog::SimpleLogger;
@@ -51,7 +51,7 @@ fn main() {
         name: "".into(),
         hash: None,
         settings,
-        layout: build_layout(),
+        items: build_layout(),
         hints: Default::default(),
     };
 
@@ -114,10 +114,10 @@ fn plando_settings() -> Settings {
 }
 
 #[rustfmt::skip]
-fn build_layout() -> Layout {
+fn build_layout() -> Items {
 
     info!("Building Item Layout from Plan...");
-    let mut layout = Layout::default();
+    let mut layout = Items::default();
 
     //////////////////////////
     // --- Ravio's Shop --- //

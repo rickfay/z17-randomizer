@@ -95,11 +95,11 @@ fn patch_great_rupee_fairy(patcher: &mut Patcher) -> Result<()> {
 #[allow(unused)]
 fn patch_street_merchant(patcher: &mut Patcher, mod_: &Mod) -> Result<()> {
     let item_left = mod_
-        .layout
+        .items
         .get(&world::hyrule::kakariko::village::get("Street Merchant (Left)").unwrap())
         .unwrap();
     let item_right = mod_
-        .layout
+        .items
         .get(&world::hyrule::kakariko::village::get("Street Merchant (Right)").unwrap())
         .unwrap();
 
@@ -145,8 +145,8 @@ fn patch_street_merchant(patcher: &mut Patcher, mod_: &Mod) -> Result<()> {
 /// Sahasrahla gives out the locations of the Red & Blue Pendants
 #[allow(unused)]
 fn patch_sahasrahla(patcher: &mut Patcher, mod_: &Mod) -> Result<()> {
-    let (pow_region, _) = mod_.layout.find_single(PendantWisdom).unwrap();
-    let (pop_region, _) = mod_.layout.find_single(PendantPower).unwrap();
+    let pow_region = mod_.items.find_single(PendantWisdom).unwrap().area.name();
+    let pop_region = mod_.items.find_single(PendantPower).unwrap().area.name();
 
     let mut sahasrahla = load_msbt(patcher, FieldLight, "FieldLight_1B")?;
     sahasrahla.set(

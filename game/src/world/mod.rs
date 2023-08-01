@@ -2,6 +2,7 @@ use std::{
     fmt::{self, Debug, Formatter},
     hash::{Hash, Hasher},
     ops::Deref,
+    ptr,
 };
 
 #[derive(Debug, Default)]
@@ -370,5 +371,19 @@ impl Deref for LocationNode {
 
     fn deref(&self) -> &Self::Target {
         self.0
+    }
+}
+
+impl Eq for LocationNode {}
+
+impl Hash for LocationNode {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        ptr::hash(self.0, state)
+    }
+}
+
+impl PartialEq for LocationNode {
+    fn eq(&self, other: &Self) -> bool {
+        ptr::eq(self.0, other.0)
     }
 }

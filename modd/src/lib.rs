@@ -1,7 +1,7 @@
-use std::{collections::BTreeMap, ops::Deref};
+use std::collections::HashMap;
 
 use game::{
-    world::{Area, Group as GroupId, Location, LocationNode},
+    world::{self, LocationNode, NamedArea},
     Item::{self, *},
 };
 use log::debug;
@@ -34,84 +34,36 @@ pub struct Mod {
     pub name: String,
     pub hash: Option<String>,
     pub settings: Settings,
-    pub layout: Layout,
+    pub items: Items,
     pub hints: Hints,
 }
 
 /// A world layout for the patcher.
-#[derive(Clone, Debug, Default, Serialize)]
-pub struct Layout {
-    #[serde(rename = "Hyrule", serialize_with = "serialize_world")]
-    hyrule: Group,
-    #[serde(rename = "Lorule", serialize_with = "serialize_world")]
-    lorule: Group,
-    #[serde(rename = "Dungeons", serialize_with = "serialize_world")]
-    dungeons: Group,
-}
+#[derive(Clone, Debug, Default)]
+pub struct Items(HashMap<LocationNode, Item>);
 
-impl Layout {
-    fn group(&self, id: GroupId) -> &Group {
-        match id {
-            GroupId::Hyrule => &self.hyrule,
-            GroupId::Lorule => &self.lorule,
-            GroupId::Dungeons => &self.dungeons,
-        }
+impl Items {
+    fn map(&self) -> &HashMap<LocationNode, Item> {
+        &self.0
     }
 
-    fn group_mut(&mut self, id: GroupId) -> &mut Group {
-        match id {
-            GroupId::Hyrule => &mut self.hyrule,
-            GroupId::Lorule => &mut self.lorule,
-            GroupId::Dungeons => &mut self.dungeons,
-        }
+    fn map_mut(&mut self) -> &mut HashMap<LocationNode, Item> {
+        &mut self.0
     }
 
-    fn get_area_mut(&mut self, area: Area) -> &mut BTreeMap<&'static str, Item> {
-        self.group_mut(area.group()).entry(area.name()).or_insert_with(Default::default)
-    }
-
-    pub fn get(&self, key: &LocationNode) -> Option<Item> {
-        let Location { area, name, .. } = key.deref();
-        self.group(area.group()).get(area.name()).and_then(|region| region.get(name).copied())
-    }
-
-    #[allow(unused)]
-    fn find(&self, item: Item) -> Vec<&'static str> {
-        todo!()
+    pub fn get(&self, location: &LocationNode) -> Option<Item> {
+        self.map().get(location).copied()
     }
 
     /// This just highlights why we need to redo [`Layout`]
-    pub fn find_single(&self, find_item: Item) -> Option<(&'static str, &'static str)> {
-        for (region_name, region) in &self.hyrule {
-            for (loc_name, item) in region {
-                if find_item.eq(item) {
-                    return Some((region_name, loc_name));
-                }
-            }
-        }
-
-        for (region_name, region) in &self.lorule {
-            for (loc_name, item) in region {
-                if find_item.eq(item) {
-                    return Some((region_name, loc_name));
-                }
-            }
-        }
-
-        for (region_name, region) in &self.dungeons {
-            for (loc_name, item) in region {
-                if find_item.eq(item) {
-                    return Some((region_name, loc_name));
-                }
-            }
-        }
-
-        None
+    pub fn find_single(&self, item: Item) -> Option<LocationNode> {
+        self.map()
+            .iter()
+            .find_map(|(location, value)| if item == *value { Some(*location) } else { None })
     }
 
     pub fn set(&mut self, location: LocationNode, item: Item) {
-        let Location { area: node, name, .. } = location.deref();
-        self.get_area_mut(node).insert(name, item.normalize());
+        self.map_mut().insert(location, item);
         debug!(
             "Placed {} in {}/{}",
             item.normalize().as_ref(),
@@ -121,32 +73,50 @@ impl Layout {
     }
 }
 
-pub type Group = BTreeMap<&'static str, BTreeMap<&'static str, Item>>;
-
-fn serialize_world<S>(region: &Group, ser: S) -> Result<S::Ok, S::Error>
-where
-    S: Serializer,
-{
-    struct Wrap<'a>(&'a BTreeMap<&'static str, Item>);
-
-    impl<'a> Serialize for Wrap<'a> {
-        fn serialize<S>(&self, ser: S) -> Result<S::Ok, S::Error>
-        where
-            S: Serializer,
-        {
-            let mut map = ser.serialize_map(Some(self.0.len()))?;
-            for (k, v) in self.0 {
-                map.serialize_entry(k, item_to_str(v))?;
-            }
-            map.end()
+impl Serialize for Items {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        struct Wrapper<'a> {
+            area: &'a NamedArea,
+            items: &'a Items,
         }
-    }
 
-    let mut map = ser.serialize_map(Some(region.len()))?;
-    for (k, v) in region {
-        map.serialize_entry(k, &Wrap(v))?;
+        impl<'a> Serialize for Wrapper<'a> {
+            fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+            where
+                S: Serializer,
+            {
+                fn serialize_area<M>(
+                    map: &mut M, area: &NamedArea, items: &Items,
+                ) -> Result<(), M::Error>
+                where
+                    M: SerializeMap,
+                {
+                    for area in area.areas {
+                        if let Some(name) = area.name {
+                            map.serialize_entry(name, &Wrapper { area, items })?;
+                        } else {
+                            serialize_area(map, area, items)?;
+                        }
+                    }
+                    for location in area.locations() {
+                        if let Some(item) = items.get(&location) {
+                            map.serialize_entry(location.name, item_to_str(&item))?;
+                        }
+                    }
+                    Ok(())
+                }
+
+                let mut map = serializer.serialize_map(None)?;
+                serialize_area(&mut map, self.area, self.items)?;
+                map.end()
+            }
+        }
+
+        Wrapper { area: &world::NAMED_AREA, items: self }.serialize(serializer)
     }
-    map.end()
 }
 
 pub fn item_to_str(item: &Item) -> &'static str {

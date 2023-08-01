@@ -4,7 +4,7 @@ use game::{
 };
 use rom::scene::{Dest, Flag, Obj, Rail, Vec3};
 
-use crate::{DungeonPrizes, Error, Layout, Result};
+use crate::{DungeonPrizes, Error, Items, Result};
 
 pub(crate) fn call<F>(unq: u16, action: F) -> (u16, Box<dyn Fn(&mut Obj)>)
 where
@@ -98,7 +98,7 @@ pub(crate) fn prize_flag(prize: Item) -> Result<Flag> {
 
 /// Fetch the placed Dungeon Rewards
 /// <br />TODO really need to clean up the Layout data structure...
-pub(crate) fn get_dungeon_prizes(layout: &Layout) -> DungeonPrizes {
+pub(crate) fn get_dungeon_prizes(layout: &Items) -> DungeonPrizes {
     DungeonPrizes {
         ep_prize: layout
             .get(&world::dungeons::eastern::palace::get("Eastern Palace Prize").unwrap())

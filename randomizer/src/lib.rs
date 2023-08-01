@@ -11,7 +11,7 @@ use log::{error, info};
 use modd::{
     filler_item::{convert, FillerItem},
     hints::formatting::*,
-    Layout, Mod, Settings,
+    Items, Mod, Settings,
 };
 use rand::{rngs::StdRng, SeedableRng};
 use serde::{Serialize, Serializer};
@@ -180,7 +180,7 @@ fn calculate_seed_info(
     )?;
 
     // Build legacy Layout object
-    let mut layout = Layout::default();
+    let mut layout = Items::default();
     for (location_info, item) in filled {
         layout.set(location_info, item);
     }
@@ -188,6 +188,7 @@ fn calculate_seed_info(
     let metrics = metrics::calculate_metrics(world_graph, check_map, &settings)?;
     let hints = hints::generate_hints(world_graph, check_map, &settings, rng)?;
 
-    let mod_ = Mod { name: hash.text_hash, hash: Some(hash.item_hash), settings, layout, hints };
+    let mod_ =
+        Mod { name: hash.text_hash, hash: Some(hash.item_hash), settings, items: layout, hints };
     Ok(SeedInfo { seed, version: VERSION, mod_, metrics })
 }
