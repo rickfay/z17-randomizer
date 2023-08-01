@@ -16,7 +16,7 @@ modd = { workspace = true }
 patcher = { path = "./patcher" }
 rand = { workspace = true }
 randomizer = { path = "./randomizer" }
-rom = { workspace = true }
+rom = { path = "./patcher/rom" }
 simplelog = "0.12.0"
 structopt = "0.3.26"
 thiserror = { workspace = true }
@@ -35,10 +35,10 @@ members = [
     "jack",
     "modd",
     "patcher",
+    "patcher/rom",
+    "patcher/rom/bytey",
+    "patcher/rom/bytey-macro",
     "randomizer",
-    "rom",
-    "rom/bytey",
-    "rom/bytey-macro",
 ]
 
 [workspace.dependencies]
@@ -50,7 +50,6 @@ log = "0.4.17"
 modd = { path = "./modd" }
 path-absolutize = "3.0.14"
 rand = { version = "0.8.5", features = ["std_rng"] }
-rom = { path = "./rom" }
 serde = { version = "1.0.152", features = ["derive"] }
 serde_json = "1.0.93"
 serde_repr = "0.1.16"
