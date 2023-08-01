@@ -4,18 +4,35 @@ use game::world::{self as game_world, LocationKey};
 use log::info;
 use modd::filler_item::FillerItem::{self, *};
 
-use crate::{
-    legacy::path::Path,
-    model::{
-        check::Check,
-        location::{Location, Location::*},
-        location_node::LocationNode,
-        logic::Logic,
-        progress::Progress,
-    },
+use crate::model::{
+    check::Check,
+    location::{Location, Location::*},
+    location_node::LocationNode,
+    logic::Logic,
+    progress::Progress,
 };
 
 pub type WorldGraph = HashMap<Location, LocationNode>;
+
+#[derive(Copy, Clone)]
+pub struct Path {
+    destination: Location,
+    logic: Logic,
+}
+
+impl Path {
+    pub fn new(destination: Location, logic: Logic) -> Self {
+        Self { destination, logic }
+    }
+
+    pub fn get_destination(self) -> Location {
+        self.destination
+    }
+
+    pub fn can_access(self, progress: &Progress) -> bool {
+        self.logic.can_access(progress)
+    }
+}
 
 // TODO Rewrite logic using combinators
 

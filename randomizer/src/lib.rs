@@ -24,7 +24,6 @@ mod filler;
 mod filler_util;
 mod hints;
 mod item_pools;
-mod legacy;
 mod metrics;
 pub mod model;
 #[rustfmt::skip]
