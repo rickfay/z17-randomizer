@@ -300,7 +300,7 @@ impl Patcher {
             .chain(world::lorule::regions());
         for locations in regions {
             for (key, location) in locations {
-                if let Some(item) = layout.get(&key) {
+                if let Some(item) = layout.get(key) {
                     self.apply(location, item, settings)?;
                 }
             }
@@ -308,29 +308,29 @@ impl Patcher {
         Ok(())
     }
 
-    fn apply(&mut self, location: Location, item: Item, settings: &Settings) -> Result<()> {
+    fn apply(&mut self, location: &Location, item: Item, settings: &Settings) -> Result<()> {
         match location {
             Location::Chest { course, stage, unq } => {
-                self.prep_chest(item, course, stage, unq, false, settings)?;
+                self.prep_chest(item, *course, *stage, *unq, false, settings)?;
             }
             Location::BigChest { course, stage, unq } => {
-                self.prep_chest(item, course, stage, unq, true, settings)?;
+                self.prep_chest(item, *course, *stage, *unq, true, settings)?;
             }
             Location::Heart { course, scene, unq }
             | Location::Key { course, scene, unq }
             | Location::SilverRupee { course, scene, unq }
             | Location::GoldRupee { course, scene, unq } => {
-                self.parse_args(course, scene, unq).1 = item as i32;
+                self.parse_args(*course, *scene, *unq).1 = item as i32;
             }
             Location::Maiamai { course, scene, unq } => {
-                self.parse_args(course, scene, unq).2 = item as i32;
+                self.parse_args(*course, *scene, *unq).2 = item as i32;
             }
             Location::Event { course, name, index } => {
-                self.flow(course)?
+                self.flow(*course)?
                     .get_mut(name)
                     .ok_or_else(|| Error::new("File not found."))??
                     .get_mut()
-                    .get_mut(index)
+                    .get_mut(*index)
                     .ok_or_else(|| {
                         Error::new(format!(
                             "{}/{} [{}] not found",
@@ -344,14 +344,14 @@ impl Patcher {
                     .set_value(item as u32);
             }
             Location::Shop(Shop::Ravio(index)) => {
-                self.rentals[index as usize] = item;
+                self.rentals[*index as usize] = item;
             }
             Location::Shop(Shop::Merchant(index)) => {
-                self.merchant[index as usize] = item;
+                self.merchant[*index as usize] = item;
             }
-            Location::Multi(patches) => {
-                for patch in patches {
-                    self.apply(patch, item, settings)?;
+            Location::Multi(locations) => {
+                for location in *locations {
+                    self.apply(location, item, settings)?;
                 }
             }
             Location::None => {}

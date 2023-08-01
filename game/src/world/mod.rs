@@ -63,7 +63,7 @@ macro_rules! regions {
 
             $(pub mod $region;)+
 
-            pub fn regions() -> impl Iterator<Item = Box<dyn Iterator<Item = (LocationKey, Location)>>> {
+            pub fn regions() -> impl Iterator<Item = Box<dyn Iterator<Item = &'static (LocationKey, Location)>>> {
                 [
                     $(Box::new($region::locations()) as Box<_>,)+
                 ].into_iter()
@@ -84,9 +84,9 @@ macro_rules! region {
         $($id:ident $props:tt,)*
     ) => {
         #[inline]
-        pub fn locations() -> impl Iterator<Item=($crate::world::LocationKey, $crate::world::Location)> {
-            $start::locations()
-                $(.chain($id::locations()))*
+        pub fn locations() -> impl Iterator<Item=&'static ($crate::world::LocationKey, $crate::world::Location)> {
+            $start::locations().iter()
+                $(.chain($id::locations().iter()))*
         }
 
         $crate::area!($start $start_props);
@@ -129,8 +129,8 @@ macro_rules! area {
 
             #[allow(unused)]
             #[inline]
-            pub fn locations() -> impl Iterator<Item = (LocationKey, Location)> {
-                [
+            pub fn locations() -> &'static [(LocationKey, Location)] {
+                &[
                     $($((
                         LocationKey {
                             area: AREA,
@@ -138,7 +138,7 @@ macro_rules! area {
                         },
                         $crate::location!($variant $props),
                     ),)*)?
-                ].into_iter()
+                ]
             }
         }
     };
@@ -154,7 +154,7 @@ macro_rules! location {
         Location::Chest { course: COURSE, stage: $stage - 1, unq: $unq }
     };
     (Chest[$($stage:literal[$unq:literal],)+]) => {
-        Location::Multi(vec![
+        Location::Multi(&[
             $(
                 Location::Chest { course: COURSE, stage: $stage - 1, unq: $unq },
             )+
@@ -176,7 +176,7 @@ macro_rules! location {
         Location::Event { course: Some($crate::Course::$course), name: stringify!($name), index: $index }
     };
     (Event[$($name:ident[$index:literal],)+]) => {
-        Location::Multi(vec![
+        Location::Multi(&[
             $(
                 Location::Event { course: Some(COURSE), name: stringify!($name), index: $index },
             )+
@@ -270,7 +270,7 @@ pub enum Location {
     SilverRupee { course: crate::Course, scene: u16, unq: u16 },
     GoldRupee { course: crate::Course, scene: u16, unq: u16 },
     Shop(Shop),
-    Multi(Vec<Location>),
+    Multi(&'static [Location]),
     None, // Workaround until everything is shufflable
 }
 
