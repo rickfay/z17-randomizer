@@ -8,7 +8,7 @@ use std::{
 
 use fs_extra::dir::CopyOptions;
 use game::{
-    world::{self, Location, Shop},
+    world::{self, LocationData, Shop},
     Course::*,
     Item,
 };
@@ -299,33 +299,33 @@ impl Patcher {
             .chain(world::hyrule::regions())
             .chain(world::lorule::regions());
         for locations in regions {
-            for (key, location) in locations {
-                if let Some(item) = layout.get(key) {
-                    self.apply(location, item, settings)?;
+            for location in locations {
+                if let Some(item) = layout.get(&location) {
+                    self.apply(&location.data, item, settings)?;
                 }
             }
         }
         Ok(())
     }
 
-    fn apply(&mut self, location: &Location, item: Item, settings: &Settings) -> Result<()> {
+    fn apply(&mut self, location: &LocationData, item: Item, settings: &Settings) -> Result<()> {
         match location {
-            Location::Chest { course, stage, unq } => {
+            LocationData::Chest { course, stage, unq } => {
                 self.prep_chest(item, *course, *stage, *unq, false, settings)?;
             }
-            Location::BigChest { course, stage, unq } => {
+            LocationData::BigChest { course, stage, unq } => {
                 self.prep_chest(item, *course, *stage, *unq, true, settings)?;
             }
-            Location::Heart { course, scene, unq }
-            | Location::Key { course, scene, unq }
-            | Location::SilverRupee { course, scene, unq }
-            | Location::GoldRupee { course, scene, unq } => {
+            LocationData::Heart { course, scene, unq }
+            | LocationData::Key { course, scene, unq }
+            | LocationData::SilverRupee { course, scene, unq }
+            | LocationData::GoldRupee { course, scene, unq } => {
                 self.parse_args(*course, *scene, *unq).1 = item as i32;
             }
-            Location::Maiamai { course, scene, unq } => {
+            LocationData::Maiamai { course, scene, unq } => {
                 self.parse_args(*course, *scene, *unq).2 = item as i32;
             }
-            Location::Event { course, name, index } => {
+            LocationData::Event { course, name, index } => {
                 self.flow(*course)?
                     .get_mut(name)
                     .ok_or_else(|| Error::new("File not found."))??
@@ -343,18 +343,18 @@ impl Patcher {
                     .ok_or_else(|| Error::new("Not an action."))?
                     .set_value(item as u32);
             }
-            Location::Shop(Shop::Ravio(index)) => {
+            LocationData::Shop(Shop::Ravio(index)) => {
                 self.rentals[*index as usize] = item;
             }
-            Location::Shop(Shop::Merchant(index)) => {
+            LocationData::Shop(Shop::Merchant(index)) => {
                 self.merchant[*index as usize] = item;
             }
-            Location::Multi(locations) => {
+            LocationData::Multi(locations) => {
                 for location in *locations {
                     self.apply(location, item, settings)?;
                 }
             }
-            Location::None => {}
+            LocationData::None => {}
         }
         Ok(())
     }

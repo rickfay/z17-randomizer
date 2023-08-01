@@ -1,7 +1,7 @@
-use std::collections::BTreeMap;
+use std::{collections::BTreeMap, ops::Deref};
 
 use game::{
-    world::{Area, Group as GroupId, LocationKey},
+    world::{Area, Group as GroupId, Location, LocationNode},
     Item::{self, *},
 };
 use log::debug;
@@ -70,8 +70,8 @@ impl Layout {
         self.group_mut(area.group()).entry(area.name()).or_insert_with(Default::default)
     }
 
-    pub fn get(&self, key: &LocationKey) -> Option<Item> {
-        let LocationKey { area, name } = key;
+    pub fn get(&self, key: &LocationNode) -> Option<Item> {
+        let Location { area, name, .. } = key.deref();
         self.group(area.group()).get(area.name()).and_then(|region| region.get(name).copied())
     }
 
@@ -109,8 +109,8 @@ impl Layout {
         None
     }
 
-    pub fn set(&mut self, location: LocationKey, item: Item) {
-        let LocationKey { area: node, name } = location;
+    pub fn set(&mut self, location: LocationNode, item: Item) {
+        let Location { area: node, name, .. } = location.deref();
         self.get_area_mut(node).insert(name, item.normalize());
         debug!(
             "Placed {} in {}/{}",

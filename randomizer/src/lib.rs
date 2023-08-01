@@ -4,7 +4,7 @@ use std::{
 };
 
 use game::{
-    world::LocationKey,
+    world::LocationNode,
     Item::{self},
 };
 use log::{error, info};
@@ -175,7 +175,7 @@ fn calculate_seed_info(
     let (mut progression, mut junk) = item_pools::get_item_pools(&settings, rng);
 
     // Filler Algorithm
-    let filled: Vec<(LocationKey, Item)> = filler::fill_all_locations_reachable(
+    let filled: Vec<(LocationNode, Item)> = filler::fill_all_locations_reachable(
         world_graph, check_map, &mut progression, &mut junk, &settings, rng,
     )?;
 

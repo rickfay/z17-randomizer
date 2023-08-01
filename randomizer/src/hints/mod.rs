@@ -60,7 +60,7 @@ impl Hint for LocationHint {
         let article = self.item.get_article().ok()?;
         Some(format!(
             "{}\nhas {}{}{}.",
-            &self.check.get_location_info().unwrap().name,
+            &self.check.get_location().unwrap().name,
             article,
             if article.is_empty() { "" } else { " " },
             &self.item.as_str_colorized()
@@ -71,7 +71,7 @@ impl Hint for LocationHint {
         let article = self.item.get_article().ok()?;
         Some(format!(
             "{} has {}{}{}.",
-            &self.check.get_location_info().unwrap().name,
+            &self.check.get_location().unwrap().name,
             article,
             if article.is_empty() { "" } else { " " },
             &self.item.as_str()
@@ -104,7 +104,7 @@ impl Hint for PathHint {
     fn get_hint(&self) -> Option<String> {
         Some(format!(
             "{}\nis on the path to\n{}",
-            &HintColor::Name.format(self.check.get_location_info().unwrap().region()),
+            &HintColor::Name.format(self.check.get_location().unwrap().region()),
             &self.goal.as_str_colorized()
         ))
     }
@@ -112,7 +112,7 @@ impl Hint for PathHint {
     fn get_hint_spoiler(&self) -> Option<String> {
         Some(format!(
             "{} is on the path to {}",
-            self.check.get_location_info().unwrap().region(),
+            self.check.get_location().unwrap().region(),
             self.goal.as_str()
         ))
     }
@@ -134,14 +134,14 @@ impl Hint for BowOfLightHint {
         Some(format!(
             "Did you find the {}\nin {}?",
             formatting::name("Bow of Light"),
-            &HintColor::Name.format(self.check.get_location_info().unwrap().region()),
+            &HintColor::Name.format(self.check.get_location().unwrap().region()),
         ))
     }
 
     fn get_hint_spoiler(&self) -> Option<String> {
         Some(format!(
             "Did you find the Bow of Light in {}?",
-            &self.check.get_location_info().unwrap().region()
+            &self.check.get_location().unwrap().region()
         ))
     }
 

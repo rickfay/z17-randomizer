@@ -1,7 +1,9 @@
+use game::world::LocationNode;
+
 use {
     crate::{
         model::{logic::Logic, progress::Progress},
-        FillerItem, LocationKey,
+        FillerItem,
     },
     std::hash::{Hash, Hasher},
 };
@@ -12,15 +14,14 @@ pub struct Check {
     name: &'static str,
     logic: Logic,
     quest: Option<FillerItem>,
-    location_info: Option<LocationKey>,
+    location: Option<LocationNode>,
 }
 
 impl Check {
     pub fn new(
-        name: &'static str, logic: Logic, quest: Option<FillerItem>,
-        location_info: Option<LocationKey>,
+        name: &'static str, logic: Logic, quest: Option<FillerItem>, location: Option<LocationNode>,
     ) -> Self {
-        Self { name, logic, quest, location_info }
+        Self { name, logic, quest, location }
     }
 
     pub fn get_name(self) -> &'static str {
@@ -31,8 +32,8 @@ impl Check {
         self.quest
     }
 
-    pub fn get_location_info(self) -> Option<LocationKey> {
-        self.location_info
+    pub fn get_location(self) -> Option<LocationNode> {
+        self.location
     }
 
     pub fn can_access(self, progress: &Progress) -> bool {

@@ -1,6 +1,6 @@
 use std::collections::{BTreeMap, HashSet};
 
-use game::{world::LocationKey, Item};
+use game::{world::LocationNode, Item};
 use log::{error, info};
 use modd::{
     filler_item::FillerItem::{self, *},
@@ -23,7 +23,7 @@ use crate::{
 pub fn fill_all_locations_reachable(
     world_graph: &mut WorldGraph, check_map: &mut CheckMap, progression_pool: &mut Pool,
     junk_pool: &mut Pool, settings: &Settings, rng: &mut StdRng,
-) -> Result<Vec<(LocationKey, Item)>> {
+) -> Result<Vec<(LocationNode, Item)>> {
     verify_all_locations_accessible(world_graph, check_map, progression_pool, settings)?;
     handle_exclusions(check_map, settings, rng, junk_pool)?;
     preplace_items(check_map, settings, rng, progression_pool, junk_pool)?;
@@ -264,11 +264,11 @@ fn handle_exclusions(
 /// Super dirty mapping I hate it
 fn map_to_result(
     world_graph: &mut WorldGraph, check_map: &mut CheckMap,
-) -> Vec<(LocationKey, Item)> {
-    let mut result: Vec<(LocationKey, Item)> = Vec::new();
+) -> Vec<(LocationNode, Item)> {
+    let mut result: Vec<(LocationNode, Item)> = Vec::new();
     for location_node in world_graph.values_mut() {
         for check in location_node.clone().get_checks() {
-            if let Some(loc_info) = check.get_location_info() {
+            if let Some(loc_info) = check.get_location() {
                 result.push((
                     loc_info,
                     convert(check_map.get(check.get_name()).unwrap().unwrap()).unwrap(),

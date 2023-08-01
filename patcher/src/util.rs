@@ -1,5 +1,5 @@
 use game::{
-    world::{self, LocationKey},
+    world,
     Item::{self, *},
 };
 use rom::scene::{Dest, Flag, Obj, Rail, Vec3};
@@ -101,40 +101,37 @@ pub(crate) fn prize_flag(prize: Item) -> Result<Flag> {
 pub(crate) fn get_dungeon_prizes(layout: &Layout) -> DungeonPrizes {
     DungeonPrizes {
         ep_prize: layout
-            .get(&LocationKey::new(world::dungeons::eastern::palace::AREA, "Eastern Palace Prize"))
+            .get(&world::dungeons::eastern::palace::get("Eastern Palace Prize").unwrap())
             .unwrap(),
         hg_prize: layout
-            .get(&LocationKey::new(world::dungeons::house::gales::AREA, "House of Gales Prize"))
+            .get(&world::dungeons::house::gales::get("House of Gales Prize").unwrap())
             .unwrap(),
         th_prize: layout
-            .get(&LocationKey::new(world::dungeons::tower::hera::AREA, "Tower of Hera Prize"))
+            .get(&world::dungeons::tower::hera::get("Tower of Hera Prize").unwrap())
             .unwrap(),
         hc_prize: layout
-            .get(&LocationKey::new(world::dungeons::hyrule::castle::AREA, "Hyrule Castle Prize"))
+            .get(&world::dungeons::hyrule::castle::get("Hyrule Castle Prize").unwrap())
             .unwrap(),
         pd_prize: layout
-            .get(&LocationKey::new(world::dungeons::dark::palace::AREA, "Dark Palace Prize"))
+            .get(&world::dungeons::dark::palace::get("Dark Palace Prize").unwrap())
             .unwrap(),
         sp_prize: layout
-            .get(&LocationKey::new(world::dungeons::swamp::palace::AREA, "Swamp Palace Prize"))
+            .get(&world::dungeons::swamp::palace::get("Swamp Palace Prize").unwrap())
             .unwrap(),
         sw_prize: layout
-            .get(&LocationKey::new(world::dungeons::skull::woods::AREA, "Skull Woods Prize"))
+            .get(&world::dungeons::skull::woods::get("Skull Woods Prize").unwrap())
             .unwrap(),
         tt_prize: layout
-            .get(&LocationKey::new(
-                world::dungeons::thieves::hideout::AREA,
-                "Thieves' Hideout Prize",
-            ))
+            .get(&world::dungeons::thieves::hideout::get("Thieves' Hideout Prize").unwrap())
             .unwrap(),
         tr_prize: layout
-            .get(&LocationKey::new(world::dungeons::turtle::rock::AREA, "Turtle Rock Prize"))
+            .get(&world::dungeons::turtle::rock::get("Turtle Rock Prize").unwrap())
             .unwrap(),
         dp_prize: layout
-            .get(&LocationKey::new(world::dungeons::desert::palace::AREA, "Desert Palace Prize"))
+            .get(&world::dungeons::desert::palace::get("Desert Palace Prize").unwrap())
             .unwrap(),
         ir_prize: layout
-            .get(&LocationKey::new(world::dungeons::ice::ruins::AREA, "Ice Ruins Prize"))
+            .get(&world::dungeons::ice::ruins::get("Ice Ruins Prize").unwrap())
             .unwrap(),
     }
 }

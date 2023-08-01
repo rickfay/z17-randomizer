@@ -1,7 +1,4 @@
-use game::{
-    world::{self, LocationKey},
-    Item::*,
-};
+use game::{world, Item::*};
 use log::{error, info, LevelFilter};
 use modd::{
     settings::{
@@ -126,503 +123,503 @@ fn build_layout() -> Layout {
     // --- Ravio's Shop --- //
     //////////////////////////
 
-    layout.set(LocationKey::new(world::hyrule::field::main::AREA, "Ravio (1)"), RupeeGold);
-    layout.set(LocationKey::new(world::hyrule::field::main::AREA, "Ravio (2)"), MessageBottle);
-    layout.set(LocationKey::new(world::hyrule::field::main::AREA, "Ravio (3)"), ItemBottle);
-    layout.set(LocationKey::new(world::hyrule::field::main::AREA, "Ravio (4)"), ItemSwordLv1);
-    layout.set(LocationKey::new(world::hyrule::field::main::AREA, "Ravio (5)"), ItemMizukaki);
-    layout.set(LocationKey::new(world::hyrule::field::main::AREA, "Ravio (6)"), RupeeG);
-    layout.set(LocationKey::new(world::hyrule::field::main::AREA, "Ravio (7)"), ItemBell);
-    layout.set(LocationKey::new(world::hyrule::field::main::AREA, "Ravio (8)"), ItemHookShotLv2);
-    layout.set(LocationKey::new(world::hyrule::field::main::AREA, "Ravio (9)"), RupeeGold);
+    layout.set(world::hyrule::field::main::get("Ravio (1)").unwrap(), RupeeGold);
+    layout.set(world::hyrule::field::main::get("Ravio (2)").unwrap(), MessageBottle);
+    layout.set(world::hyrule::field::main::get("Ravio (3)").unwrap(), ItemBottle);
+    layout.set(world::hyrule::field::main::get("Ravio (4)").unwrap(), ItemSwordLv1);
+    layout.set(world::hyrule::field::main::get("Ravio (5)").unwrap(), ItemMizukaki);
+    layout.set(world::hyrule::field::main::get("Ravio (6)").unwrap(), RupeeG);
+    layout.set(world::hyrule::field::main::get("Ravio (7)").unwrap(), ItemBell);
+    layout.set(world::hyrule::field::main::get("Ravio (8)").unwrap(), ItemHookShotLv2);
+    layout.set(world::hyrule::field::main::get("Ravio (9)").unwrap(), RupeeGold);
     // layout.set(LocationInfo::new(world::hyrule::field::main::AREA, "Thanks"), Item::RingHekiga);
 
     /////////////////////////////
     // --- Dungeons Prizes --- //
     /////////////////////////////
 
-    layout.set(LocationKey::new(world::dungeons::eastern::palace::AREA, "Eastern Palace Prize"), PendantCourage);
-    layout.set(LocationKey::new(world::dungeons::house::gales::AREA, "House of Gales Prize"), SageRosso);
-    layout.set(LocationKey::new(world::dungeons::tower::hera::AREA, "Tower of Hera Prize"), SageGulley);
+    layout.set(world::dungeons::eastern::palace::get("Eastern Palace Prize").unwrap(), PendantCourage);
+    layout.set(world::dungeons::house::gales::get("House of Gales Prize").unwrap(), SageRosso);
+    layout.set(world::dungeons::tower::hera::get("Tower of Hera Prize").unwrap(), SageGulley);
 
-    layout.set(LocationKey::new(world::dungeons::hyrule::castle::AREA, "Hyrule Castle Prize"), PendantCourage);
+    layout.set(world::dungeons::hyrule::castle::get("Hyrule Castle Prize").unwrap(), PendantCourage);
 
-    layout.set(LocationKey::new(world::dungeons::dark::palace::AREA, "Dark Palace Prize"), PendantPower);
-    layout.set(LocationKey::new(world::dungeons::swamp::palace::AREA, "Swamp Palace Prize"), SageOren);
-    layout.set(LocationKey::new(world::dungeons::skull::woods::AREA, "Skull Woods Prize"), SageSeres);
-    layout.set(LocationKey::new(world::dungeons::thieves::hideout::AREA, "Thieves' Hideout Prize"), SageOsfala);
-    layout.set(LocationKey::new(world::dungeons::turtle::rock::AREA, "Turtle Rock Prize"), SageImpa);
-    layout.set(LocationKey::new(world::dungeons::desert::palace::AREA, "Desert Palace Prize"), SageIrene);
-    layout.set(LocationKey::new(world::dungeons::ice::ruins::AREA, "Ice Ruins Prize"), PendantWisdom);
+    layout.set(world::dungeons::dark::palace::get("Dark Palace Prize").unwrap(), PendantPower);
+    layout.set(world::dungeons::swamp::palace::get("Swamp Palace Prize").unwrap(), SageOren);
+    layout.set(world::dungeons::skull::woods::get("Skull Woods Prize").unwrap(), SageSeres);
+    layout.set(world::dungeons::thieves::hideout::get("Thieves' Hideout Prize").unwrap(), SageOsfala);
+    layout.set(world::dungeons::turtle::rock::get("Turtle Rock Prize").unwrap(), SageImpa);
+    layout.set(world::dungeons::desert::palace::get("Desert Palace Prize").unwrap(), SageIrene);
+    layout.set(world::dungeons::ice::ruins::get("Ice Ruins Prize").unwrap(), PendantWisdom);
 
     ////////////////////
     // --- Hyrule --- //
     ////////////////////
 
     // Hyrule Field
-    layout.set(LocationKey::new(world::hyrule::field::main::AREA, "Cucco Treasure Dungeon"), RupeeSilver);
-    layout.set(LocationKey::new(world::hyrule::field::main::AREA, "Delivery"), RupeeGold);
-    layout.set(LocationKey::new(world::hyrule::field::main::AREA, "Behind Blacksmith"), RupeeGold);
-    layout.set(LocationKey::new(world::hyrule::field::main::AREA, "Blacksmith Cave"), ItemSwordLv1);
-    layout.set(LocationKey::new(world::hyrule::field::main::AREA, "Blacksmith"), ItemSwordLv1);
-    layout.set(LocationKey::new(world::hyrule::field::main::AREA, "Blacksmith Table"), ItemSwordLv1);
-    layout.set(LocationKey::new(world::hyrule::field::main::AREA, "Hyrule Castle Rocks"), RupeeGold);
-    layout.set(LocationKey::new(world::hyrule::field::main::AREA, "Wildlife Clearing Stump"), RupeeGold);
+    layout.set(world::hyrule::field::main::get("Cucco Treasure Dungeon").unwrap(), RupeeSilver);
+    layout.set(world::hyrule::field::main::get("Delivery").unwrap(), RupeeGold);
+    layout.set(world::hyrule::field::main::get("Behind Blacksmith").unwrap(), RupeeGold);
+    layout.set(world::hyrule::field::main::get("Blacksmith Cave").unwrap(), ItemSwordLv1);
+    layout.set(world::hyrule::field::main::get("Blacksmith").unwrap(), ItemSwordLv1);
+    layout.set(world::hyrule::field::main::get("Blacksmith Table").unwrap(), ItemSwordLv1);
+    layout.set(world::hyrule::field::main::get("Hyrule Castle Rocks").unwrap(), RupeeGold);
+    layout.set(world::hyrule::field::main::get("Wildlife Clearing Stump").unwrap(), RupeeGold);
 
-    layout.set(LocationKey::new(world::hyrule::field::main::AREA, "[Mai] Tree Behind Blacksmith"), RupeeGold);
-    layout.set(LocationKey::new(world::hyrule::field::main::AREA, "[Mai] Behind Link's House"), RupeeGold);
-    layout.set(LocationKey::new(world::hyrule::field::main::AREA, "[Mai] Blacksmith Tornado Tile"), RupeeGold);
-    layout.set(LocationKey::new(world::hyrule::field::main::AREA, "[Mai] Cucco Dungeon Big Rock"), RupeeGold);
-    layout.set(LocationKey::new(world::hyrule::field::main::AREA, "[Mai] Wildlife Clearing Tree"), RupeeGold);
-    layout.set(LocationKey::new(world::hyrule::field::main::AREA, "[Mai] Hyrule Castle Tree"), RupeeGold);
-    layout.set(LocationKey::new(world::hyrule::field::main::AREA, "[Mai] Hyrule Castle Tornado Tile"), RupeeGold);
-    layout.set(LocationKey::new(world::hyrule::field::main::AREA, "[Mai] Tree West of Link's House"), RupeeGold);
+    layout.set(world::hyrule::field::main::get("[Mai] Tree Behind Blacksmith").unwrap(), RupeeGold);
+    layout.set(world::hyrule::field::main::get("[Mai] Behind Link's House").unwrap(), RupeeGold);
+    layout.set(world::hyrule::field::main::get("[Mai] Blacksmith Tornado Tile").unwrap(), RupeeGold);
+    layout.set(world::hyrule::field::main::get("[Mai] Cucco Dungeon Big Rock").unwrap(), RupeeGold);
+    layout.set(world::hyrule::field::main::get("[Mai] Wildlife Clearing Tree").unwrap(), RupeeGold);
+    layout.set(world::hyrule::field::main::get("[Mai] Hyrule Castle Tree").unwrap(), RupeeGold);
+    layout.set(world::hyrule::field::main::get("[Mai] Hyrule Castle Tornado Tile").unwrap(), RupeeGold);
+    layout.set(world::hyrule::field::main::get("[Mai] Tree West of Link's House").unwrap(), RupeeGold);
 
     // Irene the Witch
-    layout.set(LocationKey::new(world::hyrule::irene::witch::AREA, "Irene"), RupeeGold);
+    layout.set(world::hyrule::irene::witch::get("Irene").unwrap(), RupeeGold);
 
     // Lost Woods
-    layout.set(LocationKey::new(world::hyrule::lost::woods::AREA, "Fortune-Teller"), RingRental);
-    layout.set(LocationKey::new(world::hyrule::lost::woods::AREA, "Hyrule Hotfoot (First Race)"), HintGlasses);
-    layout.set(LocationKey::new(world::hyrule::lost::woods::AREA, "Hyrule Hotfoot (Second Race)"), RupeeSilver);
-    layout.set(LocationKey::new(world::hyrule::lost::woods::AREA, "Lost Woods Alcove"), ItemHookShot);
-    layout.set(LocationKey::new(world::hyrule::lost::woods::AREA, "Lost Woods Big Rock Chest"), ItemIceRod);
-    layout.set(LocationKey::new(world::hyrule::lost::woods::AREA, "Master Sword Pedestal"), ItemIceRod);
-    layout.set(LocationKey::new(world::hyrule::lost::woods::AREA, "Rosso"), ItemIceRod);
-    layout.set(LocationKey::new(world::hyrule::lost::woods::AREA, "Rosso Cave"), ItemInsectNet);
-    layout.set(LocationKey::new(world::hyrule::lost::woods::AREA, "Rosso Rocks"), RupeeGold);
+    layout.set(world::hyrule::lost::woods::get("Fortune-Teller").unwrap(), RingRental);
+    layout.set(world::hyrule::lost::woods::get("Hyrule Hotfoot (First Race)").unwrap(), HintGlasses);
+    layout.set(world::hyrule::lost::woods::get("Hyrule Hotfoot (Second Race)").unwrap(), RupeeSilver);
+    layout.set(world::hyrule::lost::woods::get("Lost Woods Alcove").unwrap(), ItemHookShot);
+    layout.set(world::hyrule::lost::woods::get("Lost Woods Big Rock Chest").unwrap(), ItemIceRod);
+    layout.set(world::hyrule::lost::woods::get("Master Sword Pedestal").unwrap(), ItemIceRod);
+    layout.set(world::hyrule::lost::woods::get("Rosso").unwrap(), ItemIceRod);
+    layout.set(world::hyrule::lost::woods::get("Rosso Cave").unwrap(), ItemInsectNet);
+    layout.set(world::hyrule::lost::woods::get("Rosso Rocks").unwrap(), RupeeGold);
 
-    layout.set(LocationKey::new(world::hyrule::lost::woods::AREA, "[Mai] Rosso Wall"), RupeeGold);
-    layout.set(LocationKey::new(world::hyrule::lost::woods::AREA, "[Mai] Lost Woods Path Rock"), RupeeGold);
-    layout.set(LocationKey::new(world::hyrule::lost::woods::AREA, "[Mai] Lost Woods Bush"), RupeeGold);
-    layout.set(LocationKey::new(world::hyrule::lost::woods::AREA, "[Mai] Lost Woods Rock"), RupeeGold);
-    layout.set(LocationKey::new(world::hyrule::lost::woods::AREA, "[Mai] Fortune-Teller Tent"), RupeeGold);
-    layout.set(LocationKey::new(world::hyrule::lost::woods::AREA, "[Mai] Moldorm Ledge"), RupeeGold);
-    layout.set(LocationKey::new(world::hyrule::lost::woods::AREA, "[Mai] Small Pond"), RupeeGold);
-    layout.set(LocationKey::new(world::hyrule::lost::woods::AREA, "[Mai] Lost Woods Tree"), RupeeGold);
+    layout.set(world::hyrule::lost::woods::get("[Mai] Rosso Wall").unwrap(), RupeeGold);
+    layout.set(world::hyrule::lost::woods::get("[Mai] Lost Woods Path Rock").unwrap(), RupeeGold);
+    layout.set(world::hyrule::lost::woods::get("[Mai] Lost Woods Bush").unwrap(), RupeeGold);
+    layout.set(world::hyrule::lost::woods::get("[Mai] Lost Woods Rock").unwrap(), RupeeGold);
+    layout.set(world::hyrule::lost::woods::get("[Mai] Fortune-Teller Tent").unwrap(), RupeeGold);
+    layout.set(world::hyrule::lost::woods::get("[Mai] Moldorm Ledge").unwrap(), RupeeGold);
+    layout.set(world::hyrule::lost::woods::get("[Mai] Small Pond").unwrap(), RupeeGold);
+    layout.set(world::hyrule::lost::woods::get("[Mai] Lost Woods Tree").unwrap(), RupeeGold);
 
     // Death Mountain
-    layout.set(LocationKey::new(world::hyrule::death::mountain::AREA, "Death Mountain Open Cave"), PowerGlove);
-    layout.set(LocationKey::new(world::hyrule::death::mountain::AREA, "Death Mountain Blocked Cave"), RupeeGold);
-    layout.set(LocationKey::new(world::hyrule::death::mountain::AREA, "Death Mountain Fairy Cave"), RupeeGold);
-    layout.set(LocationKey::new(world::hyrule::death::mountain::AREA, "Death Mountain West Ledge"), RupeeGold);
-    layout.set(LocationKey::new(world::hyrule::death::mountain::AREA, "Donkey Cave Pegs"), RupeeGold);
-    layout.set(LocationKey::new(world::hyrule::death::mountain::AREA, "Death Mountain West Highest Cave"), RupeeGold);
-    layout.set(LocationKey::new(world::hyrule::death::mountain::AREA, "Spectacle Rock"), RupeeGold);
-    layout.set(LocationKey::new(world::hyrule::death::mountain::AREA, "Fire Cave Pillar"), RupeeGold);
-    layout.set(LocationKey::new(world::hyrule::death::mountain::AREA, "Bouldering Guy"), ItemBottle);
-    layout.set(LocationKey::new(world::hyrule::death::mountain::AREA, "Death Mountain Treasure Dungeon"), ItemHookShotLv2);
-    layout.set(LocationKey::new(world::hyrule::death::mountain::AREA, "Floating Island"), RupeeGold);
+    layout.set(world::hyrule::death::mountain::get("Death Mountain Open Cave").unwrap(), PowerGlove);
+    layout.set(world::hyrule::death::mountain::get("Death Mountain Blocked Cave").unwrap(), RupeeGold);
+    layout.set(world::hyrule::death::mountain::get("Death Mountain Fairy Cave").unwrap(), RupeeGold);
+    layout.set(world::hyrule::death::mountain::get("Death Mountain West Ledge").unwrap(), RupeeGold);
+    layout.set(world::hyrule::death::mountain::get("Donkey Cave Pegs").unwrap(), RupeeGold);
+    layout.set(world::hyrule::death::mountain::get("Death Mountain West Highest Cave").unwrap(), RupeeGold);
+    layout.set(world::hyrule::death::mountain::get("Spectacle Rock").unwrap(), RupeeGold);
+    layout.set(world::hyrule::death::mountain::get("Fire Cave Pillar").unwrap(), RupeeGold);
+    layout.set(world::hyrule::death::mountain::get("Bouldering Guy").unwrap(), ItemBottle);
+    layout.set(world::hyrule::death::mountain::get("Death Mountain Treasure Dungeon").unwrap(), ItemHookShotLv2);
+    layout.set(world::hyrule::death::mountain::get("Floating Island").unwrap(), RupeeGold);
 
-    layout.set(LocationKey::new(world::hyrule::death::mountain::AREA, "[Mai] Death Mountain Base Rock"), RupeeGold);
-    layout.set(LocationKey::new(world::hyrule::death::mountain::AREA, "[Mai] Death Mountain West Ledge"), RupeeGold);
-    layout.set(LocationKey::new(world::hyrule::death::mountain::AREA, "[Mai] Death Mountain East Ledge"), RupeeGold);
-    layout.set(LocationKey::new(world::hyrule::death::mountain::AREA, "[Mai] Rosso's Ore Mine Rock"), RupeeGold);
-    layout.set(LocationKey::new(world::hyrule::death::mountain::AREA, "[Mai] Outside Hookshot Dungeon"), RupeeGold);
+    layout.set(world::hyrule::death::mountain::get("[Mai] Death Mountain Base Rock").unwrap(), RupeeGold);
+    layout.set(world::hyrule::death::mountain::get("[Mai] Death Mountain West Ledge").unwrap(), RupeeGold);
+    layout.set(world::hyrule::death::mountain::get("[Mai] Death Mountain East Ledge").unwrap(), RupeeGold);
+    layout.set(world::hyrule::death::mountain::get("[Mai] Rosso's Ore Mine Rock").unwrap(), RupeeGold);
+    layout.set(world::hyrule::death::mountain::get("[Mai] Outside Hookshot Dungeon").unwrap(), RupeeGold);
 
     // Kakariko
-    layout.set(LocationKey::new(world::hyrule::kakariko::village::AREA, "Bee Guy (1)"), HintGlasses);
-    layout.set(LocationKey::new(world::hyrule::kakariko::village::AREA, "Bee Guy (2)"), ItemFireRod);
-    layout.set(LocationKey::new(world::hyrule::kakariko::village::AREA, "Dodge the Cuccos"), RupeeGold);
-    layout.set(LocationKey::new(world::hyrule::kakariko::village::AREA, "Kakariko Item Shop (1)"), EscapeFruit);
-    layout.set(LocationKey::new(world::hyrule::kakariko::village::AREA, "Kakariko Item Shop (2)"), StopFruit);
-    layout.set(LocationKey::new(world::hyrule::kakariko::village::AREA, "Kakariko Item Shop (3)"), ItemShield);
-    layout.set(LocationKey::new(world::hyrule::kakariko::village::AREA, "Kakariko Jail"), RupeeGold);
-    layout.set(LocationKey::new(world::hyrule::kakariko::village::AREA, "Kakariko Well (Bottom)"), RupeeGold);
-    layout.set(LocationKey::new(world::hyrule::kakariko::village::AREA, "Kakariko Well (Top)"), RupeeGold);
-    layout.set(LocationKey::new(world::hyrule::kakariko::village::AREA, "Rupee Rush (Hyrule)"), RupeeGold);
-    layout.set(LocationKey::new(world::hyrule::kakariko::village::AREA, "Shady Guy"), RupeeGold);
-    layout.set(LocationKey::new(world::hyrule::kakariko::village::AREA, "Street Merchant (Left)"), RupeeGold);
-    layout.set(LocationKey::new(world::hyrule::kakariko::village::AREA, "Street Merchant (Right)"), LiverYellow);
-    layout.set(LocationKey::new(world::hyrule::kakariko::village::AREA, "Stylish Woman"), RupeeGold);
-    layout.set(LocationKey::new(world::hyrule::kakariko::village::AREA, "Woman"), RupeeR);
+    layout.set(world::hyrule::kakariko::village::get("Bee Guy (1)").unwrap(), HintGlasses);
+    layout.set(world::hyrule::kakariko::village::get("Bee Guy (2)").unwrap(), ItemFireRod);
+    layout.set(world::hyrule::kakariko::village::get("Dodge the Cuccos").unwrap(), RupeeGold);
+    layout.set(world::hyrule::kakariko::village::get("Kakariko Item Shop (1)").unwrap(), EscapeFruit);
+    layout.set(world::hyrule::kakariko::village::get("Kakariko Item Shop (2)").unwrap(), StopFruit);
+    layout.set(world::hyrule::kakariko::village::get("Kakariko Item Shop (3)").unwrap(), ItemShield);
+    layout.set(world::hyrule::kakariko::village::get("Kakariko Jail").unwrap(), RupeeGold);
+    layout.set(world::hyrule::kakariko::village::get("Kakariko Well (Bottom)").unwrap(), RupeeGold);
+    layout.set(world::hyrule::kakariko::village::get("Kakariko Well (Top)").unwrap(), RupeeGold);
+    layout.set(world::hyrule::kakariko::village::get("Rupee Rush (Hyrule)").unwrap(), RupeeGold);
+    layout.set(world::hyrule::kakariko::village::get("Shady Guy").unwrap(), RupeeGold);
+    layout.set(world::hyrule::kakariko::village::get("Street Merchant (Left)").unwrap(), RupeeGold);
+    layout.set(world::hyrule::kakariko::village::get("Street Merchant (Right)").unwrap(), LiverYellow);
+    layout.set(world::hyrule::kakariko::village::get("Stylish Woman").unwrap(), RupeeGold);
+    layout.set(world::hyrule::kakariko::village::get("Woman").unwrap(), RupeeR);
 
-    layout.set(LocationKey::new(world::hyrule::kakariko::village::AREA, "[Mai] Cucco Ranch Tree"), RupeeGold);
-    layout.set(LocationKey::new(world::hyrule::kakariko::village::AREA, "[Mai] Hyrule Rupee Rush Wall"), RupeeGold);
-    layout.set(LocationKey::new(world::hyrule::kakariko::village::AREA, "[Mai] Kakariko Bush"), RupeeGold);
-    layout.set(LocationKey::new(world::hyrule::kakariko::village::AREA, "[Mai] Kakariko Sand"), ItemBowLight);
-    layout.set(LocationKey::new(world::hyrule::kakariko::village::AREA, "[Mai] Woman's Roof Rock"), RupeeGold);
+    layout.set(world::hyrule::kakariko::village::get("[Mai] Cucco Ranch Tree").unwrap(), RupeeGold);
+    layout.set(world::hyrule::kakariko::village::get("[Mai] Hyrule Rupee Rush Wall").unwrap(), RupeeGold);
+    layout.set(world::hyrule::kakariko::village::get("[Mai] Kakariko Bush").unwrap(), RupeeGold);
+    layout.set(world::hyrule::kakariko::village::get("[Mai] Kakariko Sand").unwrap(), ItemBowLight);
+    layout.set(world::hyrule::kakariko::village::get("[Mai] Woman's Roof Rock").unwrap(), RupeeGold);
 
     // Zora's River
-    layout.set(LocationKey::new(world::hyrule::zora::river::AREA, "Queen Oren"), RupeeGold);
-    layout.set(LocationKey::new(world::hyrule::zora::river::AREA, "Waterfall Cave"), Kinsta);
-    layout.set(LocationKey::new(world::hyrule::zora::river::AREA, "Zora's Domain Ledge"), RupeeGold);
-    layout.set(LocationKey::new(world::hyrule::zora::river::AREA, "Zora's River Treasure Dungeon"), ItemBoomerangLv2);
+    layout.set(world::hyrule::zora::river::get("Queen Oren").unwrap(), RupeeGold);
+    layout.set(world::hyrule::zora::river::get("Waterfall Cave").unwrap(), Kinsta);
+    layout.set(world::hyrule::zora::river::get("Zora's Domain Ledge").unwrap(), RupeeGold);
+    layout.set(world::hyrule::zora::river::get("Zora's River Treasure Dungeon").unwrap(), ItemBoomerangLv2);
 
-    layout.set(LocationKey::new(world::hyrule::zora::river::AREA, "[Mai] Inside Witch's House"), RupeeGold);
-    layout.set(LocationKey::new(world::hyrule::zora::river::AREA, "[Mai] Under Wooden Bridge"), RupeeGold);
-    layout.set(LocationKey::new(world::hyrule::zora::river::AREA, "[Mai] Waterfall Ledge Wall"), RupeeGold);
-    layout.set(LocationKey::new(world::hyrule::zora::river::AREA, "[Mai] Zora's Domain South Wall"), RupeeGold);
-    layout.set(LocationKey::new(world::hyrule::zora::river::AREA, "[Mai] Zora's Domain Water"), RupeeGold);
+    layout.set(world::hyrule::zora::river::get("[Mai] Inside Witch's House").unwrap(), RupeeGold);
+    layout.set(world::hyrule::zora::river::get("[Mai] Under Wooden Bridge").unwrap(), RupeeGold);
+    layout.set(world::hyrule::zora::river::get("[Mai] Waterfall Ledge Wall").unwrap(), RupeeGold);
+    layout.set(world::hyrule::zora::river::get("[Mai] Zora's Domain South Wall").unwrap(), RupeeGold);
+    layout.set(world::hyrule::zora::river::get("[Mai] Zora's Domain Water").unwrap(), RupeeGold);
 
     // Eastern Ruins
-    layout.set(LocationKey::new(world::hyrule::eastern::ruins::AREA, "Bird Lover"), RupeeGold);
-    layout.set(LocationKey::new(world::hyrule::eastern::ruins::AREA, "Eastern Ruins Treasure Dungeon"), ItemHammerLv2);
-    layout.set(LocationKey::new(world::hyrule::eastern::ruins::AREA, "Eastern Ruins Armos Chest"), ItemTornadeRod);
-    layout.set(LocationKey::new(world::hyrule::eastern::ruins::AREA, "Eastern Ruins Hookshot Chest"), ItemSandRod);
-    layout.set(LocationKey::new(world::hyrule::eastern::ruins::AREA, "Eastern Ruins Merge Chest"), ItemBoomerang);
-    layout.set(LocationKey::new(world::hyrule::eastern::ruins::AREA, "Eastern Ruins Cave"), RupeeGold);
-    layout.set(LocationKey::new(world::hyrule::eastern::ruins::AREA, "Eastern Ruins Peg Circle"), RupeeGold);
+    layout.set(world::hyrule::eastern::ruins::get("Bird Lover").unwrap(), RupeeGold);
+    layout.set(world::hyrule::eastern::ruins::get("Eastern Ruins Treasure Dungeon").unwrap(), ItemHammerLv2);
+    layout.set(world::hyrule::eastern::ruins::get("Eastern Ruins Armos Chest").unwrap(), ItemTornadeRod);
+    layout.set(world::hyrule::eastern::ruins::get("Eastern Ruins Hookshot Chest").unwrap(), ItemSandRod);
+    layout.set(world::hyrule::eastern::ruins::get("Eastern Ruins Merge Chest").unwrap(), ItemBoomerang);
+    layout.set(world::hyrule::eastern::ruins::get("Eastern Ruins Cave").unwrap(), RupeeGold);
+    layout.set(world::hyrule::eastern::ruins::get("Eastern Ruins Peg Circle").unwrap(), RupeeGold);
 
-    layout.set(LocationKey::new(world::hyrule::eastern::ruins::AREA, "[Mai] Atop Eastern Rocks"), RupeeGold);
-    layout.set(LocationKey::new(world::hyrule::eastern::ruins::AREA, "[Mai] Eastern Ruins Big Rock"), RupeeGold);
-    layout.set(LocationKey::new(world::hyrule::eastern::ruins::AREA, "[Mai] Eastern Ruins Green Tree"), RupeeGold);
-    layout.set(LocationKey::new(world::hyrule::eastern::ruins::AREA, "[Mai] Eastern Ruins Wall"), RupeeGold);
-    layout.set(LocationKey::new(world::hyrule::eastern::ruins::AREA, "[Mai] Eastern Ruins Yellow Tree"), RupeeGold);
-    layout.set(LocationKey::new(world::hyrule::eastern::ruins::AREA, "[Mai] Southern Bridge River"), RupeeGold);
+    layout.set(world::hyrule::eastern::ruins::get("[Mai] Atop Eastern Rocks").unwrap(), RupeeGold);
+    layout.set(world::hyrule::eastern::ruins::get("[Mai] Eastern Ruins Big Rock").unwrap(), RupeeGold);
+    layout.set(world::hyrule::eastern::ruins::get("[Mai] Eastern Ruins Green Tree").unwrap(), RupeeGold);
+    layout.set(world::hyrule::eastern::ruins::get("[Mai] Eastern Ruins Wall").unwrap(), RupeeGold);
+    layout.set(world::hyrule::eastern::ruins::get("[Mai] Eastern Ruins Yellow Tree").unwrap(), RupeeGold);
+    layout.set(world::hyrule::eastern::ruins::get("[Mai] Southern Bridge River").unwrap(), RupeeGold);
 
     // Desert of Mystery
-    layout.set(LocationKey::new(world::hyrule::desert::mystery::AREA, "[Mai] Buried in the Desert"), RupeeGold);
-    layout.set(LocationKey::new(world::hyrule::desert::mystery::AREA, "[Mai] Buried near Desert Palace"), RupeeGold);
-    layout.set(LocationKey::new(world::hyrule::desert::mystery::AREA, "[Mai] Southern Ruins Big Rock"), RupeeGold);
+    layout.set(world::hyrule::desert::mystery::get("[Mai] Buried in the Desert").unwrap(), RupeeGold);
+    layout.set(world::hyrule::desert::mystery::get("[Mai] Buried near Desert Palace").unwrap(), RupeeGold);
+    layout.set(world::hyrule::desert::mystery::get("[Mai] Southern Ruins Big Rock").unwrap(), RupeeGold);
 
     // Southern Ruins
-    layout.set(LocationKey::new(world::hyrule::southern::ruins::AREA, "Runaway Item Seller"), RupeeGold);
-    layout.set(LocationKey::new(world::hyrule::southern::ruins::AREA, "Southern Ruins Ledge"), ItemHammer);
-    layout.set(LocationKey::new(world::hyrule::southern::ruins::AREA, "Southern Ruins Pillar Cave"), ItemBowLight);
-    layout.set(LocationKey::new(world::hyrule::southern::ruins::AREA, "Southern Ruins Treasure Dungeon"), ItemHammer);
+    layout.set(world::hyrule::southern::ruins::get("Runaway Item Seller").unwrap(), RupeeGold);
+    layout.set(world::hyrule::southern::ruins::get("Southern Ruins Ledge").unwrap(), ItemHammer);
+    layout.set(world::hyrule::southern::ruins::get("Southern Ruins Pillar Cave").unwrap(), ItemBowLight);
+    layout.set(world::hyrule::southern::ruins::get("Southern Ruins Treasure Dungeon").unwrap(), ItemHammer);
 
-    layout.set(LocationKey::new(world::hyrule::southern::ruins::AREA, "[Mai] Outside Flippers Dungeon"), RupeeGold);
-    layout.set(LocationKey::new(world::hyrule::southern::ruins::AREA, "[Mai] Southern Ruins Bomb Cave"), RupeeGold);
-    layout.set(LocationKey::new(world::hyrule::southern::ruins::AREA, "[Mai] Southern Ruins Pillars"), RupeeGold);
+    layout.set(world::hyrule::southern::ruins::get("[Mai] Outside Flippers Dungeon").unwrap(), RupeeGold);
+    layout.set(world::hyrule::southern::ruins::get("[Mai] Southern Ruins Bomb Cave").unwrap(), RupeeGold);
+    layout.set(world::hyrule::southern::ruins::get("[Mai] Southern Ruins Pillars").unwrap(), RupeeGold);
 
     // Lake Hylia
-    layout.set(LocationKey::new(world::hyrule::lake::hylia::AREA, " 10 Maiamai"), ItemBowLv2);
-    layout.set(LocationKey::new(world::hyrule::lake::hylia::AREA, " 20 Maiamai"), ItemBoomerangLv2);
-    layout.set(LocationKey::new(world::hyrule::lake::hylia::AREA, " 30 Maiamai"), ItemHookShotLv2);
-    layout.set(LocationKey::new(world::hyrule::lake::hylia::AREA, " 40 Maiamai"), ItemHammerLv2);
-    layout.set(LocationKey::new(world::hyrule::lake::hylia::AREA, " 50 Maiamai"), ItemBombLv2);
-    layout.set(LocationKey::new(world::hyrule::lake::hylia::AREA, " 60 Maiamai"), ItemFireRodLv2);
-    layout.set(LocationKey::new(world::hyrule::lake::hylia::AREA, " 70 Maiamai"), ItemIceRodLv2);
-    layout.set(LocationKey::new(world::hyrule::lake::hylia::AREA, " 80 Maiamai"), ItemTornadeRodLv2);
-    layout.set(LocationKey::new(world::hyrule::lake::hylia::AREA, " 90 Maiamai"), ItemSandRodLv2);
-    layout.set(LocationKey::new(world::hyrule::lake::hylia::AREA, "100 Maiamai"), SpecialMove);
+    layout.set(world::hyrule::lake::hylia::get(" 10 Maiamai").unwrap(), ItemBowLv2);
+    layout.set(world::hyrule::lake::hylia::get(" 20 Maiamai").unwrap(), ItemBoomerangLv2);
+    layout.set(world::hyrule::lake::hylia::get(" 30 Maiamai").unwrap(), ItemHookShotLv2);
+    layout.set(world::hyrule::lake::hylia::get(" 40 Maiamai").unwrap(), ItemHammerLv2);
+    layout.set(world::hyrule::lake::hylia::get(" 50 Maiamai").unwrap(), ItemBombLv2);
+    layout.set(world::hyrule::lake::hylia::get(" 60 Maiamai").unwrap(), ItemFireRodLv2);
+    layout.set(world::hyrule::lake::hylia::get(" 70 Maiamai").unwrap(), ItemIceRodLv2);
+    layout.set(world::hyrule::lake::hylia::get(" 80 Maiamai").unwrap(), ItemTornadeRodLv2);
+    layout.set(world::hyrule::lake::hylia::get(" 90 Maiamai").unwrap(), ItemSandRodLv2);
+    layout.set(world::hyrule::lake::hylia::get("100 Maiamai").unwrap(), SpecialMove);
 
-    layout.set(LocationKey::new(world::hyrule::lake::hylia::AREA, "Ice Rod Cave"), RupeeGold);
-    layout.set(LocationKey::new(world::hyrule::lake::hylia::AREA, "Lake Hylia Dark Cave"), RupeeGold);
-    layout.set(LocationKey::new(world::hyrule::lake::hylia::AREA, "Lake Hylia Ledge Chest"), RupeeGold);
-    layout.set(LocationKey::new(world::hyrule::lake::hylia::AREA, "Lakeside Item Shop (1)"), EscapeFruit);
-    layout.set(LocationKey::new(world::hyrule::lake::hylia::AREA, "Lakeside Item Shop (2)"), StopFruit);
-    layout.set(LocationKey::new(world::hyrule::lake::hylia::AREA, "Lakeside Item Shop (3)"), ItemShield);
-    layout.set(LocationKey::new(world::hyrule::lake::hylia::AREA, "Southeastern Shore"), HintGlasses);
+    layout.set(world::hyrule::lake::hylia::get("Ice Rod Cave").unwrap(), RupeeGold);
+    layout.set(world::hyrule::lake::hylia::get("Lake Hylia Dark Cave").unwrap(), RupeeGold);
+    layout.set(world::hyrule::lake::hylia::get("Lake Hylia Ledge Chest").unwrap(), RupeeGold);
+    layout.set(world::hyrule::lake::hylia::get("Lakeside Item Shop (1)").unwrap(), EscapeFruit);
+    layout.set(world::hyrule::lake::hylia::get("Lakeside Item Shop (2)").unwrap(), StopFruit);
+    layout.set(world::hyrule::lake::hylia::get("Lakeside Item Shop (3)").unwrap(), ItemShield);
+    layout.set(world::hyrule::lake::hylia::get("Southeastern Shore").unwrap(), HintGlasses);
 
-    layout.set(LocationKey::new(world::hyrule::lake::hylia::AREA, "[Mai] Hyrule Hotfoot Big Rock"), RupeeGold);
-    layout.set(LocationKey::new(world::hyrule::lake::hylia::AREA, "[Mai] Island Tornado Tile"), RupeeGold);
-    layout.set(LocationKey::new(world::hyrule::lake::hylia::AREA, "[Mai] Lake Hylia SE Wall"), RupeeGold);
-    layout.set(LocationKey::new(world::hyrule::lake::hylia::AREA, "[Mai] Lake Hylia Shallow Ring"), RupeeGold);
-    layout.set(LocationKey::new(world::hyrule::lake::hylia::AREA, "[Mai] Outside Maiamai Cave"), RupeeGold);
+    layout.set(world::hyrule::lake::hylia::get("[Mai] Hyrule Hotfoot Big Rock").unwrap(), RupeeGold);
+    layout.set(world::hyrule::lake::hylia::get("[Mai] Island Tornado Tile").unwrap(), RupeeGold);
+    layout.set(world::hyrule::lake::hylia::get("[Mai] Lake Hylia SE Wall").unwrap(), RupeeGold);
+    layout.set(world::hyrule::lake::hylia::get("[Mai] Lake Hylia Shallow Ring").unwrap(), RupeeGold);
+    layout.set(world::hyrule::lake::hylia::get("[Mai] Outside Maiamai Cave").unwrap(), RupeeGold);
 
     ////////////////////
     // --- Lorule --- //
     ////////////////////
 
     // Lorule Field
-    layout.set(LocationKey::new(world::lorule::field::main::AREA, "Lorule Field Treasure Dungeon"), GanbariPowerUp);
-    layout.set(LocationKey::new(world::lorule::field::main::AREA, "Vacant House"), RupeeGold);
-    layout.set(LocationKey::new(world::lorule::field::main::AREA, "Rupee Rush (Lorule)"), RupeeGold);
-    layout.set(LocationKey::new(world::lorule::field::main::AREA, "Great Rupee Fairy"), ItemIceRod);
-    layout.set(LocationKey::new(world::lorule::field::main::AREA, "Big Bomb Flower Cave"), RupeeGold);
-    layout.set(LocationKey::new(world::lorule::field::main::AREA, "Octoball Derby"), RupeeGold);
-    layout.set(LocationKey::new(world::lorule::field::main::AREA, "Blacksmith (Lorule)"), ItemKandelaar);
-    layout.set(LocationKey::new(world::lorule::field::main::AREA, "Swamp Cave (Left)"), ItemBowLight);
-    layout.set(LocationKey::new(world::lorule::field::main::AREA, "Swamp Cave (Middle)"), RupeeGold);
-    layout.set(LocationKey::new(world::lorule::field::main::AREA, "Swamp Cave (Right)"), LiverBlue);
-    layout.set(LocationKey::new(world::lorule::field::main::AREA, "Thief Girl"), RupeeGold);
-    layout.set(LocationKey::new(world::lorule::field::main::AREA, "Lorule Field Hookshot Chest"), RupeeGold);
-    layout.set(LocationKey::new(world::lorule::field::main::AREA, "Fortune's Choice"), HeartPiece);
-    layout.set(LocationKey::new(world::lorule::field::main::AREA, "[Mai] Thieves' Town Wall"), RupeeGold);
-    layout.set(LocationKey::new(world::lorule::field::main::AREA, "[Mai] Near Lorule Fortune-Teller"), RupeeGold);
-    layout.set(LocationKey::new(world::lorule::field::main::AREA, "[Mai] Lorule Castle Wall"), RupeeGold);
-    layout.set(LocationKey::new(world::lorule::field::main::AREA, "[Mai] Lorule Castle Tree"), RupeeGold);
-    layout.set(LocationKey::new(world::lorule::field::main::AREA, "[Mai] Lorule Blacksmith Wall"), RupeeGold);
-    layout.set(LocationKey::new(world::lorule::field::main::AREA, "[Mai] Lorule Rupee Rush Wall"), RupeeGold);
-    layout.set(LocationKey::new(world::lorule::field::main::AREA, "[Mai] Big Bomb Flower Grass"), RupeeGold);
-    layout.set(LocationKey::new(world::lorule::field::main::AREA, "[Mai] Octoball Derby Skull"), RupeeGold);
-    layout.set(LocationKey::new(world::lorule::field::main::AREA, "[Mai] Vacant House Big Rock"), RupeeGold);
-    layout.set(LocationKey::new(world::lorule::field::main::AREA, "[Mai] Behind Vacant House"), RupeeGold);
-    layout.set(LocationKey::new(world::lorule::field::main::AREA, "[Mai] Lorule Haunted Grove Wall"), RupeeGold);
-    layout.set(LocationKey::new(world::lorule::field::main::AREA, "[Mai] Lorule S Ruins Pillars"), RupeeGold);
-    layout.set(LocationKey::new(world::lorule::field::main::AREA, "[Mai] Lorule S Ruins Wall"), RupeeGold);
-    layout.set(LocationKey::new(world::lorule::field::main::AREA, "[Mai] Lorule S Ruins Water"), RupeeGold);
-    layout.set(LocationKey::new(world::lorule::field::main::AREA, "[Mai] Thieves' Town Tree"), RupeeGold);
+    layout.set(world::lorule::field::main::get("Lorule Field Treasure Dungeon").unwrap(), GanbariPowerUp);
+    layout.set(world::lorule::field::main::get("Vacant House").unwrap(), RupeeGold);
+    layout.set(world::lorule::field::main::get("Rupee Rush (Lorule)").unwrap(), RupeeGold);
+    layout.set(world::lorule::field::main::get("Great Rupee Fairy").unwrap(), ItemIceRod);
+    layout.set(world::lorule::field::main::get("Big Bomb Flower Cave").unwrap(), RupeeGold);
+    layout.set(world::lorule::field::main::get("Octoball Derby").unwrap(), RupeeGold);
+    layout.set(world::lorule::field::main::get("Blacksmith (Lorule)").unwrap(), ItemKandelaar);
+    layout.set(world::lorule::field::main::get("Swamp Cave (Left)").unwrap(), ItemBowLight);
+    layout.set(world::lorule::field::main::get("Swamp Cave (Middle)").unwrap(), RupeeGold);
+    layout.set(world::lorule::field::main::get("Swamp Cave (Right)").unwrap(), LiverBlue);
+    layout.set(world::lorule::field::main::get("Thief Girl").unwrap(), RupeeGold);
+    layout.set(world::lorule::field::main::get("Lorule Field Hookshot Chest").unwrap(), RupeeGold);
+    layout.set(world::lorule::field::main::get("Fortune's Choice").unwrap(), HeartPiece);
+    layout.set(world::lorule::field::main::get("[Mai] Thieves' Town Wall").unwrap(), RupeeGold);
+    layout.set(world::lorule::field::main::get("[Mai] Near Lorule Fortune-Teller").unwrap(), RupeeGold);
+    layout.set(world::lorule::field::main::get("[Mai] Lorule Castle Wall").unwrap(), RupeeGold);
+    layout.set(world::lorule::field::main::get("[Mai] Lorule Castle Tree").unwrap(), RupeeGold);
+    layout.set(world::lorule::field::main::get("[Mai] Lorule Blacksmith Wall").unwrap(), RupeeGold);
+    layout.set(world::lorule::field::main::get("[Mai] Lorule Rupee Rush Wall").unwrap(), RupeeGold);
+    layout.set(world::lorule::field::main::get("[Mai] Big Bomb Flower Grass").unwrap(), RupeeGold);
+    layout.set(world::lorule::field::main::get("[Mai] Octoball Derby Skull").unwrap(), RupeeGold);
+    layout.set(world::lorule::field::main::get("[Mai] Vacant House Big Rock").unwrap(), RupeeGold);
+    layout.set(world::lorule::field::main::get("[Mai] Behind Vacant House").unwrap(), RupeeGold);
+    layout.set(world::lorule::field::main::get("[Mai] Lorule Haunted Grove Wall").unwrap(), RupeeGold);
+    layout.set(world::lorule::field::main::get("[Mai] Lorule S Ruins Pillars").unwrap(), RupeeGold);
+    layout.set(world::lorule::field::main::get("[Mai] Lorule S Ruins Wall").unwrap(), RupeeGold);
+    layout.set(world::lorule::field::main::get("[Mai] Lorule S Ruins Water").unwrap(), RupeeGold);
+    layout.set(world::lorule::field::main::get("[Mai] Thieves' Town Tree").unwrap(), RupeeGold);
 
     // Thieves' Town Shop
-    layout.set(LocationKey::new(world::lorule::field::main::AREA, "Thieves' Town Item Shop (1)"), Bee);
-    layout.set(LocationKey::new(world::lorule::field::main::AREA, "Thieves' Town Item Shop (2)"), GoldenBeeForSale);
-    layout.set(LocationKey::new(world::lorule::field::main::AREA, "Thieves' Town Item Shop (3)"), Fairy);
-    layout.set(LocationKey::new(world::lorule::field::main::AREA, "Thieves' Town Item Shop (4)"), ItemShield);
+    layout.set(world::lorule::field::main::get("Thieves' Town Item Shop (1)").unwrap(), Bee);
+    layout.set(world::lorule::field::main::get("Thieves' Town Item Shop (2)").unwrap(), GoldenBeeForSale);
+    layout.set(world::lorule::field::main::get("Thieves' Town Item Shop (3)").unwrap(), Fairy);
+    layout.set(world::lorule::field::main::get("Thieves' Town Item Shop (4)").unwrap(), ItemShield);
 
     // Lorule Lakeside Item Shop
-    layout.set(LocationKey::new(world::lorule::lake::lorule::AREA, "Lorule Lakeside Item Shop (1)"), Bee);
-    layout.set(LocationKey::new(world::lorule::lake::lorule::AREA, "Lorule Lakeside Item Shop (2)"), GoldenBeeForSale);
-    layout.set(LocationKey::new(world::lorule::lake::lorule::AREA, "Lorule Lakeside Item Shop (3)"), Fairy);
-    layout.set(LocationKey::new(world::lorule::lake::lorule::AREA, "Lorule Lakeside Item Shop (4)"), ItemShield);
+    layout.set(world::lorule::lake::lorule::get("Lorule Lakeside Item Shop (1)").unwrap(), Bee);
+    layout.set(world::lorule::lake::lorule::get("Lorule Lakeside Item Shop (2)").unwrap(), GoldenBeeForSale);
+    layout.set(world::lorule::lake::lorule::get("Lorule Lakeside Item Shop (3)").unwrap(), Fairy);
+    layout.set(world::lorule::lake::lorule::get("Lorule Lakeside Item Shop (4)").unwrap(), ItemShield);
 
     // Chamber of Sages
-    layout.set(LocationKey::new(world::lorule::chamber::sages::AREA, "Osfala"), DashBoots);
+    layout.set(world::lorule::chamber::sages::get("Osfala").unwrap(), DashBoots);
 
     // Skull Woods (overworld)
-    layout.set(LocationKey::new(world::lorule::skull::overworld::AREA, "Canyon House"), RupeeGold);
-    layout.set(LocationKey::new(world::lorule::skull::overworld::AREA, "Destroyed House"), RupeeGold);
-    layout.set(LocationKey::new(world::lorule::skull::overworld::AREA, "Mysterious Man"), GoldenBeeForSale);
-    layout.set(LocationKey::new(world::lorule::skull::overworld::AREA, "[Mai] Canyon House Wall"), RupeeGold);
-    layout.set(LocationKey::new(world::lorule::skull::overworld::AREA, "[Mai] Skull Woods Big Rock"), RupeeGold);
-    layout.set(LocationKey::new(world::lorule::skull::overworld::AREA, "[Mai] Skull Woods Bush"), RupeeGold);
-    layout.set(LocationKey::new(world::lorule::skull::overworld::AREA, "[Mai] Skull Woods Dry Pond"), RupeeGold);
-    layout.set(LocationKey::new(world::lorule::skull::overworld::AREA, "[Mai] Skull Woods Entrance Wall"), RupeeGold);
-    layout.set(LocationKey::new(world::lorule::skull::overworld::AREA, "[Mai] Skull Woods Grass"), RupeeGold);
-    layout.set(LocationKey::new(world::lorule::skull::overworld::AREA, "[Mai] Skull Woods Shack Tree"), RupeeGold);
-    layout.set(LocationKey::new(world::lorule::skull::overworld::AREA, "[Mai] Skull Woods Skull"), RupeeGold);
+    layout.set(world::lorule::skull::overworld::get("Canyon House").unwrap(), RupeeGold);
+    layout.set(world::lorule::skull::overworld::get("Destroyed House").unwrap(), RupeeGold);
+    layout.set(world::lorule::skull::overworld::get("Mysterious Man").unwrap(), GoldenBeeForSale);
+    layout.set(world::lorule::skull::overworld::get("[Mai] Canyon House Wall").unwrap(), RupeeGold);
+    layout.set(world::lorule::skull::overworld::get("[Mai] Skull Woods Big Rock").unwrap(), RupeeGold);
+    layout.set(world::lorule::skull::overworld::get("[Mai] Skull Woods Bush").unwrap(), RupeeGold);
+    layout.set(world::lorule::skull::overworld::get("[Mai] Skull Woods Dry Pond").unwrap(), RupeeGold);
+    layout.set(world::lorule::skull::overworld::get("[Mai] Skull Woods Entrance Wall").unwrap(), RupeeGold);
+    layout.set(world::lorule::skull::overworld::get("[Mai] Skull Woods Grass").unwrap(), RupeeGold);
+    layout.set(world::lorule::skull::overworld::get("[Mai] Skull Woods Shack Tree").unwrap(), RupeeGold);
+    layout.set(world::lorule::skull::overworld::get("[Mai] Skull Woods Skull").unwrap(), RupeeGold);
 
     // Lorule Death Mountain
-    layout.set(LocationKey::new(world::lorule::death::mountain::AREA, "Lorule Mountain E Ledge"), RupeeGold);
-    layout.set(LocationKey::new(world::lorule::death::mountain::AREA, "Behind Ice Gimos"), ItemFireRodLv2);
-    layout.set(LocationKey::new(world::lorule::death::mountain::AREA, "Lorule Mountain W Ledge"), RupeeGold);
-    layout.set(LocationKey::new(world::lorule::death::mountain::AREA, "Ice Gimos Fight"), RupeeGold);
-    layout.set(LocationKey::new(world::lorule::death::mountain::AREA, "Treacherous Tower Intermediate"), RupeeGold);
-    layout.set(LocationKey::new(world::lorule::death::mountain::AREA, "Treacherous Tower Advanced (1)"), RupeeGold);
-    layout.set(LocationKey::new(world::lorule::death::mountain::AREA, "Treacherous Tower Advanced (2)"), RupeeGold);
-    layout.set(LocationKey::new(world::lorule::death::mountain::AREA, "[Mai] Lorule Mountain W Skull"), RupeeGold);
-    layout.set(LocationKey::new(world::lorule::death::mountain::AREA, "[Mai] Lorule Mountain W Big Rock"), RupeeGold);
-    layout.set(LocationKey::new(world::lorule::death::mountain::AREA, "[Mai] Lorule Mountain E Skull"), RupeeGold);
-    layout.set(LocationKey::new(world::lorule::death::mountain::AREA, "[Mai] Lorule Mountain E Wall"), RupeeGold);
-    layout.set(LocationKey::new(world::lorule::death::mountain::AREA, "[Mai] Outside Ice Ruins"), RupeeGold);
-    layout.set(LocationKey::new(world::lorule::death::mountain::AREA, "[Mai] Lorule Mountain E Big Rock"), RupeeGold);
+    layout.set(world::lorule::death::mountain::get("Lorule Mountain E Ledge").unwrap(), RupeeGold);
+    layout.set(world::lorule::death::mountain::get("Behind Ice Gimos").unwrap(), ItemFireRodLv2);
+    layout.set(world::lorule::death::mountain::get("Lorule Mountain W Ledge").unwrap(), RupeeGold);
+    layout.set(world::lorule::death::mountain::get("Ice Gimos Fight").unwrap(), RupeeGold);
+    layout.set(world::lorule::death::mountain::get("Treacherous Tower Intermediate").unwrap(), RupeeGold);
+    layout.set(world::lorule::death::mountain::get("Treacherous Tower Advanced (1)").unwrap(), RupeeGold);
+    layout.set(world::lorule::death::mountain::get("Treacherous Tower Advanced (2)").unwrap(), RupeeGold);
+    layout.set(world::lorule::death::mountain::get("[Mai] Lorule Mountain W Skull").unwrap(), RupeeGold);
+    layout.set(world::lorule::death::mountain::get("[Mai] Lorule Mountain W Big Rock").unwrap(), RupeeGold);
+    layout.set(world::lorule::death::mountain::get("[Mai] Lorule Mountain E Skull").unwrap(), RupeeGold);
+    layout.set(world::lorule::death::mountain::get("[Mai] Lorule Mountain E Wall").unwrap(), RupeeGold);
+    layout.set(world::lorule::death::mountain::get("[Mai] Outside Ice Ruins").unwrap(), RupeeGold);
+    layout.set(world::lorule::death::mountain::get("[Mai] Lorule Mountain E Big Rock").unwrap(), RupeeGold);
 
     // Dark Ruins
-    layout.set(LocationKey::new(world::lorule::dark::ruins::AREA, "Dark Ruins Lakeview Chest"), RupeeGold);
-    layout.set(LocationKey::new(world::lorule::dark::ruins::AREA, "Dark Maze Chest"), RupeeGold);
-    layout.set(LocationKey::new(world::lorule::dark::ruins::AREA, "Dark Maze Ledge"), HeartPiece);
-    layout.set(LocationKey::new(world::lorule::dark::ruins::AREA, "Hinox (1)"), RupeeG);
-    layout.set(LocationKey::new(world::lorule::dark::ruins::AREA, "Hinox (2)"), RupeeB);
-    layout.set(LocationKey::new(world::lorule::dark::ruins::AREA, "Hinox (3)"), RupeeR);
-    layout.set(LocationKey::new(world::lorule::dark::ruins::AREA, "Hinox (4)"), RupeePurple);
-    layout.set(LocationKey::new(world::lorule::dark::ruins::AREA, "Hinox (5)"), RupeeSilver);
-    layout.set(LocationKey::new(world::lorule::dark::ruins::AREA, "Hinox (6)"), SpecialMove);
-    layout.set(LocationKey::new(world::lorule::dark::ruins::AREA, "Ku's Domain Fight"), ItemMizukaki);
-    layout.set(LocationKey::new(world::lorule::dark::ruins::AREA, "[Mai] Atop Dark Ruins Rocks"), RupeeGold);
-    layout.set(LocationKey::new(world::lorule::dark::ruins::AREA, "[Mai] Dark Maze Center Wall"), RupeeGold);
-    layout.set(LocationKey::new(world::lorule::dark::ruins::AREA, "[Mai] Dark Maze Entrance Wall"), RupeeGold);
-    layout.set(LocationKey::new(world::lorule::dark::ruins::AREA, "[Mai] Dark Ruins East Tree"), RupeeGold);
-    layout.set(LocationKey::new(world::lorule::dark::ruins::AREA, "[Mai] Dark Ruins South Area Wall"), RupeeGold);
-    layout.set(LocationKey::new(world::lorule::dark::ruins::AREA, "[Mai] Dark Ruins Waterfall"), RupeeGold);
-    layout.set(LocationKey::new(world::lorule::dark::ruins::AREA, "[Mai] Dark Ruins West Tree"), RupeeGold);
-    layout.set(LocationKey::new(world::lorule::dark::ruins::AREA, "[Mai] Ku's Domain Grass"), RupeeGold);
-    layout.set(LocationKey::new(world::lorule::dark::ruins::AREA, "[Mai] Ku's Domain Water"), RupeeGold);
-    layout.set(LocationKey::new(world::lorule::dark::ruins::AREA, "[Mai] Outside Hinox Cave"), RupeeGold);
+    layout.set(world::lorule::dark::ruins::get("Dark Ruins Lakeview Chest").unwrap(), RupeeGold);
+    layout.set(world::lorule::dark::ruins::get("Dark Maze Chest").unwrap(), RupeeGold);
+    layout.set(world::lorule::dark::ruins::get("Dark Maze Ledge").unwrap(), HeartPiece);
+    layout.set(world::lorule::dark::ruins::get("Hinox (1)").unwrap(), RupeeG);
+    layout.set(world::lorule::dark::ruins::get("Hinox (2)").unwrap(), RupeeB);
+    layout.set(world::lorule::dark::ruins::get("Hinox (3)").unwrap(), RupeeR);
+    layout.set(world::lorule::dark::ruins::get("Hinox (4)").unwrap(), RupeePurple);
+    layout.set(world::lorule::dark::ruins::get("Hinox (5)").unwrap(), RupeeSilver);
+    layout.set(world::lorule::dark::ruins::get("Hinox (6)").unwrap(), SpecialMove);
+    layout.set(world::lorule::dark::ruins::get("Ku's Domain Fight").unwrap(), ItemMizukaki);
+    layout.set(world::lorule::dark::ruins::get("[Mai] Atop Dark Ruins Rocks").unwrap(), RupeeGold);
+    layout.set(world::lorule::dark::ruins::get("[Mai] Dark Maze Center Wall").unwrap(), RupeeGold);
+    layout.set(world::lorule::dark::ruins::get("[Mai] Dark Maze Entrance Wall").unwrap(), RupeeGold);
+    layout.set(world::lorule::dark::ruins::get("[Mai] Dark Ruins East Tree").unwrap(), RupeeGold);
+    layout.set(world::lorule::dark::ruins::get("[Mai] Dark Ruins South Area Wall").unwrap(), RupeeGold);
+    layout.set(world::lorule::dark::ruins::get("[Mai] Dark Ruins Waterfall").unwrap(), RupeeGold);
+    layout.set(world::lorule::dark::ruins::get("[Mai] Dark Ruins West Tree").unwrap(), RupeeGold);
+    layout.set(world::lorule::dark::ruins::get("[Mai] Ku's Domain Grass").unwrap(), RupeeGold);
+    layout.set(world::lorule::dark::ruins::get("[Mai] Ku's Domain Water").unwrap(), RupeeGold);
+    layout.set(world::lorule::dark::ruins::get("[Mai] Outside Hinox Cave").unwrap(), RupeeGold);
 
     // Misery Mire
-    layout.set(LocationKey::new(world::lorule::misery::mire::AREA, "Misery Mire Ledge"), RupeeGold);
-    layout.set(LocationKey::new(world::lorule::misery::mire::AREA, "Misery Mire Treasure Dungeon"), ItemSandRodLv2);
-    layout.set(LocationKey::new(world::lorule::misery::mire::AREA, "[Mai] Misery Mire Water"), RupeeGold);
-    layout.set(LocationKey::new(world::lorule::misery::mire::AREA, "[Mai] Misery Mire Wall"), RupeeGold);
-    layout.set(LocationKey::new(world::lorule::misery::mire::AREA, "[Mai] Misery Mire Big Rock"), RupeeGold);
+    layout.set(world::lorule::misery::mire::get("Misery Mire Ledge").unwrap(), RupeeGold);
+    layout.set(world::lorule::misery::mire::get("Misery Mire Treasure Dungeon").unwrap(), ItemSandRodLv2);
+    layout.set(world::lorule::misery::mire::get("[Mai] Misery Mire Water").unwrap(), RupeeGold);
+    layout.set(world::lorule::misery::mire::get("[Mai] Misery Mire Wall").unwrap(), RupeeGold);
+    layout.set(world::lorule::misery::mire::get("[Mai] Misery Mire Big Rock").unwrap(), RupeeGold);
 
     // Lorule Lake
-    layout.set(LocationKey::new(world::lorule::lake::lorule::AREA, "Lorule Lake Chest"), RupeeGold);
-    layout.set(LocationKey::new(world::lorule::lake::lorule::AREA, "[Mai] Lorule Lake Big Rock"), RupeeGold);
-    layout.set(LocationKey::new(world::lorule::lake::lorule::AREA, "[Mai] Lorule Lake SE Wall"), RupeeGold);
-    layout.set(LocationKey::new(world::lorule::lake::lorule::AREA, "[Mai] Lorule Lake Skull"), RupeeGold);
-    layout.set(LocationKey::new(world::lorule::lake::lorule::AREA, "[Mai] Lorule Lake Water"), RupeeGold);
-    layout.set(LocationKey::new(world::lorule::lake::lorule::AREA, "[Mai] Lorule Lake West Wall"), RupeeGold);
+    layout.set(world::lorule::lake::lorule::get("Lorule Lake Chest").unwrap(), RupeeGold);
+    layout.set(world::lorule::lake::lorule::get("[Mai] Lorule Lake Big Rock").unwrap(), RupeeGold);
+    layout.set(world::lorule::lake::lorule::get("[Mai] Lorule Lake SE Wall").unwrap(), RupeeGold);
+    layout.set(world::lorule::lake::lorule::get("[Mai] Lorule Lake Skull").unwrap(), RupeeGold);
+    layout.set(world::lorule::lake::lorule::get("[Mai] Lorule Lake Water").unwrap(), RupeeGold);
+    layout.set(world::lorule::lake::lorule::get("[Mai] Lorule Lake West Wall").unwrap(), RupeeGold);
 
     //////////////////////////
     // --- Mini Dungeon --- //
     //////////////////////////
 
     // Graveyard (Hyrule)
-    layout.set(LocationKey::new(world::dungeons::graveyards::hyrule::AREA, "Dampe"), RingRental);
-    layout.set(LocationKey::new(world::dungeons::graveyards::hyrule::AREA, "Sanctuary Pegs"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::graveyards::hyrule::AREA, "[HS] Entrance"), KeySmall);
-    layout.set(LocationKey::new(world::dungeons::graveyards::hyrule::AREA, "[HS] Lower Chest"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::graveyards::hyrule::AREA, "[HS] Upper Chest"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::graveyards::hyrule::AREA, "[HS] Ledge"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::graveyards::hyrule::AREA, "Graveyard Ledge Cave"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::graveyards::hyrule::AREA, "[Mai] Sanctuary Wall"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::graveyards::hyrule::AREA, "[Mai] Hyrule Graveyard Wall"), RupeeGold);
+    layout.set(world::dungeons::graveyards::hyrule::get("Dampe").unwrap(), RingRental);
+    layout.set(world::dungeons::graveyards::hyrule::get("Sanctuary Pegs").unwrap(), RupeeGold);
+    layout.set(world::dungeons::graveyards::hyrule::get("[HS] Entrance").unwrap(), KeySmall);
+    layout.set(world::dungeons::graveyards::hyrule::get("[HS] Lower Chest").unwrap(), RupeeGold);
+    layout.set(world::dungeons::graveyards::hyrule::get("[HS] Upper Chest").unwrap(), RupeeGold);
+    layout.set(world::dungeons::graveyards::hyrule::get("[HS] Ledge").unwrap(), RupeeGold);
+    layout.set(world::dungeons::graveyards::hyrule::get("Graveyard Ledge Cave").unwrap(), RupeeGold);
+    layout.set(world::dungeons::graveyards::hyrule::get("[Mai] Sanctuary Wall").unwrap(), RupeeGold);
+    layout.set(world::dungeons::graveyards::hyrule::get("[Mai] Hyrule Graveyard Wall").unwrap(), RupeeGold);
 
     // Graveyard (Lorule)
-    layout.set(LocationKey::new(world::dungeons::graveyards::lorule::AREA, "Graveyard Peninsula"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::graveyards::lorule::AREA, "Philosopher's Cave"), OreBlue);
-    layout.set(LocationKey::new(world::dungeons::graveyards::lorule::AREA, "[LS] Entrance Chest"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::graveyards::lorule::AREA, "[LS] Ledge"), KeySmall);
-    layout.set(LocationKey::new(world::dungeons::graveyards::lorule::AREA, "[LS] Lower Chest"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::graveyards::lorule::AREA, "[LS] Upper Chest"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::graveyards::lorule::AREA, "[Mai] Lorule Graveyard Big Rock"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::graveyards::lorule::AREA, "[Mai] Lorule Graveyard Tree"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::graveyards::lorule::AREA, "[Mai] Lorule Graveyard Wall"), RupeeGold);
+    layout.set(world::dungeons::graveyards::lorule::get("Graveyard Peninsula").unwrap(), RupeeGold);
+    layout.set(world::dungeons::graveyards::lorule::get("Philosopher's Cave").unwrap(), OreBlue);
+    layout.set(world::dungeons::graveyards::lorule::get("[LS] Entrance Chest").unwrap(), RupeeGold);
+    layout.set(world::dungeons::graveyards::lorule::get("[LS] Ledge").unwrap(), KeySmall);
+    layout.set(world::dungeons::graveyards::lorule::get("[LS] Lower Chest").unwrap(), RupeeGold);
+    layout.set(world::dungeons::graveyards::lorule::get("[LS] Upper Chest").unwrap(), RupeeGold);
+    layout.set(world::dungeons::graveyards::lorule::get("[Mai] Lorule Graveyard Big Rock").unwrap(), RupeeGold);
+    layout.set(world::dungeons::graveyards::lorule::get("[Mai] Lorule Graveyard Tree").unwrap(), RupeeGold);
+    layout.set(world::dungeons::graveyards::lorule::get("[Mai] Lorule Graveyard Wall").unwrap(), RupeeGold);
 
     //////////////////////
     // --- Dungeons --- //
     //////////////////////
 
     // Eastern Palace
-    layout.set(LocationKey::new(world::dungeons::eastern::palace::AREA, "[EP] (1F) Merge Chest"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::eastern::palace::AREA, "[EP] (1F) Left Door Chest"), KeySmall);
-    layout.set(LocationKey::new(world::dungeons::eastern::palace::AREA, "[EP] (1F) Popo Room"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::eastern::palace::AREA, "[EP] (1F) Secret Room"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::eastern::palace::AREA, "[EP] (1F) Switch Room"), KeySmall);
-    layout.set(LocationKey::new(world::dungeons::eastern::palace::AREA, "[EP] (2F) Ball Room"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::eastern::palace::AREA, "[EP] (2F) Defeat Popos"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::eastern::palace::AREA, "[EP] (2F) Switch Room"), KeyBoss);
-    layout.set(LocationKey::new(world::dungeons::eastern::palace::AREA, "[EP] (2F) Big Chest"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::eastern::palace::AREA, "[EP] Yuga (1)"), HintGlasses);
-    layout.set(LocationKey::new(world::dungeons::eastern::palace::AREA, "[EP] Yuga (2)"), HeartContainer);
-    layout.set(LocationKey::new(world::dungeons::eastern::palace::AREA, "[EP] (3F) Escape Chest"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::eastern::palace::AREA, "[EP] (1F) Escape Chest"), RupeeGold);
+    layout.set(world::dungeons::eastern::palace::get("[EP] (1F) Merge Chest").unwrap(), RupeeGold);
+    layout.set(world::dungeons::eastern::palace::get("[EP] (1F) Left Door Chest").unwrap(), KeySmall);
+    layout.set(world::dungeons::eastern::palace::get("[EP] (1F) Popo Room").unwrap(), RupeeGold);
+    layout.set(world::dungeons::eastern::palace::get("[EP] (1F) Secret Room").unwrap(), RupeeGold);
+    layout.set(world::dungeons::eastern::palace::get("[EP] (1F) Switch Room").unwrap(), KeySmall);
+    layout.set(world::dungeons::eastern::palace::get("[EP] (2F) Ball Room").unwrap(), RupeeGold);
+    layout.set(world::dungeons::eastern::palace::get("[EP] (2F) Defeat Popos").unwrap(), RupeeGold);
+    layout.set(world::dungeons::eastern::palace::get("[EP] (2F) Switch Room").unwrap(), KeyBoss);
+    layout.set(world::dungeons::eastern::palace::get("[EP] (2F) Big Chest").unwrap(), RupeeGold);
+    layout.set(world::dungeons::eastern::palace::get("[EP] Yuga (1)").unwrap(), HintGlasses);
+    layout.set(world::dungeons::eastern::palace::get("[EP] Yuga (2)").unwrap(), HeartContainer);
+    layout.set(world::dungeons::eastern::palace::get("[EP] (3F) Escape Chest").unwrap(), RupeeGold);
+    layout.set(world::dungeons::eastern::palace::get("[EP] (1F) Escape Chest").unwrap(), RupeeGold);
 
     // House of Gales
-    layout.set(LocationKey::new(world::dungeons::house::gales::AREA, "[HG] (1F) Torches"), Compass);
-    layout.set(LocationKey::new(world::dungeons::house::gales::AREA, "[HG] (1F) Switch Room"), KeySmall);
-    layout.set(LocationKey::new(world::dungeons::house::gales::AREA, "[HG] (1F) Fire Bubbles"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::house::gales::AREA, "[HG] (1F) West Room"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::house::gales::AREA, "[HG] (1F) West Room Secret"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::house::gales::AREA, "[HG] (2F) Big Chest"), KeyBoss);
-    layout.set(LocationKey::new(world::dungeons::house::gales::AREA, "[HG] (2F) Narrow Ledge"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::house::gales::AREA, "[HG] (2F) Fire Ring"), KeySmall);
-    layout.set(LocationKey::new(world::dungeons::house::gales::AREA, "[HG] (3F) Rat Room"), KeySmall);
-    layout.set(LocationKey::new(world::dungeons::house::gales::AREA, "[HG] (3F) Fire Bubbles"), KeySmall);
-    layout.set(LocationKey::new(world::dungeons::house::gales::AREA, "[HG] Margomill"), HintGlasses);
+    layout.set(world::dungeons::house::gales::get("[HG] (1F) Torches").unwrap(), Compass);
+    layout.set(world::dungeons::house::gales::get("[HG] (1F) Switch Room").unwrap(), KeySmall);
+    layout.set(world::dungeons::house::gales::get("[HG] (1F) Fire Bubbles").unwrap(), RupeeGold);
+    layout.set(world::dungeons::house::gales::get("[HG] (1F) West Room").unwrap(), RupeeGold);
+    layout.set(world::dungeons::house::gales::get("[HG] (1F) West Room Secret").unwrap(), RupeeGold);
+    layout.set(world::dungeons::house::gales::get("[HG] (2F) Big Chest").unwrap(), KeyBoss);
+    layout.set(world::dungeons::house::gales::get("[HG] (2F) Narrow Ledge").unwrap(), RupeeGold);
+    layout.set(world::dungeons::house::gales::get("[HG] (2F) Fire Ring").unwrap(), KeySmall);
+    layout.set(world::dungeons::house::gales::get("[HG] (3F) Rat Room").unwrap(), KeySmall);
+    layout.set(world::dungeons::house::gales::get("[HG] (3F) Fire Bubbles").unwrap(), KeySmall);
+    layout.set(world::dungeons::house::gales::get("[HG] Margomill").unwrap(), HintGlasses);
 
     // Tower of Hera
-    layout.set(LocationKey::new(world::dungeons::tower::hera::AREA, "[TH] (1F) Outside"), Compass);
-    layout.set(LocationKey::new(world::dungeons::tower::hera::AREA, "[TH] (1F) Center"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::tower::hera::AREA, "[TH] (3F) Platform"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::tower::hera::AREA, "[TH] (5F) Red/Blue Switches"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::tower::hera::AREA, "[TH] (6F) Left Mole"), KeySmall);
-    layout.set(LocationKey::new(world::dungeons::tower::hera::AREA, "[TH] (6F) Right Mole"), KeySmall);
-    layout.set(LocationKey::new(world::dungeons::tower::hera::AREA, "[TH] (7F) Outside (Ledge)"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::tower::hera::AREA, "[TH] (8F) Fairy Room"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::tower::hera::AREA, "[TH] (11F) Big Chest"), KeyBoss);
-    layout.set(LocationKey::new(world::dungeons::tower::hera::AREA, "[TH] Moldorm"), HeartContainer);
+    layout.set(world::dungeons::tower::hera::get("[TH] (1F) Outside").unwrap(), Compass);
+    layout.set(world::dungeons::tower::hera::get("[TH] (1F) Center").unwrap(), RupeeGold);
+    layout.set(world::dungeons::tower::hera::get("[TH] (3F) Platform").unwrap(), RupeeGold);
+    layout.set(world::dungeons::tower::hera::get("[TH] (5F) Red/Blue Switches").unwrap(), RupeeGold);
+    layout.set(world::dungeons::tower::hera::get("[TH] (6F) Left Mole").unwrap(), KeySmall);
+    layout.set(world::dungeons::tower::hera::get("[TH] (6F) Right Mole").unwrap(), KeySmall);
+    layout.set(world::dungeons::tower::hera::get("[TH] (7F) Outside (Ledge)").unwrap(), RupeeGold);
+    layout.set(world::dungeons::tower::hera::get("[TH] (8F) Fairy Room").unwrap(), RupeeGold);
+    layout.set(world::dungeons::tower::hera::get("[TH] (11F) Big Chest").unwrap(), KeyBoss);
+    layout.set(world::dungeons::tower::hera::get("[TH] Moldorm").unwrap(), HeartContainer);
 
     // Hyrule Castle
-    layout.set(LocationKey::new(world::dungeons::hyrule::castle::AREA, "Hyrule Castle Battlement"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::hyrule::castle::AREA, "Hyrule Castle West Wing"), RupeeGold);
+    layout.set(world::dungeons::hyrule::castle::get("Hyrule Castle Battlement").unwrap(), RupeeGold);
+    layout.set(world::dungeons::hyrule::castle::get("Hyrule Castle West Wing").unwrap(), RupeeGold);
 
     // Dark Palace
-    layout.set(LocationKey::new(world::dungeons::dark::palace::AREA, "[PD] (1F) Right Pit"), Compass);
-    layout.set(LocationKey::new(world::dungeons::dark::palace::AREA, "[PD] (1F) Left Pit"), KeySmall);
-    layout.set(LocationKey::new(world::dungeons::dark::palace::AREA, "[PD] (1F) Switch Puzzle"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::dark::palace::AREA, "[PD] (1F) Hidden Room (Upper)"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::dark::palace::AREA, "[PD] (1F) Hidden Room (Lower)"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::dark::palace::AREA, "[PD] (B1) Fall From 1F"), KeySmall);
-    layout.set(LocationKey::new(world::dungeons::dark::palace::AREA, "[PD] (B1) Maze"), KeySmall);
-    layout.set(LocationKey::new(world::dungeons::dark::palace::AREA, "[PD] (B1) Helmasaur Room"), KeySmall);
-    layout.set(LocationKey::new(world::dungeons::dark::palace::AREA, "[PD] (B1) Helmasaur Room (Fall)"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::dark::palace::AREA, "[PD] (2F) Big Chest (Hidden)"), KeyBoss);
-    layout.set(LocationKey::new(world::dungeons::dark::palace::AREA, "[PD] (2F) South Hidden Room"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::dark::palace::AREA, "[PD] (2F) Alcove"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::dark::palace::AREA, "[PD] (1F) Fall From 2F"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::dark::palace::AREA, "[PD] (B1) Big Chest (Switches)"), OreGreen);
-    layout.set(LocationKey::new(world::dungeons::dark::palace::AREA, "[PD] Gemesaur King"), RupeeGold);
+    layout.set(world::dungeons::dark::palace::get("[PD] (1F) Right Pit").unwrap(), Compass);
+    layout.set(world::dungeons::dark::palace::get("[PD] (1F) Left Pit").unwrap(), KeySmall);
+    layout.set(world::dungeons::dark::palace::get("[PD] (1F) Switch Puzzle").unwrap(), RupeeGold);
+    layout.set(world::dungeons::dark::palace::get("[PD] (1F) Hidden Room (Upper)").unwrap(), RupeeGold);
+    layout.set(world::dungeons::dark::palace::get("[PD] (1F) Hidden Room (Lower)").unwrap(), RupeeGold);
+    layout.set(world::dungeons::dark::palace::get("[PD] (B1) Fall From 1F").unwrap(), KeySmall);
+    layout.set(world::dungeons::dark::palace::get("[PD] (B1) Maze").unwrap(), KeySmall);
+    layout.set(world::dungeons::dark::palace::get("[PD] (B1) Helmasaur Room").unwrap(), KeySmall);
+    layout.set(world::dungeons::dark::palace::get("[PD] (B1) Helmasaur Room (Fall)").unwrap(), RupeeGold);
+    layout.set(world::dungeons::dark::palace::get("[PD] (2F) Big Chest (Hidden)").unwrap(), KeyBoss);
+    layout.set(world::dungeons::dark::palace::get("[PD] (2F) South Hidden Room").unwrap(), RupeeGold);
+    layout.set(world::dungeons::dark::palace::get("[PD] (2F) Alcove").unwrap(), RupeeGold);
+    layout.set(world::dungeons::dark::palace::get("[PD] (1F) Fall From 2F").unwrap(), RupeeGold);
+    layout.set(world::dungeons::dark::palace::get("[PD] (B1) Big Chest (Switches)").unwrap(), OreGreen);
+    layout.set(world::dungeons::dark::palace::get("[PD] Gemesaur King").unwrap(), RupeeGold);
 
     // Swamp Palace
-    layout.set(LocationKey::new(world::dungeons::swamp::palace::AREA, "[SP] (B1) Center"), KeySmall);
-    layout.set(LocationKey::new(world::dungeons::swamp::palace::AREA, "[SP] (B1) Raft Room (Left)"), KeySmall);
-    layout.set(LocationKey::new(world::dungeons::swamp::palace::AREA, "[SP] (B1) Raft Room (Right)"), KeySmall);
-    layout.set(LocationKey::new(world::dungeons::swamp::palace::AREA, "[SP] (B1) Gyorm"), KeySmall);
-    layout.set(LocationKey::new(world::dungeons::swamp::palace::AREA, "[SP] (B1) Waterfall Room"), KeySmall);
-    layout.set(LocationKey::new(world::dungeons::swamp::palace::AREA, "[SP] (B1) Raft Room (Pillar)"), KeySmall);
-    layout.set(LocationKey::new(world::dungeons::swamp::palace::AREA, "[SP] (B1) Big Chest (Secret)"), KeySmall);
-    layout.set(LocationKey::new(world::dungeons::swamp::palace::AREA, "[SP] (1F) Water Puzzle"), KeySmall);
-    layout.set(LocationKey::new(world::dungeons::swamp::palace::AREA, "[SP] (1F) East Room"), KeySmall);
-    layout.set(LocationKey::new(world::dungeons::swamp::palace::AREA, "[SP] (1F) West Room"), KeySmall);
-    layout.set(LocationKey::new(world::dungeons::swamp::palace::AREA, "[SP] (1F) Big Chest (Fire)"), KeySmall);
-    layout.set(LocationKey::new(world::dungeons::swamp::palace::AREA, "[SP] Arrghus"), KeyBoss);
+    layout.set(world::dungeons::swamp::palace::get("[SP] (B1) Center").unwrap(), KeySmall);
+    layout.set(world::dungeons::swamp::palace::get("[SP] (B1) Raft Room (Left)").unwrap(), KeySmall);
+    layout.set(world::dungeons::swamp::palace::get("[SP] (B1) Raft Room (Right)").unwrap(), KeySmall);
+    layout.set(world::dungeons::swamp::palace::get("[SP] (B1) Gyorm").unwrap(), KeySmall);
+    layout.set(world::dungeons::swamp::palace::get("[SP] (B1) Waterfall Room").unwrap(), KeySmall);
+    layout.set(world::dungeons::swamp::palace::get("[SP] (B1) Raft Room (Pillar)").unwrap(), KeySmall);
+    layout.set(world::dungeons::swamp::palace::get("[SP] (B1) Big Chest (Secret)").unwrap(), KeySmall);
+    layout.set(world::dungeons::swamp::palace::get("[SP] (1F) Water Puzzle").unwrap(), KeySmall);
+    layout.set(world::dungeons::swamp::palace::get("[SP] (1F) East Room").unwrap(), KeySmall);
+    layout.set(world::dungeons::swamp::palace::get("[SP] (1F) West Room").unwrap(), KeySmall);
+    layout.set(world::dungeons::swamp::palace::get("[SP] (1F) Big Chest (Fire)").unwrap(), KeySmall);
+    layout.set(world::dungeons::swamp::palace::get("[SP] Arrghus").unwrap(), KeyBoss);
 
     // Skull Woods
-    layout.set(LocationKey::new(world::dungeons::skull::woods::AREA, "[SW] (B1) Gibdo Room (Lower)"), KeySmall);
-    layout.set(LocationKey::new(world::dungeons::skull::woods::AREA, "[SW] (B1) South Chest"), Compass);
-    layout.set(LocationKey::new(world::dungeons::skull::woods::AREA, "[SW] (B1) Gibdo Room (Hole)"), KeySmall);
-    layout.set(LocationKey::new(world::dungeons::skull::woods::AREA, "[SW] (B1) Grate Room"), KeySmall);
-    layout.set(LocationKey::new(world::dungeons::skull::woods::AREA, "[SW] (B2) Moving Platform Room"), KeyBoss);
-    layout.set(LocationKey::new(world::dungeons::skull::woods::AREA, "[SW] (B1) Big Chest (Eyes)"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::skull::woods::AREA, "Skull Woods Outdoor Chest"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::skull::woods::AREA, "[SW] (B1) Big Chest (Upper)"), ItemKandelaarLv2);
-    layout.set(LocationKey::new(world::dungeons::skull::woods::AREA, "[SW] Knucklemaster"), OreRed);
+    layout.set(world::dungeons::skull::woods::get("[SW] (B1) Gibdo Room (Lower)").unwrap(), KeySmall);
+    layout.set(world::dungeons::skull::woods::get("[SW] (B1) South Chest").unwrap(), Compass);
+    layout.set(world::dungeons::skull::woods::get("[SW] (B1) Gibdo Room (Hole)").unwrap(), KeySmall);
+    layout.set(world::dungeons::skull::woods::get("[SW] (B1) Grate Room").unwrap(), KeySmall);
+    layout.set(world::dungeons::skull::woods::get("[SW] (B2) Moving Platform Room").unwrap(), KeyBoss);
+    layout.set(world::dungeons::skull::woods::get("[SW] (B1) Big Chest (Eyes)").unwrap(), RupeeGold);
+    layout.set(world::dungeons::skull::woods::get("Skull Woods Outdoor Chest").unwrap(), RupeeGold);
+    layout.set(world::dungeons::skull::woods::get("[SW] (B1) Big Chest (Upper)").unwrap(), ItemKandelaarLv2);
+    layout.set(world::dungeons::skull::woods::get("[SW] Knucklemaster").unwrap(), OreRed);
 
     // Thieves' Hideout
-    layout.set(LocationKey::new(world::dungeons::thieves::hideout::AREA, "[T'H] (B1) Jail Cell"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::thieves::hideout::AREA, "[T'H] (B1) Grate Chest"), Compass);
-    layout.set(LocationKey::new(world::dungeons::thieves::hideout::AREA, "[T'H] (B2) Grate Chest (Fall)"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::thieves::hideout::AREA, "[T'H] (B2) Switch Puzzle Room"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::thieves::hideout::AREA, "[T'H] (B2) Jail Cell"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::thieves::hideout::AREA, "[T'H] (B2) Eyegores"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::thieves::hideout::AREA, "[T'H] (B1) Behind Wall"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::thieves::hideout::AREA, "[T'H] (B1) Big Chest (Entrance)"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::thieves::hideout::AREA, "[T'H] (B3) Underwater"), KeySmall);
-    layout.set(LocationKey::new(world::dungeons::thieves::hideout::AREA, "[T'H] (B3) Big Chest (Hidden)"), KeyBoss);
-    layout.set(LocationKey::new(world::dungeons::thieves::hideout::AREA, "Stalblind"), OreYellow);
+    layout.set(world::dungeons::thieves::hideout::get("[T'H] (B1) Jail Cell").unwrap(), RupeeGold);
+    layout.set(world::dungeons::thieves::hideout::get("[T'H] (B1) Grate Chest").unwrap(), Compass);
+    layout.set(world::dungeons::thieves::hideout::get("[T'H] (B2) Grate Chest (Fall)").unwrap(), RupeeGold);
+    layout.set(world::dungeons::thieves::hideout::get("[T'H] (B2) Switch Puzzle Room").unwrap(), RupeeGold);
+    layout.set(world::dungeons::thieves::hideout::get("[T'H] (B2) Jail Cell").unwrap(), RupeeGold);
+    layout.set(world::dungeons::thieves::hideout::get("[T'H] (B2) Eyegores").unwrap(), RupeeGold);
+    layout.set(world::dungeons::thieves::hideout::get("[T'H] (B1) Behind Wall").unwrap(), RupeeGold);
+    layout.set(world::dungeons::thieves::hideout::get("[T'H] (B1) Big Chest (Entrance)").unwrap(), RupeeGold);
+    layout.set(world::dungeons::thieves::hideout::get("[T'H] (B3) Underwater").unwrap(), KeySmall);
+    layout.set(world::dungeons::thieves::hideout::get("[T'H] (B3) Big Chest (Hidden)").unwrap(), KeyBoss);
+    layout.set(world::dungeons::thieves::hideout::get("Stalblind").unwrap(), OreYellow);
 
     // Ice Ruins
-    layout.set(LocationKey::new(world::dungeons::ice::ruins::AREA, "[IR] (1F) Hidden Chest"), KeySmall);
-    layout.set(LocationKey::new(world::dungeons::ice::ruins::AREA, "[IR] (B3) Grate Chest (Left)"), KeySmall);
-    layout.set(LocationKey::new(world::dungeons::ice::ruins::AREA, "[IR] (B3) Grate Chest (Right)"), KeySmall);
-    layout.set(LocationKey::new(world::dungeons::ice::ruins::AREA, "[IR] (B4) Ice Pillar"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::ice::ruins::AREA, "[IR] (B5) Big Chest"), KeyBoss);
-    layout.set(LocationKey::new(world::dungeons::ice::ruins::AREA, "[IR] (B1) East Chest"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::ice::ruins::AREA, "[IR] (B1) Narrow Ledge"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::ice::ruins::AREA, "[IR] (B1) Upper Chest"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::ice::ruins::AREA, "[IR] (B3) Big Chest (Puzzle)"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::ice::ruins::AREA, "[IR] (B4) Switches"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::ice::ruins::AREA, "[IR] (B4) Southwest Chest (Fall)"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::ice::ruins::AREA, "[IR] (B4) Narrow Platform"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::ice::ruins::AREA, "[IR] (B2) Long Merge Chest"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::ice::ruins::AREA, "[IR] (B4) Southeast Chest (Fall)"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::ice::ruins::AREA, "[IR] Dharkstare"), RupeeGold);
+    layout.set(world::dungeons::ice::ruins::get("[IR] (1F) Hidden Chest").unwrap(), KeySmall);
+    layout.set(world::dungeons::ice::ruins::get("[IR] (B3) Grate Chest (Left)").unwrap(), KeySmall);
+    layout.set(world::dungeons::ice::ruins::get("[IR] (B3) Grate Chest (Right)").unwrap(), KeySmall);
+    layout.set(world::dungeons::ice::ruins::get("[IR] (B4) Ice Pillar").unwrap(), RupeeGold);
+    layout.set(world::dungeons::ice::ruins::get("[IR] (B5) Big Chest").unwrap(), KeyBoss);
+    layout.set(world::dungeons::ice::ruins::get("[IR] (B1) East Chest").unwrap(), RupeeGold);
+    layout.set(world::dungeons::ice::ruins::get("[IR] (B1) Narrow Ledge").unwrap(), RupeeGold);
+    layout.set(world::dungeons::ice::ruins::get("[IR] (B1) Upper Chest").unwrap(), RupeeGold);
+    layout.set(world::dungeons::ice::ruins::get("[IR] (B3) Big Chest (Puzzle)").unwrap(), RupeeGold);
+    layout.set(world::dungeons::ice::ruins::get("[IR] (B4) Switches").unwrap(), RupeeGold);
+    layout.set(world::dungeons::ice::ruins::get("[IR] (B4) Southwest Chest (Fall)").unwrap(), RupeeGold);
+    layout.set(world::dungeons::ice::ruins::get("[IR] (B4) Narrow Platform").unwrap(), RupeeGold);
+    layout.set(world::dungeons::ice::ruins::get("[IR] (B2) Long Merge Chest").unwrap(), RupeeGold);
+    layout.set(world::dungeons::ice::ruins::get("[IR] (B4) Southeast Chest (Fall)").unwrap(), RupeeGold);
+    layout.set(world::dungeons::ice::ruins::get("[IR] Dharkstare").unwrap(), RupeeGold);
 
     // Desert Palace
-    layout.set(LocationKey::new(world::dungeons::desert::palace::AREA, "[DP] (1F) Entrance"), Compass);
-    layout.set(LocationKey::new(world::dungeons::desert::palace::AREA, "[DP] (1F) Sand Room (South)"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::desert::palace::AREA, "[DP] (1F) Sand Switch Room"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::desert::palace::AREA, "[DP] (1F) Sand Room (North)"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::desert::palace::AREA, "[DP] (1F) Big Chest (Behind Wall)"), KeyBoss);
-    layout.set(LocationKey::new(world::dungeons::desert::palace::AREA, "[DP] (1F) Behind Rocks"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::desert::palace::AREA, "[DP] (2F) Under Rock (Left)"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::desert::palace::AREA, "[DP] (2F) Beamos Room"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::desert::palace::AREA, "[DP] (2F) Under Rock (Right)"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::desert::palace::AREA, "[DP] (2F) Under Rock (Ball Room)"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::desert::palace::AREA, "[DP] (2F) Big Chest (Puzzle)"), PowerfulGlove);
-    layout.set(LocationKey::new(world::dungeons::desert::palace::AREA, "[DP] (2F) Red/Blue Switches"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::desert::palace::AREA, "[DP] (2F) Leever Room"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::desert::palace::AREA, "[DP] (3F) Behind Falling Sand"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::desert::palace::AREA, "[DP] (3F) Armos Room"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::desert::palace::AREA, "Zaganaga"), RupeeGold);
+    layout.set(world::dungeons::desert::palace::get("[DP] (1F) Entrance").unwrap(), Compass);
+    layout.set(world::dungeons::desert::palace::get("[DP] (1F) Sand Room (South)").unwrap(), RupeeGold);
+    layout.set(world::dungeons::desert::palace::get("[DP] (1F) Sand Switch Room").unwrap(), RupeeGold);
+    layout.set(world::dungeons::desert::palace::get("[DP] (1F) Sand Room (North)").unwrap(), RupeeGold);
+    layout.set(world::dungeons::desert::palace::get("[DP] (1F) Big Chest (Behind Wall)").unwrap(), KeyBoss);
+    layout.set(world::dungeons::desert::palace::get("[DP] (1F) Behind Rocks").unwrap(), RupeeGold);
+    layout.set(world::dungeons::desert::palace::get("[DP] (2F) Under Rock (Left)").unwrap(), RupeeGold);
+    layout.set(world::dungeons::desert::palace::get("[DP] (2F) Beamos Room").unwrap(), RupeeGold);
+    layout.set(world::dungeons::desert::palace::get("[DP] (2F) Under Rock (Right)").unwrap(), RupeeGold);
+    layout.set(world::dungeons::desert::palace::get("[DP] (2F) Under Rock (Ball Room)").unwrap(), RupeeGold);
+    layout.set(world::dungeons::desert::palace::get("[DP] (2F) Big Chest (Puzzle)").unwrap(), PowerfulGlove);
+    layout.set(world::dungeons::desert::palace::get("[DP] (2F) Red/Blue Switches").unwrap(), RupeeGold);
+    layout.set(world::dungeons::desert::palace::get("[DP] (2F) Leever Room").unwrap(), RupeeGold);
+    layout.set(world::dungeons::desert::palace::get("[DP] (3F) Behind Falling Sand").unwrap(), RupeeGold);
+    layout.set(world::dungeons::desert::palace::get("[DP] (3F) Armos Room").unwrap(), RupeeGold);
+    layout.set(world::dungeons::desert::palace::get("Zaganaga").unwrap(), RupeeGold);
 
     // Turtle Rock
-    layout.set(LocationKey::new(world::dungeons::turtle::rock::AREA, "[TR] (1F) Center"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::turtle::rock::AREA, "[TR] (1F) Grate Chest"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::turtle::rock::AREA, "[TR] (1F) Portal Room NW"), KeySmall);
-    layout.set(LocationKey::new(world::dungeons::turtle::rock::AREA, "[TR] (1F) Northeast Ledge"), KeySmall);
-    layout.set(LocationKey::new(world::dungeons::turtle::rock::AREA, "[TR] (1F) Southeast Chest"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::turtle::rock::AREA, "[TR] (1F) Defeat Flamolas"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::turtle::rock::AREA, "Turtle Rock Left Balcony"), ItemMizukaki);
-    layout.set(LocationKey::new(world::dungeons::turtle::rock::AREA, "[TR] (B1) Northeast Room"), KeySmall);
-    layout.set(LocationKey::new(world::dungeons::turtle::rock::AREA, "[TR] (B1) Grate Chest (Small)"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::turtle::rock::AREA, "[TR] (B1) Big Chest (Center)"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::turtle::rock::AREA, "[TR] (B1) Platform"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::turtle::rock::AREA, "[TR] (B1) Big Chest (Top)"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::turtle::rock::AREA, "[TR] (1F) Under Center"), Compass);
-    layout.set(LocationKey::new(world::dungeons::turtle::rock::AREA, "[TR] (B1) Under Center"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::turtle::rock::AREA, "[TR] Grinexx"), KeyBoss);
+    layout.set(world::dungeons::turtle::rock::get("[TR] (1F) Center").unwrap(), RupeeGold);
+    layout.set(world::dungeons::turtle::rock::get("[TR] (1F) Grate Chest").unwrap(), RupeeGold);
+    layout.set(world::dungeons::turtle::rock::get("[TR] (1F) Portal Room NW").unwrap(), KeySmall);
+    layout.set(world::dungeons::turtle::rock::get("[TR] (1F) Northeast Ledge").unwrap(), KeySmall);
+    layout.set(world::dungeons::turtle::rock::get("[TR] (1F) Southeast Chest").unwrap(), RupeeGold);
+    layout.set(world::dungeons::turtle::rock::get("[TR] (1F) Defeat Flamolas").unwrap(), RupeeGold);
+    layout.set(world::dungeons::turtle::rock::get("Turtle Rock Left Balcony").unwrap(), ItemMizukaki);
+    layout.set(world::dungeons::turtle::rock::get("[TR] (B1) Northeast Room").unwrap(), KeySmall);
+    layout.set(world::dungeons::turtle::rock::get("[TR] (B1) Grate Chest (Small)").unwrap(), RupeeGold);
+    layout.set(world::dungeons::turtle::rock::get("[TR] (B1) Big Chest (Center)").unwrap(), RupeeGold);
+    layout.set(world::dungeons::turtle::rock::get("[TR] (B1) Platform").unwrap(), RupeeGold);
+    layout.set(world::dungeons::turtle::rock::get("[TR] (B1) Big Chest (Top)").unwrap(), RupeeGold);
+    layout.set(world::dungeons::turtle::rock::get("[TR] (1F) Under Center").unwrap(), Compass);
+    layout.set(world::dungeons::turtle::rock::get("[TR] (B1) Under Center").unwrap(), RupeeGold);
+    layout.set(world::dungeons::turtle::rock::get("[TR] Grinexx").unwrap(), KeyBoss);
 
     // Lorule Castle
-    layout.set(LocationKey::new(world::dungeons::lorule::castle::AREA, "[LC] (1F) Ledge"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::lorule::castle::AREA, "[LC] (1F) Center"), HintGlasses);
-    layout.set(LocationKey::new(world::dungeons::lorule::castle::AREA, "[LC] (2F) Near Torches"), Compass);
-    layout.set(LocationKey::new(world::dungeons::lorule::castle::AREA, "[LC] (2F) Hidden Path"), KeySmall);
-    layout.set(LocationKey::new(world::dungeons::lorule::castle::AREA, "[LC] (2F) Ledge"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::lorule::castle::AREA, "[LC] (4F) Center"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::lorule::castle::AREA, "[LC] (4F) Hidden Path"), ItemBowLight);
-    layout.set(LocationKey::new(world::dungeons::lorule::castle::AREA, "[LC] (3F) Bomb Trial Center Chest"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::lorule::castle::AREA, "[LC] (3F) Big Bomb Flower Chest"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::lorule::castle::AREA, "[LC] (3F) Merge Trial Free Chest"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::lorule::castle::AREA, "[LC] (3F) Spike Ball Chest"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::lorule::castle::AREA, "[LC] (4F) Lamp Trial Chest"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::lorule::castle::AREA, "[LC] (4F) Lava Switch Chest"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::lorule::castle::AREA, "[LC] (4F) Eyeball Chest"), RupeeGold);
-    layout.set(LocationKey::new(world::dungeons::lorule::castle::AREA, "Zelda"), ItemBow);
+    layout.set(world::dungeons::lorule::castle::get("[LC] (1F) Ledge").unwrap(), RupeeGold);
+    layout.set(world::dungeons::lorule::castle::get("[LC] (1F) Center").unwrap(), HintGlasses);
+    layout.set(world::dungeons::lorule::castle::get("[LC] (2F) Near Torches").unwrap(), Compass);
+    layout.set(world::dungeons::lorule::castle::get("[LC] (2F) Hidden Path").unwrap(), KeySmall);
+    layout.set(world::dungeons::lorule::castle::get("[LC] (2F) Ledge").unwrap(), RupeeGold);
+    layout.set(world::dungeons::lorule::castle::get("[LC] (4F) Center").unwrap(), RupeeGold);
+    layout.set(world::dungeons::lorule::castle::get("[LC] (4F) Hidden Path").unwrap(), ItemBowLight);
+    layout.set(world::dungeons::lorule::castle::get("[LC] (3F) Bomb Trial Center Chest").unwrap(), RupeeGold);
+    layout.set(world::dungeons::lorule::castle::get("[LC] (3F) Big Bomb Flower Chest").unwrap(), RupeeGold);
+    layout.set(world::dungeons::lorule::castle::get("[LC] (3F) Merge Trial Free Chest").unwrap(), RupeeGold);
+    layout.set(world::dungeons::lorule::castle::get("[LC] (3F) Spike Ball Chest").unwrap(), RupeeGold);
+    layout.set(world::dungeons::lorule::castle::get("[LC] (4F) Lamp Trial Chest").unwrap(), RupeeGold);
+    layout.set(world::dungeons::lorule::castle::get("[LC] (4F) Lava Switch Chest").unwrap(), RupeeGold);
+    layout.set(world::dungeons::lorule::castle::get("[LC] (4F) Eyeball Chest").unwrap(), RupeeGold);
+    layout.set(world::dungeons::lorule::castle::get("Zelda").unwrap(), ItemBow);
 
     info!("Successfully Built Layout");
 

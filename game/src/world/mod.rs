@@ -1,6 +1,7 @@
 use std::{
     fmt::{self, Debug, Formatter},
     hash::{Hash, Hasher},
+    ops::Deref,
 };
 
 pub struct AreaInfo {
@@ -59,11 +60,11 @@ macro_rules! regions {
         $($region:ident;)+
     })+) => {
         $(pub mod $group {
-            use super::{Location, LocationKey};
+            use super::LocationNode;
 
             $(pub mod $region;)+
 
-            pub fn regions() -> impl Iterator<Item = Box<dyn Iterator<Item = &'static (LocationKey, Location)>>> {
+            pub fn regions() -> impl Iterator<Item = Box<dyn Iterator<Item = LocationNode>>> {
                 [
                     $(Box::new($region::locations()) as Box<_>,)+
                 ].into_iter()
@@ -84,9 +85,9 @@ macro_rules! region {
         $($id:ident $props:tt,)*
     ) => {
         #[inline]
-        pub fn locations() -> impl Iterator<Item=&'static ($crate::world::LocationKey, $crate::world::Location)> {
-            $start::locations().iter()
-                $(.chain($id::locations().iter()))*
+        pub fn locations() -> impl Iterator<Item=$crate::world::LocationNode> {
+            $start::locations()
+                $(.chain($id::locations()))*
         }
 
         $crate::area!($start $start_props);
@@ -117,7 +118,7 @@ macro_rules! area {
         $(quest: $kind:ident$(::$qvariant:ident)?,)?
     }) => {
         pub mod $id {
-            use $crate::world::{Area, AreaInfo, Location, LocationKey};
+            use $crate::world::{Area, AreaInfo, Location, LocationNode};
 
             pub use super::COURSE;
 
@@ -129,16 +130,21 @@ macro_rules! area {
 
             #[allow(unused)]
             #[inline]
-            pub fn locations() -> &'static [(LocationKey, Location)] {
-                &[
-                    $($((
-                        LocationKey {
+            pub fn locations() -> impl Iterator<Item = LocationNode> {
+                use $crate::world::LocationData;
+                [
+                    $($(Location {
                             area: AREA,
                             name: $key,
-                        },
-                        $crate::location!($variant $props),
-                    ),)*)?
-                ]
+                            data: $crate::location!($variant $props),
+                    },)*)?
+                ].iter().map(LocationNode)
+            }
+
+            pub fn get(name: &'static str) -> Option<LocationNode> {
+                locations().find(|location| {
+                    location.name == name
+                })
             }
         }
     };
@@ -148,75 +154,75 @@ macro_rules! area {
 #[macro_export]
 macro_rules! location {
     (Chest($course:ident $stage:literal[$unq:literal])) => {
-        Location::Chest { course: $crate::Course::$course, stage: $stage - 1, unq: $unq }
+        LocationData::Chest { course: $crate::Course::$course, stage: $stage - 1, unq: $unq }
     };
     (Chest($stage:literal[$unq:literal])) => {
-        Location::Chest { course: COURSE, stage: $stage - 1, unq: $unq }
+        LocationData::Chest { course: COURSE, stage: $stage - 1, unq: $unq }
     };
     (Chest[$($stage:literal[$unq:literal],)+]) => {
-        Location::Multi(&[
+        LocationData::Multi(&[
             $(
-                Location::Chest { course: COURSE, stage: $stage - 1, unq: $unq },
+                LocationData::Chest { course: COURSE, stage: $stage - 1, unq: $unq },
             )+
         ])
     };
     (BigChest($course:ident $stage:literal[$unq:literal])) => {
-        Location::BigChest { course: $crate::Course::$course, stage: $stage - 1, unq: $unq }
+        LocationData::BigChest { course: $crate::Course::$course, stage: $stage - 1, unq: $unq }
     };
     (BigChest($stage:literal[$unq:literal])) => {
-        Location::BigChest { course: COURSE, stage: $stage - 1, unq: $unq }
+        LocationData::BigChest { course: COURSE, stage: $stage - 1, unq: $unq }
     };
     (Event($name:ident[$index:literal])) => {
-        Location::Event { course: Some(COURSE), name: stringify!($name), index: $index }
+        LocationData::Event { course: Some(COURSE), name: stringify!($name), index: $index }
     };
     (Event(Boot/$name:ident[$index:literal])) => {
-        Location::Event { course: None, name: stringify!($name), index: $index }
+        LocationData::Event { course: None, name: stringify!($name), index: $index }
     };
     (Event($course:ident/$name:ident[$index:literal])) => {
-        Location::Event { course: Some($crate::Course::$course), name: stringify!($name), index: $index }
+        LocationData::Event { course: Some($crate::Course::$course), name: stringify!($name), index: $index }
     };
     (Event[$($name:ident[$index:literal],)+]) => {
-        Location::Multi(&[
+        LocationData::Multi(&[
             $(
-                Location::Event { course: Some(COURSE), name: stringify!($name), index: $index },
+                LocationData::Event { course: Some(COURSE), name: stringify!($name), index: $index },
             )+
         ])
     };
     (Heart($course:ident $scene:literal[$unq:literal])) => {
-        Location::Heart { course: $crate::Course::$course, scene: $scene - 1, unq: $unq }
+        LocationData::Heart { course: $crate::Course::$course, scene: $scene - 1, unq: $unq }
     };
     (Heart($scene:literal[$unq:literal])) => {
-        Location::Heart { course: COURSE, scene: $scene - 1, unq: $unq }
+        LocationData::Heart { course: COURSE, scene: $scene - 1, unq: $unq }
     };
     (Key($course:ident $scene:literal[$unq:literal])) => {
-        Location::Key { course: $crate::Course::$course, scene: $scene - 1, unq: $unq }
+        LocationData::Key { course: $crate::Course::$course, scene: $scene - 1, unq: $unq }
     };
     (Key($scene:literal[$unq:literal])) => {
-        Location::Key { course: COURSE, scene: $scene - 1, unq: $unq }
+        LocationData::Key { course: COURSE, scene: $scene - 1, unq: $unq }
     };
     (Maiamai($course:ident $scene:literal[$unq:literal])) => {
-        Location::Maiamai { course: $crate::Course::$course, scene: $scene - 1, unq: $unq }
+        LocationData::Maiamai { course: $crate::Course::$course, scene: $scene - 1, unq: $unq }
     };
     (Maiamai($scene:literal[$unq:literal])) => {
-        Location::Maiamai { course: COURSE, scene: $scene - 1, unq: $unq }
+        LocationData::Maiamai { course: COURSE, scene: $scene - 1, unq: $unq }
     };
     (SilverRupee($course:ident $scene:literal[$unq:literal])) => {
-        Location::SilverRupee { course: $crate::Course::$course, scene: $scene - 1, unq: $unq }
+        LocationData::SilverRupee { course: $crate::Course::$course, scene: $scene - 1, unq: $unq }
     };
     (SilverRupee($scene:literal[$unq:literal])) => {
-        Location::SilverRupee { course: COURSE, scene: $scene - 1, unq: $unq }
+        LocationData::SilverRupee { course: COURSE, scene: $scene - 1, unq: $unq }
     };
     (GoldRupee($course:ident $scene:literal[$unq:literal])) => {
-        Location::GoldRupee { course: $crate::Course::$course, scene: $scene - 1, unq: $unq }
+        LocationData::GoldRupee { course: $crate::Course::$course, scene: $scene - 1, unq: $unq }
     };
     (GoldRupee($scene:literal[$unq:literal])) => {
-        Location::GoldRupee { course: COURSE, scene: $scene - 1, unq: $unq }
+        LocationData::GoldRupee { course: COURSE, scene: $scene - 1, unq: $unq }
     };
     (Shop($variant:ident$($args:tt)?)) => {
-        Location::Shop($crate::world::Shop::$variant $($args)?)
+        LocationData::Shop($crate::world::Shop::$variant $($args)?)
     };
     (None()) => {
-        Location::None
+        LocationData::None
     }
 }
 
@@ -260,7 +266,7 @@ regions! {
 }
 
 #[derive(Clone, Debug)]
-pub enum Location {
+pub enum LocationData {
     Chest { course: crate::Course, stage: u16, unq: u16 },
     BigChest { course: crate::Course, stage: u16, unq: u16 },
     Event { course: Option<crate::Course>, name: &'static str, index: u16 },
@@ -270,7 +276,7 @@ pub enum Location {
     SilverRupee { course: crate::Course, scene: u16, unq: u16 },
     GoldRupee { course: crate::Course, scene: u16, unq: u16 },
     Shop(Shop),
-    Multi(&'static [Location]),
+    Multi(&'static [LocationData]),
     None, // Workaround until everything is shufflable
 }
 
@@ -280,22 +286,30 @@ pub enum Shop {
     Merchant(u8),
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq, Hash)]
-pub struct LocationKey {
+#[derive(Clone, Debug)]
+pub struct Location {
     pub area: Area,
     pub name: &'static str,
+    pub data: LocationData,
 }
 
-impl LocationKey {
-    pub const fn new(area: Area, name: &'static str) -> Self {
-        Self { area, name }
-    }
-
+impl Location {
     pub fn group(&self) -> Group {
         self.area.group()
     }
 
     pub fn region(&self) -> &'static str {
         self.area.name()
+    }
+}
+
+#[derive(Clone, Copy, Debug)]
+pub struct LocationNode(&'static Location);
+
+impl Deref for LocationNode {
+    type Target = Location;
+
+    fn deref(&self) -> &Self::Target {
+        self.0
     }
 }

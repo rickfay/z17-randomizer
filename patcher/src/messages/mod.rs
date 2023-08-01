@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 
 use game::{
-    world::{self, LocationKey},
+    world,
     Course::*,
     Item::{PendantPower, PendantWisdom},
 };
@@ -96,11 +96,11 @@ fn patch_great_rupee_fairy(patcher: &mut Patcher) -> Result<()> {
 fn patch_street_merchant(patcher: &mut Patcher, mod_: &Mod) -> Result<()> {
     let item_left = mod_
         .layout
-        .get(&LocationKey::new(world::hyrule::kakariko::village::AREA, "Street Merchant (Left)"))
+        .get(&world::hyrule::kakariko::village::get("Street Merchant (Left)").unwrap())
         .unwrap();
     let item_right = mod_
         .layout
-        .get(&LocationKey::new(world::hyrule::kakariko::village::AREA, "Street Merchant (Right)"))
+        .get(&world::hyrule::kakariko::village::get("Street Merchant (Right)").unwrap())
         .unwrap();
 
     let mut street_merchant = load_msbt(patcher, FieldLight, "FieldLight_18").unwrap();
