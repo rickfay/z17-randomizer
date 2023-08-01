@@ -9,7 +9,7 @@ edition = "2021"
 license = "GPL-2.0-or-later"
 
 [dependencies]
-bytey = { workspace = true }
+bytey = { path = "./bytey" }
 csv = "1.2.0"
 data-encoding = "2.3.3"
 game = { workspace = true }

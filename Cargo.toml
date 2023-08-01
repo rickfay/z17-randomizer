@@ -30,8 +30,6 @@ path = "./src/bin/plando.rs"
 
 [workspace]
 members = [
-    "bytey",
-    "bytey-macro",
     "cli",
     "game",
     "jack",
@@ -39,11 +37,12 @@ members = [
     "patcher",
     "randomizer",
     "rom",
+    "rom/bytey",
+    "rom/bytey-macro",
 ]
 
 [workspace.dependencies]
 byteorder = "1.4.3"
-bytey = { path = "./bytey" }
 cli = { path = "./cli" }
 game = { path = "./game" }
 jack = { path = "./jack" }
