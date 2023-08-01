@@ -4,6 +4,19 @@ use std::{
     ops::Deref,
 };
 
+#[derive(Debug, Default)]
+pub struct NamedArea {
+    pub name: Option<&'static str>,
+    pub areas: &'static [NamedArea],
+    locations: &'static [Location],
+}
+
+impl NamedArea {
+    pub fn locations(&self) -> impl Iterator<Item = LocationNode> {
+        self.locations.iter().map(LocationNode)
+    }
+}
+
 pub struct AreaInfo {
     name: &'static str,
     group: Group,
@@ -55,12 +68,34 @@ pub enum Group {
     Dungeons,
 }
 
+pub const NAMED_AREA: NamedArea = NamedArea {
+    name: None,
+    areas: &[
+        hyrule::NAMED_AREA,
+        lorule::NAMED_AREA,
+        dungeons::graveyards::NAMED_AREA,
+        dungeons::eastern::NAMED_AREA,
+        dungeons::house::NAMED_AREA,
+        dungeons::tower::NAMED_AREA,
+        dungeons::hyrule::NAMED_AREA,
+        dungeons::dark::NAMED_AREA,
+        dungeons::swamp::NAMED_AREA,
+        dungeons::skull::NAMED_AREA,
+        dungeons::thieves::NAMED_AREA,
+        dungeons::ice::NAMED_AREA,
+        dungeons::desert::NAMED_AREA,
+        dungeons::turtle::NAMED_AREA,
+        dungeons::lorule::NAMED_AREA,
+    ],
+    locations: &[],
+};
+
 macro_rules! regions {
     ($($group:ident($variant:ident) {
         $($region:ident;)+
     })+) => {
         $(pub mod $group {
-            use super::LocationNode;
+            use super::{LocationNode, NamedArea};
 
             $(pub mod $region;)+
 
@@ -69,6 +104,14 @@ macro_rules! regions {
                     $(Box::new($region::locations()) as Box<_>,)+
                 ].into_iter()
             }
+
+            pub const NAMED_AREA: NamedArea = NamedArea {
+                name: Some(stringify!($variant)),
+                areas: &[
+                    $($region::NAMED_AREA,)+
+                ],
+                locations: &[],
+            };
 
             pub const GROUP: super::Group = super::Group::$variant;
         })+
@@ -98,6 +141,15 @@ macro_rules! region {
             $start::AREA
         }
 
+        pub const NAMED_AREA: $crate::world::NamedArea = $crate::world::NamedArea {
+            name: Some($name),
+            areas: &[
+                $start::NAMED_AREA,
+                $($id::NAMED_AREA,)*
+            ],
+            locations: &[],
+        };
+
         pub const NAME: &str = $name;
         #[allow(unused)]
         pub const COURSE: $crate::Course = $crate::Course::$course;
@@ -118,7 +170,7 @@ macro_rules! area {
         $(quest: $kind:ident$(::$qvariant:ident)?,)?
     }) => {
         pub mod $id {
-            use $crate::world::{Area, AreaInfo, Location, LocationNode};
+            use $crate::world::{Area, AreaInfo, Location, LocationData, LocationNode, NamedArea};
 
             pub use super::COURSE;
 
@@ -131,14 +183,7 @@ macro_rules! area {
             #[allow(unused)]
             #[inline]
             pub fn locations() -> impl Iterator<Item = LocationNode> {
-                use $crate::world::LocationData;
-                [
-                    $($(Location {
-                            area: AREA,
-                            name: $key,
-                            data: $crate::location!($variant $props),
-                    },)*)?
-                ].iter().map(LocationNode)
+                LOCATIONS.iter().map(LocationNode)
             }
 
             pub fn get(name: &'static str) -> Option<LocationNode> {
@@ -146,6 +191,20 @@ macro_rules! area {
                     location.name == name
                 })
             }
+
+            pub const NAMED_AREA: NamedArea = NamedArea {
+                name: None,
+                areas: &[],
+                locations: LOCATIONS,
+            };
+
+            const LOCATIONS: &[Location] = &[
+                $($(Location {
+                        area: AREA,
+                        name: $key,
+                        data: $crate::location!($variant $props),
+                },)*)?
+            ];
         }
     };
 }
