@@ -1,10 +1,10 @@
 use game::{
-    world,
+    world::{self, LocationKey},
     Item::{self, *},
 };
 use rom::scene::{Dest, Flag, Obj, Rail, Vec3};
 
-use crate::{patch::DungeonPrizes, Error, Layout, LocationKey, Result};
+use crate::{DungeonPrizes, Error, Layout, Result};
 
 pub(crate) fn call<F>(unq: u16, action: F) -> (u16, Box<dyn Fn(&mut Obj)>)
 where
@@ -74,13 +74,6 @@ pub(crate) fn add_rail(unq: u16, rail: (i32, i32)) -> (u16, Box<dyn Fn(&mut Obj)
 #[allow(unused)]
 pub(crate) fn remove_collision(unq: u16) -> (u16, Box<dyn Fn(&mut Obj)>) {
     (unq, Box::new(|obj: &mut Obj| obj.srt.scale = Vec3::ZERO))
-}
-
-pub fn is_sage(item: Item) -> bool {
-    matches!(
-        item,
-        SageGulley | SageOren | SageSeres | SageOsfala | SageImpa | SageIrene | SageRosso
-    )
 }
 
 pub(crate) fn is_pendant(item: Item) -> bool {

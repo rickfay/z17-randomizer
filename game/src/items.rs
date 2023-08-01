@@ -267,3 +267,18 @@ pub enum Item {
     /// Sage Rosso (FAKE ITEM, acts as stand-in until we can add new GetItems)
     SageRosso = 0x67,
 }
+
+impl Item {
+    pub fn is_sage(&self) -> bool {
+        matches!(
+            self,
+            Self::SageGulley
+                | Self::SageOren
+                | Self::SageSeres
+                | Self::SageOsfala
+                | Self::SageImpa
+                | Self::SageIrene
+                | Self::SageRosso
+        )
+    }
+}

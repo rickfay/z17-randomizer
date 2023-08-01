@@ -1,7 +1,6 @@
 use std::{
     collections::{hash_map::DefaultHasher, BTreeMap},
     hash::{Hash, Hasher},
-    io,
 };
 
 use game::{
@@ -14,11 +13,10 @@ use modd::{
     hints::formatting::*,
     Layout, Mod, Settings,
 };
-use patch::Patcher;
 use rand::{rngs::StdRng, SeedableRng};
 use serde::{Serialize, Serializer};
 
-use crate::{constants::VERSION, metrics::Metrics, system::UserConfig};
+use crate::{constants::VERSION, metrics::Metrics};
 
 pub mod constants;
 mod entrance_rando;
@@ -29,8 +27,6 @@ mod item_pools;
 mod legacy;
 mod metrics;
 pub mod model;
-pub mod patch;
-pub mod system;
 #[rustfmt::skip]
 mod world;
 
@@ -40,21 +36,11 @@ pub type Result<T, E = Error> = ::std::result::Result<T, E>;
 pub enum Error {
     #[error("{0}")]
     Message(String),
-    #[error(transparent)]
-    Rom(#[from] rom::Error),
-    #[error(transparent)]
-    Io(#[from] io::Error),
 }
 
 impl Error {
     fn new(msg: impl Into<String>) -> Self {
         Self::Message(msg.into())
-    }
-}
-
-impl From<modd::Error> for Error {
-    fn from(err: modd::Error) -> Self {
-        Self::Message(err.to_string())
     }
 }
 
@@ -67,9 +53,7 @@ pub struct SeedInfo {
 }
 
 /// Main entry point to generate one ALBWR Seed.
-pub fn generate_seed(
-    seed: u32, settings: Settings, user_config: &UserConfig, no_patch: bool, no_spoiler: bool,
-) -> Result<()> {
+pub fn generate_seed(seed: u32, settings: Settings) -> Result<SeedInfo> {
     validate_settings(&settings)?;
 
     let rng = &mut StdRng::seed_from_u64(seed as u64);
@@ -78,10 +62,7 @@ pub fn generate_seed(
     info!("Hash:                           {}\n", hash.text_hash);
     settings.log_settings();
 
-    let seed_info = &calculate_seed_info(seed, settings, hash, rng)?;
-    patch::patch(&seed_info.mod_, user_config, no_patch, no_spoiler)?;
-
-    Ok(())
+    calculate_seed_info(seed, settings, hash, rng)
 }
 
 /// A hash used in-game to quickly verify that two players are playing the same seed.

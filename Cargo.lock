@@ -19,6 +19,7 @@ dependencies = [
  "game",
  "log",
  "modd",
+ "patcher",
  "rand",
  "randomizer",
  "rom",
@@ -330,6 +331,25 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b7e5500299e16ebb147ae15a00a942af264cf3688f47923b8fc2cd5858f23ad3"
 
 [[package]]
+name = "patcher"
+version = "0.1.0"
+dependencies = [
+ "byteorder",
+ "fs_extra",
+ "game",
+ "json_comments",
+ "log",
+ "modd",
+ "path-absolutize",
+ "rom",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "thiserror",
+ "try-insert-ext",
+]
+
+[[package]]
 name = "path-absolutize"
 version = "3.0.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -435,22 +455,14 @@ dependencies = [
 name = "randomizer"
 version = "0.3.1"
 dependencies = [
- "byteorder",
  "cli",
- "fs_extra",
  "game",
- "json_comments",
  "log",
  "modd",
- "path-absolutize",
  "queue",
  "rand",
- "rom",
  "serde",
- "serde_json",
- "tempfile",
  "thiserror",
- "try-insert-ext",
 ]
 
 [[package]]

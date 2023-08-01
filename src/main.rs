@@ -1,10 +1,8 @@
 use {
     log::{error, info},
     modd::Settings,
-    randomizer::{
-        constants::VERSION,
-        system::{System, UserConfig},
-    },
+    patcher::system::{System, UserConfig},
+    randomizer::constants::VERSION,
     simplelog::{LevelFilter, SimpleLogger},
     structopt::StructOpt,
 };
@@ -74,14 +72,10 @@ fn main() {
         info!("Preset:                         {}", preset_name);
         info!("Version:                        {}", VERSION);
 
-        match randomizer::generate_seed(
-            seed,
-            settings.clone(),
-            &user_config,
-            opt.no_patch,
-            opt.no_spoiler,
-        ) {
-            Ok(_) => {
+        match randomizer::generate_seed(seed, settings.clone()) {
+            Ok(seed_info) => {
+                patcher::patch(&seed_info.mod_, &user_config, opt.no_patch, opt.no_spoiler)
+                    .expect("patcher failed");
                 println!();
                 info!("Successfully Generated ALBWR Seed: {}", seed);
                 break;

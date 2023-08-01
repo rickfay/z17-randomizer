@@ -3,8 +3,7 @@ use log::info;
 use modd::settings::{hyrule_castle::HyruleCastle, logic::LogicMode, Settings};
 use rom::scene::{Arg, Dest, Flag, Obj, Transform, Vec3};
 
-use super::Patcher;
-use crate::{patch::util::*, Result};
+use crate::{util::*, Patcher, Result};
 
 macro_rules! apply {
     ($patcher:expr, $($course:ident $stage:literal {

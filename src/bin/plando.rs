@@ -13,7 +13,7 @@ use modd::{
     },
     Layout, Mod,
 };
-use randomizer::system::{System, UserConfig};
+use patcher::system::{System, UserConfig};
 use simplelog::SimpleLogger;
 use structopt::StructOpt;
 
@@ -58,7 +58,7 @@ fn main() {
         hints: Default::default(),
     };
 
-    match randomizer::patch::patch(&mod_, &user_config, args.no_patch, args.no_spoiler) {
+    match patcher::patch(&mod_, &user_config, args.no_patch, args.no_spoiler) {
         Ok(_) => {
             println!();
             info!("Successfully Generated ALBW Plandomizer Seed");

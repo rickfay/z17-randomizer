@@ -13,6 +13,7 @@ cli = { workspace = true }
 game = { workspace = true }
 log = { workspace = true }
 modd = { workspace = true }
+patcher = { path = "./patcher" }
 rand = { workspace = true }
 randomizer = { path = "./randomizer" }
 rom = { workspace = true }
@@ -35,6 +36,7 @@ members = [
     "game",
     "jack",
     "modd",
+    "patcher",
     "randomizer",
     "rom",
 ]

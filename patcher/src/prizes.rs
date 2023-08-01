@@ -5,7 +5,7 @@ use game::{
     Item::{self, *},
 };
 use log::info;
-use modd::{ItemExt, MsbfKey};
+use modd::{ItemExt, MsbfKey, Settings};
 use rom::{
     byaml,
     language::FlowChart,
@@ -13,10 +13,7 @@ use rom::{
     Actor, File,
 };
 
-use crate::{
-    patch::{util::*, DungeonPrizes},
-    Error, Patcher, Result, Settings,
-};
+use crate::{util::*, DungeonPrizes, Error, Patcher, Result};
 
 pub(crate) fn patch_dungeon_prizes(
     patcher: &mut Patcher, prizes: &DungeonPrizes, settings: &Settings,
@@ -441,7 +438,7 @@ fn patch_eastern(patcher: &mut Patcher, prize: Item) -> Result<()> {
         },
     );
 
-    if is_sage(prize) {
+    if prize.is_sage() {
         reroute_sage_warp(patcher, prize, outside_hyrule_castle)?;
     }
 
@@ -529,7 +526,7 @@ fn patch_gales(patcher: &mut Patcher, prize: Item) -> Result<()> {
     );
 
     // Gulley will fall down on his own, other Sages need to be put on a Rail to appear
-    if is_sage(prize) && prize != SageGulley {
+    if prize.is_sage() && prize != SageGulley {
         patcher.modify_objs(DungeonWind, 3, &[add_rail(UNQ_PRIZE, (12, 0))]);
 
         let (end_y, end_z) = if prize == SageImpa { (2.0, -47.0) } else { (0.0, -46.5) };
@@ -603,7 +600,7 @@ fn patch_hera(patcher: &mut Patcher, prize: Item) -> Result<()> {
     )?;
 
     // Gulley will fall down on his own, other Sages need to be put on a Rail to appear
-    if is_sage(prize) && prize != SageGulley {
+    if prize.is_sage() && prize != SageGulley {
         patcher.modify_objs(DungeonHera, 1, &[add_rail(UNQ_PRIZE, (56, 0))]);
 
         let (end_y, end_z) = if prize == SageImpa { (103.0, -6.0) } else { (101.0, -5.5) };
@@ -983,7 +980,7 @@ fn modify_dungeon_reward(
             }
         })],
     );
-    if is_sage(prize) {
+    if prize.is_sage() {
         reroute_sage_warp(patcher, prize, dest)?;
     }
     Ok(())

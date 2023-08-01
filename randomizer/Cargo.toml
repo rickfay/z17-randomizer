@@ -9,19 +9,11 @@ edition = "2021"
 license = "GPL-2.0-or-later"
 
 [dependencies]
-byteorder = { workspace = true }
 cli = { workspace = true }
-fs_extra = "1.3.0"
 game = { workspace = true }
-json_comments = "0.2.1"
 log = { workspace = true }
 modd = { workspace = true }
 queue = "0.3.2-final"
-path-absolutize = { workspace = true }
 rand = { workspace = true }
-rom = { workspace = true }
 serde = { workspace = true }
-serde_json = { workspace = true }
-tempfile = "3.4.0"
 thiserror = { workspace = true }
-try-insert-ext = "0.1.0"

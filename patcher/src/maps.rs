@@ -2,10 +2,7 @@ use game::{Course::*, Item};
 use log::info;
 use rom::scene::{Flag, Icn, IcnArgs, StageMeta};
 
-use crate::{
-    patch::{util::*, DungeonPrizes},
-    Patcher, Result,
-};
+use crate::{util::*, DungeonPrizes, Patcher, Result};
 
 #[non_exhaustive]
 struct Icon;
@@ -88,7 +85,7 @@ fn patch_lorule_maps(patcher: &mut Patcher, prizes: &DungeonPrizes) -> Result<()
 
 fn mark_by_prize(stage_meta: &mut StageMeta, prize: Item, icn_index: usize) -> Result<()> {
     let icn = stage_meta.icn.get_mut(icn_index).unwrap();
-    if is_sage(prize) {
+    if prize.is_sage() {
         icn.enable();
         icn.disable_on(prize_flag(prize)?);
     } else {

@@ -1,4 +1,10 @@
-use std::{collections::HashMap, fs, io::Write, iter, path::Path};
+use std::{
+    collections::HashMap,
+    fs,
+    io::{self, Write},
+    iter,
+    path::Path,
+};
 
 use fs_extra::dir::CopyOptions;
 use game::{
@@ -7,7 +13,7 @@ use game::{
     Item,
 };
 use log::{debug, error, info};
-use modd::{ItemExt, Mod, Settings};
+use modd::{ItemExt, Layout, Mod, Settings};
 use path_absolutize::*;
 use rom::{
     demo::Timed,
@@ -19,7 +25,7 @@ use serde::Serialize;
 use tempfile::tempdir;
 use try_insert_ext::EntryInsertExt;
 
-use crate::{patch::util::*, system::UserConfig, Error, Layout, Result};
+use crate::{system::UserConfig, util::*};
 
 use code::Code;
 
@@ -29,8 +35,32 @@ mod maps;
 mod messages;
 mod prizes;
 mod scenes;
+pub mod system;
 pub mod util;
 
+pub type Result<T, E = Error> = ::std::result::Result<T, E>;
+
+#[derive(Debug, thiserror::Error)]
+pub enum Error {
+    #[error("{0}")]
+    Message(String),
+    #[error(transparent)]
+    Rom(#[from] rom::Error),
+    #[error(transparent)]
+    Io(#[from] io::Error),
+}
+
+impl Error {
+    fn new(msg: impl Into<String>) -> Self {
+        Self::Message(msg.into())
+    }
+}
+
+impl From<modd::Error> for Error {
+    fn from(err: modd::Error) -> Self {
+        Self::Message(err.to_string())
+    }
+}
 #[non_exhaustive]
 pub struct DungeonPrizes {
     ep_prize: Item,

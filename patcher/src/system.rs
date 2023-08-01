@@ -10,8 +10,6 @@ use log::info;
 use modd::Settings;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
-use crate::constants::CONFIG_FILE_NAME;
-
 pub type Result<T, E = Error> = std::result::Result<T, E>;
 
 #[derive(Debug)]
@@ -95,3 +93,5 @@ impl UserConfig {
         &self.output
     }
 }
+
+pub const CONFIG_FILE_NAME: &str = "config.json";

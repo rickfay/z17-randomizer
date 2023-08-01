@@ -14,7 +14,7 @@ use modd::{
 use rom::ExHeader;
 
 use super::Patcher;
-use crate::{patch::util::prize_flag, Result};
+use crate::{util::prize_flag, Result};
 
 mod arm;
 

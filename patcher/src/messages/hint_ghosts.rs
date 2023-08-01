@@ -1,6 +1,6 @@
 use game::Course::*;
 
-use crate::FillerItem::{self, *};
+use modd::filler_item::FillerItem::{self, *};
 
 #[derive(Eq, PartialEq, Hash)]
 pub(crate) struct HintGhost<'hg> {

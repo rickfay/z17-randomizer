@@ -10,7 +10,6 @@ use crate::{
     filler::{find_reachable_checks, get_items_from_reachable_checks},
     filler_util::shuffle,
     model::{check::Check, progress::Progress},
-    patch::util::is_sage,
     world::WorldGraph,
     CheckMap, Error,
     FillerItem::{self, *},
@@ -486,7 +485,7 @@ fn generate_path_hints(
     let mut extra_paths_needed = 0;
 
     for (goal, prize_loc) in bosses_and_prize_locations {
-        if is_sage(convert(check_map.get(prize_loc).unwrap().unwrap()).unwrap()) {
+        if convert(check_map.get(prize_loc).unwrap().unwrap()).unwrap().is_sage() {
             let mut potential_paths = get_potential_path_hints(
                 settings, rng, world_graph, check_map, taken_checks, goal,
             )?;

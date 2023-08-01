@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 
 use game::{
-    world,
+    world::{self, LocationKey},
     Course::*,
     Item::{PendantPower, PendantWisdom},
 };
@@ -9,8 +9,8 @@ use log::info;
 use modd::{hints::formatting::*, Mod};
 
 use crate::{
-    patch::messages::{hint_ghosts::HintGhost, msbt::load_msbt},
-    Error, LocationKey, Patcher, Result,
+    messages::{hint_ghosts::HintGhost, msbt::load_msbt},
+    Error, Patcher, Result,
 };
 
 mod hint_ghosts;
