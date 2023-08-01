@@ -1,17 +1,15 @@
 use std::collections::HashMap;
 
-use game::{
-    Course::*,
-    Item::{self, *},
-};
+use game::Course::*;
 use log::info;
-use modd::{ItemExt, MsbfKey, Settings};
+use modd::{Item, Settings};
 use rom::{
     byaml,
     language::FlowChart,
     scene::{Arg, Dest, Flag, Obj, Point, Rail, Transform, Vec3},
     Actor, File,
 };
+use strum::AsRefStr;
 
 use crate::{util::*, DungeonPrizes, Error, Patcher, Result};
 
@@ -30,17 +28,17 @@ pub(crate) fn patch_dungeon_prizes(
 fn patch_flowchart(patcher: &mut Patcher, prizes: &DungeonPrizes) -> Result<()> {
     // Map dungeon MsbfInfo to the randomized prizes
     let dungeon_msbf_mapping: Vec<(Option<&'static str>, game::Course)> = Vec::from([
-        (prizes.ep_prize.msbf_key()?, DungeonEast),
-        (prizes.hg_prize.msbf_key()?, DungeonWind),
-        (prizes.th_prize.msbf_key()?, DungeonHera),
-        (prizes.hc_prize.msbf_key()?, IndoorLight),
-        (prizes.pd_prize.msbf_key()?, DungeonDark),
-        (prizes.sp_prize.msbf_key()?, DungeonWater),
-        (prizes.sw_prize.msbf_key()?, FieldDark),
-        (prizes.tt_prize.msbf_key()?, IndoorDark),
-        (prizes.tr_prize.msbf_key()?, DungeonKame),
-        (prizes.dp_prize.msbf_key()?, FieldDark),
-        (prizes.ir_prize.msbf_key()?, DungeonIce),
+        (msbf_key(prizes.ep_prize), DungeonEast),
+        (msbf_key(prizes.hg_prize), DungeonWind),
+        (msbf_key(prizes.th_prize), DungeonHera),
+        (msbf_key(prizes.hc_prize), IndoorLight),
+        (msbf_key(prizes.pd_prize), DungeonDark),
+        (msbf_key(prizes.sp_prize), DungeonWater),
+        (msbf_key(prizes.sw_prize), FieldDark),
+        (msbf_key(prizes.tt_prize), IndoorDark),
+        (msbf_key(prizes.tr_prize), DungeonKame),
+        (msbf_key(prizes.dp_prize), FieldDark),
+        (msbf_key(prizes.ir_prize), DungeonIce),
     ]);
 
     // Read and deserialize the FlowChart from RegionBoot
@@ -69,17 +67,196 @@ fn patch_flowchart(patcher: &mut Patcher, prizes: &DungeonPrizes) -> Result<()> 
     Ok(())
 }
 
+fn msbf_key(item: Item) -> Option<&'static str> {
+    match item {
+        Item::SageGulley => Some(MsbfKey::Dark.as_ref()),
+        Item::SageOren => Some(MsbfKey::Water.as_ref()),
+        Item::SageSeres => Some(MsbfKey::Dokuro.as_ref()),
+        Item::SageOsfala => Some(MsbfKey::Hagure.as_ref()),
+        Item::SageIrene => Some(MsbfKey::Sand.as_ref()),
+        Item::SageRosso => Some(MsbfKey::Ice.as_ref()),
+        _ => None,
+    }
+}
+
+#[allow(dead_code, non_camel_case_types)]
+#[derive(Clone, Copy, Debug, AsRefStr)]
+pub enum MsbfKey {
+    Castle,
+    CatchInsect,
+    Cave,
+    CaveDark10,
+    cl_Church_UG,
+    CrossBattle,
+    CrossBoard,
+    CrossForceTalk,
+    CrossOldMan,
+    Dark,
+    Dokuro,
+    DoorHouse,
+    E3_flow,
+    East,
+    Ending,
+    FieldDark_00_GoldenBeeShop,
+    FieldDark_05_GameTower,
+    FieldDark_0F_Namazu,
+    FieldDark_13_Sinpu,
+    FieldDark_14_Danpei,
+    FieldDark_16_HagureHouse,
+    FieldDark_16_MagicShop,
+    FieldDark_17_NpcHinox,
+    FieldDark_18_BakudanTouzoku,
+    FieldDark_18_BoxManDark,
+    FieldDark_18_ItemShop,
+    FieldDark_1A_FortuneGirlUra,
+    FieldDark_1B_Bakudanya,
+    FieldDark_1B_Hilda,
+    FieldDark_1E_Sennyukun,
+    FieldDark_28_Minigame,
+    FieldDark_29_BakudanShop,
+    FieldDark_29_HappyFairy,
+    FieldDark_2A_GameMaster,
+    FieldDark_2C_RaviosDiary,
+    FieldDark_33_Daibakudankabe,
+    FieldDark_33_Touzoku,
+    FieldDark_35_ItemShop,
+    FieldDark_35_Kame,
+    FieldDark_3A_CrazyMan,
+    FieldDark_Tennokoe,
+    FieldLight_00_JyohoShop,
+    FieldLight_00_Mayoinomori,
+    FieldLight_02_KikoriMan,
+    FieldLight_03_Kanban,
+    FieldLight_05_Climber,
+    FieldLight_0A_Kanban,
+    FieldLight_0F_Kanban,
+    FieldLight_0F_Zora,
+    FieldLight_11_FortuneGirl,
+    FieldLight_11_Maple,
+    FieldLight_12_Maple,
+    FieldLight_12_SignBoard,
+    FieldLight_13_Danpei,
+    FieldLight_13_Medium,
+    FieldLight_13_SignBoard,
+    FieldLight_13_Sinpu,
+    FieldLight_13_Sister,
+    FieldLight_14_Danpei,
+    FieldLight_14_Maple,
+    FieldLight_16_Ending,
+    FieldLight_16_MagicShop,
+    FieldLight_16_Obaba,
+    FieldLight_16_SignBoard,
+    FieldLight_17_Kanban,
+    FieldLight_18_Bard,
+    FieldLight_18_BoxMan,
+    FieldLight_18_ClosedHouse,
+    FieldLight_18_InsectNet,
+    FieldLight_18_ItemShop,
+    FieldLight_18_Kakarikoboy,
+    FieldLight_18_KakarikoGirl,
+    FieldLight_18_MaidSahasulala,
+    FieldLight_18_MiddleLady,
+    FieldLight_18_MiddleMan,
+    FieldLight_18_MilkbarMaster,
+    FieldLight_18_MilkbarSoldier,
+    FieldLight_18_Rotenshonin,
+    FieldLight_18_SahasPupil,
+    FieldLight_18_SignBoard,
+    FieldLight_18_Soldier,
+    FieldLight_18_StandItem,
+    FieldLight_18_Touzoku,
+    FieldLight_1A_Maple,
+    FieldLight_1A_SignBoard,
+    FieldLight_1B_BlackSmithKid,
+    FieldLight_1B_Commander,
+    FieldLight_1B_Hekiga,
+    FieldLight_1B_Impa,
+    FieldLight_1B_Rakcha,
+    FieldLight_1B_Sahasrahla,
+    FieldLight_1B_Soldier,
+    FieldLight_1B_Zelda,
+    FieldLight_1E_Sahasrahla,
+    FieldLight_22_BlackSmith,
+    FieldLight_22_BlackSmithKid,
+    FieldLight_22_BlackSmithWife,
+    FieldLight_22_Dwarf,
+    FieldLight_22_Maple,
+    FieldLight_28_Minigame,
+    FieldLight_29_Kokko,
+    FieldLight_2A_BlacksmithKid,
+    FieldLight_2A_BlacksmithWife,
+    FieldLight_2B_AppleTree,
+    FieldLight_2B_BlackSmithKid,
+    FieldLight_2B_Maple,
+    FieldLight_2C_BlackSmithKid,
+    FieldLight_2C_GanbariTutorial,
+    FieldLight_2C_Rental,
+    FieldLight_2C_RentalItem,
+    FieldLight_2C_SahasPupil,
+    FieldLight_2C_Sahasrahla,
+    FieldLight_2C_SignBoard,
+    FieldLight_2C_Soldier,
+    FieldLight_2D_Maple,
+    FieldLight_2D_UnderBridgeStranger,
+    FieldLight_2E_Maple,
+    FieldLight_33_Douguya,
+    FieldLight_35_Douguya,
+    FieldLight_35_ItemShop,
+    FieldLight_35_Kinsta,
+    FieldLight_35_Marutakun,
+    FieldLight_35_Zora,
+    FieldLight_37_MessageBottle,
+    FieldLight_BlacksmithWife,
+    FieldLight_HyruleRace,
+    FieldLight_Tennokoe,
+    FieldLight_WarpEvent,
+    FiledDark_22_BlackSmithUra,
+    FiledDark_22_BlackSmithWifeUra,
+    GameOver,
+    Ganon,
+    GirigiriGameTest,
+    Hagure,
+    Hera,
+    HintGhost,
+    Ice,
+    IndoorDark1_ZoraQueen,
+    IndoorDark2_Demo080,
+    Kame,
+    MessageBoard,
+    MiniDungeon_FieldDark_2B,
+    MiniDungeon_FieldLight_07,
+    MiniDungeon_FieldLight_15,
+    MiniDungeon_FieldLight_1E,
+    MiniDungeon_FieldLight_32,
+    MiniDungeon_FieldLight_33,
+    NpcClimberTest,
+    NpcHinox,
+    NpcShadowLink,
+    NpcStand,
+    npcTest00,
+    NpcTestIwata,
+    NpcTownEtc,
+    Sand,
+    Telephone,
+    test,
+    ToRentalShopBoard,
+    Water,
+    Wind,
+    yamazaki,
+    yamazaki2,
+}
+
 /// Get msbf event files and inject them into scenes
 #[rustfmt::skip]
 fn patch_msbf_files(patcher: &mut Patcher, prizes: &DungeonPrizes) {
     let prize_msbf_map: HashMap<Item, (&str, File<Box<[u8]>>)> = HashMap::from([
-        (SageGulley, (MsbfKey::Dark.as_ref(), patcher.language(DungeonDark).unwrap().flow().extract("World/Flow/Dark.msbf").unwrap())),
-        (SageOren, (MsbfKey::Water.as_ref(), patcher.language(DungeonWater).unwrap().flow().extract("World/Flow/Water.msbf").unwrap())),
-        (SageSeres, (MsbfKey::Dokuro.as_ref(), patcher.language(FieldDark).unwrap().flow().extract("World/Flow/Dokuro.msbf").unwrap())),
-        (SageOsfala, (MsbfKey::Hagure.as_ref(), patcher.language(IndoorDark).unwrap().flow().extract("World/Flow/Hagure.msbf").unwrap())),
+        (Item::SageGulley, (MsbfKey::Dark.as_ref(), patcher.language(DungeonDark).unwrap().flow().extract("World/Flow/Dark.msbf").unwrap())),
+        (Item::SageOren, (MsbfKey::Water.as_ref(), patcher.language(DungeonWater).unwrap().flow().extract("World/Flow/Water.msbf").unwrap())),
+        (Item::SageSeres, (MsbfKey::Dokuro.as_ref(), patcher.language(FieldDark).unwrap().flow().extract("World/Flow/Dokuro.msbf").unwrap())),
+        (Item::SageOsfala, (MsbfKey::Hagure.as_ref(), patcher.language(IndoorDark).unwrap().flow().extract("World/Flow/Hagure.msbf").unwrap())),
         /* No Impa */
-        (SageIrene, (MsbfKey::Sand.as_ref(), patcher.language(FieldDark).unwrap().flow().extract("World/Flow/Sand.msbf").unwrap())),
-        (SageRosso, (MsbfKey::Ice.as_ref(), patcher.language(DungeonIce).unwrap().flow().extract("World/Flow/Ice.msbf").unwrap())),
+        (Item::SageIrene, (MsbfKey::Sand.as_ref(), patcher.language(FieldDark).unwrap().flow().extract("World/Flow/Sand.msbf").unwrap())),
+        (Item::SageRosso, (MsbfKey::Ice.as_ref(), patcher.language(DungeonIce).unwrap().flow().extract("World/Flow/Ice.msbf").unwrap())),
     ]);
 
     patcher.inject_msbf(DungeonEast, prize_msbf_map.get(&prizes.ep_prize)).unwrap();
@@ -101,17 +278,17 @@ fn patch_dungeon_prize_actors(patcher: &mut Patcher, prizes: &DungeonPrizes) {
     // Fetch and map Actors to their dungeon prizes
     let pendant = patcher.scene(DungeonWind, 2).unwrap().actors().get_actor_bch("Pendant").unwrap();
     let actor_map: HashMap<Item, Actor> = HashMap::from([
-        (PendantPower, pendant.clone()),
-        (PendantWisdom, pendant.clone()),
-        (PendantCourage, pendant.clone()),
-        (ZeldaAmulet, pendant),
-        (SageGulley, patcher.scene(DungeonDark, 0).unwrap().actors().get_actor_bch("PictureBlacksmithBoy").unwrap()),
-        (SageOren, patcher.scene(DungeonWater, 2).unwrap().actors().get_actor_bch("PictureZoraQueen").unwrap()),
-        (SageSeres, patcher.scene(FieldDark, 0).unwrap().actors().get_actor_bch("PicturePriestGirl").unwrap()),
-        (SageOsfala, patcher.scene(IndoorDark, 14).unwrap().actors().get_actor_bch("PictureSahasPupil").unwrap()),
-        (SageImpa, patcher.scene(DungeonKame, 2).unwrap().actors().get_actor_bch("PictureInpa").unwrap()),
-        (SageIrene, patcher.scene(FieldDark, 30).unwrap().actors().get_actor_bch("PictureMaple").unwrap()),
-        (SageRosso, patcher.scene(DungeonIce, 0).unwrap().actors().get_actor_bch("PictureMountaineer").unwrap()),
+        (Item::PendantPower, pendant.clone()),
+        (Item::PendantWisdom, pendant.clone()),
+        (Item::PendantCourage, pendant.clone()),
+        (Item::ZeldaAmulet, pendant),
+        (Item::SageGulley, patcher.scene(DungeonDark, 0).unwrap().actors().get_actor_bch("PictureBlacksmithBoy").unwrap()),
+        (Item::SageOren, patcher.scene(DungeonWater, 2).unwrap().actors().get_actor_bch("PictureZoraQueen").unwrap()),
+        (Item::SageSeres, patcher.scene(FieldDark, 0).unwrap().actors().get_actor_bch("PicturePriestGirl").unwrap()),
+        (Item::SageOsfala, patcher.scene(IndoorDark, 14).unwrap().actors().get_actor_bch("PictureSahasPupil").unwrap()),
+        (Item::SageImpa, patcher.scene(DungeonKame, 2).unwrap().actors().get_actor_bch("PictureInpa").unwrap()),
+        (Item::SageIrene, patcher.scene(FieldDark, 30).unwrap().actors().get_actor_bch("PictureMaple").unwrap()),
+        (Item::SageRosso, patcher.scene(DungeonIce, 0).unwrap().actors().get_actor_bch("PictureMountaineer").unwrap()),
     ]);
 
     // Add Actors to relevant scenes
@@ -195,7 +372,7 @@ fn patch_oren(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
     );
 
     if settings.logic.reverse_sage_events {
-        let oren_flag = prize_flag(SageOren)?;
+        let oren_flag = prize_flag(Item::SageOren)?;
 
         // Shady Guy Trigger
         patcher.modify_objs(
@@ -239,7 +416,7 @@ fn patch_oren(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
 
 /// Impa
 fn patch_impa(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
-    let impa_flag = prize_flag(SageImpa)?;
+    let impa_flag = prize_flag(Item::SageImpa)?;
     if !settings.logic.reverse_sage_events {
         // Remove HC Impa when not RSE
         patcher.modify_objs(IndoorLight, 12, &[disable(36)]);
@@ -283,7 +460,7 @@ fn patch_irene(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
         return Ok(());
     }
 
-    let irene_flag = prize_flag(SageIrene)?;
+    let irene_flag = prize_flag(Item::SageIrene)?;
 
     // Bridge
     patcher.modify_objs(
@@ -321,9 +498,9 @@ fn patch_irene(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
 /// Rosso
 fn patch_rosso(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
     let rosso_flag = if settings.logic.reverse_sage_events {
-        prize_flag(SageRosso)
+        prize_flag(Item::SageRosso)
     } else {
-        prize_flag(PendantCourage)
+        prize_flag(Item::PendantCourage)
     }?;
 
     // Outside Rosso's House
@@ -526,10 +703,10 @@ fn patch_gales(patcher: &mut Patcher, prize: Item) -> Result<()> {
     );
 
     // Gulley will fall down on his own, other Sages need to be put on a Rail to appear
-    if prize.is_sage() && prize != SageGulley {
+    if prize.is_sage() && prize != Item::SageGulley {
         patcher.modify_objs(DungeonWind, 3, &[add_rail(UNQ_PRIZE, (12, 0))]);
 
-        let (end_y, end_z) = if prize == SageImpa { (2.0, -47.0) } else { (0.0, -46.5) };
+        let (end_y, end_z) = if prize == Item::SageImpa { (2.0, -47.0) } else { (0.0, -46.5) };
         patcher.add_rail(
             DungeonWind,
             3,
@@ -600,10 +777,10 @@ fn patch_hera(patcher: &mut Patcher, prize: Item) -> Result<()> {
     )?;
 
     // Gulley will fall down on his own, other Sages need to be put on a Rail to appear
-    if prize.is_sage() && prize != SageGulley {
+    if prize.is_sage() && prize != Item::SageGulley {
         patcher.modify_objs(DungeonHera, 1, &[add_rail(UNQ_PRIZE, (56, 0))]);
 
-        let (end_y, end_z) = if prize == SageImpa { (103.0, -6.0) } else { (101.0, -5.5) };
+        let (end_y, end_z) = if prize == Item::SageImpa { (103.0, -6.0) } else { (101.0, -5.5) };
         patcher.add_rail(
             DungeonHera,
             1,
@@ -675,7 +852,7 @@ fn patch_dark(patcher: &mut Patcher, prize: Item) -> Result<()> {
     //                 Obj::step_switch(Flag::Course(21), 4, 400, 400,
     //                                  Vec3 { x: 0.0, y: 0.0, z: -44.75 }));
 
-    if prize == SageGulley {
+    if prize == Item::SageGulley {
         return Ok(());
     }
 
@@ -694,7 +871,7 @@ fn patch_dark(patcher: &mut Patcher, prize: Item) -> Result<()> {
         // Put non-Gulley Portraits on a Rail so they drop down after the boss
         // TODO Figure out how to attach skeletal animation to portraits so they drop non-jankily
         patcher.modify_objs(DungeonDark, 1, &[add_rail(262, (14, 0))]);
-        let (end_y, end_z) = if prize == SageImpa { (2.0, -48.0) } else { (0.0, -47.5) };
+        let (end_y, end_z) = if prize == Item::SageImpa { (2.0, -48.0) } else { (0.0, -47.5) };
         patcher.add_rail(
             DungeonDark,
             1,
@@ -752,7 +929,7 @@ fn patch_dark(patcher: &mut Patcher, prize: Item) -> Result<()> {
 
 /// Swamp Palace
 fn patch_swamp(patcher: &mut Patcher, prize: Item) -> Result<()> {
-    if prize == SageOren {
+    if prize == Item::SageOren {
         return Ok(());
     }
 
@@ -762,7 +939,7 @@ fn patch_swamp(patcher: &mut Patcher, prize: Item) -> Result<()> {
 
 /// Skull Woods
 fn patch_skull(patcher: &mut Patcher, prize: Item) -> Result<()> {
-    if prize == SageSeres {
+    if prize == Item::SageSeres {
         return Ok(());
     }
 
@@ -772,7 +949,7 @@ fn patch_skull(patcher: &mut Patcher, prize: Item) -> Result<()> {
 
 /// Thieves' Hideout
 fn patch_thieves(patcher: &mut Patcher, prize: Item) -> Result<()> {
-    if prize == SageOsfala {
+    if prize == Item::SageOsfala {
         return Ok(());
     }
 
@@ -791,7 +968,7 @@ fn patch_turtle(patcher: &mut Patcher, prize: Item) -> Result<()> {
     //                 Obj::step_switch(Flag::Course(130), 0, 32, 100,
     //                                  Vec3 { x: 0.0, y: 5.0, z: -39.0 }));
 
-    if prize == SageImpa {
+    if prize == Item::SageImpa {
         return Ok(());
     }
 
@@ -824,7 +1001,7 @@ fn patch_turtle(patcher: &mut Patcher, prize: Item) -> Result<()> {
         );
     } else {
         // Gulley is a difficult child
-        if prize == SageGulley {
+        if prize == Item::SageGulley {
             patcher.modify_objs(
                 DungeonKame,
                 3,
@@ -870,7 +1047,7 @@ fn patch_desert(patcher: &mut Patcher, prize: Item) -> Result<()> {
     //                 Obj::step_switch(Flag::Course(252), 0, 58, 137,
     //                                  Vec3 { x: -19.0, y: 0.0, z: -19.0 }));
 
-    if prize == SageIrene {
+    if prize == Item::SageIrene {
         return Ok(());
     }
 
@@ -897,7 +1074,7 @@ fn patch_ice(patcher: &mut Patcher, prize: Item) -> Result<()> {
     //     }),
     // ]);
 
-    if prize == SageRosso {
+    if prize == Item::SageRosso {
         return Ok(());
     }
 
@@ -921,17 +1098,17 @@ impl PrizePatchData {
 
     fn get(prize: Item) -> Result<Self> {
         match prize {
-            SageGulley => Ok(Self::new(418, Flag::Event(536), 0.0, 0, 1, 60)),
-            SageOren => Ok(Self::new(423, Flag::Event(556), 330.0, 0, 0, 30)),
-            SageSeres => Ok(Self::new(420, Flag::Event(576), 330.0, 0, 0, 30)),
-            SageOsfala => Ok(Self::new(419, Flag::Event(596), 330.0, 0, 0, 30)),
-            SageRosso => Ok(Self::new(422, Flag::Event(616), 330.0, 0, 0, 30)),
-            SageIrene => Ok(Self::new(417, Flag::Event(636), 330.0, 0, 0, 30)),
-            SageImpa => Ok(Self::new(421, Flag::Event(656), 330.0, 0, 0, 120)),
-            PendantPower => Ok(Self::new(173, Flag::Event(372), 0.0, 0, 0, 0)),
-            PendantWisdom => Ok(Self::new(173, Flag::Event(342), 0.0, 1, 0, 0)),
-            PendantCourage => Ok(Self::new(173, Flag::Course(500), 0.0, 2, 0, 0)),
-            ZeldaAmulet => Ok(Self::new(173, Flag::Course(501), 0.0, 2, 0, 0)),
+            Item::SageGulley => Ok(Self::new(418, Flag::Event(536), 0.0, 0, 1, 60)),
+            Item::SageOren => Ok(Self::new(423, Flag::Event(556), 330.0, 0, 0, 30)),
+            Item::SageSeres => Ok(Self::new(420, Flag::Event(576), 330.0, 0, 0, 30)),
+            Item::SageOsfala => Ok(Self::new(419, Flag::Event(596), 330.0, 0, 0, 30)),
+            Item::SageRosso => Ok(Self::new(422, Flag::Event(616), 330.0, 0, 0, 30)),
+            Item::SageIrene => Ok(Self::new(417, Flag::Event(636), 330.0, 0, 0, 30)),
+            Item::SageImpa => Ok(Self::new(421, Flag::Event(656), 330.0, 0, 0, 120)),
+            Item::PendantPower => Ok(Self::new(173, Flag::Event(372), 0.0, 0, 0, 0)),
+            Item::PendantWisdom => Ok(Self::new(173, Flag::Event(342), 0.0, 1, 0, 0)),
+            Item::PendantCourage => Ok(Self::new(173, Flag::Course(500), 0.0, 2, 0, 0)),
+            Item::ZeldaAmulet => Ok(Self::new(173, Flag::Course(501), 0.0, 2, 0, 0)),
             _ => Err(Error::new(format!("\"{}\" is not a dungeon prize.", prize.as_ref()))),
         }
     }
@@ -940,14 +1117,16 @@ impl PrizePatchData {
 fn reroute_sage_warp(patcher: &mut Patcher, prize: Item, dest: Dest) -> Result<()> {
     // Get UNQ of warp object in the Chamber of Sages
     let unq_sage_warp = match prize {
-        SageGulley => Ok(Some(73)),
-        SageOren => Ok(Some(72)),
-        SageSeres => Ok(Some(71)),
-        SageOsfala => Ok(Some(67)),
-        SageRosso => Ok(Some(69)),
-        SageIrene => Ok(Some(70)),
-        SageImpa => Ok(Some(68)),
-        PendantPower | PendantWisdom | PendantCourage | ZeldaAmulet => Ok(None),
+        Item::SageGulley => Ok(Some(73)),
+        Item::SageOren => Ok(Some(72)),
+        Item::SageSeres => Ok(Some(71)),
+        Item::SageOsfala => Ok(Some(67)),
+        Item::SageRosso => Ok(Some(69)),
+        Item::SageIrene => Ok(Some(70)),
+        Item::SageImpa => Ok(Some(68)),
+        Item::PendantPower | Item::PendantWisdom | Item::PendantCourage | Item::ZeldaAmulet => {
+            Ok(None)
+        }
         _ => Err(Error::new(format!("\"{}\" is not a dungeon prize.", prize.as_ref()))),
     }?;
 

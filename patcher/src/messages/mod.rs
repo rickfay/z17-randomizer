@@ -1,12 +1,8 @@
 use std::collections::BTreeMap;
 
-use game::{
-    world,
-    Course::*,
-    Item::{PendantPower, PendantWisdom},
-};
+use game::{world, Course::*};
 use log::info;
-use modd::{hints::formatting::*, Mod};
+use modd::{hints::formatting::*, Item, Mod};
 
 use crate::{
     messages::{hint_ghosts::HintGhost, msbt::load_msbt},
@@ -145,8 +141,8 @@ fn patch_street_merchant(patcher: &mut Patcher, mod_: &Mod) -> Result<()> {
 /// Sahasrahla gives out the locations of the Red & Blue Pendants
 #[allow(unused)]
 fn patch_sahasrahla(patcher: &mut Patcher, mod_: &Mod) -> Result<()> {
-    let pow_region = mod_.items.find_single(PendantWisdom).unwrap().area.name();
-    let pop_region = mod_.items.find_single(PendantPower).unwrap().area.name();
+    let pow_region = mod_.items.find_single(Item::PendantWisdom).unwrap().area.name();
+    let pop_region = mod_.items.find_single(Item::PendantPower).unwrap().area.name();
 
     let mut sahasrahla = load_msbt(patcher, FieldLight, "FieldLight_1B")?;
     sahasrahla.set(

@@ -1,10 +1,11 @@
 use std::collections::{BTreeMap, HashSet};
 
-use game::{world::LocationNode, Item};
+use game::world::LocationNode;
 use log::{error, info};
 use modd::{
     filler_item::FillerItem::{self, *},
     settings::{logic::LogicMode::*, Settings},
+    Item,
 };
 use queue::Queue;
 use rand::{rngs::StdRng, Rng};

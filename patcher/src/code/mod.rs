@@ -6,9 +6,9 @@ use std::{
 };
 
 use arm::*;
-use game::Item::{self, *};
 use modd::{
     settings::{pedestal::Pedestal::*, Settings},
+    Item::{self, *},
     Mod,
 };
 use rom::ExHeader;
@@ -147,7 +147,7 @@ impl Ips {
 }
 
 pub fn create(patcher: &Patcher, mod_: &Mod) -> Result<Code> {
-    let mut code = Code::new(patcher.game.exheader());
+    let mut code = Code::new(patcher.rom.exheader());
 
     // Enable Y Button
     code.text().patch(0x47B2C8, [mov(R0, 1)]);
@@ -719,7 +719,7 @@ fn actor_names(code: &mut Code) -> HashMap<Item, u32> {
     let mut map = IntoIterator::into_iter(ACTOR_NAME_OFFSETS).collect::<HashMap<_, _>>();
     map.extend(IntoIterator::into_iter(ACTOR_NAMES).map(|(item, name)| {
         let name = format!("{}\0", name);
-        (item, code.rodata().declare(name.as_bytes()))
+        (*item, code.rodata().declare(name.as_bytes()))
     }));
     map
 }
@@ -728,7 +728,7 @@ fn item_names(code: &mut Code) -> HashMap<Item, u32> {
     let mut map = IntoIterator::into_iter(ITEM_NAME_OFFSETS).collect::<HashMap<_, _>>();
     map.extend(IntoIterator::into_iter(ITEM_NAMES).map(|(item, name)| {
         let name = format!("item_name_{}\0", name);
-        (item, code.rodata().declare(name.as_bytes()))
+        (*item, code.rodata().declare(name.as_bytes()))
     }));
     map
 }
@@ -754,7 +754,7 @@ const ACTOR_NAME_OFFSETS: [(Item, u32); 29] = [
     (ItemBottle, 0x5D7048),
     (HintGlasses, 0x5D70AC),
     (RupeeGold, 0x5D7144),
-    (ItemSwordLv2, 0x5D7178),
+    (ItemSword, 0x5D7178),
     (LiverPurple, 0x5D762C),
     (LiverYellow, 0x5D7640),
     (LiverBlue, 0x5D7654),
@@ -765,20 +765,17 @@ const ACTOR_NAME_OFFSETS: [(Item, u32); 29] = [
     (HeartPiece, 0x5D7B94),
 ];
 
-const ACTOR_NAMES: [(Item, &str); 39] = [
+const ACTOR_NAMES: &[(Item, &str)] = &[
     (KeyBoss, "KeyBoss"),
     (Compass, "Compass"),
     (ItemKandelaar, "GtEvKandelaar"),
-    (ItemKandelaarLv2, "GtEvKandelaar"),
     (ItemMizukaki, "GtEvFin"),
-    (RingRental, "RingRental"),
     (RingHekiga, "RingRental"),
     (ItemBell, "GtEvBell"),
     (PowerGlove, "GtEvGloveA"),
     (ItemInsectNet, "GtEvNet"),
-    (ItemInsectNetLv2, "GtEvNet"),
     (BadgeBee, "BadgeBee"),
-    (ClothesBlue, "GtEvCloth"),
+    (Clothes, "GtEvCloth"),
     (HyruleShield, "GtEvShieldB"),
     (OreYellow, "OreSword"),
     (OreGreen, "OreSword"),
@@ -786,15 +783,6 @@ const ACTOR_NAMES: [(Item, &str); 39] = [
     (GanbariPowerUp, "PowerUp"),
     (DashBoots, "GtEvBoots"),
     (OreRed, "OreSword"),
-    (ItemIceRodLv2, "GtEvRodIceB"),
-    (ItemSandRodLv2, "GtEvRodSandB"),
-    (ItemTornadeRodLv2, "GtEvTornadoB"),
-    (ItemBombLv2, "BombM"),
-    (ItemFireRodLv2, "GtEvRodFireB"),
-    (ItemHookShotLv2, "GtEvHookshotB"),
-    (ItemBoomerangLv2, "GtEvBoomerangB"),
-    (ItemHammerLv2, "GtEvHammerB"),
-    (ItemBowLv2, "GtEvBowB"),
     (MilkMatured, "GtEvBottleMedicine"), // Red Milk lol
     (Kinsta, "KinSta"),
     (PendantPower, "Pendant"),
@@ -824,13 +812,12 @@ const ITEM_NAME_OFFSETS: [(Item, u32); 14] = [
     (ItemStoneBeauty, 0x6F9D56),
 ];
 
-const ITEM_NAMES: [(Item, &str); 55] = [
+const ITEM_NAMES: &[(Item, &str)] = &[
     (BadgeBee, "beebadge"),
     (ItemBell, "bell"),
     (ItemBowLight, "bow_light"),
-    (RingRental, "bracelet"),
     (RingHekiga, "bracelet"),
-    (ClothesBlue, "clothes_blue"),
+    (Clothes, "clothes_blue"),
     (EscapeFruit, "doron"),
     (StopFruit, "durian"),
     (RupeeR, "gamecoin"),
@@ -848,14 +835,11 @@ const ITEM_NAMES: [(Item, &str); 55] = [
     (KeySmall, "keysmall"),
     (Kinsta, "kinsta"),
     (ItemKandelaar, "lantern"),
-    (ItemKandelaarLv2, "lantern_lv2"),
-    (ItemSwordLv2, "mastersword"),
     (Empty, "mastersword"),
     (MessageBottle, "messagebottle"),
     (Milk, "milk"),
     (MilkMatured, "milk_matured"),
     (ItemInsectNet, "net"),
-    (ItemInsectNetLv2, "net_lv2"),
     (OreYellow, "ore"),
     (OreGreen, "ore"),
     (OreBlue, "ore"),
@@ -869,15 +853,6 @@ const ITEM_NAMES: [(Item, &str); 55] = [
     (PowerGlove, "powergloves"),
     (ItemShield, "shield"),
     (SpecialMove, "special_move"),
-    (ItemBombLv2, "bomb_LV2"),
-    (ItemBoomerangLv2, "boomerang_LV2"),
-    (ItemBowLv2, "bow_LV2"),
-    (ItemFireRodLv2, "firerod_LV2"),
-    (ItemHammerLv2, "hammer_LV2"),
-    (ItemHookShotLv2, "hookshot_LV2"),
-    (ItemIceRodLv2, "icerod_LV2"),
-    (ItemSandRodLv2, "sandrod_LV2"),
-    (ItemTornadeRodLv2, "tornaderod_LV2"),
     (ItemMizukaki, "web"),
     (ZeldaAmulet, "charm"),
 ];

@@ -344,6 +344,7 @@ dependencies = [
  "rom",
  "serde",
  "serde_json",
+ "strum",
  "tempfile",
  "thiserror",
  "try-insert-ext",

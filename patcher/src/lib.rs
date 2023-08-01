@@ -10,10 +10,9 @@ use fs_extra::dir::CopyOptions;
 use game::{
     world::{self, LocationData, Shop},
     Course::*,
-    Item,
 };
 use log::{debug, error, info};
-use modd::{ItemExt, Items, Mod, Settings};
+use modd::{Item, Items, Mod, Settings};
 use path_absolutize::*;
 use rom::{
     demo::Timed,
@@ -78,7 +77,7 @@ pub struct DungeonPrizes {
 
 #[derive(Debug)]
 pub struct Patcher {
-    game: Rom,
+    rom: Rom,
     boot: Language,
     rentals: [Item; 9],
     merchant: [Item; 3],
@@ -89,7 +88,7 @@ impl Patcher {
     pub fn new(game: Rom) -> Result<Self> {
         let boot = game.boot()?;
         Ok(Self {
-            game,
+            rom: game,
             boot,
             rentals: [Item::KeySmall; 9],
             merchant: [Item::KeySmall; 3],
@@ -185,12 +184,12 @@ impl Patcher {
     }
 
     fn course(&mut self, course: game::Course) -> Result<&mut Course> {
-        let Self { game, ref mut courses, .. } = self;
+        let Self { rom: game, ref mut courses, .. } = self;
         Ok(courses.entry(course).or_insert(Self::load_course(game, course)))
     }
 
     fn scene(&mut self, course: game::Course, stage: u16) -> Result<&mut Scene> {
-        let Self { game, ref mut courses, .. } = self;
+        let Self { rom: game, ref mut courses, .. } = self;
         courses
             .entry(course)
             .or_insert(Self::load_course(game, course))
@@ -201,7 +200,7 @@ impl Patcher {
     }
 
     fn scene_meta(&mut self, course: game::Course) -> &mut SceneMeta {
-        let Self { game, ref mut courses, .. } = self;
+        let Self { rom: game, ref mut courses, .. } = self;
         let Course { ref mut scene_meta, .. } =
             courses.entry(course).or_insert(Self::load_course(game, course));
         scene_meta.as_mut().unwrap()
@@ -264,7 +263,7 @@ impl Patcher {
         let large_chest = (34, "TreasureBoxL");
 
         let chest_data = if settings.options.chest_size_matches_contents {
-            if item.goes_in_csmc_large_chest() {
+            if item.big_chest() {
                 large_chest
             } else {
                 small_chest
@@ -360,16 +359,17 @@ impl Patcher {
     }
 
     pub fn prepare(mut self, mod_: &Mod) -> Result<Patches> {
-        let common_archive = self.game.common()?;
+        let common_archive = self.rom.common()?;
         let mut item_actors = HashMap::new();
 
-        for (item, get_item) in self.game.match_items_to_get_items() {
+        for (item, get_item) in self.rom.match_items_to_get_items() {
+            let item: Item = item.into();
             if Item::SpecialMove.as_ref().eq(&get_item.0) {
                 // fixme hacky and gross
                 let mut actor = common_archive.get_actor_bch("SwordD")?.clone();
                 actor.rename(String::from("World/Actor/SwordD.bch"));
                 item_actors.insert(item, actor);
-            } else if let Some(mut actor) = get_item.actor(&self.game) {
+            } else if let Some(mut actor) = get_item.actor(&self.rom) {
                 actor.rename(format!("World/Actor/{}.bch", get_item.actor_name()?));
                 item_actors.insert(item, actor);
             }
@@ -425,7 +425,7 @@ impl Patcher {
             kakariko_actors.add(item_actors.get(&merchant[2]).unwrap().clone())?;
         }
         let code = code::create(&self, mod_)?;
-        let Self { game, boot, courses, .. } = self;
+        let Self { rom: game, boot, courses, .. } = self;
         let mut romfs = Files(vec![]);
 
         // Add Actors to Common Archive

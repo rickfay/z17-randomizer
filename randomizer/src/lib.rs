@@ -3,15 +3,12 @@ use std::{
     hash::{Hash, Hasher},
 };
 
-use game::{
-    world::LocationNode,
-    Item::{self},
-};
+use game::world::LocationNode;
 use log::{error, info};
 use modd::{
     filler_item::{convert, FillerItem},
     hints::formatting::*,
-    Items, Mod, Settings,
+    Item, Items, Mod, Settings,
 };
 use rand::{rngs::StdRng, SeedableRng};
 use serde::{Serialize, Serializer};

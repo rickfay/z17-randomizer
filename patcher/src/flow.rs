@@ -1,6 +1,5 @@
-use game::Item;
 use log::info;
-use modd::Settings;
+use modd::{Item, Settings};
 
 use super::Patcher;
 use crate::{Error, Result};

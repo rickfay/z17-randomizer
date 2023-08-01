@@ -1,5 +1,6 @@
-use game::{Course::*, Item};
+use game::Course::*;
 use log::info;
+use modd::Item;
 use rom::scene::{Flag, Icn, IcnArgs, StageMeta};
 
 use crate::{util::*, DungeonPrizes, Patcher, Result};

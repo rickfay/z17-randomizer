@@ -1,6 +1,9 @@
-use game::{Course::*, Item::*};
+use game::Course::*;
 use log::info;
-use modd::settings::{hyrule_castle::HyruleCastle, logic::LogicMode, Settings};
+use modd::{
+    settings::{hyrule_castle::HyruleCastle, logic::LogicMode, Settings},
+    Item,
+};
 use rom::scene::{Arg, Dest, Flag, Obj, Transform, Vec3};
 
 use crate::{util::*, Patcher, Result};
@@ -918,7 +921,7 @@ fn patch_ghost_into_hildas_study(patcher: &mut Patcher) {
 }
 
 fn patch_castles(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
-    let green_pendant_flag = prize_flag(PendantCourage)?;
+    let green_pendant_flag = prize_flag(Item::PendantCourage)?;
     let yuga_defeated = Flag::Event(420); // Set after Yuga 2 defeated
     let hc_31 = Flag::Course(31); // Also set after Yuga 2 defeated
     let hacky_flag = Flag::Event(421); // Repurposed for Curtain/Trial's Door removal

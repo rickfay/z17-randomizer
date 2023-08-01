@@ -1,7 +1,5 @@
-use game::{
-    world,
-    Item::{self, *},
-};
+use game::world;
+use modd::Item::{self, *};
 use rom::scene::{Dest, Flag, Obj, Rail, Vec3};
 
 use crate::{DungeonPrizes, Error, Items, Result};

@@ -1,4 +1,4 @@
-use game::{world, Item::*};
+use game::world;
 use log::{error, info, LevelFilter};
 use modd::{
     settings::{
@@ -8,6 +8,7 @@ use modd::{
         pedestal::Pedestal,
         Exclude, Exclusion, Options, Settings,
     },
+    Item::*,
     Items, Mod,
 };
 use patcher::system::{System, UserConfig};
@@ -126,11 +127,11 @@ fn build_layout() -> Items {
     layout.set(world::hyrule::field::main::get("Ravio (1)").unwrap(), RupeeGold);
     layout.set(world::hyrule::field::main::get("Ravio (2)").unwrap(), MessageBottle);
     layout.set(world::hyrule::field::main::get("Ravio (3)").unwrap(), ItemBottle);
-    layout.set(world::hyrule::field::main::get("Ravio (4)").unwrap(), ItemSwordLv1);
+    layout.set(world::hyrule::field::main::get("Ravio (4)").unwrap(), ItemSword);
     layout.set(world::hyrule::field::main::get("Ravio (5)").unwrap(), ItemMizukaki);
     layout.set(world::hyrule::field::main::get("Ravio (6)").unwrap(), RupeeG);
     layout.set(world::hyrule::field::main::get("Ravio (7)").unwrap(), ItemBell);
-    layout.set(world::hyrule::field::main::get("Ravio (8)").unwrap(), ItemHookShotLv2);
+    layout.set(world::hyrule::field::main::get("Ravio (8)").unwrap(), ItemHookShot);
     layout.set(world::hyrule::field::main::get("Ravio (9)").unwrap(), RupeeGold);
     // layout.set(LocationInfo::new(world::hyrule::field::main::AREA, "Thanks"), Item::RingHekiga);
 
@@ -160,9 +161,9 @@ fn build_layout() -> Items {
     layout.set(world::hyrule::field::main::get("Cucco Treasure Dungeon").unwrap(), RupeeSilver);
     layout.set(world::hyrule::field::main::get("Delivery").unwrap(), RupeeGold);
     layout.set(world::hyrule::field::main::get("Behind Blacksmith").unwrap(), RupeeGold);
-    layout.set(world::hyrule::field::main::get("Blacksmith Cave").unwrap(), ItemSwordLv1);
-    layout.set(world::hyrule::field::main::get("Blacksmith").unwrap(), ItemSwordLv1);
-    layout.set(world::hyrule::field::main::get("Blacksmith Table").unwrap(), ItemSwordLv1);
+    layout.set(world::hyrule::field::main::get("Blacksmith Cave").unwrap(), ItemSword);
+    layout.set(world::hyrule::field::main::get("Blacksmith").unwrap(), ItemSword);
+    layout.set(world::hyrule::field::main::get("Blacksmith Table").unwrap(), ItemSword);
     layout.set(world::hyrule::field::main::get("Hyrule Castle Rocks").unwrap(), RupeeGold);
     layout.set(world::hyrule::field::main::get("Wildlife Clearing Stump").unwrap(), RupeeGold);
 
@@ -179,7 +180,7 @@ fn build_layout() -> Items {
     layout.set(world::hyrule::irene::witch::get("Irene").unwrap(), RupeeGold);
 
     // Lost Woods
-    layout.set(world::hyrule::lost::woods::get("Fortune-Teller").unwrap(), RingRental);
+    layout.set(world::hyrule::lost::woods::get("Fortune-Teller").unwrap(), RingHekiga);
     layout.set(world::hyrule::lost::woods::get("Hyrule Hotfoot (First Race)").unwrap(), HintGlasses);
     layout.set(world::hyrule::lost::woods::get("Hyrule Hotfoot (Second Race)").unwrap(), RupeeSilver);
     layout.set(world::hyrule::lost::woods::get("Lost Woods Alcove").unwrap(), ItemHookShot);
@@ -208,7 +209,7 @@ fn build_layout() -> Items {
     layout.set(world::hyrule::death::mountain::get("Spectacle Rock").unwrap(), RupeeGold);
     layout.set(world::hyrule::death::mountain::get("Fire Cave Pillar").unwrap(), RupeeGold);
     layout.set(world::hyrule::death::mountain::get("Bouldering Guy").unwrap(), ItemBottle);
-    layout.set(world::hyrule::death::mountain::get("Death Mountain Treasure Dungeon").unwrap(), ItemHookShotLv2);
+    layout.set(world::hyrule::death::mountain::get("Death Mountain Treasure Dungeon").unwrap(), ItemHookShot);
     layout.set(world::hyrule::death::mountain::get("Floating Island").unwrap(), RupeeGold);
 
     layout.set(world::hyrule::death::mountain::get("[Mai] Death Mountain Base Rock").unwrap(), RupeeGold);
@@ -244,7 +245,7 @@ fn build_layout() -> Items {
     layout.set(world::hyrule::zora::river::get("Queen Oren").unwrap(), RupeeGold);
     layout.set(world::hyrule::zora::river::get("Waterfall Cave").unwrap(), Kinsta);
     layout.set(world::hyrule::zora::river::get("Zora's Domain Ledge").unwrap(), RupeeGold);
-    layout.set(world::hyrule::zora::river::get("Zora's River Treasure Dungeon").unwrap(), ItemBoomerangLv2);
+    layout.set(world::hyrule::zora::river::get("Zora's River Treasure Dungeon").unwrap(), ItemBoomerang);
 
     layout.set(world::hyrule::zora::river::get("[Mai] Inside Witch's House").unwrap(), RupeeGold);
     layout.set(world::hyrule::zora::river::get("[Mai] Under Wooden Bridge").unwrap(), RupeeGold);
@@ -254,7 +255,7 @@ fn build_layout() -> Items {
 
     // Eastern Ruins
     layout.set(world::hyrule::eastern::ruins::get("Bird Lover").unwrap(), RupeeGold);
-    layout.set(world::hyrule::eastern::ruins::get("Eastern Ruins Treasure Dungeon").unwrap(), ItemHammerLv2);
+    layout.set(world::hyrule::eastern::ruins::get("Eastern Ruins Treasure Dungeon").unwrap(), ItemHammer);
     layout.set(world::hyrule::eastern::ruins::get("Eastern Ruins Armos Chest").unwrap(), ItemTornadeRod);
     layout.set(world::hyrule::eastern::ruins::get("Eastern Ruins Hookshot Chest").unwrap(), ItemSandRod);
     layout.set(world::hyrule::eastern::ruins::get("Eastern Ruins Merge Chest").unwrap(), ItemBoomerang);
@@ -284,15 +285,15 @@ fn build_layout() -> Items {
     layout.set(world::hyrule::southern::ruins::get("[Mai] Southern Ruins Pillars").unwrap(), RupeeGold);
 
     // Lake Hylia
-    layout.set(world::hyrule::lake::hylia::get(" 10 Maiamai").unwrap(), ItemBowLv2);
-    layout.set(world::hyrule::lake::hylia::get(" 20 Maiamai").unwrap(), ItemBoomerangLv2);
-    layout.set(world::hyrule::lake::hylia::get(" 30 Maiamai").unwrap(), ItemHookShotLv2);
-    layout.set(world::hyrule::lake::hylia::get(" 40 Maiamai").unwrap(), ItemHammerLv2);
-    layout.set(world::hyrule::lake::hylia::get(" 50 Maiamai").unwrap(), ItemBombLv2);
-    layout.set(world::hyrule::lake::hylia::get(" 60 Maiamai").unwrap(), ItemFireRodLv2);
-    layout.set(world::hyrule::lake::hylia::get(" 70 Maiamai").unwrap(), ItemIceRodLv2);
-    layout.set(world::hyrule::lake::hylia::get(" 80 Maiamai").unwrap(), ItemTornadeRodLv2);
-    layout.set(world::hyrule::lake::hylia::get(" 90 Maiamai").unwrap(), ItemSandRodLv2);
+    layout.set(world::hyrule::lake::hylia::get(" 10 Maiamai").unwrap(), ItemBow);
+    layout.set(world::hyrule::lake::hylia::get(" 20 Maiamai").unwrap(), ItemBoomerang);
+    layout.set(world::hyrule::lake::hylia::get(" 30 Maiamai").unwrap(), ItemHookShot);
+    layout.set(world::hyrule::lake::hylia::get(" 40 Maiamai").unwrap(), ItemHammer);
+    layout.set(world::hyrule::lake::hylia::get(" 50 Maiamai").unwrap(), ItemBomb);
+    layout.set(world::hyrule::lake::hylia::get(" 60 Maiamai").unwrap(), ItemFireRod);
+    layout.set(world::hyrule::lake::hylia::get(" 70 Maiamai").unwrap(), ItemIceRod);
+    layout.set(world::hyrule::lake::hylia::get(" 80 Maiamai").unwrap(), ItemTornadeRod);
+    layout.set(world::hyrule::lake::hylia::get(" 90 Maiamai").unwrap(), ItemSandRod);
     layout.set(world::hyrule::lake::hylia::get("100 Maiamai").unwrap(), SpecialMove);
 
     layout.set(world::hyrule::lake::hylia::get("Ice Rod Cave").unwrap(), RupeeGold);
@@ -373,7 +374,7 @@ fn build_layout() -> Items {
 
     // Lorule Death Mountain
     layout.set(world::lorule::death::mountain::get("Lorule Mountain E Ledge").unwrap(), RupeeGold);
-    layout.set(world::lorule::death::mountain::get("Behind Ice Gimos").unwrap(), ItemFireRodLv2);
+    layout.set(world::lorule::death::mountain::get("Behind Ice Gimos").unwrap(), ItemFireRod);
     layout.set(world::lorule::death::mountain::get("Lorule Mountain W Ledge").unwrap(), RupeeGold);
     layout.set(world::lorule::death::mountain::get("Ice Gimos Fight").unwrap(), RupeeGold);
     layout.set(world::lorule::death::mountain::get("Treacherous Tower Intermediate").unwrap(), RupeeGold);
@@ -410,7 +411,7 @@ fn build_layout() -> Items {
 
     // Misery Mire
     layout.set(world::lorule::misery::mire::get("Misery Mire Ledge").unwrap(), RupeeGold);
-    layout.set(world::lorule::misery::mire::get("Misery Mire Treasure Dungeon").unwrap(), ItemSandRodLv2);
+    layout.set(world::lorule::misery::mire::get("Misery Mire Treasure Dungeon").unwrap(), ItemSandRod);
     layout.set(world::lorule::misery::mire::get("[Mai] Misery Mire Water").unwrap(), RupeeGold);
     layout.set(world::lorule::misery::mire::get("[Mai] Misery Mire Wall").unwrap(), RupeeGold);
     layout.set(world::lorule::misery::mire::get("[Mai] Misery Mire Big Rock").unwrap(), RupeeGold);
@@ -428,7 +429,7 @@ fn build_layout() -> Items {
     //////////////////////////
 
     // Graveyard (Hyrule)
-    layout.set(world::dungeons::graveyards::hyrule::get("Dampe").unwrap(), RingRental);
+    layout.set(world::dungeons::graveyards::hyrule::get("Dampe").unwrap(), RingHekiga);
     layout.set(world::dungeons::graveyards::hyrule::get("Sanctuary Pegs").unwrap(), RupeeGold);
     layout.set(world::dungeons::graveyards::hyrule::get("[HS] Entrance").unwrap(), KeySmall);
     layout.set(world::dungeons::graveyards::hyrule::get("[HS] Lower Chest").unwrap(), RupeeGold);
@@ -536,7 +537,7 @@ fn build_layout() -> Items {
     layout.set(world::dungeons::skull::woods::get("[SW] (B2) Moving Platform Room").unwrap(), KeyBoss);
     layout.set(world::dungeons::skull::woods::get("[SW] (B1) Big Chest (Eyes)").unwrap(), RupeeGold);
     layout.set(world::dungeons::skull::woods::get("Skull Woods Outdoor Chest").unwrap(), RupeeGold);
-    layout.set(world::dungeons::skull::woods::get("[SW] (B1) Big Chest (Upper)").unwrap(), ItemKandelaarLv2);
+    layout.set(world::dungeons::skull::woods::get("[SW] (B1) Big Chest (Upper)").unwrap(), ItemKandelaar);
     layout.set(world::dungeons::skull::woods::get("[SW] Knucklemaster").unwrap(), OreRed);
 
     // Thieves' Hideout
@@ -580,7 +581,7 @@ fn build_layout() -> Items {
     layout.set(world::dungeons::desert::palace::get("[DP] (2F) Beamos Room").unwrap(), RupeeGold);
     layout.set(world::dungeons::desert::palace::get("[DP] (2F) Under Rock (Right)").unwrap(), RupeeGold);
     layout.set(world::dungeons::desert::palace::get("[DP] (2F) Under Rock (Ball Room)").unwrap(), RupeeGold);
-    layout.set(world::dungeons::desert::palace::get("[DP] (2F) Big Chest (Puzzle)").unwrap(), PowerfulGlove);
+    layout.set(world::dungeons::desert::palace::get("[DP] (2F) Big Chest (Puzzle)").unwrap(), PowerGlove);
     layout.set(world::dungeons::desert::palace::get("[DP] (2F) Red/Blue Switches").unwrap(), RupeeGold);
     layout.set(world::dungeons::desert::palace::get("[DP] (2F) Leever Room").unwrap(), RupeeGold);
     layout.set(world::dungeons::desert::palace::get("[DP] (3F) Behind Falling Sand").unwrap(), RupeeGold);

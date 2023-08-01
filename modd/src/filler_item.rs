@@ -1,7 +1,11 @@
-use game::{Item, Item::*};
 use serde::{Deserialize, Serialize, Serializer};
 
-use crate::{hints::HintColor::*, item_to_str, Error, Result};
+use crate::{
+    hints::HintColor::*,
+    Error,
+    Item::{self, *},
+    Result,
+};
 
 use FillerItem::*;
 
@@ -1303,7 +1307,7 @@ impl FillerItem {
         }
     }
 
-    pub fn as_str(self) -> &'static str {
+    pub fn as_str(&self) -> &'static str {
         match self {
             HyruleSanctuaryKey => "Hyrule Sanctuary Small Key",
             LoruleSanctuaryKey => "Lorule Sanctuary Small Key",
@@ -1448,7 +1452,7 @@ impl FillerItem {
             HintGhostSwampPalaceOutsideRight => "Swamp Palace Outside Right Ghost",
             HintGhostMiseryMireBridge => "Misery Mire Bridge Ghost",
 
-            _ => item_to_str(&(convert(self).unwrap())),
+            _ => (convert(*self).unwrap()).into(),
         }
     }
 
@@ -1467,7 +1471,7 @@ impl FillerItem {
             Dharkstare => Attention,
             _ => Name,
         }
-        .format(Self::as_str(*self))
+        .format(self.as_str())
     }
 }
 
@@ -1497,8 +1501,8 @@ pub fn convert(fill_item: FillerItem) -> Option<Item> {
         BowOfLight => Some(ItemBowLight),
         PegasusBoots => Some(DashBoots),
         Flippers => Some(ItemMizukaki),
-        RaviosBracelet01 => Some(RingRental),
-        RaviosBracelet02 => Some(RingRental),
+        RaviosBracelet01 => Some(RingHekiga),
+        RaviosBracelet02 => Some(RingHekiga),
         HylianShield => Some(HyruleShield),
         SmoothGem => Some(ItemStoneBeauty),
         LetterInABottle => Some(MessageBottle),
@@ -1522,13 +1526,13 @@ pub fn convert(fill_item: FillerItem) -> Option<Item> {
 
         Lamp01 | Lamp02 => Some(ItemKandelaar),
 
-        Sword01 | Sword02 | Sword03 | Sword04 => Some(ItemSwordLv1),
+        Sword01 | Sword02 | Sword03 | Sword04 => Some(ItemSword),
 
         Glove01 | Glove02 => Some(PowerGlove),
 
         Net01 | Net02 => Some(ItemInsectNet),
 
-        Mail01 | Mail02 => Some(ClothesBlue),
+        Mail01 | Mail02 => Some(Clothes),
 
         FillerItem::OreYellow => Some(Item::OreYellow),
         FillerItem::OreGreen => Some(Item::OreGreen),
