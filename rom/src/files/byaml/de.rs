@@ -562,7 +562,11 @@ impl<'doc, 'de> de::Deserializer<'de> for Node<'doc, 'de> {
     where
         V: Visitor<'de>,
     {
-        if self.is_null() { visitor.visit_none() } else { visitor.visit_some(self) }
+        if self.is_null() {
+            visitor.visit_none()
+        } else {
+            visitor.visit_some(self)
+        }
     }
 
     fn deserialize_unit<V>(self, visitor: V) -> Result<V::Value, Self::Error>
@@ -742,16 +746,21 @@ impl<'doc, 'de> MapAccess<'de> for Map<'doc, 'de> {
 
 impl Display for Kind {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        write!(f, "{:02X} [{}]", *self as u8, match self {
-            Kind::String => "string",
-            Kind::Array => "array",
-            Kind::Map => "map",
-            Kind::Strings => "strings",
-            Kind::Boolean => "boolean",
-            Kind::Integer => "integer",
-            Kind::Float => "float",
-            Kind::Null => "null",
-        })
+        write!(
+            f,
+            "{:02X} [{}]",
+            *self as u8,
+            match self {
+                Kind::String => "string",
+                Kind::Array => "array",
+                Kind::Map => "map",
+                Kind::Strings => "strings",
+                Kind::Boolean => "boolean",
+                Kind::Integer => "integer",
+                Kind::Float => "float",
+                Kind::Null => "null",
+            }
+        )
     }
 }
 
@@ -792,7 +801,11 @@ fn read_strings(source: &[u8]) -> Result<Vec<&[u8]>> {
 }
 
 fn split(slice: &[u8], mid: usize) -> Result<(&[u8], &[u8])> {
-    if mid > slice.len() { Err(Error::eof()) } else { Ok(slice.split_at(mid)) }
+    if mid > slice.len() {
+        Err(Error::eof())
+    } else {
+        Ok(slice.split_at(mid))
+    }
 }
 
 fn header(source: &[u8], kind: Kind) -> Result<(u32, &[u8])> {
@@ -843,9 +856,10 @@ mod tests {
 
     #[test]
     fn it_deserializes_nested_array() {
-        assert_eq!(super::from_bytes::<Vec<Vec<i32>>>(data::NESTED_ARRAY).unwrap(), vec![vec![
-            0x01234567
-        ]])
+        assert_eq!(
+            super::from_bytes::<Vec<Vec<i32>>>(data::NESTED_ARRAY).unwrap(),
+            vec![vec![0x01234567]]
+        )
     }
 
     #[test]

@@ -58,8 +58,12 @@ impl Sarc {
                                 false
                             }
                         })
-                        .unwrap_or_else(|| panic!("File with hash collision did not have matching filename: {}",
-                            filename))
+                        .unwrap_or_else(|| {
+                            panic!(
+                                "File with hash collision did not have matching filename: {}",
+                                filename
+                            )
+                        })
                         .data
                         .clone(),
                 )
@@ -85,8 +89,12 @@ impl Sarc {
                             false
                         }
                     })
-                    .unwrap_or_else(|| panic!("File with hash collision did not have matching filename: {}",
-                        filename))
+                    .unwrap_or_else(|| {
+                        panic!(
+                            "File with hash collision did not have matching filename: {}",
+                            filename
+                        )
+                    })
                     .data = data;
             }
         } else {
