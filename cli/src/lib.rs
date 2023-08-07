@@ -4,9 +4,11 @@ use std::{
 };
 
 use log::info;
-use modinfo::{
-    hyrule_castle_setting::HyruleCastleSetting, logic::Logic, logic_mode::LogicMode,
-    pedestal_setting::PedestalSetting, Options, Settings,
+use modinfo::settings::{
+    hyrule_castle::HyruleCastleSetting,
+    logic::{Logic, LogicMode},
+    pedestal::PedestalSetting,
+    Options, Settings,
 };
 
 /// Pauses program execution

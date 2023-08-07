@@ -1,8 +1,8 @@
-use {
-    crate::hyrule_castle_setting::HyruleCastleSetting::*,
-    serde::{Deserialize, Serialize},
-    std::fmt::{Display, Formatter},
-};
+use std::fmt::{Display, Formatter};
+
+use serde::{Deserialize, Serialize};
+
+use HyruleCastleSetting::*;
 
 /// Choose how the randomizer handles the Dungeon portion of Hyrule Castle
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq, Deserialize, Serialize)]

@@ -1,8 +1,8 @@
-use {
-    crate::pedestal_setting::PedestalSetting::{Charmed, Standard, Vanilla},
-    serde::{Deserialize, Serialize},
-    std::fmt::{Display, Formatter},
-};
+use std::fmt::{Display, Formatter};
+
+use serde::{Deserialize, Serialize};
+
+use PedestalSetting::{Charmed, Standard, Vanilla};
 
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq, Deserialize, Serialize)]
 pub enum PedestalSetting {

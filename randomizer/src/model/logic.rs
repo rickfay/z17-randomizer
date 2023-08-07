@@ -1,6 +1,6 @@
 use std::fmt::{Debug, Formatter};
 
-use modinfo::logic_mode::LogicMode::*;
+use modinfo::settings::logic::LogicMode::*;
 
 use crate::model::progress::Progress;
 

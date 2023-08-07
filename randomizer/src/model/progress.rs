@@ -1,8 +1,6 @@
 use std::collections::HashSet;
 
-use modinfo::{
-    hyrule_castle_setting::HyruleCastleSetting, pedestal_setting::PedestalSetting, Settings,
-};
+use modinfo::settings::{hyrule_castle::HyruleCastleSetting, pedestal::PedestalSetting, Settings};
 
 use crate::{
     item_pools::{

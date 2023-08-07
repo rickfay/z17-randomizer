@@ -4,7 +4,7 @@ use game::{
 };
 use log::info;
 use macros::fail;
-use modinfo::{hyrule_castle_setting::HyruleCastleSetting, logic_mode::LogicMode, Settings};
+use modinfo::settings::{hyrule_castle::HyruleCastleSetting, logic::LogicMode, Settings};
 use rom::scene::{Arg, Dest, Flag, Obj, Transform, Vec3};
 
 use super::Patcher;

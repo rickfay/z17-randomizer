@@ -3,7 +3,7 @@ use std::collections::{BTreeMap, HashSet};
 use game::Item;
 use log::{error, info};
 use macros::fail;
-use modinfo::{logic_mode::LogicMode::*, Settings};
+use modinfo::settings::{logic::LogicMode::*, Settings};
 use queue::Queue;
 use rand::{rngs::StdRng, Rng};
 

@@ -1,10 +1,8 @@
-use {
-    crate::{
-        entrance_shuffle_setting::EntranceShuffleSetting,
-        hyrule_castle_setting::HyruleCastleSetting, logic_mode::LogicMode,
-        pedestal_setting::PedestalSetting,
-    },
-    serde::{Deserialize, Serialize},
+use serde::{Deserialize, Serialize};
+
+use super::{
+    entrance_shuffle::EntranceShuffleSetting, hyrule_castle::HyruleCastleSetting,
+    pedestal::PedestalSetting,
 };
 
 /// Settings to change the randomizer's logic checks.
@@ -16,7 +14,7 @@ pub struct Logic {
     pub logic_mode: LogicMode,
 
     /// Randomizes the Pendants and Portraits between Hyrule and Lorule dungeons
-    #[serde(default = "crate::r#true")]
+    #[serde(default = "r#true")]
     pub randomize_dungeon_prizes: bool,
 
     /// Vanilla Charm
@@ -27,11 +25,11 @@ pub struct Logic {
     pub vanilla_charm: bool,
 
     /// The number of Portraits needed to trigger the Hilda cutscene to open Lorule Castle
-    #[serde(default = "crate::seven")]
+    #[serde(default = "seven")]
     pub lc_requirement: u8,
 
     /// The number of Portraits needed to fight Yuga Ganon
-    #[serde(default = "crate::seven", skip_serializing)]
+    #[serde(default = "seven", skip_serializing)]
     pub yuganon_requirement: u8,
 
     /// Configure which Pendants are required to reach the Master Sword Pedestal
@@ -123,6 +121,29 @@ pub struct Logic {
     pub weather_vanes_activated: bool,
 
     /// Price of Hints from Hint Ghosts
-    #[serde(default = "crate::thirty")]
+    #[serde(default = "thirty")]
     pub hint_ghost_price: u16,
+}
+
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq, Deserialize, Serialize)]
+pub enum LogicMode {
+    #[default]
+    Normal,
+    Hard,
+    Glitched,
+    AdvGlitched,
+    Hell,
+    NoLogic,
+}
+
+const fn seven() -> u8 {
+    7
+}
+
+const fn thirty() -> u16 {
+    30
+}
+
+const fn r#true() -> bool {
+    true
 }
