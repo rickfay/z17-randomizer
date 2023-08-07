@@ -3,9 +3,9 @@ use std::collections::{BTreeMap, HashSet};
 use game::Item;
 use log::{error, info};
 use macros::fail;
+use modinfo::{logic_mode::LogicMode::*, Settings};
 use queue::Queue;
 use rand::{rngs::StdRng, Rng};
-use settings::logic_mode::LogicMode::*;
 
 use crate::{
     convert,
@@ -14,7 +14,7 @@ use crate::{
     world::WorldGraph,
     CheckMap,
     FillerItem::{self, *},
-    LocationInfo, Settings,
+    LocationInfo,
 };
 
 /// Fill Seed such that All Locations are Reachable

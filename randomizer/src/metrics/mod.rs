@@ -1,13 +1,14 @@
-use {
-    crate::{
-        filler,
-        model::{check::Check, progress::Progress},
-        world::WorldGraph,
-        CheckMap, Settings,
-    },
-    log::info,
-    serde::Serialize,
-    std::collections::BTreeMap,
+use std::collections::BTreeMap;
+
+use log::info;
+use modinfo::Settings;
+use serde::Serialize;
+
+use crate::{
+    filler,
+    model::{check::Check, progress::Progress},
+    world::WorldGraph,
+    CheckMap,
 };
 
 /// Perform any post-generation analysis for a seed here

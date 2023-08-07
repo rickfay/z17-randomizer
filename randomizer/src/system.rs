@@ -1,16 +1,17 @@
-use {
-    crate::{constants::CONFIG_FILE_NAME, Settings},
-    json_comments::StripComments,
-    log::info,
-    macros::fail,
-    serde::{de::DeserializeOwned, Deserialize, Serialize},
-    std::{
-        error::Error as StdError,
-        fmt::{self, Display, Formatter},
-        fs, io,
-        path::{Path, PathBuf},
-    },
+use std::{
+    error::Error as StdError,
+    fmt::{self, Display, Formatter},
+    fs, io,
+    path::{Path, PathBuf},
 };
+
+use json_comments::StripComments;
+use log::info;
+use macros::fail;
+use modinfo::Settings;
+use serde::{de::DeserializeOwned, Deserialize, Serialize};
+
+use crate::constants::CONFIG_FILE_NAME;
 
 pub type Result<T, E = Error> = std::result::Result<T, E>;
 

@@ -11,13 +11,13 @@ use game::Item::{self, *};
 use log::{debug, error, info};
 use macros::fail;
 use model::filler_item::{convert, FillerItem};
+use modinfo::Settings;
 use patch::Patcher;
 use path_absolutize::*;
 use rand::{rngs::StdRng, SeedableRng};
 use regions::Subregion;
 use rom::Rom;
 use serde::{ser::SerializeMap, Serialize, Serializer};
-use settings::Settings;
 
 use crate::{
     constants::VERSION,

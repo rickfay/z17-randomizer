@@ -1,19 +1,18 @@
-use {
-    crate::{
-        convert,
-        filler::{find_reachable_checks, get_items_from_reachable_checks},
-        filler_util::shuffle,
-        model::{check::Check, progress::Progress},
-        patch::util::is_sage,
-        world::WorldGraph,
-        CheckMap,
-        FillerItem::{self, *},
-        Settings,
-    },
-    log::{debug, info},
-    macros::fail,
-    rand::{rngs::StdRng, seq::IteratorRandom, Rng},
-    serde::{ser::SerializeStruct, Serialize, Serializer},
+use log::{debug, info};
+use macros::fail;
+use modinfo::Settings;
+use rand::{rngs::StdRng, seq::IteratorRandom, Rng};
+use serde::{ser::SerializeStruct, Serialize, Serializer};
+
+use crate::{
+    convert,
+    filler::{find_reachable_checks, get_items_from_reachable_checks},
+    filler_util::shuffle,
+    model::{check::Check, progress::Progress},
+    patch::util::is_sage,
+    world::WorldGraph,
+    CheckMap,
+    FillerItem::{self, *},
 };
 
 pub mod formatting;

@@ -1,11 +1,11 @@
 use {
     log::{error, info},
     macros::fail,
+    modinfo::Settings,
     randomizer::{
         constants::VERSION,
         system::{System, UserConfig},
     },
-    settings::Settings,
     simplelog::{LevelFilter, SimpleLogger},
     structopt::StructOpt,
 };

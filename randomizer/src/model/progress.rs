@@ -1,14 +1,14 @@
-use {
-    crate::{
-        item_pools::{
-            get_gold_rupee_pool, get_maiamai_pool, get_purple_rupee_pool, get_silver_rupee_pool,
-        },
-        model::filler_item::{FillerItem, FillerItem::*},
+use std::collections::HashSet;
+
+use modinfo::{
+    hyrule_castle_setting::HyruleCastleSetting, pedestal_setting::PedestalSetting, Settings,
+};
+
+use crate::{
+    item_pools::{
+        get_gold_rupee_pool, get_maiamai_pool, get_purple_rupee_pool, get_silver_rupee_pool,
     },
-    settings::{
-        hyrule_castle_setting::HyruleCastleSetting, pedestal_setting::PedestalSetting, Settings,
-    },
-    std::collections::HashSet,
+    model::filler_item::{FillerItem, FillerItem::*},
 };
 
 #[derive(Clone)]
@@ -414,9 +414,10 @@ impl Progress {
     }
 
     pub fn has_gales_keys(&self, amount: u8) -> bool {
-        self.has_amount(amount, &[
-            GalesKeySmall01, GalesKeySmall02, GalesKeySmall03, GalesKeySmall04,
-        ])
+        self.has_amount(
+            amount,
+            &[GalesKeySmall01, GalesKeySmall02, GalesKeySmall03, GalesKeySmall04],
+        )
     }
 
     pub fn has_gales_big_key(&self) -> bool {
@@ -465,9 +466,10 @@ impl Progress {
     }
 
     pub fn has_swamp_keys(&self, amount: u8) -> bool {
-        self.has_amount(amount, &[
-            SwampKeySmall01, SwampKeySmall02, SwampKeySmall03, SwampKeySmall04,
-        ])
+        self.has_amount(
+            amount,
+            &[SwampKeySmall01, SwampKeySmall02, SwampKeySmall03, SwampKeySmall04],
+        )
     }
 
     pub fn has_swamp_big_key(&self) -> bool {
@@ -517,10 +519,13 @@ impl Progress {
     }
 
     pub fn has_desert_keys(&self, amount: u8) -> bool {
-        self.has_amount(amount, &[
-            DesertKeySmall01, DesertKeySmall02, DesertKeySmall03, DesertKeySmall04,
-            DesertKeySmall05,
-        ])
+        self.has_amount(
+            amount,
+            &[
+                DesertKeySmall01, DesertKeySmall02, DesertKeySmall03, DesertKeySmall04,
+                DesertKeySmall05,
+            ],
+        )
     }
 
     pub fn has_desert_big_key(&self) -> bool {
@@ -544,10 +549,13 @@ impl Progress {
     }
 
     pub fn has_lorule_keys(&self, amount: u8) -> bool {
-        self.has_amount(amount, &[
-            LoruleCastleKeySmall01, LoruleCastleKeySmall02, LoruleCastleKeySmall03,
-            LoruleCastleKeySmall04, LoruleCastleKeySmall05,
-        ])
+        self.has_amount(
+            amount,
+            &[
+                LoruleCastleKeySmall01, LoruleCastleKeySmall02, LoruleCastleKeySmall03,
+                LoruleCastleKeySmall04, LoruleCastleKeySmall05,
+            ],
+        )
     }
 
     pub fn has_completed_trials(&self) -> bool {
@@ -712,15 +720,17 @@ impl Progress {
     }
 
     pub fn has_lc_requirement(&self) -> bool {
-        self.has_amount(self.settings.logic.lc_requirement, &[
-            SageGulley, SageOren, SageSeres, SageOsfala, SageImpa, SageIrene, SageRosso,
-        ])
+        self.has_amount(
+            self.settings.logic.lc_requirement,
+            &[SageGulley, SageOren, SageSeres, SageOsfala, SageImpa, SageIrene, SageRosso],
+        )
     }
 
     pub fn has_yuganon_requirement(&self) -> bool {
-        self.has_amount(self.settings.logic.yuganon_requirement, &[
-            SageGulley, SageOren, SageSeres, SageOsfala, SageImpa, SageIrene, SageRosso,
-        ])
+        self.has_amount(
+            self.settings.logic.yuganon_requirement,
+            &[SageGulley, SageOren, SageSeres, SageOsfala, SageImpa, SageIrene, SageRosso],
+        )
     }
 
     pub fn has_opened_stylish_womans_house(&self) -> bool {

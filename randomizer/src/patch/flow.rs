@@ -1,6 +1,6 @@
 use game::{Course, Item};
 use log::info;
-use settings::Settings;
+use modinfo::Settings;
 
 use super::Patcher;
 use crate::Result;

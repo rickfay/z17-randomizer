@@ -1,5 +1,5 @@
 [package]
-name = "settings"
+name = "modinfo"
 version = "0.3.1"
 authors = ["Rick Fay <rickwithanh@gmail.com>"]
 edition = "2021"

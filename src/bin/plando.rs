@@ -1,16 +1,16 @@
 use game::Item::*;
 use log::{error, info, LevelFilter};
 use macros::fail;
+use modinfo::{
+    entrance_shuffle_setting::EntranceShuffleSetting, hyrule_castle_setting::HyruleCastleSetting,
+    logic::Logic, logic_mode::LogicMode, pedestal_setting::PedestalSetting, Exclude, Exclusion,
+    Options, Settings,
+};
 use randomizer::{
     constants::VERSION,
     regions,
     system::{System, UserConfig},
     Layout, LocationInfo, SeedHash, SeedInfo,
-};
-use settings::{
-    entrance_shuffle_setting::EntranceShuffleSetting, hyrule_castle_setting::HyruleCastleSetting,
-    logic::Logic, logic_mode::LogicMode, pedestal_setting::PedestalSetting, Exclude, Exclusion,
-    Options, Settings,
 };
 use simplelog::SimpleLogger;
 use structopt::StructOpt;

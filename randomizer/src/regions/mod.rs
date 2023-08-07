@@ -1,11 +1,12 @@
-use {
-    crate::{hints::hint_color::HintColor, patch::Patcher, Settings},
-    log::info,
-    std::{
-        fmt::{self, Debug, Formatter},
-        hash::{Hash, Hasher},
-    },
+use std::{
+    fmt::{self, Debug, Formatter},
+    hash::{Hash, Hasher},
 };
+
+use log::info;
+use modinfo::Settings;
+
+use crate::{hints::hint_color::HintColor, patch::Patcher};
 
 pub struct Subregion {
     name: &'static str,

@@ -7,4 +7,4 @@ license = "GPL-2.0-or-later"
 
 [dependencies]
 log = { workspace = true }
-settings = { workspace = true }
+modinfo = { workspace = true }

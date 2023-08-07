@@ -19,10 +19,10 @@ dependencies = [
  "game",
  "log",
  "macros",
+ "modinfo",
  "rand",
  "randomizer",
  "rom",
- "settings",
  "simplelog",
  "structopt",
  "winres",
@@ -127,7 +127,7 @@ name = "cli"
 version = "0.3.1"
 dependencies = [
  "log",
- "settings",
+ "modinfo",
 ]
 
 [[package]]
@@ -300,6 +300,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2dffe52ecf27772e601905b7522cb4ef790d2cc203488bbd0e2fe85fcb74566d"
 
 [[package]]
+name = "modinfo"
+version = "0.3.1"
+dependencies = [
+ "log",
+ "macros",
+ "rand",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "num_threads"
 version = "0.1.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -428,13 +439,13 @@ dependencies = [
  "lazy_static",
  "log",
  "macros",
+ "modinfo",
  "path-absolutize",
  "queue",
  "rand",
  "rom",
  "serde",
  "serde_json",
- "settings",
  "tempfile",
  "try-insert-ext",
 ]
@@ -557,17 +568,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 1.0.109",
-]
-
-[[package]]
-name = "settings"
-version = "0.3.1"
-dependencies = [
- "log",
- "macros",
- "rand",
- "serde",
- "serde_json",
 ]
 
 [[package]]

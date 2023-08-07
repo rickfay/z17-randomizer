@@ -6,6 +6,7 @@ use game::{
 };
 use log::info;
 use macros::fail;
+use modinfo::Settings;
 use rom::{
     byaml,
     language::FlowChart,
@@ -15,7 +16,7 @@ use rom::{
 
 use crate::{
     patch::{util::*, DungeonPrizes},
-    ItemExt, MsbfKey, Patcher, Settings,
+    ItemExt, MsbfKey, Patcher,
 };
 
 pub(crate) fn patch_dungeon_prizes(
