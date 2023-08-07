@@ -17,7 +17,7 @@ modinfo = { workspace = true }
 rand = { workspace = true }
 randomizer = { path = "./randomizer" }
 rom = { workspace = true }
-simplelog = "0.12.0"
+simplelog = "0.12.1"
 structopt = "0.3.26"
 
 [build-dependencies]
@@ -46,14 +46,14 @@ bytey = { path = "./bytey" }
 cli = { path = "./cli" }
 game = { path = "./game" }
 jack = { path = "./jack" }
-log = "0.4.17"
+log = "0.4.19"
 macros = { path = "./macros" }
 modinfo = { path = "./modinfo" }
-path-absolutize = "3.0.14"
+path-absolutize = "3.1.0"
 rand = { version = "0.8.5", features = ["std_rng"] }
 rom = { path = "./rom" }
-serde = { version = "1.0.152", features = ["derive"] }
-serde_json = "1.0.93"
+serde = { version = "1.0.183", features = ["derive"] }
+serde_json = "1.0.104"
 yaz0 = "0.3.0"
 
 [profile.release]
