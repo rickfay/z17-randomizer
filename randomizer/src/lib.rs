@@ -1,26 +1,3 @@
-/*
-use {
-    crate::{
-        constants::VERSION,
-        hints::{formatting::*, Hints},
-        metrics::Metrics,
-        patch::msbf::MsbfKey,
-        system::UserConfig,
-    },
-    albw::{
-        Game,
-        Item::{self, *},
-    },
-    log::{debug, error, info},
-    macros::fail,
-    model::filler_item::{convert, FillerItem},
-    patch::Patcher,
-    path_absolutize::*,
-    rand::{rngs::StdRng, SeedableRng},
-    regions::Subregion,
-    serde::{ser::SerializeMap, Serialize, Serializer},
-    settings::Settings,
-    */
 use std::{
     collections::{hash_map::DefaultHasher, BTreeMap},
     error::Error as StdError,
@@ -30,6 +7,7 @@ use std::{
     ops::Deref,
 };
 
+use game::Item::{self, *};
 use log::{debug, error, info};
 use macros::fail;
 use model::filler_item::{convert, FillerItem};
@@ -37,10 +15,7 @@ use patch::Patcher;
 use path_absolutize::*;
 use rand::{rngs::StdRng, SeedableRng};
 use regions::Subregion;
-use rom::{
-    Item::{self, *},
-    Rom,
-};
+use rom::Rom;
 use serde::{ser::SerializeMap, Serialize, Serializer};
 use settings::Settings;
 

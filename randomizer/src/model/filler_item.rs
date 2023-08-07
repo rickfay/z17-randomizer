@@ -1,5 +1,5 @@
+use game::{Item, Item::*};
 use macros::fail;
-use rom::{Item, Item::*};
 use serde::{Deserialize, Serialize, Serializer};
 
 use crate::{hints::hint_color::HintColor::*, item_to_str, Result};

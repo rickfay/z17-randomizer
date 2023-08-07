@@ -1,4 +1,5 @@
-use rom::{course, Language, Result};
+use game::Course;
+use rom::{Language, Result};
 
 mod common;
 
@@ -15,7 +16,7 @@ fn iterate(language: Language) -> Result<()> {
 fn it_works() -> Result<()> {
     let game = common::load()?;
     iterate(game.boot()?)?;
-    for course in course::Id::iter() {
+    for course in Course::iter() {
         iterate(game.course(course).language()?)?;
     }
     Ok(())

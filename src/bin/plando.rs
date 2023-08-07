@@ -1,3 +1,4 @@
+use game::Item::*;
 use log::{error, info, LevelFilter};
 use macros::fail;
 use randomizer::{
@@ -6,7 +7,6 @@ use randomizer::{
     system::{System, UserConfig},
     Layout, LocationInfo, SeedHash, SeedInfo,
 };
-use rom::Item::*;
 use settings::{
     entrance_shuffle_setting::EntranceShuffleSetting, hyrule_castle_setting::HyruleCastleSetting,
     logic::Logic, logic_mode::LogicMode, pedestal_setting::PedestalSetting, Exclude, Exclusion,

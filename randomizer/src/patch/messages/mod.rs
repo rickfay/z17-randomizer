@@ -1,10 +1,10 @@
 use std::collections::BTreeMap;
 
-use log::info;
-use rom::{
-    course::Id::*,
+use game::{
+    Course::{self, *},
     Item::{PendantPower, PendantWisdom},
 };
+use log::info;
 
 use crate::{
     hints::{formatting::*, Hint},
@@ -37,7 +37,7 @@ pub fn patch_messages(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()>
 /// Prints out all String Values and their indexed Label Keys for a given MSBT File
 #[allow(unused)]
 #[deprecated]
-fn debug(patcher: &mut Patcher, course: rom::course::Id, file: &str) {
+fn debug(patcher: &mut Patcher, course: Course, file: &str) {
     load_msbt(patcher, course, file).unwrap().debug();
     info!("Early Debug Exit");
     std::process::exit(0);

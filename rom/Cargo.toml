@@ -12,6 +12,7 @@ license = "GPL-2.0-or-later"
 bytey = { workspace = true }
 csv = "1.2.0"
 data-encoding = "2.3.3"
+game = { workspace = true }
 log = { workspace = true }
 once_cell = "1.17.1"
 path-absolutize = { workspace = true }

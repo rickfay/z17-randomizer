@@ -6,10 +6,8 @@ use std::{
 };
 
 use arm::*;
-use rom::{
-    ExHeader,
-    Item::{self, *},
-};
+use game::Item::{self, *};
+use rom::ExHeader;
 use settings::pedestal_setting::PedestalSetting::*;
 
 use super::Patcher;

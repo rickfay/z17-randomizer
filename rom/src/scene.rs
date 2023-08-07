@@ -1,8 +1,9 @@
-use {
-    crate::{actors::Actors, course::Id, files::sarc::Sarc, File, Item, Result},
-    serde::{de, ser::SerializeTuple, Deserialize, Deserializer, Serialize, Serializer},
-    std::{fmt, path::Path},
-};
+use std::{fmt, path::Path};
+
+use game::Course;
+use serde::{de, ser::SerializeTuple, Deserialize, Deserializer, Serialize, Serializer};
+
+use crate::{actors::Actors, files::sarc::Sarc, File, Item, Result};
 
 #[derive(Debug)]
 pub struct Scene {
@@ -629,13 +630,13 @@ impl Serialize for Transform {
 
 #[derive(Debug, Copy, Clone)]
 pub struct Dest {
-    pub scene: Id,
+    pub scene: Course,
     pub scene_index: i32,
     pub spawn_point: i32,
 }
 
 impl Dest {
-    pub fn new(scene: Id, scene_index: i32, spawn_point: i32) -> Self {
+    pub fn new(scene: Course, scene_index: i32, spawn_point: i32) -> Self {
         Self { scene, scene_index, spawn_point }
     }
 }

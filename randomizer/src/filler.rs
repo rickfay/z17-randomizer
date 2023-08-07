@@ -1,28 +1,10 @@
-/*
-use {
-    crate::{
-        convert,
-        item_pools::{get_maiamai_pool, Pool},
-        model::{check::Check, location::Location, progress::Progress},
-        world::WorldGraph,
-        CheckMap,
-        FillerItem::{self, *},
-        LocationInfo, Settings,
-    },
-    albw::Item,
-    log::{error, info},
-    queue::Queue,
-    rand::{rngs::StdRng, Rng},
-    settings::logic_mode::LogicMode::*,
-    std::collections::{BTreeMap, HashSet},
-    */
 use std::collections::{BTreeMap, HashSet};
 
+use game::Item;
 use log::{error, info};
 use macros::fail;
 use queue::Queue;
 use rand::{rngs::StdRng, Rng};
-use rom::Item;
 use settings::logic_mode::LogicMode::*;
 
 use crate::{

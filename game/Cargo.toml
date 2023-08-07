@@ -1,0 +1,9 @@
+[package]
+name = "game"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+bytey = { workspace = true }
+serde = { workspace = true }
+serde_repr = "0.1.10"

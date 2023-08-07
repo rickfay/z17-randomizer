@@ -10,6 +10,7 @@ license = "GPL-2.0-or-later"
 
 [dependencies]
 cli = { workspace = true }
+game = { workspace = true }
 log = { workspace = true }
 macros = { workspace = true }
 rand = { workspace = true }
@@ -31,6 +32,7 @@ members = [
     "bytey",
     "bytey-macro",
     "cli",
+    "game",
     "jack",
     "macros",
     "randomizer",
@@ -42,6 +44,7 @@ members = [
 byteorder = "1.4.3"
 bytey = { path = "./bytey" }
 cli = { path = "./cli" }
+game = { path = "./game" }
 jack = { path = "./jack" }
 log = "0.4.17"
 macros = { path = "./macros" }

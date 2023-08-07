@@ -1,14 +1,16 @@
 use std::collections::HashMap;
 
+use game::{
+    Course::{self, *},
+    Item::{self, *},
+};
 use log::info;
 use macros::fail;
 use rom::{
     byaml,
-    course::{Id, Id::*},
     language::FlowChart,
     scene::{Arg, Dest, Flag, Obj, Point, Rail, Transform, Vec3},
     Actor, File,
-    Item::{self, *},
 };
 
 use crate::{
@@ -29,7 +31,7 @@ pub(crate) fn patch_dungeon_prizes(
 /// Adds entries to the FlowChart for the MSBF files related to each Portrait
 fn patch_flowchart(patcher: &mut Patcher, prizes: &DungeonPrizes) {
     // Map dungeon MsbfInfo to the randomized prizes
-    let dungeon_msbf_mapping: Vec<(Option<&'static str>, Id)> = Vec::from([
+    let dungeon_msbf_mapping: Vec<(Option<&'static str>, Course)> = Vec::from([
         (prizes.ep_prize.msbf_key(), DungeonEast),
         (prizes.hg_prize.msbf_key(), DungeonWind),
         (prizes.th_prize.msbf_key(), DungeonHera),
@@ -938,7 +940,7 @@ fn reroute_sage_warp(patcher: &mut Patcher, prize: Item, dest: Dest) {
 }
 
 fn modify_dungeon_reward(
-    patcher: &mut Patcher, prize: Item, unq: u16, scene: Id, scene_index: u16, activate: bool,
+    patcher: &mut Patcher, prize: Item, unq: u16, scene: Course, scene_index: u16, activate: bool,
     dest: Dest,
 ) {
     let data = PrizePatchData::get(prize);

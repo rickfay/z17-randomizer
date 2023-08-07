@@ -1,5 +1,5 @@
+use game::{Course, Item};
 use log::info;
-use rom::{course::Id, Item};
 use settings::Settings;
 
 use super::Patcher;
@@ -56,7 +56,7 @@ macro_rules! course {
         None
     };
     ($course:ident) => {
-        ::rom::course::Id::$course
+        ::game::Course::$course
     };
 }
 
@@ -203,7 +203,7 @@ fn patch_final_boss(patcher: &mut Patcher) -> Result<()> {
 #[deprecated]
 fn debug<C>(patcher: &mut Patcher, course: C, file_name: &str) -> Result<()>
 where
-    C: Into<Option<Id>>,
+    C: Into<Option<Course>>,
 {
     let course = course.into();
 

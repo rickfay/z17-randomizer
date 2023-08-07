@@ -1,8 +1,6 @@
+use game::Item::{self, *};
 use macros::fail;
-use rom::{
-    scene::{Dest, Flag, Obj, Rail, Vec3},
-    Item::{self, *},
-};
+use rom::scene::{Dest, Flag, Obj, Rail, Vec3};
 
 use super::DungeonPrizes;
 use crate::{regions, Layout, LocationInfo};

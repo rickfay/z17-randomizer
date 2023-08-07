@@ -1,10 +1,10 @@
-use rom::course::{Id, Id::*};
+use game::Course::{self, *};
 
 use crate::FillerItem::{self, *};
 
 #[derive(Eq, PartialEq, Hash)]
 pub(crate) struct HintGhost<'hg> {
-    pub(crate) course: Id,
+    pub(crate) course: Course,
     pub(crate) msbt_file: &'hg str,
     pub(crate) msg_label: &'hg str,
 }

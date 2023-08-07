@@ -1,17 +1,17 @@
-use {
-    crate::{
-        course,
-        files::{sarc::Sarc, FromFile},
-        flow::{Flow, FlowMut},
-        Error, File, Result,
-    },
-    serde::{Deserialize, Serialize},
-    std::{
-        cell::Ref,
-        collections::{BTreeMap, HashSet},
-        marker::PhantomData,
-        path::Path,
-    },
+use std::{
+    cell::Ref,
+    collections::{BTreeMap, HashSet},
+    marker::PhantomData,
+    path::Path,
+};
+
+use game::Course;
+use serde::{Deserialize, Serialize};
+
+use crate::{
+    files::{sarc::Sarc, FromFile},
+    flow::{Flow, FlowMut},
+    Error, File, Result,
 };
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -39,7 +39,7 @@ impl Load {
         Ok(self.0.get("Boot").ok_or_else(|| Error::new("Boot key not found."))?)
     }
 
-    pub fn course(&self, id: course::Id) -> Option<&[String]> {
+    pub fn course(&self, id: Course) -> Option<&[String]> {
         self.0.get(id.as_str()).map(AsRef::as_ref)
     }
 

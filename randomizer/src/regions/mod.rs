@@ -226,7 +226,7 @@ macro_rules! region {
         pub const NAME: &str = $name;
         pub const COLOR: $crate::hints::hint_color::HintColor = $crate::hints::hint_color::HintColor::$color;
         #[allow(unused)]
-        pub const COURSE: ::rom::course::Id = ::rom::course::Id::$course;
+        pub const COURSE: ::game::Course = ::game::Course::$course;
     };
 }
 
@@ -277,7 +277,7 @@ macro_rules! subregion {
 #[macro_export]
 macro_rules! patch {
     (Chest($course:ident $stage:literal[$unq:literal])) => {
-        Patch::Chest { course: ::rom::course::Id::$course, stage: $stage - 1, unq: $unq }
+        Patch::Chest { course: ::game::Course::$course, stage: $stage - 1, unq: $unq }
     };
     (Chest($stage:literal[$unq:literal])) => {
         Patch::Chest { course: COURSE, stage: $stage - 1, unq: $unq }
@@ -290,7 +290,7 @@ macro_rules! patch {
         ])
     };
     (BigChest($course:ident $stage:literal[$unq:literal])) => {
-        Patch::BigChest { course: ::rom::course::Id::$course, stage: $stage - 1, unq: $unq }
+        Patch::BigChest { course: ::game::Course::$course, stage: $stage - 1, unq: $unq }
     };
     (BigChest($stage:literal[$unq:literal])) => {
         Patch::BigChest { course: COURSE, stage: $stage - 1, unq: $unq }
@@ -302,7 +302,7 @@ macro_rules! patch {
         Patch::Event { course: None, name: stringify!($name), index: $index }
     };
     (Event($course:ident/$name:ident[$index:literal])) => {
-        Patch::Event { course: Some(::rom::course::Id::$course), name: stringify!($name), index: $index }
+        Patch::Event { course: Some(::game::Course::$course), name: stringify!($name), index: $index }
     };
     (Event[$($name:ident[$index:literal],)+]) => {
         Patch::Multi(vec![
@@ -312,31 +312,31 @@ macro_rules! patch {
         ])
     };
     (Heart($course:ident $scene:literal[$unq:literal])) => {
-        Patch::Heart { course: ::rom::course::Id::$course, scene: $scene - 1, unq: $unq }
+        Patch::Heart { course: ::game::Course::$course, scene: $scene - 1, unq: $unq }
     };
     (Heart($scene:literal[$unq:literal])) => {
         Patch::Heart { course: COURSE, scene: $scene - 1, unq: $unq }
     };
     (Key($course:ident $scene:literal[$unq:literal])) => {
-        Patch::Key { course: ::rom::course::Id::$course, scene: $scene - 1, unq: $unq }
+        Patch::Key { course: ::game::Course::$course, scene: $scene - 1, unq: $unq }
     };
     (Key($scene:literal[$unq:literal])) => {
         Patch::Key { course: COURSE, scene: $scene - 1, unq: $unq }
     };
     (Maiamai($course:ident $scene:literal[$unq:literal])) => {
-        Patch::Maiamai { course: ::rom::course::Id::$course, scene: $scene - 1, unq: $unq }
+        Patch::Maiamai { course: ::game::Course::$course, scene: $scene - 1, unq: $unq }
     };
     (Maiamai($scene:literal[$unq:literal])) => {
         Patch::Maiamai { course: COURSE, scene: $scene - 1, unq: $unq }
     };
     (SilverRupee($course:ident $scene:literal[$unq:literal])) => {
-        Patch::SilverRupee { course: ::rom::course::Id::$course, scene: $scene - 1, unq: $unq }
+        Patch::SilverRupee { course: ::game::Course::$course, scene: $scene - 1, unq: $unq }
     };
     (SilverRupee($scene:literal[$unq:literal])) => {
         Patch::SilverRupee { course: COURSE, scene: $scene - 1, unq: $unq }
     };
     (GoldRupee($course:ident $scene:literal[$unq:literal])) => {
-        Patch::GoldRupee { course: ::rom::course::Id::$course, scene: $scene - 1, unq: $unq }
+        Patch::GoldRupee { course: ::game::Course::$course, scene: $scene - 1, unq: $unq }
     };
     (GoldRupee($scene:literal[$unq:literal])) => {
         Patch::GoldRupee { course: COURSE, scene: $scene - 1, unq: $unq }
