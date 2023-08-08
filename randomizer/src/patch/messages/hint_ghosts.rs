@@ -1,6 +1,7 @@
-use game::Course::{self, *};
-
-use crate::FillerItem::{self, *};
+use game::{
+    self,
+    Course::{self, *},
+};
 
 #[derive(Eq, PartialEq, Hash)]
 pub(crate) struct HintGhost<'hg> {
@@ -15,11 +16,10 @@ macro_rules! hint_ghost_from {
         $($ghost:ident => $course:ident, $msbt_file:literal, $msg_label:literal;)+
     ) => {
         $(#[$attr])*
-        impl<'hg> From<FillerItem> for HintGhost<'hg> {
-            fn from(value: FillerItem) -> Self {
+        impl<'hg> From<::game::HintGhost> for HintGhost<'hg> {
+            fn from(value: ::game::HintGhost) -> Self {
                 match value {
-                    $($ghost => Self { course: $course, msbt_file: $msbt_file, msg_label: $msg_label },)+
-                    _ => macros::fail!("\"{:?}\" is not a Hint Ghost", value),
+                    $(::game::HintGhost::$ghost => Self { course: $course, msbt_file: $msbt_file, msg_label: $msg_label },)+
                 }
             }
         }
@@ -28,66 +28,66 @@ macro_rules! hint_ghost_from {
 
 hint_ghost_from! {
     // Lost Woods
-    HintGhostLostWoodsMaze1 => FieldLight, "FieldLight_00", "lgt_MayoinoHintObake_Msg4";
-    HintGhostLostWoodsMaze2 => FieldLight, "FieldLight_00", "lgt_MayoinoHintObake_Msg8";
-    HintGhostLostWoodsMaze3 => FieldLight, "FieldLight_00", "lgt_MayoinoHintObake_Msg6";
+    LostWoodsMaze1 => FieldLight, "FieldLight_00", "lgt_MayoinoHintObake_Msg4";
+    LostWoodsMaze2 => FieldLight, "FieldLight_00", "lgt_MayoinoHintObake_Msg8";
+    LostWoodsMaze3 => FieldLight, "FieldLight_00", "lgt_MayoinoHintObake_Msg6";
 
     // Hyrule
-    HintGhostLostWoods => FieldLight, "HintGhostLight", "HintGhost_FieldLight_00_000";
-    HintGhostSpectacleRock => FieldLight, "HintGhostLight", "HintGhost_FieldLight_03_002";
-    HintGhostTowerOfHeraOutside => FieldLight, "HintGhostLight", "HintGhost_FieldLight_03_003";
-    HintGhostFloatingIsland => FieldLight, "HintGhostLight", "HintGhost_FieldLight_05_004";
-    HintGhostFireCave => FieldLight, "HintGhostLight", "HintGhost_FieldLight_05_005";
-    HintGhostMoldormCave => FieldLight, "HintGhostLight", "HintGhost_FieldLight_0A_006";
-    HintGhostZorasDomain => FieldLight, "HintGhostLight", "HintGhost_FieldLight_0F_007";
-    HintGhostFortuneTellerHyrule => FieldLight, "HintGhostLight", "HintGhost_FieldLight_11_008";
-    HintGhostSanctuary => FieldLight, "HintGhostLight", "HintGhost_FieldLight_13_009";
-    HintGhostGraveyardHyrule => FieldLight, "HintGhostLight", "HintGhost_FieldLight_14_010";
-    HintGhostWaterfallCave => FieldLight, "HintGhostLight", "HintGhost_FieldLight_17_011";
-    HintGhostWell => FieldLight, "HintGhostLight", "HintGhost_FieldLight_18_012";
-    HintGhostShadyGuy => FieldLight, "HintGhostLight", "HintGhost_FieldLight_18_013";
-    HintGhostStylishWoman => FieldLight, "HintGhostLight", "HintGhost_FieldLight_18_014";
-    HintGhostBlacksmithCave => FieldLight, "HintGhostLight", "HintGhost_FieldLight_22_015";
-    HintGhostEasternRuinsPegs => FieldLight, "HintGhostLight", "HintGhost_FieldLight_1E_016";
-    HintGhostEasternRuinsCave => FieldLight, "HintGhostLight", "HintGhost_FieldLight_1E_017";
-    HintGhostEasternRuinsEntrance => FieldLight, "HintGhostLight", "HintGhost_FieldLight_1E_018";
-    HintGhostRupeeRushHyrule => FieldLight, "HintGhostLight", "HintGhost_FieldLight_28_019";
-    HintGhostCuccos => FieldLight, "HintGhostLight", "HintGhost_FieldLight_29_020";
-    HintGhostSouthBridge => FieldLight, "HintGhostLight", "HintGhost_FieldLight_2D_021";
-    HintGhostSouthernRuins => FieldLight, "HintGhostLight", "HintGhost_FieldLight_33_022";
-    HintGhostHouseOfGalesIsland => FieldLight, "HintGhostLight", "HintGhost_FieldLight_35_023";
-    HintGhostHyruleHotfoot => FieldLight, "HintGhostLight", "HintGhost_FieldLight_37_024";
-    HintGhostLetter => FieldLight, "HintGhostLight", "HintGhost_FieldLight_37_025";
-    HintGhostStreetPassTree => FieldLight, "HintGhostLight", "HintGhost_FieldLight_2B_026";
-    HintGhostBlacksmithBehind => FieldLight, "HintGhostLight", "HintGhost_FieldLight_1A_027";
-    HintGhostGraveyardLedge => FieldLight, "HintGhostLight", "HintGhost_FieldLight_14_028";
-    HintGhostDesertEast => FieldLight, "HintGhostLight", "HintGhost_FieldLight_14_029";
-    HintGhostDesertCenter => FieldLight, "HintGhostLight", "HintGhost_FieldLight_14_030";
-    HintGhostDesertSouthWest => FieldLight, "HintGhostLight", "HintGhost_FieldLight_14_031";
-    HintGhostHyruleCastleRocks => FieldLight, "HintGhostLight", "HintGhost_FieldLight_14_032";
-    HintGhostWitchsHouse => FieldLight, "HintGhostLight", "HintGhost_FieldLight_14_033";
+    LostWoods => FieldLight, "HintGhostLight", "HintGhost_FieldLight_00_000";
+    SpectacleRock => FieldLight, "HintGhostLight", "HintGhost_FieldLight_03_002";
+    TowerOfHeraOutside => FieldLight, "HintGhostLight", "HintGhost_FieldLight_03_003";
+    FloatingIsland => FieldLight, "HintGhostLight", "HintGhost_FieldLight_05_004";
+    FireCave => FieldLight, "HintGhostLight", "HintGhost_FieldLight_05_005";
+    MoldormCave => FieldLight, "HintGhostLight", "HintGhost_FieldLight_0A_006";
+    ZorasDomain => FieldLight, "HintGhostLight", "HintGhost_FieldLight_0F_007";
+    FortuneTellerHyrule => FieldLight, "HintGhostLight", "HintGhost_FieldLight_11_008";
+    Sanctuary => FieldLight, "HintGhostLight", "HintGhost_FieldLight_13_009";
+    GraveyardHyrule => FieldLight, "HintGhostLight", "HintGhost_FieldLight_14_010";
+    WaterfallCave => FieldLight, "HintGhostLight", "HintGhost_FieldLight_17_011";
+    Well => FieldLight, "HintGhostLight", "HintGhost_FieldLight_18_012";
+    ShadyGuy => FieldLight, "HintGhostLight", "HintGhost_FieldLight_18_013";
+    StylishWoman => FieldLight, "HintGhostLight", "HintGhost_FieldLight_18_014";
+    BlacksmithCave => FieldLight, "HintGhostLight", "HintGhost_FieldLight_22_015";
+    EasternRuinsPegs => FieldLight, "HintGhostLight", "HintGhost_FieldLight_1E_016";
+    EasternRuinsCave => FieldLight, "HintGhostLight", "HintGhost_FieldLight_1E_017";
+    EasternRuinsEntrance => FieldLight, "HintGhostLight", "HintGhost_FieldLight_1E_018";
+    RupeeRushHyrule => FieldLight, "HintGhostLight", "HintGhost_FieldLight_28_019";
+    Cuccos => FieldLight, "HintGhostLight", "HintGhost_FieldLight_29_020";
+    SouthBridge => FieldLight, "HintGhostLight", "HintGhost_FieldLight_2D_021";
+    SouthernRuins => FieldLight, "HintGhostLight", "HintGhost_FieldLight_33_022";
+    HouseOfGalesIsland => FieldLight, "HintGhostLight", "HintGhost_FieldLight_35_023";
+    HyruleHotfoot => FieldLight, "HintGhostLight", "HintGhost_FieldLight_37_024";
+    Letter => FieldLight, "HintGhostLight", "HintGhost_FieldLight_37_025";
+    StreetPassTree => FieldLight, "HintGhostLight", "HintGhost_FieldLight_2B_026";
+    BlacksmithBehind => FieldLight, "HintGhostLight", "HintGhost_FieldLight_1A_027";
+    GraveyardLedge => FieldLight, "HintGhostLight", "HintGhost_FieldLight_14_028";
+    DesertEast => FieldLight, "HintGhostLight", "HintGhost_FieldLight_14_029";
+    DesertCenter => FieldLight, "HintGhostLight", "HintGhost_FieldLight_14_030";
+    DesertSouthWest => FieldLight, "HintGhostLight", "HintGhost_FieldLight_14_031";
+    HyruleCastleRocks => FieldLight, "HintGhostLight", "HintGhost_FieldLight_14_032";
+    WitchsHouse => FieldLight, "HintGhostLight", "HintGhost_FieldLight_14_033";
 
     // Lorule
-    HintGhostSkullWoodsCuccos => FieldDark, "HintGhostDark", "HintGhost_FieldDark_02_001";
-    HintGhostTreacherousTower => FieldDark, "HintGhostDark", "HintGhost_FieldDark_03_002";
-    HintGhostIceRuinsOutside => FieldDark, "HintGhostDark", "HintGhost_FieldDark_07_003";
-    HintGhostLoruleGraveyard => FieldDark, "HintGhostDark", "HintGhost_FieldDark_14_004";
-    HintGhostDarkRuinsNorth => FieldDark, "HintGhostDark", "HintGhost_FieldDark_16_005";
-    HintGhostSkullWoodsSouth => FieldDark, "HintGhostDark", "HintGhost_FieldDark_18_006";
-    HintGhostFortunesChoice => IndoorDark, "HintGhostDark", "HintGhost_FieldDark_18_007";
-    HintGhostVeteranThief => IndoorDark, "HintGhostDark", "HintGhost_FieldDark_18_008";
-    HintGhostFortuneTellerLorule => FieldDark, "HintGhostDark", "HintGhost_FieldDark_1A_009";
-    HintGhostDarkMaze => FieldDark, "HintGhostDark", "HintGhost_FieldDark_1E_010";
-    HintGhostRupeeRushLorule => FieldDark, "HintGhostDark", "HintGhost_FieldDark_28_011";
-    HintGhostGreatRupeeFairy => FieldDark, "HintGhostDark", "HintGhost_FieldDark_29_012";
-    HintGhostOctoballDerby => FieldDark, "HintGhostDark", "HintGhost_FieldDark_2A_013";
-    HintGhostVacantHouse => FieldDark, "HintGhostDark", "HintGhost_FieldDark_2C_014";
-    HintGhostMiseryMireLedge => FieldDark, "HintGhostDark", "HintGhost_FieldDark_30_015";
-    HintGhostSwampPalaceOutsideLeft => FieldDark, "HintGhostDark", "HintGhost_FieldDark_33_016";
-    HintGhostTurtleBullied => FieldDark, "HintGhostDark", "HintGhost_FieldDark_35_017";
-    HintGhostTurtleWall => FieldDark, "HintGhostDark", "HintGhost_FieldDark_35_018";
-    HintGhostTurtleRockOutside => FieldDark, "HintGhostDark", "HintGhost_FieldDark_35_019";
-    HintGhostDarkPalaceOutside => FieldDark, "HintGhostDark", "HintGhost_FieldDark_1E_020";
-    HintGhostSwampPalaceOutsideRight => FieldDark, "HintGhostDark", "HintGhost_FieldDark_33_021";
-    HintGhostMiseryMireBridge => FieldDark, "HintGhostDark", "HintGhost_FieldDark_33_022";
+    SkullWoodsCuccos => FieldDark, "HintGhostDark", "HintGhost_FieldDark_02_001";
+    TreacherousTower => FieldDark, "HintGhostDark", "HintGhost_FieldDark_03_002";
+    IceRuinsOutside => FieldDark, "HintGhostDark", "HintGhost_FieldDark_07_003";
+    LoruleGraveyard => FieldDark, "HintGhostDark", "HintGhost_FieldDark_14_004";
+    DarkRuinsNorth => FieldDark, "HintGhostDark", "HintGhost_FieldDark_16_005";
+    SkullWoodsSouth => FieldDark, "HintGhostDark", "HintGhost_FieldDark_18_006";
+    FortunesChoice => IndoorDark, "HintGhostDark", "HintGhost_FieldDark_18_007";
+    VeteranThief => IndoorDark, "HintGhostDark", "HintGhost_FieldDark_18_008";
+    FortuneTellerLorule => FieldDark, "HintGhostDark", "HintGhost_FieldDark_1A_009";
+    DarkMaze => FieldDark, "HintGhostDark", "HintGhost_FieldDark_1E_010";
+    RupeeRushLorule => FieldDark, "HintGhostDark", "HintGhost_FieldDark_28_011";
+    GreatRupeeFairy => FieldDark, "HintGhostDark", "HintGhost_FieldDark_29_012";
+    OctoballDerby => FieldDark, "HintGhostDark", "HintGhost_FieldDark_2A_013";
+    VacantHouse => FieldDark, "HintGhostDark", "HintGhost_FieldDark_2C_014";
+    MiseryMireLedge => FieldDark, "HintGhostDark", "HintGhost_FieldDark_30_015";
+    SwampPalaceOutsideLeft => FieldDark, "HintGhostDark", "HintGhost_FieldDark_33_016";
+    TurtleBullied => FieldDark, "HintGhostDark", "HintGhost_FieldDark_35_017";
+    TurtleWall => FieldDark, "HintGhostDark", "HintGhost_FieldDark_35_018";
+    TurtleRockOutside => FieldDark, "HintGhostDark", "HintGhost_FieldDark_35_019";
+    DarkPalaceOutside => FieldDark, "HintGhostDark", "HintGhost_FieldDark_1E_020";
+    SwampPalaceOutsideRight => FieldDark, "HintGhostDark", "HintGhost_FieldDark_33_021";
+    MiseryMireBridge => FieldDark, "HintGhostDark", "HintGhost_FieldDark_33_022";
 }
