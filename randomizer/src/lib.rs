@@ -10,7 +10,7 @@ use std::{
 use game::Item::{self, *};
 use log::{debug, error, info};
 use macros::fail;
-use model::filler_item::{convert, FillerItem};
+use model::filler_item::FillerItem;
 use modinfo::Settings;
 use patch::Patcher;
 use path_absolutize::*;

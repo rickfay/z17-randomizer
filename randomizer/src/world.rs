@@ -14,9 +14,7 @@ use crate::{
         logic::Logic,
         progress::Progress,
     },
-    regions,
-    FillerItem::{self, *},
-    LocationInfo,
+    regions, FillerItem, LocationInfo,
 };
 
 pub type WorldGraph = HashMap<Location, LocationNode>;
@@ -2423,7 +2421,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                     ),
                     check_quest(
                         "Bouldering Guy's Trash",
-                        Bottle05,
+                        filler_item::Item::Bottle05,
                         Some(|p| {
                             p.has_premium_milk()
                                 || (p.has_letter_in_a_bottle() && p.can_access_milk_bar())

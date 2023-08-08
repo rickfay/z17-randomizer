@@ -1,12 +1,9 @@
 use modinfo::settings::{logic::LogicMode, Settings};
 use rand::{rngs::StdRng, Rng};
 
-use crate::{
-    filler_util::shuffle,
-    FillerItem::{self, *},
-};
+use crate::{filler_util::shuffle, model::filler_item::Item};
 
-pub type Pool = Vec<FillerItem>;
+pub type Pool = Vec<Item>;
 
 /**
  * Builds the Progression and Junk item pools according to the settings<br /><br />
@@ -27,15 +24,20 @@ pub(crate) fn get_item_pools(settings: &Settings, rng: &mut StdRng) -> (Pool, Po
 
     // Remove the Bee Badge from Hell Logic to keep Bee Boosting viable
     match settings.logic.logic_mode {
-        LogicMode::Hell => junk_pool.push(Empty),
-        _ => progression_items.push(BeeBadge),
+        LogicMode::Hell => junk_pool.push(Item::Empty),
+        _ => progression_items.push(Item::BeeBadge),
     };
 
     // Swordless Mode
     if settings.logic.swordless_mode {
-        junk_pool.extend_from_slice(&[Empty, Empty, Empty, Empty]);
+        junk_pool.extend_from_slice(&[Item::Empty, Item::Empty, Item::Empty, Item::Empty]);
     } else {
-        progression_items.extend_from_slice(&[Sword01, Sword02, Sword03, Sword04]);
+        progression_items.extend_from_slice(&[
+            Item::Sword01,
+            Item::Sword02,
+            Item::Sword03,
+            Item::Sword04,
+        ]);
     }
 
     (
@@ -55,8 +57,8 @@ pub(crate) fn get_item_pools(settings: &Settings, rng: &mut StdRng) -> (Pool, Po
  * - All other progression
  */
 fn shuffle_order_progression_pools(
-    rng: &mut StdRng, dungeon_prizes: Vec<FillerItem>, big_keys: Vec<FillerItem>,
-    small_keys: Vec<FillerItem>, compasses: Vec<FillerItem>, progression: Vec<FillerItem>,
+    rng: &mut StdRng, dungeon_prizes: Vec<Item>, big_keys: Vec<Item>, small_keys: Vec<Item>,
+    compasses: Vec<Item>, progression: Vec<Item>,
 ) -> Pool {
     let mut progression_pool;
 
@@ -72,11 +74,12 @@ fn shuffle_order_progression_pools(
 /// Randomly chooses one trade item to include in the seed.
 /// - If [`LetterInABottle`] is chosen, it must be turned in at the Milk Bar to get the [`PremiumMilk`].
 /// - If [`PremiumMilk`] is chosen, the Milk Bar is irrelevant and there simply is no [`LetterInABottle`] in the seed.
-fn choose_trade_item(rng: &mut StdRng) -> FillerItem {
-    [LetterInABottle, PremiumMilk][rng.gen_range(0..2)]
+fn choose_trade_item(rng: &mut StdRng) -> Item {
+    [Item::LetterInABottle, Item::PremiumMilk][rng.gen_range(0..2)]
 }
 
-fn get_base_progression_pool() -> Vec<FillerItem> {
+fn get_base_progression_pool() -> Vec<Item> {
+    use Item::*;
     let mut progression_pool = vec![
         GreatSpin, Lamp01, Lamp02, Bow01, Bow02, Boomerang01, Boomerang02, Hookshot01, Hookshot02,
         Hammer01, Hammer02, Bombs01, Bombs02, FireRod01, FireRod02, IceRod01, IceRod02,
@@ -94,21 +97,24 @@ fn get_base_progression_pool() -> Vec<FillerItem> {
     progression_pool
 }
 
-fn get_dungeon_prize_pool() -> Vec<FillerItem> {
+fn get_dungeon_prize_pool() -> Vec<Item> {
+    use Item::*;
     vec![
         PendantOfPower, PendantOfWisdom, PendantOfCourage01, PendantOfCourage02, SageGulley,
         SageOren, SageSeres, SageOsfala, SageImpa, SageIrene, SageRosso,
     ]
 }
 
-fn get_big_key_pool() -> Vec<FillerItem> {
+fn get_big_key_pool() -> Vec<Item> {
+    use Item::*;
     vec![
         EasternKeyBig, GalesKeyBig, HeraKeyBig, DarkKeyBig, SwampKeyBig, SkullKeyBig,
         ThievesKeyBig, IceKeyBig, DesertKeyBig, TurtleKeyBig,
     ]
 }
 
-fn get_small_key_pool() -> Vec<FillerItem> {
+fn get_small_key_pool() -> Vec<Item> {
+    use Item::*;
     vec![
         HyruleSanctuaryKey, LoruleSanctuaryKey, EasternKeySmall01, EasternKeySmall02,
         GalesKeySmall01, GalesKeySmall02, GalesKeySmall03, GalesKeySmall04, HeraKeySmall01,
@@ -122,21 +128,24 @@ fn get_small_key_pool() -> Vec<FillerItem> {
     ]
 }
 
-fn get_compass_pool() -> Vec<FillerItem> {
+fn get_compass_pool() -> Vec<Item> {
+    use Item::*;
     vec![
         EasternCompass, GalesCompass, HeraCompass, DarkCompass, SwampCompass, SkullCompass,
         ThievesCompass, TurtleCompass, DesertCompass, IceCompass, LoruleCastleCompass,
     ]
 }
 
-pub(crate) fn get_gold_rupee_pool() -> Vec<FillerItem> {
+pub(crate) fn get_gold_rupee_pool() -> Vec<Item> {
+    use Item::*;
     vec![
         RupeeGold01, RupeeGold02, RupeeGold03, RupeeGold04, RupeeGold05, RupeeGold06, RupeeGold07,
         RupeeGold08, RupeeGold09, RupeeGold10,
     ]
 }
 
-pub(crate) fn get_silver_rupee_pool() -> Vec<FillerItem> {
+pub(crate) fn get_silver_rupee_pool() -> Vec<Item> {
+    use Item::*;
     vec![
         RupeeSilver01, RupeeSilver02, RupeeSilver03, RupeeSilver04, RupeeSilver05, RupeeSilver06,
         RupeeSilver07, RupeeSilver08, RupeeSilver09, RupeeSilver10, RupeeSilver11, RupeeSilver12,
@@ -151,7 +160,8 @@ pub(crate) fn get_silver_rupee_pool() -> Vec<FillerItem> {
     ]
 }
 
-pub(crate) fn get_purple_rupee_pool() -> Vec<FillerItem> {
+pub(crate) fn get_purple_rupee_pool() -> Vec<Item> {
+    use Item::*;
     vec![
         RupeePurple01, RupeePurple02, RupeePurple03, RupeePurple04, RupeePurple05, RupeePurple06,
         RupeePurple07, RupeePurple08, RupeePurple09, RupeePurple10, RupeePurple11, RupeePurple12,
@@ -160,7 +170,8 @@ pub(crate) fn get_purple_rupee_pool() -> Vec<FillerItem> {
     ]
 }
 
-fn get_base_junk_pool() -> Vec<FillerItem> {
+fn get_base_junk_pool() -> Vec<Item> {
+    use Item::*;
     vec![
         // The Greg Twins
         RupeeGreen, RupeeGreen, // 8 Blue Rupees
@@ -193,7 +204,8 @@ fn get_base_junk_pool() -> Vec<FillerItem> {
     ]
 }
 
-pub(crate) fn get_maiamai_pool() -> Vec<FillerItem> {
+pub(crate) fn get_maiamai_pool() -> Vec<Item> {
+    use Item::*;
     vec![
         Maiamai001, Maiamai002, Maiamai003, Maiamai004, Maiamai005, Maiamai006, Maiamai007,
         Maiamai008, Maiamai009, Maiamai010, Maiamai011, Maiamai012, Maiamai013, Maiamai014,
