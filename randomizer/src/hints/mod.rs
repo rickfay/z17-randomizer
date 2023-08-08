@@ -13,7 +13,7 @@ use crate::{
     convert,
     filler::{find_reachable_checks, get_items_from_reachable_checks},
     filler_util::shuffle,
-    model::{check::Check, progress::Progress},
+    model::{check::Check, filler_item, progress::Progress},
     patch::util::is_sage,
     world::WorldGraph,
     CheckMap,
@@ -118,7 +118,7 @@ pub struct PathHint {
     pub check: Check,
 
     /// The goal that this hint leads to.
-    pub goal: FillerItem,
+    pub goal: filler_item::Goal,
 
     /// List of Hint Ghosts that are guaranteed to be logically reachable before the hinted item.
     pub logical_ghosts: Vec<HintGhost>,
@@ -506,18 +506,18 @@ fn generate_path_hints(
     settings: &Settings, rng: &mut StdRng, world_graph: &mut WorldGraph, check_map: &mut CheckMap,
     taken_checks: &mut Vec<&'static str>, taken_ghosts: &mut Vec<HintGhost>,
 ) -> Vec<PathHint> {
-    let mut bosses_and_prize_locations: Vec<(FillerItem, &str)> = vec![
-        (Yuga, "Eastern Palace Prize"),
-        (Margomill, "House of Gales Prize"),
-        (Moldorm, "Tower of Hera Prize"),
-        (ZeldasThrone, "Hyrule Castle Prize"),
-        (GemesaurKing, "Dark Palace Prize"),
-        (Arrghus, "Swamp Palace Prize"),
-        (Knucklemaster, "Skull Woods Prize"),
-        (Stalblind, "Thieves' Hideout Prize"),
-        (Grinexx, "Turtle Rock Prize"),
-        (Zaganaga, "Desert Palace Prize"),
-        (Dharkstare, "Ice Ruins Prize"),
+    let mut bosses_and_prize_locations = vec![
+        (filler_item::Goal::Yuga, "Eastern Palace Prize"),
+        (filler_item::Goal::Margomill, "House of Gales Prize"),
+        (filler_item::Goal::Moldorm, "Tower of Hera Prize"),
+        (filler_item::Goal::ZeldasThrone, "Hyrule Castle Prize"),
+        (filler_item::Goal::GemesaurKing, "Dark Palace Prize"),
+        (filler_item::Goal::Arrghus, "Swamp Palace Prize"),
+        (filler_item::Goal::Knucklemaster, "Skull Woods Prize"),
+        (filler_item::Goal::Stalblind, "Thieves' Hideout Prize"),
+        (filler_item::Goal::Grinexx, "Turtle Rock Prize"),
+        (filler_item::Goal::Zaganaga, "Desert Palace Prize"),
+        (filler_item::Goal::Dharkstare, "Ice Ruins Prize"),
     ];
 
     bosses_and_prize_locations = shuffle(rng, bosses_and_prize_locations);
@@ -600,8 +600,10 @@ fn choose_path_hint(
 
 /// Finds all checks available before a given Quest Goal using a modified Sphere Search.
 fn find_checks_before_goal(
-    settings: &Settings, world_graph: &mut WorldGraph, check_map: &mut CheckMap, goal: FillerItem,
+    settings: &Settings, world_graph: &mut WorldGraph, check_map: &mut CheckMap,
+    goal: impl Into<FillerItem>,
 ) -> Vec<Check> {
+    let goal = goal.into();
     let mut progress = Progress::new(settings.clone());
     let mut reachable_checks: Vec<Check>;
     let mut potential_path_checks: Vec<Check> = Vec::new();
@@ -630,7 +632,7 @@ fn find_checks_before_goal(
 /// Determines the possible Path Hints for a given goal, if any exist. Paths are returned in a random order.
 fn get_potential_path_hints(
     settings: &Settings, rng: &mut StdRng, world_graph: &mut WorldGraph, check_map: &mut CheckMap,
-    taken_checks: &[&str], goal: FillerItem,
+    taken_checks: &[&str], goal: filler_item::Goal,
 ) -> Vec<PathHint> {
     let mut reachable_checks: Vec<Check>;
     let mut potential_paths: Vec<PathHint> = Vec::new();

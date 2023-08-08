@@ -439,47 +439,7 @@ pub enum FillerItem {
     Fairy02,
     Shield04,
 
-    // Quest Items ---------------------------------------------------------------------------------
-
-    // Bosses -------
-    Yuga,
-    Margomill,
-    Moldorm,
-    ZeldasThrone,
-    GemesaurKing,
-    Arrghus,
-    Knucklemaster,
-    Stalblind,
-    Grinexx,
-    Zaganaga,
-    Dharkstare,
-
-    // The rest ------
-    OpenSanctuaryDoors,
-    ShadyGuyTrigger,
-    BigBombFlower,
-    StylishWomansHouseOpen,
-    WomanRoofMaiamai,
-    SkullEyeRight,
-    SkullEyeLeft,
-    ThievesB1DoorOpen,
-    ThievesB2DoorOpen,
-    ThievesB3WaterDrained,
-    TurtleFlipped,
-    TurtleAttacked,
-    TurtleWall,
-    AccessPotionShop,
-    AccessMilkBar,
-    #[allow(unused)]
-    AccessFairyFountain, // todo add to world graph
-    AccessHyruleBlacksmith,
-    AccessLoruleCastleField,
-    LcBombTrial,
-    LcBallTrial,
-    LcLampTrial,
-    LcHookTrial,
-    Triforce,
-
+    Goal(Goal),
     HintGhost(game::HintGhost),
 }
 
@@ -870,7 +830,7 @@ impl FillerItem {
             // LcBallTrial |
             // LcLampTrial |
             // LcHookTrial |
-            Triforce => true,
+            Goal(Goal::Triforce) => true,
             _ => false
         }
     }
@@ -1027,36 +987,10 @@ impl FillerItem {
             | GoldBee01 | Bee01 | GoldBee02 | Fairy01 | Shield03 | Bee02 | GoldBee03 | Fairy02
             | Shield04 => "a",
 
-            OpenSanctuaryDoors
-            | ShadyGuyTrigger
-            | BigBombFlower
-            | StylishWomansHouseOpen
-            | WomanRoofMaiamai
-            | SkullEyeRight
-            | SkullEyeLeft
-            | ThievesB1DoorOpen
-            | ThievesB2DoorOpen
-            | ThievesB3WaterDrained
-            | TurtleFlipped
-            | TurtleAttacked
-            | TurtleWall
-            | AccessPotionShop
-            | AccessMilkBar
-            | AccessFairyFountain
-            | AccessHyruleBlacksmith
-            | AccessLoruleCastleField
-            | LcBombTrial
-            | LcBallTrial
-            | LcLampTrial
-            | LcHookTrial
-            | Triforce => fail!("Articles are not defined for Progression Events: {:?}", self),
-
-            Yuga | Margomill | Moldorm | ZeldasThrone | GemesaurKing | Arrghus | Knucklemaster
-            | Stalblind | Grinexx | Zaganaga | Dharkstare => {
+            Self::Goal(_) => {
                 fail!("Articles are not defined for Goals: {:?}", self)
             }
-
-            HintGhost(_) => {
+            Self::HintGhost(_) => {
                 fail!("Articles are not defined for Hint Ghosts: {:?}", self)
             }
         }
@@ -1110,44 +1044,8 @@ impl FillerItem {
             | LoruleCastleKeySmall04
             | LoruleCastleKeySmall05 => "Lorule Castle Small Key",
 
-            Yuga => "Yuga",
-            Margomill => "Margomill",
-            Moldorm => "Moldorm",
-            ZeldasThrone => "Zelda's Throne",
-
-            GemesaurKing => "Gemesaur King",
-            Arrghus => "Arrghus",
-            Knucklemaster => "Knucklemaster",
-            Stalblind => "Stalblind",
-            Grinexx => "Grinexx",
-            Zaganaga => "Zaganaga",
-            Dharkstare => "Dharkstare",
-
-            OpenSanctuaryDoors => "Sanctuary Doors Opened",
-            ShadyGuyTrigger => "Shady Guy Trigger",
-            BigBombFlower => "Big Bomb Flower",
-            StylishWomansHouseOpen => "Stylish Woman's House Opened",
-            WomanRoofMaiamai => "Woman's Roof Maiamai",
-            SkullEyeRight => "Skull Woods Right Eye",
-            SkullEyeLeft => "Skull Woods Left Eye",
-            ThievesB1DoorOpen => "Thieves' Hideout B1 Door Open",
-            ThievesB2DoorOpen => "Thieves' Hideout B2 Door Open",
-            ThievesB3WaterDrained => "Thieves' Hideout B3 Water Drained",
-            TurtleFlipped => "Turtle Flipped",
-            TurtleAttacked => "Turtle Bullied",
-            TurtleWall => "Turtle Wall",
-            AccessPotionShop => "Potion Shop Access",
-            AccessMilkBar => "Milk Bar Access",
-            AccessFairyFountain => "Fairy Fountain Access",
-            AccessHyruleBlacksmith => "Hyrule Blacksmith Access",
-            AccessLoruleCastleField => "Lorule Castle Field Access",
-            LcBombTrial => "Bomb Trial Complete",
-            LcBallTrial => "Ball Trial Complete",
-            LcLampTrial => "Lamp Trial Complete",
-            LcHookTrial => "Hook Trial Complete",
-            Triforce => "Triforce",
-
-            HintGhost(ghost) => hint_ghost_name(&ghost),
+            Self::Goal(goal) => goal.as_str(),
+            Self::HintGhost(ghost) => hint_ghost_name(&ghost),
 
             _ => item_to_str(&(convert(self).unwrap())),
         }
@@ -1155,20 +1053,15 @@ impl FillerItem {
 
     pub fn as_str_colorized(&self) -> String {
         match self {
-            Yuga => Green,
-            Margomill => Blue,
-            Moldorm => Attention,
-            ZeldasThrone => Name,
-            GemesaurKing => Green,
-            Arrghus => Beige,
-            Knucklemaster => Blue,
-            Stalblind => Beige,
-            Grinexx => Purple,
-            Zaganaga => Name,
-            Dharkstare => Attention,
-            _ => Name,
+            Self::Goal(goal) => goal.as_str_colorized(),
+            _ => Name.format(self.as_str()),
         }
-        .format(Self::as_str(*self))
+    }
+}
+
+impl From<Goal> for FillerItem {
+    fn from(goal: Goal) -> Self {
+        Self::Goal(goal)
     }
 }
 
@@ -1178,6 +1071,110 @@ impl Serialize for FillerItem {
         S: Serializer,
     {
         serializer.serialize_str(self.as_str())
+    }
+}
+
+// Quest Items ---------------------------------------------------------------------------------
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+pub enum Goal {
+    // Bosses -------
+    Yuga,
+    Margomill,
+    Moldorm,
+    ZeldasThrone,
+    GemesaurKing,
+    Arrghus,
+    Knucklemaster,
+    Stalblind,
+    Grinexx,
+    Zaganaga,
+    Dharkstare,
+
+    // The rest ------
+    OpenSanctuaryDoors,
+    ShadyGuyTrigger,
+    BigBombFlower,
+    StylishWomansHouseOpen,
+    WomanRoofMaiamai,
+    SkullEyeRight,
+    SkullEyeLeft,
+    ThievesB1DoorOpen,
+    ThievesB2DoorOpen,
+    ThievesB3WaterDrained,
+    TurtleFlipped,
+    TurtleAttacked,
+    TurtleWall,
+    AccessPotionShop,
+    AccessMilkBar,
+    #[allow(unused)]
+    AccessFairyFountain, // todo add to world graph
+    AccessHyruleBlacksmith,
+    AccessLoruleCastleField,
+    LcBombTrial,
+    LcBallTrial,
+    LcLampTrial,
+    LcHookTrial,
+    Triforce,
+}
+
+impl Goal {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            Self::Yuga => "Yuga",
+            Self::Margomill => "Margomill",
+            Self::Moldorm => "Moldorm",
+            Self::ZeldasThrone => "Zelda's Throne",
+
+            Self::GemesaurKing => "Gemesaur King",
+            Self::Arrghus => "Arrghus",
+            Self::Knucklemaster => "Knucklemaster",
+            Self::Stalblind => "Stalblind",
+            Self::Grinexx => "Grinexx",
+            Self::Zaganaga => "Zaganaga",
+            Self::Dharkstare => "Dharkstare",
+
+            Self::OpenSanctuaryDoors => "Sanctuary Doors Opened",
+            Self::ShadyGuyTrigger => "Shady Guy Trigger",
+            Self::BigBombFlower => "Big Bomb Flower",
+            Self::StylishWomansHouseOpen => "Stylish Woman's House Opened",
+            Self::WomanRoofMaiamai => "Woman's Roof Maiamai",
+            Self::SkullEyeRight => "Skull Woods Right Eye",
+            Self::SkullEyeLeft => "Skull Woods Left Eye",
+            Self::ThievesB1DoorOpen => "Thieves' Hideout B1 Door Open",
+            Self::ThievesB2DoorOpen => "Thieves' Hideout B2 Door Open",
+            Self::ThievesB3WaterDrained => "Thieves' Hideout B3 Water Drained",
+            Self::TurtleFlipped => "Turtle Flipped",
+            Self::TurtleAttacked => "Turtle Bullied",
+            Self::TurtleWall => "Turtle Wall",
+            Self::AccessPotionShop => "Potion Shop Access",
+            Self::AccessMilkBar => "Milk Bar Access",
+            Self::AccessFairyFountain => "Fairy Fountain Access",
+            Self::AccessHyruleBlacksmith => "Hyrule Blacksmith Access",
+            Self::AccessLoruleCastleField => "Lorule Castle Field Access",
+            Self::LcBombTrial => "Bomb Trial Complete",
+            Self::LcBallTrial => "Ball Trial Complete",
+            Self::LcLampTrial => "Lamp Trial Complete",
+            Self::LcHookTrial => "Hook Trial Complete",
+            Self::Triforce => "Triforce",
+        }
+    }
+
+    pub fn as_str_colorized(&self) -> String {
+        match self {
+            Self::Yuga => Green,
+            Self::Margomill => Blue,
+            Self::Moldorm => Attention,
+            Self::ZeldasThrone => Name,
+            Self::GemesaurKing => Green,
+            Self::Arrghus => Beige,
+            Self::Knucklemaster => Blue,
+            Self::Stalblind => Beige,
+            Self::Grinexx => Purple,
+            Self::Zaganaga => Name,
+            Self::Dharkstare => Attention,
+            _ => Name,
+        }
+        .format(self.as_str())
     }
 }
 
@@ -1353,43 +1350,6 @@ pub fn convert(fill_item: FillerItem) -> Option<Item> {
         GoldBee01 | GoldBee02 | GoldBee03 => Some(GoldenBeeForSale),
         Fairy01 | Fairy02 => Some(Fairy),
 
-        // Quest Items don't translate
-        Yuga
-        | Margomill
-        | Moldorm
-        | ZeldasThrone
-        | GemesaurKing
-        | Arrghus
-        | Knucklemaster
-        | Stalblind
-        | Grinexx
-        | Zaganaga
-        | Dharkstare
-        | ShadyGuyTrigger
-        | OpenSanctuaryDoors
-        | BigBombFlower
-        | StylishWomansHouseOpen
-        | WomanRoofMaiamai
-        | SkullEyeRight
-        | SkullEyeLeft
-        | ThievesB1DoorOpen
-        | ThievesB2DoorOpen
-        | ThievesB3WaterDrained
-        | TurtleFlipped
-        | TurtleAttacked
-        | TurtleWall
-        | AccessLoruleCastleField
-        | AccessHyruleBlacksmith
-        | AccessPotionShop
-        | AccessFairyFountain
-        | AccessMilkBar
-        | LcBombTrial
-        | LcBallTrial
-        | LcLampTrial
-        | LcHookTrial
-        | Triforce => None,
-
-        // Hint Ghosts don't map either
-        HintGhost(_) => None,
+        FillerItem::Goal(_) | FillerItem::HintGhost(_) => None,
     }
 }

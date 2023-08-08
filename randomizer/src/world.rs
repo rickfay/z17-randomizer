@@ -8,6 +8,7 @@ use crate::{
     legacy::path::Path,
     model::{
         check::Check,
+        filler_item,
         location::{Location, Location::*},
         location_node::LocationNode,
         logic::Logic,
@@ -344,7 +345,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                     ),
                     check_quest(
                         "Woman Roof Maiamai",
-                        WomanRoofMaiamai,
+                        filler_item::Goal::WomanRoofMaiamai,
                         Some(|p| p.has_power_glove()),
                         None,
                         None,
@@ -1023,7 +1024,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             location(
                 "Witch's House",
                 vec![
-                    check_quest_free("Access Potion Shop", AccessPotionShop),
+                    check_quest_free("Access Potion Shop", filler_item::Goal::AccessPotionShop),
                     check(
                         LocationInfo::new(
                             regions::hyrule::zora::river::SUBREGION,
@@ -1132,7 +1133,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                 vec![
                     check_quest(
                         "Shady Guy Trigger",
-                        ShadyGuyTrigger,
+                        filler_item::Goal::ShadyGuyTrigger,
                         Some(|p| !p.is_rse() || p.has_sage_oren()),
                         None,
                         None,
@@ -1417,7 +1418,10 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                         None,
                         None,
                     ),
-                    check_quest_free("Access Hyrule Blacksmith", AccessHyruleBlacksmith),
+                    check_quest_free(
+                        "Access Hyrule Blacksmith",
+                        filler_item::Goal::AccessHyruleBlacksmith,
+                    ),
                 ],
                 vec![path_free(HyruleField)],
             ),
@@ -1471,7 +1475,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                         regions::dungeons::hyrule::castle::SUBREGION,
                         "Hyrule Castle Prize",
                     )),
-                    check_quest_free("Zelda's Throne", ZeldasThrone),
+                    check_quest_free("Zelda's Throne", filler_item::Goal::ZeldasThrone),
                 ],
                 vec![path_free(HyruleCastleCourtyard), path_free(HyruleCastleRoof)],
             ),
@@ -1646,7 +1650,10 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                         regions::hyrule::kakariko::village::SUBREGION,
                         "Stylish Woman",
                     )),
-                    check_quest_free("Open Stylish Woman's House", StylishWomansHouseOpen),
+                    check_quest_free(
+                        "Open Stylish Woman's House",
+                        filler_item::Goal::StylishWomansHouseOpen,
+                    ),
                 ],
                 vec![portal_std(LoruleCastleField), path_free(HyruleField)],
             ),
@@ -1655,7 +1662,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
             MilkBar,
             location(
                 "Milk Bar",
-                vec![check_quest_free("Access Milk Bar", AccessMilkBar)],
+                vec![check_quest_free("Access Milk Bar", filler_item::Goal::AccessMilkBar)],
                 vec![path_free(HyruleField)],
             ),
         ),
@@ -1894,7 +1901,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                     ),
                     check_quest(
                         "Open Sanctuary Doors",
-                        OpenSanctuaryDoors,
+                        filler_item::Goal::OpenSanctuaryDoors,
                         Some(|p| {
                             (p.has_lamp() || (p.has_fire_rod() && p.lampless()))
                                 && p.can_attack()
@@ -2506,7 +2513,10 @@ fn lorule() -> HashMap<Location, LocationNode> {
                         regions::lorule::field::main::SUBREGION,
                         "Octoball Derby",
                     )),
-                    check_quest_free("Access Hilda Barrier", AccessLoruleCastleField),
+                    check_quest_free(
+                        "Access Hilda Barrier",
+                        filler_item::Goal::AccessLoruleCastleField,
+                    ),
                     check_free(LocationInfo::new(
                         regions::lorule::field::main::SUBREGION,
                         "Fortune's Choice",
@@ -2774,7 +2784,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
             location(
                 "Big Bomb Flower Field",
                 vec![
-                    check_quest_free("Obtain Big Bomb Flower", BigBombFlower),
+                    check_quest_free("Obtain Big Bomb Flower", filler_item::Goal::BigBombFlower),
                     check_free(LocationInfo::new(
                         regions::lorule::field::main::SUBREGION,
                         "[Mai] Big Bomb Flower Grass",
@@ -3410,7 +3420,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                 vec![
                     check_quest(
                         "Turtle (wall)",
-                        TurtleWall,
+                        filler_item::Goal::TurtleWall,
                         Some(|p| p.can_merge()),
                         None,
                         None,
@@ -3448,7 +3458,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
             location(
                 "Lorule Lake South West",
                 vec![
-                    check_quest_free("Turtle (flipped)", TurtleFlipped),
+                    check_quest_free("Turtle (flipped)", filler_item::Goal::TurtleFlipped),
                     check(
                         LocationInfo::new(
                             regions::lorule::lake::lorule::SUBREGION,
@@ -3500,7 +3510,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                 vec![
                     check_quest(
                         "Turtle (under attack)",
-                        TurtleAttacked,
+                        filler_item::Goal::TurtleAttacked,
                         Some(|p| p.can_attack()),
                         Some(|p| p.has_lamp_or_net()),
                         None,
@@ -4609,7 +4619,7 @@ fn eastern_palace() -> HashMap<Location, LocationNode> {
                         regions::dungeons::eastern::palace::SUBREGION,
                         "Eastern Palace Prize",
                     )),
-                    check_quest_free("Eastern Palace Complete", Yuga),
+                    check_quest_free("Eastern Palace Complete", filler_item::Goal::Yuga),
                 ],
                 vec![
                     path_free(EasternPalace2F),
@@ -4864,7 +4874,7 @@ fn house_of_gales() -> HashMap<Location, LocationNode> {
                         regions::dungeons::house::gales::SUBREGION,
                         "House of Gales Prize",
                     )),
-                    check_quest_free("Margomill Defeated", Margomill),
+                    check_quest_free("Margomill Defeated", filler_item::Goal::Margomill),
                 ],
                 vec![],
             ),
@@ -5021,7 +5031,7 @@ fn tower_of_hera() -> HashMap<Location, LocationNode> {
                         regions::dungeons::tower::hera::SUBREGION,
                         "Tower of Hera Prize",
                     )),
-                    check_quest_free("Moldorm", Moldorm),
+                    check_quest_free("Moldorm", filler_item::Goal::Moldorm),
                 ],
                 vec![],
             ),
@@ -5265,7 +5275,7 @@ fn dark_palace() -> HashMap<Location, LocationNode> {
                         regions::dungeons::dark::palace::SUBREGION,
                         "Dark Palace Prize",
                     )),
-                    check_quest_free("Gemesaur King", GemesaurKing),
+                    check_quest_free("Gemesaur King", filler_item::Goal::GemesaurKing),
                 ],
                 vec![],
             ),
@@ -5487,7 +5497,7 @@ fn swamp_palace() -> HashMap<Location, LocationNode> {
                         regions::dungeons::swamp::palace::SUBREGION,
                         "Swamp Palace Prize",
                     )),
-                    check_quest_free("Arrghus", Arrghus),
+                    check_quest_free("Arrghus", filler_item::Goal::Arrghus),
                 ],
                 vec![],
             ),
@@ -5688,7 +5698,7 @@ fn skull_woods() -> HashMap<Location, LocationNode> {
                         regions::dungeons::skull::woods::SUBREGION,
                         "Skull Woods Prize",
                     )),
-                    check_quest_free("Knucklemaster", Knucklemaster),
+                    check_quest_free("Knucklemaster", filler_item::Goal::Knucklemaster),
                 ],
                 vec![path_free(SkullWoodsBossRoom)],
             ),
@@ -5720,7 +5730,7 @@ fn skull_woods() -> HashMap<Location, LocationNode> {
                         None,
                         None,
                     ),
-                    check_quest_free("Skull Eye Right", SkullEyeRight),
+                    check_quest_free("Skull Eye Right", filler_item::Goal::SkullEyeRight),
                 ],
                 vec![
                     path(
@@ -5796,7 +5806,7 @@ fn skull_woods() -> HashMap<Location, LocationNode> {
                     ),
                     check_quest(
                         "Skull Eye Left",
-                        SkullEyeLeft,
+                        filler_item::Goal::SkullEyeLeft,
                         Some(|p| p.can_merge()),
                         None,
                         None,
@@ -5857,7 +5867,7 @@ fn thieves_hideout() -> HashMap<Location, LocationNode> {
                     ),
                     check_quest(
                         "Thieves' Hideout B1 Door Open",
-                        ThievesB1DoorOpen,
+                        filler_item::Goal::ThievesB1DoorOpen,
                         Some(|p| p.can_merge() && p.can_hit_switch()),
                         None,
                         Some(|p| p.has_boots() && (p.has_boomerang() || p.has_ice_rod())),
@@ -5878,7 +5888,7 @@ fn thieves_hideout() -> HashMap<Location, LocationNode> {
                     ),
                     check_quest(
                         "Thieves' Hideout B2 Door Open",
-                        ThievesB2DoorOpen,
+                        filler_item::Goal::ThievesB2DoorOpen,
                         Some(|p| {
                             p.thieves_b1_door_open()
                                 && p.can_merge()
@@ -5941,7 +5951,7 @@ fn thieves_hideout() -> HashMap<Location, LocationNode> {
                     /* Escape */
                     check_quest(
                         "Thieves' Hideout B3 Water Drained",
-                        ThievesB3WaterDrained,
+                        filler_item::Goal::ThievesB3WaterDrained,
                         Some(|p| {
                             p.thieves_b1b2_doors_open()
                                 && p.has_thieves_key()
@@ -6062,7 +6072,7 @@ fn thieves_hideout() -> HashMap<Location, LocationNode> {
                         regions::dungeons::thieves::hideout::SUBREGION,
                         "Thieves' Hideout Prize",
                     )),
-                    check_quest_free("Stalblind Defeated", Stalblind),
+                    check_quest_free("Stalblind Defeated", filler_item::Goal::Stalblind),
                 ],
                 vec![],
             ),
@@ -6262,7 +6272,7 @@ fn ice_ruins() -> HashMap<Location, LocationNode> {
                         regions::dungeons::ice::ruins::SUBREGION,
                         "Ice Ruins Prize",
                     )),
-                    check_quest_free("Dharkstare", Dharkstare),
+                    check_quest_free("Dharkstare", filler_item::Goal::Dharkstare),
                 ],
                 vec![],
             ),
@@ -6557,7 +6567,7 @@ fn desert_palace() -> HashMap<Location, LocationNode> {
                         regions::dungeons::desert::palace::SUBREGION,
                         "Desert Palace Prize",
                     )),
-                    check_quest_free("Zaganaga Defeated", Zaganaga),
+                    check_quest_free("Zaganaga Defeated", filler_item::Goal::Zaganaga),
                 ],
                 vec![fast_travel_lorule()],
             ),
@@ -6802,7 +6812,7 @@ fn turtle_rock() -> HashMap<Location, LocationNode> {
                         regions::dungeons::turtle::rock::SUBREGION,
                         "Turtle Rock Prize",
                     )),
-                    check_quest_free("Grinexx", Grinexx),
+                    check_quest_free("Grinexx", filler_item::Goal::Grinexx),
                 ],
                 vec![],
             ),
@@ -6924,7 +6934,7 @@ fn lorule_castle() -> HashMap<Location, LocationNode> {
                     )),
                     check_quest(
                         "Bomb Trial",
-                        LcBombTrial,
+                        filler_item::Goal::LcBombTrial,
                         Some(|p| p.has_lorule_keys(5) && p.can_hit_switch() && p.can_attack()),
                         None,
                         None,
@@ -6944,7 +6954,7 @@ fn lorule_castle() -> HashMap<Location, LocationNode> {
                     ),
                     check_quest(
                         "Ball Trial",
-                        LcBallTrial,
+                        filler_item::Goal::LcBallTrial,
                         Some(|p| p.has_lorule_keys(5) && (p.can_attack() || p.has_hookshot())),
                         None,
                         None,
@@ -6999,7 +7009,7 @@ fn lorule_castle() -> HashMap<Location, LocationNode> {
                     ),
                     check_quest(
                         "Lamp Trial",
-                        LcLampTrial,
+                        filler_item::Goal::LcLampTrial,
                         Some(|p| p.has_lorule_keys(5) && p.has_fire_source() && p.can_attack()),
                         Some(|p| p.has_lorule_keys(5) && p.can_attack()),
                         None,
@@ -7030,7 +7040,7 @@ fn lorule_castle() -> HashMap<Location, LocationNode> {
                     ),
                     check_quest(
                         "Hookshot Trial",
-                        LcHookTrial,
+                        filler_item::Goal::LcHookTrial,
                         Some(|p| p.has_lorule_keys(5) && p.has_hookshot() && p.can_attack()),
                         None,
                         None,
@@ -7101,7 +7111,11 @@ fn lorule_castle() -> HashMap<Location, LocationNode> {
         ),
         (
             SacredRealm,
-            location("Sacred Realm", vec![check_quest_free("Sacred Realm", Triforce)], vec![]),
+            location(
+                "Sacred Realm",
+                vec![check_quest_free("Sacred Realm", filler_item::Goal::Triforce)],
+                vec![],
+            ),
         ),
     ])
 }
@@ -7137,15 +7151,20 @@ fn check_unreachable(location_info: LocationInfo) -> Check {
 }
 
 fn check_quest(
-    name: &'static str, quest: FillerItem, normal: Option<fn(&Progress) -> bool>,
+    name: &'static str, quest: impl Into<FillerItem>, normal: Option<fn(&Progress) -> bool>,
     hard: Option<fn(&Progress) -> bool>, glitched: Option<fn(&Progress) -> bool>,
     adv_glitched: Option<fn(&Progress) -> bool>, hell: Option<fn(&Progress) -> bool>,
 ) -> Check {
-    Check::new(name, Logic::new(normal, hard, glitched, adv_glitched, hell), Some(quest), None)
+    Check::new(
+        name,
+        Logic::new(normal, hard, glitched, adv_glitched, hell),
+        Some(quest.into()),
+        None,
+    )
 }
 
-fn check_quest_free(name: &'static str, quest: FillerItem) -> Check {
-    Check::new(name, Logic::free(), Some(quest), None)
+fn check_quest_free(name: &'static str, quest: filler_item::Goal) -> Check {
+    Check::new(name, Logic::free(), Some(quest.into()), None)
 }
 
 fn ghost(ghost: HintGhost) -> Check {

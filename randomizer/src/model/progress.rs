@@ -9,6 +9,8 @@ use crate::{
     model::filler_item::{FillerItem, FillerItem::*},
 };
 
+use super::filler_item;
+
 #[derive(Clone)]
 pub struct Progress {
     items: HashSet<FillerItem>,
@@ -44,16 +46,16 @@ impl Progress {
         new_items
     }
 
-    pub fn has(&self, item: FillerItem) -> bool {
-        self.items.contains(&item)
+    pub fn has(&self, item: impl Into<FillerItem>) -> bool {
+        self.items.contains(&item.into())
     }
 
-    fn has_either(&self, item1: FillerItem, item2: FillerItem) -> bool {
-        self.items.contains(&item1) || self.items.contains(&item2)
+    fn has_either(&self, item1: impl Into<FillerItem>, item2: impl Into<FillerItem>) -> bool {
+        self.items.contains(&item1.into()) || self.items.contains(&item2.into())
     }
 
-    fn has_both(&self, item1: FillerItem, item2: FillerItem) -> bool {
-        self.items.contains(&item1) && self.items.contains(&item2)
+    fn has_both(&self, item1: impl Into<FillerItem>, item2: impl Into<FillerItem>) -> bool {
+        self.items.contains(&item1.into()) && self.items.contains(&item2.into())
     }
 
     fn has_any(&self, items: &[FillerItem]) -> bool {
@@ -558,10 +560,10 @@ impl Progress {
 
     pub fn has_completed_trials(&self) -> bool {
         self.settings.logic.skip_trials
-            || (self.has(LcBombTrial)
-                && self.has(LcBallTrial)
-                && self.has(LcLampTrial)
-                && self.has(LcHookTrial))
+            || (self.has(filler_item::Goal::LcBombTrial)
+                && self.has(filler_item::Goal::LcBallTrial)
+                && self.has(filler_item::Goal::LcLampTrial)
+                && self.has(filler_item::Goal::LcHookTrial))
     }
 
     pub fn has_bow_of_light(&self) -> bool {
@@ -605,23 +607,23 @@ impl Progress {
     // }
 
     pub fn has_skull_eye_right(&self) -> bool {
-        self.has(SkullEyeRight)
+        self.has(filler_item::Goal::SkullEyeRight)
     }
 
     pub fn has_skull_eyes(&self) -> bool {
-        self.has_both(SkullEyeLeft, SkullEyeRight)
+        self.has_both(filler_item::Goal::SkullEyeLeft, filler_item::Goal::SkullEyeRight)
     }
 
     pub fn thieves_b1_door_open(&self) -> bool {
-        self.has(ThievesB1DoorOpen)
+        self.has(filler_item::Goal::ThievesB1DoorOpen)
     }
 
     pub fn thieves_b2_door_open(&self) -> bool {
-        self.has(ThievesB2DoorOpen)
+        self.has(filler_item::Goal::ThievesB2DoorOpen)
     }
 
     pub fn thieves_b3_water_drained(&self) -> bool {
-        self.has(ThievesB3WaterDrained)
+        self.has(filler_item::Goal::ThievesB3WaterDrained)
     }
 
     pub fn thieves_b1b2_doors_open(&self) -> bool {
@@ -651,15 +653,17 @@ impl Progress {
     }
 
     pub fn can_rescue_turtles(&self) -> bool {
-        self.has(TurtleFlipped) && self.has(TurtleAttacked) && self.has(TurtleWall)
+        self.has(filler_item::Goal::TurtleFlipped)
+            && self.has(filler_item::Goal::TurtleAttacked)
+            && self.has(filler_item::Goal::TurtleWall)
     }
 
     pub fn has_bomb_flower(&self) -> bool {
-        self.has(BigBombFlower)
+        self.has(filler_item::Goal::BigBombFlower)
     }
 
     pub fn has_shady_guy_trigger(&self) -> bool {
-        self.has(ShadyGuyTrigger)
+        self.has(filler_item::Goal::ShadyGuyTrigger)
     }
 
     fn has_charm(&self) -> bool {
@@ -732,30 +736,32 @@ impl Progress {
     }
 
     pub fn has_opened_stylish_womans_house(&self) -> bool {
-        self.has(StylishWomansHouseOpen)
+        self.has(filler_item::Goal::StylishWomansHouseOpen)
     }
 
     pub fn has_woman_roof_maiamai(&self) -> bool {
-        self.has(WomanRoofMaiamai)
+        self.has(filler_item::Goal::WomanRoofMaiamai)
     }
 
     pub fn has_opened_sanctuary_doors(&self) -> bool {
-        self.has(OpenSanctuaryDoors)
+        self.has(filler_item::Goal::OpenSanctuaryDoors)
     }
 
     pub fn can_access_milk_bar(&self) -> bool {
-        self.has(AccessMilkBar)
+        self.has(filler_item::Goal::AccessMilkBar)
     }
 
     pub fn can_get_potion(&self) -> bool {
-        self.has_bottle() && self.has_either(AccessPotionShop, AccessMilkBar)
+        self.has_bottle()
+            && self
+                .has_either(filler_item::Goal::AccessPotionShop, filler_item::Goal::AccessMilkBar)
     }
 
     pub fn can_access_hyrule_blacksmith(&self) -> bool {
-        self.has(AccessHyruleBlacksmith)
+        self.has(filler_item::Goal::AccessHyruleBlacksmith)
     }
 
     pub fn can_access_lorule_castle_field(&self) -> bool {
-        self.has(AccessLoruleCastleField)
+        self.has(filler_item::Goal::AccessLoruleCastleField)
     }
 }
