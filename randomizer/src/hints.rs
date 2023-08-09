@@ -9,10 +9,6 @@ use modinfo::{
     Settings,
 };
 use rand::{rngs::StdRng, seq::IteratorRandom, Rng};
-use serde::{
-    ser::{SerializeSeq, SerializeStruct},
-    Serialize, Serializer,
-};
 use strum::IntoEnumIterator;
 
 use crate::{
@@ -83,18 +79,6 @@ impl Hint for LocationHint {
     }
 }
 
-impl Serialize for LocationHint {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        let mut ser = serializer.serialize_struct("LocationHint", 2)?;
-        ser.serialize_field("hint", &self.text().to_text().expect("a valid UTF-8 string"))?;
-        ser.serialize_field("ghosts", &SerializeGhosts(&self.ghosts))?;
-        ser.end()
-    }
-}
-
 /// A [`Hint`] that tells where an item needed to reach a specific `gaol` is located.
 #[derive(Debug, Clone)]
 pub struct PathHint {
@@ -122,18 +106,6 @@ impl Hint for PathHint {
     }
 }
 
-impl Serialize for PathHint {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        let mut ser = serializer.serialize_struct("PathHint", 2)?;
-        ser.serialize_field("hint", &self.text().to_text().expect("a valid UTF-8 string"))?;
-        ser.serialize_field("ghosts", &SerializeGhosts(&self.ghosts))?;
-        ser.end()
-    }
-}
-
 /// A [`Hint`] specifically for the Bow of Light.
 #[derive(Debug, Clone)]
 pub struct BowOfLightHint {
@@ -149,15 +121,6 @@ impl Hint for BowOfLightHint {
             .text("\nin ")
             .colored(self.check.get_location_info().unwrap().region_colorized())
             .finish()
-    }
-}
-
-impl Serialize for BowOfLightHint {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        serializer.serialize_str(&self.text().to_text().expect("a valid UTF-8 string"))
     }
 }
 
@@ -689,21 +652,6 @@ fn get_potential_path_hints(
     }
 
     shuffle(rng, potential_paths)
-}
-
-struct SerializeGhosts<'a>(&'a [HintGhost]);
-
-impl Serialize for SerializeGhosts<'_> {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        let mut seq = serializer.serialize_seq(Some(self.0.len()))?;
-        for ghost in self.0.iter() {
-            seq.serialize_element(hint_ghost_name(ghost))?;
-        }
-        seq.end()
-    }
 }
 
 use filler_item::Item::*;

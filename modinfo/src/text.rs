@@ -24,7 +24,7 @@ impl<'a> Text<'a> {
         })
     }
 
-    pub fn to_text(&self) -> Option<String> {
+    pub fn to_string(&self) -> Option<String> {
         self.parts.iter().map(Part::to_string).collect()
     }
 
@@ -38,7 +38,7 @@ impl Serialize for Text<'_> {
     where
         S: serde::Serializer,
     {
-        serializer.serialize_str(&self.to_text().expect("a valid UTF-8 string"))
+        serializer.serialize_str(&self.to_string().expect("a valid UTF-8 string"))
     }
 }
 
