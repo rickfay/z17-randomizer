@@ -5,9 +5,10 @@ use game::{
     Item::{PendantPower, PendantWisdom},
 };
 use log::info;
+use modinfo::text::{Color, Colored, Control};
 
 use crate::{
-    hints::{formatting::*, Hint},
+    hints::Hint,
     patch::messages::{hint_ghosts::HintGhost, msbt::load_msbt},
     LocationInfo, Patcher, Result, SeedInfo,
 };
@@ -66,7 +67,7 @@ fn patch_ravio(patcher: &mut Patcher) -> Result<()> {
         "lgt_NpcRental_08",
         &format!(
             "Huh? Not interested?\nIf you don't have enough rupees, I'll\ngive you your first item {}.",
-            name("for free")
+            Colored::new(Color::Name, "for free"),
         ),
     );
     ravio_shop.set("lgt_RentalKeeper_Field_2C_03", "stuff and things");
@@ -77,7 +78,10 @@ fn patch_ravio(patcher: &mut Patcher) -> Result<()> {
 
 fn patch_great_rupee_fairy(patcher: &mut Patcher) -> Result<()> {
     let mut grf = load_msbt(patcher, CaveDark, "Cave").unwrap();
-    grf.set("CaveDark29_LuckyFairy_00", &format!("Throw Rupees into the fountain?\n{}", *CHOICE_2));
+    grf.set(
+        "CaveDark29_LuckyFairy_00",
+        &format!("Throw Rupees into the fountain?\n{}", Control::Choice2),
+    );
     grf.set("CaveDark29_LuckyFairy_01", "Throw 3000");
     grf.set("CaveDark29_LuckyFairy_02", "Don't throw any");
     grf.set("CaveDark29_LuckyFairy_03", "1234567"); // shorten string so file matches OG size FIXME
@@ -110,9 +114,9 @@ fn patch_street_merchant(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<
         "lgt_NpcStand_BottleEmpty_00_select",
         &format!(
             "That's a {}.\nUseful for a bunch of things.\nHow about {}?{}",
-            name(item_left),
-            *PRICE,
-            *CHOICE_2
+            Colored::new(Color::Name, item_left),
+            Control::Price,
+            Control::Choice2
         ),
     );
 
@@ -122,9 +126,9 @@ fn patch_street_merchant(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<
             "Ah, yes! A {} \n\
         of remarkable quality. Smooth as silk!\n\
         And for you? Only {}!{}",
-            name(item_right),
-            *PRICE,
-            *CHOICE_2
+            Colored::new(Color::Name, item_right),
+            Control::Price,
+            Control::Choice2
         ),
     );
     street_merchant.set(
@@ -135,7 +139,7 @@ fn patch_street_merchant(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<
         smooth, smooth {}.\n\
         Oh it's so VERY smooth! I shouldn't\n\
         have let it go at such a bargain.",
-            name(item_right)
+            Colored::new(Color::Name, item_right),
         ),
     );
 
@@ -159,10 +163,10 @@ fn patch_sahasrahla(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
         \n\
         And the {}, in the\n\
         {}.",
-            name("Pendant of Wisdom"),
-            name(pow_region),
-            attention("Pendant of Power"),
-            attention(pop_region)
+            Colored::new(Color::Name, "Pendant of Wisdom"),
+            Colored::new(Color::Name, pow_region),
+            Colored::new(Color::Attention, "Pendant of Power"),
+            Colored::new(Color::Attention, pop_region)
         ),
     );
 
@@ -179,9 +183,9 @@ fn patch_general_hint_ghosts(patcher: &mut Patcher, seed_info: &SeedInfo) -> Res
         "HintGhost_02_select",
         &format!(
             "Buy a {} for {}?{}",
-            blue("Ghost Hint"),
-            attention(format!("{} Rupees", price.as_str()).as_str()),
-            *CHOICE_2
+            Colored::new(Color::Blue, "Ghost Hint"),
+            Colored::new(Color::Attention, format!("{} Rupees", price.as_str()).as_str()),
+            Control::Choice2,
         ),
     );
     hint_ghost.set("HintGhost_02_select_00", "Buy");
@@ -212,7 +216,7 @@ fn patch_hint_ghosts(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> 
             let entry = msbt_hint_map
                 .entry((hint_ghost.course, hint_ghost.msbt_file))
                 .or_insert_with(BTreeMap::new);
-            entry.insert(hint_ghost.msg_label, path_hint.get_hint());
+            entry.insert(hint_ghost.msg_label, path_hint.text().to_game_text());
         }
     }
 
@@ -226,7 +230,7 @@ fn patch_hint_ghosts(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> 
             let entry = msbt_hint_map
                 .entry((hint_ghost.course, hint_ghost.msbt_file))
                 .or_insert_with(BTreeMap::new);
-            entry.insert(hint_ghost.msg_label, always_hint.get_hint());
+            entry.insert(hint_ghost.msg_label, always_hint.text().to_game_text());
         }
     }
 
@@ -240,7 +244,7 @@ fn patch_hint_ghosts(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> 
             let entry = msbt_hint_map
                 .entry((hint_ghost.course, hint_ghost.msbt_file))
                 .or_insert_with(BTreeMap::new);
-            entry.insert(hint_ghost.msg_label, sometimes_hint.get_hint());
+            entry.insert(hint_ghost.msg_label, sometimes_hint.text().to_game_text());
         }
     }
 
@@ -281,7 +285,7 @@ fn patch_bow_of_light(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()>
         let mut msbt = load_msbt(patcher, IndoorDark, "HintGhostDark")?;
         // Most of HintGhostDark.msbt is a duplicate of the identical file under FieldDark, but it's not used. Choosing
         // an easily testable ghost Key to repurpose for a new Ghost in Hilda's Study.
-        msbt.set("HintGhost_FieldDark_2C_014", &bow_of_light_hint.get_hint());
+        msbt.set("HintGhost_FieldDark_2C_014", &bow_of_light_hint.text().to_game_text());
         // fixme also dumb: clear out unused messages to keep filesize down.
         msbt.set("HintGhost_FieldDark_02_001", EMPTY_MSG);
         msbt.set("HintGhost_FieldDark_03_002", EMPTY_MSG);

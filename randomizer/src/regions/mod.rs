@@ -4,13 +4,16 @@ use std::{
 };
 
 use log::info;
-use modinfo::Settings;
+use modinfo::{
+    text::{Color, Colored},
+    Settings,
+};
 
-use crate::{hints::hint_color::HintColor, patch::Patcher};
+use crate::patch::Patcher;
 
 pub struct Subregion {
     name: &'static str,
-    color: HintColor,
+    color: Color,
     world: World,
     id: &'static str,
 }
@@ -20,8 +23,8 @@ impl Subregion {
         self.name
     }
 
-    pub fn name_colorized(&self) -> String {
-        self.color.format(self.name)
+    pub fn name_colorized(&self) -> Colored<'static> {
+        Colored::new(self.color, self.name)
     }
 
     pub fn world(&self) -> World {
@@ -225,7 +228,7 @@ macro_rules! region {
         }
 
         pub const NAME: &str = $name;
-        pub const COLOR: $crate::hints::hint_color::HintColor = $crate::hints::hint_color::HintColor::$color;
+        pub const COLOR: ::modinfo::text::Color = ::modinfo::text::Color::$color;
         #[allow(unused)]
         pub const COURSE: ::game::Course = ::game::Course::$course;
     };
