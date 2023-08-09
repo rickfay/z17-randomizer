@@ -1,9 +1,7 @@
+use modinfo::text::{Color, Colored};
 use serde::{Serialize, Serializer};
 
-use crate::{
-    hints::{hint_color::HintColor::*, hint_ghost_name},
-    item_to_str, Result,
-};
+use crate::{hints::hint_ghost_name, item_to_str, Result};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum FillerItem {
@@ -37,13 +35,6 @@ impl FillerItem {
             Self::Item(item) => item.as_str(),
             Self::Goal(goal) => goal.as_str(),
             Self::HintGhost(ghost) => hint_ghost_name(&ghost),
-        }
-    }
-
-    pub fn as_str_colorized(&self) -> String {
-        match self {
-            Self::Goal(goal) => goal.as_str_colorized(),
-            _ => Name.format(self.as_str()),
         }
     }
 }
@@ -986,8 +977,8 @@ impl Item {
         }
     }
 
-    pub fn as_str_colorized(&self) -> String {
-        Name.format(self.as_str())
+    pub fn to_colored(&self) -> Colored {
+        Colored::new(Color::Name, self.as_str())
     }
 }
 
@@ -1076,21 +1067,23 @@ impl Goal {
         }
     }
 
-    pub fn as_str_colorized(&self) -> String {
-        match self {
-            Self::Yuga => Green,
-            Self::Margomill => Blue,
-            Self::Moldorm => Attention,
-            Self::ZeldasThrone => Name,
-            Self::GemesaurKing => Green,
-            Self::Arrghus => Beige,
-            Self::Knucklemaster => Blue,
-            Self::Stalblind => Beige,
-            Self::Grinexx => Purple,
-            Self::Zaganaga => Name,
-            Self::Dharkstare => Attention,
-            _ => Name,
-        }
-        .format(self.as_str())
+    pub fn to_colored(&self) -> Colored {
+        Colored::new(
+            match self {
+                Self::Yuga => Color::Green,
+                Self::Margomill => Color::Blue,
+                Self::Moldorm => Color::Attention,
+                Self::ZeldasThrone => Color::Name,
+                Self::GemesaurKing => Color::Green,
+                Self::Arrghus => Color::Beige,
+                Self::Knucklemaster => Color::Blue,
+                Self::Stalblind => Color::Beige,
+                Self::Grinexx => Color::Purple,
+                Self::Zaganaga => Color::Name,
+                Self::Dharkstare => Color::Attention,
+                _ => Color::Name,
+            },
+            self.as_str(),
+        )
     }
 }

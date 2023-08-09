@@ -5,14 +5,16 @@ use std::{
     fs::File,
     hash::{Hash, Hasher},
     io::{self, Write},
-    ops::Deref,
 };
 
 use game::Item::{self, *};
 use log::{debug, error, info};
 use macros::fail;
 use model::filler_item::FillerItem;
-use modinfo::Settings;
+use modinfo::{
+    text::{Colored, Symbol},
+    Settings,
+};
 use patch::Patcher;
 use path_absolutize::*;
 use rand::{rngs::StdRng, SeedableRng};
@@ -21,11 +23,7 @@ use rom::Rom;
 use serde::{ser::SerializeMap, Serialize, Serializer};
 
 use crate::{
-    constants::VERSION,
-    hints::{formatting::*, Hints},
-    metrics::Metrics,
-    patch::msbf::MsbfKey,
-    system::UserConfig,
+    constants::VERSION, hints::Hints, metrics::Metrics, patch::msbf::MsbfKey, system::UserConfig,
 };
 
 pub mod constants;
@@ -124,7 +122,7 @@ impl LocationInfo {
         self.subregion.name()
     }
 
-    pub fn region_colorized(&self) -> String {
+    pub fn region_colorized(&self) -> Colored<'static> {
         self.subregion.name_colorized()
     }
 
@@ -547,17 +545,17 @@ impl SeedHash {
         let mut hash = hasher.finish() % 100_000;
 
         // Convert to Item Hash
-        let hash_item_lut: Vec<(&String, &str)> = vec![
-            (A_BUTTON.deref(), "(A)"),
-            (B_BUTTON.deref(), "(B)"),
-            (X_BUTTON.deref(), "(X)"),
-            (Y_BUTTON.deref(), "(Y)"),
-            (L_BUTTON.deref(), "(L)"),
-            (R_BUTTON.deref(), "(R)"),
-            (RAVIO.deref(), "(Ravio)"),
-            (BOW.deref(), "(Bow)"),
-            (BOMBS.deref(), "(Bombs)"),
-            (FIRE_ROD.deref(), "(Fire Rod)"),
+        let hash_item_lut = vec![
+            (Symbol::AButton, "(A)"),
+            (Symbol::BButton, "(B)"),
+            (Symbol::XButton, "(X)"),
+            (Symbol::YButton, "(Y)"),
+            (Symbol::LButton, "(L)"),
+            (Symbol::RButton, "(R)"),
+            (Symbol::Ravio, "(Ravio)"),
+            (Symbol::Bow, "(Bow)"),
+            (Symbol::Bombs, "(Bombs)"),
+            (Symbol::FireRod, "(Fire Rod)"),
         ];
 
         const HASH_LEN: usize = 5;

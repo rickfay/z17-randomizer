@@ -1,7 +1,10 @@
 use game::HintGhost;
 use log::{debug, info};
 use macros::fail;
-use modinfo::Settings;
+use modinfo::{
+    text::{Color, Colored, Text},
+    Settings,
+};
 use rand::{rngs::StdRng, seq::IteratorRandom, Rng};
 use serde::{
     ser::{SerializeSeq, SerializeStruct},
@@ -14,17 +17,13 @@ use crate::{
     filler_util::shuffle,
     model::{
         check::Check,
-        filler_item::{self, FillerItem, Item},
+        filler_item::{self, FillerItem},
         progress::Progress,
     },
     patch::util::is_sage,
     world::WorldGraph,
     CheckMap,
 };
-
-pub mod formatting;
-pub mod hint_color;
-mod hints;
 
 #[derive(Default, Debug, Clone, Serialize)]
 pub struct Hints {
@@ -35,16 +34,15 @@ pub struct Hints {
 }
 
 /// Basic functionality for all in-game hints.
-pub(crate) trait Hint: Serialize {
-    fn get_hint(&self) -> String;
-    fn get_hint_spoiler(&self) -> String;
+pub(crate) trait Hint {
+    fn text(&self) -> Text;
 }
 
 /// A [`Hint`] that exposes the item at a certain location
 #[derive(Debug, Clone)]
 pub struct LocationHint {
     /// The hinted item
-    pub item: Item,
+    pub item: filler_item::Item,
 
     /// The specific [`Check`] containing the hinted item.
     pub check: Check,
@@ -78,26 +76,15 @@ impl LocationHint {
 }
 
 impl Hint for LocationHint {
-    fn get_hint(&self) -> String {
+    fn text(&self) -> Text {
         let article = self.item.get_article();
-        format!(
-            "{}\nhas {}{}{}.",
-            &self.check.get_location_info().unwrap().name(),
-            article,
-            if article.is_empty() { "" } else { " " },
-            &self.item.as_str_colorized()
-        )
-    }
-
-    fn get_hint_spoiler(&self) -> String {
-        let article = self.item.get_article();
-        format!(
-            "{} has {}{}{}.",
-            &self.check.get_location_info().unwrap().name(),
-            article,
-            if article.is_empty() { "" } else { " " },
-            &self.item.as_str()
-        )
+        Text::build()
+            .text(self.check.get_location_info().unwrap().name())
+            .text("\n has ")
+            .text(article)
+            .text(if article.is_empty() { "" } else { " " })
+            .colored(self.item.to_colored())
+            .finish()
     }
 }
 
@@ -107,7 +94,7 @@ impl Serialize for LocationHint {
         S: Serializer,
     {
         let mut ser = serializer.serialize_struct("LocationHint", 2)?;
-        ser.serialize_field("hint", &self.get_hint_spoiler())?;
+        ser.serialize_field("hint", &self.text().to_text().expect("a valid UTF-8 string"))?;
         ser.serialize_field("ghosts", &SerializeGhosts(&self.ghosts))?;
         ser.end()
     }
@@ -134,20 +121,12 @@ pub struct PathHint {
 }
 
 impl Hint for PathHint {
-    fn get_hint(&self) -> String {
-        format!(
-            "{}\nis on the path to\n{}",
-            &self.check.get_location_info().unwrap().region_colorized(),
-            &self.goal.as_str_colorized()
-        )
-    }
-
-    fn get_hint_spoiler(&self) -> String {
-        format!(
-            "{} is on the path to {}",
-            self.check.get_location_info().unwrap().region(),
-            self.goal.as_str()
-        )
+    fn text(&self) -> Text {
+        Text::build()
+            .colored(self.check.get_location_info().unwrap().region_colorized())
+            .text("\nis on the path to\n")
+            .colored(self.goal.to_colored())
+            .finish()
     }
 }
 
@@ -157,7 +136,7 @@ impl Serialize for PathHint {
         S: Serializer,
     {
         let mut ser = serializer.serialize_struct("PathHint", 2)?;
-        ser.serialize_field("hint", &self.get_hint_spoiler())?;
+        ser.serialize_field("hint", &self.text().to_text().expect("a valid UTF-8 string"))?;
         ser.serialize_field("path_item", &self.path_item.as_str())?;
         ser.serialize_field("ghosts", &SerializeGhosts(&self.ghosts))?;
         ser.end()
@@ -172,19 +151,13 @@ pub struct BowOfLightHint {
 }
 
 impl Hint for BowOfLightHint {
-    fn get_hint(&self) -> String {
-        format!(
-            "Did you find the {}\nin {}?",
-            formatting::name("Bow of Light"),
-            &self.check.get_location_info().unwrap().region_colorized(),
-        )
-    }
-
-    fn get_hint_spoiler(&self) -> String {
-        format!(
-            "Did you find the Bow of Light in {}?",
-            &self.check.get_location_info().unwrap().region()
-        )
+    fn text(&self) -> Text {
+        Text::build()
+            .text("Did you find the ")
+            .colored(Colored::new(Color::Name, "Bow of Light"))
+            .text("\nin ")
+            .colored(self.check.get_location_info().unwrap().region_colorized())
+            .finish()
     }
 }
 
@@ -193,7 +166,7 @@ impl Serialize for BowOfLightHint {
     where
         S: Serializer,
     {
-        serializer.serialize_str(&self.get_hint_spoiler())
+        serializer.serialize_str(&self.text().to_text().expect("a valid UTF-8 string"))
     }
 }
 
@@ -277,7 +250,7 @@ fn generate_bow_of_light_hint(
     for location_node in world_graph.values_mut() {
         for &check in location_node.clone().get_checks().iter().flatten().collect::<Vec<&Check>>() {
             if let FillerItem::Item(item) = check_map.get(check.get_name()).unwrap().unwrap() {
-                if Item::BowOfLight.eq(&item) {
+                if filler_item::Item::BowOfLight.eq(&item) {
                     return BowOfLightHint { check };
                 }
             }
@@ -339,7 +312,7 @@ fn generate_location_hint(
     }
 
     let (item, check) = if let Some(check) = check {
-        (check_map.get(check.get_name()).unwrap().unwrap(), check)
+        (check_map.get(check.get_name()).unwrap().unwrap().as_item().unwrap(), check)
     } else {
         fail!("Failed to lookup Check from check_name: {}", check_name);
     };
@@ -353,13 +326,7 @@ fn generate_location_hint(
             None
         })
         .collect::<Vec<_>>();
-
-    LocationHint {
-        item: item.as_item().unwrap(),
-        check: check.clone(),
-        logical_ghosts,
-        ghosts: vec![],
-    }
+    LocationHint { item, check, logical_ghosts, ghosts: vec![] }
 }
 
 /**
@@ -644,11 +611,9 @@ fn get_potential_path_hints(
 
     // Limit potential paths to locations with valid Path Items that haven't yet been taken
     potential_path_checks.retain(|check| {
-        if let FillerItem::Item(item) = check_map.get(check.get_name()).unwrap().unwrap() {
-            !taken_checks.contains(&check.get_name()) && POSSIBLE_PATH_ITEMS.contains(&item)
-        } else {
-            false
-        }
+        !taken_checks.contains(&check.get_name())
+            && POSSIBLE_PATH_ITEMS
+                .contains(&check_map.get(check.get_name()).unwrap().unwrap().as_item().unwrap())
     });
 
     // Test candidate items to see if Boss can be defeated without them
@@ -786,8 +751,8 @@ pub(crate) fn hint_ghost_name(ghost: &HintGhost) -> &'static str {
     }
 }
 
-use Item::*;
-const POSSIBLE_PATH_ITEMS: [Item; 48] = [
+use filler_item::Item::*;
+const POSSIBLE_PATH_ITEMS: [filler_item::Item; 48] = [
     Bow01, Bow02, Boomerang01, Boomerang02, Hookshot01, Hookshot02, Bombs01, Bombs02, FireRod01,
     FireRod02, IceRod01, IceRod02, Hammer01, Hammer02, SandRod01, SandRod02, TornadoRod01,
     TornadoRod02, Bell, StaminaScroll, PegasusBoots, Flippers, HylianShield, SmoothGem,
