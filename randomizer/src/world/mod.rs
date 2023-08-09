@@ -1,3 +1,5 @@
+use modinfo::hints::hint_ghost_name;
+
 mod dark;
 mod desert;
 mod eastern;
@@ -15,7 +17,6 @@ mod turtle;
 
 use crate::regions::Subregion;
 use crate::{
-    hints::hint_ghost_name,
     legacy::path::Path,
     model::{
         check::Check,

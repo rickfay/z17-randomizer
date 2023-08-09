@@ -12,6 +12,7 @@ use log::{debug, error, info};
 use macros::fail;
 use model::filler_item::FillerItem;
 use modinfo::{
+    hints::Hints,
     text::{Colored, Symbol},
     Settings,
 };
@@ -22,9 +23,7 @@ use regions::Subregion;
 use rom::Rom;
 use serde::{ser::SerializeMap, Serialize, Serializer};
 
-use crate::{
-    constants::VERSION, hints::Hints, metrics::Metrics, patch::msbf::MsbfKey, system::UserConfig,
-};
+use crate::{constants::VERSION, metrics::Metrics, patch::msbf::MsbfKey, system::UserConfig};
 
 pub mod constants;
 mod entrance_rando;

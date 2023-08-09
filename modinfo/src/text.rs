@@ -1,4 +1,9 @@
-use std::fmt::{self, Display, Formatter, Write};
+use std::{
+    borrow::Cow,
+    fmt::{self, Display, Formatter, Write},
+};
+
+use serde::Serialize;
 
 pub type GameString = String;
 
@@ -22,6 +27,19 @@ impl<'a> Text<'a> {
     pub fn to_text(&self) -> Option<String> {
         self.parts.iter().map(Part::to_string).collect()
     }
+
+    pub fn to_owned(&self) -> Text<'static> {
+        Text { parts: self.parts.iter().map(Part::to_owned).collect() }
+    }
+}
+
+impl Serialize for Text<'_> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        serializer.serialize_str(&self.to_text().expect("a valid UTF-8 string"))
+    }
 }
 
 #[derive(Debug, Default)]
@@ -31,7 +49,7 @@ pub struct TextBuilder<'a> {
 
 impl<'a> TextBuilder<'a> {
     pub fn text(mut self, text: &'a str) -> Self {
-        self.parts.push(Part::Raw(text));
+        self.parts.push(Part::Raw(text.into()));
         self
     }
 
@@ -50,9 +68,9 @@ impl<'a> TextBuilder<'a> {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub enum Part<'a> {
-    Raw(&'a str),
+    Raw(Cow<'a, str>),
     Colored(Colored<'a>),
     Control(Control),
 }
@@ -76,17 +94,29 @@ impl<'a> Part<'a> {
             Self::Control(_) => None,
         }
     }
+
+    fn to_owned(&self) -> Part<'static> {
+        match self {
+            Self::Raw(raw) => Part::Raw(Cow::Owned(raw.clone().into_owned())),
+            Self::Colored(colored) => Part::Colored(colored.to_owned()),
+            Self::Control(control) => Part::Control(*control),
+        }
+    }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Colored<'a> {
     color: Color,
-    text: &'a str,
+    text: Cow<'a, str>,
 }
 
 impl<'a> Colored<'a> {
     pub fn new(color: Color, text: &'a str) -> Self {
-        Self { color, text }
+        Self { color, text: text.into() }
+    }
+
+    fn to_owned(&self) -> Colored<'static> {
+        Colored { color: self.color, text: Cow::Owned(self.text.clone().into_owned()) }
     }
 }
 
