@@ -5,13 +5,9 @@ use serde::{ser::SerializeMap, Serialize};
 
 use crate::text::Text;
 
-type HintMap = HashMap<HintGhost, Text<'static>>;
-
-#[derive(Debug, Default, Serialize)]
+#[derive(Debug, Default)]
 pub struct Hints {
-    #[serde(serialize_with = "serialize_ghosts")]
-    pub ghosts: HintMap,
-    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ghosts: HashMap<HintGhost, Text<'static>>,
     pub bow_of_light: Option<Text<'static>>,
 }
 
@@ -21,15 +17,22 @@ impl Hints {
     }
 }
 
-fn serialize_ghosts<S>(ghosts: &HintMap, serializer: S) -> Result<S::Ok, S::Error>
-where
-    S: serde::Serializer,
-{
-    let mut map = serializer.serialize_map(Some(ghosts.len()))?;
-    for (ghost, text) in ghosts.iter() {
-        map.serialize_entry(hint_ghost_name(ghost), text)?;
+impl Serialize for Hints {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        let mut map = serializer.serialize_map(Some(
+            self.ghosts.len() + self.bow_of_light.as_ref().map(|_| 1).unwrap_or_default(),
+        ))?;
+        for (ghost, text) in self.ghosts.iter() {
+            map.serialize_entry(hint_ghost_name(ghost), text)?;
+        }
+        if let Some(text) = self.bow_of_light.as_ref() {
+            map.serialize_entry("Bow of Light Hint", text)?;
+        }
+        map.end()
     }
-    map.end()
 }
 
 pub fn hint_ghost_name(ghost: &HintGhost) -> &'static str {
