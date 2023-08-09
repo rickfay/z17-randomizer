@@ -1,7 +1,10 @@
-use modinfo::text::{Color, Colored};
+use modinfo::{
+    hints::hint_ghost_name,
+    text::{Color, Colored},
+};
 use serde::{Serialize, Serializer};
 
-use crate::{hints::hint_ghost_name, item_to_str, Result};
+use crate::{item_to_str, Result};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum FillerItem {

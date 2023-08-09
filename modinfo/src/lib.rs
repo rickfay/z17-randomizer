@@ -1,3 +1,4 @@
+pub mod hints;
 pub mod settings;
 pub mod text;
 

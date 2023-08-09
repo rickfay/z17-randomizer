@@ -8,7 +8,6 @@ use log::info;
 use modinfo::text::{Color, Colored, Control};
 
 use crate::{
-    hints::Hint,
     patch::messages::{hint_ghosts::HintGhost, msbt::load_msbt},
     LocationInfo, Patcher, Result, SeedInfo,
 };
@@ -196,7 +195,7 @@ fn patch_general_hint_ghosts(patcher: &mut Patcher, seed_info: &SeedInfo) -> Res
 const EMPTY_MSG: &str = "\0\0";
 
 fn patch_hint_ghosts(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
-    if seed_info.hints.always_hints.is_empty() {
+    if seed_info.hints.is_empty() {
         info!("No Ghost Hints generated.");
         return Ok(());
     } else {
@@ -206,46 +205,12 @@ fn patch_hint_ghosts(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> 
     // Organize Hints by the MSBT File they need to update
     let mut msbt_hint_map = BTreeMap::new();
 
-    // Path Hints
-    for path_hint in &seed_info.hints.path_hints {
-        // Make mutable copy of hint for processing
-        let path_hint = &mut path_hint.clone();
-
-        for ghost in &path_hint.ghosts {
-            let hint_ghost = HintGhost::from(*ghost);
-            let entry = msbt_hint_map
-                .entry((hint_ghost.course, hint_ghost.msbt_file))
-                .or_insert_with(BTreeMap::new);
-            entry.insert(hint_ghost.msg_label, path_hint.text().to_game_text());
-        }
-    }
-
-    // Always Hints
-    for always_hint in &seed_info.hints.always_hints {
-        // Make mutable copy of hint for processing
-        let always_hint = &mut always_hint.clone();
-
-        for ghost in &always_hint.ghosts {
-            let hint_ghost = HintGhost::from(*ghost);
-            let entry = msbt_hint_map
-                .entry((hint_ghost.course, hint_ghost.msbt_file))
-                .or_insert_with(BTreeMap::new);
-            entry.insert(hint_ghost.msg_label, always_hint.text().to_game_text());
-        }
-    }
-
-    // Sometimes Hints
-    for sometimes_hint in &seed_info.hints.sometimes_hints {
-        // Make mutable copy of hint for processing
-        let sometimes_hint = &mut sometimes_hint.clone();
-
-        for ghost in &sometimes_hint.ghosts {
-            let hint_ghost = HintGhost::from(*ghost);
-            let entry = msbt_hint_map
-                .entry((hint_ghost.course, hint_ghost.msbt_file))
-                .or_insert_with(BTreeMap::new);
-            entry.insert(hint_ghost.msg_label, sometimes_hint.text().to_game_text());
-        }
+    for (ghost, text) in seed_info.hints.ghosts.iter() {
+        let hint_ghost = HintGhost::from(*ghost);
+        let entry = msbt_hint_map
+            .entry((hint_ghost.course, hint_ghost.msbt_file))
+            .or_insert_with(BTreeMap::new);
+        entry.insert(hint_ghost.msg_label, text.to_game_text());
     }
 
     // FIXME extremely dumb. Clear out some unused messages in Lost Woods to keep file size down.
@@ -281,11 +246,11 @@ fn patch_hint_ghosts(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> 
 }
 
 fn patch_bow_of_light(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
-    if let Some(bow_of_light_hint) = seed_info.hints.bow_of_light_hint.as_ref() {
+    if let Some(bow_of_light_hint) = seed_info.hints.bow_of_light.as_ref() {
         let mut msbt = load_msbt(patcher, IndoorDark, "HintGhostDark")?;
         // Most of HintGhostDark.msbt is a duplicate of the identical file under FieldDark, but it's not used. Choosing
         // an easily testable ghost Key to repurpose for a new Ghost in Hilda's Study.
-        msbt.set("HintGhost_FieldDark_2C_014", &bow_of_light_hint.text().to_game_text());
+        msbt.set("HintGhost_FieldDark_2C_014", &bow_of_light_hint.to_game_text());
         // fixme also dumb: clear out unused messages to keep filesize down.
         msbt.set("HintGhost_FieldDark_02_001", EMPTY_MSG);
         msbt.set("HintGhost_FieldDark_03_002", EMPTY_MSG);

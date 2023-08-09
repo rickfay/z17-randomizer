@@ -2,9 +2,9 @@ use std::collections::HashMap;
 
 use game::HintGhost;
 use log::info;
+use modinfo::hints::hint_ghost_name;
 
 use crate::{
-    hints::hint_ghost_name,
     legacy::path::Path,
     model::{
         check::Check,
