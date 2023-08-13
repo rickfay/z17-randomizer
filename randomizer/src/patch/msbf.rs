@@ -1,4 +1,4 @@
-use albw::string_constants;
+use rom::string_constants;
 
 string_constants! {
     #[allow(non_upper_case_globals)]

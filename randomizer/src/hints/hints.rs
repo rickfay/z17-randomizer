@@ -1,7 +1,7 @@
 // todo externalize all hint text here
 
 #[allow(unused)]
-pub(crate) const JOKE_HINTS: [&'static str; 1] = [r#"I'm shocked. You're the first
+pub(crate) const JOKE_HINTS: [&str; 1] = [r#"I'm shocked. You're the first
 person who's ever spoken to me.
 
 I've been here for many years,

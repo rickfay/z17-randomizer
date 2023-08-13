@@ -1,8 +1,8 @@
-use {
-    crate::model::progress::Progress,
-    settings::logic_mode::LogicMode::*,
-    std::fmt::{Debug, Formatter},
-};
+use std::fmt::{Debug, Formatter};
+
+use modinfo::settings::logic::LogicMode::*;
+
+use crate::model::progress::Progress;
 
 // TODO I'd eventually like to externalize the logic, both for organization purposes and to allow users to write custom logic. But this is fine for now.
 

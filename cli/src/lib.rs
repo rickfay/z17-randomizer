@@ -1,13 +1,14 @@
-use {
-    log::info,
-    settings::{
-        hyrule_castle_setting::HyruleCastleSetting, logic::Logic, logic_mode::LogicMode,
-        pedestal_setting::PedestalSetting, Options, Settings,
-    },
-    std::{
-        io::{stdin, stdout, Read, Write},
-        str::FromStr,
-    },
+use std::{
+    io::{stdin, stdout, Read, Write},
+    str::FromStr,
+};
+
+use log::info;
+use modinfo::settings::{
+    hyrule_castle::HyruleCastleSetting,
+    logic::{Logic, LogicMode},
+    pedestal::PedestalSetting,
+    Options, Settings,
 };
 
 /// Pauses program execution

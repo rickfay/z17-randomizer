@@ -1,9 +1,10 @@
-use {
-    crate::model::location::{Location, Location::*},
-    albw::course::{Id, Id::*},
-    std::collections::HashMap,
-    LoadingZoneId::*,
-};
+use std::collections::HashMap;
+
+use game::Course::{self, *};
+
+use crate::model::location::{Location, Location::*};
+
+use LoadingZoneId::*;
 
 /**
 
@@ -22,7 +23,7 @@ pub struct LoadingZone {
 
     unq: u16,
 
-    scene: Id,
+    scene: Course,
     scene_id: u16,
     spawn: u16,
 

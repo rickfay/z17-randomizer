@@ -1,15 +1,15 @@
-use {
-    crate::{
-        hints::{formatting::*, Hint},
-        patch::messages::{hint_ghosts::HintGhost, msbt::load_msbt},
-        LocationInfo, Patcher, Result, SeedInfo,
-    },
-    albw::{
-        course::Id::*,
-        Item::{PendantPower, PendantWisdom},
-    },
-    log::info,
-    std::collections::BTreeMap,
+use std::collections::BTreeMap;
+
+use game::{
+    Course::{self, *},
+    Item::{PendantPower, PendantWisdom},
+};
+use log::info;
+
+use crate::{
+    hints::{formatting::*, Hint},
+    patch::messages::{hint_ghosts::HintGhost, msbt::load_msbt},
+    LocationInfo, Patcher, Result, SeedInfo,
 };
 
 mod hint_ghosts;
@@ -37,7 +37,7 @@ pub fn patch_messages(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()>
 /// Prints out all String Values and their indexed Label Keys for a given MSBT File
 #[allow(unused)]
 #[deprecated]
-fn debug(patcher: &mut Patcher, course: albw::course::Id, file: &str) {
+fn debug(patcher: &mut Patcher, course: Course, file: &str) {
     load_msbt(patcher, course, file).unwrap().debug();
     info!("Early Debug Exit");
     std::process::exit(0);
@@ -69,7 +69,7 @@ fn patch_ravio(patcher: &mut Patcher) -> Result<()> {
             name("for free")
         ),
     );
-    ravio_shop.set("lgt_RentalKeeper_Field_2C_03", &format!("stuff and things"));
+    ravio_shop.set("lgt_RentalKeeper_Field_2C_03", "stuff and things");
     patcher.update(ravio_shop.dump())?;
 
     Ok(())
@@ -211,7 +211,7 @@ fn patch_hint_ghosts(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> 
             let hint_ghost = HintGhost::from(*ghost);
             let entry = msbt_hint_map
                 .entry((hint_ghost.course, hint_ghost.msbt_file))
-                .or_insert_with(|| BTreeMap::new());
+                .or_insert_with(BTreeMap::new);
             entry.insert(hint_ghost.msg_label, path_hint.get_hint());
         }
     }
@@ -225,7 +225,7 @@ fn patch_hint_ghosts(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> 
             let hint_ghost = HintGhost::from(*ghost);
             let entry = msbt_hint_map
                 .entry((hint_ghost.course, hint_ghost.msbt_file))
-                .or_insert_with(|| BTreeMap::new());
+                .or_insert_with(BTreeMap::new);
             entry.insert(hint_ghost.msg_label, always_hint.get_hint());
         }
     }
@@ -239,7 +239,7 @@ fn patch_hint_ghosts(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> 
             let hint_ghost = HintGhost::from(*ghost);
             let entry = msbt_hint_map
                 .entry((hint_ghost.course, hint_ghost.msbt_file))
-                .or_insert_with(|| BTreeMap::new());
+                .or_insert_with(BTreeMap::new);
             entry.insert(hint_ghost.msg_label, sometimes_hint.get_hint());
         }
     }

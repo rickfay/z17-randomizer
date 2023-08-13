@@ -1,22 +1,27 @@
-use {
-    self::code::Code,
-    crate::{patch::util::*, Error, ItemExt, Result, SeedInfo, Settings},
-    albw::{
-        course::{Id, Id::*},
-        demo::Timed,
-        flow::FlowMut,
-        scene::{Arg, Obj, Rail, SceneMeta},
-        Demo, File, Game, IntoBytes, Item, Language, Scene,
-    },
-    fs_extra::dir::CopyOptions,
-    log::{debug, error, info},
-    macros::fail,
-    path_absolutize::*,
-    serde::Serialize,
-    std::{collections::HashMap, fs, iter, path::Path},
-    tempfile::tempdir,
-    try_insert_ext::EntryInsertExt,
+use std::{collections::HashMap, fs, iter, path::Path};
+
+use fs_extra::dir::CopyOptions;
+use game::{
+    Course::{self as CourseId, *},
+    Item,
 };
+use log::{debug, error, info};
+use macros::fail;
+use modinfo::Settings;
+use path_absolutize::*;
+use rom::{
+    demo::Timed,
+    flow::FlowMut,
+    scene::{Arg, Obj, Rail, SceneMeta},
+    Demo, File, IntoBytes, Language, Rom, Scene,
+};
+use serde::Serialize;
+use tempfile::tempdir;
+use try_insert_ext::EntryInsertExt;
+
+use crate::{patch::util::*, Error, ItemExt, Result, SeedInfo};
+
+use code::Code;
 
 mod code;
 mod flow;
@@ -44,15 +49,15 @@ pub struct DungeonPrizes {
 
 #[derive(Debug)]
 pub struct Patcher {
-    game: Game,
+    game: Rom,
     boot: Language,
     rentals: [Item; 9],
     merchant: [Item; 3],
-    courses: HashMap<Id, Course>,
+    courses: HashMap<CourseId, Course>,
 }
 
 impl Patcher {
-    pub fn new(game: Game) -> Result<Self> {
+    pub fn new(game: Rom) -> Result<Self> {
         let boot = game.boot()?;
         Ok(Self {
             game,
@@ -63,20 +68,22 @@ impl Patcher {
         })
     }
 
-    fn add_obj(&mut self, id: Id, stage_index: u16, obj: Obj) {
+    fn add_obj(&mut self, id: CourseId, stage_index: u16, obj: Obj) {
         self.scene(id, stage_index - 1).unwrap().stage_mut().get_mut().add_obj(obj);
     }
 
-    fn add_rail(&mut self, id: Id, stage_index: u16, rail: Rail) {
+    fn add_rail(&mut self, id: CourseId, stage_index: u16, rail: Rail) {
         self.scene(id, stage_index - 1).unwrap().stage_mut().get_mut().add_rail(rail);
     }
 
     #[allow(unused)]
-    fn add_system(&mut self, id: Id, stage_index: u16, obj: Obj) {
+    fn add_system(&mut self, id: CourseId, stage_index: u16, obj: Obj) {
         self.scene(id, stage_index - 1).unwrap().stage_mut().get_mut().add_system(obj);
     }
 
-    fn modify_objs(&mut self, id: Id, stage_index: u16, actions: &[(u16, Box<dyn Fn(&mut Obj)>)]) {
+    fn modify_objs(
+        &mut self, id: CourseId, stage_index: u16, actions: &[(u16, Box<dyn Fn(&mut Obj)>)],
+    ) {
         let stage = self.scene(id, stage_index - 1).unwrap().stage_mut().get_mut();
         for (unq, action) in actions {
             action(
@@ -96,7 +103,7 @@ impl Patcher {
     }
 
     fn modify_rails(
-        &mut self, id: Id, stage_index: u16, actions: &[(u16, Box<dyn Fn(&mut Rail)>)],
+        &mut self, id: CourseId, stage_index: u16, actions: &[(u16, Box<dyn Fn(&mut Rail)>)],
     ) {
         let stage = self.scene(id, stage_index - 1).unwrap().stage_mut().get_mut();
         for (unq, action) in actions {
@@ -117,7 +124,7 @@ impl Patcher {
     }
 
     fn modify_system(
-        &mut self, id: Id, stage_index: u16, actions: &[(u16, Box<dyn Fn(&mut Obj)>)],
+        &mut self, id: CourseId, stage_index: u16, actions: &[(u16, Box<dyn Fn(&mut Obj)>)],
     ) {
         let stage = self.scene(id, stage_index - 1).unwrap().stage_mut().get_mut();
         for (unq, action) in actions {
@@ -137,7 +144,7 @@ impl Patcher {
         }
     }
 
-    fn load_course(game: &mut Game, course: Id) -> Course {
+    fn load_course(game: &mut Rom, course: CourseId) -> Course {
         game.course(course)
             .language()
             .map(|load| Course {
@@ -148,12 +155,12 @@ impl Patcher {
             .unwrap()
     }
 
-    fn course(&mut self, course: Id) -> Result<&mut Course> {
+    fn course(&mut self, course: CourseId) -> Result<&mut Course> {
         let Self { game, ref mut courses, .. } = self;
         Ok(courses.entry(course).or_insert(Self::load_course(game, course)))
     }
 
-    fn scene(&mut self, course: Id, stage: u16) -> Result<&mut Scene> {
+    fn scene(&mut self, course: CourseId, stage: u16) -> Result<&mut Scene> {
         let Self { game, ref mut courses, .. } = self;
         courses
             .entry(course)
@@ -164,19 +171,21 @@ impl Patcher {
             .map_err(Into::into)
     }
 
-    fn scene_meta(&mut self, course: Id) -> &mut SceneMeta {
+    fn scene_meta(&mut self, course: CourseId) -> &mut SceneMeta {
         let Self { game, ref mut courses, .. } = self;
         let Course { ref mut scene_meta, .. } =
             courses.entry(course).or_insert(Self::load_course(game, course));
         scene_meta.as_mut().unwrap()
     }
 
-    fn update(&mut self, (course, file): (Id, File<Vec<u8>>)) -> Result<()> {
+    fn update(&mut self, (course, file): (CourseId, File<Vec<u8>>)) -> Result<()> {
         self.language(course)?.update(file)?;
         Ok(())
     }
 
-    fn inject_msbf(&mut self, course: Id, msbf: Option<&(&str, File<Box<[u8]>>)>) -> Result<()> {
+    fn inject_msbf(
+        &mut self, course: CourseId, msbf: Option<&(&str, File<Box<[u8]>>)>,
+    ) -> Result<()> {
         if let Some((msbf_key, msbf_file)) = msbf {
             self.language(course)?.flow_inject(msbf_key, msbf_file.clone())?;
         }
@@ -186,7 +195,7 @@ impl Patcher {
 
     fn language<C>(&mut self, course: C) -> Result<&mut Language>
     where
-        C: Into<Option<Id>>,
+        C: Into<Option<CourseId>>,
     {
         Ok(if let Some(course) = course.into() {
             &mut self.course(course)?.language
@@ -195,14 +204,14 @@ impl Patcher {
         })
     }
 
-    fn flow<C>(&mut self, course: C) -> Result<albw::language::LoadedMut<FlowMut>>
+    fn flow<C>(&mut self, course: C) -> Result<rom::language::LoadedMut<FlowMut>>
     where
-        C: Into<Option<Id>>,
+        C: Into<Option<CourseId>>,
     {
         Ok(self.language(course)?.flow_mut())
     }
 
-    fn parse_args(&mut self, course: Id, stage: u16, unq: u16) -> &mut Arg {
+    fn parse_args(&mut self, course: CourseId, stage: u16, unq: u16) -> &mut Arg {
         self.scene(course, stage)
             .unwrap()
             .stage_mut()
@@ -216,7 +225,8 @@ impl Patcher {
     }
 
     fn prep_chest(
-        &mut self, item: Item, course: Id, stage: u16, unq: u16, is_big: bool, settings: &Settings,
+        &mut self, item: Item, course: CourseId, stage: u16, unq: u16, is_big: bool,
+        settings: &Settings,
     ) -> Result<()> {
         // Set contents
         self.parse_args(course, stage, unq).0 = item as i32;
@@ -225,9 +235,15 @@ impl Patcher {
         let large_chest = (34, "TreasureBoxL");
 
         let chest_data = if settings.options.chest_size_matches_contents {
-            if item.goes_in_csmc_large_chest() { large_chest } else { small_chest }
+            if item.goes_in_csmc_large_chest() {
+                large_chest
+            } else {
+                small_chest
+            }
+        } else if is_big {
+            large_chest
         } else {
-            if is_big { large_chest } else { small_chest }
+            small_chest
         };
 
         // Forcibly set ID
@@ -275,7 +291,7 @@ impl Patcher {
                     .ok_or_else(|| {
                         Error::game(format!(
                             "{}/{} [{}] not found",
-                            course.as_ref().map(Id::as_str).unwrap_or("Boot"),
+                            course.as_ref().map(CourseId::as_str).unwrap_or("Boot"),
                             name,
                             index
                         ))
@@ -321,7 +337,7 @@ impl Patcher {
         self.scene(DungeonWind, 0)?.actors_mut().add(warp_tile.clone())?; // Gales 1F
         self.scene(FieldDark, 19)?.actors_mut().add(warp_tile.clone())?; // Dark Maze
         self.scene(DungeonWater, 1)?.actors_mut().add(warp_tile.clone())?; // Swamp Palace B1
-        self.scene(DungeonDokuro, 1)?.actors_mut().add(warp_tile.clone())?; // Skull Woods B2
+        self.scene(DungeonDokuro, 1)?.actors_mut().add(warp_tile)?; // Skull Woods B2
 
         // Add Ravio to Hilda's Study to give out Bow of Light Hint
         let hint_ghost = self.scene(IndoorDark, 15)?.actors().get_actor_bch("HintGhost")?;
@@ -405,14 +421,14 @@ pub struct Course {
 
 #[derive(Clone, Debug)]
 pub enum Patch {
-    Chest { course: Id, stage: u16, unq: u16 },
-    BigChest { course: Id, stage: u16, unq: u16 },
-    Event { course: Option<Id>, name: &'static str, index: u16 },
-    Heart { course: Id, scene: u16, unq: u16 },
-    Key { course: Id, scene: u16, unq: u16 },
-    Maiamai { course: Id, scene: u16, unq: u16 },
-    SilverRupee { course: Id, scene: u16, unq: u16 },
-    GoldRupee { course: Id, scene: u16, unq: u16 },
+    Chest { course: CourseId, stage: u16, unq: u16 },
+    BigChest { course: CourseId, stage: u16, unq: u16 },
+    Event { course: Option<CourseId>, name: &'static str, index: u16 },
+    Heart { course: CourseId, scene: u16, unq: u16 },
+    Key { course: CourseId, scene: u16, unq: u16 },
+    Maiamai { course: CourseId, scene: u16, unq: u16 },
+    SilverRupee { course: CourseId, scene: u16, unq: u16 },
+    GoldRupee { course: CourseId, scene: u16, unq: u16 },
     Shop(Shop),
     Multi(Vec<Patch>),
     None, // Workaround until everything is shufflable
@@ -432,7 +448,7 @@ pub enum Shop {
 
 #[derive(Debug)]
 pub struct Patches {
-    game: Game,
+    game: Rom,
     code: Code,
     romfs: Files,
 }
@@ -458,10 +474,11 @@ impl Patches {
             self.game.id()
         );
 
-        match fs_extra::copy_items(&[moddir], path, &CopyOptions {
-            overwrite: true,
-            ..Default::default()
-        })
+        match fs_extra::copy_items(
+            &[moddir],
+            path,
+            &CopyOptions { overwrite: true, ..Default::default() },
+        )
         .map_err(Error::io)
         {
             Ok(_) => Ok(()),
@@ -495,7 +512,7 @@ impl Files {
 
 /// Removes extraneous events from all important cutscenes.
 fn cutscenes<'game>(
-    game: &'game Game, settings: &Settings,
+    game: &'game Rom, settings: &Settings,
 ) -> impl Iterator<Item = Result<File<Demo>>> + 'game {
     info!("Patching Cutscenes...");
     let Settings { logic, options, .. } = settings.clone();

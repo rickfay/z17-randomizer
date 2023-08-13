@@ -1,9 +1,10 @@
-use {
-    crate::{Patcher, Result},
-    albw::{course::Id, File},
-    byteorder::{ByteOrder, LittleEndian},
-    std::str::from_utf8,
-};
+use std::str::from_utf8;
+
+use byteorder::{ByteOrder, LittleEndian};
+use game::Course;
+use rom::File;
+
+use crate::{Patcher, Result};
 
 /// MSBT File
 ///
@@ -12,7 +13,7 @@ use {
 /// Reference: https://github.com/Kinnay/Nintendo-File-Formats/wiki/MSBT-File-Format
 pub(crate) struct MsbtFile {
     filename: String,
-    course: Id,
+    course: Course,
     lbl1: Lbl1Block,
     #[allow(unused)]
     atr1: Atr1Block,
@@ -48,12 +49,11 @@ impl MsbtFile {
         let hash = calc_hash(String::from(key), self.lbl1.num_slots) as usize;
         let hash_table_slot = self.lbl1.hash_table.get(hash).unwrap();
 
-        return if let Some(label) = hash_table_slot.labels.iter().find(|&label| label.label.eq(key))
-        {
-            Some(label.item_index as usize)
-        } else {
-            None
-        };
+        return hash_table_slot
+            .labels
+            .iter()
+            .find(|&label| label.label.eq(key))
+            .map(|label| label.item_index as usize);
     }
 
     #[allow(unused)]
@@ -73,7 +73,7 @@ impl MsbtFile {
     }
 
     /// Builds a valid `.msbt` file and dumps it as a [`File<Vec<u8>>`]
-    pub(crate) fn dump(&self) -> (Id, File<Vec<u8>>) {
+    pub(crate) fn dump(&self) -> (Course, File<Vec<u8>>) {
         // LBL1 BLOCK
         let mut hash_table_buffer = Vec::new();
         let mut labels_buffer = Vec::new();
@@ -156,7 +156,7 @@ impl MsbtFile {
         msbt_file.extend_from_slice(&atr1_block);
         msbt_file.extend_from_slice(&txt2_block);
 
-        (self.course, File::new(self.filename.clone(), Vec::from(msbt_file)))
+        (self.course, File::new(self.filename.clone(), msbt_file))
     }
 }
 
@@ -269,10 +269,9 @@ struct Txt2Block {
 }
 
 /// Load MSBT File
-pub(crate) fn load_msbt(patcher: &mut Patcher, course: Id, file: &str) -> Result<MsbtFile> {
+pub(crate) fn load_msbt(patcher: &mut Patcher, course: Course, file: &str) -> Result<MsbtFile> {
     let filename = format!("US_English/{}.msbt", file);
-    let mut file =
-        patcher.language(course.clone()).unwrap().flow().extract(filename.as_str()).unwrap();
+    let mut file = patcher.language(course).unwrap().flow().extract(filename.as_str()).unwrap();
 
     let raw = file.get_mut();
 

@@ -1,19 +1,17 @@
-use {
-    super::Patcher,
-    crate::{patch::util::prize_flag, Result, SeedInfo, Settings},
-    albw::{
-        ExHeader,
-        Item::{self, *},
-    },
-    arm::*,
-    settings::pedestal_setting::PedestalSetting::*,
-    std::{
-        collections::HashMap,
-        fs::{self, File},
-        io::prelude::*,
-        path::Path,
-    },
+use std::{
+    collections::HashMap,
+    fs::{self, File},
+    io::Write,
+    path::Path,
 };
+
+use arm::*;
+use game::Item::{self, *};
+use modinfo::settings::{pedestal::PedestalSetting::*, Settings};
+use rom::ExHeader;
+
+use super::Patcher;
+use crate::{patch::util::prize_flag, Result, SeedInfo};
 
 mod arm;
 
@@ -215,7 +213,7 @@ pub fn create(patcher: &Patcher, seed_info: &SeedInfo) -> Code {
         let actor = actor_names
             .get(rental)
             .copied()
-            .expect(&*format!("Could not find actor name for {}", rental.as_str()));
+            .unwrap_or_else(|| panic!("Could not find actor name for {}", rental.as_str()));
         code.text().define([
             ldr(R1, actor),
             str_(R4, (R0, actor_offset)),

@@ -1,10 +1,9 @@
-use {
-    super::Patcher,
-    crate::Result,
-    albw::{course::Id, Item},
-    log::info,
-    settings::Settings,
-};
+use game::{Course, Item};
+use log::info;
+use modinfo::Settings;
+
+use super::Patcher;
+use crate::Result;
 
 /*
  * TODO - Want to rewrite this entire subsystem
@@ -57,7 +56,7 @@ macro_rules! course {
         None
     };
     ($course:ident) => {
-        ::albw::course::Id::$course
+        ::game::Course::$course
     };
 }
 
@@ -157,7 +156,7 @@ fn patch_castle_connection(patcher: &mut Patcher, _settings: &Settings) -> Resul
 
 fn patch_hint_ghosts(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
     let price = settings.logic.hint_ghost_price as u32;
-    let negative_price = (-1 * price as i32) as u32;
+    let negative_price = -(price as i32) as u32;
 
     apply!(patcher,
         Boot/HintGhost {
@@ -204,11 +203,11 @@ fn patch_final_boss(patcher: &mut Patcher) -> Result<()> {
 #[deprecated]
 fn debug<C>(patcher: &mut Patcher, course: C, file_name: &str) -> Result<()>
 where
-    C: Into<Option<Id>>,
+    C: Into<Option<Course>>,
 {
     let course = course.into();
 
-    if let Some(file) = patcher.flow(course.clone())?.get_mut(file_name) {
+    if let Some(file) = patcher.flow(course)?.get_mut(file_name) {
         file?.get().debug();
     } else {
         macros::fail!(

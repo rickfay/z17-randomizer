@@ -1,32 +1,30 @@
-use {
-    crate::{
-        constants::VERSION,
-        hints::{formatting::*, Hints},
-        metrics::Metrics,
-        patch::msbf::MsbfKey,
-        system::UserConfig,
-    },
-    albw::{
-        Game,
-        Item::{self, *},
-    },
-    log::{debug, error, info},
-    macros::fail,
-    model::filler_item::{convert, FillerItem},
-    patch::Patcher,
-    path_absolutize::*,
-    rand::{rngs::StdRng, SeedableRng},
-    regions::Subregion,
-    serde::{ser::SerializeMap, Serialize, Serializer},
-    settings::Settings,
-    std::{
-        collections::{hash_map::DefaultHasher, BTreeMap},
-        error::Error as StdError,
-        fs::File,
-        hash::{Hash, Hasher},
-        io::{self, Write},
-        ops::Deref,
-    },
+use std::{
+    collections::{hash_map::DefaultHasher, BTreeMap},
+    error::Error as StdError,
+    fs::File,
+    hash::{Hash, Hasher},
+    io::{self, Write},
+    ops::Deref,
+};
+
+use game::Item::{self, *};
+use log::{debug, error, info};
+use macros::fail;
+use model::filler_item::{convert, FillerItem};
+use modinfo::Settings;
+use patch::Patcher;
+use path_absolutize::*;
+use rand::{rngs::StdRng, SeedableRng};
+use regions::Subregion;
+use rom::Rom;
+use serde::{ser::SerializeMap, Serialize, Serializer};
+
+use crate::{
+    constants::VERSION,
+    hints::{formatting::*, Hints},
+    metrics::Metrics,
+    patch::msbf::MsbfKey,
+    system::UserConfig,
 };
 
 pub mod constants;
@@ -78,11 +76,11 @@ impl Error {
     }
 }
 
-impl From<albw::Error> for Error {
-    fn from(err: albw::Error) -> Self {
+impl From<rom::Error> for Error {
+    fn from(err: rom::Error) -> Self {
         let kind = match err.kind() {
-            albw::ErrorKind::Io => ErrorKind::Io,
-            albw::ErrorKind::Rom => ErrorKind::Game,
+            rom::ErrorKind::Io => ErrorKind::Io,
+            rom::ErrorKind::Rom => ErrorKind::Game,
         };
         Self { kind, inner: err.into_inner() }
     }
@@ -468,7 +466,7 @@ fn align_json_values(json: &mut String) {
     const KEY_ALIGNMENT: usize = 56;
     let mut index_colon = 0;
     while index_colon < json.len() {
-        let index_colon_opt = json[index_colon..].find(":");
+        let index_colon_opt = json[index_colon..].find(':');
         if index_colon_opt.is_none() {
             break;
         }
@@ -478,7 +476,7 @@ fn align_json_values(json: &mut String) {
             continue;
         }
 
-        let index_prev_new_line = json[..index_colon].rfind("\n").unwrap_or_else(|| {
+        let index_prev_new_line = json[..index_colon].rfind('\n').unwrap_or_else(|| {
             fail!("Couldn't fine new line character before index: {}", index_colon);
         });
         let line_length_up_to_value = index_colon - index_prev_new_line;
@@ -665,12 +663,12 @@ pub fn patch_seed(
     if !no_patch {
         info!("Starting Patch Process...");
 
-        let game = Game::load(user_config.rom())?;
+        let game = Rom::load(user_config.rom())?;
         let mut patcher = Patcher::new(game)?;
 
         info!("ROM Loaded.\n");
 
-        regions::patch(&mut patcher, &seed_info.layout, &seed_info.settings)?;
+        regions::patch(&mut patcher, &seed_info.layout, seed_info.settings)?;
         let patches = patcher.prepare(seed_info)?;
         patches.dump(user_config.output())?;
     }

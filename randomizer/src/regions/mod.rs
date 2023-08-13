@@ -1,11 +1,12 @@
-use {
-    crate::{hints::hint_color::HintColor, patch::Patcher, Settings},
-    log::info,
-    std::{
-        fmt::{self, Debug, Formatter},
-        hash::{Hash, Hasher},
-    },
+use std::{
+    fmt::{self, Debug, Formatter},
+    hash::{Hash, Hasher},
 };
+
+use log::info;
+use modinfo::Settings;
+
+use crate::{hints::hint_color::HintColor, patch::Patcher};
 
 pub struct Subregion {
     name: &'static str,
@@ -20,7 +21,7 @@ impl Subregion {
     }
 
     pub fn name_colorized(&self) -> String {
-        self.color.format(&self.name)
+        self.color.format(self.name)
     }
 
     pub fn world(&self) -> World {
@@ -209,24 +210,24 @@ macro_rules! region {
     ) => {
 
         #[inline]
-        pub fn patch(patcher: &mut crate::patch::Patcher, layout: &crate::Layout, settings: &$crate::Settings) -> crate::Result<()> {
+        pub fn patch(patcher: &mut $crate::patch::Patcher, layout: &$crate::Layout, settings: &$crate::Settings) -> $crate::Result<()> {
             $start::patch(patcher, layout, settings)?;
             $($id::patch(patcher, layout, settings)?;)*
             Ok(())
         }
 
-        crate::subregion!($start $start_props);
-        $(crate::subregion!($id $props);)*
+        $crate::subregion!($start $start_props);
+        $($crate::subregion!($id $props);)*
 
         #[allow(unused)]
-        pub(crate) fn start() -> &'static crate::regions::Subregion {
+        pub(crate) fn start() -> &'static $crate::regions::Subregion {
             $start::SUBREGION
         }
 
         pub const NAME: &str = $name;
-        pub const COLOR: crate::hints::hint_color::HintColor = crate::hints::hint_color::HintColor::$color;
+        pub const COLOR: $crate::hints::hint_color::HintColor = $crate::hints::hint_color::HintColor::$color;
         #[allow(unused)]
-        pub const COURSE: albw::course::Id = albw::course::Id::$course;
+        pub const COURSE: ::game::Course = ::game::Course::$course;
     };
 }
 
@@ -245,7 +246,7 @@ macro_rules! subregion {
     }) => {
         pub mod $id {
 
-            use crate::{patch::Patcher, regions::Subregion};
+            use $crate::{patch::Patcher, regions::Subregion};
 
             pub use super::COURSE;
 
@@ -258,12 +259,12 @@ macro_rules! subregion {
 
             #[allow(unused)]
             #[inline]
-            pub fn patch(patcher: &mut Patcher, layout: &crate::Layout, settings: &$crate::Settings) -> crate::Result<()> {
-                $(use crate::patch::Patch;
-                $(crate::patch!($variant $props).apply(
+            pub fn patch(patcher: &mut Patcher, layout: &$crate::Layout, settings: &$crate::Settings) -> $crate::Result<()> {
+                $(use $crate::patch::Patch;
+                $($crate::patch!($variant $props).apply(
                     patcher,
                     layout
-                        .get(&crate::LocationInfo::new(SUBREGION, $key))
+                        .get(&$crate::LocationInfo::new(SUBREGION, $key))
                         .unwrap_or_else(|| unreachable!(stringify!($key))),
                     settings,
                 )?;)*)?
@@ -277,7 +278,7 @@ macro_rules! subregion {
 #[macro_export]
 macro_rules! patch {
     (Chest($course:ident $stage:literal[$unq:literal])) => {
-        Patch::Chest { course: albw::course::Id::$course, stage: $stage - 1, unq: $unq }
+        Patch::Chest { course: ::game::Course::$course, stage: $stage - 1, unq: $unq }
     };
     (Chest($stage:literal[$unq:literal])) => {
         Patch::Chest { course: COURSE, stage: $stage - 1, unq: $unq }
@@ -290,7 +291,7 @@ macro_rules! patch {
         ])
     };
     (BigChest($course:ident $stage:literal[$unq:literal])) => {
-        Patch::BigChest { course: albw::course::Id::$course, stage: $stage - 1, unq: $unq }
+        Patch::BigChest { course: ::game::Course::$course, stage: $stage - 1, unq: $unq }
     };
     (BigChest($stage:literal[$unq:literal])) => {
         Patch::BigChest { course: COURSE, stage: $stage - 1, unq: $unq }
@@ -302,7 +303,7 @@ macro_rules! patch {
         Patch::Event { course: None, name: stringify!($name), index: $index }
     };
     (Event($course:ident/$name:ident[$index:literal])) => {
-        Patch::Event { course: Some(albw::course::Id::$course), name: stringify!($name), index: $index }
+        Patch::Event { course: Some(::game::Course::$course), name: stringify!($name), index: $index }
     };
     (Event[$($name:ident[$index:literal],)+]) => {
         Patch::Multi(vec![
@@ -312,37 +313,37 @@ macro_rules! patch {
         ])
     };
     (Heart($course:ident $scene:literal[$unq:literal])) => {
-        Patch::Heart { course: albw::course::Id::$course, scene: $scene - 1, unq: $unq }
+        Patch::Heart { course: ::game::Course::$course, scene: $scene - 1, unq: $unq }
     };
     (Heart($scene:literal[$unq:literal])) => {
         Patch::Heart { course: COURSE, scene: $scene - 1, unq: $unq }
     };
     (Key($course:ident $scene:literal[$unq:literal])) => {
-        Patch::Key { course: albw::course::Id::$course, scene: $scene - 1, unq: $unq }
+        Patch::Key { course: ::game::Course::$course, scene: $scene - 1, unq: $unq }
     };
     (Key($scene:literal[$unq:literal])) => {
         Patch::Key { course: COURSE, scene: $scene - 1, unq: $unq }
     };
     (Maiamai($course:ident $scene:literal[$unq:literal])) => {
-        Patch::Maiamai { course: albw::course::Id::$course, scene: $scene - 1, unq: $unq }
+        Patch::Maiamai { course: ::game::Course::$course, scene: $scene - 1, unq: $unq }
     };
     (Maiamai($scene:literal[$unq:literal])) => {
         Patch::Maiamai { course: COURSE, scene: $scene - 1, unq: $unq }
     };
     (SilverRupee($course:ident $scene:literal[$unq:literal])) => {
-        Patch::SilverRupee { course: albw::course::Id::$course, scene: $scene - 1, unq: $unq }
+        Patch::SilverRupee { course: ::game::Course::$course, scene: $scene - 1, unq: $unq }
     };
     (SilverRupee($scene:literal[$unq:literal])) => {
         Patch::SilverRupee { course: COURSE, scene: $scene - 1, unq: $unq }
     };
     (GoldRupee($course:ident $scene:literal[$unq:literal])) => {
-        Patch::GoldRupee { course: albw::course::Id::$course, scene: $scene - 1, unq: $unq }
+        Patch::GoldRupee { course: ::game::Course::$course, scene: $scene - 1, unq: $unq }
     };
     (GoldRupee($scene:literal[$unq:literal])) => {
         Patch::GoldRupee { course: COURSE, scene: $scene - 1, unq: $unq }
     };
     (Shop($variant:ident$($args:tt)?)) => {
-        Patch::Shop(crate::patch::Shop::$variant $($args)?)
+        Patch::Shop($crate::patch::Shop::$variant $($args)?)
     };
     (None()) => {
         Patch::None

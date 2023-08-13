@@ -1,0 +1,13 @@
+[package]
+name = "modinfo"
+version = "0.3.1"
+authors = ["Rick Fay <rickwithanh@gmail.com>"]
+edition = "2021"
+license = "GPL-2.0-or-later"
+
+[dependencies]
+macros = { workspace = true }
+log = { workspace = true }
+rand = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }

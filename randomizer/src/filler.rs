@@ -1,20 +1,20 @@
-use {
-    crate::{
-        convert,
-        item_pools::{get_maiamai_pool, Pool},
-        model::{check::Check, location::Location, progress::Progress},
-        world::WorldGraph,
-        CheckMap,
-        FillerItem::{self, *},
-        LocationInfo, Settings,
-    },
-    albw::Item,
-    log::{error, info},
-    macros::fail,
-    queue::Queue,
-    rand::{rngs::StdRng, Rng},
-    settings::logic_mode::LogicMode::*,
-    std::collections::{BTreeMap, HashSet},
+use std::collections::{BTreeMap, HashSet};
+
+use game::Item;
+use log::{error, info};
+use macros::fail;
+use modinfo::settings::{logic::LogicMode::*, Settings};
+use queue::Queue;
+use rand::{rngs::StdRng, Rng};
+
+use crate::{
+    convert,
+    item_pools::{get_maiamai_pool, Pool},
+    model::{check::Check, location::Location, progress::Progress},
+    world::WorldGraph,
+    CheckMap,
+    FillerItem::{self, *},
+    LocationInfo,
 };
 
 /// Fill Seed such that All Locations are Reachable
@@ -127,7 +127,7 @@ fn preplace_items(
     for (check_name, item) in check_map.clone() {
         if check_name.starts_with("[LC]") && item.is_none() {
             let _ = &bow_light_positions.push(check_name.clone());
-        } else if check_name.starts_with("Ravio") && !check_name.contains("6") {
+        } else if check_name.starts_with("Ravio") && !check_name.contains('6') {
             let _ = &shop_positions.push(check_name.clone());
         } else if check_name.starts_with("[Mai]") {
             let _ = &maiamai_positions.push(check_name.clone());
@@ -264,7 +264,7 @@ fn map_to_result(
     world_graph: &mut WorldGraph, check_map: &mut CheckMap,
 ) -> Vec<(LocationInfo, Item)> {
     let mut result: Vec<(LocationInfo, Item)> = Vec::new();
-    for (_, location_node) in world_graph {
+    for location_node in world_graph.values_mut() {
         for check in location_node.clone().get_checks() {
             if let Some(loc_info) = check.get_location_info() {
                 result.push((
@@ -278,76 +278,85 @@ fn map_to_result(
 }
 
 fn is_dungeon_prize(item: FillerItem) -> bool {
-    match item {
-        PendantOfPower | PendantOfWisdom | PendantOfCourage01 | PendantOfCourage02 | SageGulley
-        | SageOren | SageSeres | SageOsfala | SageImpa | SageIrene | SageRosso => true,
-        _ => false,
-    }
+    matches!(
+        item,
+        PendantOfPower
+            | PendantOfWisdom
+            | PendantOfCourage01
+            | PendantOfCourage02
+            | SageGulley
+            | SageOren
+            | SageSeres
+            | SageOsfala
+            | SageImpa
+            | SageIrene
+            | SageRosso
+    )
 }
 
 fn is_dungeon_item(item: FillerItem) -> bool {
-    match item {
+    matches!(
+        item,
         HyruleSanctuaryKey
-        | LoruleSanctuaryKey
-        | EasternCompass
-        | EasternKeyBig
-        | EasternKeySmall01
-        | EasternKeySmall02
-        | GalesCompass
-        | GalesKeyBig
-        | GalesKeySmall01
-        | GalesKeySmall02
-        | GalesKeySmall03
-        | GalesKeySmall04
-        | HeraCompass
-        | HeraKeyBig
-        | HeraKeySmall01
-        | HeraKeySmall02
-        | DarkCompass
-        | DarkKeyBig
-        | DarkKeySmall01
-        | DarkKeySmall02
-        | DarkKeySmall03
-        | DarkKeySmall04
-        | SwampCompass
-        | SwampKeyBig
-        | SwampKeySmall01
-        | SwampKeySmall02
-        | SwampKeySmall03
-        | SwampKeySmall04
-        | SkullCompass
-        | SkullKeyBig
-        | SkullKeySmall01
-        | SkullKeySmall02
-        | SkullKeySmall03
-        | ThievesCompass
-        | ThievesKeyBig
-        | ThievesKeySmall
-        | IceCompass
-        | IceKeyBig
-        | IceKeySmall01
-        | IceKeySmall02
-        | IceKeySmall03
-        | DesertCompass
-        | DesertKeyBig
-        | DesertKeySmall01
-        | DesertKeySmall02
-        | DesertKeySmall03
-        | DesertKeySmall04
-        | DesertKeySmall05
-        | TurtleCompass
-        | TurtleKeyBig
-        | TurtleKeySmall01
-        | TurtleKeySmall02
-        | TurtleKeySmall03
-        | LoruleCastleCompass
-        | LoruleCastleKeySmall01
-        | LoruleCastleKeySmall02
-        | LoruleCastleKeySmall03
-        | LoruleCastleKeySmall04
-        | LoruleCastleKeySmall05 => true,
-        _ => false,
-    }
+            | LoruleSanctuaryKey
+            | EasternCompass
+            | EasternKeyBig
+            | EasternKeySmall01
+            | EasternKeySmall02
+            | GalesCompass
+            | GalesKeyBig
+            | GalesKeySmall01
+            | GalesKeySmall02
+            | GalesKeySmall03
+            | GalesKeySmall04
+            | HeraCompass
+            | HeraKeyBig
+            | HeraKeySmall01
+            | HeraKeySmall02
+            | DarkCompass
+            | DarkKeyBig
+            | DarkKeySmall01
+            | DarkKeySmall02
+            | DarkKeySmall03
+            | DarkKeySmall04
+            | SwampCompass
+            | SwampKeyBig
+            | SwampKeySmall01
+            | SwampKeySmall02
+            | SwampKeySmall03
+            | SwampKeySmall04
+            | SkullCompass
+            | SkullKeyBig
+            | SkullKeySmall01
+            | SkullKeySmall02
+            | SkullKeySmall03
+            | ThievesCompass
+            | ThievesKeyBig
+            | ThievesKeySmall
+            | IceCompass
+            | IceKeyBig
+            | IceKeySmall01
+            | IceKeySmall02
+            | IceKeySmall03
+            | DesertCompass
+            | DesertKeyBig
+            | DesertKeySmall01
+            | DesertKeySmall02
+            | DesertKeySmall03
+            | DesertKeySmall04
+            | DesertKeySmall05
+            | TurtleCompass
+            | TurtleKeyBig
+            | TurtleKeySmall01
+            | TurtleKeySmall02
+            | TurtleKeySmall03
+            | LoruleCastleCompass
+            | LoruleCastleKeySmall01
+            | LoruleCastleKeySmall02
+            | LoruleCastleKeySmall03
+            | LoruleCastleKeySmall04
+            | LoruleCastleKeySmall05
+    )
 }
 
 fn fill_junk(check_map: &mut CheckMap, rng: &mut StdRng, junk_items: &mut Pool) {
@@ -383,34 +392,32 @@ fn place_item_randomly(
     );
 }
 
-fn filter_checks(
-    item: FillerItem, checks: &mut Vec<Check>, check_map: &mut CheckMap,
-) -> Vec<Check> {
+fn filter_checks(item: FillerItem, checks: &[Check], check_map: &mut CheckMap) -> Vec<Check> {
     // Filter out non-empty checks
     let mut filtered_checks = checks
         .iter()
         .filter(|&x| check_map.get(x.get_name()).unwrap().is_none())
         .cloned()
-        .collect();
+        .collect::<Vec<_>>();
 
     // Filter checks by item type
     if is_dungeon_prize(item) {
-        filtered_checks = filter_dungeon_prize_checks(&mut filtered_checks);
+        filtered_checks = filter_dungeon_prize_checks(&filtered_checks);
     } else if is_dungeon_item(item) {
         let is_keysanity = false; // No keysanity yet, hardcode to false
         if !is_keysanity {
-            filtered_checks = filter_dungeon_checks(item, &mut filtered_checks);
+            filtered_checks = filter_dungeon_checks(item, &filtered_checks);
         }
     }
 
     filtered_checks
 }
 
-fn filter_dungeon_prize_checks(eligible_checks: &mut Vec<Check>) -> Vec<Check> {
+fn filter_dungeon_prize_checks(eligible_checks: &[Check]) -> Vec<Check> {
     eligible_checks.iter().filter(|&x| x.get_name().contains("Prize")).cloned().collect()
 }
 
-fn filter_dungeon_checks(item: FillerItem, eligible_checks: &mut Vec<Check>) -> Vec<Check> {
+fn filter_dungeon_checks(item: FillerItem, eligible_checks: &[Check]) -> Vec<Check> {
     eligible_checks
         .iter()
         .filter(|&x| {
@@ -466,15 +473,9 @@ fn exist_empty_reachable_check(checks: &Vec<Check>, check_map: &mut CheckMap) ->
 pub fn prefill_check_map(world_graph: &mut WorldGraph) -> CheckMap {
     let mut check_map = BTreeMap::new();
 
-    for (_, location_node) in world_graph {
+    for location_node in world_graph.values_mut() {
         for check in location_node.clone().get_checks() {
-            if check_map
-                .insert(check.get_name().to_owned(), match check.get_quest() {
-                    None => None,
-                    Some(quest) => Some(quest), // Quest items are static so just set them right away
-                })
-                .is_some()
-            {
+            if check_map.insert(check.get_name().to_owned(), check.get_quest()).is_some() {
                 fail!("Multiple checks have duplicate name: {}", check.get_name());
             }
         }
@@ -535,7 +536,7 @@ fn verify_all_locations_accessible(
     if reachable_checks.len() != IN_LOGIC_CHECKS + PROGRESSION_EVENTS + HINT_GHOSTS_OW {
         let reachable_check_names: Vec<&str> =
             reachable_checks.iter().map(|c| c.get_name()).collect();
-        for (check, _) in check_map {
+        for check in check_map.keys() {
             if !reachable_check_names.contains(&check.as_str()) {
                 info!("Unreachable Check: {}", check);
             }
@@ -644,9 +645,9 @@ fn assumed_fill(
         //
         reachable_checks = assumed_search(world_graph, items_owned, check_map, settings);
 
-        let filtered_checks = filter_checks(item, &mut reachable_checks, check_map);
+        let filtered_checks = filter_checks(item, &reachable_checks, check_map);
 
-        if filtered_checks.len() == 0 {
+        if filtered_checks.is_empty() {
             info!("No reachable checks found to place: {:?}", item);
         }
 
@@ -664,7 +665,7 @@ fn assumed_fill(
 /// all such items have been exhausted.
 ///
 fn assumed_search(
-    world_graph: &mut WorldGraph, items_owned: &mut Pool, mut check_map: &mut CheckMap,
+    world_graph: &mut WorldGraph, items_owned: &mut Pool, check_map: &mut CheckMap,
     settings: &Settings,
 ) -> Vec<Check> {
     let mut considered_items = build_progress_from_items(&items_owned.clone(), settings);
@@ -673,7 +674,7 @@ fn assumed_search(
     loop {
         reachable_checks = find_reachable_checks(world_graph, &considered_items);
         let reachable_items =
-            get_items_from_reachable_checks(&reachable_checks, &mut check_map, settings);
+            get_items_from_reachable_checks(&reachable_checks, check_map, settings);
 
         let new_items = reachable_items.difference(&considered_items);
 

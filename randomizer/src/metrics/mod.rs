@@ -1,13 +1,14 @@
-use {
-    crate::{
-        filler,
-        model::{check::Check, progress::Progress},
-        world::WorldGraph,
-        CheckMap, Settings,
-    },
-    log::info,
-    serde::Serialize,
-    std::collections::BTreeMap,
+use std::collections::BTreeMap;
+
+use log::info;
+use modinfo::Settings;
+use serde::Serialize;
+
+use crate::{
+    filler,
+    model::{check::Check, progress::Progress},
+    world::WorldGraph,
+    CheckMap,
 };
 
 /// Perform any post-generation analysis for a seed here
@@ -22,7 +23,7 @@ pub fn calculate_metrics(
 }
 
 /// Sphere Search
-fn sphere_search<'a>(
+fn sphere_search(
     world_graph: &mut WorldGraph, check_map: &mut CheckMap, settings: &Settings,
 ) -> BTreeMap<String, BTreeMap<&'static str, &'static str>> {
     info!("Generating Playthrough...");

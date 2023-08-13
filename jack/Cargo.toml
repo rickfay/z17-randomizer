@@ -6,10 +6,10 @@ edition = "2021"
 license = "GPL-2.0-or-later"
 
 [dependencies]
-albw = { path = "../albw" }
-byteorder = "1.4.3"
-cli = { path = "../cli" }
-log = "0.4.17"
-macros = { path = "../macros" }
-serde = "1.0.160"
-yaz0 = "0.3.0"
+byteorder = { workspace = true }
+cli = { workspace = true }
+log = { workspace = true }
+macros = { workspace = true }
+rom = { workspace = true }
+serde = { workspace = true }
+yaz0 = { workspace = true }

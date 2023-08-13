@@ -1,14 +1,13 @@
-use {
-    crate::{
-        patch::{util::*, DungeonPrizes},
-        Patcher,
-    },
-    albw::{
-        course::{Id, Id::*},
-        scene::{Flag, Icn, IcnArgs, StageMeta},
-        Item,
-    },
-    log::info,
+use game::{
+    Course::{self, *},
+    Item,
+};
+use log::info;
+use rom::scene::{Flag, Icn, IcnArgs, StageMeta};
+
+use crate::{
+    patch::{util::*, DungeonPrizes},
+    Patcher,
 };
 
 #[non_exhaustive]
@@ -27,15 +26,15 @@ impl Icon {
     pub const WARP_POINT: i32 = 8;
     pub const PROPELLER: i32 = 9; // Gales
     pub const VALVE: i32 = 10; // Swamp
-    // pub const ELEVEN: i32 = 11; // ?
-    // pub const TWELVE: i32 = 12; // ?
-    // pub const THIRTEEN: i32 = 13; // ?
-    // pub const FOURTEEN: i32 = 14; // ?
-    // pub const FIFTEEN: i32 = 15; // ?
-    // pub const SIXTEEN: i32 = 16; // ?
-    // pub const SEVENTEEN: i32 = 17; // ?
-    // pub const EIGHTEEN: i32 = 18; // ?
-    // pub const NINETEEN: i32 = 19; // ?
+                               // pub const ELEVEN: i32 = 11; // ?
+                               // pub const TWELVE: i32 = 12; // ?
+                               // pub const THIRTEEN: i32 = 13; // ?
+                               // pub const FOURTEEN: i32 = 14; // ?
+                               // pub const FIFTEEN: i32 = 15; // ?
+                               // pub const SIXTEEN: i32 = 16; // ?
+                               // pub const SEVENTEEN: i32 = 17; // ?
+                               // pub const EIGHTEEN: i32 = 18; // ?
+                               // pub const NINETEEN: i32 = 19; // ?
     pub const DESTINATION: i32 = 20; // Red X
     pub const SAVE_POINT: i32 = 21; // Weather Vane
     pub const PORTAL: i32 = 22;
@@ -49,7 +48,7 @@ pub fn patch_maps(patcher: &mut Patcher, prizes: &DungeonPrizes) {
 }
 
 fn patch_hyrule_maps(patcher: &mut Patcher, prizes: &DungeonPrizes) {
-    const HYRULE_MAPS: [Id; 4] = [AttractionLight, CaveLight, FieldLight, IndoorLight];
+    const HYRULE_MAPS: [Course; 4] = [AttractionLight, CaveLight, FieldLight, IndoorLight];
 
     for map in HYRULE_MAPS {
         let stage_meta = patcher.scene_meta(map).stage_meta_mut().get_mut();
@@ -66,7 +65,7 @@ fn patch_hyrule_maps(patcher: &mut Patcher, prizes: &DungeonPrizes) {
 }
 
 fn patch_lorule_maps(patcher: &mut Patcher, prizes: &DungeonPrizes) {
-    const LORULE_MAPS: [Id; 7] =
+    const LORULE_MAPS: [Course; 7] =
         [AttractionDark, CaveDark, EnemyAttackS, EnemyAttackM, EnemyAttackL, FieldDark, IndoorDark];
 
     for map in LORULE_MAPS {
