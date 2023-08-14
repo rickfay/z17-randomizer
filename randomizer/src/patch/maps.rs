@@ -21,20 +21,24 @@ impl Icon {
     pub const BOSS_DOOR: i32 = 3;
     pub const STAIR_UP: i32 = 4;
     pub const STAIR_DOWN: i32 = 5;
+
     // pub const SIX: i32 = 6; // RaceGoal ?
+
     pub const ENTRANCE: i32 = 7;
     pub const WARP_POINT: i32 = 8;
     pub const PROPELLER: i32 = 9; // Gales
     pub const VALVE: i32 = 10; // Swamp
-                               // pub const ELEVEN: i32 = 11; // ?
-                               // pub const TWELVE: i32 = 12; // ?
-                               // pub const THIRTEEN: i32 = 13; // ?
-                               // pub const FOURTEEN: i32 = 14; // ?
-                               // pub const FIFTEEN: i32 = 15; // ?
-                               // pub const SIXTEEN: i32 = 16; // ?
-                               // pub const SEVENTEEN: i32 = 17; // ?
-                               // pub const EIGHTEEN: i32 = 18; // ?
-                               // pub const NINETEEN: i32 = 19; // ?
+
+    // pub const ELEVEN: i32 = 11; // ?
+    // pub const TWELVE: i32 = 12; // ?
+    // pub const THIRTEEN: i32 = 13; // ?
+    // pub const FOURTEEN: i32 = 14; // ?
+    // pub const FIFTEEN: i32 = 15; // ?
+    // pub const SIXTEEN: i32 = 16; // ?
+    // pub const SEVENTEEN: i32 = 17; // ?
+    // pub const EIGHTEEN: i32 = 18; // ?
+    // pub const NINETEEN: i32 = 19; // ?
+
     pub const DESTINATION: i32 = 20; // Red X
     pub const SAVE_POINT: i32 = 21; // Weather Vane
     pub const PORTAL: i32 = 22;
@@ -44,9 +48,20 @@ pub fn patch_maps(patcher: &mut Patcher, prizes: &DungeonPrizes) {
     info!("Patching Maps...");
     patch_hyrule_maps(patcher, prizes);
     patch_lorule_maps(patcher, prizes);
-    add_compass_chests(patcher);
+    patch_eastern_maps(patcher);
+    patch_gales_maps(patcher);
+    patch_hera_maps(patcher);
+    patch_dark_maps(patcher);
+    patch_swamp_maps(patcher);
+    patch_skull_maps(patcher);
+    patch_thieves_maps(patcher);
+    patch_turtle_maps(patcher);
+    patch_desert_maps(patcher);
+    patch_ice_maps(patcher);
+    patch_lorule_castle_maps(patcher);
 }
 
+/// Hyrule Field Maps
 fn patch_hyrule_maps(patcher: &mut Patcher, prizes: &DungeonPrizes) {
     const HYRULE_MAPS: [Course; 4] = [AttractionLight, CaveLight, FieldLight, IndoorLight];
 
@@ -64,6 +79,7 @@ fn patch_hyrule_maps(patcher: &mut Patcher, prizes: &DungeonPrizes) {
     }
 }
 
+/// Lorule Field Maps
 fn patch_lorule_maps(patcher: &mut Patcher, prizes: &DungeonPrizes) {
     const LORULE_MAPS: [Course; 7] =
         [AttractionDark, CaveDark, EnemyAttackS, EnemyAttackM, EnemyAttackL, FieldDark, IndoorDark];
@@ -100,89 +116,126 @@ fn disable_icn(stage_meta: &mut StageMeta, icn_index: usize) {
     stage_meta.icn.get_mut(icn_index).unwrap().disable();
 }
 
-/// Add icons for dungeon chests that contained the compass in vanilla
-fn add_compass_chests(patcher: &mut Patcher) {
-    // Eastern
-    patcher.scene_meta(DungeonEast).stage_meta_mut().get_mut().icn.push(Icn {
+/// Eastern Palace Maps
+fn patch_eastern_maps(patcher: &mut Patcher) {
+    let eastern_meta = patcher.scene_meta(DungeonEast).stage_meta_mut().get_mut();
+
+    // Add vanilla compass chest icon
+    eastern_meta.icn.push(Icn {
         arg: IcnArgs(Icon::TREASURE_BOX, 1, 0, 0, 0, 3, 0, 2),
         pos: vec![-22.0, 2.5, -47.0],
         scr: vec![0.0, 0.0],
         msg: None,
     });
 
-    // Gales
+    // Make post-boss chest icons visible without defeating boss
+    eastern_meta.icn.get_mut(5).unwrap().clear_enabled(); // 1F Escape Chest
+    eastern_meta.icn.get_mut(6).unwrap().clear_enabled(); // 1F Merge Chest
+    eastern_meta.icn.get_mut(17).unwrap().clear_enabled(); // 3F Escape Chest
+}
+
+/// House of Gales Maps
+fn patch_gales_maps(patcher: &mut Patcher) {
+    // Add vanilla compass chest icon
     patcher.scene_meta(DungeonWind).stage_meta_mut().get_mut().icn.push(Icn {
         arg: IcnArgs(Icon::TREASURE_BOX, 1, 0, 0, 0, 3, 0, 3),
         pos: vec![-19.0, 2.5, -23.5],
         scr: vec![0.0, 0.0],
         msg: None,
     });
+}
 
-    // Hera
+/// Tower of Hera Maps
+fn patch_hera_maps(patcher: &mut Patcher) {
+    // Add vanilla compass chest icon
     patcher.scene_meta(DungeonHera).stage_meta_mut().get_mut().icn.push(Icn {
         arg: IcnArgs(Icon::TREASURE_BOX, 1, 0, 0, 0, 3, 0, 1),
         pos: vec![0.0, 5.0, -1.9],
         scr: vec![0.0, 0.0],
         msg: None,
     });
+}
 
-    // Dark
+/// Dark Palace Maps
+fn patch_dark_maps(patcher: &mut Patcher) {
+    // Add vanilla compass chest icon
     patcher.scene_meta(DungeonDark).stage_meta_mut().get_mut().icn.push(Icn {
         arg: IcnArgs(Icon::TREASURE_BOX, 1, 1, 0, 0, 3, 0, 43),
         pos: vec![-24.5, 2.5, -47.5],
         scr: vec![0.0, 0.0],
         msg: None,
     });
+}
 
-    // Swamp
+/// Swamp Palace Maps
+fn patch_swamp_maps(patcher: &mut Patcher) {
+    // Add vanilla compass chest icon
     patcher.scene_meta(DungeonWater).stage_meta_mut().get_mut().icn.push(Icn {
         arg: IcnArgs(Icon::TREASURE_BOX, -1, 1, 0, 0, 3, 0, 64),
         pos: vec![0.0, 0.0, -48.5],
         scr: vec![0.0, 0.0],
         msg: None,
     });
+}
 
-    // Skull
+/// Skull Woods Maps
+fn patch_skull_maps(patcher: &mut Patcher) {
+    // Add vanilla compass chest icon
     patcher.scene_meta(DungeonDokuro).stage_meta_mut().get_mut().icn.push(Icn {
         arg: IcnArgs(Icon::TREASURE_BOX, -1, 0, 0, 0, 3, 0, 3),
         pos: vec![18.0, 0.0, -58.5],
         scr: vec![0.0, 0.0],
         msg: None,
     });
+}
 
-    // Thieves'
+/// Thieves' Hideout Maps
+fn patch_thieves_maps(patcher: &mut Patcher) {
+    // Add vanilla compass chest icon
     patcher.scene_meta(DungeonHagure).stage_meta_mut().get_mut().icn.push(Icn {
         arg: IcnArgs(Icon::TREASURE_BOX, -2, 0, 0, 0, 3, 0, 106),
         pos: vec![6.5, 0.0, -31.25],
         scr: vec![0.0, 0.0],
         msg: None,
     });
+}
 
-    // Turtle
+/// Turtle Rock Maps
+fn patch_turtle_maps(patcher: &mut Patcher) {
+    // Add vanilla compass chest icon
     patcher.scene_meta(DungeonKame).stage_meta_mut().get_mut().icn.push(Icn {
         arg: IcnArgs(Icon::TREASURE_BOX, 1, 0, 0, 0, 3, 0, 5),
         pos: vec![0.0, 5.0, -33.5],
         scr: vec![0.0, 0.0],
         msg: None,
     });
+}
 
-    // Desert
+/// Desert Palace Maps
+fn patch_desert_maps(patcher: &mut Patcher) {
+    // Add vanilla compass chest icon
     patcher.scene_meta(DungeonSand).stage_meta_mut().get_mut().icn.push(Icn {
         arg: IcnArgs(Icon::TREASURE_BOX, 1, 0, 0, 0, 3, 0, 1),
         pos: vec![-22.0, 5.0, -67.0],
         scr: vec![0.0, 0.0],
         msg: None,
     });
+}
 
-    // Ice
+/// Ice Ruins Maps
+fn patch_ice_maps(patcher: &mut Patcher) {
+    // Add vanilla compass chest icon
     patcher.scene_meta(DungeonIce).stage_meta_mut().get_mut().icn.push(Icn {
         arg: IcnArgs(Icon::TREASURE_BOX, -1, 0, 0, 0, 3, 0, 17),
         pos: vec![23.0, 75.0, -2.5],
         scr: vec![0.0, 0.0],
         msg: None,
     });
+}
 
-    // Lorule Castle
+/// Lorule Castle Maps
+fn patch_lorule_castle_maps(patcher: &mut Patcher) {
+    // Add vanilla compass chest icon
     patcher.scene_meta(DungeonGanon).stage_meta_mut().get_mut().icn.push(Icn {
         arg: IcnArgs(Icon::TREASURE_BOX, 4, 0, 0, 0, 3, 0, 215),
         pos: vec![0.0, 40.0, -2.77344],
