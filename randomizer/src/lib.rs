@@ -39,7 +39,6 @@ pub mod model;
 mod patch;
 pub mod regions;
 pub mod system;
-#[rustfmt::skip]
 mod world;
 
 pub type Result<T, E = Error> = core::result::Result<T, E>;
