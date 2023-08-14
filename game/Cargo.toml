@@ -7,3 +7,4 @@ edition = "2021"
 bytey = { workspace = true }
 serde = { workspace = true }
 serde_repr = "0.1.16"
+strum = { workspace = true }

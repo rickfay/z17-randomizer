@@ -1,18 +1,25 @@
+use game::HintGhost;
 use log::{debug, info};
 use macros::fail;
 use modinfo::Settings;
 use rand::{rngs::StdRng, seq::IteratorRandom, Rng};
-use serde::{ser::SerializeStruct, Serialize, Serializer};
+use serde::{
+    ser::{SerializeSeq, SerializeStruct},
+    Serialize, Serializer,
+};
+use strum::IntoEnumIterator;
 
 use crate::{
-    convert,
     filler::{find_reachable_checks, get_items_from_reachable_checks},
     filler_util::shuffle,
-    model::{check::Check, progress::Progress},
+    model::{
+        check::Check,
+        filler_item::{self, FillerItem, Item},
+        progress::Progress,
+    },
     patch::util::is_sage,
     world::WorldGraph,
     CheckMap,
-    FillerItem::{self, *},
 };
 
 pub mod formatting;
@@ -37,22 +44,22 @@ pub(crate) trait Hint: Serialize {
 #[derive(Debug, Clone)]
 pub struct LocationHint {
     /// The hinted item
-    pub item: FillerItem,
+    pub item: Item,
 
     /// The specific [`Check`] containing the hinted item.
     pub check: Check,
 
     /// List of Hint Ghosts that are guaranteed to be logically reachable before the hinted item.
-    pub logical_ghosts: Vec<FillerItem>,
+    pub logical_ghosts: Vec<HintGhost>,
 
     /// Hint Ghosts that will give out this hint. <br />
     /// Only one of these is guaranteed to be from `logical_ghosts`, the other(s) are placed completely at random.
-    pub ghosts: Vec<FillerItem>,
+    pub ghosts: Vec<HintGhost>,
 }
 
 impl LocationHint {
     pub(crate) fn choose_ghost(
-        &mut self, rng: &mut StdRng, taken_ghosts: &mut Vec<FillerItem>,
+        &mut self, rng: &mut StdRng, taken_ghosts: &mut Vec<HintGhost>,
     ) -> Result<(), &'static str> {
         match self
             .logical_ghosts
@@ -101,7 +108,7 @@ impl Serialize for LocationHint {
     {
         let mut ser = serializer.serialize_struct("LocationHint", 2)?;
         ser.serialize_field("hint", &self.get_hint_spoiler())?;
-        ser.serialize_field("ghosts", &self.ghosts)?;
+        ser.serialize_field("ghosts", &SerializeGhosts(&self.ghosts))?;
         ser.end()
     }
 }
@@ -113,14 +120,14 @@ pub struct PathHint {
     pub check: Check,
 
     /// The goal that this hint leads to.
-    pub goal: FillerItem,
+    pub goal: filler_item::Goal,
 
     /// List of Hint Ghosts that are guaranteed to be logically reachable before the hinted item.
-    pub logical_ghosts: Vec<FillerItem>,
+    pub logical_ghosts: Vec<HintGhost>,
 
     /// Hint Ghosts that will give out this hint. <br />
     /// Only one of these is guaranteed to be from `logical_ghosts`, the other(s) are placed completely at random.
-    pub ghosts: Vec<FillerItem>,
+    pub ghosts: Vec<HintGhost>,
 }
 
 impl Hint for PathHint {
@@ -148,7 +155,7 @@ impl Serialize for PathHint {
     {
         let mut ser = serializer.serialize_struct("PathHint", 2)?;
         ser.serialize_field("hint", &self.get_hint_spoiler())?;
-        ser.serialize_field("ghosts", &self.ghosts)?;
+        ser.serialize_field("ghosts", &SerializeGhosts(&self.ghosts))?;
         ser.end()
     }
 }
@@ -194,7 +201,7 @@ pub fn generate_hints(
 
     const NUM_TOTAL_HINTS: usize = 29;
     let mut taken_checks: Vec<&'static str> = Vec::new();
-    let mut taken_ghosts: Vec<FillerItem> = Vec::new();
+    let mut taken_ghosts = Vec::new();
 
     let mut always_hints = generate_always_hints(
         settings, world_graph, check_map, &mut taken_checks, &mut taken_ghosts, rng,
@@ -220,7 +227,7 @@ pub fn generate_hints(
 }
 
 fn duplicate_hints(
-    taken_ghosts: &mut Vec<FillerItem>, always_hints: &mut Vec<LocationHint>,
+    taken_ghosts: &mut Vec<HintGhost>, always_hints: &mut Vec<LocationHint>,
     path_hints: &mut Vec<PathHint>, sometimes_hints: &mut Vec<LocationHint>,
     num_total_hints: usize, rng: &mut StdRng,
 ) {
@@ -240,7 +247,7 @@ fn duplicate_hints(
 
     // todo probably don't need to duplicate this
 
-    let mut ghosts = FillerItem::get_all_ghosts();
+    let mut ghosts = HintGhost::iter().collect::<Vec<_>>();
     ghosts.retain(|ghost| !taken_ghosts.contains(ghost));
 
     for hint in always_hints {
@@ -265,8 +272,10 @@ fn generate_bow_of_light_hint(
 ) -> BowOfLightHint {
     for location_node in world_graph.values_mut() {
         for &check in location_node.clone().get_checks() {
-            if BowOfLight.eq(&check_map.get(check.get_name()).unwrap().unwrap()) {
-                return BowOfLightHint { check };
+            if let FillerItem::Item(item) = check_map.get(check.get_name()).unwrap().unwrap() {
+                if Item::BowOfLight.eq(&item) {
+                    return BowOfLightHint { check };
+                }
             }
         }
     }
@@ -280,7 +289,7 @@ fn generate_bow_of_light_hint(
  */
 fn generate_always_hints(
     settings: &Settings, world_graph: &mut WorldGraph, check_map: &mut CheckMap,
-    taken_checks: &mut Vec<&'static str>, taken_ghosts: &mut Vec<FillerItem>, rng: &mut StdRng,
+    taken_checks: &mut Vec<&'static str>, taken_ghosts: &mut Vec<HintGhost>, rng: &mut StdRng,
 ) -> Vec<LocationHint> {
     let mut always_checks = vec![
         "Master Sword Pedestal", "Great Rupee Fairy", "Blacksmith (Lorule)", "Bouldering Guy",
@@ -338,16 +347,14 @@ fn generate_location_hint(
     let logical_ghosts = find_checks_before_goal(settings, world_graph, check_map, item)
         .iter()
         .filter_map(|check| {
-            if let Some(quest) = check.get_quest() {
-                if quest.is_hint_ghost() {
-                    return Some(quest);
-                }
+            if let Some(FillerItem::HintGhost(ghost)) = check.get_quest() {
+                return Some(ghost);
             };
             None
         })
         .collect::<Vec<_>>();
 
-    LocationHint { item, check, logical_ghosts, ghosts: vec![] }
+    LocationHint { item: item.as_item().unwrap(), check, logical_ghosts, ghosts: vec![] }
 }
 
 /**
@@ -357,7 +364,7 @@ fn generate_location_hint(
  */
 fn generate_sometimes_hints(
     settings: &Settings, world_graph: &mut WorldGraph, rng: &mut StdRng, check_map: &mut CheckMap,
-    num_sometimes_hints: usize, taken_checks: &[&'static str], taken_ghosts: &mut Vec<FillerItem>,
+    num_sometimes_hints: usize, taken_checks: &[&'static str], taken_ghosts: &mut Vec<HintGhost>,
 ) -> Vec<LocationHint> {
     let mut sometimes_checks = vec![
         "Bee Guy (2)",
@@ -501,20 +508,20 @@ fn generate_sometimes_hints(
  */
 fn generate_path_hints(
     settings: &Settings, rng: &mut StdRng, world_graph: &mut WorldGraph, check_map: &mut CheckMap,
-    taken_checks: &mut Vec<&'static str>, taken_ghosts: &mut Vec<FillerItem>,
+    taken_checks: &mut Vec<&'static str>, taken_ghosts: &mut Vec<HintGhost>,
 ) -> Vec<PathHint> {
-    let mut bosses_and_prize_locations: Vec<(FillerItem, &str)> = vec![
-        (Yuga, "Eastern Palace Prize"),
-        (Margomill, "House of Gales Prize"),
-        (Moldorm, "Tower of Hera Prize"),
-        (ZeldasThrone, "Hyrule Castle Prize"),
-        (GemesaurKing, "Dark Palace Prize"),
-        (Arrghus, "Swamp Palace Prize"),
-        (Knucklemaster, "Skull Woods Prize"),
-        (Stalblind, "Thieves' Hideout Prize"),
-        (Grinexx, "Turtle Rock Prize"),
-        (Zaganaga, "Desert Palace Prize"),
-        (Dharkstare, "Ice Ruins Prize"),
+    let mut bosses_and_prize_locations = vec![
+        (filler_item::Goal::Yuga, "Eastern Palace Prize"),
+        (filler_item::Goal::Margomill, "House of Gales Prize"),
+        (filler_item::Goal::Moldorm, "Tower of Hera Prize"),
+        (filler_item::Goal::ZeldasThrone, "Hyrule Castle Prize"),
+        (filler_item::Goal::GemesaurKing, "Dark Palace Prize"),
+        (filler_item::Goal::Arrghus, "Swamp Palace Prize"),
+        (filler_item::Goal::Knucklemaster, "Skull Woods Prize"),
+        (filler_item::Goal::Stalblind, "Thieves' Hideout Prize"),
+        (filler_item::Goal::Grinexx, "Turtle Rock Prize"),
+        (filler_item::Goal::Zaganaga, "Desert Palace Prize"),
+        (filler_item::Goal::Dharkstare, "Ice Ruins Prize"),
     ];
 
     bosses_and_prize_locations = shuffle(rng, bosses_and_prize_locations);
@@ -524,13 +531,13 @@ fn generate_path_hints(
     let mut extra_paths_needed = 0;
 
     for (goal, prize_loc) in bosses_and_prize_locations {
-        if is_sage(convert(check_map.get(prize_loc).unwrap().unwrap()).unwrap()) {
+        if is_sage(check_map.get(prize_loc).unwrap().unwrap().as_item().unwrap().to_game_item()) {
             let mut potential_paths =
                 get_potential_path_hints(settings, rng, world_graph, check_map, taken_checks, goal);
 
             // fixme slow
             potential_paths.iter_mut().for_each(|i: &mut PathHint| {
-                i.logical_ghosts.sort_by_key(|p| p.as_str());
+                i.logical_ghosts.sort_by_key(hint_ghost_name);
             });
 
             if let Some(chosen_path) =
@@ -568,7 +575,7 @@ fn generate_path_hints(
 
 fn choose_path_hint(
     potential_paths: &mut Vec<PathHint>, taken_checks: &mut Vec<&'static str>,
-    taken_ghosts: &mut Vec<FillerItem>, rng: &mut StdRng,
+    taken_ghosts: &mut Vec<HintGhost>, rng: &mut StdRng,
 ) -> Option<PathHint> {
     potential_paths.retain(|path| !taken_checks.contains(&path.check.get_name()));
 
@@ -597,8 +604,10 @@ fn choose_path_hint(
 
 /// Finds all checks available before a given Quest Goal using a modified Sphere Search.
 fn find_checks_before_goal(
-    settings: &Settings, world_graph: &mut WorldGraph, check_map: &mut CheckMap, goal: FillerItem,
+    settings: &Settings, world_graph: &mut WorldGraph, check_map: &mut CheckMap,
+    goal: impl Into<FillerItem>,
 ) -> Vec<Check> {
+    let goal = goal.into();
     let mut progress = Progress::new(settings.clone());
     let mut reachable_checks: Vec<Check>;
     let mut potential_path_checks: Vec<Check> = Vec::new();
@@ -627,7 +636,7 @@ fn find_checks_before_goal(
 /// Determines the possible Path Hints for a given goal, if any exist. Paths are returned in a random order.
 fn get_potential_path_hints(
     settings: &Settings, rng: &mut StdRng, world_graph: &mut WorldGraph, check_map: &mut CheckMap,
-    taken_checks: &[&str], goal: FillerItem,
+    taken_checks: &[&str], goal: filler_item::Goal,
 ) -> Vec<PathHint> {
     let mut reachable_checks: Vec<Check>;
     let mut potential_paths: Vec<PathHint> = Vec::new();
@@ -636,8 +645,11 @@ fn get_potential_path_hints(
 
     // Limit potential paths to locations with valid Path Items that haven't yet been taken
     potential_path_checks.retain(|check| {
-        !taken_checks.contains(&check.get_name())
-            && POSSIBLE_PATH_ITEMS.contains(&check_map.get(check.get_name()).unwrap().unwrap())
+        if let FillerItem::Item(item) = check_map.get(check.get_name()).unwrap().unwrap() {
+            !taken_checks.contains(&check.get_name()) && POSSIBLE_PATH_ITEMS.contains(&item)
+        } else {
+            false
+        }
     });
 
     // Test candidate items to see if Boss can be defeated without them
@@ -662,7 +674,13 @@ fn get_potential_path_hints(
                     let hint_locations = reachable_items
                         .get_items()
                         .iter()
-                        .filter_map(|&item| if item.is_hint_ghost() { Some(item) } else { None })
+                        .filter_map(|&item| {
+                            if let FillerItem::HintGhost(ghost) = item {
+                                Some(ghost)
+                            } else {
+                                None
+                            }
+                        })
                         .collect::<_>();
 
                     potential_paths.push(PathHint {
@@ -684,7 +702,87 @@ fn get_potential_path_hints(
     shuffle(rng, potential_paths)
 }
 
-const POSSIBLE_PATH_ITEMS: [FillerItem; 48] = [
+struct SerializeGhosts<'a>(&'a [HintGhost]);
+
+impl Serialize for SerializeGhosts<'_> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut seq = serializer.serialize_seq(Some(self.0.len()))?;
+        for ghost in self.0.iter() {
+            seq.serialize_element(hint_ghost_name(ghost))?;
+        }
+        seq.end()
+    }
+}
+
+pub(crate) fn hint_ghost_name(ghost: &HintGhost) -> &'static str {
+    match ghost {
+        HintGhost::LostWoodsMaze1 => "Lost Woods Maze Ghost 1",
+        HintGhost::LostWoodsMaze2 => "Lost Woods Maze Ghost 2",
+        HintGhost::LostWoodsMaze3 => "Lost Woods Maze Ghost 3",
+        HintGhost::LostWoods => "Lost Woods Ghost",
+        HintGhost::SpectacleRock => "Spectacle Rock Ghost",
+        HintGhost::TowerOfHeraOutside => "Outside Tower of Hera Ghost",
+        HintGhost::FloatingIsland => "Floating Island Ghost",
+        HintGhost::FireCave => "Fire Cave Ghost",
+        HintGhost::MoldormCave => "Moldorm Cave Ghost",
+        HintGhost::ZorasDomain => "Zora's Domain Ghost",
+        HintGhost::FortuneTellerHyrule => "Hyrule Fortune-Teller Ghost",
+        HintGhost::Sanctuary => "Sanctuary Ghost",
+        HintGhost::GraveyardHyrule => "Hyrule Graveyard Ghost",
+        HintGhost::WaterfallCave => "Waterfall Cave Ghost",
+        HintGhost::Well => "Kakariko Well Ghost",
+        HintGhost::ShadyGuy => "Shady Guy Ghost",
+        HintGhost::StylishWoman => "Stylish Woman Ghost",
+        HintGhost::BlacksmithCave => "Blacksmith Cave Ghost",
+        HintGhost::EasternRuinsPegs => "Eastern Ruins Pegs Ghost",
+        HintGhost::EasternRuinsCave => "Eastern Ruins Cave Ghost",
+        HintGhost::EasternRuinsEntrance => "Eastern Ruins Entrance Ghost",
+        HintGhost::RupeeRushHyrule => "Hyrule Rupee Rush Ghost",
+        HintGhost::Cuccos => "Dodge the Cuccos Ghost",
+        HintGhost::SouthBridge => "Southern Bridge Ghost",
+        HintGhost::SouthernRuins => "Southern Ruins Ghost",
+        HintGhost::HouseOfGalesIsland => "House of Gales Island Ghost",
+        HintGhost::HyruleHotfoot => "Hyrule Hotfoot Ghost",
+        HintGhost::Letter => "Letter in a Bottle Ghost",
+        HintGhost::StreetPassTree => "StreetPass Tree Ghost",
+        HintGhost::BlacksmithBehind => "Behind Blacksmith Ghost",
+        HintGhost::GraveyardLedge => "Graveyard Ledge Ghost",
+        HintGhost::DesertEast => "Desert East Ghost",
+        HintGhost::DesertCenter => "Desert Center Ghost",
+        HintGhost::DesertSouthWest => "Desert South West Ghost",
+        HintGhost::HyruleCastleRocks => "Hyrule Castle Rocks Ghost",
+        HintGhost::WitchsHouse => "Witch's House Ghost",
+
+        HintGhost::SkullWoodsCuccos => "Skull Woods Cuccos Ghost",
+        HintGhost::TreacherousTower => "Treacherous Tower Ghost",
+        HintGhost::IceRuinsOutside => "Ice Ruins Outside Ghost",
+        HintGhost::LoruleGraveyard => "Lorule Graveyard Ghost",
+        HintGhost::DarkRuinsNorth => "Dark Ruins North Ghost",
+        HintGhost::SkullWoodsSouth => "Skull Woods South Ghost",
+        HintGhost::FortunesChoice => "Fortune's Choice Ghost",
+        HintGhost::VeteranThief => "Veteran Thief Ghost",
+        HintGhost::FortuneTellerLorule => "Lorule Fortune-Teller Ghost",
+        HintGhost::DarkMaze => "Dark Maze Ghost",
+        HintGhost::RupeeRushLorule => "Lorule Rupee Rush Ghost",
+        HintGhost::GreatRupeeFairy => "Great Rupee Fairy Ghost",
+        HintGhost::OctoballDerby => "Octoball Derby Ghost",
+        HintGhost::VacantHouse => "Vacant House Ghost",
+        HintGhost::MiseryMireLedge => "Misery Mire Ledge Ghost",
+        HintGhost::SwampPalaceOutsideLeft => "Swamp Palace Outside Left Ghost",
+        HintGhost::TurtleBullied => "Turtle Bullied Ghost",
+        HintGhost::TurtleWall => "Turtle Wall Ghost",
+        HintGhost::TurtleRockOutside => "Turtle Rock Outside Ghost",
+        HintGhost::DarkPalaceOutside => "Dark Palace Outside Ghost",
+        HintGhost::SwampPalaceOutsideRight => "Swamp Palace Outside Right Ghost",
+        HintGhost::MiseryMireBridge => "Misery Mire Bridge Ghost",
+    }
+}
+
+use Item::*;
+const POSSIBLE_PATH_ITEMS: [Item; 48] = [
     Bow01, Bow02, Boomerang01, Boomerang02, Hookshot01, Hookshot02, Bombs01, Bombs02, FireRod01,
     FireRod02, IceRod01, IceRod02, Hammer01, Hammer02, SandRod01, SandRod02, TornadoRod01,
     TornadoRod02, Bell, StaminaScroll, PegasusBoots, Flippers, HylianShield, SmoothGem,

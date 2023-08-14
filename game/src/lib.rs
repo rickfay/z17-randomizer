@@ -1,9 +1,11 @@
 use std::error::Error as StdError;
 
 mod courses;
+mod ghosts;
 mod items;
 
 pub use courses::Course;
+pub use ghosts::HintGhost;
 pub use items::Item;
 
 /// An error resulting from trying to read the ROM file.

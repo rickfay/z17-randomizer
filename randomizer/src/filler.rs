@@ -1,6 +1,5 @@
 use std::collections::{BTreeMap, HashSet};
 
-use game::Item;
 use log::{error, info};
 use macros::fail;
 use modinfo::settings::{logic::LogicMode::*, Settings};
@@ -8,13 +7,15 @@ use queue::Queue;
 use rand::{rngs::StdRng, Rng};
 
 use crate::{
-    convert,
     item_pools::{get_maiamai_pool, Pool},
-    model::{check::Check, location::Location, progress::Progress},
+    model::{
+        check::Check,
+        filler_item::{FillerItem, Item},
+        location::Location,
+        progress::Progress,
+    },
     world::WorldGraph,
-    CheckMap,
-    FillerItem::{self, *},
-    LocationInfo,
+    CheckMap, LocationInfo,
 };
 
 /// Fill Seed such that All Locations are Reachable
@@ -23,7 +24,7 @@ use crate::{
 pub fn fill_all_locations_reachable(
     world_graph: &mut WorldGraph, check_map: &mut CheckMap, progression_pool: &mut Pool,
     junk_pool: &mut Pool, settings: &Settings, rng: &mut StdRng,
-) -> Vec<(LocationInfo, Item)> {
+) -> Vec<(LocationInfo, game::Item)> {
     verify_all_locations_accessible(world_graph, check_map, progression_pool, settings);
     handle_exclusions(check_map, settings, rng, junk_pool);
     preplace_items(check_map, settings, rng, progression_pool, junk_pool);
@@ -34,66 +35,66 @@ pub fn fill_all_locations_reachable(
 
 /// Place static items ahead of the randomly filled ones
 fn preplace_items(
-    check_map: &mut CheckMap, settings: &Settings, rng: &mut StdRng,
-    progression: &mut Vec<FillerItem>, junk: &mut Vec<FillerItem>,
+    check_map: &mut CheckMap, settings: &Settings, rng: &mut StdRng, progression: &mut Vec<Item>,
+    junk: &mut Vec<Item>,
 ) {
     // Vanilla Dungeon Prizes
     if !settings.logic.randomize_dungeon_prizes {
-        place_static(check_map, progression, PendantOfCourage01, "Eastern Palace Prize");
-        place_static(check_map, progression, PendantOfWisdom, "House of Gales Prize");
-        place_static(check_map, progression, PendantOfPower, "Tower of Hera Prize");
-        place_static(check_map, progression, PendantOfCourage02, "Hyrule Castle Prize");
-        place_static(check_map, progression, SageGulley, "Dark Palace Prize");
-        place_static(check_map, progression, SageOren, "Swamp Palace Prize");
-        place_static(check_map, progression, SageSeres, "Skull Woods Prize");
-        place_static(check_map, progression, SageOsfala, "Thieves' Hideout Prize");
-        place_static(check_map, progression, SageImpa, "Turtle Rock Prize");
-        place_static(check_map, progression, SageIrene, "Desert Palace Prize");
-        place_static(check_map, progression, SageRosso, "Ice Ruins Prize");
+        place_static(check_map, progression, Item::PendantOfCourage01, "Eastern Palace Prize");
+        place_static(check_map, progression, Item::PendantOfWisdom, "House of Gales Prize");
+        place_static(check_map, progression, Item::PendantOfPower, "Tower of Hera Prize");
+        place_static(check_map, progression, Item::PendantOfCourage02, "Hyrule Castle Prize");
+        place_static(check_map, progression, Item::SageGulley, "Dark Palace Prize");
+        place_static(check_map, progression, Item::SageOren, "Swamp Palace Prize");
+        place_static(check_map, progression, Item::SageSeres, "Skull Woods Prize");
+        place_static(check_map, progression, Item::SageOsfala, "Thieves' Hideout Prize");
+        place_static(check_map, progression, Item::SageImpa, "Turtle Rock Prize");
+        place_static(check_map, progression, Item::SageIrene, "Desert Palace Prize");
+        place_static(check_map, progression, Item::SageRosso, "Ice Ruins Prize");
     } else if settings.logic.vanilla_charm {
         // Vanilla Charm
-        place_static(check_map, progression, PendantOfCourage02, "Hyrule Castle Prize");
+        place_static(check_map, progression, Item::PendantOfCourage02, "Hyrule Castle Prize");
     }
 
     // Place un-randomized items
-    place_static(check_map, progression, RupeeSilver40, "Hyrule Hotfoot (Second Race)");
-    place_static(check_map, progression, RupeeSilver41, "[TR] (1F) Under Center");
-    place_static(check_map, progression, RupeeGold09, "[TR] (B1) Under Center");
-    place_static(check_map, progression, RupeeGold10, "[PD] (2F) South Hidden Room");
-    place_static(check_map, progression, HeartPiece28, "Fortune's Choice");
+    place_static(check_map, progression, Item::RupeeSilver40, "Hyrule Hotfoot (Second Race)");
+    place_static(check_map, progression, Item::RupeeSilver41, "[TR] (1F) Under Center");
+    place_static(check_map, progression, Item::RupeeGold09, "[TR] (B1) Under Center");
+    place_static(check_map, progression, Item::RupeeGold10, "[PD] (2F) South Hidden Room");
+    place_static(check_map, progression, Item::HeartPiece28, "Fortune's Choice");
 
     // Kakariko Item Shop
-    place_static(check_map, progression, ScootFruit01, "Kakariko Item Shop (1)");
-    place_static(check_map, progression, FoulFruit01, "Kakariko Item Shop (2)");
-    place_static(check_map, progression, Shield01, "Kakariko Item Shop (3)");
+    place_static(check_map, progression, Item::ScootFruit01, "Kakariko Item Shop (1)");
+    place_static(check_map, progression, Item::FoulFruit01, "Kakariko Item Shop (2)");
+    place_static(check_map, progression, Item::Shield01, "Kakariko Item Shop (3)");
 
     // Lakeside Item Shop
-    place_static(check_map, progression, ScootFruit02, "Lakeside Item Shop (1)");
-    place_static(check_map, progression, FoulFruit02, "Lakeside Item Shop (2)");
-    place_static(check_map, progression, Shield02, "Lakeside Item Shop (3)");
+    place_static(check_map, progression, Item::ScootFruit02, "Lakeside Item Shop (1)");
+    place_static(check_map, progression, Item::FoulFruit02, "Lakeside Item Shop (2)");
+    place_static(check_map, progression, Item::Shield02, "Lakeside Item Shop (3)");
 
     // Mysterious Man
-    place_static(check_map, progression, GoldBee01, "Mysterious Man");
+    place_static(check_map, progression, Item::GoldBee01, "Mysterious Man");
 
     // Thieves' Town Item Shop
-    place_static(check_map, progression, Bee01, "Thieves' Town Item Shop (1)");
-    place_static(check_map, progression, GoldBee02, "Thieves' Town Item Shop (2)");
-    place_static(check_map, progression, Fairy01, "Thieves' Town Item Shop (3)");
-    place_static(check_map, progression, Shield03, "Thieves' Town Item Shop (4)");
+    place_static(check_map, progression, Item::Bee01, "Thieves' Town Item Shop (1)");
+    place_static(check_map, progression, Item::GoldBee02, "Thieves' Town Item Shop (2)");
+    place_static(check_map, progression, Item::Fairy01, "Thieves' Town Item Shop (3)");
+    place_static(check_map, progression, Item::Shield03, "Thieves' Town Item Shop (4)");
 
     // Lorule Lake Item Shop
-    place_static(check_map, progression, Bee02, "Lorule Lakeside Item Shop (1)");
-    place_static(check_map, progression, GoldBee03, "Lorule Lakeside Item Shop (2)");
-    place_static(check_map, progression, Fairy02, "Lorule Lakeside Item Shop (3)");
-    place_static(check_map, progression, Shield04, "Lorule Lakeside Item Shop (4)");
+    place_static(check_map, progression, Item::Bee02, "Lorule Lakeside Item Shop (1)");
+    place_static(check_map, progression, Item::GoldBee03, "Lorule Lakeside Item Shop (2)");
+    place_static(check_map, progression, Item::Fairy02, "Lorule Lakeside Item Shop (3)");
+    place_static(check_map, progression, Item::Shield04, "Lorule Lakeside Item Shop (4)");
 
     // Super Items
     if settings.logic.super_items {
         exclude("Treacherous Tower Advanced (1)", rng, check_map, junk);
         exclude("Treacherous Tower Advanced (2)", rng, check_map, junk);
     } else {
-        place_static(check_map, progression, Lamp02, "Treacherous Tower Advanced (1)");
-        place_static(check_map, progression, Net02, "Treacherous Tower Advanced (2)");
+        place_static(check_map, progression, Item::Lamp02, "Treacherous Tower Advanced (1)");
+        place_static(check_map, progression, Item::Net02, "Treacherous Tower Advanced (2)");
     }
 
     // Nice Mode
@@ -108,15 +109,15 @@ fn preplace_items(
         exclude(" 80 Maiamai", rng, check_map, junk);
         exclude(" 90 Maiamai", rng, check_map, junk);
     } else {
-        place_static(check_map, progression, Bow02, " 10 Maiamai");
-        place_static(check_map, progression, Boomerang02, " 20 Maiamai");
-        place_static(check_map, progression, Hookshot02, " 30 Maiamai");
-        place_static(check_map, progression, Hammer02, " 40 Maiamai");
-        place_static(check_map, progression, Bombs02, " 50 Maiamai");
-        place_static(check_map, progression, FireRod02, " 60 Maiamai");
-        place_static(check_map, progression, IceRod02, " 70 Maiamai");
-        place_static(check_map, progression, TornadoRod02, " 80 Maiamai");
-        place_static(check_map, progression, SandRod02, " 90 Maiamai");
+        place_static(check_map, progression, Item::Bow02, " 10 Maiamai");
+        place_static(check_map, progression, Item::Boomerang02, " 20 Maiamai");
+        place_static(check_map, progression, Item::Hookshot02, " 30 Maiamai");
+        place_static(check_map, progression, Item::Hammer02, " 40 Maiamai");
+        place_static(check_map, progression, Item::Bombs02, " 50 Maiamai");
+        place_static(check_map, progression, Item::FireRod02, " 60 Maiamai");
+        place_static(check_map, progression, Item::IceRod02, " 70 Maiamai");
+        place_static(check_map, progression, Item::TornadoRod02, " 80 Maiamai");
+        place_static(check_map, progression, Item::SandRod02, " 90 Maiamai");
     }
     exclude("100 Maiamai", rng, check_map, junk);
 
@@ -137,61 +138,77 @@ fn preplace_items(
     if settings.logic.bow_of_light_in_castle {
         check_map.insert(
             bow_light_positions.remove(rng.gen_range(0..bow_light_positions.len())),
-            Some(BowOfLight),
+            Some(Item::BowOfLight.into()),
         );
-        progression.retain(|x| *x != BowOfLight);
+        progression.retain(|x| *x != Item::BowOfLight);
     }
 
     // Bell in Shop
     if settings.logic.bell_in_shop {
-        check_map.insert(shop_positions.remove(rng.gen_range(0..shop_positions.len())), Some(Bell));
-        progression.retain(|x| *x != Bell);
+        check_map.insert(
+            shop_positions.remove(rng.gen_range(0..shop_positions.len())),
+            Some(Item::Bell.into()),
+        );
+        progression.retain(|x| *x != Item::Bell);
     }
 
     // Pouch in Shop
     if settings.logic.pouch_in_shop {
-        check_map
-            .insert(shop_positions.remove(rng.gen_range(0..shop_positions.len())), Some(Pouch));
-        progression.retain(|x| *x != Pouch);
+        check_map.insert(
+            shop_positions.remove(rng.gen_range(0..shop_positions.len())),
+            Some(Item::Pouch.into()),
+        );
+        progression.retain(|x| *x != Item::Pouch);
     }
 
     // Sword in Shop
     if settings.logic.sword_in_shop {
-        check_map
-            .insert(shop_positions.remove(rng.gen_range(0..shop_positions.len())), Some(Sword01));
-        progression.retain(|x| *x != Sword01);
+        check_map.insert(
+            shop_positions.remove(rng.gen_range(0..shop_positions.len())),
+            Some(Item::Sword01.into()),
+        );
+        progression.retain(|x| *x != Item::Sword01);
     }
 
     // Boots in Shop
     if settings.logic.boots_in_shop {
         check_map.insert(
             shop_positions.remove(rng.gen_range(0..shop_positions.len())),
-            Some(PegasusBoots),
+            Some(Item::PegasusBoots.into()),
         );
-        progression.retain(|x| *x != PegasusBoots);
+        progression.retain(|x| *x != Item::PegasusBoots);
     }
 
     // Assures a weapon will be available in Ravio's Shop
     if (!settings.logic.sword_in_shop && !settings.logic.boots_in_shop)
         && settings.logic.assured_weapon
     {
-        let mut weapons = Vec::from([Bow01, Bombs01, FireRod01, IceRod01, Hammer01, PegasusBoots]);
+        let mut weapons = Vec::from([
+            Item::Bow01,
+            Item::Bombs01,
+            Item::FireRod01,
+            Item::IceRod01,
+            Item::Hammer01,
+            Item::PegasusBoots,
+        ]);
 
         if !settings.logic.swordless_mode {
-            weapons.extend_from_slice(&[Sword01]);
+            weapons.extend_from_slice(&[Item::Sword01]);
         }
 
         match settings.logic.logic_mode {
             Normal => {}
             _ => {
-                weapons.extend_from_slice(&[Lamp01, Net01]);
+                weapons.extend_from_slice(&[Item::Lamp01, Item::Net01]);
             }
         }
 
         let weapon = *weapons.get(rng.gen_range(0..weapons.len())).unwrap();
 
-        check_map
-            .insert(shop_positions.remove(rng.gen_range(0..shop_positions.len())), Some(weapon));
+        check_map.insert(
+            shop_positions.remove(rng.gen_range(0..shop_positions.len())),
+            Some(weapon.into()),
+        );
         progression.retain(|x| *x != weapon);
     }
 
@@ -222,15 +239,15 @@ fn preplace_items(
 }
 
 // Statically place an item in a given location, then remove it from the item pool provided
-fn place_static(check_map: &mut CheckMap, pool: &mut Pool, item: FillerItem, check_name: &str) {
-    check_map.insert(check_name.to_owned(), Some(item));
+fn place_static(check_map: &mut CheckMap, pool: &mut Pool, item: Item, check_name: &str) {
+    check_map.insert(check_name.to_owned(), Some(item.into()));
     pool.retain(|x| *x != item);
 }
 
 // Exclude a location by placing a random junk item there
 fn exclude(check_name: &str, rng: &mut StdRng, check_map: &mut CheckMap, junk: &mut Pool) {
     if check_map
-        .insert(check_name.to_owned(), Some(junk.remove(rng.gen_range(0..junk.len()))))
+        .insert(check_name.to_owned(), Some(junk.remove(rng.gen_range(0..junk.len())).into()))
         .is_none()
     {
         fail!("Check not found: {}", check_name);
@@ -238,8 +255,7 @@ fn exclude(check_name: &str, rng: &mut StdRng, check_map: &mut CheckMap, junk: &
 }
 
 fn handle_exclusions(
-    check_map: &mut CheckMap, settings: &Settings, rng: &mut StdRng,
-    junk_pool: &mut Vec<FillerItem>,
+    check_map: &mut CheckMap, settings: &Settings, rng: &mut StdRng, junk_pool: &mut Vec<Item>,
 ) {
     let opt = settings.exclusions.0.get("exclusions");
     if opt.is_none() {
@@ -251,7 +267,7 @@ fn handle_exclusions(
     for exclusion in exclusions {
         if check_map.contains_key(exclusion) {
             let rng_index = rng.gen_range(0..junk_pool.len());
-            check_map.insert(exclusion.clone(), Some(junk_pool.remove(rng_index)));
+            check_map.insert(exclusion.clone(), Some(junk_pool.remove(rng_index).into()));
         } else {
             error!("Cannot exclude \"{}\", no matching check found with that name.", exclusion);
             fail!("Consult a spoiler log for a list of valid check names.");
@@ -262,100 +278,99 @@ fn handle_exclusions(
 /// Super dirty mapping I hate it
 fn map_to_result(
     world_graph: &mut WorldGraph, check_map: &mut CheckMap,
-) -> Vec<(LocationInfo, Item)> {
-    let mut result: Vec<(LocationInfo, Item)> = Vec::new();
+) -> Vec<(LocationInfo, game::Item)> {
+    let mut result = Vec::new();
     for location_node in world_graph.values_mut() {
         for check in location_node.clone().get_checks() {
             if let Some(loc_info) = check.get_location_info() {
-                result.push((
-                    loc_info,
-                    convert(check_map.get(check.get_name()).unwrap().unwrap()).unwrap(),
-                ));
+                if let FillerItem::Item(item) = check_map.get(check.get_name()).unwrap().unwrap() {
+                    result.push((loc_info, item.to_game_item()));
+                }
             }
         }
     }
     result
 }
 
-fn is_dungeon_prize(item: FillerItem) -> bool {
+fn is_dungeon_prize(item: Item) -> bool {
     matches!(
         item,
-        PendantOfPower
-            | PendantOfWisdom
-            | PendantOfCourage01
-            | PendantOfCourage02
-            | SageGulley
-            | SageOren
-            | SageSeres
-            | SageOsfala
-            | SageImpa
-            | SageIrene
-            | SageRosso
+        Item::PendantOfPower
+            | Item::PendantOfWisdom
+            | Item::PendantOfCourage01
+            | Item::PendantOfCourage02
+            | Item::SageGulley
+            | Item::SageOren
+            | Item::SageSeres
+            | Item::SageOsfala
+            | Item::SageImpa
+            | Item::SageIrene
+            | Item::SageRosso
     )
 }
 
-fn is_dungeon_item(item: FillerItem) -> bool {
+fn is_dungeon_item(item: Item) -> bool {
     matches!(
         item,
-        HyruleSanctuaryKey
-            | LoruleSanctuaryKey
-            | EasternCompass
-            | EasternKeyBig
-            | EasternKeySmall01
-            | EasternKeySmall02
-            | GalesCompass
-            | GalesKeyBig
-            | GalesKeySmall01
-            | GalesKeySmall02
-            | GalesKeySmall03
-            | GalesKeySmall04
-            | HeraCompass
-            | HeraKeyBig
-            | HeraKeySmall01
-            | HeraKeySmall02
-            | DarkCompass
-            | DarkKeyBig
-            | DarkKeySmall01
-            | DarkKeySmall02
-            | DarkKeySmall03
-            | DarkKeySmall04
-            | SwampCompass
-            | SwampKeyBig
-            | SwampKeySmall01
-            | SwampKeySmall02
-            | SwampKeySmall03
-            | SwampKeySmall04
-            | SkullCompass
-            | SkullKeyBig
-            | SkullKeySmall01
-            | SkullKeySmall02
-            | SkullKeySmall03
-            | ThievesCompass
-            | ThievesKeyBig
-            | ThievesKeySmall
-            | IceCompass
-            | IceKeyBig
-            | IceKeySmall01
-            | IceKeySmall02
-            | IceKeySmall03
-            | DesertCompass
-            | DesertKeyBig
-            | DesertKeySmall01
-            | DesertKeySmall02
-            | DesertKeySmall03
-            | DesertKeySmall04
-            | DesertKeySmall05
-            | TurtleCompass
-            | TurtleKeyBig
-            | TurtleKeySmall01
-            | TurtleKeySmall02
-            | TurtleKeySmall03
-            | LoruleCastleCompass
-            | LoruleCastleKeySmall01
-            | LoruleCastleKeySmall02
-            | LoruleCastleKeySmall03
-            | LoruleCastleKeySmall04
-            | LoruleCastleKeySmall05
+        Item::HyruleSanctuaryKey
+            | Item::LoruleSanctuaryKey
+            | Item::EasternCompass
+            | Item::EasternKeyBig
+            | Item::EasternKeySmall01
+            | Item::EasternKeySmall02
+            | Item::GalesCompass
+            | Item::GalesKeyBig
+            | Item::GalesKeySmall01
+            | Item::GalesKeySmall02
+            | Item::GalesKeySmall03
+            | Item::GalesKeySmall04
+            | Item::HeraCompass
+            | Item::HeraKeyBig
+            | Item::HeraKeySmall01
+            | Item::HeraKeySmall02
+            | Item::DarkCompass
+            | Item::DarkKeyBig
+            | Item::DarkKeySmall01
+            | Item::DarkKeySmall02
+            | Item::DarkKeySmall03
+            | Item::DarkKeySmall04
+            | Item::SwampCompass
+            | Item::SwampKeyBig
+            | Item::SwampKeySmall01
+            | Item::SwampKeySmall02
+            | Item::SwampKeySmall03
+            | Item::SwampKeySmall04
+            | Item::SkullCompass
+            | Item::SkullKeyBig
+            | Item::SkullKeySmall01
+            | Item::SkullKeySmall02
+            | Item::SkullKeySmall03
+            | Item::ThievesCompass
+            | Item::ThievesKeyBig
+            | Item::ThievesKeySmall
+            | Item::IceCompass
+            | Item::IceKeyBig
+            | Item::IceKeySmall01
+            | Item::IceKeySmall02
+            | Item::IceKeySmall03
+            | Item::DesertCompass
+            | Item::DesertKeyBig
+            | Item::DesertKeySmall01
+            | Item::DesertKeySmall02
+            | Item::DesertKeySmall03
+            | Item::DesertKeySmall04
+            | Item::DesertKeySmall05
+            | Item::TurtleCompass
+            | Item::TurtleKeyBig
+            | Item::TurtleKeySmall01
+            | Item::TurtleKeySmall02
+            | Item::TurtleKeySmall03
+            | Item::LoruleCastleCompass
+            | Item::LoruleCastleKeySmall01
+            | Item::LoruleCastleKeySmall02
+            | Item::LoruleCastleKeySmall03
+            | Item::LoruleCastleKeySmall04
+            | Item::LoruleCastleKeySmall05
     )
 }
 
@@ -378,21 +393,23 @@ fn fill_junk(check_map: &mut CheckMap, rng: &mut StdRng, junk_items: &mut Pool) 
     }
 
     for junk in junk_items {
-        check_map
-            .insert(empty_check_keys.remove(rng.gen_range(0..empty_check_keys.len())), Some(*junk));
+        check_map.insert(
+            empty_check_keys.remove(rng.gen_range(0..empty_check_keys.len())),
+            Some((*junk).into()),
+        );
     }
 }
 
 fn place_item_randomly(
-    item: FillerItem, checks: &Vec<Check>, check_map: &mut CheckMap, rng: &mut StdRng,
+    item: Item, checks: &Vec<Check>, check_map: &mut CheckMap, rng: &mut StdRng,
 ) {
     check_map.insert(
         checks.get(rng.gen_range(0..checks.len())).unwrap().get_name().to_owned(),
-        Some(item),
+        Some(item.into()),
     );
 }
 
-fn filter_checks(item: FillerItem, checks: &[Check], check_map: &mut CheckMap) -> Vec<Check> {
+fn filter_checks(item: Item, checks: &[Check], check_map: &mut CheckMap) -> Vec<Check> {
     // Filter out non-empty checks
     let mut filtered_checks = checks
         .iter()
@@ -417,7 +434,8 @@ fn filter_dungeon_prize_checks(eligible_checks: &[Check]) -> Vec<Check> {
     eligible_checks.iter().filter(|&x| x.get_name().contains("Prize")).cloned().collect()
 }
 
-fn filter_dungeon_checks(item: FillerItem, eligible_checks: &[Check]) -> Vec<Check> {
+fn filter_dungeon_checks(item: Item, eligible_checks: &[Check]) -> Vec<Check> {
+    use Item::*;
     eligible_checks
         .iter()
         .filter(|&x| {

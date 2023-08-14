@@ -1,13 +1,76 @@
-use game::{Item, Item::*};
-use macros::fail;
-use serde::{Deserialize, Serialize, Serializer};
+use serde::{Serialize, Serializer};
 
-use crate::{hints::hint_color::HintColor::*, item_to_str, Result};
+use crate::{
+    hints::{hint_color::HintColor::*, hint_ghost_name},
+    item_to_str, Result,
+};
 
-use FillerItem::*;
-
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Deserialize)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum FillerItem {
+    Item(Item),
+    Goal(Goal),
+    HintGhost(game::HintGhost),
+}
+
+impl FillerItem {
+    pub fn as_item(&self) -> Option<Item> {
+        match self {
+            Self::Item(item) => Some(*item),
+            _ => None,
+        }
+    }
+
+    pub fn is_hint_ghost(self) -> bool {
+        matches!(self, Self::HintGhost(_))
+    }
+
+    pub fn include_in_sphere_search(self) -> bool {
+        match self {
+            Self::Item(item) => item.include_in_sphere_search(),
+            Self::Goal(Goal::Triforce) => true,
+            _ => false,
+        }
+    }
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Item(item) => item.as_str(),
+            Self::Goal(goal) => goal.as_str(),
+            Self::HintGhost(ghost) => hint_ghost_name(&ghost),
+        }
+    }
+
+    pub fn as_str_colorized(&self) -> String {
+        match self {
+            Self::Goal(goal) => goal.as_str_colorized(),
+            _ => Name.format(self.as_str()),
+        }
+    }
+}
+
+impl From<Item> for FillerItem {
+    fn from(item: Item) -> Self {
+        Self::Item(item)
+    }
+}
+
+impl From<Goal> for FillerItem {
+    fn from(goal: Goal) -> Self {
+        Self::Goal(goal)
+    }
+}
+
+impl Serialize for FillerItem {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_str(self.as_str())
+    }
+}
+
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+pub enum Item {
     Empty,
 
     Bow01,
@@ -435,629 +498,305 @@ pub enum FillerItem {
     GoldBee03,
     Fairy02,
     Shield04,
-
-    // Quest Items ---------------------------------------------------------------------------------
-
-    // Bosses -------
-    Yuga,
-    Margomill,
-    Moldorm,
-    ZeldasThrone,
-    GemesaurKing,
-    Arrghus,
-    Knucklemaster,
-    Stalblind,
-    Grinexx,
-    Zaganaga,
-    Dharkstare,
-
-    // The rest ------
-    OpenSanctuaryDoors,
-    ShadyGuyTrigger,
-    BigBombFlower,
-    StylishWomansHouseOpen,
-    WomanRoofMaiamai,
-    SkullEyeRight,
-    SkullEyeLeft,
-    ThievesB1DoorOpen,
-    ThievesB2DoorOpen,
-    ThievesB3WaterDrained,
-    TurtleFlipped,
-    TurtleAttacked,
-    TurtleWall,
-    AccessPotionShop,
-    AccessMilkBar,
-    #[allow(unused)]
-    AccessFairyFountain, // todo add to world graph
-    AccessHyruleBlacksmith,
-    AccessLoruleCastleField,
-    LcBombTrial,
-    LcBallTrial,
-    LcLampTrial,
-    LcHookTrial,
-    Triforce,
-
-    // Hyrule Overworld Hint Ghosts (36) -----------------------------------------------------------
-    HintGhostLostWoodsMaze1,
-    HintGhostLostWoodsMaze2,
-    HintGhostLostWoodsMaze3,
-    HintGhostLostWoods,
-    HintGhostSpectacleRock,
-    HintGhostTowerOfHeraOutside,
-    HintGhostFloatingIsland,
-    HintGhostFireCave,
-    HintGhostMoldormCave,
-    HintGhostZorasDomain,
-    HintGhostFortuneTellerHyrule,
-    HintGhostSanctuary,
-    HintGhostGraveyardHyrule,
-    HintGhostWaterfallCave,
-    HintGhostWell,
-    HintGhostShadyGuy,
-    HintGhostStylishWoman,
-    HintGhostBlacksmithCave,
-    HintGhostEasternRuinsPegs,
-    HintGhostEasternRuinsCave,
-    HintGhostEasternRuinsEntrance,
-    HintGhostRupeeRushHyrule,
-    HintGhostCuccos,
-    HintGhostSouthBridge,
-    HintGhostSouthernRuins,
-    HintGhostHouseOfGalesIsland,
-    HintGhostHyruleHotfoot,
-    HintGhostLetter,
-    HintGhostStreetPassTree,
-    HintGhostBlacksmithBehind,
-    HintGhostGraveyardLedge,
-    HintGhostDesertEast,
-    HintGhostDesertCenter,
-    HintGhostDesertSouthWest,
-    HintGhostHyruleCastleRocks,
-    HintGhostWitchsHouse,
-
-    // Lorule Overworld Hint Ghosts (20) -----------------------------------------------------------
-    HintGhostSkullWoodsCuccos,
-    HintGhostTreacherousTower,
-    HintGhostIceRuinsOutside,
-    HintGhostLoruleGraveyard,
-    HintGhostDarkRuinsNorth,
-    HintGhostSkullWoodsSouth,
-    HintGhostFortunesChoice,
-    HintGhostVeteranThief,
-    HintGhostFortuneTellerLorule,
-    HintGhostDarkMaze,
-    HintGhostRupeeRushLorule,
-    HintGhostGreatRupeeFairy,
-    HintGhostOctoballDerby,
-    HintGhostVacantHouse,
-    HintGhostMiseryMireLedge,
-    HintGhostSwampPalaceOutsideLeft,
-    HintGhostTurtleBullied,
-    HintGhostTurtleWall,
-    HintGhostTurtleRockOutside,
-    HintGhostDarkPalaceOutside,
-    HintGhostSwampPalaceOutsideRight,
-    HintGhostMiseryMireBridge,
 }
 
-impl FillerItem {
-    pub(crate) fn get_all_ghosts() -> Vec<Self> {
-        vec![
-            HintGhostLostWoodsMaze1,
-            HintGhostLostWoodsMaze2,
-            HintGhostLostWoodsMaze3,
-            HintGhostLostWoods,
-            HintGhostSpectacleRock,
-            HintGhostTowerOfHeraOutside,
-            HintGhostFloatingIsland,
-            HintGhostFireCave,
-            HintGhostMoldormCave,
-            HintGhostZorasDomain,
-            HintGhostFortuneTellerHyrule,
-            HintGhostSanctuary,
-            HintGhostGraveyardHyrule,
-            HintGhostWaterfallCave,
-            HintGhostWell,
-            HintGhostShadyGuy,
-            HintGhostStylishWoman,
-            HintGhostBlacksmithCave,
-            HintGhostEasternRuinsPegs,
-            HintGhostEasternRuinsCave,
-            HintGhostEasternRuinsEntrance,
-            HintGhostRupeeRushHyrule,
-            HintGhostCuccos,
-            HintGhostSouthBridge,
-            HintGhostSouthernRuins,
-            HintGhostHouseOfGalesIsland,
-            HintGhostHyruleHotfoot,
-            HintGhostLetter,
-            HintGhostStreetPassTree,
-            HintGhostBlacksmithBehind,
-            HintGhostGraveyardLedge,
-            HintGhostDesertEast,
-            HintGhostDesertCenter,
-            HintGhostDesertSouthWest,
-            HintGhostHyruleCastleRocks,
-            HintGhostWitchsHouse,
-            HintGhostSkullWoodsCuccos,
-            HintGhostTreacherousTower,
-            HintGhostIceRuinsOutside,
-            HintGhostLoruleGraveyard,
-            HintGhostDarkRuinsNorth,
-            HintGhostSkullWoodsSouth,
-            HintGhostFortunesChoice,
-            HintGhostVeteranThief,
-            HintGhostFortuneTellerLorule,
-            HintGhostDarkMaze,
-            HintGhostRupeeRushLorule,
-            HintGhostGreatRupeeFairy,
-            HintGhostOctoballDerby,
-            HintGhostVacantHouse,
-            HintGhostMiseryMireLedge,
-            HintGhostSwampPalaceOutsideLeft,
-            HintGhostTurtleBullied,
-            HintGhostTurtleWall,
-            HintGhostTurtleRockOutside,
-            HintGhostDarkPalaceOutside,
-            HintGhostSwampPalaceOutsideRight,
-            HintGhostMiseryMireBridge,
-        ]
-    }
-
-    pub fn is_hint_ghost(self) -> bool {
-        matches!(
-            self,
-            HintGhostLostWoodsMaze1
-                | HintGhostLostWoodsMaze2
-                | HintGhostLostWoodsMaze3
-                | HintGhostLostWoods
-                | HintGhostSpectacleRock
-                | HintGhostTowerOfHeraOutside
-                | HintGhostFloatingIsland
-                | HintGhostFireCave
-                | HintGhostMoldormCave
-                | HintGhostZorasDomain
-                | HintGhostFortuneTellerHyrule
-                | HintGhostSanctuary
-                | HintGhostGraveyardHyrule
-                | HintGhostWaterfallCave
-                | HintGhostWell
-                | HintGhostShadyGuy
-                | HintGhostStylishWoman
-                | HintGhostBlacksmithCave
-                | HintGhostEasternRuinsPegs
-                | HintGhostEasternRuinsCave
-                | HintGhostEasternRuinsEntrance
-                | HintGhostRupeeRushHyrule
-                | HintGhostCuccos
-                | HintGhostSouthBridge
-                | HintGhostSouthernRuins
-                | HintGhostHouseOfGalesIsland
-                | HintGhostHyruleHotfoot
-                | HintGhostLetter
-                | HintGhostStreetPassTree
-                | HintGhostBlacksmithBehind
-                | HintGhostGraveyardLedge
-                | HintGhostDesertEast
-                | HintGhostDesertCenter
-                | HintGhostDesertSouthWest
-                | HintGhostHyruleCastleRocks
-                | HintGhostWitchsHouse
-                | HintGhostSkullWoodsCuccos
-                | HintGhostTreacherousTower
-                | HintGhostIceRuinsOutside
-                | HintGhostLoruleGraveyard
-                | HintGhostDarkRuinsNorth
-                | HintGhostSkullWoodsSouth
-                | HintGhostFortunesChoice
-                | HintGhostVeteranThief
-                | HintGhostFortuneTellerLorule
-                | HintGhostDarkMaze
-                | HintGhostRupeeRushLorule
-                | HintGhostGreatRupeeFairy
-                | HintGhostOctoballDerby
-                | HintGhostVacantHouse
-                | HintGhostMiseryMireLedge
-                | HintGhostSwampPalaceOutsideLeft
-                | HintGhostTurtleBullied
-                | HintGhostTurtleWall
-                | HintGhostTurtleRockOutside
-                | HintGhostDarkPalaceOutside
-                | HintGhostSwampPalaceOutsideRight
-                | HintGhostMiseryMireBridge
-        )
-    }
-
-    pub fn include_in_sphere_search(self) -> bool {
+impl Item {
+    pub fn to_game_item(&self) -> game::Item {
+        use Item::*;
         match self {
-            // Empty |
-            Bow01 |
-            Bow02 |
-            Boomerang01 |
-            Boomerang02 |
-            Hookshot01 |
-            Hookshot02 |
-            Bombs01 |
-            Bombs02 |
-            FireRod01 |
-            FireRod02 |
-            IceRod01 |
-            IceRod02 |
-            Hammer01 |
-            Hammer02 |
-            SandRod01 |
-            SandRod02 |
-            TornadoRod01 |
-            TornadoRod02 |
-            Bell |
-            StaminaScroll |
-            BowOfLight |
-            PegasusBoots |
-            Flippers |
-            RaviosBracelet01 |
-            RaviosBracelet02 |
-            HylianShield |
-            SmoothGem |
-            LetterInABottle |
-            PremiumMilk |
-            // FillerItem::Pouch |
-            // BeeBadge |
-            // FillerItem::HintGlasses |
-            GreatSpin |
-            // RupeeGreen |
-            // RupeeBlue |
-            // RupeeRed |
-            // RupeePurple01 |
-            // RupeePurple02 |
-            // RupeePurple03 |
-            // RupeePurple04 |
-            // RupeePurple05 |
-            // RupeePurple06 |
-            // RupeePurple07 |
-            // RupeePurple08 |
-            // RupeePurple09 |
-            // RupeePurple10 |
-            // RupeePurple11 |
-            // RupeePurple12 |
-            // RupeePurple13 |
-            // RupeePurple14 |
-            // RupeePurple15 |
-            // RupeePurple16 |
-            // RupeePurple17 |
-            // RupeePurple18 |
-            // RupeePurple19 |
-            // RupeePurple20 |
-            // RupeeSilver01 |
-            // RupeeSilver02 |
-            // RupeeSilver03 |
-            // RupeeSilver04 |
-            // RupeeSilver05 |
-            // RupeeSilver06 |
-            // RupeeSilver07 |
-            // RupeeSilver08 |
-            // RupeeSilver09 |
-            // RupeeSilver10 |
-            // RupeeSilver11 |
-            // RupeeSilver12 |
-            // RupeeSilver13 |
-            // RupeeSilver14 |
-            // RupeeSilver15 |
-            // RupeeSilver16 |
-            // RupeeSilver17 |
-            // RupeeSilver18 |
-            // RupeeSilver19 |
-            // RupeeSilver20 |
-            // RupeeSilver21 |
-            // RupeeSilver22 |
-            // RupeeSilver23 |
-            // RupeeSilver24 |
-            // RupeeSilver25 |
-            // RupeeSilver26 |
-            // RupeeSilver27 |
-            // RupeeSilver28 |
-            // RupeeSilver29 |
-            // RupeeSilver30 |
-            // RupeeSilver31 |
-            // RupeeSilver32 |
-            // RupeeSilver33 |
-            // RupeeSilver34 |
-            // RupeeSilver35 |
-            // RupeeSilver36 |
-            // RupeeSilver37 |
-            // RupeeSilver38 |
-            // RupeeSilver39 |
-            // RupeeSilver40 |
-            // RupeeSilver41 |
-            // RupeeGold01 |
-            // RupeeGold02 |
-            // RupeeGold03 |
-            // RupeeGold04 |
-            // RupeeGold05 |
-            // RupeeGold06 |
-            // RupeeGold07 |
-            // RupeeGold08 |
-            // RupeeGold09 |
-            // RupeeGold10 |
-            // Maiamai001 |
-            // Maiamai002 |
-            // Maiamai003 |
-            // Maiamai004 |
-            // Maiamai005 |
-            // Maiamai006 |
-            // Maiamai007 |
-            // Maiamai008 |
-            // Maiamai009 |
-            // Maiamai010 |
-            // Maiamai011 |
-            // Maiamai012 |
-            // Maiamai013 |
-            // Maiamai014 |
-            // Maiamai015 |
-            // Maiamai016 |
-            // Maiamai017 |
-            // Maiamai018 |
-            // Maiamai019 |
-            // Maiamai020 |
-            // Maiamai021 |
-            // Maiamai022 |
-            // Maiamai023 |
-            // Maiamai024 |
-            // Maiamai025 |
-            // Maiamai026 |
-            // Maiamai027 |
-            // Maiamai028 |
-            // Maiamai029 |
-            // Maiamai030 |
-            // Maiamai031 |
-            // Maiamai032 |
-            // Maiamai033 |
-            // Maiamai034 |
-            // Maiamai035 |
-            // Maiamai036 |
-            // Maiamai037 |
-            // Maiamai038 |
-            // Maiamai039 |
-            // Maiamai040 |
-            // Maiamai041 |
-            // Maiamai042 |
-            // Maiamai043 |
-            // Maiamai044 |
-            // Maiamai045 |
-            // Maiamai046 |
-            // Maiamai047 |
-            // Maiamai048 |
-            // Maiamai049 |
-            // Maiamai050 |
-            // Maiamai051 |
-            // Maiamai052 |
-            // Maiamai053 |
-            // Maiamai054 |
-            // Maiamai055 |
-            // Maiamai056 |
-            // Maiamai057 |
-            // Maiamai058 |
-            // Maiamai059 |
-            // Maiamai060 |
-            // Maiamai061 |
-            // Maiamai062 |
-            // Maiamai063 |
-            // Maiamai064 |
-            // Maiamai065 |
-            // Maiamai066 |
-            // Maiamai067 |
-            // Maiamai068 |
-            // Maiamai069 |
-            // Maiamai070 |
-            // Maiamai071 |
-            // Maiamai072 |
-            // Maiamai073 |
-            // Maiamai074 |
-            // Maiamai075 |
-            // Maiamai076 |
-            // Maiamai077 |
-            // Maiamai078 |
-            // Maiamai079 |
-            // Maiamai080 |
-            // Maiamai081 |
-            // Maiamai082 |
-            // Maiamai083 |
-            // Maiamai084 |
-            // Maiamai085 |
-            // Maiamai086 |
-            // Maiamai087 |
-            // Maiamai088 |
-            // Maiamai089 |
-            // Maiamai090 |
-            // Maiamai091 |
-            // Maiamai092 |
-            // Maiamai093 |
-            // Maiamai094 |
-            // Maiamai095 |
-            // Maiamai096 |
-            // Maiamai097 |
-            // Maiamai098 |
-            // Maiamai099 |
-            // Maiamai100 |
-            // MonsterGuts |
-            // MonsterHorn |
-            // MonsterTail |
-            // HeartPiece01 |
-            // HeartPiece02 |
-            // HeartPiece03 |
-            // HeartPiece04 |
-            // HeartPiece05 |
-            // HeartPiece06 |
-            // HeartPiece07 |
-            // HeartPiece08 |
-            // HeartPiece09 |
-            // HeartPiece10 |
-            // HeartPiece11 |
-            // HeartPiece12 |
-            // HeartPiece13 |
-            // HeartPiece14 |
-            // HeartPiece15 |
-            // HeartPiece16 |
-            // HeartPiece17 |
-            // HeartPiece18 |
-            // HeartPiece19 |
-            // HeartPiece20 |
-            // HeartPiece21 |
-            // HeartPiece22 |
-            // HeartPiece23 |
-            // HeartPiece24 |
-            // HeartPiece25 |
-            // HeartPiece26 |
-            // HeartPiece27 |
-            // HeartPiece28 |
-            // HeartContainer01 |
-            // HeartContainer02 |
-            // HeartContainer03 |
-            // HeartContainer04 |
-            // HeartContainer05 |
-            // HeartContainer06 |
-            // HeartContainer07 |
-            // HeartContainer08 |
-            // HeartContainer09 |
-            // HeartContainer10 |
-            Bottle01 |
-            Bottle02 |
-            Bottle03 |
-            Bottle04 |
-            // Bottle05 |
-            Lamp01 |
-            Lamp02 |
-            Sword01 |
-            Sword02 |
-            Sword03 |
-            Sword04 |
-            Glove01 |
-            Glove02 |
-            Net01 |
-            Net02 |
-            Mail01 |
-            Mail02 |
-            FillerItem::OreYellow |
-            FillerItem::OreGreen |
-            FillerItem::OreBlue |
-            FillerItem::OreRed |
-            HyruleSanctuaryKey |
-            LoruleSanctuaryKey |
-            // EasternCompass |
-            EasternKeyBig |
-            EasternKeySmall01 |
-            EasternKeySmall02 |
-            // GalesCompass |
-            GalesKeyBig |
-            GalesKeySmall01 |
-            GalesKeySmall02 |
-            GalesKeySmall03 |
-            GalesKeySmall04 |
-            // HeraCompass |
-            HeraKeyBig |
-            HeraKeySmall01 |
-            HeraKeySmall02 |
-            // DarkCompass |
-            DarkKeyBig |
-            DarkKeySmall01 |
-            DarkKeySmall02 |
-            DarkKeySmall03 |
-            DarkKeySmall04 |
-            // SwampCompass |
-            SwampKeyBig |
-            SwampKeySmall01 |
-            SwampKeySmall02 |
-            SwampKeySmall03 |
-            SwampKeySmall04 |
-            // SkullCompass |
-            SkullKeyBig |
-            SkullKeySmall01 |
-            SkullKeySmall02 |
-            SkullKeySmall03 |
-            // ThievesCompass |
-            ThievesKeyBig |
-            ThievesKeySmall |
-            // IceCompass |
-            IceKeyBig |
-            IceKeySmall01 |
-            IceKeySmall02 |
-            IceKeySmall03 |
-            // DesertCompass |
-            DesertKeyBig |
-            DesertKeySmall01 |
-            DesertKeySmall02 |
-            DesertKeySmall03 |
-            DesertKeySmall04 |
-            DesertKeySmall05 |
-            // TurtleCompass |
-            TurtleKeyBig |
-            TurtleKeySmall01 |
-            TurtleKeySmall02 |
-            TurtleKeySmall03 |
-            // LoruleCastleCompass |
-            LoruleCastleKeySmall01 |
-            LoruleCastleKeySmall02 |
-            LoruleCastleKeySmall03 |
-            LoruleCastleKeySmall04 |
-            LoruleCastleKeySmall05 |
-            PendantOfPower |
-            PendantOfWisdom |
-            PendantOfCourage01 |
-            PendantOfCourage02 |
-            FillerItem::SageGulley |
-            FillerItem::SageOren |
-            FillerItem::SageSeres |
-            FillerItem::SageOsfala |
-            FillerItem::SageRosso |
-            FillerItem::SageIrene |
-            FillerItem::SageImpa |
-            ScootFruit01 |
-            // FoulFruit01 |
-            // Shield01 |
-            ScootFruit02 |
-            // FoulFruit02 |
-            // Shield02 |
-            GoldBee01 |
-            // Bee01 |
-            // GoldBee02 |
-            // Fairy01 |
-            // Shield03 |
-            // Bee02 |
-            // GoldBee03 |
-            // Fairy02 |
-            // Shield04 |
-            // EasternComplete |
-            // DarkComplete |
-            // ThievesComplete |
-            // OpenSanctuaryDoors |
-            // ShadyGuyTrigger |
-            // BigBombFlower |
-            // StylishWomansHouseOpen |
-            // WomanRoofMaiamai |
-            // SkullEyeRight |
-            // SkullEyeLeft |
-            // ThievesB1DoorOpen |
-            // ThievesB2DoorOpen |
-            // ThievesB3WaterDrained |
-            // TurtleFlipped |
-            // TurtleAttacked |
-            // TurtleWall |
-            // AccessPotionShop |
-            // AccessMilkBar |
-            // AccessFairyFountain |
-            // AccessHyruleBlacksmith |
-            // AccessLoruleCastleField |
-            // LcBombTrial |
-            // LcBallTrial |
-            // LcLampTrial |
-            // LcHookTrial |
-            Triforce => true,
-            _ => false
+            Empty => game::Item::Empty,
+            Bow01 | Bow02 => game::Item::ItemBow,
+            Boomerang01 | Boomerang02 => game::Item::ItemBoomerang,
+            Hookshot01 | Hookshot02 => game::Item::ItemHookShot,
+            Bombs01 | Bombs02 => game::Item::ItemBomb,
+            FireRod01 | FireRod02 => game::Item::ItemFireRod,
+            IceRod01 | IceRod02 => game::Item::ItemIceRod,
+            Hammer01 | Hammer02 => game::Item::ItemHammer,
+            Bell => game::Item::ItemBell,
+            StaminaScroll => game::Item::GanbariPowerUp,
+            SandRod01 | SandRod02 => game::Item::ItemSandRod,
+            TornadoRod01 | TornadoRod02 => game::Item::ItemTornadeRod,
+            BowOfLight => game::Item::ItemBowLight,
+            PegasusBoots => game::Item::DashBoots,
+            Flippers => game::Item::ItemMizukaki,
+            RaviosBracelet01 => game::Item::RingRental,
+            RaviosBracelet02 => game::Item::RingRental,
+            HylianShield => game::Item::HyruleShield,
+            SmoothGem => game::Item::ItemStoneBeauty,
+            LetterInABottle => game::Item::MessageBottle,
+            PremiumMilk => game::Item::MilkMatured,
+            Pouch => game::Item::Pouch,
+            BeeBadge => game::Item::BadgeBee,
+            HintGlasses => game::Item::HintGlasses,
+
+            HeartPiece01 | HeartPiece02 | HeartPiece03 | HeartPiece04 | HeartPiece05
+            | HeartPiece06 | HeartPiece07 | HeartPiece08 | HeartPiece09 | HeartPiece10
+            | HeartPiece11 | HeartPiece12 | HeartPiece13 | HeartPiece14 | HeartPiece15
+            | HeartPiece16 | HeartPiece17 | HeartPiece18 | HeartPiece19 | HeartPiece20
+            | HeartPiece21 | HeartPiece22 | HeartPiece23 | HeartPiece24 | HeartPiece25
+            | HeartPiece26 | HeartPiece27 | HeartPiece28 => game::Item::HeartPiece,
+
+            HeartContainer01 | HeartContainer02 | HeartContainer03 | HeartContainer04
+            | HeartContainer05 | HeartContainer06 | HeartContainer07 | HeartContainer08
+            | HeartContainer09 | HeartContainer10 => game::Item::HeartContainer,
+
+            Bottle01 | Bottle02 | Bottle03 | Bottle04 | Bottle05 => game::Item::ItemBottle,
+
+            Lamp01 | Lamp02 => game::Item::ItemKandelaar,
+
+            Sword01 | Sword02 | Sword03 | Sword04 => game::Item::ItemSwordLv1,
+
+            Glove01 | Glove02 => game::Item::PowerGlove,
+
+            Net01 | Net02 => game::Item::ItemInsectNet,
+
+            Mail01 | Mail02 => game::Item::ClothesBlue,
+
+            OreYellow => game::Item::OreYellow,
+            OreGreen => game::Item::OreGreen,
+            OreBlue => game::Item::OreBlue,
+            OreRed => game::Item::OreRed,
+
+            // Small Keys
+            HyruleSanctuaryKey
+            | LoruleSanctuaryKey
+            | EasternKeySmall01
+            | EasternKeySmall02
+            | GalesKeySmall01
+            | GalesKeySmall02
+            | GalesKeySmall03
+            | GalesKeySmall04
+            | HeraKeySmall01
+            | HeraKeySmall02
+            | DarkKeySmall01
+            | DarkKeySmall02
+            | DarkKeySmall03
+            | DarkKeySmall04
+            | SwampKeySmall01
+            | SwampKeySmall02
+            | SwampKeySmall03
+            | SwampKeySmall04
+            | SkullKeySmall01
+            | SkullKeySmall02
+            | SkullKeySmall03
+            | ThievesKeySmall
+            | IceKeySmall01
+            | IceKeySmall02
+            | IceKeySmall03
+            | DesertKeySmall01
+            | DesertKeySmall02
+            | DesertKeySmall03
+            | DesertKeySmall04
+            | DesertKeySmall05
+            | TurtleKeySmall01
+            | TurtleKeySmall02
+            | TurtleKeySmall03
+            | LoruleCastleKeySmall01
+            | LoruleCastleKeySmall02
+            | LoruleCastleKeySmall03
+            | LoruleCastleKeySmall04
+            | LoruleCastleKeySmall05 => game::Item::KeySmall,
+
+            // Big Keys
+            EasternKeyBig | GalesKeyBig | HeraKeyBig | DarkKeyBig | SwampKeyBig | SkullKeyBig
+            | ThievesKeyBig | IceKeyBig | DesertKeyBig | TurtleKeyBig => game::Item::KeyBoss,
+
+            // Compasses
+            EasternCompass | GalesCompass | HeraCompass | DarkCompass | SwampCompass
+            | SkullCompass | ThievesCompass | IceCompass | DesertCompass | TurtleCompass
+            | LoruleCastleCompass => game::Item::Compass,
+
+            GreatSpin => game::Item::SpecialMove,
+            RupeeGreen => game::Item::RupeeG,
+            RupeeBlue => game::Item::RupeeB,
+            RupeeRed => game::Item::RupeeR,
+
+            RupeePurple01 | RupeePurple02 | RupeePurple03 | RupeePurple04 | RupeePurple05
+            | RupeePurple06 | RupeePurple07 | RupeePurple08 | RupeePurple09 | RupeePurple10
+            | RupeePurple11 | RupeePurple12 | RupeePurple13 | RupeePurple14 | RupeePurple15
+            | RupeePurple16 | RupeePurple17 | RupeePurple18 | RupeePurple19 | RupeePurple20 => {
+                game::Item::RupeePurple
+            }
+
+            RupeeSilver01 | RupeeSilver02 | RupeeSilver03 | RupeeSilver04 | RupeeSilver05
+            | RupeeSilver06 | RupeeSilver07 | RupeeSilver08 | RupeeSilver09 | RupeeSilver10
+            | RupeeSilver11 | RupeeSilver12 | RupeeSilver13 | RupeeSilver14 | RupeeSilver15
+            | RupeeSilver16 | RupeeSilver17 | RupeeSilver18 | RupeeSilver19 | RupeeSilver20
+            | RupeeSilver21 | RupeeSilver22 | RupeeSilver23 | RupeeSilver24 | RupeeSilver25
+            | RupeeSilver26 | RupeeSilver27 | RupeeSilver28 | RupeeSilver29 | RupeeSilver30
+            | RupeeSilver31 | RupeeSilver32 | RupeeSilver33 | RupeeSilver34 | RupeeSilver35
+            | RupeeSilver36 | RupeeSilver37 | RupeeSilver38 | RupeeSilver39 | RupeeSilver40
+            | RupeeSilver41 => game::Item::RupeeSilver,
+
+            RupeeGold01 | RupeeGold02 | RupeeGold03 | RupeeGold04 | RupeeGold05 | RupeeGold06
+            | RupeeGold07 | RupeeGold08 | RupeeGold09 | RupeeGold10 => game::Item::RupeeGold,
+
+            Maiamai001 | Maiamai002 | Maiamai003 | Maiamai004 | Maiamai005 | Maiamai006
+            | Maiamai007 | Maiamai008 | Maiamai009 | Maiamai010 | Maiamai011 | Maiamai012
+            | Maiamai013 | Maiamai014 | Maiamai015 | Maiamai016 | Maiamai017 | Maiamai018
+            | Maiamai019 | Maiamai020 | Maiamai021 | Maiamai022 | Maiamai023 | Maiamai024
+            | Maiamai025 | Maiamai026 | Maiamai027 | Maiamai028 | Maiamai029 | Maiamai030
+            | Maiamai031 | Maiamai032 | Maiamai033 | Maiamai034 | Maiamai035 | Maiamai036
+            | Maiamai037 | Maiamai038 | Maiamai039 | Maiamai040 | Maiamai041 | Maiamai042
+            | Maiamai043 | Maiamai044 | Maiamai045 | Maiamai046 | Maiamai047 | Maiamai048
+            | Maiamai049 | Maiamai050 | Maiamai051 | Maiamai052 | Maiamai053 | Maiamai054
+            | Maiamai055 | Maiamai056 | Maiamai057 | Maiamai058 | Maiamai059 | Maiamai060
+            | Maiamai061 | Maiamai062 | Maiamai063 | Maiamai064 | Maiamai065 | Maiamai066
+            | Maiamai067 | Maiamai068 | Maiamai069 | Maiamai070 | Maiamai071 | Maiamai072
+            | Maiamai073 | Maiamai074 | Maiamai075 | Maiamai076 | Maiamai077 | Maiamai078
+            | Maiamai079 | Maiamai080 | Maiamai081 | Maiamai082 | Maiamai083 | Maiamai084
+            | Maiamai085 | Maiamai086 | Maiamai087 | Maiamai088 | Maiamai089 | Maiamai090
+            | Maiamai091 | Maiamai092 | Maiamai093 | Maiamai094 | Maiamai095 | Maiamai096
+            | Maiamai097 | Maiamai098 | Maiamai099 | Maiamai100 => game::Item::Kinsta,
+
+            MonsterGuts => game::Item::LiverPurple,
+            MonsterHorn => game::Item::LiverYellow,
+            MonsterTail => game::Item::LiverBlue,
+
+            // Dungeon Items
+            PendantOfPower => game::Item::PendantPower,
+            PendantOfWisdom => game::Item::PendantWisdom,
+            PendantOfCourage01 | PendantOfCourage02 => game::Item::PendantCourage,
+            SageGulley => game::Item::SageGulley,
+            SageOren => game::Item::SageOren,
+            SageSeres => game::Item::SageSeres,
+            SageOsfala => game::Item::SageOsfala,
+            SageImpa => game::Item::SageImpa,
+            SageIrene => game::Item::SageIrene,
+            SageRosso => game::Item::SageRosso,
+
+            // Shop Items
+            ScootFruit01 | ScootFruit02 => game::Item::EscapeFruit,
+            FoulFruit01 | FoulFruit02 => game::Item::StopFruit,
+            Shield01 | Shield02 | Shield03 | Shield04 => game::Item::ItemShield,
+            Bee01 | Bee02 => game::Item::Bee,
+            GoldBee01 | GoldBee02 | GoldBee03 => game::Item::GoldenBeeForSale,
+            Fairy01 | Fairy02 => game::Item::Fairy,
         }
     }
 
+    pub fn include_in_sphere_search(self) -> bool {
+        matches!(
+            self,
+            Self::Bow01
+                | Self::Bow02
+                | Self::Boomerang01
+                | Self::Boomerang02
+                | Self::Hookshot01
+                | Self::Hookshot02
+                | Self::Bombs01
+                | Self::Bombs02
+                | Self::FireRod01
+                | Self::FireRod02
+                | Self::IceRod01
+                | Self::IceRod02
+                | Self::Hammer01
+                | Self::Hammer02
+                | Self::SandRod01
+                | Self::SandRod02
+                | Self::TornadoRod01
+                | Self::TornadoRod02
+                | Self::Bell
+                | Self::StaminaScroll
+                | Self::BowOfLight
+                | Self::PegasusBoots
+                | Self::Flippers
+                | Self::RaviosBracelet01
+                | Self::RaviosBracelet02
+                | Self::HylianShield
+                | Self::SmoothGem
+                | Self::LetterInABottle
+                | Self::PremiumMilk
+                | Self::GreatSpin
+                | Self::Bottle01
+                | Self::Bottle02
+                | Self::Bottle03
+                | Self::Bottle04
+                | Self::Lamp01
+                | Self::Lamp02
+                | Self::Sword01
+                | Self::Sword02
+                | Self::Sword03
+                | Self::Sword04
+                | Self::Glove01
+                | Self::Glove02
+                | Self::Net01
+                | Self::Net02
+                | Self::Mail01
+                | Self::Mail02
+                | Self::OreYellow
+                | Self::OreGreen
+                | Self::OreBlue
+                | Self::OreRed
+                | Self::HyruleSanctuaryKey
+                | Self::LoruleSanctuaryKey
+                | Self::EasternKeyBig
+                | Self::EasternKeySmall01
+                | Self::EasternKeySmall02
+                | Self::GalesKeyBig
+                | Self::GalesKeySmall01
+                | Self::GalesKeySmall02
+                | Self::GalesKeySmall03
+                | Self::GalesKeySmall04
+                | Self::HeraKeyBig
+                | Self::HeraKeySmall01
+                | Self::HeraKeySmall02
+                | Self::DarkKeyBig
+                | Self::DarkKeySmall01
+                | Self::DarkKeySmall02
+                | Self::DarkKeySmall03
+                | Self::DarkKeySmall04
+                | Self::SwampKeyBig
+                | Self::SwampKeySmall01
+                | Self::SwampKeySmall02
+                | Self::SwampKeySmall03
+                | Self::SwampKeySmall04
+                | Self::SkullKeyBig
+                | Self::SkullKeySmall01
+                | Self::SkullKeySmall02
+                | Self::SkullKeySmall03
+                | Self::ThievesKeyBig
+                | Self::ThievesKeySmall
+                | Self::IceKeyBig
+                | Self::IceKeySmall01
+                | Self::IceKeySmall02
+                | Self::IceKeySmall03
+                | Self::DesertKeyBig
+                | Self::DesertKeySmall01
+                | Self::DesertKeySmall02
+                | Self::DesertKeySmall03
+                | Self::DesertKeySmall04
+                | Self::DesertKeySmall05
+                | Self::TurtleKeyBig
+                | Self::TurtleKeySmall01
+                | Self::TurtleKeySmall02
+                | Self::TurtleKeySmall03
+                | Self::LoruleCastleKeySmall01
+                | Self::LoruleCastleKeySmall02
+                | Self::LoruleCastleKeySmall03
+                | Self::LoruleCastleKeySmall04
+                | Self::LoruleCastleKeySmall05
+                | Self::PendantOfPower
+                | Self::PendantOfWisdom
+                | Self::PendantOfCourage01
+                | Self::PendantOfCourage02
+                | Self::SageGulley
+                | Self::SageOren
+                | Self::SageSeres
+                | Self::SageOsfala
+                | Self::SageRosso
+                | Self::SageIrene
+                | Self::SageImpa
+                | Self::ScootFruit01
+                | Self::ScootFruit02
+                | Self::GoldBee01
+        )
+    }
+
     pub fn get_article(self) -> &'static str {
+        use Item::*;
         match self {
-            FillerItem::Empty => "",
+            Empty => "",
 
             Bow01 | Bow02 | Boomerang01 | Boomerang02 | Hookshot01 | Hookshot02 | FireRod01
             | FireRod02 | IceRod01 | IceRod02 | Hammer01 | Hammer02 | SandRod01 | SandRod02
@@ -1071,14 +810,8 @@ impl FillerItem {
 
             RaviosBracelet01 | RaviosBracelet02 => "a",
 
-            HylianShield
-            | SmoothGem
-            | LetterInABottle
-            | PremiumMilk
-            | FillerItem::Pouch
-            | BeeBadge
-            | FillerItem::HintGlasses
-            | GreatSpin => "the",
+            HylianShield | SmoothGem | LetterInABottle | PremiumMilk | Pouch | BeeBadge
+            | HintGlasses | GreatSpin => "the",
 
             RupeeGreen | RupeeBlue | RupeeRed | RupeePurple01 | RupeePurple02 | RupeePurple03
             | RupeePurple04 | RupeePurple05 | RupeePurple06 | RupeePurple07 | RupeePurple08
@@ -1137,10 +870,7 @@ impl FillerItem {
 
             Mail01 | Mail02 => "an",
 
-            FillerItem::OreYellow
-            | FillerItem::OreGreen
-            | FillerItem::OreBlue
-            | FillerItem::OreRed => "some",
+            OreYellow | OreGreen | OreBlue | OreRed => "some",
 
             HyruleSanctuaryKey | LoruleSanctuaryKey => "the",
 
@@ -1195,111 +925,16 @@ impl FillerItem {
 
             PendantOfCourage01 | PendantOfCourage02 => "a",
 
-            FillerItem::SageGulley
-            | FillerItem::SageOren
-            | FillerItem::SageSeres
-            | FillerItem::SageOsfala
-            | FillerItem::SageRosso
-            | FillerItem::SageIrene
-            | FillerItem::SageImpa => "",
+            SageGulley | SageOren | SageSeres | SageOsfala | SageRosso | SageIrene | SageImpa => "",
 
             ScootFruit01 | FoulFruit01 | Shield01 | ScootFruit02 | FoulFruit02 | Shield02
             | GoldBee01 | Bee01 | GoldBee02 | Fairy01 | Shield03 | Bee02 | GoldBee03 | Fairy02
             | Shield04 => "a",
-
-            OpenSanctuaryDoors
-            | ShadyGuyTrigger
-            | BigBombFlower
-            | StylishWomansHouseOpen
-            | WomanRoofMaiamai
-            | SkullEyeRight
-            | SkullEyeLeft
-            | ThievesB1DoorOpen
-            | ThievesB2DoorOpen
-            | ThievesB3WaterDrained
-            | TurtleFlipped
-            | TurtleAttacked
-            | TurtleWall
-            | AccessPotionShop
-            | AccessMilkBar
-            | AccessFairyFountain
-            | AccessHyruleBlacksmith
-            | AccessLoruleCastleField
-            | LcBombTrial
-            | LcBallTrial
-            | LcLampTrial
-            | LcHookTrial
-            | Triforce => fail!("Articles are not defined for Progression Events: {:?}", self),
-
-            Yuga | Margomill | Moldorm | ZeldasThrone | GemesaurKing | Arrghus | Knucklemaster
-            | Stalblind | Grinexx | Zaganaga | Dharkstare => {
-                fail!("Articles are not defined for Goals: {:?}", self)
-            }
-
-            HintGhostLostWoodsMaze1
-            | HintGhostLostWoodsMaze2
-            | HintGhostLostWoodsMaze3
-            | HintGhostLostWoods
-            | HintGhostSpectacleRock
-            | HintGhostTowerOfHeraOutside
-            | HintGhostFloatingIsland
-            | HintGhostFireCave
-            | HintGhostMoldormCave
-            | HintGhostZorasDomain
-            | HintGhostFortuneTellerHyrule
-            | HintGhostSanctuary
-            | HintGhostGraveyardHyrule
-            | HintGhostWaterfallCave
-            | HintGhostWell
-            | HintGhostShadyGuy
-            | HintGhostStylishWoman
-            | HintGhostBlacksmithCave
-            | HintGhostEasternRuinsPegs
-            | HintGhostEasternRuinsCave
-            | HintGhostEasternRuinsEntrance
-            | HintGhostRupeeRushHyrule
-            | HintGhostCuccos
-            | HintGhostSouthBridge
-            | HintGhostSouthernRuins
-            | HintGhostHouseOfGalesIsland
-            | HintGhostHyruleHotfoot
-            | HintGhostLetter
-            | HintGhostStreetPassTree
-            | HintGhostBlacksmithBehind
-            | HintGhostGraveyardLedge
-            | HintGhostDesertEast
-            | HintGhostDesertCenter
-            | HintGhostDesertSouthWest
-            | HintGhostHyruleCastleRocks
-            | HintGhostWitchsHouse
-            | HintGhostSkullWoodsCuccos
-            | HintGhostTreacherousTower
-            | HintGhostIceRuinsOutside
-            | HintGhostLoruleGraveyard
-            | HintGhostDarkRuinsNorth
-            | HintGhostSkullWoodsSouth
-            | HintGhostFortunesChoice
-            | HintGhostVeteranThief
-            | HintGhostFortuneTellerLorule
-            | HintGhostDarkMaze
-            | HintGhostRupeeRushLorule
-            | HintGhostGreatRupeeFairy
-            | HintGhostOctoballDerby
-            | HintGhostVacantHouse
-            | HintGhostMiseryMireLedge
-            | HintGhostSwampPalaceOutsideLeft
-            | HintGhostTurtleBullied
-            | HintGhostTurtleWall
-            | HintGhostTurtleRockOutside
-            | HintGhostDarkPalaceOutside
-            | HintGhostSwampPalaceOutsideRight
-            | HintGhostMiseryMireBridge => {
-                fail!("Articles are not defined for Hint Ghosts: {:?}", self)
-            }
         }
     }
 
-    pub fn as_str(self) -> &'static str {
+    pub fn as_str(&self) -> &'static str {
+        use Item::*;
         match self {
             HyruleSanctuaryKey => "Hyrule Sanctuary Small Key",
             LoruleSanctuaryKey => "Lorule Sanctuary Small Key",
@@ -1347,401 +982,115 @@ impl FillerItem {
             | LoruleCastleKeySmall04
             | LoruleCastleKeySmall05 => "Lorule Castle Small Key",
 
-            Yuga => "Yuga",
-            Margomill => "Margomill",
-            Moldorm => "Moldorm",
-            ZeldasThrone => "Zelda's Throne",
+            _ => item_to_str(&self.to_game_item()),
+        }
+    }
 
-            GemesaurKing => "Gemesaur King",
-            Arrghus => "Arrghus",
-            Knucklemaster => "Knucklemaster",
-            Stalblind => "Stalblind",
-            Grinexx => "Grinexx",
-            Zaganaga => "Zaganaga",
-            Dharkstare => "Dharkstare",
+    pub fn as_str_colorized(&self) -> String {
+        Name.format(self.as_str())
+    }
+}
 
-            OpenSanctuaryDoors => "Sanctuary Doors Opened",
-            ShadyGuyTrigger => "Shady Guy Trigger",
-            BigBombFlower => "Big Bomb Flower",
-            StylishWomansHouseOpen => "Stylish Woman's House Opened",
-            WomanRoofMaiamai => "Woman's Roof Maiamai",
-            SkullEyeRight => "Skull Woods Right Eye",
-            SkullEyeLeft => "Skull Woods Left Eye",
-            ThievesB1DoorOpen => "Thieves' Hideout B1 Door Open",
-            ThievesB2DoorOpen => "Thieves' Hideout B2 Door Open",
-            ThievesB3WaterDrained => "Thieves' Hideout B3 Water Drained",
-            TurtleFlipped => "Turtle Flipped",
-            TurtleAttacked => "Turtle Bullied",
-            TurtleWall => "Turtle Wall",
-            AccessPotionShop => "Potion Shop Access",
-            AccessMilkBar => "Milk Bar Access",
-            AccessFairyFountain => "Fairy Fountain Access",
-            AccessHyruleBlacksmith => "Hyrule Blacksmith Access",
-            AccessLoruleCastleField => "Lorule Castle Field Access",
-            LcBombTrial => "Bomb Trial Complete",
-            LcBallTrial => "Ball Trial Complete",
-            LcLampTrial => "Lamp Trial Complete",
-            LcHookTrial => "Hook Trial Complete",
-            Triforce => "Triforce",
+// Quest Items ---------------------------------------------------------------------------------
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+pub enum Goal {
+    // Bosses -------
+    Yuga,
+    Margomill,
+    Moldorm,
+    ZeldasThrone,
+    GemesaurKing,
+    Arrghus,
+    Knucklemaster,
+    Stalblind,
+    Grinexx,
+    Zaganaga,
+    Dharkstare,
 
-            HintGhostLostWoodsMaze1 => "Lost Woods Maze Ghost 1",
-            HintGhostLostWoodsMaze2 => "Lost Woods Maze Ghost 2",
-            HintGhostLostWoodsMaze3 => "Lost Woods Maze Ghost 3",
-            HintGhostLostWoods => "Lost Woods Ghost",
-            HintGhostSpectacleRock => "Spectacle Rock Ghost",
-            HintGhostTowerOfHeraOutside => "Outside Tower of Hera Ghost",
-            HintGhostFloatingIsland => "Floating Island Ghost",
-            HintGhostFireCave => "Fire Cave Ghost",
-            HintGhostMoldormCave => "Moldorm Cave Ghost",
-            HintGhostZorasDomain => "Zora's Domain Ghost",
-            HintGhostFortuneTellerHyrule => "Hyrule Fortune-Teller Ghost",
-            HintGhostSanctuary => "Sanctuary Ghost",
-            HintGhostGraveyardHyrule => "Hyrule Graveyard Ghost",
-            HintGhostWaterfallCave => "Waterfall Cave Ghost",
-            HintGhostWell => "Kakariko Well Ghost",
-            HintGhostShadyGuy => "Shady Guy Ghost",
-            HintGhostStylishWoman => "Stylish Woman Ghost",
-            HintGhostBlacksmithCave => "Blacksmith Cave Ghost",
-            HintGhostEasternRuinsPegs => "Eastern Ruins Pegs Ghost",
-            HintGhostEasternRuinsCave => "Eastern Ruins Cave Ghost",
-            HintGhostEasternRuinsEntrance => "Eastern Ruins Entrance Ghost",
-            HintGhostRupeeRushHyrule => "Hyrule Rupee Rush Ghost",
-            HintGhostCuccos => "Dodge the Cuccos Ghost",
-            HintGhostSouthBridge => "Southern Bridge Ghost",
-            HintGhostSouthernRuins => "Southern Ruins Ghost",
-            HintGhostHouseOfGalesIsland => "House of Gales Island Ghost",
-            HintGhostHyruleHotfoot => "Hyrule Hotfoot Ghost",
-            HintGhostLetter => "Letter in a Bottle Ghost",
-            HintGhostStreetPassTree => "StreetPass Tree Ghost",
-            HintGhostBlacksmithBehind => "Behind Blacksmith Ghost",
-            HintGhostGraveyardLedge => "Graveyard Ledge Ghost",
-            HintGhostDesertEast => "Desert East Ghost",
-            HintGhostDesertCenter => "Desert Center Ghost",
-            HintGhostDesertSouthWest => "Desert South West Ghost",
-            HintGhostHyruleCastleRocks => "Hyrule Castle Rocks Ghost",
-            HintGhostWitchsHouse => "Witch's House Ghost",
+    // The rest ------
+    OpenSanctuaryDoors,
+    ShadyGuyTrigger,
+    BigBombFlower,
+    StylishWomansHouseOpen,
+    WomanRoofMaiamai,
+    SkullEyeRight,
+    SkullEyeLeft,
+    ThievesB1DoorOpen,
+    ThievesB2DoorOpen,
+    ThievesB3WaterDrained,
+    TurtleFlipped,
+    TurtleAttacked,
+    TurtleWall,
+    AccessPotionShop,
+    AccessMilkBar,
+    #[allow(unused)]
+    AccessFairyFountain, // todo add to world graph
+    AccessHyruleBlacksmith,
+    AccessLoruleCastleField,
+    LcBombTrial,
+    LcBallTrial,
+    LcLampTrial,
+    LcHookTrial,
+    Triforce,
+}
 
-            HintGhostSkullWoodsCuccos => "Skull Woods Cuccos Ghost",
-            HintGhostTreacherousTower => "Treacherous Tower Ghost",
-            HintGhostIceRuinsOutside => "Ice Ruins Outside Ghost",
-            HintGhostLoruleGraveyard => "Lorule Graveyard Ghost",
-            HintGhostDarkRuinsNorth => "Dark Ruins North Ghost",
-            HintGhostSkullWoodsSouth => "Skull Woods South Ghost",
-            HintGhostFortunesChoice => "Fortune's Choice Ghost",
-            HintGhostVeteranThief => "Veteran Thief Ghost",
-            HintGhostFortuneTellerLorule => "Lorule Fortune-Teller Ghost",
-            HintGhostDarkMaze => "Dark Maze Ghost",
-            HintGhostRupeeRushLorule => "Lorule Rupee Rush Ghost",
-            HintGhostGreatRupeeFairy => "Great Rupee Fairy Ghost",
-            HintGhostOctoballDerby => "Octoball Derby Ghost",
-            HintGhostVacantHouse => "Vacant House Ghost",
-            HintGhostMiseryMireLedge => "Misery Mire Ledge Ghost",
-            HintGhostSwampPalaceOutsideLeft => "Swamp Palace Outside Left Ghost",
-            HintGhostTurtleBullied => "Turtle Bullied Ghost",
-            HintGhostTurtleWall => "Turtle Wall Ghost",
-            HintGhostTurtleRockOutside => "Turtle Rock Outside Ghost",
-            HintGhostDarkPalaceOutside => "Dark Palace Outside Ghost",
-            HintGhostSwampPalaceOutsideRight => "Swamp Palace Outside Right Ghost",
-            HintGhostMiseryMireBridge => "Misery Mire Bridge Ghost",
+impl Goal {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            Self::Yuga => "Yuga",
+            Self::Margomill => "Margomill",
+            Self::Moldorm => "Moldorm",
+            Self::ZeldasThrone => "Zelda's Throne",
 
-            _ => item_to_str(&(convert(self).unwrap())),
+            Self::GemesaurKing => "Gemesaur King",
+            Self::Arrghus => "Arrghus",
+            Self::Knucklemaster => "Knucklemaster",
+            Self::Stalblind => "Stalblind",
+            Self::Grinexx => "Grinexx",
+            Self::Zaganaga => "Zaganaga",
+            Self::Dharkstare => "Dharkstare",
+
+            Self::OpenSanctuaryDoors => "Sanctuary Doors Opened",
+            Self::ShadyGuyTrigger => "Shady Guy Trigger",
+            Self::BigBombFlower => "Big Bomb Flower",
+            Self::StylishWomansHouseOpen => "Stylish Woman's House Opened",
+            Self::WomanRoofMaiamai => "Woman's Roof Maiamai",
+            Self::SkullEyeRight => "Skull Woods Right Eye",
+            Self::SkullEyeLeft => "Skull Woods Left Eye",
+            Self::ThievesB1DoorOpen => "Thieves' Hideout B1 Door Open",
+            Self::ThievesB2DoorOpen => "Thieves' Hideout B2 Door Open",
+            Self::ThievesB3WaterDrained => "Thieves' Hideout B3 Water Drained",
+            Self::TurtleFlipped => "Turtle Flipped",
+            Self::TurtleAttacked => "Turtle Bullied",
+            Self::TurtleWall => "Turtle Wall",
+            Self::AccessPotionShop => "Potion Shop Access",
+            Self::AccessMilkBar => "Milk Bar Access",
+            Self::AccessFairyFountain => "Fairy Fountain Access",
+            Self::AccessHyruleBlacksmith => "Hyrule Blacksmith Access",
+            Self::AccessLoruleCastleField => "Lorule Castle Field Access",
+            Self::LcBombTrial => "Bomb Trial Complete",
+            Self::LcBallTrial => "Ball Trial Complete",
+            Self::LcLampTrial => "Lamp Trial Complete",
+            Self::LcHookTrial => "Hook Trial Complete",
+            Self::Triforce => "Triforce",
         }
     }
 
     pub fn as_str_colorized(&self) -> String {
         match self {
-            Yuga => Green,
-            Margomill => Blue,
-            Moldorm => Attention,
-            ZeldasThrone => Name,
-            GemesaurKing => Green,
-            Arrghus => Beige,
-            Knucklemaster => Blue,
-            Stalblind => Beige,
-            Grinexx => Purple,
-            Zaganaga => Name,
-            Dharkstare => Attention,
+            Self::Yuga => Green,
+            Self::Margomill => Blue,
+            Self::Moldorm => Attention,
+            Self::ZeldasThrone => Name,
+            Self::GemesaurKing => Green,
+            Self::Arrghus => Beige,
+            Self::Knucklemaster => Blue,
+            Self::Stalblind => Beige,
+            Self::Grinexx => Purple,
+            Self::Zaganaga => Name,
+            Self::Dharkstare => Attention,
             _ => Name,
         }
-        .format(Self::as_str(*self))
-    }
-}
-
-impl Serialize for FillerItem {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        serializer.serialize_str(self.as_str())
-    }
-}
-
-pub fn convert(fill_item: FillerItem) -> Option<Item> {
-    match fill_item {
-        FillerItem::Empty => Some(Item::Empty),
-        Bow01 | Bow02 => Some(ItemBow),
-        Boomerang01 | Boomerang02 => Some(ItemBoomerang),
-        Hookshot01 | Hookshot02 => Some(ItemHookShot),
-        Bombs01 | Bombs02 => Some(ItemBomb),
-        FireRod01 | FireRod02 => Some(ItemFireRod),
-        IceRod01 | IceRod02 => Some(ItemIceRod),
-        Hammer01 | Hammer02 => Some(ItemHammer),
-        Bell => Some(ItemBell),
-        StaminaScroll => Some(GanbariPowerUp),
-        SandRod01 | SandRod02 => Some(ItemSandRod),
-        TornadoRod01 | TornadoRod02 => Some(ItemTornadeRod),
-        BowOfLight => Some(ItemBowLight),
-        PegasusBoots => Some(DashBoots),
-        Flippers => Some(ItemMizukaki),
-        RaviosBracelet01 => Some(RingRental),
-        RaviosBracelet02 => Some(RingRental),
-        HylianShield => Some(HyruleShield),
-        SmoothGem => Some(ItemStoneBeauty),
-        LetterInABottle => Some(MessageBottle),
-        PremiumMilk => Some(MilkMatured),
-        FillerItem::Pouch => Some(Item::Pouch),
-        BeeBadge => Some(BadgeBee),
-        FillerItem::HintGlasses => Some(Item::HintGlasses),
-
-        HeartPiece01 | HeartPiece02 | HeartPiece03 | HeartPiece04 | HeartPiece05 | HeartPiece06
-        | HeartPiece07 | HeartPiece08 | HeartPiece09 | HeartPiece10 | HeartPiece11
-        | HeartPiece12 | HeartPiece13 | HeartPiece14 | HeartPiece15 | HeartPiece16
-        | HeartPiece17 | HeartPiece18 | HeartPiece19 | HeartPiece20 | HeartPiece21
-        | HeartPiece22 | HeartPiece23 | HeartPiece24 | HeartPiece25 | HeartPiece26
-        | HeartPiece27 | HeartPiece28 => Some(HeartPiece),
-
-        HeartContainer01 | HeartContainer02 | HeartContainer03 | HeartContainer04
-        | HeartContainer05 | HeartContainer06 | HeartContainer07 | HeartContainer08
-        | HeartContainer09 | HeartContainer10 => Some(HeartContainer),
-
-        Bottle01 | Bottle02 | Bottle03 | Bottle04 | Bottle05 => Some(ItemBottle),
-
-        Lamp01 | Lamp02 => Some(ItemKandelaar),
-
-        Sword01 | Sword02 | Sword03 | Sword04 => Some(ItemSwordLv1),
-
-        Glove01 | Glove02 => Some(PowerGlove),
-
-        Net01 | Net02 => Some(ItemInsectNet),
-
-        Mail01 | Mail02 => Some(ClothesBlue),
-
-        FillerItem::OreYellow => Some(Item::OreYellow),
-        FillerItem::OreGreen => Some(Item::OreGreen),
-        FillerItem::OreBlue => Some(Item::OreBlue),
-        FillerItem::OreRed => Some(Item::OreRed),
-
-        // Small Keys
-        HyruleSanctuaryKey
-        | LoruleSanctuaryKey
-        | EasternKeySmall01
-        | EasternKeySmall02
-        | GalesKeySmall01
-        | GalesKeySmall02
-        | GalesKeySmall03
-        | GalesKeySmall04
-        | HeraKeySmall01
-        | HeraKeySmall02
-        | DarkKeySmall01
-        | DarkKeySmall02
-        | DarkKeySmall03
-        | DarkKeySmall04
-        | SwampKeySmall01
-        | SwampKeySmall02
-        | SwampKeySmall03
-        | SwampKeySmall04
-        | SkullKeySmall01
-        | SkullKeySmall02
-        | SkullKeySmall03
-        | ThievesKeySmall
-        | IceKeySmall01
-        | IceKeySmall02
-        | IceKeySmall03
-        | DesertKeySmall01
-        | DesertKeySmall02
-        | DesertKeySmall03
-        | DesertKeySmall04
-        | DesertKeySmall05
-        | TurtleKeySmall01
-        | TurtleKeySmall02
-        | TurtleKeySmall03
-        | LoruleCastleKeySmall01
-        | LoruleCastleKeySmall02
-        | LoruleCastleKeySmall03
-        | LoruleCastleKeySmall04
-        | LoruleCastleKeySmall05 => Some(KeySmall),
-
-        // Big Keys
-        EasternKeyBig | GalesKeyBig | HeraKeyBig | DarkKeyBig | SwampKeyBig | SkullKeyBig
-        | ThievesKeyBig | IceKeyBig | DesertKeyBig | TurtleKeyBig => Some(KeyBoss),
-
-        // Compasses
-        EasternCompass | GalesCompass | HeraCompass | DarkCompass | SwampCompass | SkullCompass
-        | ThievesCompass | IceCompass | DesertCompass | TurtleCompass | LoruleCastleCompass => {
-            Some(Compass)
-        }
-
-        GreatSpin => Some(SpecialMove),
-        RupeeGreen => Some(RupeeG),
-        RupeeBlue => Some(RupeeB),
-        RupeeRed => Some(RupeeR),
-
-        RupeePurple01 | RupeePurple02 | RupeePurple03 | RupeePurple04 | RupeePurple05
-        | RupeePurple06 | RupeePurple07 | RupeePurple08 | RupeePurple09 | RupeePurple10
-        | RupeePurple11 | RupeePurple12 | RupeePurple13 | RupeePurple14 | RupeePurple15
-        | RupeePurple16 | RupeePurple17 | RupeePurple18 | RupeePurple19 | RupeePurple20 => {
-            Some(RupeePurple)
-        }
-
-        RupeeSilver01 | RupeeSilver02 | RupeeSilver03 | RupeeSilver04 | RupeeSilver05
-        | RupeeSilver06 | RupeeSilver07 | RupeeSilver08 | RupeeSilver09 | RupeeSilver10
-        | RupeeSilver11 | RupeeSilver12 | RupeeSilver13 | RupeeSilver14 | RupeeSilver15
-        | RupeeSilver16 | RupeeSilver17 | RupeeSilver18 | RupeeSilver19 | RupeeSilver20
-        | RupeeSilver21 | RupeeSilver22 | RupeeSilver23 | RupeeSilver24 | RupeeSilver25
-        | RupeeSilver26 | RupeeSilver27 | RupeeSilver28 | RupeeSilver29 | RupeeSilver30
-        | RupeeSilver31 | RupeeSilver32 | RupeeSilver33 | RupeeSilver34 | RupeeSilver35
-        | RupeeSilver36 | RupeeSilver37 | RupeeSilver38 | RupeeSilver39 | RupeeSilver40
-        | RupeeSilver41 => Some(RupeeSilver),
-
-        RupeeGold01 | RupeeGold02 | RupeeGold03 | RupeeGold04 | RupeeGold05 | RupeeGold06
-        | RupeeGold07 | RupeeGold08 | RupeeGold09 | RupeeGold10 => Some(RupeeGold),
-
-        Maiamai001 | Maiamai002 | Maiamai003 | Maiamai004 | Maiamai005 | Maiamai006
-        | Maiamai007 | Maiamai008 | Maiamai009 | Maiamai010 | Maiamai011 | Maiamai012
-        | Maiamai013 | Maiamai014 | Maiamai015 | Maiamai016 | Maiamai017 | Maiamai018
-        | Maiamai019 | Maiamai020 | Maiamai021 | Maiamai022 | Maiamai023 | Maiamai024
-        | Maiamai025 | Maiamai026 | Maiamai027 | Maiamai028 | Maiamai029 | Maiamai030
-        | Maiamai031 | Maiamai032 | Maiamai033 | Maiamai034 | Maiamai035 | Maiamai036
-        | Maiamai037 | Maiamai038 | Maiamai039 | Maiamai040 | Maiamai041 | Maiamai042
-        | Maiamai043 | Maiamai044 | Maiamai045 | Maiamai046 | Maiamai047 | Maiamai048
-        | Maiamai049 | Maiamai050 | Maiamai051 | Maiamai052 | Maiamai053 | Maiamai054
-        | Maiamai055 | Maiamai056 | Maiamai057 | Maiamai058 | Maiamai059 | Maiamai060
-        | Maiamai061 | Maiamai062 | Maiamai063 | Maiamai064 | Maiamai065 | Maiamai066
-        | Maiamai067 | Maiamai068 | Maiamai069 | Maiamai070 | Maiamai071 | Maiamai072
-        | Maiamai073 | Maiamai074 | Maiamai075 | Maiamai076 | Maiamai077 | Maiamai078
-        | Maiamai079 | Maiamai080 | Maiamai081 | Maiamai082 | Maiamai083 | Maiamai084
-        | Maiamai085 | Maiamai086 | Maiamai087 | Maiamai088 | Maiamai089 | Maiamai090
-        | Maiamai091 | Maiamai092 | Maiamai093 | Maiamai094 | Maiamai095 | Maiamai096
-        | Maiamai097 | Maiamai098 | Maiamai099 | Maiamai100 => Some(Kinsta),
-
-        MonsterGuts => Some(LiverPurple),
-        MonsterHorn => Some(LiverYellow),
-        MonsterTail => Some(LiverBlue),
-
-        // Dungeon Items
-        PendantOfPower => Some(PendantPower),
-        PendantOfWisdom => Some(PendantWisdom),
-        PendantOfCourage01 | PendantOfCourage02 => Some(PendantCourage),
-        FillerItem::SageGulley => Some(Item::SageGulley),
-        FillerItem::SageOren => Some(Item::SageOren),
-        FillerItem::SageSeres => Some(Item::SageSeres),
-        FillerItem::SageOsfala => Some(Item::SageOsfala),
-        FillerItem::SageImpa => Some(Item::SageImpa),
-        FillerItem::SageIrene => Some(Item::SageIrene),
-        FillerItem::SageRosso => Some(Item::SageRosso),
-
-        // Shop Items
-        ScootFruit01 | ScootFruit02 => Some(EscapeFruit),
-        FoulFruit01 | FoulFruit02 => Some(StopFruit),
-        Shield01 | Shield02 | Shield03 | Shield04 => Some(ItemShield),
-        Bee01 | Bee02 => Some(Bee),
-        GoldBee01 | GoldBee02 | GoldBee03 => Some(GoldenBeeForSale),
-        Fairy01 | Fairy02 => Some(Fairy),
-
-        // Quest Items don't translate
-        Yuga
-        | Margomill
-        | Moldorm
-        | ZeldasThrone
-        | GemesaurKing
-        | Arrghus
-        | Knucklemaster
-        | Stalblind
-        | Grinexx
-        | Zaganaga
-        | Dharkstare
-        | ShadyGuyTrigger
-        | OpenSanctuaryDoors
-        | BigBombFlower
-        | StylishWomansHouseOpen
-        | WomanRoofMaiamai
-        | SkullEyeRight
-        | SkullEyeLeft
-        | ThievesB1DoorOpen
-        | ThievesB2DoorOpen
-        | ThievesB3WaterDrained
-        | TurtleFlipped
-        | TurtleAttacked
-        | TurtleWall
-        | AccessLoruleCastleField
-        | AccessHyruleBlacksmith
-        | AccessPotionShop
-        | AccessFairyFountain
-        | AccessMilkBar
-        | LcBombTrial
-        | LcBallTrial
-        | LcLampTrial
-        | LcHookTrial
-        | Triforce => None,
-
-        // Hint Ghosts don't map either
-        HintGhostLostWoodsMaze1
-        | HintGhostLostWoodsMaze2
-        | HintGhostLostWoodsMaze3
-        | HintGhostLostWoods
-        | HintGhostSpectacleRock
-        | HintGhostTowerOfHeraOutside
-        | HintGhostFloatingIsland
-        | HintGhostFireCave
-        | HintGhostMoldormCave
-        | HintGhostZorasDomain
-        | HintGhostFortuneTellerHyrule
-        | HintGhostSanctuary
-        | HintGhostGraveyardHyrule
-        | HintGhostWaterfallCave
-        | HintGhostWell
-        | HintGhostShadyGuy
-        | HintGhostStylishWoman
-        | HintGhostBlacksmithCave
-        | HintGhostEasternRuinsPegs
-        | HintGhostEasternRuinsCave
-        | HintGhostEasternRuinsEntrance
-        | HintGhostRupeeRushHyrule
-        | HintGhostCuccos
-        | HintGhostSouthBridge
-        | HintGhostSouthernRuins
-        | HintGhostHouseOfGalesIsland
-        | HintGhostHyruleHotfoot
-        | HintGhostLetter
-        | HintGhostStreetPassTree
-        | HintGhostBlacksmithBehind
-        | HintGhostGraveyardLedge
-        | HintGhostDesertEast
-        | HintGhostDesertCenter
-        | HintGhostDesertSouthWest
-        | HintGhostHyruleCastleRocks
-        | HintGhostWitchsHouse
-        | HintGhostSkullWoodsCuccos
-        | HintGhostTreacherousTower
-        | HintGhostIceRuinsOutside
-        | HintGhostLoruleGraveyard
-        | HintGhostDarkRuinsNorth
-        | HintGhostSkullWoodsSouth
-        | HintGhostFortunesChoice
-        | HintGhostVeteranThief
-        | HintGhostFortuneTellerLorule
-        | HintGhostDarkMaze
-        | HintGhostRupeeRushLorule
-        | HintGhostGreatRupeeFairy
-        | HintGhostOctoballDerby
-        | HintGhostVacantHouse
-        | HintGhostMiseryMireLedge
-        | HintGhostSwampPalaceOutsideLeft
-        | HintGhostTurtleBullied
-        | HintGhostTurtleWall
-        | HintGhostTurtleRockOutside
-        | HintGhostDarkPalaceOutside
-        | HintGhostSwampPalaceOutsideRight
-        | HintGhostMiseryMireBridge => None,
+        .format(self.as_str())
     }
 }
