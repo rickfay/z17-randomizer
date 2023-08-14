@@ -2136,6 +2136,14 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                         None,
                         Some(|p| p.has_bombs()),
                     ),
+                    path(
+                        DeathBombCave,
+                        None,
+                        None,
+                        Some(|p| p.has_bombs() && (p.has_boomerang() || p.has_hookshot())),
+                        None,
+                        None,
+                    ),
                 ],
             ),
         ),
@@ -2196,14 +2204,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                     fast_travel_hyrule(),
                     path_free(AmidaCaveUpper),
                     path_free(DeathThirdFloor),
-                    path(
-                        SpectacleRock,
-                        Some(|p| p.can_merge()),
-                        Some(|_| true), // noobs don't realize you can just jump here
-                        None,
-                        None,
-                        None,
-                    ),
+                    path_free(SpectacleRock),
                     path(DeathMountainWestTop, Some(|p| p.can_merge()), None, None, None, None),
                 ],
             ),
@@ -2245,14 +2246,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                     path_free(SpectacleRockCaveRight),
                     path(TowerOfHeraFoyer, Some(|p| p.has_hammer()), None, None, None, None),
                     path(DeathTopLeftLedge, Some(|p| p.can_merge()), None, None, None, None),
-                    path(
-                        SpectacleRock,
-                        Some(|p| p.can_merge()),
-                        Some(|_| true), // noobs don't realize you can just jump here
-                        None,
-                        None,
-                        None,
-                    ),
+                    path_free(SpectacleRock),
                     path_free(DeathThirdFloor),
                     path(DeathMountainEastTop, Some(|p| p.has_hookshot()), None, None, None, None),
                 ],
@@ -2356,7 +2350,7 @@ fn hyrule() -> HashMap<Location, LocationNode> {
                 vec![
                     path(FireCaveCenter, Some(|p| p.can_merge()), None, None, None, None),
                     path_free(BoulderingLedgeLeft),
-                    path_free(BoulderingLedgeRight),
+                    path_free(BoulderingLedgeBottom),
                 ],
             ),
         ),
@@ -3144,8 +3138,12 @@ fn lorule() -> HashMap<Location, LocationNode> {
                     portal_std(MiseryMire),
                     path(
                         MiseryMireLedge, // todo portal-ify
-                        Some(|p| p.can_merge() && p.has_bombs() && p.has_sand_rod()),
-                        Some(|p| p.can_merge() && p.has_bombs() && p.has_stamina_scroll()),
+                        Some(|p| {
+                            p.can_merge()
+                                && p.has_bombs()
+                                && (p.has_sand_rod() || p.has_stamina_scroll())
+                        }),
+                        None,
                         Some(|p| {
                             p.can_merge()
                                 && (p.has_nice_bombs() || (p.has_fire_rod() && p.has_bombs()))
@@ -4326,6 +4324,7 @@ fn lorule() -> HashMap<Location, LocationNode> {
                     fast_travel_lorule(),
                     path_free(IceCaveWest),
                     path_free(LoruleDeathEastLedgeLower),
+                    path(RossosOreMineLorule, None, None, Some(|p| p.has_nice_bombs()), None, None),
                 ],
             ),
         ),
@@ -4561,19 +4560,15 @@ fn eastern_palace() -> HashMap<Location, LocationNode> {
                         EasternPalaceBoss,
                         Some(|p| {
                             p.has_eastern_big_key()
-                                && p.has_eastern_keys(2)
+                                && ((p.has_eastern_keys(2) && p.can_hit_far_switch())
+                                    || p.has_ice_rod())
                                 && p.can_attack()
-                                && p.can_hit_far_switch()
                         }),
                         Some(|p| {
                             p.has_eastern_big_key()
-                                && (p.has_bombs()
-                                    || p.has_ice_rod()
-                                    || (p.has_eastern_keys(2)
-                                        && p.has_lamp_or_net()
-                                        && p.can_hit_far_switch()))
+                                && (p.has_bombs() || (p.has_eastern_keys(2) && p.has_lamp_or_net()))
                         }),
-                        None,
+                        Some(|p| p.has_master_sword() || p.can_great_spin()),
                         Some(|p| p.has_tornado_rod()),
                         None,
                     ),
@@ -4590,13 +4585,14 @@ fn eastern_palace() -> HashMap<Location, LocationNode> {
                     Some(|p| p.has_bow()),
                     Some(|p| {
                         p.has_bombs()
+                            || p.has_master_sword()
                             || ((p.has_boomerang() || p.has_hookshot())
                                 && (p.can_attack() || p.has_lamp_or_net()))
                             || p.has_nice_ice_rod()
                     }),
                     None,
                     None,
-                    Some(|p| p.has_master_sword() || p.has_ice_rod()), // gross
+                    Some(|p| p.has_ice_rod()), // gross
                 )],
             ),
         ),
