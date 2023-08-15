@@ -222,14 +222,10 @@ fn generate_bow_of_light_hint(
 ) -> BowOfLightHint {
     for location_node in world_graph.values_mut() {
         for &check in location_node.clone().get_checks() {
-            if filler_item::Item::BowOfLight.eq(&check_map
-                .get(check.get_name())
-                .unwrap()
-                .unwrap()
-                .as_item()
-                .unwrap())
-            {
-                return BowOfLightHint { check };
+            if let Some(item) = check_map.get(check.get_name()).unwrap().unwrap().as_item() {
+                if filler_item::Item::BowOfLight.eq(&item) {
+                    return BowOfLightHint { check };
+                }
             }
         }
     }
@@ -599,9 +595,11 @@ fn get_potential_path_hints(
 
     // Limit potential paths to locations with valid Path Items that haven't yet been taken
     potential_path_checks.retain(|check| {
-        !taken_checks.contains(&check.get_name())
-            && POSSIBLE_PATH_ITEMS
-                .contains(&check_map.get(check.get_name()).unwrap().unwrap().as_item().unwrap())
+        if let Some(item) = check_map.get(check.get_name()).unwrap().unwrap().as_item() {
+            !taken_checks.contains(&check.get_name()) && POSSIBLE_PATH_ITEMS.contains(&item)
+        } else {
+            false
+        }
     });
 
     // Test candidate items to see if Boss can be defeated without them
