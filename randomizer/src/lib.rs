@@ -1,5 +1,6 @@
+use std::collections::btree_map::BTreeMap;
 use std::{
-    collections::{hash_map::DefaultHasher, BTreeMap},
+    collections::hash_map::DefaultHasher,
     error::Error as StdError,
     fs::File,
     hash::{Hash, Hasher},
@@ -111,7 +112,7 @@ pub struct LocationInfo {
 }
 
 impl LocationInfo {
-    pub const fn new(subregion: &'static Subregion, name: &'static str) -> Self {
+    pub const fn new(name: &'static str, subregion: &'static Subregion) -> Self {
         Self { subregion, name }
     }
 
@@ -478,7 +479,7 @@ fn align_json_values(json: &mut String) {
         let index_prev_new_line = json[..index_colon].rfind('\n').unwrap_or_else(|| {
             fail!("Couldn't fine new line character before index: {}", index_colon);
         });
-        let line_length_up_to_value = index_colon - index_prev_new_line;
+        let line_length_up_to_value = &index_colon - index_prev_new_line;
 
         if KEY_ALIGNMENT < line_length_up_to_value {
             error!("Failed to write Spoiler Log");
@@ -492,7 +493,7 @@ fn align_json_values(json: &mut String) {
         let spaces_to_add = KEY_ALIGNMENT - line_length_up_to_value;
 
         json.insert_str(
-            index_colon + 1,
+            &index_colon + 1,
             (0..spaces_to_add).map(|_| " ").collect::<String>().as_str(),
         );
         index_colon += 1;
@@ -516,8 +517,8 @@ pub fn generate_seed(
 ) -> Result<()> {
     validate_settings(settings)?;
 
-    let rng = &mut StdRng::seed_from_u64(seed as u64);
-    let hash = SeedHash::new(seed, settings);
+    let rng = &mut StdRng::seed_from_u64(seed.clone() as u64);
+    let hash = SeedHash::new(seed.clone(), settings);
 
     info!("Hash:                           {}\n", hash.text_hash);
     settings.log_settings();
@@ -561,7 +562,7 @@ impl SeedHash {
         const HASH_LEN: usize = 5;
         let mut digit = Vec::with_capacity(HASH_LEN);
         for _ in 0..HASH_LEN {
-            digit.push(hash_item_lut.get((hash % 10) as usize).unwrap());
+            digit.push(hash_item_lut.get((&hash % 10) as usize).unwrap());
             hash /= 10;
         }
 

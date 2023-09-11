@@ -1,4 +1,4 @@
-use std::collections::BTreeMap;
+use std::collections::btree_map::BTreeMap;
 
 use game::{
     Course::{self, *},
@@ -91,16 +91,16 @@ fn patch_street_merchant(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<
     let item_left = seed_info
         .layout
         .get(&LocationInfo::new(
-            crate::regions::hyrule::kakariko::village::SUBREGION,
             "Street Merchant (Left)",
+            crate::regions::hyrule::kakariko::village::SUBREGION,
         ))
         .unwrap()
         .as_str();
     let item_right = seed_info
         .layout
         .get(&LocationInfo::new(
-            crate::regions::hyrule::kakariko::village::SUBREGION,
             "Street Merchant (Right)",
+            crate::regions::hyrule::kakariko::village::SUBREGION,
         ))
         .unwrap()
         .as_str();

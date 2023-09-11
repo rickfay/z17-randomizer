@@ -27,7 +27,7 @@
     "skip_trials":                 false,               // Automatically opens the Lorule Castle Trials door.
     "bow_of_light_in_castle":      false,               // Limits the Bow of Light's placement to somewhere in Lorule Castle (including possibly Zelda).
 
-    "weather_vanes_activated":     false,               // Begin the game with all Weather Vanes activated. Not supported by any trackers currently.
+    "active_weather_vanes":        "Default",           // Choose which Weather Vanes are Activated from game start: "Default", "Hyrule", "Lorule", "All"
     "dark_rooms_lampless":         false,               // If enabled the logic may expect players to cross Dark Rooms without the Lamp.
     "swordless_mode":              false,               // Removes *ALL* Swords from the game.
 

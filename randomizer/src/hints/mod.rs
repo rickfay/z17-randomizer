@@ -271,7 +271,7 @@ fn generate_bow_of_light_hint(
     world_graph: &mut WorldGraph, check_map: &mut CheckMap,
 ) -> BowOfLightHint {
     for location_node in world_graph.values_mut() {
-        for &check in location_node.clone().get_checks() {
+        for &check in location_node.clone().get_checks().iter().flatten().collect::<Vec<&Check>>() {
             if let FillerItem::Item(item) = check_map.get(check.get_name()).unwrap().unwrap() {
                 if Item::BowOfLight.eq(&item) {
                     return BowOfLightHint { check };
@@ -330,7 +330,8 @@ fn generate_location_hint(
     // fixme this sucks
     let mut check = None;
     'outer: for (_, loc_node) in world_graph.clone() {
-        for c in loc_node.get_checks().clone() {
+        let checks = loc_node.get_checks().clone();
+        for c in checks.into_iter().flatten().collect::<Vec<Check>>() {
             if check_name.eq(c.get_name()) {
                 check = Some(c);
                 break 'outer;
@@ -354,7 +355,7 @@ fn generate_location_hint(
         })
         .collect::<Vec<_>>();
 
-    LocationHint { item: item.as_item().unwrap(), check, logical_ghosts, ghosts: vec![] }
+    LocationHint { item: item.as_item().unwrap(), check: check.clone(), logical_ghosts, ghosts: vec![] }
 }
 
 /**

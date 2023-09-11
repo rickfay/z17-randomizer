@@ -22,6 +22,8 @@ use try_insert_ext::EntryInsertExt;
 use crate::{patch::util::*, Error, ItemExt, Result, SeedInfo};
 
 use code::Code;
+use modinfo::settings::active_weather_vanes::ActiveWeatherVanes;
+use rom::flag::Flag;
 
 mod code;
 mod flow;
@@ -590,34 +592,14 @@ fn cutscenes<'game>(
                 opening.add_event_flag(964);
             }
 
-            if logic.weather_vanes_activated {
-                for flag in IntoIterator::into_iter([
-                    920, //	Your House Weather Vane
-                    921, //	Kakariko Village Weather Vane
-                    922, //	Eastern Palace Weather Vane
-                    923, //	House of Gales Weather Vane
-                    924, //	Tower of Hera Weather Vane
-                    925, //	Witch's House Weather Vane
-                    926, //	Death Mountain (Hyrule) Weather Vane
-                    927, //	Desert Palace Weather Vane
-                    928, //	Sanctuary Weather Vane
-                    932, //	Skull Woods Weather Vane
-                    933, //	Treacherous Tower Weather Vane
-                    934, //	Ice Ruins Weather Vane
-                    935, //	Lorule Castle Weather Vane
-                    936, //	Graveyard Weather Vane
-                    937, //	Thieves' Town Weather Vane
-                    938, //	Dark Palace Weather Vane
-                    939, //	Blacksmith Weather Vane
-                    940, //	Vacant House Weather Vane
-                    941, //	Misery Mire Weather Vane
-                    942, //	Swamp Palace Weather Vane
-                    943, //	Turtle Rock Weather Vane
-                    944, //	Death Mountain (Lorule) Weather Vane
-                ]) {
-                    opening.add_event_flag(flag);
-                }
-            }
+            // Weather Vanes
+            let wv_flags = match logic.active_weather_vanes {
+                ActiveWeatherVanes::Default => None,
+                ActiveWeatherVanes::Hyrule => Some(Flag::get_hyrule_weather_vane_flags()),
+                ActiveWeatherVanes::Lorule => Some(Flag::get_lorule_weather_vane_flags()),
+                ActiveWeatherVanes::All => Some(Flag::get_all_weather_vane_flags()),
+            };
+            wv_flags.iter().flatten().for_each(|flag| opening.add_event_flag(flag.get_value()));
 
             // Swordless Mode - Tear down Barrier at game start
             if logic.swordless_mode {

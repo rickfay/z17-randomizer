@@ -1,12 +1,12 @@
-use std::{
-    collections::{BTreeMap, BTreeSet},
-    hash::{Hash, Hasher},
-};
+use std::collections::btree_map::BTreeMap;
+use std::collections::btree_set::BTreeSet;
+use std::hash::{Hash, Hasher};
 
 use log::info;
 use logic::{Logic, LogicMode::*};
 use serde::{Deserialize, Serialize};
 
+pub mod active_weather_vanes;
 pub mod entrance_shuffle;
 pub mod hyrule_castle;
 pub mod logic;
@@ -79,14 +79,14 @@ impl Settings {
             if logic.start_with_merge { "Yes" } else { "No" }
         );
         let shop_items = vec![
-            (logic.bell_in_shop, "Bell"),
-            (logic.pouch_in_shop, "Pouch"),
-            (logic.sword_in_shop, "Sword"),
-            (logic.boots_in_shop, "Pegasus Boots"),
-            (logic.assured_weapon, "Weapon"),
+            (&logic.bell_in_shop, "Bell"),
+            (&logic.pouch_in_shop, "Pouch"),
+            (&logic.sword_in_shop, "Sword"),
+            (&logic.boots_in_shop, "Pegasus Boots"),
+            (&logic.assured_weapon, "Weapon"),
         ]
         .iter()
-        .flat_map(|(setting, str)| if *setting { Some(*str) } else { None })
+        .flat_map(|(setting, str)| if **setting { Some(*str) } else { None })
         .collect::<Vec<_>>()
         .join(", ");
         if !shop_items.is_empty() {
@@ -104,10 +104,7 @@ impl Settings {
             "Bow of Light:                   {}",
             if logic.bow_of_light_in_castle { "Tournament" } else { "Normal" }
         );
-        info!(
-            "Weather Vanes:                  {}",
-            if logic.weather_vanes_activated { "All Activated" } else { "Normal" }
-        );
+        info!("Active Weather Vanes:           {}", logic.active_weather_vanes);
         info!(
             "Dark Room Crossing:             {}",
             if logic.dark_rooms_lampless { "Lamp Not Required" } else { "Lamp Required" }

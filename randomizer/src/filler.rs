@@ -1,4 +1,5 @@
-use std::collections::{BTreeMap, HashSet};
+use std::collections::btree_map::BTreeMap;
+use std::collections::HashSet;
 
 use log::{error, info};
 use macros::fail;
@@ -17,6 +18,7 @@ use crate::{
     world::WorldGraph,
     CheckMap, LocationInfo,
 };
+use crate::legacy::path::Path;
 
 /// Fill Seed such that All Locations are Reachable
 ///
@@ -281,7 +283,7 @@ fn map_to_result(
 ) -> Vec<(LocationInfo, game::Item)> {
     let mut result = Vec::new();
     for location_node in world_graph.values_mut() {
-        for check in location_node.clone().get_checks() {
+        for check in location_node.clone().get_checks().iter().flatten().collect::<Vec<&Check>>() {
             if let Some(loc_info) = check.get_location_info() {
                 if let FillerItem::Item(item) = check_map.get(check.get_name()).unwrap().unwrap() {
                     result.push((loc_info, item.to_game_item()));
@@ -492,7 +494,7 @@ pub fn prefill_check_map(world_graph: &mut WorldGraph) -> CheckMap {
     let mut check_map = BTreeMap::new();
 
     for location_node in world_graph.values_mut() {
-        for check in location_node.clone().get_checks() {
+        for check in location_node.clone().get_checks().iter().flatten().collect::<Vec<&Check>>() {
             if check_map.insert(check.get_name().to_owned(), check.get_quest()).is_some() {
                 fail!("Multiple checks have duplicate name: {}", check.get_name());
             }
@@ -591,14 +593,14 @@ pub(crate) fn find_reachable_checks(
         };
 
         // Iterate over the location's checks
-        for check in location_node.clone().get_checks() {
+        for check in location_node.clone().get_checks().iter().flatten().collect::<Vec<&Check>>() {
             if check.can_access(progress) {
                 reachable_checks.push(*check);
             }
         }
 
         // Queue new paths reachable from this location
-        for path in location_node.clone().get_paths() {
+        for path in location_node.clone().get_paths().iter().flatten().collect::<Vec<&Path>>() {
             let destination = path.get_destination();
             if !visited.contains(&destination) && path.can_access(progress) {
                 loc_queue.queue(destination).expect("TODO: panic message");

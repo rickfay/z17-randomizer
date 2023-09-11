@@ -33,6 +33,7 @@ pub mod actors;
 pub mod course;
 pub mod demo;
 mod files;
+pub mod flag;
 pub mod flow;
 pub mod item;
 pub mod language;
@@ -144,7 +145,7 @@ impl Rom {
 
     /// Gets the 64-bit title ID.
     pub fn id(&self) -> u64 {
-        self.id
+        self.id.into()
     }
 
     /// Gets the ROM's extended header.

@@ -1,6 +1,7 @@
 use game::Item::{self, *};
 use macros::fail;
-use rom::scene::{Dest, Flag, Obj, Rail, Vec3};
+use rom::flag::Flag;
+use rom::scene::{Dest, Obj, Rail, Vec3};
 
 use super::DungeonPrizes;
 use crate::{regions, Layout, LocationInfo};
@@ -108,66 +109,66 @@ pub(crate) fn get_dungeon_prizes(layout: &Layout) -> DungeonPrizes {
     DungeonPrizes {
         ep_prize: layout
             .get(&LocationInfo::new(
-                regions::dungeons::eastern::palace::SUBREGION,
                 "Eastern Palace Prize",
+                regions::dungeons::eastern::palace::SUBREGION,
             ))
             .unwrap(),
         hg_prize: layout
             .get(&LocationInfo::new(
-                regions::dungeons::house::gales::SUBREGION,
                 "House of Gales Prize",
+                regions::dungeons::house::gales::SUBREGION,
             ))
             .unwrap(),
         th_prize: layout
             .get(&LocationInfo::new(
-                regions::dungeons::tower::hera::SUBREGION,
                 "Tower of Hera Prize",
+                regions::dungeons::tower::hera::SUBREGION,
             ))
             .unwrap(),
         hc_prize: layout
             .get(&LocationInfo::new(
-                regions::dungeons::hyrule::castle::SUBREGION,
                 "Hyrule Castle Prize",
+                regions::dungeons::hyrule::castle::SUBREGION,
             ))
             .unwrap(),
         pd_prize: layout
             .get(&LocationInfo::new(
-                regions::dungeons::dark::palace::SUBREGION,
                 "Dark Palace Prize",
+                regions::dungeons::dark::palace::SUBREGION,
             ))
             .unwrap(),
         sp_prize: layout
             .get(&LocationInfo::new(
-                regions::dungeons::swamp::palace::SUBREGION,
                 "Swamp Palace Prize",
+                regions::dungeons::swamp::palace::SUBREGION,
             ))
             .unwrap(),
         sw_prize: layout
             .get(&LocationInfo::new(
-                regions::dungeons::skull::woods::SUBREGION,
                 "Skull Woods Prize",
+                regions::dungeons::skull::woods::SUBREGION,
             ))
             .unwrap(),
         tt_prize: layout
             .get(&LocationInfo::new(
-                regions::dungeons::thieves::hideout::SUBREGION,
                 "Thieves' Hideout Prize",
+                regions::dungeons::thieves::hideout::SUBREGION,
             ))
             .unwrap(),
         tr_prize: layout
             .get(&LocationInfo::new(
-                regions::dungeons::turtle::rock::SUBREGION,
                 "Turtle Rock Prize",
+                regions::dungeons::turtle::rock::SUBREGION,
             ))
             .unwrap(),
         dp_prize: layout
             .get(&LocationInfo::new(
-                regions::dungeons::desert::palace::SUBREGION,
                 "Desert Palace Prize",
+                regions::dungeons::desert::palace::SUBREGION,
             ))
             .unwrap(),
         ir_prize: layout
-            .get(&LocationInfo::new(regions::dungeons::ice::ruins::SUBREGION, "Ice Ruins Prize"))
+            .get(&LocationInfo::new("Ice Ruins Prize", regions::dungeons::ice::ruins::SUBREGION))
             .unwrap(),
     }
 }

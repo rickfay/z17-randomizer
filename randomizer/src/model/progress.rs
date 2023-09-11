@@ -1,5 +1,6 @@
 use std::collections::HashSet;
 
+use modinfo::settings::active_weather_vanes::ActiveWeatherVanes;
 use modinfo::settings::{hyrule_castle::HyruleCastleSetting, pedestal::PedestalSetting, Settings};
 
 use super::filler_item::{FillerItem, Goal, Item};
@@ -233,8 +234,18 @@ impl Progress {
         self.has(Item::Bell)
     }
 
-    pub fn are_vanes_activated(&self) -> bool {
-        self.settings.logic.weather_vanes_activated
+    pub fn are_hyrule_vanes_active(&self) -> bool {
+        match self.settings.logic.active_weather_vanes {
+            ActiveWeatherVanes::Hyrule | ActiveWeatherVanes::All => true,
+            _ => false,
+        }
+    }
+
+    pub fn are_lorule_vanes_active(&self) -> bool {
+        match self.settings.logic.active_weather_vanes {
+            ActiveWeatherVanes::Lorule | ActiveWeatherVanes::All => true,
+            _ => false,
+        }
     }
 
     pub fn can_escape(&self) -> bool {

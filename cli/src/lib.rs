@@ -4,6 +4,7 @@ use std::{
 };
 
 use log::info;
+use modinfo::settings::active_weather_vanes::ActiveWeatherVanes;
 use modinfo::settings::{
     hyrule_castle::HyruleCastleSetting,
     logic::{Logic, LogicMode},
@@ -113,7 +114,7 @@ pub fn get_seed_settings() -> Result<Settings, String> {
         "If enabled the Pegasus Boots will be placed in Ravio's Shop.",
     );
 
-    let assured_weapon = if !sword_in_shop && !boots_in_shop {
+    let assured_weapon = if !&sword_in_shop && !&boots_in_shop {
         prompt_bool(
             "Assured Weapon in Shop",
             "If enabled at least one weapon is guaranteed to be placed in Ravio's Shop.",
@@ -146,12 +147,16 @@ pub fn get_seed_settings() -> Result<Settings, String> {
         "Limits the Bow of Light's placement to somewhere in Lorule Castle (including possibly Zelda).",
     );
 
-    let weather_vanes_activated = prompt_bool(
-        "Pre-Activated Weather Vanes",
-        "Begin the game with all Weather Vanes activated.\n\
-        The logic may expect players to use the Bell to reach otherwise unreachable locations this way.\n\
-        Note: Trackers do not currently support this feature.",
-    );
+    let active_weather_vanes = ActiveWeatherVanes::try_from(prompt_u8_in_range(
+        "Active Weather Vanes",
+        "Choose which Weather Vanes are active from game start. Logic may require using them to progress.\n\
+        [0] Default - Only the default Weather Vanes (Link's House & Vacant House)
+        [1] Hyrule  - Only the  9 Hyrule Weather Vanes (and Vacant House)\n\
+        [2] Lorule  - Only the 13 Lorule Weather Vanes (and Link's House)\n\
+        [3] All     - All 22 Weather Vanes\n",
+        0,
+        3,
+    ))?;
 
     let dark_rooms_lampless = prompt_bool(
         "Dark Room Crossing (advanced)",
@@ -159,7 +164,7 @@ pub fn get_seed_settings() -> Result<Settings, String> {
         Not for beginners and those who like being able to see things.",
     );
 
-    let swordless_mode = if !sword_in_shop {
+    let swordless_mode = if !&sword_in_shop {
         prompt_bool(
             "Swordless Mode (advanced)",
             "Removes *ALL* Swords from the game.\n\
@@ -194,7 +199,7 @@ pub fn get_seed_settings() -> Result<Settings, String> {
             logic_mode,
             randomize_dungeon_prizes,
             vanilla_charm,
-            lc_requirement,
+            lc_requirement: lc_requirement.clone(),
             yuganon_requirement: lc_requirement,
             ped_requirement,
             hyrule_castle_setting,
@@ -209,7 +214,7 @@ pub fn get_seed_settings() -> Result<Settings, String> {
             boots_in_shop,
             assured_weapon,
             maiamai_madness,
-            weather_vanes_activated,
+            active_weather_vanes,
             minigames_excluded,
             skip_big_bomb_flower,
             skip_trials,

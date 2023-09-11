@@ -3,7 +3,7 @@ use std::{fmt, path::Path};
 use game::Course;
 use serde::{de, ser::SerializeTuple, Deserialize, Deserializer, Serialize, Serializer};
 
-use crate::{actors::Actors, files::sarc::Sarc, File, Item, Result};
+use crate::{actors::Actors, files::sarc::Sarc, flag::Flag, File, Item, Result};
 
 #[derive(Debug)]
 pub struct Scene {
@@ -683,46 +683,5 @@ pub struct Point {
 impl Clone for Point {
     fn clone(&self) -> Self {
         Self { arg: self.arg, ctl: self.ctl, lnk: self.lnk.clone(), srt: self.srt }
-    }
-}
-
-#[derive(Debug, Copy, Clone)]
-pub enum Flag {
-    React(u16),   // 0 - Reactions with system objects, not persisted
-    Session(u16), // 1 - Flag persists until game is reset (I think?)
-    Two(u16),     // 2 - ???
-    Course(u16),  // 3 - Course-specific, shared between scenes of the same course
-    Event(u16),   // 4 - Global
-}
-
-impl Flag {
-    pub fn get_type(self) -> u8 {
-        match self {
-            Flag::React(_) => 0,
-            Flag::Session(_) => 1,
-            Flag::Two(_) => 2,
-            Flag::Course(_) => 3,
-            Flag::Event(_) => 4,
-        }
-    }
-
-    pub fn get_value(self) -> u16 {
-        match self {
-            Flag::React(flag) => flag,
-            Flag::Session(flag) => flag,
-            Flag::Two(flag) => flag,
-            Flag::Course(flag) => flag,
-            Flag::Event(flag) => flag,
-        }
-    }
-
-    pub fn into_pair(self) -> (u8, u16) {
-        match self {
-            Flag::React(flag) => (0, flag),
-            Flag::Session(flag) => (1, flag),
-            Flag::Two(flag) => (2, flag),
-            Flag::Course(flag) => (3, flag),
-            Flag::Event(flag) => (4, flag),
-        }
     }
 }

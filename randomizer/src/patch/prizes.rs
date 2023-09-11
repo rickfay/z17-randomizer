@@ -7,10 +7,11 @@ use game::{
 use log::info;
 use macros::fail;
 use modinfo::Settings;
+use rom::flag::Flag;
 use rom::{
     byaml,
     language::FlowChart,
-    scene::{Arg, Dest, Flag, Obj, Point, Rail, Transform, Vec3},
+    scene::{Arg, Dest, Obj, Point, Rail, Transform, Vec3},
     Actor, File,
 };
 

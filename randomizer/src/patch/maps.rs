@@ -3,7 +3,8 @@ use game::{
     Item,
 };
 use log::info;
-use rom::scene::{Flag, Icn, IcnArgs, StageMeta};
+use rom::flag::Flag;
+use rom::scene::{Icn, IcnArgs, StageMeta};
 
 use crate::{
     patch::{util::*, DungeonPrizes},
