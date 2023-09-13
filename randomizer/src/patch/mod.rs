@@ -23,6 +23,7 @@ use crate::{patch::util::*, Error, ItemExt, Result, SeedInfo};
 
 use code::Code;
 use modinfo::settings::active_weather_vanes::ActiveWeatherVanes;
+use rom::byaml::scene_env::SceneEnvFile;
 use rom::flag::Flag;
 
 mod code;
@@ -31,6 +32,7 @@ mod maps;
 mod messages;
 pub mod msbf;
 mod prizes;
+mod scene_env;
 mod scenes;
 pub mod util;
 
@@ -178,6 +180,10 @@ impl Patcher {
         let Course { ref mut scene_meta, .. } =
             courses.entry(course).or_insert(Self::load_course(game, course));
         scene_meta.as_mut().unwrap()
+    }
+
+    fn scene_env(&mut self) -> rom::Result<SceneEnvFile> {
+        self.game.scene_env()
     }
 
     fn update(&mut self, (course, file): (CourseId, File<Vec<u8>>)) -> Result<()> {
@@ -370,6 +376,7 @@ impl Patcher {
         prizes::patch_dungeon_prizes(&mut self, &prizes, seed_info.settings);
         maps::patch_maps(&mut self, &prizes);
         scenes::patch_byaml_files(&mut self, seed_info.settings)?;
+        let scene_env_file = scene_env::patch_scene_env(&mut self, seed_info.settings);
 
         {
             let Self { ref rentals, ref merchant, ref mut courses, .. } = self;
@@ -394,6 +401,9 @@ impl Patcher {
         //romfs.add(common.into_archive().unwrap());
 
         romfs.add(boot.into_archive());
+        if let Some(scene_env_file) = scene_env_file {
+            romfs.add_serialize(scene_env_file.into_file());
+        };
         for (_, Course { language, scenes, scene_meta }) in courses {
             romfs.add(language.into_archive());
             if let Some(scene_meta) = scene_meta {

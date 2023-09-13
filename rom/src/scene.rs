@@ -1,9 +1,7 @@
-use std::{fmt, path::Path};
-
+use crate::{actors::Actors, files::sarc::Sarc, flag::Flag, File, Item, Result};
 use game::Course;
 use serde::{de, ser::SerializeTuple, Deserialize, Deserializer, Serialize, Serializer};
-
-use crate::{actors::Actors, files::sarc::Sarc, flag::Flag, File, Item, Result};
+use std::{fmt, path::Path};
 
 #[derive(Debug)]
 pub struct Scene {

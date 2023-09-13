@@ -165,7 +165,7 @@ impl Sarc {
             let file_end = buf.read_u32::<LittleEndian>()?;
 
             // First byte of attrs is the hash collision count, remaining 3 are the offset into the filename table
-            let filename_hash_count = (filename_attributes >> 0x18) as u8;
+            let filename_hash_count = (&filename_attributes >> 0x18) as u8;
             let filename_table_offset = filename_attributes & 0x00FFFFFF;
 
             fat_entries.push(FatEntry {
@@ -187,7 +187,7 @@ impl Sarc {
             let filename = if entry.filename_hash_count > 0 {
                 let mut filename_buffer = Vec::new();
                 buf.seek(SeekFrom::Start(
-                    filename_table_start + (entry.filename_table_offset * 4) as u64,
+                    &filename_table_start + (entry.filename_table_offset * 4) as u64,
                 ))?;
                 let filename_len = buf.read_until(0x0, &mut filename_buffer)?;
                 Some(from_utf8(&filename_buffer[0..filename_len - 1]).unwrap().to_owned())
@@ -195,8 +195,8 @@ impl Sarc {
                 None
             };
 
-            let start = offset_to_data + entry.file_start as usize;
-            let end = offset_to_data + entry.file_end as usize;
+            let start = &offset_to_data + entry.file_start as usize;
+            let end = &offset_to_data + entry.file_end as usize;
             let data = Vec::from(&bytes[start..end]);
 
             let file = SarcInnerFile { filename, data };
@@ -215,7 +215,9 @@ impl Sarc {
     /// Hash function used to hash filenames
     #[allow(unused)]
     fn calculate_hash(&self, filename: &str) -> u32 {
-        filename.chars().fold(0, |hash, char| hash.wrapping_mul(self.multiplier) + (char as u32))
+        filename
+            .chars()
+            .fold(0, |hash, char| hash.wrapping_mul(self.multiplier.clone()) + (char as u32))
     }
 
     /// List all files in this SARC Archive, for debugging purposes
@@ -302,7 +304,7 @@ impl IntoBytes for Sarc {
 
                     sfnt.extend_from_slice(filename.as_bytes());
 
-                    filename_attributes = (bucket_len << 0x18) | (filename_table_idx / 4);
+                    filename_attributes = (&bucket_len << 0x18) | (&filename_table_idx / 4);
                     filename_table_idx += filename.len() as u32;
                 } else {
                     filename_attributes = 0;
@@ -318,13 +320,13 @@ impl IntoBytes for Sarc {
 
         // SARC Header
         let sarc_header_len = 0x14;
-        let mut offset_to_data = sarc_header_len + sfat.len() + sfnt.len();
-        let sfnt_padding = 0x80 - (offset_to_data % 0x80); // align - TODO see above alignment comment, same thing
-        offset_to_data += sfnt_padding;
+        let mut offset_to_data = &sarc_header_len + sfat.len() + sfnt.len();
+        let sfnt_padding = 0x80 - (&offset_to_data % 0x80); // align - TODO see above alignment comment, same thing
+        offset_to_data += &sfnt_padding;
 
-        let filesize = offset_to_data + data.len();
+        let filesize = &offset_to_data + data.len();
 
-        let mut szs = Vec::with_capacity(filesize);
+        let mut szs = Vec::with_capacity(filesize.clone());
         szs.extend(b"SARC");
         szs.extend(&(sarc_header_len as u16).to_le_bytes());
         szs.extend(&0xFFFEu16.to_be_bytes());
@@ -351,7 +353,7 @@ struct SarcInnerFile {
 
 ///
 fn align(data: Vec<u8>, alignment: usize, value: u8) -> Vec<u8> {
-    let padding_amt = alignment - (data.len() % alignment);
+    let padding_amt = &alignment - (data.len() % &alignment);
     if padding_amt < alignment {
         let mut data = data;
         data.resize(data.len() + padding_amt, value);

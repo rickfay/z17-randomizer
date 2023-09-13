@@ -6,8 +6,7 @@ use crate::model::location_node::LocationNode;
 use crate::model::logic::Logic;
 use crate::regions;
 use crate::world::{
-    check, edge, fast_travel_hyrule, fast_travel_lorule, goal, location, old_check, old_path,
-    portal_std,
+    check, edge, fast_travel_hyrule, fast_travel_lorule, goal, location, portal_std,
 };
 use crate::LocationInfo;
 
@@ -19,27 +18,17 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
             DesertPalaceFoyer,
             location(
                 "Desert Palace Entrance",
-                vec![old_check(
-                    LocationInfo::new(
-                        "[DP] (1F) Entrance",
-                        regions::dungeons::desert::palace::SUBREGION,
-                    ),
-                    Some(|p| p.has_sand_rod() && p.can_merge()),
-                    None,
-                    None,
-                    None,
-                    None,
+                vec![check!(
+                    "[DP] (1F) Entrance",
+                    regions::dungeons::desert::palace::SUBREGION,
+                    |p| p.has_sand_rod() && p.can_merge()
                 )],
                 vec![
                     edge!(DesertPalaceWeatherVane),
-                    old_path(
-                        DesertPalace1F,
-                        Some(|p| p.has_sand_rod() && p.can_merge() && p.can_attack()),
-                        Some(|p| p.has_sand_rod() && p.can_merge() && p.has_lamp_or_net()),
-                        None,
-                        None,
-                        None,
-                    ),
+                    edge!(DesertPalace1F => {
+                        normal: |p| p.has_sand_rod() && p.can_merge() && p.can_attack(),
+                        hard: |p| p.has_sand_rod() && p.can_merge() && p.has_lamp_or_net(),
+                    }),
                 ],
             ),
         ),
@@ -60,46 +49,23 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                         "[DP] (1F) Sand Room (South)",
                         regions::dungeons::desert::palace::SUBREGION
                     ),
-                    old_check(
-                        LocationInfo::new(
-                            "[DP] (1F) Behind Rocks",
-                            regions::dungeons::desert::palace::SUBREGION,
-                        ),
-                        Some(|p| p.has_titans_mitt()),
-                        None,
-                        None,
-                        None,
-                        None,
+                    check!(
+                        "[DP] (1F) Behind Rocks",
+                        regions::dungeons::desert::palace::SUBREGION,
+                        |p| p.has_titans_mitt()
                     ),
-                    old_check(
-                        LocationInfo::new(
-                            "[DP] (1F) Big Chest (Behind Wall)",
-                            regions::dungeons::desert::palace::SUBREGION,
-                        ),
-                        Some(|p| p.has_desert_keys(1)),
-                        None,
-                        None,
-                        None,
-                        None,
+                    check!(
+                        "[DP] (1F) Big Chest (Behind Wall)",
+                        regions::dungeons::desert::palace::SUBREGION,
+                        |p| p.has_desert_keys(1)
                     ),
                 ],
                 vec![
-                    old_path(
-                        DesertPalaceFoyer,
-                        Some(|p| p.has_sand_rod() && p.can_attack()),
-                        Some(|p| p.has_sand_rod() && p.has_lamp_or_net()),
-                        None,
-                        None,
-                        None,
-                    ),
-                    old_path(
-                        DesertPalaceMidwayLedge,
-                        Some(|p| p.has_desert_keys(2) && p.has_titans_mitt()),
-                        None,
-                        None,
-                        None,
-                        None,
-                    ),
+                    edge!(DesertPalaceFoyer => {
+                        normal: |p| p.has_sand_rod() && p.can_attack(),
+                        hard: |p| p.has_sand_rod() && p.has_lamp_or_net(),
+                    }),
+                    edge!(DesertPalaceMidwayLedge, |p| p.has_desert_keys(2) && p.has_titans_mitt()),
                 ],
             ),
         ),
@@ -107,7 +73,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
             DesertPalaceMidwayLedge,
             location(
                 "Desert Palace Midway Ledge",
-                vec![],
+                None,
                 vec![
                     fast_travel_hyrule(),
                     edge!(DesertPalaceWeatherVane),
@@ -121,85 +87,46 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
             location(
                 "Desert Palace 2F",
                 vec![
-                    old_check(
-                        LocationInfo::new(
-                            "[DP] (2F) Under Rock (Left)",
-                            regions::dungeons::desert::palace::SUBREGION,
-                        ),
-                        Some(|p| p.has_titans_mitt()),
-                        None,
-                        None,
-                        None,
-                        None,
+                    check!(
+                        "[DP] (2F) Under Rock (Left)",
+                        regions::dungeons::desert::palace::SUBREGION,
+                        |p| p.has_titans_mitt()
                     ),
-                    old_check(
-                        LocationInfo::new(
-                            "[DP] (2F) Under Rock (Right)",
-                            regions::dungeons::desert::palace::SUBREGION,
-                        ),
-                        Some(|p| p.has_titans_mitt()),
-                        None,
-                        None,
-                        None,
-                        None,
+                    check!(
+                        "[DP] (2F) Under Rock (Right)",
+                        regions::dungeons::desert::palace::SUBREGION,
+                        |p| p.has_titans_mitt()
                     ),
-                    old_check(
-                        LocationInfo::new(
-                            "[DP] (2F) Under Rock (Ball Room)",
-                            regions::dungeons::desert::palace::SUBREGION,
-                        ),
-                        Some(|p| p.has_titans_mitt()),
-                        None,
-                        None,
-                        None,
-                        None,
+                    check!(
+                        "[DP] (2F) Under Rock (Ball Room)",
+                        regions::dungeons::desert::palace::SUBREGION,
+                        |p| p.has_titans_mitt()
                     ),
                     check!("[DP] (2F) Beamos Room", regions::dungeons::desert::palace::SUBREGION),
                     check!(
                         "[DP] (2F) Red/Blue Switches",
                         regions::dungeons::desert::palace::SUBREGION
                     ),
-                    old_check(
-                        LocationInfo::new(
-                            "[DP] (2F) Big Chest (Puzzle)",
-                            regions::dungeons::desert::palace::SUBREGION,
-                        ),
-                        Some(|p| p.can_merge()),
-                        None,
-                        None,
-                        None,
-                        None,
+                    check!(
+                        "[DP] (2F) Big Chest (Puzzle)",
+                        regions::dungeons::desert::palace::SUBREGION,
+                        |p| p.can_merge()
                     ),
-                    old_check(
-                        LocationInfo::new(
-                            "[DP] (2F) Leever Room",
-                            regions::dungeons::desert::palace::SUBREGION,
-                        ),
-                        Some(|p| p.has_desert_keys(3)),
-                        None,
-                        None,
-                        Some(|p| p.has_tornado_rod()),
-                        None,
-                    ),
+                    check!("[DP] (2F) Leever Room", regions::dungeons::desert::palace::SUBREGION => {
+                        normal: |p| p.has_desert_keys(3),
+                        adv_glitched: |p| p.has_tornado_rod(),
+                    }),
                 ],
                 vec![
                     edge!(DesertPalaceMidwayLedge),
-                    old_path(
-                        DesertPalace1F,
-                        Some(|p| p.can_attack()),      // midway
-                        Some(|p| p.has_lamp_or_net()), // midway
-                        None,
-                        None,
-                        None,
-                    ),
-                    old_path(
-                        DesertPalace3F,
-                        Some(|p| p.has_desert_keys(4) && p.can_merge() && p.has_sand_rod()),
-                        None,
-                        None,
-                        Some(|p| p.has_tornado_rod() && p.has_boots()),
-                        None,
-                    ),
+                    edge!(DesertPalace1F => {
+                        normal: |p| p.can_attack(), // midway
+                        hard: |p| p.has_lamp_or_net(), // midway
+                    }),
+                    edge!(DesertPalace3F => {
+                        normal: |p| p.has_desert_keys(4) && p.can_merge() && p.has_sand_rod(),
+                        adv_glitched: |p| p.has_tornado_rod() && p.has_boots(),
+                    }),
                 ],
             ),
         ),
@@ -212,32 +139,22 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                         "[DP] (3F) Behind Falling Sand",
                         regions::dungeons::desert::palace::SUBREGION
                     ),
-                    old_check(
-                        LocationInfo::new(
-                            "[DP] (3F) Armos Room",
-                            regions::dungeons::desert::palace::SUBREGION,
-                        ),
-                        Some(|p| p.can_attack()),
-                        Some(|_| true),
-                        None,
-                        None,
-                        None,
-                    ),
+                    check!("[DP] (3F) Armos Room", regions::dungeons::desert::palace::SUBREGION => {
+                        normal: |p| p.can_attack(),
+                        hard: |_| true,
+                    }),
                 ],
                 vec![
                     edge!(DesertPalace2F),
-                    old_path(
-                        DesertPalaceExit3F,
-                        Some(|p| {
+                    edge!(DesertPalaceExit3F => {
+                        normal: |p| {
                             p.has_desert_keys(5)
                                 && p.has_desert_big_key()
                                 && (p.progression_enemies() || p.has_bombs())
-                        }),
-                        None,
-                        Some(|p| p.has_tornado_rod() && p.has_desert_big_key()),
-                        Some(|p| p.has_tornado_rod()),
-                        None,
-                    ),
+                        },
+                        glitched: |p| p.has_tornado_rod() && p.has_desert_big_key(),
+                        adv_glitched: |p| p.has_tornado_rod(),
+                    }),
                 ],
             ),
         ),
@@ -246,10 +163,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
             location(
                 "Desert Palace Exit 3F",
                 vec![],
-                vec![
-                    old_path(DesertPalace3F, Some(|p| p.has_sand_rod()), None, None, None, None),
-                    edge!(DesertZaganagaLedge),
-                ],
+                vec![edge!(DesertPalace3F, |p| p.has_sand_rod()), edge!(DesertZaganagaLedge)],
             ),
         ),
         (
@@ -268,14 +182,10 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                 vec![
                     fast_travel_lorule(),
                     portal_std(DesertZaganagaLedge),
-                    old_path(
-                        MiseryMireRewardBasket,
-                        Some(|p| p.can_defeat_zaganaga()),
-                        None,
-                        None,
-                        None,
-                        Some(|p| p.has_bow() || p.has_master_sword()),
-                    ),
+                    edge!(MiseryMireRewardBasket => {
+                        normal: |p| p.can_defeat_zaganaga(),
+                        hell: |p| p.has_bow() || p.has_master_sword(),
+                    }),
                 ],
             ),
         ),

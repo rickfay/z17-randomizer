@@ -133,7 +133,7 @@ fn build_layout() -> Layout {
     layout.set(LocationInfo::new("Ravio (2)", regions::hyrule::field::main::SUBREGION), MessageBottle);
     layout.set(LocationInfo::new("Ravio (3)", regions::hyrule::field::main::SUBREGION), ItemBottle);
     layout.set(LocationInfo::new("Ravio (4)", regions::hyrule::field::main::SUBREGION), ItemSwordLv1);
-    layout.set(LocationInfo::new("Ravio (5)", regions::hyrule::field::main::SUBREGION), ItemMizukaki);
+    layout.set(LocationInfo::new("Ravio (5)", regions::hyrule::field::main::SUBREGION), ItemKandelaar);
     layout.set(LocationInfo::new("Ravio (6)", regions::hyrule::field::main::SUBREGION), RupeeG);
     layout.set(LocationInfo::new("Ravio (7)", regions::hyrule::field::main::SUBREGION), ItemBell);
     layout.set(LocationInfo::new("Ravio (8)", regions::hyrule::field::main::SUBREGION), ItemHookShotLv2);

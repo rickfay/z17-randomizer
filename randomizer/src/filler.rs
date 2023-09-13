@@ -7,6 +7,7 @@ use modinfo::settings::{logic::LogicMode::*, Settings};
 use queue::Queue;
 use rand::{rngs::StdRng, Rng};
 
+use crate::legacy::path::Path;
 use crate::{
     item_pools::{get_maiamai_pool, Pool},
     model::{
@@ -18,7 +19,6 @@ use crate::{
     world::WorldGraph,
     CheckMap, LocationInfo,
 };
-use crate::legacy::path::Path;
 
 /// Fill Seed such that All Locations are Reachable
 ///
@@ -41,7 +41,7 @@ fn preplace_items(
     junk: &mut Vec<Item>,
 ) {
     // Vanilla Dungeon Prizes
-    if !settings.logic.randomize_dungeon_prizes {
+    if !&settings.logic.randomize_dungeon_prizes {
         place_static(check_map, progression, Item::PendantOfCourage01, "Eastern Palace Prize");
         place_static(check_map, progression, Item::PendantOfWisdom, "House of Gales Prize");
         place_static(check_map, progression, Item::PendantOfPower, "Tower of Hera Prize");
@@ -182,7 +182,7 @@ fn preplace_items(
     }
 
     // Assures a weapon will be available in Ravio's Shop
-    if (!settings.logic.sword_in_shop && !settings.logic.boots_in_shop)
+    if (!&settings.logic.sword_in_shop && !&settings.logic.boots_in_shop)
         && settings.logic.assured_weapon
     {
         let mut weapons = Vec::from([
@@ -194,7 +194,7 @@ fn preplace_items(
             Item::PegasusBoots,
         ]);
 
-        if !settings.logic.swordless_mode {
+        if !&settings.logic.swordless_mode {
             weapons.extend_from_slice(&[Item::Sword01]);
         }
 
@@ -232,7 +232,7 @@ fn preplace_items(
 
     // For non-Maiamai Madness seeds, default them to Maiamai
     // FIXME Inefficient to add Maiamai to progression pool, shuffle, then remove them
-    if !settings.logic.maiamai_madness {
+    if !&settings.logic.maiamai_madness {
         let mut maiamai_items = get_maiamai_pool();
         for check_name in maiamai_positions {
             place_static(check_map, progression, maiamai_items.remove(0), &check_name);

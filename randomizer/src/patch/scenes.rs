@@ -1368,10 +1368,8 @@ fn patch_no_progression_enemies(patcher: &mut Patcher, settings: &Settings) {
 //noinspection ALL
 #[rustfmt::skip]
 #[allow(unused)]
-/**
- * Development Zone
- * Make changes here for dev & testing we don't want to risk making it into the actual release.
- */
+/// Development Sandbox
+/// Make changes here for dev & testing we don't want to risk making it into the actual release.
 fn do_dev_stuff(patcher: &mut Patcher, settings: &Settings) {
     if !settings.dev_mode {
         return;
@@ -1381,6 +1379,7 @@ fn do_dev_stuff(patcher: &mut Patcher, settings: &Settings) {
     patcher.modify_objs(IndoorLight, 1, &[call(24, |obj| {
         obj.redirect(Dest::new(
             FieldLight, 27, 5,  // No Redirect
+            // FieldLight, 43, 0, // Sacred Realm
             // FieldLight, 36, 0,  // Hotfoot Area
             // FieldLight, 4, 3,
             // FieldLight, 18, 10, // Hyrule Castle Front Door

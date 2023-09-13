@@ -198,6 +198,22 @@ fn patch_final_boss(patcher: &mut Patcher) -> Result<()> {
     Ok(())
 }
 
+fn patch_weather_vanes(patcher: &mut Patcher) -> Result<()> {
+    apply!(patcher,
+        Boot/Telephone {
+
+            // Cut out as much as possible from 1st time activation
+            [2] => None,
+
+            // Never show "You've been playing for a while..." text
+            [4 into_branch] switch [[1] => None,],
+            [10 into_text] => None,
+        },
+    );
+
+    Ok(())
+}
+
 /// Dev debugging, prints the contents of an MSBF file in a format for spreadsheets. Don't leave this on.
 #[allow(unused)]
 #[deprecated]
@@ -228,12 +244,13 @@ where
 pub fn apply(patcher: &mut Patcher, free: Item, settings: &Settings) -> Result<()> {
     info!("Patching Flow Charts...");
 
-    // debug(patcher, Id::FieldLight, "FieldLight_05_Climber")?;
+    // debug(patcher, None, "Telephone")?;
 
     patch_lorule_castle_requirements(patcher, settings)?;
     patch_castle_connection(patcher, settings)?;
     patch_final_boss(patcher)?;
     patch_hint_ghosts(patcher, settings)?;
+    patch_weather_vanes(patcher)?;
 
     apply!(patcher,
 
@@ -465,14 +482,6 @@ pub fn apply(patcher: &mut Patcher, free: Item, settings: &Settings) -> Result<(
 
     // untouched
     apply!(patcher,
-        // Bird statues
-        Boot/Telephone {
-            // TelephoneCall
-            [2] => 3, // Skip activation dialogue
-            [0x0C into_branch] switch [
-                [1] => None, // Skip break dialogue
-            ],
-        },
         // Rosso
         FieldLight/FieldLight_02_KikoriMan {
             // Entry_KikoriMan3

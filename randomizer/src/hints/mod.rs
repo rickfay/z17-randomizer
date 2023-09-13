@@ -355,7 +355,12 @@ fn generate_location_hint(
         })
         .collect::<Vec<_>>();
 
-    LocationHint { item: item.as_item().unwrap(), check: check.clone(), logical_ghosts, ghosts: vec![] }
+    LocationHint {
+        item: item.as_item().unwrap(),
+        check: check.clone(),
+        logical_ghosts,
+        ghosts: vec![],
+    }
 }
 
 /**
