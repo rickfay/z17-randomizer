@@ -1,7 +1,7 @@
 use crate::patch::Patcher;
 use log::info;
 use modinfo::Settings;
-use rom::byaml::scene_env::{SceneEnvFile, SceneEnvScene};
+use rom::byaml::scene_env::SceneEnvFile;
 
 /// Patch the SceneEnv.byaml file
 pub fn patch_scene_env(patcher: &mut Patcher, settings: &Settings) -> Option<SceneEnvFile> {
@@ -13,11 +13,11 @@ pub fn patch_scene_env(patcher: &mut Patcher, settings: &Settings) -> Option<Sce
     info!("Patching SceneEnv.byaml...");
 
     let mut scene_env_file = patcher.scene_env().expect("loading World/Byaml/SceneEnv.byaml");
-    let scene_env = scene_env_file.scene_env.get_mut();
+    let _scene_env = scene_env_file.scene_env.get_mut();
 
-    (scene_env.IndoorLight1.get_mut(0).unwrap() as &mut SceneEnvScene).turn_off_lights();
-    (scene_env.FieldLight.get_mut(0).unwrap() as &mut SceneEnvScene).turn_off_lights();
-    (scene_env.FieldLight43.get_mut(0).unwrap() as &mut SceneEnvScene).turn_off_lights();
+    // (scene_env.IndoorLight1.get_mut(0).unwrap() as &mut SceneEnvScene).turn_off_lights();
+    // (scene_env.FieldLight.get_mut(0).unwrap() as &mut SceneEnvScene).turn_off_lights();
+    // (scene_env.FieldLight43.get_mut(0).unwrap() as &mut SceneEnvScene).turn_off_lights();
 
     Some(scene_env_file)
 }

@@ -10,7 +10,7 @@ crate::region! {
             "Lost Woods Alcove": HeartPiece @Heart(1[46]),
             "Lost Woods Big Rock Chest": RupeeR @Chest(1[133]),
             "Master Sword Pedestal": ItemSwordLv2 @Chest(34[71]),
-            "Rosso": PowerGlove @Chest(IndoorLight 10[7]),
+            "Rosso": PowerGlove @Event(IndoorLight/FieldLight_02_KikoriMan[0]),
             "Rosso Cave": RupeeR @Chest(CaveLight 6[6]),
             "Rosso Rocks": RupeePurple @Chest(IndoorLight 10[25]),
 

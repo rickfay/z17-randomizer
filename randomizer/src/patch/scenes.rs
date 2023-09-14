@@ -1379,6 +1379,7 @@ fn do_dev_stuff(patcher: &mut Patcher, settings: &Settings) {
     patcher.modify_objs(IndoorLight, 1, &[call(24, |obj| {
         obj.redirect(Dest::new(
             FieldLight, 27, 5,  // No Redirect
+            // IndoorLight, 10, 0, // Rosso's House
             // FieldLight, 43, 0, // Sacred Realm
             // FieldLight, 36, 0,  // Hotfoot Area
             // FieldLight, 4, 3,

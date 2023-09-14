@@ -89,7 +89,7 @@ fn plando_settings() -> Settings {
 
             nice_mode: true,
             super_items: true,
-            reverse_sage_events: false,
+            reverse_sage_events: true,
             no_progression_enemies: true,
             entrance_rando: EntranceShuffleSetting::NotShuffled,
 
@@ -131,7 +131,7 @@ fn build_layout() -> Layout {
 
     layout.set(LocationInfo::new("Ravio (1)", regions::hyrule::field::main::SUBREGION), RupeeGold);
     layout.set(LocationInfo::new("Ravio (2)", regions::hyrule::field::main::SUBREGION), MessageBottle);
-    layout.set(LocationInfo::new("Ravio (3)", regions::hyrule::field::main::SUBREGION), ItemBottle);
+    layout.set(LocationInfo::new("Ravio (3)", regions::hyrule::field::main::SUBREGION), PowerGlove);
     layout.set(LocationInfo::new("Ravio (4)", regions::hyrule::field::main::SUBREGION), ItemSwordLv1);
     layout.set(LocationInfo::new("Ravio (5)", regions::hyrule::field::main::SUBREGION), ItemKandelaar);
     layout.set(LocationInfo::new("Ravio (6)", regions::hyrule::field::main::SUBREGION), RupeeG);

@@ -51,6 +51,8 @@ macro_rules! event_flags {
 
 impl Flag {
     event_flags! {
+        730: CREDITS,
+
         920: WV_YOUR_HOUSE,
         921: WV_KAKARIKO_VILLAGE,
         922: WV_EASTERN_PALACE,

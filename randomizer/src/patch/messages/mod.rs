@@ -19,7 +19,7 @@ mod msbt;
 pub fn patch_messages(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
     info!("Patching MSBT Files...");
 
-    // debug(patcher, LanguageBoot, "Common");
+    // debug(patcher, IndoorLight, "FieldLight_02");
 
     patch_file_select(patcher, seed_info)?;
     // patch_ravio(patcher)?;
