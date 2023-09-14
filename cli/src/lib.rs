@@ -150,12 +150,13 @@ pub fn get_seed_settings() -> Result<Settings, String> {
     let active_weather_vanes = ActiveWeatherVanes::try_from(prompt_u8_in_range(
         "Active Weather Vanes",
         "Choose which Weather Vanes are active from game start. Logic may require using them to progress.\n\
-        [0] Default - Only the default Weather Vanes (Link's House & Vacant House)
-        [1] Hyrule  - Only the  9 Hyrule Weather Vanes (and Vacant House)\n\
-        [2] Lorule  - Only the 13 Lorule Weather Vanes (and Link's House)\n\
-        [3] All     - All 22 Weather Vanes\n",
+        [0] Standard   - Only the standard complimentary Weather Vanes (Link's House & Vacant House)\n\
+        [1] Convenient - Only convenient Weather Vanes that don't affect logic\n\
+        [2] Hyrule     - Only the  9 Hyrule Weather Vanes (and Vacant House)\n\
+        [3] Lorule     - Only the 13 Lorule Weather Vanes (and Link's House)\n\
+        [4] All        - All 22 Weather Vanes\n",
         0,
-        3,
+        4,
     ))?;
 
     let dark_rooms_lampless = prompt_bool(

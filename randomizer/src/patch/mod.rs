@@ -22,7 +22,7 @@ use try_insert_ext::EntryInsertExt;
 use crate::{patch::util::*, Error, ItemExt, Result, SeedInfo};
 
 use code::Code;
-use modinfo::settings::active_weather_vanes::ActiveWeatherVanes;
+use modinfo::settings::active_weather_vanes::ActiveWeatherVanes::*;
 use rom::byaml::scene_env::SceneEnvFile;
 use rom::flag::Flag;
 
@@ -604,10 +604,11 @@ fn cutscenes<'game>(
 
             // Weather Vanes
             let wv_flags = match logic.active_weather_vanes {
-                ActiveWeatherVanes::Default => None,
-                ActiveWeatherVanes::Hyrule => Some(Flag::get_hyrule_weather_vane_flags()),
-                ActiveWeatherVanes::Lorule => Some(Flag::get_lorule_weather_vane_flags()),
-                ActiveWeatherVanes::All => Some(Flag::get_all_weather_vane_flags()),
+                Standard => None,
+                Convenient => Flag::get_convenient_weather_vane_flags(),
+                Hyrule => Flag::get_hyrule_weather_vane_flags(),
+                Lorule => Flag::get_lorule_weather_vane_flags(),
+                All => Flag::get_all_weather_vane_flags(),
             };
             wv_flags.iter().flatten().for_each(|flag| opening.add_event_flag(flag.get_value()));
 

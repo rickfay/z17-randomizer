@@ -78,9 +78,26 @@ impl Flag {
         944: WV_DEATH_MTN_LORULE,
     }
 
-    pub fn get_hyrule_weather_vane_flags() -> Vec<Flag> {
-        vec![
-            Flag::WV_YOUR_HOUSE,
+    /// Flags of "Convenient" Weather Vanes, that don't affect logic but save time
+    pub fn get_convenient_weather_vane_flags() -> Option<Vec<Flag>> {
+        Some(vec![
+            // Flag::WV_YOUR_HOUSE,
+            Flag::WV_KAKARIKO_VILLAGE,
+            Flag::WV_WITCHS_HOUSE,
+            Flag::WV_SANCTUARY,
+            Flag::WV_SKULL_WOODS,
+            Flag::WV_LORULE_CASTLE,
+            Flag::WV_THIEVES_TOWN,
+            Flag::WV_DARK_PALACE,
+            Flag::WV_BLACKSMITH,
+            // Flag::WV_VACANT_HOUSE,
+            Flag::WV_MISERY_MIRE,
+        ])
+    }
+
+    pub fn get_hyrule_weather_vane_flags() -> Option<Vec<Flag>> {
+        Some(vec![
+            // Flag::WV_YOUR_HOUSE,
             Flag::WV_KAKARIKO_VILLAGE,
             Flag::WV_EASTERN_PALACE,
             Flag::WV_HOUSE_OF_GALES,
@@ -89,11 +106,11 @@ impl Flag {
             Flag::WV_DEATH_MTN_HYRULE,
             Flag::WV_DESERT_PALACE,
             Flag::WV_SANCTUARY,
-        ]
+        ])
     }
 
-    pub fn get_lorule_weather_vane_flags() -> Vec<Flag> {
-        vec![
+    pub fn get_lorule_weather_vane_flags() -> Option<Vec<Flag>> {
+        Some(vec![
             Flag::WV_SKULL_WOODS,
             Flag::WV_TREACHEROUS_TOWER,
             Flag::WV_ICE_RUINS,
@@ -102,18 +119,18 @@ impl Flag {
             Flag::WV_THIEVES_TOWN,
             Flag::WV_DARK_PALACE,
             Flag::WV_BLACKSMITH,
-            Flag::WV_VACANT_HOUSE,
+            // Flag::WV_VACANT_HOUSE,
             Flag::WV_MISERY_MIRE,
             Flag::WV_SWAMP_PALACE,
             Flag::WV_TURTLE_ROCK,
             Flag::WV_DEATH_MTN_LORULE,
-        ]
+        ])
     }
 
-    pub fn get_all_weather_vane_flags() -> Vec<Flag> {
+    pub fn get_all_weather_vane_flags() -> Option<Vec<Flag>> {
         let mut flags = Vec::with_capacity(22);
-        flags.append(&mut Flag::get_hyrule_weather_vane_flags());
-        flags.append(&mut Flag::get_lorule_weather_vane_flags());
-        flags
+        flags.extend(&mut Flag::get_hyrule_weather_vane_flags().iter().flatten());
+        flags.extend(&mut Flag::get_lorule_weather_vane_flags().iter().flatten());
+        Some(flags)
     }
 }

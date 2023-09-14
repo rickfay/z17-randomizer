@@ -27,7 +27,7 @@
     "skip_trials":                 false,               // Automatically opens the Lorule Castle Trials door.
     "bow_of_light_in_castle":      false,               // Limits the Bow of Light's placement to somewhere in Lorule Castle (including possibly Zelda).
 
-    "active_weather_vanes":        "Default",           // Choose which Weather Vanes are Activated from game start: "Default", "Hyrule", "Lorule", "All"
+    "active_weather_vanes":        "Standard",           // Choose initially active Weather Vanes: "Standard", "Convenient", "Hyrule", "Lorule", "All"
     "dark_rooms_lampless":         false,               // If enabled the logic may expect players to cross Dark Rooms without the Lamp.
     "swordless_mode":              false,               // Removes *ALL* Swords from the game.
 
@@ -41,7 +41,7 @@
     // Exclude certain locations to guarantee Junk Items will be placed there.
     // Check Names are all unique, consult a spoiler log for a complete list.
     "exclusions": [
-      "Great Rupee Fairy"
+      "Cucco Treasure Dungeon"
     ]
   }
 }

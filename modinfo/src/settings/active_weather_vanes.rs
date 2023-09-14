@@ -3,9 +3,11 @@ use std::fmt::{Display, Formatter};
 
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq, Deserialize, Serialize)]
 pub enum ActiveWeatherVanes {
-    /// Only the default Weather Vanes (Link's House & Vacant House) are active at game start
+    /// Only the standard, complimentary Weather Vanes (Link's House & Vacant House) are active at game start
     #[default]
-    Default,
+    Standard,
+    /// Activate all the Weather Vanes that don't affect logic, but do make getting around easier
+    Convenient,
     /// Activate the 9 Hyrule Weather Vanes at game start
     Hyrule,
     /// Activate the 13 Lorule Weather Vanes at game start
@@ -19,10 +21,11 @@ impl TryFrom<u8> for ActiveWeatherVanes {
 
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         match value {
-            0 => Ok(ActiveWeatherVanes::Default),
-            1 => Ok(ActiveWeatherVanes::Hyrule),
-            2 => Ok(ActiveWeatherVanes::Lorule),
-            3 => Ok(ActiveWeatherVanes::All),
+            0 => Ok(ActiveWeatherVanes::Standard),
+            1 => Ok(ActiveWeatherVanes::Convenient),
+            2 => Ok(ActiveWeatherVanes::Hyrule),
+            3 => Ok(ActiveWeatherVanes::Lorule),
+            4 => Ok(ActiveWeatherVanes::All),
             _ => Err("Invalid Weather Vane Setting: {}".to_owned()),
         }
     }
@@ -34,7 +37,8 @@ impl Display for ActiveWeatherVanes {
             f,
             "{}",
             match self {
-                ActiveWeatherVanes::Default => "Default",
+                ActiveWeatherVanes::Standard => "Standard",
+                ActiveWeatherVanes::Convenient => "Convenient",
                 ActiveWeatherVanes::Hyrule => "Hyrule",
                 ActiveWeatherVanes::Lorule => "Lorule",
                 ActiveWeatherVanes::All => "All",
