@@ -5,7 +5,9 @@ use crate::model::location::Location::{self, *};
 use crate::model::location_node::LocationNode;
 use crate::model::logic::Logic;
 use crate::regions;
-use crate::world::{check, edge, fast_travel_hyrule, ghost, goal, location, portal_std};
+use crate::world::{
+    check, edge, fast_travel_hyrule, ghost, goal, location, out_of_logic, portal_std,
+};
 use crate::LocationInfo;
 use game::HintGhost;
 use std::collections::HashMap;

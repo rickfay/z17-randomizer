@@ -3,7 +3,7 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
 
 <br />
 <p align="center">
-  <img src="randomizer/icon.ico" alt="icon" />
+  <img src="icon.ico" alt="icon" />
 </p>
 
 ## Updates
