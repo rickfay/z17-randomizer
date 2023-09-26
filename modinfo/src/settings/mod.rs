@@ -117,7 +117,11 @@ impl Settings {
             "Chest Size:                     {}",
             if options.chest_size_matches_contents { "Matches Contents" } else { "Normal" }
         );
-        info!("Hint Ghost Price:               {} Rupees", logic.hint_ghost_price);
+        info!(
+            "Hint Ghost Price:               {} {}",
+            logic.hint_ghost_price,
+            if logic.hint_ghost_price == 1 { "Rupee" } else { "Rupees" }
+        );
         println!();
     }
 }

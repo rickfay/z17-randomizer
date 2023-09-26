@@ -172,7 +172,7 @@ fn patch_sahasrahla(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
 }
 
 fn patch_general_hint_ghosts(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
-    let price = seed_info.settings.logic.hint_ghost_price.to_string();
+    let price = seed_info.settings.logic.hint_ghost_price;
 
     let mut hint_ghost = load_msbt(patcher, LanguageBoot, "HintGhost")?;
     hint_ghost.set(
@@ -180,11 +180,15 @@ fn patch_general_hint_ghosts(patcher: &mut Patcher, seed_info: &SeedInfo) -> Res
         &format!(
             "Buy a {} for {}?{}",
             blue("Ghost Hint"),
-            attention(format!("{} Rupees", price.as_str()).as_str()),
+            attention(&format!("{} {}", price, if price == 1 { "Rupee" } else { "Rupees" })),
             *CHOICE_2
         ),
     );
     hint_ghost.set("HintGhost_02_select_00", "Buy");
+    hint_ghost.set(
+        "HintGhost_07",
+        &format!("Looks like you don't have enough\n{}!", attention("Rupees")),
+    );
     patcher.update(hint_ghost.dump())?;
     Ok(())
 }

@@ -41,8 +41,8 @@ fn main() {
         if let Some(preset_name) = opt.preset.as_ref() {
             (
                 preset_name,
-                System::load_preset(preset_name).unwrap_or_else(|_| {
-                    fail!("Failed to load preset: {}", preset_name);
+                System::load_preset(preset_name).unwrap_or_else(|err| {
+                    fail!("Failed to load preset: {}\nError: {}", preset_name, err);
                 }),
             )
         } else {
