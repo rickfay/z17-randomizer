@@ -586,6 +586,7 @@ fn cutscenes<'game>(
                 920, // Link's House Weather Vane
                 940, // Vacant House Weather Vane
                 950, // Maiamai
+                955, // Master Ore Icon
                 960, // Blacksmith's Wife
                 965, // Suppress Energy Potion
             ]) {

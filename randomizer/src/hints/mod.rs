@@ -128,6 +128,9 @@ pub struct PathHint {
     /// Hint Ghosts that will give out this hint. <br />
     /// Only one of these is guaranteed to be from `logical_ghosts`, the other(s) are placed completely at random.
     pub ghosts: Vec<HintGhost>,
+
+    /// The underlying Path Item (hidden in-game, visible in Spoiler Log)
+    pub path_item: FillerItem,
 }
 
 impl Hint for PathHint {
@@ -155,6 +158,7 @@ impl Serialize for PathHint {
     {
         let mut ser = serializer.serialize_struct("PathHint", 2)?;
         ser.serialize_field("hint", &self.get_hint_spoiler())?;
+        ser.serialize_field("path_item", &self.path_item.as_str())?;
         ser.serialize_field("ghosts", &SerializeGhosts(&self.ghosts))?;
         ser.end()
     }
@@ -295,11 +299,6 @@ fn generate_always_hints(
         "Master Sword Pedestal", "Great Rupee Fairy", "Blacksmith (Lorule)", "Bouldering Guy",
         "Irene", "Rosso", "Osfala", "Wildlife Clearing Stump",
     ];
-
-    // todo
-    // if settings.logic.nice_mode {
-    //     always_checks.extend(vec![" 30 Maiamai", " 40 Maiamai", " 50 Maiamai"]);
-    // }
 
     if settings.logic.reverse_sage_events {
         always_checks.extend(vec!["Queen Oren", "Hyrule Castle Battlement"]);
@@ -459,12 +458,6 @@ fn generate_sometimes_hints(
             "[Mai] Southern Ruins Bomb Cave",
         ]);
     }
-
-    // Nice Mode
-    // todo
-    // if settings.logic.nice_mode {
-    //     sometimes_checks.extend(vec![" 20 Maiamai"]);
-    // }
 
     // Minigames
     if !settings.logic.minigames_excluded {
@@ -689,11 +682,17 @@ fn get_potential_path_hints(
                         })
                         .collect::<_>();
 
+                    let path_item = check_map
+                        .get(check.get_name())
+                        .expect("Path check should be in Check Map")
+                        .expect("Path check should have Path Item");
+
                     potential_paths.push(PathHint {
                         goal,
                         check,
                         ghosts: vec![],
                         logical_ghosts: hint_locations,
+                        path_item,
                     });
                 }
                 break;

@@ -295,9 +295,9 @@ where
 }
 
 pub fn apply(patcher: &mut Patcher, free: Item, settings: &Settings) -> Result<()> {
-    info!("Patching Flow Charts...");
+    info!("Patching MSBF Files...");
 
-    // debug(patcher, Course::IndoorLight, "FieldLight_02_KikoriMan")?;
+    // debug(patcher, None, "GameOver")?;
 
     patch_lorule_castle_requirements(patcher, settings)?;
     patch_castle_connection(patcher, settings)?;

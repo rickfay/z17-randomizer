@@ -13,7 +13,7 @@
     "reverse_sage_events":         true,                // Ties Sage-related checks and events to actually rescuing that Sage.
     "no_progression_enemies":      true,                // Removes Enemies from dungeons that are themselves Progression (e.g.: Bawbs, the bomb enemy)
 
-    "start_with_merge":            true,                // Start with the ability to Merge into walls, without Ravio's Bracelet.
+    "start_with_merge":            false,               // Start with the ability to Merge into walls, without Ravio's Bracelet.
     "bell_in_shop":                true,                // If enabled the Bell will be placed in Ravio's Shop.
     "pouch_in_shop":               false,               // If enabled the Pouch will be placed in Ravio's Shop.
     "sword_in_shop":               false,               // If enabled at least one Sword will be placed in Ravio's Shop. (Note: This option is incompatible with Swordless Mode, which removes all Swords from the game.)

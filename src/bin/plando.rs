@@ -87,7 +87,7 @@ fn plando_settings() -> Settings {
             ped_requirement: PedestalSetting::Standard,
             hyrule_castle_setting: HyruleCastleSetting::EarlyLoruleCastle,
 
-            nice_mode: true,
+            nice_mode: false,
             super_items: true,
             reverse_sage_events: true,
             no_progression_enemies: true,
@@ -129,16 +129,17 @@ fn build_layout() -> Layout {
     // --- Ravio's Shop --- //
     //////////////////////////
 
-    layout.set(LocationInfo::new("Ravio (1)", regions::hyrule::field::main::SUBREGION), RupeeGold);
-    layout.set(LocationInfo::new("Ravio (2)", regions::hyrule::field::main::SUBREGION), MessageBottle);
-    layout.set(LocationInfo::new("Ravio (3)", regions::hyrule::field::main::SUBREGION), PowerGlove);
-    layout.set(LocationInfo::new("Ravio (4)", regions::hyrule::field::main::SUBREGION), ItemSwordLv1);
-    layout.set(LocationInfo::new("Ravio (5)", regions::hyrule::field::main::SUBREGION), ItemKandelaar);
-    layout.set(LocationInfo::new("Ravio (6)", regions::hyrule::field::main::SUBREGION), RupeeG);
-    layout.set(LocationInfo::new("Ravio (7)", regions::hyrule::field::main::SUBREGION), ItemBell);
-    layout.set(LocationInfo::new("Ravio (8)", regions::hyrule::field::main::SUBREGION), ItemHookShotLv2);
-    layout.set(LocationInfo::new("Ravio (9)", regions::hyrule::field::main::SUBREGION), RupeeGold);
     // layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Thanks"), Item::RingHekiga);
+
+    layout.set(LocationInfo::new("Ravio (1)", regions::hyrule::field::main::SUBREGION), OreBlue);
+    layout.set(LocationInfo::new("Ravio (2)", regions::hyrule::field::main::SUBREGION), RupeeG);
+    layout.set(LocationInfo::new("Ravio (3)", regions::hyrule::field::main::SUBREGION), OreGreen);
+    layout.set(LocationInfo::new("Ravio (4)", regions::hyrule::field::main::SUBREGION), RupeeG);
+    layout.set(LocationInfo::new("Ravio (5)", regions::hyrule::field::main::SUBREGION), RupeeG);
+    layout.set(LocationInfo::new("Ravio (6)", regions::hyrule::field::main::SUBREGION), OreYellow);
+    layout.set(LocationInfo::new("Ravio (7)", regions::hyrule::field::main::SUBREGION), RupeeG);
+    layout.set(LocationInfo::new("Ravio (8)", regions::hyrule::field::main::SUBREGION), OreRed);
+    layout.set(LocationInfo::new("Ravio (9)", regions::hyrule::field::main::SUBREGION), RupeeGold);
 
     /////////////////////////////
     // --- Dungeons Prizes --- //
