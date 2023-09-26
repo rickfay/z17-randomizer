@@ -155,34 +155,44 @@ fn patch_castle_connection(patcher: &mut Patcher, _settings: &Settings) -> Resul
 }
 
 fn patch_hint_ghosts(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
-    let price = settings.logic.hint_ghost_price as u32;
-    let negative_price = -(price as i32) as u32;
+    let price = settings.logic.hint_ghost_price;
 
-    apply!(patcher,
-        Boot/HintGhost {
-            [11] => 17, // Skip 13 - "The Hint Ghost is studying its book."
+    if price == 0 {
+        apply!(patcher,
+            Boot/HintGhost {
+                [0 into_start] => 8,
+                [8] => None,
+            },
+        );
+    } else {
+        let negative_price = -(price as i32) as u32;
+        apply!(patcher,
+            Boot/HintGhost {
+                [0 into_start] => 15, // Skip 27, 39, 40, 1, 11, 13, 10, 12, 14, 4, 17
+                [15] each [arg1(6), value(1), command(50),], // Show Rupee Counter (instead of Play Coin Counter)
+                [3 into_branch] switch [[0] => 6,], // Skip 36
+                [16] each [arg1(6), value(0), command(50),], // Hide Rupee Counter (instead of Play Coin Counter)
 
-            [15] each [arg1(6), value(1), command(50),], // Show Rupee Counter (instead of Play Coin Counter)
-            [16] each [arg1(6), value(0), command(50),], // Hide Rupee Counter (instead of Play Coin Counter)
-            [24] each [arg1(6), value(0), command(50),], // Hide Rupee Counter (instead of Play Coin Counter)
+                // Rupee count check (instead of Play Coins)
+                [6 into_branch] each [
+                    value(price as u32),
+                    command(6),
+                    switch [
+                        [0] => 9, // Skip 37
+                    ],
+                ],
 
-            // Rupee count check (instead of Play Coins)
-            [6 into_branch] each [
-                value(price),
-                command(6),
-            ],
-
-            // Charge Rupees instead of Play Coins
-            [9] each [
-                value(negative_price),
-                command(37),
-                => 26, // 31 // skip animation
-            ],
-            [19 into_start] => 22, // Skip 29, 35
-            [22] => 38, // Skip 23
-            [38] => 24, // Skip 21, 20 - "The Hint Ghost goes back to its book."
-        },
-    );
+                // Charge Rupees instead of Play Coins
+                [9] each [
+                    value(negative_price),
+                    command(37),
+                    => 8, // Skip 5, 28, 34, 33, 21, 30, 32, 26, 18
+                ],
+                [8] => 24, // Skip 25, 19, 29, 35, 22, 23, 38, 21, 20
+                [24] each [arg1(6), value(0), command(50),], // Hide Rupee Counter (instead of Play Coin Counter)
+            },
+        );
+    }
 
     Ok(())
 }
