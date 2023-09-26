@@ -7,10 +7,11 @@ use game::{
 use log::info;
 use macros::fail;
 use modinfo::Settings;
+use rom::flag::Flag;
 use rom::{
     byaml,
     language::FlowChart,
-    scene::{Arg, Dest, Flag, Obj, Point, Rail, Transform, Vec3},
+    scene::{Arg, Dest, Obj, Point, Rail, Transform, Vec3},
     Actor, File,
 };
 
@@ -330,6 +331,8 @@ fn patch_rosso(patcher: &mut Patcher, settings: &Settings) {
             disable(88),                     // early game LZ to Rosso's House
             clear_disable_flag(100),         // Keep Entry_KikoriMan3 from disappearing
             clear_disable_flag(100),         // NpcMountaineer
+            clear_enable_flag(101),          // Rosso
+            set_disable_flag(101, Flag::CREDITS), // Rosso
             set_disable_flag(128, rosso_flag), // "Not in right now." signboard
             set_46_args(132, rosso_flag),    // Door
             disable(135),                    // Disable LZ to IndoorLight4 cutscene
@@ -342,10 +345,8 @@ fn patch_rosso(patcher: &mut Patcher, settings: &Settings) {
         IndoorLight,
         10,
         &[call(7, move |obj| {
-            obj.set_inactive_flag(Flag::Event(282));
             obj.set_enable_flag(rosso_flag);
             obj.clear_disable_flag();
-            obj.set_typ(1);
         })],
     );
 

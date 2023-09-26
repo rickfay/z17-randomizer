@@ -1,4 +1,5 @@
-use std::collections::{BTreeMap, HashSet};
+use std::collections::btree_map::BTreeMap;
+use std::collections::HashSet;
 
 use log::{error, info};
 use macros::fail;
@@ -6,6 +7,7 @@ use modinfo::settings::{logic::LogicMode::*, Settings};
 use queue::Queue;
 use rand::{rngs::StdRng, Rng};
 
+use crate::legacy::path::Path;
 use crate::{
     item_pools::{get_maiamai_pool, Pool},
     model::{
@@ -39,7 +41,7 @@ fn preplace_items(
     junk: &mut Vec<Item>,
 ) {
     // Vanilla Dungeon Prizes
-    if !settings.logic.randomize_dungeon_prizes {
+    if !&settings.logic.randomize_dungeon_prizes {
         place_static(check_map, progression, Item::PendantOfCourage01, "Eastern Palace Prize");
         place_static(check_map, progression, Item::PendantOfWisdom, "House of Gales Prize");
         place_static(check_map, progression, Item::PendantOfPower, "Tower of Hera Prize");
@@ -180,7 +182,7 @@ fn preplace_items(
     }
 
     // Assures a weapon will be available in Ravio's Shop
-    if (!settings.logic.sword_in_shop && !settings.logic.boots_in_shop)
+    if (!&settings.logic.sword_in_shop && !&settings.logic.boots_in_shop)
         && settings.logic.assured_weapon
     {
         let mut weapons = Vec::from([
@@ -192,7 +194,7 @@ fn preplace_items(
             Item::PegasusBoots,
         ]);
 
-        if !settings.logic.swordless_mode {
+        if !&settings.logic.swordless_mode {
             weapons.extend_from_slice(&[Item::Sword01]);
         }
 
@@ -230,7 +232,7 @@ fn preplace_items(
 
     // For non-Maiamai Madness seeds, default them to Maiamai
     // FIXME Inefficient to add Maiamai to progression pool, shuffle, then remove them
-    if !settings.logic.maiamai_madness {
+    if !&settings.logic.maiamai_madness {
         let mut maiamai_items = get_maiamai_pool();
         for check_name in maiamai_positions {
             place_static(check_map, progression, maiamai_items.remove(0), &check_name);
@@ -281,7 +283,7 @@ fn map_to_result(
 ) -> Vec<(LocationInfo, game::Item)> {
     let mut result = Vec::new();
     for location_node in world_graph.values_mut() {
-        for check in location_node.clone().get_checks() {
+        for check in location_node.clone().get_checks().iter().flatten().collect::<Vec<&Check>>() {
             if let Some(loc_info) = check.get_location_info() {
                 if let FillerItem::Item(item) = check_map.get(check.get_name()).unwrap().unwrap() {
                     result.push((loc_info, item.to_game_item()));
@@ -492,7 +494,7 @@ pub fn prefill_check_map(world_graph: &mut WorldGraph) -> CheckMap {
     let mut check_map = BTreeMap::new();
 
     for location_node in world_graph.values_mut() {
-        for check in location_node.clone().get_checks() {
+        for check in location_node.clone().get_checks().iter().flatten().collect::<Vec<&Check>>() {
             if check_map.insert(check.get_name().to_owned(), check.get_quest()).is_some() {
                 fail!("Multiple checks have duplicate name: {}", check.get_name());
             }
@@ -591,14 +593,14 @@ pub(crate) fn find_reachable_checks(
         };
 
         // Iterate over the location's checks
-        for check in location_node.clone().get_checks() {
+        for check in location_node.clone().get_checks().iter().flatten().collect::<Vec<&Check>>() {
             if check.can_access(progress) {
                 reachable_checks.push(*check);
             }
         }
 
         // Queue new paths reachable from this location
-        for path in location_node.clone().get_paths() {
+        for path in location_node.clone().get_paths().iter().flatten().collect::<Vec<&Path>>() {
             let destination = path.get_destination();
             if !visited.contains(&destination) && path.can_access(progress) {
                 loc_queue.queue(destination).expect("TODO: panic message");

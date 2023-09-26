@@ -48,7 +48,7 @@ impl Demo {
 
     /// Adds an event flag to be set during the cutscene.
     pub fn add_event_flag(&mut self, flag: u16) {
-        self.commands.insert(0, Timed::new(Command::SetEventFlag(flag)));
+        self.commands.insert(0, Timed::new(Command::SetEventFlag(flag.into())));
     }
 
     /// Gets a mutable reference to the 'Finish' command.

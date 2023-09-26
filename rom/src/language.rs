@@ -1,9 +1,5 @@
-use std::{
-    cell::Ref,
-    collections::{BTreeMap, HashSet},
-    marker::PhantomData,
-    path::Path,
-};
+use std::collections::btree_map::BTreeMap;
+use std::{cell::Ref, collections::HashSet, marker::PhantomData, path::Path};
 
 use game::Course;
 use serde::{Deserialize, Serialize};

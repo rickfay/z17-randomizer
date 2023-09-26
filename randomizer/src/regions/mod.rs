@@ -264,7 +264,7 @@ macro_rules! subregion {
                 $($crate::patch!($variant $props).apply(
                     patcher,
                     layout
-                        .get(&$crate::LocationInfo::new(SUBREGION, $key))
+                        .get(&$crate::LocationInfo::new($key, SUBREGION))
                         .unwrap_or_else(|| unreachable!(stringify!($key))),
                     settings,
                 )?;)*)?

@@ -2,20 +2,24 @@ use crate::{legacy::path::Path, model::check::Check};
 
 #[derive(Clone)]
 pub struct LocationNode {
-    checks: Vec<Check>,
-    paths: Vec<Path>,
+    checks: Option<Vec<Check>>,
+    paths: Option<Vec<Path>>,
 }
 
 impl LocationNode {
-    pub fn new(_name: &'static str, checks: Vec<Check>, paths: Vec<Path>) -> Self {
-        Self { checks, paths }
+    pub fn new<C, P>(_name: &'static str, checks: C, paths: P) -> Self
+    where
+        C: Into<Option<Vec<Check>>>,
+        P: Into<Option<Vec<Path>>>,
+    {
+        Self { checks: checks.into(), paths: paths.into() }
     }
 
-    pub fn get_checks(&self) -> &Vec<Check> {
+    pub fn get_checks(&self) -> &Option<Vec<Check>> {
         &self.checks
     }
 
-    pub fn get_paths(self) -> Vec<Path> {
+    pub fn get_paths(self) -> Option<Vec<Path>> {
         self.paths
     }
 }

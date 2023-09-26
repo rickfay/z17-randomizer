@@ -1,4 +1,6 @@
+pub mod actor_profile;
 mod de;
+pub mod scene_env;
 mod ser;
 
 pub use {

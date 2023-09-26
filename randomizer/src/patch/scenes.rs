@@ -5,7 +5,8 @@ use game::{
 use log::info;
 use macros::fail;
 use modinfo::settings::{hyrule_castle::HyruleCastleSetting, logic::LogicMode, Settings};
-use rom::scene::{Arg, Dest, Flag, Obj, Transform, Vec3};
+use rom::flag::Flag;
+use rom::scene::{Arg, Dest, Obj, Transform, Vec3};
 
 use super::Patcher;
 use crate::{patch::util::*, Result};
@@ -1209,7 +1210,7 @@ fn patch_big_problem_chests(patcher: &mut Patcher, settings: &Settings) {
     }
 }
 
-fn patch_softlock_prevention(patcher: &mut Patcher, settings: &Settings) {
+fn patch_softlock_prevention(patcher: &mut Patcher, _settings: &Settings) {
     // Gales 1F - Add trigger to drop wall if player entered miniboss without hitting switch
     patcher.add_obj(
         DungeonWind,
@@ -1218,39 +1219,42 @@ fn patch_softlock_prevention(patcher: &mut Patcher, settings: &Settings) {
     );
 
     // Dark Maze w/o Merge
-    if settings.logic.weather_vanes_activated {
-        // 1st Prison Cell softlock prevention
-        patcher.add_obj(
-            FieldDark,
-            20,
-            Obj::warp_tile(
-                Flag::Event(1),
-                0,
-                66,
-                245,
-                0,
-                1,
-                19,
-                Vec3 { x: 1.0 + 2.0, y: 0.5, z: 23.0 },
-            ),
-        );
-
-        // 2nd Prison Cell softlock prevention
-        patcher.add_obj(
-            FieldDark,
-            20,
-            Obj::warp_tile(
-                Flag::Event(1),
-                0,
-                67,
-                246,
-                0,
-                1,
-                19,
-                Vec3 { x: -17.0 + 2.5, y: 0.5, z: -17.0 },
-            ),
-        );
-    }
+    // match settings.logic.active_weather_vanes {
+    //     ActiveWeatherVanes::Lorule | ActiveWeatherVanes::All => {
+    //         // 1st Prison Cell softlock prevention
+    //         patcher.add_obj(
+    //             FieldDark,
+    //             20,
+    //             Obj::warp_tile(
+    //                 Flag::Event(1),
+    //                 0,
+    //                 66,
+    //                 245,
+    //                 0,
+    //                 1,
+    //                 19,
+    //                 Vec3 { x: 1.0 + 2.0, y: 0.5, z: 23.0 },
+    //             ),
+    //         );
+    //
+    //         // 2nd Prison Cell softlock prevention
+    //         patcher.add_obj(
+    //             FieldDark,
+    //             20,
+    //             Obj::warp_tile(
+    //                 Flag::Event(1),
+    //                 0,
+    //                 67,
+    //                 246,
+    //                 0,
+    //                 1,
+    //                 19,
+    //                 Vec3 { x: -17.0 + 2.5, y: 0.5, z: -17.0 },
+    //             ),
+    //         );
+    //     }
+    //     _ => {}
+    // };
 
     // Swamp Palace SE Room w/o Merge
     // Swamp Palace SW Room w/o Merge
@@ -1364,10 +1368,8 @@ fn patch_no_progression_enemies(patcher: &mut Patcher, settings: &Settings) {
 //noinspection ALL
 #[rustfmt::skip]
 #[allow(unused)]
-/**
- * Development Zone
- * Make changes here for dev & testing we don't want to risk making it into the actual release.
- */
+/// Development Sandbox
+/// Make changes here for dev & testing we don't want to risk making it into the actual release.
 fn do_dev_stuff(patcher: &mut Patcher, settings: &Settings) {
     if !settings.dev_mode {
         return;
@@ -1377,6 +1379,8 @@ fn do_dev_stuff(patcher: &mut Patcher, settings: &Settings) {
     patcher.modify_objs(IndoorLight, 1, &[call(24, |obj| {
         obj.redirect(Dest::new(
             FieldLight, 27, 5,  // No Redirect
+            // IndoorLight, 10, 0, // Rosso's House
+            // FieldLight, 43, 0, // Sacred Realm
             // FieldLight, 36, 0,  // Hotfoot Area
             // FieldLight, 4, 3,
             // FieldLight, 18, 10, // Hyrule Castle Front Door

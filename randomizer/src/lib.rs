@@ -1,5 +1,6 @@
+use std::collections::btree_map::BTreeMap;
 use std::{
-    collections::{hash_map::DefaultHasher, BTreeMap},
+    collections::hash_map::DefaultHasher,
     error::Error as StdError,
     fs::File,
     hash::{Hash, Hasher},
@@ -111,7 +112,7 @@ pub struct LocationInfo {
 }
 
 impl LocationInfo {
-    pub const fn new(subregion: &'static Subregion, name: &'static str) -> Self {
+    pub const fn new(name: &'static str, subregion: &'static Subregion) -> Self {
         Self { subregion, name }
     }
 
@@ -167,6 +168,10 @@ impl Layout {
     fn get(&self, location: &LocationInfo) -> Option<Item> {
         let LocationInfo { subregion: node, name } = location;
         self.world(node.world()).get(node.name()).and_then(|region| region.get(name).copied())
+    }
+
+    fn get_item(&self, name: &'static str, subregion: &'static Subregion) -> Item {
+        self.get(&LocationInfo::new(name, subregion)).unwrap()
     }
 
     #[allow(unused)]
@@ -254,41 +259,41 @@ fn item_to_str(item: &Item) -> &'static str {
         RupeeG => "Green Rupee",
         RupeeB => "Blue Rupee",
         HeartPiece => "Piece of Heart",
-        ItemIceRod => "Ice Rod",
+        ItemIceRod => "Ice Rod+",
         ItemIceRodLv2 => "Nice Ice Rod",
-        ItemSandRod => "Sand Rod",
+        ItemSandRod => "Sand Rod+",
         ItemSandRodLv2 => "Nice Sand Rod",
-        ItemTornadeRod => "Tornado Rod",
+        ItemTornadeRod => "Tornado Rod+",
         ItemTornadeRodLv2 => "Nice Tornado Rod",
-        ItemBomb => "Bombs",
+        ItemBomb => "Bombs+",
         ItemBombLv2 => "Nice Bombs",
-        ItemFireRod => "Fire Rod",
+        ItemFireRod => "Fire Rod+",
         ItemFireRodLv2 => "Nice Fire Rod",
-        ItemHookShot => "Hookshot",
+        ItemHookShot => "Hookshot+",
         ItemHookShotLv2 => "Nice Hookshot",
-        ItemBoomerang => "Boomerang",
+        ItemBoomerang => "Boomerang+",
         ItemBoomerangLv2 => "Nice Boomerang",
-        ItemHammer => "Hammer",
+        ItemHammer => "Hammer+",
         ItemHammerLv2 => "Nice Hammer",
-        ItemBow => "Bow",
+        ItemBow => "Bow+",
         ItemBowLv2 => "Nice Bow",
         ItemShield => "Shield",
         ItemBottle => "Empty Bottle",
         ItemStoneBeauty => "Smooth Gem",
-        ItemKandelaar => "Lamp",
+        ItemKandelaar => "Lamp+",
         ItemKandelaarLv2 => "Super Lamp",
-        ItemSwordLv1 => "Sword Upgrade",
-        ItemSwordLv2 => "Sword Upgrade",
+        ItemSwordLv1 => "Sword+",
+        ItemSwordLv2 => "Master Sword",
         ItemSwordLv3 => "Master Sword Lv2",
         ItemSwordLv4 => "Master Sword Lv3",
         ItemMizukaki => "Zora's Flippers",
-        RingRental => "Bracelet Upgrade",
+        RingRental => "Ravio's Bracelet+",
         RingHekiga => "Ravio's Bracelet",
         ItemBell => "Bell",
         RupeeGold => "Gold Rupee",
         RupeeSilver => "Silver Rupee",
-        PowerGlove => "Strength Upgrade",
-        ItemInsectNet => "Net",
+        PowerGlove => "Strength+",
+        ItemInsectNet => "Net+",
         ItemInsectNetLv2 => "Super Net",
         Kinsta => "Lost Maiamai",
         BadgeBee => "Bee Badge",
@@ -296,7 +301,7 @@ fn item_to_str(item: &Item) -> &'static str {
         LiverBlue => "Monster Tail",
         LiverPurple => "Monster Guts",
         LiverYellow => "Monster Horn",
-        ClothesBlue | ClothesRed => "Armor Upgrade",
+        ClothesBlue | ClothesRed => "Mail+",
         HyruleShield => "Hylian Shield",
         OreYellow => "Master Ore",
         OreGreen => "Master Ore",
@@ -317,7 +322,7 @@ fn item_to_str(item: &Item) -> &'static str {
 
         PendantPower => "Pendant of Power",
         PendantWisdom => "Pendant of Wisdom",
-        ZeldaAmulet | PendantCourage => "Pendant of Courage Upgrade",
+        ZeldaAmulet | PendantCourage => "Pendant of Courage+",
 
         SageGulley => "Sage Gulley",
         SageOren => "Sage Oren",
@@ -478,7 +483,7 @@ fn align_json_values(json: &mut String) {
         let index_prev_new_line = json[..index_colon].rfind('\n').unwrap_or_else(|| {
             fail!("Couldn't fine new line character before index: {}", index_colon);
         });
-        let line_length_up_to_value = index_colon - index_prev_new_line;
+        let line_length_up_to_value = &index_colon - index_prev_new_line;
 
         if KEY_ALIGNMENT < line_length_up_to_value {
             error!("Failed to write Spoiler Log");
@@ -492,7 +497,7 @@ fn align_json_values(json: &mut String) {
         let spaces_to_add = KEY_ALIGNMENT - line_length_up_to_value;
 
         json.insert_str(
-            index_colon + 1,
+            &index_colon + 1,
             (0..spaces_to_add).map(|_| " ").collect::<String>().as_str(),
         );
         index_colon += 1;
@@ -516,8 +521,8 @@ pub fn generate_seed(
 ) -> Result<()> {
     validate_settings(settings)?;
 
-    let rng = &mut StdRng::seed_from_u64(seed as u64);
-    let hash = SeedHash::new(seed, settings);
+    let rng = &mut StdRng::seed_from_u64(seed.clone() as u64);
+    let hash = SeedHash::new(seed.clone(), settings);
 
     info!("Hash:                           {}\n", hash.text_hash);
     settings.log_settings();
@@ -561,7 +566,7 @@ impl SeedHash {
         const HASH_LEN: usize = 5;
         let mut digit = Vec::with_capacity(HASH_LEN);
         for _ in 0..HASH_LEN {
-            digit.push(hash_item_lut.get((hash % 10) as usize).unwrap());
+            digit.push(hash_item_lut.get((&hash % 10) as usize).unwrap());
             hash /= 10;
         }
 

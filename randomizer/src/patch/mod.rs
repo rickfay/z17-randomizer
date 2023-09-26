@@ -22,6 +22,9 @@ use try_insert_ext::EntryInsertExt;
 use crate::{patch::util::*, Error, ItemExt, Result, SeedInfo};
 
 use code::Code;
+use modinfo::settings::active_weather_vanes::ActiveWeatherVanes::*;
+use rom::byaml::scene_env::SceneEnvFile;
+use rom::flag::Flag;
 
 mod code;
 mod flow;
@@ -29,6 +32,7 @@ mod maps;
 mod messages;
 pub mod msbf;
 mod prizes;
+mod scene_env;
 mod scenes;
 pub mod util;
 
@@ -176,6 +180,10 @@ impl Patcher {
         let Course { ref mut scene_meta, .. } =
             courses.entry(course).or_insert(Self::load_course(game, course));
         scene_meta.as_mut().unwrap()
+    }
+
+    fn scene_env(&mut self) -> rom::Result<SceneEnvFile> {
+        self.game.scene_env()
     }
 
     fn update(&mut self, (course, file): (CourseId, File<Vec<u8>>)) -> Result<()> {
@@ -368,6 +376,7 @@ impl Patcher {
         prizes::patch_dungeon_prizes(&mut self, &prizes, seed_info.settings);
         maps::patch_maps(&mut self, &prizes);
         scenes::patch_byaml_files(&mut self, seed_info.settings)?;
+        let scene_env_file = scene_env::patch_scene_env(&mut self, seed_info.settings);
 
         {
             let Self { ref rentals, ref merchant, ref mut courses, .. } = self;
@@ -392,6 +401,9 @@ impl Patcher {
         //romfs.add(common.into_archive().unwrap());
 
         romfs.add(boot.into_archive());
+        if let Some(scene_env_file) = scene_env_file {
+            romfs.add_serialize(scene_env_file.into_file());
+        };
         for (_, Course { language, scenes, scene_meta }) in courses {
             romfs.add(language.into_archive());
             if let Some(scene_meta) = scene_meta {
@@ -574,6 +586,7 @@ fn cutscenes<'game>(
                 920, // Link's House Weather Vane
                 940, // Vacant House Weather Vane
                 950, // Maiamai
+                955, // Master Ore Icon
                 960, // Blacksmith's Wife
                 965, // Suppress Energy Potion
             ]) {
@@ -590,34 +603,15 @@ fn cutscenes<'game>(
                 opening.add_event_flag(964);
             }
 
-            if logic.weather_vanes_activated {
-                for flag in IntoIterator::into_iter([
-                    920, //	Your House Weather Vane
-                    921, //	Kakariko Village Weather Vane
-                    922, //	Eastern Palace Weather Vane
-                    923, //	House of Gales Weather Vane
-                    924, //	Tower of Hera Weather Vane
-                    925, //	Witch's House Weather Vane
-                    926, //	Death Mountain (Hyrule) Weather Vane
-                    927, //	Desert Palace Weather Vane
-                    928, //	Sanctuary Weather Vane
-                    932, //	Skull Woods Weather Vane
-                    933, //	Treacherous Tower Weather Vane
-                    934, //	Ice Ruins Weather Vane
-                    935, //	Lorule Castle Weather Vane
-                    936, //	Graveyard Weather Vane
-                    937, //	Thieves' Town Weather Vane
-                    938, //	Dark Palace Weather Vane
-                    939, //	Blacksmith Weather Vane
-                    940, //	Vacant House Weather Vane
-                    941, //	Misery Mire Weather Vane
-                    942, //	Swamp Palace Weather Vane
-                    943, //	Turtle Rock Weather Vane
-                    944, //	Death Mountain (Lorule) Weather Vane
-                ]) {
-                    opening.add_event_flag(flag);
-                }
-            }
+            // Weather Vanes
+            let wv_flags = match logic.active_weather_vanes {
+                Standard => None,
+                Convenient => Flag::get_convenient_weather_vane_flags(),
+                Hyrule => Flag::get_hyrule_weather_vane_flags(),
+                Lorule => Flag::get_lorule_weather_vane_flags(),
+                All => Flag::get_all_weather_vane_flags(),
+            };
+            wv_flags.iter().flatten().for_each(|flag| opening.add_event_flag(flag.get_value()));
 
             // Swordless Mode - Tear down Barrier at game start
             if logic.swordless_mode {

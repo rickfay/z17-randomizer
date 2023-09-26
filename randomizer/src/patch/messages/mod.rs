@@ -1,4 +1,4 @@
-use std::collections::BTreeMap;
+use std::collections::btree_map::BTreeMap;
 
 use game::{
     Course::{self, *},
@@ -19,7 +19,7 @@ mod msbt;
 pub fn patch_messages(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
     info!("Patching MSBT Files...");
 
-    // debug(patcher, FieldLight, "FieldLight_05");
+    // debug(patcher, IndoorLight, "FieldLight_02");
 
     patch_file_select(patcher, seed_info)?;
     // patch_ravio(patcher)?;
@@ -91,16 +91,16 @@ fn patch_street_merchant(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<
     let item_left = seed_info
         .layout
         .get(&LocationInfo::new(
-            crate::regions::hyrule::kakariko::village::SUBREGION,
             "Street Merchant (Left)",
+            crate::regions::hyrule::kakariko::village::SUBREGION,
         ))
         .unwrap()
         .as_str();
     let item_right = seed_info
         .layout
         .get(&LocationInfo::new(
-            crate::regions::hyrule::kakariko::village::SUBREGION,
             "Street Merchant (Right)",
+            crate::regions::hyrule::kakariko::village::SUBREGION,
         ))
         .unwrap()
         .as_str();

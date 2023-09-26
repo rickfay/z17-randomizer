@@ -8,16 +8,14 @@ use std::{
     path::Path,
 };
 
+use log::info;
+use path_absolutize::*;
+
 use game::{
     Course::{self as CourseId, LanguageBoot},
     Item,
 };
 use language::FlowChart;
-use log::info;
-use path_absolutize::*;
-
-use crate::{language::Load, scene::SceneMeta};
-
 pub use {
     actors::{Actor, Actors},
     course::Course,
@@ -28,11 +26,14 @@ pub use {
     scene::{Scene, Stage},
 };
 
-pub mod actor_profile;
+use crate::byaml::scene_env::SceneEnvFile;
+use crate::{language::Load, scene::SceneMeta};
+
 pub mod actors;
 pub mod course;
 pub mod demo;
 mod files;
+pub mod flag;
 pub mod flow;
 pub mod item;
 pub mod language;
@@ -144,7 +145,7 @@ impl Rom {
 
     /// Gets the 64-bit title ID.
     pub fn id(&self) -> u64 {
-        self.id
+        self.id.into()
     }
 
     /// Gets the ROM's extended header.
@@ -236,7 +237,14 @@ impl Rom {
         Some(SceneMeta::new(stage_meta))
     }
 
-    pub(crate) fn stage(&self, course: CourseId, stage: u16) -> Result<Stage> {
+    pub fn scene_env(&self) -> Result<SceneEnvFile> {
+        let mut romfs = self.romfs.borrow_mut();
+        let scene_env =
+            romfs.read("World/Byaml/SceneEnv.byaml")?.try_map(|data| byaml::from_bytes(&data))?;
+        Ok(SceneEnvFile::new(scene_env))
+    }
+
+    pub fn stage(&self, course: CourseId, stage: u16) -> Result<Stage> {
         byaml::from_bytes(
             self.romfs
                 .borrow_mut()

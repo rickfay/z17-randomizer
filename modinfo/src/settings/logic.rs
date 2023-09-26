@@ -1,9 +1,8 @@
+use crate::settings::active_weather_vanes::ActiveWeatherVanes;
+use crate::settings::entrance_shuffle::EntranceShuffleSetting;
+use crate::settings::hyrule_castle::HyruleCastleSetting;
+use crate::settings::pedestal::PedestalSetting;
 use serde::{Deserialize, Serialize};
-
-use super::{
-    entrance_shuffle::EntranceShuffleSetting, hyrule_castle::HyruleCastleSetting,
-    pedestal::PedestalSetting,
-};
 
 /// Settings to change the randomizer's logic checks.
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq, Deserialize, Serialize)]
@@ -118,7 +117,7 @@ pub struct Logic {
 
     /// Pre-activates Weather Vanes, allowing the Bell to travel anywhere from game start
     #[serde(default)]
-    pub weather_vanes_activated: bool,
+    pub active_weather_vanes: ActiveWeatherVanes,
 
     /// Price of Hints from Hint Ghosts
     #[serde(default = "thirty")]

@@ -4,7 +4,7 @@ use rom::Rom;
 
 use sead::sarc::Sarc;
 
-mod byaml;
+pub mod byaml;
 pub mod sead;
 
 /// Object-Safe Supertrait for all Jack Files

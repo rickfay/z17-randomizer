@@ -198,6 +198,75 @@ fn patch_final_boss(patcher: &mut Patcher) -> Result<()> {
     Ok(())
 }
 
+fn patch_weather_vanes(patcher: &mut Patcher) -> Result<()> {
+    apply!(patcher,
+        Boot/Telephone {
+
+            // Cut out as much as possible from 1st time activation
+            [2] => None,
+
+            // Never show "You've been playing for a while..." text
+            [4 into_branch] switch [[1] => None,],
+            [10 into_text] => None,
+        },
+    );
+
+    Ok(())
+}
+
+fn patch_rosso(patcher: &mut Patcher) -> Result<()> {
+    // Rosso's House
+    apply!(patcher,
+        IndoorLight/FieldLight_02_KikoriMan {
+
+            // Rearrange...
+            [3 into_start] => 4,
+            // Check if we've received our item yet
+            [4 into_branch] each [
+                value(261), // Flag 344
+                switch [
+                    [0] => 13, // Give out item path
+                    [1] => 40, // Repeat visits text
+                ],
+            ],
+
+            // Has Smashed Rocks check
+            [40 into_branch] switch [
+                [0] => 16, // 19,
+                // [1] - "Glad to share what's in that chest with you. You earned it, kid!"
+            ],
+
+            // Has Power Glove check
+            [16 into_branch] switch [
+                [0] => 19, // Has glove, long text about picking up rocks
+                [1] => 7, // No glove
+            ],
+
+            // No Glove path "Urggh! These rocks! Real pain in the neck!"
+            [7 into_text] => None,
+
+            // Give out item path - skip text
+            [12] => 69,
+            [68] => 14,
+            [15] => 21,
+            [96] => None,
+        },
+    );
+
+    // Outside Rosso's House
+    apply!(patcher,
+        FieldLight/FieldLight_02_KikoriMan {
+            // After all rock cleanup, remove text from Rosso exiting house
+            [77] => 28,
+            [78] => 32,
+            [31] => 34,
+            [83] => 80,
+        },
+    );
+
+    Ok(())
+}
+
 /// Dev debugging, prints the contents of an MSBF file in a format for spreadsheets. Don't leave this on.
 #[allow(unused)]
 #[deprecated]
@@ -226,14 +295,16 @@ where
 }
 
 pub fn apply(patcher: &mut Patcher, free: Item, settings: &Settings) -> Result<()> {
-    info!("Patching Flow Charts...");
+    info!("Patching MSBF Files...");
 
-    // debug(patcher, Id::FieldLight, "FieldLight_05_Climber")?;
+    // debug(patcher, None, "GameOver")?;
 
     patch_lorule_castle_requirements(patcher, settings)?;
     patch_castle_connection(patcher, settings)?;
     patch_final_boss(patcher)?;
     patch_hint_ghosts(patcher, settings)?;
+    patch_weather_vanes(patcher)?;
+    patch_rosso(patcher)?;
 
     apply!(patcher,
 
@@ -465,19 +536,6 @@ pub fn apply(patcher: &mut Patcher, free: Item, settings: &Settings) -> Result<(
 
     // untouched
     apply!(patcher,
-        // Bird statues
-        Boot/Telephone {
-            // TelephoneCall
-            [2] => 3, // Skip activation dialogue
-            [0x0C into_branch] switch [
-                [1] => None, // Skip break dialogue
-            ],
-        },
-        // Rosso
-        FieldLight/FieldLight_02_KikoriMan {
-            // Entry_KikoriMan3
-            [0x17 into_start] => 0x23,
-        },
         // Bouldering Guy
         FieldLight/FieldLight_05_Climber {
             [3 into_branch] each [

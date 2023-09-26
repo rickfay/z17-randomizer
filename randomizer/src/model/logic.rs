@@ -16,12 +16,46 @@ pub struct Logic {
 }
 
 impl Logic {
-    pub fn new(
-        normal: Option<fn(&Progress) -> bool>, hard: Option<fn(&Progress) -> bool>,
-        glitched: Option<fn(&Progress) -> bool>, adv_glitched: Option<fn(&Progress) -> bool>,
-        hell: Option<fn(&Progress) -> bool>,
-    ) -> Self {
-        Self { normal, hard, glitched, adv_glitched, hell }
+    pub fn new() -> Self {
+        Self { normal: None, hard: None, glitched: None, adv_glitched: None, hell: None }
+    }
+
+    pub fn config<L>(normal: L, hard: L, glitched: L, adv_glitched: L, hell: L) -> Self
+    where
+        L: Into<Option<fn(&Progress) -> bool>>,
+    {
+        Self {
+            normal: normal.into(),
+            hard: hard.into(),
+            glitched: glitched.into(),
+            adv_glitched: adv_glitched.into(),
+            hell: hell.into(),
+        }
+    }
+
+    pub fn normal(&mut self, logic: fn(&Progress) -> bool) -> &mut Self {
+        self.normal = logic.into();
+        self
+    }
+
+    pub fn hard(&mut self, logic: fn(&Progress) -> bool) -> &mut Self {
+        self.hard = logic.into();
+        self
+    }
+
+    pub fn glitched(&mut self, logic: fn(&Progress) -> bool) -> &mut Self {
+        self.glitched = logic.into();
+        self
+    }
+
+    pub fn adv_glitched(&mut self, logic: fn(&Progress) -> bool) -> &mut Self {
+        self.adv_glitched = logic.into();
+        self
+    }
+
+    pub fn hell(&mut self, logic: fn(&Progress) -> bool) -> &mut Self {
+        self.normal = logic.into();
+        self
     }
 
     pub fn can_access(self, progress: &Progress) -> bool {

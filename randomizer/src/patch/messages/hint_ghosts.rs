@@ -27,12 +27,12 @@ macro_rules! hint_ghost_from {
 }
 
 hint_ghost_from! {
-    // Lost Woods
+    // Lost Woods Maze (3)
     LostWoodsMaze1 => FieldLight, "FieldLight_00", "lgt_MayoinoHintObake_Msg4";
     LostWoodsMaze2 => FieldLight, "FieldLight_00", "lgt_MayoinoHintObake_Msg8";
     LostWoodsMaze3 => FieldLight, "FieldLight_00", "lgt_MayoinoHintObake_Msg6";
 
-    // Hyrule
+    // Hyrule (33)
     LostWoods => FieldLight, "HintGhostLight", "HintGhost_FieldLight_00_000";
     SpectacleRock => FieldLight, "HintGhostLight", "HintGhost_FieldLight_03_002";
     TowerOfHeraOutside => FieldLight, "HintGhostLight", "HintGhost_FieldLight_03_003";
@@ -67,15 +67,15 @@ hint_ghost_from! {
     HyruleCastleRocks => FieldLight, "HintGhostLight", "HintGhost_FieldLight_14_032";
     WitchsHouse => FieldLight, "HintGhostLight", "HintGhost_FieldLight_14_033";
 
-    // Lorule
+    // Lorule (22)
     SkullWoodsCuccos => FieldDark, "HintGhostDark", "HintGhost_FieldDark_02_001";
     TreacherousTower => FieldDark, "HintGhostDark", "HintGhost_FieldDark_03_002";
     IceRuinsOutside => FieldDark, "HintGhostDark", "HintGhost_FieldDark_07_003";
     LoruleGraveyard => FieldDark, "HintGhostDark", "HintGhost_FieldDark_14_004";
     DarkRuinsNorth => FieldDark, "HintGhostDark", "HintGhost_FieldDark_16_005";
     SkullWoodsSouth => FieldDark, "HintGhostDark", "HintGhost_FieldDark_18_006";
-    FortunesChoice => IndoorDark, "HintGhostDark", "HintGhost_FieldDark_18_007";
-    VeteranThief => IndoorDark, "HintGhostDark", "HintGhost_FieldDark_18_008";
+    FortunesChoice => IndoorDark, "HintGhostDark", "HintGhost_FieldDark_18_007"; // Indoors
+    VeteranThief => IndoorDark, "HintGhostDark", "HintGhost_FieldDark_18_008"; // Indoors
     FortuneTellerLorule => FieldDark, "HintGhostDark", "HintGhost_FieldDark_1A_009";
     DarkMaze => FieldDark, "HintGhostDark", "HintGhost_FieldDark_1E_010";
     RupeeRushLorule => FieldDark, "HintGhostDark", "HintGhost_FieldDark_28_011";

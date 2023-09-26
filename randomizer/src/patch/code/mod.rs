@@ -8,6 +8,7 @@ use std::{
 use arm::*;
 use game::Item::{self, *};
 use modinfo::settings::{pedestal::PedestalSetting::*, Settings};
+use rom::flag::Flag;
 use rom::ExHeader;
 
 use super::Patcher;
@@ -163,7 +164,7 @@ pub fn create(patcher: &Patcher, seed_info: &SeedInfo) -> Code {
     // fix castle barrier?
     let master_sword_flag = code.text().define([
         ldr(R0, EVENT_FLAG_PTR),
-        ldr(R1, 410),
+        ldr(R1, Flag::HC_BARRIER.get_value()),
         mov(R2, 1),
         ldr(R0, (R0, 0)),
         bl(0x4CDF40),
@@ -204,6 +205,8 @@ pub fn create(patcher: &Patcher, seed_info: &SeedInfo) -> Code {
     ]);
     code.patch(0x243DE8, [bl(get_sword_flag1)]);
     code.patch(0x30E160, [bl(get_sword_flag2)]);
+
+    //
     let actor_names = actor_names(&mut code);
     let item_names = item_names(&mut code);
     let overwrite_rentals = code.text;
@@ -308,7 +311,7 @@ pub fn create(patcher: &Patcher, seed_info: &SeedInfo) -> Code {
 
 /// Show Hint Ghosts always, without the need for the Hint Glasses
 fn show_hint_ghosts(code: &mut Code) {
-    // Allowing talking to Hint Ghosts without glasses
+    // Allow talking to Hint Ghosts without glasses
     code.patch(0x1cb3c8, [mov(R0, 0x1)]);
 
     // Skip checking if Hint Glasses are taken off
@@ -729,7 +732,7 @@ fn item_names(code: &mut Code) -> HashMap<Item, u32> {
     map
 }
 
-const ACTOR_NAME_OFFSETS: [(Item, u32); 29] = [
+const ACTOR_NAME_OFFSETS: [(Item, u32); 32] = [
     (ItemStoneBeauty, 0x5D2060),
     (RupeeR, 0x5D639C),
     (RupeeG, 0x5D639C),
@@ -750,7 +753,10 @@ const ACTOR_NAME_OFFSETS: [(Item, u32); 29] = [
     (ItemBottle, 0x5D7048),
     (HintGlasses, 0x5D70AC),
     (RupeeGold, 0x5D7144),
+    (ItemSwordLv1, 0x5D7178),
     (ItemSwordLv2, 0x5D7178),
+    (ItemSwordLv3, 0x5D7178),
+    (ItemSwordLv4, 0x5D7178),
     (LiverPurple, 0x5D762C),
     (LiverYellow, 0x5D7640),
     (LiverBlue, 0x5D7654),
@@ -761,7 +767,7 @@ const ACTOR_NAME_OFFSETS: [(Item, u32); 29] = [
     (HeartPiece, 0x5D7B94),
 ];
 
-const ACTOR_NAMES: [(Item, &str); 39] = [
+const ACTOR_NAMES: [(Item, &str); 41] = [
     (KeyBoss, "KeyBoss"),
     (Compass, "Compass"),
     (ItemKandelaar, "GtEvKandelaar"),
@@ -775,6 +781,7 @@ const ACTOR_NAMES: [(Item, &str); 39] = [
     (ItemInsectNetLv2, "GtEvNet"),
     (BadgeBee, "BadgeBee"),
     (ClothesBlue, "GtEvCloth"),
+    (Heart, "Heart"),
     (HyruleShield, "GtEvShieldB"),
     (OreYellow, "OreSword"),
     (OreGreen, "OreSword"),
@@ -791,6 +798,7 @@ const ACTOR_NAMES: [(Item, &str); 39] = [
     (ItemBoomerangLv2, "GtEvBoomerangB"),
     (ItemHammerLv2, "GtEvHammerB"),
     (ItemBowLv2, "GtEvBowB"),
+    (Milk, "GtEvBottleMedicine"),        // Red Milk lol
     (MilkMatured, "GtEvBottleMedicine"), // Red Milk lol
     (Kinsta, "KinSta"),
     (PendantPower, "Pendant"),
@@ -820,8 +828,9 @@ const ITEM_NAME_OFFSETS: [(Item, u32); 14] = [
     (ItemStoneBeauty, 0x6F9D56),
 ];
 
-const ITEM_NAMES: [(Item, &str); 55] = [
+const ITEM_NAMES: [(Item, &str); 59] = [
     (BadgeBee, "beebadge"),
+    (Compass, "compass"),
     (ItemBell, "bell"),
     (ItemBowLight, "bow_light"),
     (RingRental, "bracelet"),
@@ -845,7 +854,10 @@ const ITEM_NAMES: [(Item, &str); 55] = [
     (Kinsta, "kinsta"),
     (ItemKandelaar, "lantern"),
     (ItemKandelaarLv2, "lantern_lv2"),
+    (ItemSwordLv1, "mastersword"),
     (ItemSwordLv2, "mastersword"),
+    (ItemSwordLv3, "mastersword"),
+    (ItemSwordLv4, "mastersword"),
     (Empty, "mastersword"),
     (MessageBottle, "messagebottle"),
     (Milk, "milk"),

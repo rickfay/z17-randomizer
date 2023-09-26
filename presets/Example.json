@@ -13,7 +13,7 @@
     "reverse_sage_events":         true,                // Ties Sage-related checks and events to actually rescuing that Sage.
     "no_progression_enemies":      true,                // Removes Enemies from dungeons that are themselves Progression (e.g.: Bawbs, the bomb enemy)
 
-    "start_with_merge":            true,                // Start with the ability to Merge into walls, without Ravio's Bracelet.
+    "start_with_merge":            false,               // Start with the ability to Merge into walls, without Ravio's Bracelet.
     "bell_in_shop":                true,                // If enabled the Bell will be placed in Ravio's Shop.
     "pouch_in_shop":               false,               // If enabled the Pouch will be placed in Ravio's Shop.
     "sword_in_shop":               false,               // If enabled at least one Sword will be placed in Ravio's Shop. (Note: This option is incompatible with Swordless Mode, which removes all Swords from the game.)
@@ -27,7 +27,7 @@
     "skip_trials":                 false,               // Automatically opens the Lorule Castle Trials door.
     "bow_of_light_in_castle":      false,               // Limits the Bow of Light's placement to somewhere in Lorule Castle (including possibly Zelda).
 
-    "weather_vanes_activated":     false,               // Begin the game with all Weather Vanes activated. Not supported by any trackers currently.
+    "active_weather_vanes":        "Standard",           // Choose initially active Weather Vanes: "Standard", "Convenient", "Hyrule", "Lorule", "All"
     "dark_rooms_lampless":         false,               // If enabled the logic may expect players to cross Dark Rooms without the Lamp.
     "swordless_mode":              false,               // Removes *ALL* Swords from the game.
 
@@ -41,7 +41,7 @@
     // Exclude certain locations to guarantee Junk Items will be placed there.
     // Check Names are all unique, consult a spoiler log for a complete list.
     "exclusions": [
-      "Great Rupee Fairy"
+      "Cucco Treasure Dungeon"
     ]
   }
 }
