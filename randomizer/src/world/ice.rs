@@ -95,28 +95,23 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                         Some(|p| p.has_boots()),
                         None,
                     ),
-                    old_check(
-                        LocationInfo::new(
-                            "[IR] (B4) Switches",
-                            regions::dungeons::ice::ruins::SUBREGION,
-                        ),
-                        Some(|p| {
+                    check!("[IR] (B4) Switches", regions::dungeons::ice::ruins::SUBREGION => {
+                        normal: |p| {
                             p.has_ice_keys(2)
                                 && p.can_merge()
                                 && (p.progression_enemies()
                                     || p.has_bombs()
+                                    || p.can_great_spin()
                                     || p.has_nice_ice_rod())
-                        }),
-                        None,
-                        None,
-                        Some(|p| {
+                        },
+                        adv_glitched: |p| {
                             p.has_boots()
                                 && (p.progression_enemies()
                                     || p.has_bombs()
+                                    || p.can_great_spin()
                                     || p.has_nice_ice_rod())
-                        }),
-                        None,
-                    ),
+                        },
+                    }),
                     old_check(
                         LocationInfo::new(
                             "[IR] (B4) Southwest Chest (Fall)",

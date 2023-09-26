@@ -5,9 +5,7 @@ use crate::model::location::Location::{self, *};
 use crate::model::location_node::LocationNode;
 use crate::model::logic::Logic;
 use crate::regions;
-use crate::world::{
-    check, edge, fast_travel_hyrule, ghost, goal, location, out_of_logic, portal_std,
-};
+use crate::world::{check, edge, fast_travel_hyrule, ghost, goal, location, portal_std};
 use crate::LocationInfo;
 use game::HintGhost;
 use std::collections::HashMap;
@@ -994,7 +992,28 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                     check!("Southern Ruins Treasure Dungeon", regions::hyrule::southern::ruins::SUBREGION => {
                         normal: |p| p.has_boomerang() && p.has_hookshot() && p.has_flippers(),
                         hard: |p| p.has_hookshot() && p.has_flippers() && (p.has_master_sword() || p.has_bombs()),
-                        glitched: |p| p.has_nice_bombs() || p.has_nice_ice_rod() || p.can_great_spin(),
+                        glitched: |p| {
+                            p.has_nice_bombs()
+                            || p.can_great_spin()
+                            || (
+                                p.has_nice_ice_rod() && (
+                                    // need to be able to hit SE switch
+                                    p.has_boomerang()
+                                    || p.has_hookshot()
+                                    || (
+                                        p.has_flippers()
+                                        && (
+                                            // animation storage onto switch
+                                            p.has_sword()
+                                            || p.has_bow()
+                                            || p.has_boots()
+                                            || p.has_hammer()
+                                        )
+                                    )
+                                )
+                            )
+                        },
+                        hell: |p| p.has_nice_ice_rod(), // possible but sucks
                     }),
                 ],
                 vec![edge!(HyruleField)],

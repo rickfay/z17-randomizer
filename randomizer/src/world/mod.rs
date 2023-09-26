@@ -114,6 +114,7 @@ macro_rules! goal {
 }
 
 /// Path convenience macros
+/// Rust won't let me call it a Path so I'm using the dumb math name >:(
 macro_rules! edge {
     ($dest:ident) => (
         Path::new($dest, Logic::free())

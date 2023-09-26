@@ -29,14 +29,10 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                 )],
                 vec![
                     edge!(EasternRuinsUpper),
-                    old_path(
-                        EasternPalace1F,
-                        Some(|p| p.can_hit_far_switch() || p.can_merge() || p.has_nice_ice_rod()),
-                        Some(|p| p.has_master_sword()),
-                        None,
-                        None,
-                        None, // not including Nice Ice Rod for now
-                    ),
+                    edge!(EasternPalace1F => {
+                        normal: |p| p.can_hit_far_switch() || p.can_merge() || p.has_nice_ice_rod(),
+                        hard: |p| p.has_master_sword(),
+                    }),
                 ],
             ),
         ),
@@ -45,17 +41,10 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
             location(
                 "Eastern Palace 1F",
                 vec![
-                    old_check(
-                        LocationInfo::new(
-                            "[EP] (1F) Left Door Chest",
-                            regions::dungeons::eastern::palace::SUBREGION,
-                        ),
-                        Some(|p| p.can_hit_far_switch() || p.has_nice_ice_rod()),
-                        Some(|_| true), // throw pot
-                        None,
-                        None,
-                        None,
-                    ),
+                    check!("[EP] (1F) Left Door Chest", regions::dungeons::eastern::palace::SUBREGION => {
+                        normal: |p| p.can_hit_far_switch() || p.has_nice_ice_rod(),
+                        hard: |_| true, // throw pot
+                    }),
                     old_check(
                         LocationInfo::new(
                             "[EP] (1F) Popo Room",
@@ -201,20 +190,17 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
             location(
                 "Eastern Palace 3F",
                 vec![],
-                vec![old_path(
-                    EasternPalacePostYuga,
-                    Some(|p| p.has_bow()),
-                    Some(|p| {
+                vec![edge!(EasternPalacePostYuga => {
+                    normal: |p| p.has_bow(),
+                    hard: |p| {
                         p.has_bombs()
                             || p.has_master_sword()
                             || ((p.has_boomerang() || p.has_hookshot())
                                 && (p.can_attack() || p.has_lamp_or_net()))
                             || p.has_nice_ice_rod()
-                    }),
-                    None,
-                    None,
-                    Some(|p| p.has_ice_rod()), // gross
-                )],
+                    },
+                    hell: |p| p.has_ice_rod(), // gross
+                })],
             ),
         ),
         (

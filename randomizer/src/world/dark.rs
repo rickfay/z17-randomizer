@@ -131,14 +131,11 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                 ],
                 vec![
                     edge!(DarkPalaceMain),
-                    old_path(
-                        DarkPalaceBoss,
-                        Some(|p| p.has_dark_big_key() && p.can_merge()),
-                        Some(|p| p.has_dark_big_key() && p.has_ice_rod()),
-                        Some(|p| p.has_dark_big_key() && p.has_nice_bombs()),
-                        None,
-                        None,
-                    ),
+                    edge!(DarkPalaceBoss => {
+                        normal: |p| p.has_dark_big_key() && p.can_merge(),
+                        hard: |p| p.has_dark_big_key() && p.has_ice_rod(),
+                        glitched: |p| p.has_dark_big_key() && p.has_nice_bombs(),
+                    }),
                 ],
             ),
         ),
