@@ -369,6 +369,9 @@ impl Patcher {
         // just testin'
         // let sarc = jack::open_szs(&self.game, "Archive/ActorProfile.szs");
 
+        // Debugging
+        // debug(&mut self, IndoorLight, "FieldLight_18_MiddleLady", IndoorLight, "FieldLight_18");
+
         let prizes = get_dungeon_prizes(&seed_info.layout);
         let free = self.rentals[8];
         flow::apply(&mut self, free, seed_info.settings)?;
@@ -422,6 +425,22 @@ impl Patcher {
         }
         Ok(Patches { game, code, romfs })
     }
+}
+
+/// Debugging for MSBF and MSBT Files
+#[allow(unused)]
+#[deprecated]
+fn debug<C>(
+    patcher: &mut Patcher, msbf_course: C, msbf_file: &str, msbt_course: game::Course,
+    msbt_file: &str,
+) where
+    C: Into<Option<game::Course>>,
+{
+    flow::debug(patcher, msbf_course, msbf_file);
+    messages::debug(patcher, msbt_course, msbt_file);
+
+    info!("Early Debug Exit");
+    std::process::exit(0);
 }
 
 #[derive(Debug)]

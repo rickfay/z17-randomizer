@@ -19,8 +19,6 @@ mod msbt;
 pub fn patch_messages(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
     info!("Patching MSBT Files...");
 
-    // debug(patcher, IndoorLight, "FieldLight_02");
-
     patch_file_select(patcher, seed_info)?;
     // patch_ravio(patcher)?;
     patch_great_rupee_fairy(patcher)?;
@@ -35,12 +33,9 @@ pub fn patch_messages(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()>
 }
 
 /// Prints out all String Values and their indexed Label Keys for a given MSBT File
-#[allow(unused)]
-#[deprecated]
-fn debug(patcher: &mut Patcher, course: Course, file: &str) {
+pub fn debug(patcher: &mut Patcher, course: Course, file: &str) {
     load_msbt(patcher, course, file).unwrap().debug();
-    info!("Early Debug Exit");
-    std::process::exit(0);
+    info!("Finished MSBF Debug");
 }
 
 fn patch_file_select(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {

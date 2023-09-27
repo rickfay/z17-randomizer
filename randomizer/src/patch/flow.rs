@@ -277,10 +277,63 @@ fn patch_rosso(patcher: &mut Patcher) -> Result<()> {
     Ok(())
 }
 
+/// Stylish Woman
+fn patch_stylish_woman(patcher: &mut Patcher) -> Result<()> {
+    apply!(patcher,
+        IndoorLight/FieldLight_18_ClosedHouse {
+            [12] => 41, // Skip 1
+            [26] => 20, // Skip 3
+            [28] => 44, // Skip 21
+            [48] => 23, // Skip 46
+        },
+    );
+
+    Ok(())
+}
+
+/// Woman
+fn patch_woman(patcher: &mut Patcher) -> Result<()> {
+    apply!(patcher,
+        IndoorLight/FieldLight_18_MiddleLady {
+            [12 into_branch] switch [[0] => 15,], // Skip 11
+        },
+    );
+
+    Ok(())
+}
+
+/// Quit / Game Over dialog
+fn patch_gameover(_patcher: &mut Patcher) -> Result<()> {
+    // apply!(patcher,
+    //     Boot/GameOver {
+    // [9] => 1, // Should cause Death -> choose Quit? (actually caused Fairy revival but no text, stuck in dialog with no dialog)
+    //[9] => 12, // Should cause... nothing. He just lies there...?
+
+    // [10 into_branch] switch [
+    //     [0] => 5,
+    //     [1] => 5,
+    // ],
+
+    // [11 into_branch] switch [
+    //     [0] => 1,
+    //     [1] => 1,
+    // ],
+    //
+    // [13 into_branch] switch [
+    //     [0] => 1,
+    //     [1] => 1,
+    // ],
+
+    // [9] => 5,
+    // [9] => 8,
+    //     },
+    // );
+
+    Ok(())
+}
+
 /// Dev debugging, prints the contents of an MSBF file in a format for spreadsheets. Don't leave this on.
-#[allow(unused)]
-#[deprecated]
-fn debug<C>(patcher: &mut Patcher, course: C, file_name: &str) -> Result<()>
+pub fn debug<C>(patcher: &mut Patcher, course: C, file_name: &str) -> Result<()>
 where
     C: Into<Option<Course>>,
 {
@@ -301,7 +354,7 @@ where
     };
 
     info!("Finished MSBF Debug");
-    std::process::exit(0);
+    Ok(())
 }
 
 pub fn apply(patcher: &mut Patcher, free: Item, settings: &Settings) -> Result<()> {
@@ -315,6 +368,10 @@ pub fn apply(patcher: &mut Patcher, free: Item, settings: &Settings) -> Result<(
     patch_hint_ghosts(patcher, settings)?;
     patch_weather_vanes(patcher)?;
     patch_rosso(patcher)?;
+    // patch_mother_maiamai(patcher)?;
+    // patch_gameover(patcher)?;
+    patch_stylish_woman(patcher)?;
+    patch_woman(patcher)?;
 
     apply!(patcher,
 
