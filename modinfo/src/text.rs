@@ -5,8 +5,6 @@ use std::{
 
 use serde::Serialize;
 
-pub type GameString = String;
-
 #[derive(Debug)]
 pub struct Text<'a> {
     parts: Vec<Part<'a>>,
@@ -17,7 +15,7 @@ impl<'a> Text<'a> {
         Default::default()
     }
 
-    pub fn to_game_text(&self) -> GameString {
+    pub fn to_game_text(&self) -> String {
         self.parts.iter().fold(String::new(), |mut text, part| {
             part.write(&mut text);
             text
