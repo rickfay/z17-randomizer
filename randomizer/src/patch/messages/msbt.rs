@@ -57,19 +57,33 @@ impl MsbtFile {
     }
 
     #[allow(unused)]
-    pub(crate) fn debug(&self) {
+    pub(crate) fn debug(&self, edotor: bool) -> Vec<(String, String)> {
         let mut labels =
             self.lbl1.hash_table.iter().flat_map(|slot| slot.labels.iter()).collect::<Vec<_>>();
         labels.sort_by(|this, that| this.item_index.cmp(&that.item_index));
 
-        for label in &labels {
-            println!(
-                "\nIndex: {}\nLabel: \"{}\"\n\"{}\"\n\n",
-                label.item_index,
-                label.label,
-                self.txt2.messages.get(label.item_index as usize).unwrap()
-            );
+        let results = labels
+            .iter()
+            .map(|label: &&Label| {
+                (
+                    label.label.clone(),
+                    self.txt2.messages.get(label.item_index as usize).unwrap().clone(),
+                )
+            })
+            .collect::<Vec<_>>();
+
+        if !edotor {
+            for label in &labels {
+                println!(
+                    "\nIndex: {}\nLabel: \"{}\"\n\"{}\"\n\n",
+                    label.item_index,
+                    label.label,
+                    self.txt2.messages.get(label.item_index as usize).unwrap()
+                );
+            }
         }
+
+        results
     }
 
     /// Builds a valid `.msbt` file and dumps it as a [`File<Vec<u8>>`]

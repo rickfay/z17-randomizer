@@ -33,9 +33,10 @@ pub fn patch_messages(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()>
 }
 
 /// Prints out all String Values and their indexed Label Keys for a given MSBT File
-pub fn debug(patcher: &mut Patcher, course: Course, file: &str) {
-    load_msbt(patcher, course, file).unwrap().debug();
-    info!("Finished MSBF Debug");
+pub fn debug(
+    patcher: &mut Patcher, course: Course, file: &str, edotor: bool,
+) -> Vec<(String, String)> {
+    load_msbt(patcher, course, file).unwrap().debug(edotor)
 }
 
 fn patch_file_select(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {

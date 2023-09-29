@@ -1,3 +1,4 @@
+use game::Item;
 use {
     crate::{
         files::{msgbn::MsgBn, FromFile},
@@ -190,6 +191,7 @@ impl<'input> FlowMut<'input> {
         }
     }
 
+    /// Hacky debugging that prints out MSBF file info
     pub fn debug(&self) {
         typedef! {
             struct Inner: FromBytes<'_> [STEP_LEN] {
@@ -197,7 +199,8 @@ impl<'input> FlowMut<'input> {
             [1] arg1: u8,
             [2] arg2: u8,
             [3] arg3: u8,
-            [4] value: u32,
+            [4] arg4: u16,
+            [6] value: u16,
             [8] next: u16,
             [0xA] command: u16,
             [0xC] count: u16,
@@ -212,7 +215,7 @@ impl<'input> FlowMut<'input> {
             }
         }
 
-        println!("index,kind,arg1,arg2,arg3,value,next,command,count,branch,+0,+1,notes");
+        println!("index,kind,arg1,arg2,arg3,arg4,value,next,command,count,branch,0,1,notes");
         let mut step: Inner;
         for i in 0..(self.steps.inner.len() / STEP_LEN) {
             step = unsafe {
@@ -221,12 +224,13 @@ impl<'input> FlowMut<'input> {
                 )
             };
             println!(
-                "[{: >3}],{},{},{},{},{},{},{},{},{}",
+                "[{: >3}],{},{},{},{},{},{},{},{},{},{}",
                 i,
                 step.kind,
                 step.arg1,
                 step.arg2,
                 step.arg3,
+                step.arg4,
                 step.value,
                 step.next,
                 step.command,
@@ -242,6 +246,164 @@ impl<'input> FlowMut<'input> {
             };
             println!("[{}],{},{}", i, branch.arg0, branch.arg1);
         }
+    }
+
+    /// Generates a dot graph to visualize the MSBF/MSBT files.
+    /// Plug the results into: http://edotor.net/
+    pub fn edotor(&self, labels: Vec<(String, String)>) {
+        typedef! {
+            struct Inner: FromBytes<'_> [STEP_LEN] {
+            [0] kind: u8,
+            [1] arg1: u8,
+            [2] arg2: u8,
+            [3] arg3: u8,
+            [4] arg4: u16,
+            [6] value: u16,
+            [8] next: u16,
+            [0xA] command: u16,
+            [0xC] count: u16,
+            [0xE] branch: u16,
+            }
+        }
+
+        typedef! {
+            struct InnerBranch: FromBytes<'_> [STEP_LEN] {
+            [0] arg0: u16,
+            }
+        }
+
+        // Find Branches first
+        let mut branches: Vec<InnerBranch> = Vec::new();
+        for i in 0..(&self.branches.inner.len() / 2) {
+            branches.push(unsafe {
+                InnerBranch::from_slice_unchecked(&self.branches.inner[(i * 2)..((i * 2) + 2)])
+            });
+        }
+
+        println!("digraph {{");
+        for i in 0..(self.steps.inner.len() / STEP_LEN) {
+            let step = unsafe {
+                Inner::from_slice_unchecked(
+                    &self.steps.inner[(i * STEP_LEN)..((i * STEP_LEN) + STEP_LEN)],
+                )
+            };
+
+            match step.kind {
+                1 => {
+                    let label = if let Some((label, msg)) = labels.get(step.count as usize) {
+                        let mut bytes: Vec<u8> = msg.as_bytes().into();
+                        bytes = bytes
+                            .iter()
+                            .map(|&b| if b != 0xA && (b < 0x20 || b > 0x7E) { 0xEF } else { b })
+                            .collect::<Vec<_>>();
+
+                        let msg = String::from_utf8_lossy(&*bytes);
+                        Some((label, str::replace(&*msg, "\n", "\\n")))
+                    } else {
+                        None
+                    };
+
+                    println!(
+                        "    {} [color=green4, shape=rect, label=\"{}\\n{}\"]",
+                        i,
+                        i,
+                        if let Some((label, msg)) = label {
+                            format!("\\\"{}\\\"\\n\\n\\\"{}\\\"", label, msg)
+                        } else {
+                            "".to_owned()
+                        }
+                    );
+                    println!(
+                        "    {} -> {}",
+                        i,
+                        if step.next == 65535 {
+                            format!("END_{}", i)
+                        } else {
+                            step.next.to_string()
+                        }
+                    );
+                }
+                2 => {
+                    let label = if step.arg1 == 6 && step.command == 10 {
+                        format!("Check Event Flag {}", step.arg4)
+                    } else if step.arg1 == 0 && step.command == 6 {
+                        format!("Got {} Rupees?", step.arg4)
+                    } else if step.arg1 == 0 && step.command == 0xE {
+                        format!("Check Course Flag {}", step.arg4)
+                    } else {
+                        "???".to_owned()
+                    };
+
+                    println!(
+                        "    {} [color=orange3, shape=diamond, label=\"{}\\n{}\"]",
+                        i, i, label
+                    );
+
+                    for j in 0..step.count {
+                        let branch = branches.get((step.branch + j) as usize).unwrap();
+                        println!(
+                            "    {} -> {}",
+                            i,
+                            if branch.arg0 == 65535 {
+                                format!("END_{}_{}", i, j)
+                            } else {
+                                branch.arg0.to_string()
+                            }
+                        );
+                    }
+                }
+                3 => {
+                    let label = if step.arg1 == 6 && (step.command == 0 || step.command == 0xE) {
+                        format!("Set Event Flag {}", step.arg4)
+                    } else if step.arg1 == 6 && step.command == 11 {
+                        Item::try_from(step.arg4).unwrap().as_str().to_owned()
+                    } else {
+                        "?".to_owned()
+                    };
+
+                    println!("    {} [label=\"{}\\n{}\"]", i, i, label);
+                    println!(
+                        "    {} -> {}",
+                        i,
+                        if step.next == 65535 {
+                            format!("END_{}", i)
+                        } else {
+                            step.next.to_string()
+                        }
+                    );
+                }
+                4 => {
+                    println!("    {} [color=cyan3, shape=doublecircle]", i);
+                    println!(
+                        "    {} -> {}",
+                        i,
+                        if step.next == 65535 {
+                            format!("END_{}", i)
+                        } else {
+                            step.next.to_string()
+                        }
+                    );
+                }
+                5 => {
+                    println!(
+                        "    {} [color=purple, shape=pentagon, label=\"{}\\nGOTO {}\"]",
+                        i, i, step.next
+                    );
+                    println!(
+                        "    {} -> {}",
+                        i,
+                        if step.next == 65535 {
+                            format!("END_{}", i)
+                        } else {
+                            step.next.to_string()
+                        }
+                    );
+                }
+                _ => unreachable!(),
+            }
+        }
+
+        println!("}}");
     }
 }
 

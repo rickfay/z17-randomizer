@@ -383,9 +383,9 @@ fn build_layout() -> Layout {
     layout.set(LocationInfo::new("Behind Ice Gimos", regions::lorule::death::mountain::SUBREGION), ItemFireRodLv2);
     layout.set(LocationInfo::new("Lorule Mountain W Ledge", regions::lorule::death::mountain::SUBREGION), RupeeGold);
     layout.set(LocationInfo::new("Ice Gimos Fight", regions::lorule::death::mountain::SUBREGION), RupeeGold);
-    layout.set(LocationInfo::new("Treacherous Tower Intermediate", regions::lorule::death::mountain::SUBREGION), RupeeGold);
-    layout.set(LocationInfo::new("Treacherous Tower Advanced (1)", regions::lorule::death::mountain::SUBREGION), RupeeGold);
-    layout.set(LocationInfo::new("Treacherous Tower Advanced (2)", regions::lorule::death::mountain::SUBREGION), RupeeGold);
+    layout.set(LocationInfo::new("Treacherous Tower Intermediate", regions::lorule::death::mountain::SUBREGION), HeartPiece);
+    layout.set(LocationInfo::new("Treacherous Tower Advanced (1)", regions::lorule::death::mountain::SUBREGION), ItemKandelaarLv2);
+    layout.set(LocationInfo::new("Treacherous Tower Advanced (2)", regions::lorule::death::mountain::SUBREGION), ItemInsectNetLv2);
     layout.set(LocationInfo::new("[Mai] Lorule Mountain W Skull", regions::lorule::death::mountain::SUBREGION), RupeeGold);
     layout.set(LocationInfo::new("[Mai] Lorule Mountain W Big Rock", regions::lorule::death::mountain::SUBREGION), RupeeGold);
     layout.set(LocationInfo::new("[Mai] Lorule Mountain E Skull", regions::lorule::death::mountain::SUBREGION), RupeeGold);

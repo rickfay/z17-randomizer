@@ -616,11 +616,15 @@ fn patch_open_lost_woods(patcher: &mut Patcher) {
 
 /// Witch's House
 fn patch_magic_shop(patcher: &mut Patcher) {
-    patcher.modify_objs(IndoorLight, 2, &[
-        disable(19), // Entry_FieldLight16_Obaba_MissingMaple_00
-        disable(20), // MagicShopKeeper_StoneBeauty
-        disable(21), // Entry_FieldLight16_Obaba_HelpMaple
-    ]);
+    patcher.modify_objs(
+        IndoorLight,
+        2,
+        &[
+            disable(19), // Entry_FieldLight16_Obaba_MissingMaple_00
+            disable(20), // MagicShopKeeper_StoneBeauty
+            disable(21), // Entry_FieldLight16_Obaba_HelpMaple
+        ],
+    );
 }
 
 // Hyrule Blacksmith
@@ -1389,6 +1393,7 @@ fn do_dev_stuff(patcher: &mut Patcher, settings: &Settings) {
     patcher.modify_objs(IndoorLight, 1, &[call(24, |obj| {
         obj.redirect(Dest::new(
             FieldLight, 27, 5,  // No Redirect
+            // FieldDark, 3, 0, // Lorule Death Mountain West
             // IndoorLight, 2, 0, // Witch's House
             // IndoorLight, 14, 0, // Stylish Woman's House
             // CaveLight, 15, 0, // Maiamai Cave

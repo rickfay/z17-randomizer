@@ -302,7 +302,19 @@ fn patch_woman(patcher: &mut Patcher) -> Result<()> {
     Ok(())
 }
 
+/// Treacherous Tower
+fn patch_treacherous_tower(patcher: &mut Patcher) -> Result<()> {
+    apply!(patcher,
+        FieldDark / FieldDark_05_GameTower {
+            [62 into_branch] switch [[0] => 65,], // Unlock Intermediate from the start
+        },
+    );
+
+    Ok(())
+}
+
 /// Quit / Game Over dialog
+#[allow(unused)]
 fn patch_gameover(_patcher: &mut Patcher) -> Result<()> {
     // apply!(patcher,
     //     Boot/GameOver {
@@ -333,14 +345,21 @@ fn patch_gameover(_patcher: &mut Patcher) -> Result<()> {
 }
 
 /// Dev debugging, prints the contents of an MSBF file in a format for spreadsheets. Don't leave this on.
-pub fn debug<C>(patcher: &mut Patcher, course: C, file_name: &str) -> Result<()>
+pub fn debug<C, M>(
+    patcher: &mut Patcher, course: C, file_name: &str, labels: M, edotor: bool,
+) -> Result<()>
 where
     C: Into<Option<Course>>,
+    M: Into<Option<Vec<(String, String)>>>,
 {
     let course = course.into();
 
     if let Some(file) = patcher.flow(course)?.get_mut(file_name) {
-        file?.get().debug();
+        if edotor {
+            file?.get().edotor(labels.into().expect("No MSBT Message Info provided"));
+        } else {
+            file?.get().debug();
+        }
     } else {
         macros::fail!(
             "File not found: US{}.szs -> World/Flow/{}.msbf",
@@ -372,6 +391,7 @@ pub fn apply(patcher: &mut Patcher, free: Item, settings: &Settings) -> Result<(
     // patch_gameover(patcher)?;
     patch_stylish_woman(patcher)?;
     patch_woman(patcher)?;
+    patch_treacherous_tower(patcher)?;
 
     apply!(patcher,
 
