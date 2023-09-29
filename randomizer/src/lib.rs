@@ -170,6 +170,7 @@ impl Layout {
         self.world(node.world()).get(node.name()).and_then(|region| region.get(name).copied())
     }
 
+    #[allow(unused)]
     fn get_item(&self, name: &'static str, subregion: &'static Subregion) -> Item {
         self.get(&LocationInfo::new(name, subregion)).unwrap()
     }
@@ -668,6 +669,15 @@ pub fn patch_seed(
         let mut patcher = Patcher::new(game)?;
 
         info!("ROM Loaded.\n");
+
+        // patch::debug_msbf_msbt(
+        //     &mut patcher,
+        //     game::Course::FieldDark,
+        //     "FieldDark_05_GameTower",
+        //     game::Course::FieldDark,
+        //     "FieldDark_05",
+        //     false,
+        // );
 
         regions::patch(&mut patcher, &seed_info.layout, seed_info.settings)?;
         let patches = patcher.prepare(seed_info)?;
