@@ -672,10 +672,10 @@ pub fn patch_seed(
 
         // patch::debug_msbf_msbt(
         //     &mut patcher,
-        //     game::Course::FieldLight,
-        //     "FieldLight_1B_Soldier",
-        //     game::Course::FieldLight,
-        //     "FieldLight_1B",
+        //     game::Course::IndoorLight,
+        //     "FieldLight_2C_Rental",
+        //     game::Course::IndoorLight,
+        //     "FieldLight_2C",
         //     true,
         // );
 

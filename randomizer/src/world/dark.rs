@@ -5,7 +5,7 @@ use crate::model::location::Location::{self, *};
 use crate::model::location_node::LocationNode;
 use crate::model::logic::Logic;
 use crate::regions;
-use crate::world::{check, edge, goal, location, old_check, old_path};
+use crate::world::{check, edge, goal, location};
 use crate::LocationInfo;
 
 use std::collections::HashMap;
@@ -16,17 +16,16 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
             DarkPalaceFoyer,
             location(
                 "Dark Palace",
-                vec![],
+                vec![check!(
+                    "[PD] (1F) Right Pit",
+                    regions::dungeons::dark::palace::SUBREGION,
+                    |p| p.has_bombs()
+                )],
                 vec![
                     edge!(DarkRuins),
-                    old_path(
-                        DarkPalaceSecondRoom,
-                        Some(|p| p.has_bombs() && (p.has_lamp() || p.lampless())),
-                        None, // not considering Fire Rod + Nice Ice Rod combo yet
-                        None,
-                        None,
-                        None,
-                    ),
+                    edge!(DarkPalaceSecondRoom, |p| (p.has_bombs()
+                        || (p.has_nice_ice_rod() && p.has_fire_rod()))
+                        && (p.has_lamp() || p.lampless())),
                 ],
             ),
         ),
@@ -34,24 +33,12 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
             DarkPalaceSecondRoom,
             location(
                 "Dark Palace Second Room",
-                vec![
-                    check!("[PD] (1F) Right Pit", regions::dungeons::dark::palace::SUBREGION),
-                    old_check(
-                        LocationInfo::new(
-                            "[PD] (1F) Left Pit",
-                            regions::dungeons::dark::palace::SUBREGION,
-                        ),
-                        Some(|p| p.can_merge() || p.has_boomerang() || p.has_hookshot()),
-                        None,
-                        None,
-                        None,
-                        None,
-                    ),
-                ],
-                vec![
-                    edge!(DarkPalaceFoyer),
-                    old_path(DarkPalaceMain, Some(|p| p.has_dark_keys(1)), None, None, None, None),
-                ],
+                vec![check!(
+                    "[PD] (1F) Left Pit",
+                    regions::dungeons::dark::palace::SUBREGION,
+                    |p| p.can_merge() || p.has_boomerang() || p.has_hookshot()
+                )],
+                vec![edge!(DarkPalaceFoyer), edge!(DarkPalaceMain, |p| p.has_dark_keys(1))],
             ),
         ),
         (
@@ -74,28 +61,12 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                         "[PD] (B1) Helmasaur Room (Fall)",
                         regions::dungeons::dark::palace::SUBREGION
                     ),
-                    old_check(
-                        LocationInfo::new(
-                            "[PD] (B1) Maze",
-                            regions::dungeons::dark::palace::SUBREGION,
-                        ),
-                        Some(|p| p.can_merge()),
-                        None,
-                        None,
-                        None,
-                        None,
-                    ),
+                    check!("[PD] (B1) Maze", regions::dungeons::dark::palace::SUBREGION, |p| p
+                        .can_merge()),
                 ],
                 vec![
                     edge!(DarkPalaceSecondRoom),
-                    old_path(
-                        DarkPalaceLockedDoors,
-                        Some(|p| p.has_dark_keys(4)),
-                        None,
-                        None,
-                        None,
-                        None,
-                    ),
+                    edge!(DarkPalaceLockedDoors, |p| p.has_dark_keys(4)),
                 ],
             ),
         ),
@@ -113,17 +84,8 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                         "[PD] (2F) South Hidden Room",
                         regions::dungeons::dark::palace::SUBREGION
                     ),
-                    old_check(
-                        LocationInfo::new(
-                            "[PD] (2F) Alcove",
-                            regions::dungeons::dark::palace::SUBREGION,
-                        ),
-                        Some(|p| p.can_merge()),
-                        None,
-                        None,
-                        None,
-                        None,
-                    ),
+                    check!("[PD] (2F) Alcove", regions::dungeons::dark::palace::SUBREGION, |p| p
+                        .can_merge()),
                     check!(
                         "[PD] (B1) Big Chest (Switches)",
                         regions::dungeons::dark::palace::SUBREGION
@@ -143,15 +105,8 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
             DarkPalaceBoss,
             location(
                 "Dark Palace Boss",
-                vec![],
-                vec![old_path(
-                    DarkPalaceAfterBoss,
-                    Some(|p| p.can_defeat_gemesaur()),
-                    None,
-                    None,
-                    None,
-                    None,
-                )],
+                None,
+                vec![edge!(DarkPalaceAfterBoss, |p| p.can_defeat_gemesaur())],
             ),
         ),
         (
@@ -163,7 +118,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                     check!("Dark Palace Prize", regions::dungeons::dark::palace::SUBREGION),
                     goal!("Gemesaur King", Goal::GemesaurKing),
                 ],
-                vec![],
+                None,
             ),
         ),
     ])

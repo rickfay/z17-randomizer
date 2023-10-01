@@ -238,6 +238,7 @@ pub enum Location {
 
     DesertPalaceFoyer,
     DesertPalace1F,
+    DesertPalace2FMiniboss,
     DesertPalace2F,
     DesertPalace3F,
     DesertPalaceExit3F,

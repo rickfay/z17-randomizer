@@ -285,7 +285,12 @@ struct Txt2Block {
 /// Load MSBT File
 pub(crate) fn load_msbt(patcher: &mut Patcher, course: Course, file: &str) -> Result<MsbtFile> {
     let filename = format!("US_English/{}.msbt", file);
-    let mut file = patcher.language(course).unwrap().flow().extract(filename.as_str()).unwrap();
+    let mut file = patcher
+        .language(course)
+        .unwrap()
+        .flow()
+        .extract(filename.as_str())
+        .expect(&format!("loading MSBT file: {}", filename));
 
     let raw = file.get_mut();
 
