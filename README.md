@@ -8,6 +8,41 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
 
 ## Updates
 <details open="open">
+<summary>Version 0.3.2</summary>
+
+- New Active Weather Vane Options:
+  - Hyrule Weather Vanes Only
+  - Lorule Weather Vanes Only
+  - "Convenient" Weather Vanes Only (only those that don't affect logic)
+- Hint Ghosts will give out their Hints faster, and dialogue won't charge you "0 Rupees" if you set the price to free.
+- Treacherous Tower Intermediate will now be available without needing to complete the Beginner course.
+- Eastern Palace chest icons that would normally only appear after defeating the boss will now appear beforehand (if you have the Compass).
+- Rosso has been fixed, no more Crooked Chest in his house.
+- Path Hints will now explicitly list their underlying Path Item in the Spoiler Log.
+- Logic Changes:
+  - Normal:
+    - The Ice Rod or Bombs are now considered viable ways to activate the Eastern Palace switch(es) that activate the bridge to the Boss Door.
+    - The Misery Mire Ledge is now considered logically accessible with the Stamina Scroll as an alternative to the Sand Rod.
+    - The Dark Palace right-side entrance chest no longer logically requires Lamp
+  - Glitched:
+    - The new Sandcastling trick makes it possible to complete the Misery Mire Treasure dungeon without the Tornado Rod.
+  - Hell:
+    - The new Sand Hopping trick has been added. It allows completing the Hyrule portion of Desert Palace without Merge and reaching the 1F miniboss chest without the Titan's Mitt.
+- Various text improvments:
+  - Bee Guy
+  - Hint Ghosts
+  - Impa / Soldier
+  - Mother Maiamai
+  - Ravio
+  - Stylish Woman
+  - Thief Girl
+  - Turtle Rock Turtles
+  - Witch
+  - Woman
+
+</details>
+
+<details>
 <summary>Version 0.3.1</summary>
 
 - Always Hint pool expanded to include most checks that are locked behind Dungeon Prizes.
@@ -16,7 +51,7 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
 
 </details>
 
-<details open="open">
+<details>
 <summary>Version 0.3.0</summary>
 
 - <u>Dungeon Rewards Shuffled</u>

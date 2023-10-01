@@ -5,27 +5,22 @@ use crate::model::location::Location::{self, *};
 use crate::model::location_node::LocationNode;
 use crate::model::logic::Logic;
 use crate::regions;
-use crate::world::{check, edge, goal, location, old_check, old_path};
+use crate::world::{check, edge, goal, location};
 use crate::LocationInfo;
 
 use std::collections::HashMap;
 
+/// Eastern Palace World Graph
 pub(crate) fn graph() -> HashMap<Location, LocationNode> {
     HashMap::from([
         (
             EasternPalaceFoyer,
             location(
                 "Eastern Palace",
-                vec![old_check(
-                    LocationInfo::new(
-                        "[EP] (1F) Merge Chest",
-                        regions::dungeons::eastern::palace::SUBREGION,
-                    ),
-                    Some(|p| p.can_merge()),
-                    None,
-                    None,
-                    None,
-                    None,
+                vec![check!(
+                    "[EP] (1F) Merge Chest",
+                    regions::dungeons::eastern::palace::SUBREGION,
+                    |p| p.can_merge()
                 )],
                 vec![
                     edge!(EasternRuinsUpper),
@@ -45,57 +40,22 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                         normal: |p| p.can_hit_far_switch() || p.has_nice_ice_rod(),
                         hard: |_| true, // throw pot
                     }),
-                    old_check(
-                        LocationInfo::new(
-                            "[EP] (1F) Popo Room",
-                            regions::dungeons::eastern::palace::SUBREGION,
-                        ),
-                        Some(|p| p.can_attack()),
-                        Some(|p| p.has_lamp_or_net()),
-                        None,
-                        None,
-                        None,
-                    ),
-                    old_check(
-                        LocationInfo::new(
-                            "[EP] (1F) Secret Room",
-                            regions::dungeons::eastern::palace::SUBREGION,
-                        ),
-                        Some(|p| p.can_attack()),
-                        Some(|p| p.has_lamp_or_net()),
-                        None,
-                        None,
-                        None,
-                    ),
-                    old_check(
-                        LocationInfo::new(
-                            "[EP] (1F) Switch Room",
-                            regions::dungeons::eastern::palace::SUBREGION,
-                        ),
-                        Some(|p| p.can_hit_far_switch()),
-                        Some(|p| p.has_ice_rod() || p.has_master_sword()), // Ice Rod + Pot
-                        None,
-                        None,
-                        None,
-                    ),
+                    check!("[EP] (1F) Popo Room", regions::dungeons::eastern::palace::SUBREGION => {
+                        normal: |p| p.can_attack(),
+                        hard: |p| p.has_lamp_or_net(),
+                    }),
+                    check!("[EP] (1F) Secret Room", regions::dungeons::eastern::palace::SUBREGION => {
+                        normal: |p| p.can_attack(),
+                        hard: |p| p.has_lamp_or_net(),
+                    }),
+                    check!("[EP] (1F) Switch Room", regions::dungeons::eastern::palace::SUBREGION => {
+                        normal: |p| p.can_hit_far_switch(),
+                        hard: |p| p.has_ice_rod() || p.has_master_sword(), // Ice Rod + Pot
+                    }),
                 ],
                 vec![
-                    old_path(
-                        EasternPalaceFoyer,
-                        Some(|p| p.can_hit_switch() || p.can_merge()),
-                        None,
-                        None,
-                        None,
-                        None,
-                    ),
-                    old_path(
-                        EasternPalaceMiniboss,
-                        Some(|p| p.has_eastern_keys(1)),
-                        None,
-                        None,
-                        None,
-                        None,
-                    ),
+                    edge!(EasternPalaceFoyer, |p| p.can_hit_switch() || p.can_merge()),
+                    edge!(EasternPalaceMiniboss, |p| p.has_eastern_keys(1)),
                 ],
             ),
         ),
@@ -103,24 +63,16 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
             EasternPalaceMiniboss,
             location(
                 "Eastern Palace Miniboss",
-                vec![],
+                None,
                 vec![
-                    old_path(
-                        EasternPalace1F,
-                        Some(|p| p.can_attack()),
-                        Some(|p| p.has_lamp_or_net()),
-                        None,
-                        None,
-                        None,
-                    ),
-                    old_path(
-                        EasternPalace2F,
-                        Some(|p| p.can_attack()),
-                        Some(|p| p.has_lamp_or_net()),
-                        None,
-                        None,
-                        None,
-                    ),
+                    edge!(EasternPalace1F => {
+                        normal: |p| p.can_attack(),
+                        hard: |p| p.has_lamp_or_net(),
+                    }),
+                    edge!(EasternPalace2F => {
+                        normal: |p| p.can_attack(),
+                        hard: |p| p.has_lamp_or_net(),
+                    }),
                 ],
             ),
         ),
@@ -129,59 +81,35 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
             location(
                 "Eastern Palace 2F",
                 vec![
-                    old_check(
-                        LocationInfo::new(
-                            "[EP] (2F) Defeat Popos",
-                            regions::dungeons::eastern::palace::SUBREGION,
-                        ),
-                        Some(|p| p.can_attack()),
-                        Some(|p| p.has_lamp_or_net()),
-                        None,
-                        None,
-                        None,
-                    ),
+                    check!("[EP] (2F) Defeat Popos", regions::dungeons::eastern::palace::SUBREGION => {
+                        normal: |p| p.can_attack(),
+                        hard: |p| p.has_lamp_or_net(),
+                    }),
                     check!("[EP] (2F) Ball Room", regions::dungeons::eastern::palace::SUBREGION),
-                    old_check(
-                        LocationInfo::new(
-                            "[EP] (2F) Switch Room",
-                            regions::dungeons::eastern::palace::SUBREGION,
-                        ),
-                        Some(|p| p.can_hit_far_switch() || p.has_ice_rod()),
-                        Some(|_| true), // pots
-                        None,
-                        None,
-                        None,
-                    ),
-                    old_check(
-                        LocationInfo::new(
-                            "[EP] (2F) Big Chest",
-                            regions::dungeons::eastern::palace::SUBREGION,
-                        ),
-                        Some(|p| p.has_eastern_keys(2)),
-                        None,
-                        None,
-                        Some(|p| p.has_tornado_rod()),
-                        None,
-                    ),
+                    check!("[EP] (2F) Switch Room", regions::dungeons::eastern::palace::SUBREGION => {
+                        normal: |p| p.can_hit_far_switch() || p.has_ice_rod(),
+                        hard: |_| true, // pots
+                    }),
+                    check!("[EP] (2F) Big Chest", regions::dungeons::eastern::palace::SUBREGION => {
+                        normal: |p| p.has_eastern_keys(2),
+                        adv_glitched: |p| p.has_tornado_rod(),
+                    }),
                 ],
                 vec![
                     edge!(EasternPalaceMiniboss),
-                    old_path(
-                        EasternPalaceBoss,
-                        Some(|p| {
-                            p.has_eastern_big_key()
-                                && ((p.has_eastern_keys(2) && p.can_hit_far_switch())
-                                    || p.has_ice_rod())
-                                && p.can_attack()
-                        }),
-                        Some(|p| {
-                            p.has_eastern_big_key()
-                                && (p.has_bombs() || (p.has_eastern_keys(2) && p.has_lamp_or_net()))
-                        }),
-                        Some(|p| p.has_master_sword() || p.can_great_spin()),
-                        Some(|p| p.has_tornado_rod()),
-                        None,
-                    ),
+                    edge!(
+                        EasternPalaceBoss => {
+                        normal: |p| p.has_eastern_big_key()
+                            && (
+                                (p.has_eastern_keys(2) && p.can_hit_far_switch())
+                                || p.has_ice_rod()
+                                || p.has_bombs()
+                            )
+                            && p.can_attack(),
+                        hard: |p| p.has_eastern_big_key() && p.has_eastern_keys(2) && p.has_lamp_or_net(),
+                        glitched: |p| p.has_master_sword() || p.can_great_spin(),
+                        adv_glitched: |p| p.has_tornado_rod(),
+                    }),
                 ],
             ),
         ),
@@ -189,7 +117,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
             EasternPalaceBoss,
             location(
                 "Eastern Palace 3F",
-                vec![],
+                None,
                 vec![edge!(EasternPalacePostYuga => {
                     normal: |p| p.has_bow(),
                     hard: |p| {
@@ -213,10 +141,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                     check!("Eastern Palace Prize", regions::dungeons::eastern::palace::SUBREGION),
                     goal!("Eastern Palace Complete", Goal::Yuga),
                 ],
-                vec![
-                    edge!(EasternPalace2F),
-                    old_path(EasternPalaceEscape, Some(|p| p.can_merge()), None, None, None, None),
-                ],
+                vec![edge!(EasternPalace2F), edge!(EasternPalaceEscape, |p| p.can_merge())],
             ),
         ),
         (

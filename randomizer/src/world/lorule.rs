@@ -772,17 +772,12 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
             SandRodDungeon,
             location(
                 "Misery Mire Treasure Dungeon",
-                vec![old_check(
-                    LocationInfo::new(
-                        "Misery Mire Treasure Dungeon",
-                        regions::lorule::misery::mire::SUBREGION,
-                    ),
-                    Some(|p| p.has_sand_rod() && p.has_tornado_rod()),
-                    None,
-                    None,
-                    None,
-                    None,
-                )],
+                vec![
+                    check!("Misery Mire Treasure Dungeon", regions::lorule::misery::mire::SUBREGION => {
+                        normal: |p| p.has_sand_rod() && p.has_tornado_rod(),
+                        glitched: |p| p.has_sand_rod(),
+                    }),
+                ],
                 vec![edge!(MiseryMire)],
             ),
         ),
