@@ -1,3 +1,4 @@
+use crate::flag::Flag;
 use game::Item;
 use {
     crate::{
@@ -325,11 +326,13 @@ impl<'input> FlowMut<'input> {
                 }
                 2 => {
                     let label = if step.arg1 == 6 && step.command == 10 {
-                        format!("Check Event Flag {}", step.arg4)
+                        format!("Check Event Flag {}", Flag::get_true_flag(step.arg4))
                     } else if step.arg1 == 0 && step.command == 6 {
                         format!("Got {} Rupees?", step.arg4)
                     } else if step.arg1 == 0 && step.command == 0xE {
                         format!("Check Course Flag {}", step.arg4)
+                    } else if step.arg1 == 0 && step.command == 0xD {
+                        format!("Check Local (2) Flag {}", step.arg4)
                     } else {
                         "???".to_owned()
                     };
@@ -354,7 +357,11 @@ impl<'input> FlowMut<'input> {
                 }
                 3 => {
                     let label = if step.arg1 == 6 && (step.command == 0 || step.command == 0xE) {
-                        format!("Set Event Flag {}", step.arg4)
+                        format!("Set Event Flag {}", Flag::get_true_flag(step.arg4))
+                    } else if step.arg1 == 0 && step.command == 28 {
+                        format!("Set Local (2) Flag {}", step.arg4)
+                    } else if step.arg1 == 0 && step.command == 30 {
+                        format!("Set Course Flag {}", step.arg4)
                     } else if step.arg1 == 6 && step.command == 11 {
                         Item::try_from(step.arg4).unwrap().as_str().to_owned()
                     } else {

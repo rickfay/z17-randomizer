@@ -672,11 +672,11 @@ pub fn patch_seed(
 
         // patch::debug_msbf_msbt(
         //     &mut patcher,
-        //     game::Course::FieldDark,
-        //     "FieldDark_05_GameTower",
-        //     game::Course::FieldDark,
-        //     "FieldDark_05",
-        //     false,
+        //     game::Course::FieldLight,
+        //     "FieldLight_1B_Soldier",
+        //     game::Course::FieldLight,
+        //     "FieldLight_1B",
+        //     true,
         // );
 
         regions::patch(&mut patcher, &seed_info.layout, seed_info.settings)?;

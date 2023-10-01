@@ -178,7 +178,7 @@ fn old_path(
     Path::new(default, Logic::config(normal, hard, glitched, adv_glitched, hell))
 }
 /// Used for checks that the Randomizer should be aware of existing, but are not considered part of any logic.
-/// Most things that use this are typically not in logic *yet*,
+/// Most things that use this are typically not in logic *yet*
 fn out_of_logic(name: &'static str, subregion: &'static Subregion) -> Check {
     Check::new(
         name,

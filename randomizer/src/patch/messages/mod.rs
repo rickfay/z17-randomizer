@@ -22,6 +22,7 @@ pub fn patch_messages(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()>
     patch_file_select(patcher, seed_info)?;
     // patch_ravio(patcher)?;
     patch_great_rupee_fairy(patcher)?;
+    patch_thief_girl(patcher)?;
 
     // patch_street_merchant(patcher, seed_info)?;
     patch_sahasrahla(patcher, seed_info)?;
@@ -78,6 +79,20 @@ fn patch_great_rupee_fairy(patcher: &mut Patcher) -> Result<()> {
     grf.set("CaveDark29_LuckyFairy_02", "Don't throw any");
     grf.set("CaveDark29_LuckyFairy_03", "1234567"); // shorten string so file matches OG size FIXME
     patcher.update(grf.dump())?;
+
+    Ok(())
+}
+
+/// Thief Girl
+fn patch_thief_girl(patcher: &mut Patcher) -> Result<()> {
+    let mut msbt = load_msbt(patcher, DungeonHagure, "Hagure").unwrap();
+
+    // Shorten initial Thief Girl text to just the last textbox.
+    msbt.set(
+        "Hagure_girl_03",
+        "Come on. Let's hurry out of here. This\nplace gives me the chills.",
+    );
+    patcher.update(msbt.dump())?;
 
     Ok(())
 }

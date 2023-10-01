@@ -90,7 +90,7 @@ fn plando_settings() -> Settings {
             nice_mode: false,
             super_items: true,
             reverse_sage_events: true,
-            no_progression_enemies: true,
+            no_progression_enemies: false,
             entrance_rando: EntranceShuffleSetting::NotShuffled,
 
             start_with_merge: true,
@@ -131,14 +131,14 @@ fn build_layout() -> Layout {
 
     // layout.set(LocationInfo::new(regions::hyrule::field::main::SUBREGION, "Thanks"), Item::RingHekiga);
 
-    layout.set(LocationInfo::new("Ravio (1)", regions::hyrule::field::main::SUBREGION), OreBlue);
-    layout.set(LocationInfo::new("Ravio (2)", regions::hyrule::field::main::SUBREGION), RupeeG);
-    layout.set(LocationInfo::new("Ravio (3)", regions::hyrule::field::main::SUBREGION), OreGreen);
-    layout.set(LocationInfo::new("Ravio (4)", regions::hyrule::field::main::SUBREGION), RupeeG);
-    layout.set(LocationInfo::new("Ravio (5)", regions::hyrule::field::main::SUBREGION), RupeeG);
-    layout.set(LocationInfo::new("Ravio (6)", regions::hyrule::field::main::SUBREGION), OreYellow);
-    layout.set(LocationInfo::new("Ravio (7)", regions::hyrule::field::main::SUBREGION), RupeeG);
-    layout.set(LocationInfo::new("Ravio (8)", regions::hyrule::field::main::SUBREGION), OreRed);
+    layout.set(LocationInfo::new("Ravio (1)", regions::hyrule::field::main::SUBREGION), RupeeGold);
+    layout.set(LocationInfo::new("Ravio (2)", regions::hyrule::field::main::SUBREGION), RupeeGold);
+    layout.set(LocationInfo::new("Ravio (3)", regions::hyrule::field::main::SUBREGION), ItemSwordLv1);
+    layout.set(LocationInfo::new("Ravio (4)", regions::hyrule::field::main::SUBREGION), ItemSwordLv1);
+    layout.set(LocationInfo::new("Ravio (5)", regions::hyrule::field::main::SUBREGION), ItemSwordLv1);
+    layout.set(LocationInfo::new("Ravio (6)", regions::hyrule::field::main::SUBREGION), RupeeGold);
+    layout.set(LocationInfo::new("Ravio (7)", regions::hyrule::field::main::SUBREGION), ItemSwordLv1);
+    layout.set(LocationInfo::new("Ravio (8)", regions::hyrule::field::main::SUBREGION), RupeeGold);
     layout.set(LocationInfo::new("Ravio (9)", regions::hyrule::field::main::SUBREGION), RupeeGold);
 
     /////////////////////////////
@@ -547,15 +547,15 @@ fn build_layout() -> Layout {
     layout.set(LocationInfo::new("[SW] Knucklemaster", regions::dungeons::skull::woods::SUBREGION), OreRed);
 
     // Thieves' Hideout
-    layout.set(LocationInfo::new("[T'H] (B1) Jail Cell", regions::dungeons::thieves::hideout::SUBREGION), RupeeGold);
-    layout.set(LocationInfo::new("[T'H] (B1) Grate Chest", regions::dungeons::thieves::hideout::SUBREGION), Compass);
-    layout.set(LocationInfo::new("[T'H] (B2) Grate Chest (Fall)", regions::dungeons::thieves::hideout::SUBREGION), RupeeGold);
-    layout.set(LocationInfo::new("[T'H] (B2) Switch Puzzle Room", regions::dungeons::thieves::hideout::SUBREGION), RupeeGold);
-    layout.set(LocationInfo::new("[T'H] (B2) Jail Cell", regions::dungeons::thieves::hideout::SUBREGION), RupeeGold);
+    layout.set(LocationInfo::new("[T'H] (B1) Jail Cell", regions::dungeons::thieves::hideout::SUBREGION), ItemSwordLv2);
+    layout.set(LocationInfo::new("[T'H] (B1) Grate Chest", regions::dungeons::thieves::hideout::SUBREGION), ItemSwordLv2);
+    layout.set(LocationInfo::new("[T'H] (B2) Grate Chest (Fall)", regions::dungeons::thieves::hideout::SUBREGION), ItemSwordLv2);
+    layout.set(LocationInfo::new("[T'H] (B2) Switch Puzzle Room", regions::dungeons::thieves::hideout::SUBREGION), ItemSwordLv2);
+    layout.set(LocationInfo::new("[T'H] (B2) Jail Cell", regions::dungeons::thieves::hideout::SUBREGION), KeySmall);
     layout.set(LocationInfo::new("[T'H] (B2) Eyegores", regions::dungeons::thieves::hideout::SUBREGION), RupeeGold);
     layout.set(LocationInfo::new("[T'H] (B1) Behind Wall", regions::dungeons::thieves::hideout::SUBREGION), RupeeGold);
     layout.set(LocationInfo::new("[T'H] (B1) Big Chest (Entrance)", regions::dungeons::thieves::hideout::SUBREGION), RupeeGold);
-    layout.set(LocationInfo::new("[T'H] (B3) Underwater", regions::dungeons::thieves::hideout::SUBREGION), KeySmall);
+    layout.set(LocationInfo::new("[T'H] (B3) Underwater", regions::dungeons::thieves::hideout::SUBREGION), KeyBoss);
     layout.set(LocationInfo::new("[T'H] (B3) Big Chest (Hidden)", regions::dungeons::thieves::hideout::SUBREGION), KeyBoss);
     layout.set(LocationInfo::new("Stalblind", regions::dungeons::thieves::hideout::SUBREGION), OreYellow);
 
