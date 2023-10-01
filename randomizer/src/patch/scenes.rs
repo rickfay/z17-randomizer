@@ -405,6 +405,7 @@ pub fn patch_byaml_files(patcher: &mut Patcher, settings: &Settings) -> Result<(
             [56].disable(), // Disable second Ravio
             [57].disable(), // Disable second Sheerow
 
+            [31].disable(), // Disable first time goodbye text
             [46].disable(), // Disable Ravio's bye-bye
             [54].disable(), // Disable Ravio's welcome
             [55].disable(Flag::Course(244)),
@@ -516,7 +517,6 @@ pub fn patch_byaml_files(patcher: &mut Patcher, settings: &Settings) -> Result<(
 
         // Thieves' Hideout
         DungeonHagure 1 {
-            [541].enable(), // Thief Girl - Keep her from despawning after dungeon clear
             [1371].disable(), // Spear Boy AreaEventTalk
             [1372].disable(), // Spear Boy
             [1345].disable(), // Thief Girl Text - 1st Zazak Fight
@@ -1393,6 +1393,9 @@ fn do_dev_stuff(patcher: &mut Patcher, settings: &Settings) {
     patcher.modify_objs(IndoorLight, 1, &[call(24, |obj| {
         obj.redirect(Dest::new(
             FieldLight, 27, 5,  // No Redirect
+            // IndoorLight, 17, 0, // Bee Guy's House
+            // CaveLight, 30, 0, // Witch Cave
+            // DungeonHagure, 1, 0,  // Thieves' Hideout
             // FieldDark, 3, 0, // Lorule Death Mountain West
             // IndoorLight, 2, 0, // Witch's House
             // IndoorLight, 14, 0, // Stylish Woman's House

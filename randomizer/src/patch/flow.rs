@@ -89,6 +89,64 @@ macro_rules! action {
     };
 }
 
+fn patch_ravio_shop(_patcher: &mut Patcher) -> Result<()> {
+    // apply!(patcher,
+    //     IndoorLight/FieldLight_2C_Rental {
+    //
+    //     },
+    // );
+
+    Ok(())
+}
+
+fn patch_thieves_hideout(patcher: &mut Patcher) -> Result<()> {
+    apply!(patcher,
+        DungeonHagure / Hagure {
+            [17] => None, // Skip 16, 18 "We're locked in!" and camera pan
+            [100] => None, // Skip 91, 93 "We're locked in!" and camera pan
+
+            [23] => None, // Skip 25, 24 "We're cut off!" and camera pan
+            [113] => None, // Skip 105, 149, 153 "We're cut off!" and camera pan
+
+            [50] => 49, // Skip 48 Thief Girl's "Gyaaah! What gives?!" when entering boss (not needed?)
+            [156] => 157, // Skip 45 Thief Girl's "Gyaaah! What gives?!" when entering boss
+            // Intentionally keeping Stalblind's textbox 49 / 46
+
+            // Skip Post-boss text, instead set flag to activate shield to reach boss chest
+            [40 convert_into_action] each [
+                arg1(3),
+                value(3006),
+                command(30),
+                count(0),
+            ],
+        },
+
+        FieldDark/FieldDark_16_HagureHouse {
+            [46] => 41, // Skip 42 text in Thieves' Town "You're looking for that painting, yah?"
+        },
+
+        IndoorDark/FieldDark_16_HagureHouse {
+            [27] => 30, // Skip 25 text in front of painting "This is the one, right?"
+        },
+    );
+
+    Ok(())
+}
+
+/// Turtle Rock Turtles
+fn patch_turtles(patcher: &mut Patcher) -> Result<()> {
+    apply!(patcher,
+        FieldDark/FieldDark_35_Kame {
+            [40] => 41, // Skip Jillo text (Bullied Turtle)
+            [42] => 43, // Skip Tallo text (Wall Turtle)
+            [44] => 45, // Skip Sabro text (Flipped Turtle)
+            [29] => 46, // Skip Mama Turtle "You found all my babies!..." text
+        },
+    );
+
+    Ok(())
+}
+
 fn patch_lorule_castle_requirements(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
     let lc_requirement = settings.logic.lc_requirement as u32;
 
@@ -313,6 +371,52 @@ fn patch_treacherous_tower(patcher: &mut Patcher) -> Result<()> {
     Ok(())
 }
 
+/// Bee Guy
+fn patch_bee_guy(patcher: &mut Patcher) -> Result<()> {
+    apply!(patcher,
+        // Bee Guy
+        IndoorLight/FieldLight_18_InsectNet {
+            [1 into_start] => 7,
+            [16 into_branch] each [
+                command(14), // Check Course Flag 48
+                value(3048),
+                switch [
+                    [0] => 11,
+                    [1] => 29,
+                ],
+            ],
+            [10 convert_into_action] each [
+                command(30), // Set Course Flag 48
+                value(3048),
+            ],
+            [30 into_branch] switch [[0] => 51,], // Skip 53
+            [51] => 31, // Skip 28
+            [52] => 33, // Skip 32
+            [38 into_branch] switch [[1] => 2,],
+        },
+    );
+
+    Ok(())
+}
+
+/// Impa's conversation with the soldier
+fn patch_impa(patcher: &mut Patcher) -> Result<()> {
+    apply!(patcher,
+        FieldLight/FieldLight_1B_Soldier {
+            [84] => 34, // Skip 29, 59
+            [58] => 62, // Skip 30
+            [97] => 63, // Skip 31
+            [63] => 38, // Skip 60
+            [139] => 95, // Skip 32
+            [140] => 96, // Skip 61, 65
+            [73] => 102, // Skip 72
+            [103] => 57, // Skip 99
+        },
+    );
+
+    Ok(())
+}
+
 /// Quit / Game Over dialog
 #[allow(unused)]
 fn patch_gameover(_patcher: &mut Patcher) -> Result<()> {
@@ -381,6 +485,9 @@ pub fn apply(patcher: &mut Patcher, free: Item, settings: &Settings) -> Result<(
 
     // debug(patcher, None, "GameOver")?;
 
+    patch_ravio_shop(patcher)?;
+    patch_thieves_hideout(patcher)?;
+    patch_turtles(patcher)?;
     patch_lorule_castle_requirements(patcher, settings)?;
     patch_castle_connection(patcher, settings)?;
     patch_final_boss(patcher)?;
@@ -392,6 +499,8 @@ pub fn apply(patcher: &mut Patcher, free: Item, settings: &Settings) -> Result<(
     patch_stylish_woman(patcher)?;
     patch_woman(patcher)?;
     patch_treacherous_tower(patcher)?;
+    patch_bee_guy(patcher)?;
+    patch_impa(patcher)?;
 
     apply!(patcher,
 
@@ -693,23 +802,6 @@ pub fn apply(patcher: &mut Patcher, free: Item, settings: &Settings) -> Result<(
             // HintGlassesGet
             [3 into_start] => 4, // Skip to item get
             [4] => None,
-        },
-        // Bee Guy
-        IndoorLight/FieldLight_18_InsectNet {
-            // Entry_MushitoriMan
-            [9] => 0xE, // Skip text on first visit
-            [0x10 into_branch] each [
-                = 0xE,
-                value(0xBE8), // Use scene flag
-                switch [ // Swap branches
-                    [0] => 0x11,
-                    [1] => 2,
-                ],
-            ],
-            [0xC convert_into_action] each [
-                = 0x1E,
-                value(0xBE8),
-            ],
         },
         // Zelda
         IndoorLight/FieldLight_1B_Zelda {
