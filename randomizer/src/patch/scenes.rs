@@ -117,6 +117,7 @@ pub fn patch_byaml_files(patcher: &mut Patcher, settings: &Settings) -> Result<(
     patch_no_progression_enemies(patcher, settings);
     patch_open_lost_woods(patcher);
     patch_magic_shop(patcher);
+    patch_ice_ruins(patcher);
 
     patcher.modify_objs(FieldLight, 18, &[disable(529)]);
 
@@ -627,7 +628,33 @@ fn patch_magic_shop(patcher: &mut Patcher) {
     );
 }
 
-// Hyrule Blacksmith
+/// Ice Ruins
+fn patch_ice_ruins(patcher: &mut Patcher) {
+    // Add extra torch as alternative way to open the annoying door
+    patcher.add_obj(
+        DungeonIce,
+        1,
+        Obj {
+            arg: Arg(0, 1, 0, 1, 3, 0, 35, 0, 0, 0, 0, 0, 0, 0.0),
+            clp: 16,
+            flg: (0, 0, 0, 0),
+            id: 112,
+            lnk: vec![],
+            nme: None,
+            ril: vec![],
+            ser: Some(408),
+            srt: Transform {
+                scale: Vec3::UNIT,
+                rotate: Vec3::ZERO,
+                translate: Vec3 { x: 15.5, y: 47.5, z: -7.0 },
+            },
+            typ: 1,
+            unq: 1214,
+        },
+    );
+}
+
+/// Hyrule Blacksmith
 fn patch_blacksmith_hyrule(patcher: &mut Patcher) {
     patcher.modify_objs(
         IndoorLight,
@@ -1396,6 +1423,7 @@ fn do_dev_stuff(patcher: &mut Patcher, settings: &Settings) {
             // IndoorLight, 17, 0, // Bee Guy's House
             // CaveLight, 30, 0, // Witch Cave
             // DungeonHagure, 1, 0,  // Thieves' Hideout
+            // DungeonIce, 1, 0,  // Ice Ruins
             // FieldDark, 3, 0, // Lorule Death Mountain West
             // IndoorLight, 2, 0, // Witch's House
             // IndoorLight, 14, 0, // Stylish Woman's House
