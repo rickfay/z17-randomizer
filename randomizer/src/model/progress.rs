@@ -543,14 +543,15 @@ impl Progress {
         self.has(Item::SkullKeyBig)
     }
 
-    pub fn can_defeat_knucklemaster(&self) -> bool {
+    pub fn can_technically_defeat_knucklemaster(&self) -> bool {
         self.can_merge()
             && (self.has_sword()
             // Bow does not work
             || self.has_bombs()
             || self.has_fire_rod()
             || self.has_ice_rod()
-            || self.has_hammer())
+            || self.has_hammer()
+            || self.has_lamp_or_net())
     }
 
     pub fn has_thieves_key(&self) -> bool {
@@ -588,10 +589,6 @@ impl Progress {
 
     pub fn has_desert_big_key(&self) -> bool {
         self.has(Item::DesertKeyBig)
-    }
-
-    pub fn can_defeat_zaganaga(&self) -> bool {
-        self.has_sand_rod() && self.can_attack()
     }
 
     pub fn has_turtle_keys(&self, amount: u8) -> bool {
