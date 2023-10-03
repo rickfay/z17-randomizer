@@ -33,8 +33,6 @@ use std::collections::HashMap;
 
 pub type WorldGraph = HashMap<Location, LocationNode>;
 
-// TODO Rewrite logic using combinators
-
 /// Build the World Graph
 pub fn build_world_graph() -> WorldGraph {
     info!("Building World Graph...");

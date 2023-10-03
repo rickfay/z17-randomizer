@@ -219,8 +219,8 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                     fast_travel_lorule(),
                     portal_std(DesertZaganagaLedge),
                     edge!(MiseryMireRewardBasket => {
-                        normal: |p| p.can_defeat_zaganaga(),
-                        hell: |p| p.has_bow() || p.has_master_sword(),
+                        normal: |p| p.has_sand_rod() && p.has_master_sword(),
+                        hell: |p| (p.has_sand_rod() && p.can_attack()) || p.has_bow() || p.has_master_sword(),
                     }),
                 ],
             ),

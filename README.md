@@ -21,6 +21,7 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
 - Path Hints will now explicitly list their underlying Path Item in the Spoiler Log.
 - Logic Changes:
   - Normal:
+    - Knucklemaster, Zaganaga, and Yuga Ganon each now logically require the Master Sword to defeat
     - The Ice Rod or Bombs are now considered viable ways to activate the Eastern Palace switch(es) that activate the bridge to the Boss Door.
     - The Misery Mire Ledge is now considered logically accessible with the Stamina Scroll as an alternative to the Sand Rod.
     - The Dark Palace right-side entrance chest no longer logically requires Lamp
