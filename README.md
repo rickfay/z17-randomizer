@@ -334,7 +334,8 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
 
 1. Unzip the download to your directory of choice.
 2. Move your A Link Between Worlds ROM into the same folder. Name it: `ALBW.3ds`
-   - If your ROM is located elsewhere or if you'd like to name it something different, you can modify the `config.json` file to point to the ROM instead
+   - If your ROM is located elsewhere or if you'd like to name it something different, you can modify the `config.json` file to point to the ROM instead.
+   - This must be a decrypted 3ds ROM. If dumping your own rom, make sure to decrypt it using GodMode9.
 
 ![fs-setup.png](docs/fs-setup.png)
 
