@@ -88,13 +88,11 @@ impl Yaz0File<Decompressed> {
                     buffer.extend_from_slice(remainder);
                     buffer.resize(buffer.len() + padding, 0);
                 }
-            }
+            },
             // Real compression, takes a lot of time per file
             Some(level) => {
-                Yaz0Writer::new(&mut buffer)
-                    .compress_and_write(&self.into_bytes(), level)
-                    .expect("Could not compress");
-            }
+                Yaz0Writer::new(&mut buffer).compress_and_write(&self.into_bytes(), level).expect("Could not compress");
+            },
         }
 
         Yaz0File { path, data: buffer.into(), state: PhantomData::<Compressed> }

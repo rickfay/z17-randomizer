@@ -1,3 +1,16 @@
+use crate::regions::Subregion;
+use crate::{
+    filler::filler_item::FillerItem,
+    filler::{check::Check, location::Location, location_node::LocationNode, logic::Logic, progress::Progress},
+    hints::hint_ghost_name,
+    DashMap, LocationInfo, PortalMap,
+};
+use game::ghosts::HintGhost;
+use log::info;
+use serde::ser::SerializeStruct;
+use serde::{Serialize, Serializer};
+use std::ops::{Deref, DerefMut};
+
 mod dark;
 mod desert;
 mod eastern;
@@ -13,50 +26,65 @@ mod swamp;
 mod thieves;
 mod turtle;
 
-use crate::regions::Subregion;
-use crate::{
-    hints::hint_ghost_name,
-    legacy::path::Path,
-    model::{
-        check::Check,
-        filler_item::FillerItem,
-        location::{Location, Location::*},
-        location_node::LocationNode,
-        logic::Logic,
-        progress::Progress,
-    },
-    LocationInfo,
-};
-use game::HintGhost;
-use log::info;
-use std::collections::HashMap;
+#[derive(Default)]
+pub struct WorldGraph {
+    graph: DashMap<Location, LocationNode>,
+}
 
-pub type WorldGraph = HashMap<Location, LocationNode>;
+impl WorldGraph {
+    fn new() -> Self {
+        Self { graph: Default::default() }
+    }
+}
+
+impl Serialize for WorldGraph {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let ser = serializer.serialize_struct("WorldGraph", 2)?;
+        ser.end()
+    }
+}
+
+impl Deref for WorldGraph {
+    type Target = DashMap<Location, LocationNode>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.graph
+    }
+}
+
+impl DerefMut for WorldGraph {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.graph
+    }
+}
 
 /// Build the World Graph
-pub fn build_world_graph() -> WorldGraph {
+/// FIXME shouldn't take portal_map as argument, map should be independent of that randomization
+pub fn build_world_graph(portal_map: &PortalMap) -> WorldGraph {
     info!("Building World Graph...");
-
     let mut world = WorldGraph::new();
 
-    world.extend(hyrule::graph());
-    world.extend(lorule::graph());
+    world.extend(hyrule::graph(portal_map));
+    world.extend(lorule::graph(portal_map));
 
     world.extend(eastern::graph());
     world.extend(gales::graph());
     world.extend(hera::graph());
 
-    world.extend(hyrule_castle::graph());
+    world.extend(hyrule_castle::graph(portal_map));
 
     world.extend(dark::graph());
     world.extend(swamp::graph());
     world.extend(skull::graph());
     world.extend(thieves::graph());
     world.extend(ice::graph());
-    world.extend(desert::graph());
+    world.extend(desert::graph(portal_map));
     world.extend(turtle::graph());
 
-    world.extend(lorule_castle::graph());
+    world.extend(lorule_castle::graph(portal_map));
 
     world
 }
@@ -85,6 +113,31 @@ macro_rules! check {
             $(.hell($hell))?, None, Some(LocationInfo::new($loc_name, $loc_region)))
     );
 }
+
+/// Weather Vane convenience macros
+// macro_rules! vane {
+//     ($loc_name:expr, $vane:expr) => {
+//         Check::new($loc_name, Logic::free(), Some($vane.into()), None)
+//     };
+//     ($loc_name:expr, $vane:expr, $normal:expr) => {
+//         Check::new($loc_name, *Logic::new()
+//             .normal($normal), Some($vane.into()), None)
+//     };
+//     ($loc_name:expr, $vane:expr => {
+//         $(normal: $normal:expr,)?
+//         $(hard: $hard:expr,)?
+//         $(glitched: $glitched:expr,)?
+//         $(adv_glitched: $adv_glitched:expr,)?
+//         $(hell: $hell:expr,)?
+//     }) => (
+//         Check::new($loc_name, *Logic::new()
+//             $(.normal($normal))?
+//             $(.hard($hard))?
+//             $(.glitched($glitched))?
+//             $(.adv_glitched($adv_glitched))?
+//             $(.hell($hell))?, Some($vane.into()), None)
+//     );
+// }
 
 /// Goal convenience macros
 macro_rules! goal {
@@ -115,10 +168,10 @@ macro_rules! goal {
 /// Rust won't let me call it a Path so I'm using the dumb math name >:(
 macro_rules! edge {
     ($dest:ident) => (
-        Path::new($dest, Logic::free())
+        Path::new(Location::$dest, Logic::free())
     );
     ($dest:ident, $normal:expr) => (
-        Path::new($dest, *Logic::new()
+        Path::new(Location::$dest, *Logic::new()
             .normal($normal))
     );
     ($dest:ident => {
@@ -128,7 +181,7 @@ macro_rules! edge {
         $(adv_glitched: $adv_glitched:expr,)?
         $(hell: $hell:expr,)?
     }) => (
-        Path::new($dest,
+        Path::new(Location::$dest,
             *Logic::new()
             $(.normal($normal))?
             $(.hard($hard))?
@@ -139,6 +192,8 @@ macro_rules! edge {
     );
 }
 
+use crate::filler::path::Path;
+use crate::filler::portals::Portal;
 pub(crate) use check;
 pub(crate) use edge;
 pub(crate) use goal;
@@ -154,16 +209,11 @@ where
 // TODO REMOVE
 // #[deprecated]
 fn old_check(
-    location_info: LocationInfo, normal: Option<fn(&Progress) -> bool>,
-    hard: Option<fn(&Progress) -> bool>, glitched: Option<fn(&Progress) -> bool>,
-    adv_glitched: Option<fn(&Progress) -> bool>, hell: Option<fn(&Progress) -> bool>,
+    location_info: LocationInfo, normal: Option<fn(&Progress) -> bool>, hard: Option<fn(&Progress) -> bool>,
+    glitched: Option<fn(&Progress) -> bool>, adv_glitched: Option<fn(&Progress) -> bool>,
+    hell: Option<fn(&Progress) -> bool>,
 ) -> Check {
-    Check::new(
-        location_info.name,
-        Logic::config(normal, hard, glitched, adv_glitched, hell),
-        None,
-        Some(location_info),
-    )
+    Check::new(location_info.name, Logic::config(normal, hard, glitched, adv_glitched, hell), None, Some(location_info))
 }
 
 // todo REMOVE
@@ -175,6 +225,7 @@ fn old_path(
 ) -> Path {
     Path::new(default, Logic::config(normal, hard, glitched, adv_glitched, hell))
 }
+
 /// Used for checks that the Randomizer should be aware of existing, but are not considered part of any logic.
 /// Most things that use this are typically not in logic *yet*
 fn out_of_logic(name: &'static str, subregion: &'static Subregion) -> Check {
@@ -186,17 +237,16 @@ fn out_of_logic(name: &'static str, subregion: &'static Subregion) -> Check {
     )
 }
 
-// TODO read destination from portal map
-fn portal(
-    destination: Location, normal: Option<fn(&Progress) -> bool>,
-    hard: Option<fn(&Progress) -> bool>, glitched: Option<fn(&Progress) -> bool>,
-    adv_glitched: Option<fn(&Progress) -> bool>, hell: Option<fn(&Progress) -> bool>,
-) -> Path {
-    Path::new(destination, Logic::config(normal, hard, glitched, adv_glitched, hell))
+fn portal_left(portal: Portal, portal_map: &PortalMap) -> Path {
+    let dest_portal = portal_map.get(&portal).expect(&format!("PortalMap missing Portal: {:?}", portal));
+    let (_left, right) = dest_portal.get_left_right_locations();
+    Path::new(right, *Logic::new().normal(|p| p.can_merge()))
 }
 
-fn portal_std(default: Location) -> Path {
-    portal(default, Some(|p| p.can_merge()), None, None, None, None)
+fn portal_right(portal: Portal, portal_map: &PortalMap) -> Path {
+    let dest_portal = portal_map.get(&portal).expect("PortalMap should have all Portals mapped");
+    let (left, _right) = dest_portal.get_left_right_locations();
+    Path::new(left, *Logic::new().normal(|p| p.can_merge()))
 }
 
 fn fast_travel_hyrule() -> Path {

@@ -25,19 +25,12 @@ impl Sarc {
     #[allow(unused)]
     pub(crate) fn create(&mut self, filename: &str, data: Vec<u8>, named: bool) {
         if self.read(filename).is_some() {
-            fail!(
-                "File '{}' with matching Hash already exists in SZS Archive: '{}'",
-                filename,
-                self.path
-            );
+            fail!("File '{}' with matching Hash already exists in SZS Archive: '{}'", filename, self.path);
         }
 
         self.files.insert(
             self.calculate_hash(filename),
-            vec![SarcInnerFile {
-                filename: if named { Some(filename.to_owned()) } else { None },
-                data,
-            }],
+            vec![SarcInnerFile { filename: if named { Some(filename.to_owned()) } else { None }, data }],
         );
     }
 
@@ -59,10 +52,7 @@ impl Sarc {
                             }
                         })
                         .unwrap_or_else(|| {
-                            panic!(
-                                "File with hash collision did not have matching filename: {}",
-                                filename
-                            )
+                            panic!("File with hash collision did not have matching filename: {}", filename)
                         })
                         .data
                         .clone(),
@@ -89,20 +79,11 @@ impl Sarc {
                             false
                         }
                     })
-                    .unwrap_or_else(|| {
-                        panic!(
-                            "File with hash collision did not have matching filename: {}",
-                            filename
-                        )
-                    })
+                    .unwrap_or_else(|| panic!("File with hash collision did not have matching filename: {}", filename))
                     .data = data;
             }
         } else {
-            fail!(
-                "Could not update file '{}' in SARC archive '{}': File doesn't exist.",
-                filename,
-                self.path
-            );
+            fail!("Could not update file '{}' in SARC archive '{}': File doesn't exist.", filename, self.path);
         }
     }
 
@@ -114,18 +95,12 @@ impl Sarc {
             if files.len() == 1 {
                 self.files.remove(&filename_hash);
                 return; // success
-            } else if let Some(index) =
-                files.iter().position(|file| file.filename.as_deref() == Some(filename))
-            {
+            } else if let Some(index) = files.iter().position(|file| file.filename.as_deref() == Some(filename)) {
                 files.remove(index);
                 return; // success
             }
         }
-        fail!(
-            "Could not delete file '{}' in SARC Archive '{}': File doesn't exist",
-            filename,
-            self.path
-        );
+        fail!("Could not delete file '{}' in SARC Archive '{}': File doesn't exist", filename, self.path);
     }
 
     /// Creates a representation of a [`Sarc`] Archive from the given file `path` and array of `bytes`.
@@ -186,9 +161,7 @@ impl Sarc {
             let filename_hash = entry.filename_hash;
             let filename = if entry.filename_hash_count > 0 {
                 let mut filename_buffer = Vec::new();
-                buf.seek(SeekFrom::Start(
-                    &filename_table_start + (entry.filename_table_offset * 4) as u64,
-                ))?;
+                buf.seek(SeekFrom::Start(&filename_table_start + (entry.filename_table_offset * 4) as u64))?;
                 let filename_len = buf.read_until(0x0, &mut filename_buffer)?;
                 Some(from_utf8(&filename_buffer[0..filename_len - 1]).unwrap().to_owned())
             } else {
@@ -215,12 +188,10 @@ impl Sarc {
     /// Hash function used to hash filenames
     #[allow(unused)]
     fn calculate_hash(&self, filename: &str) -> u32 {
-        filename
-            .chars()
-            .fold(0, |hash, char| hash.wrapping_mul(self.multiplier.clone()) + (char as u32))
+        filename.chars().fold(0, |hash, char| hash.wrapping_mul(self.multiplier.clone()) + (char as u32))
     }
 
-    /// List all files in this SARC Archive, for debugging purposes
+    /// List all files in this SARC Archive, for research purposes
     #[allow(unused)]
     #[deprecated]
     pub(crate) fn list_files(&self) {
@@ -228,11 +199,7 @@ impl Sarc {
         info!("Multiplier: {}", self.multiplier);
 
         for (filename_hash, files) in &self.files {
-            info!(
-                "0x{:0>8X}: {:?}",
-                filename_hash,
-                files.iter().flat_map(|f| f.filename.clone()).collect::<Vec<_>>()
-            );
+            info!("0x{:0>8X}: {:?}", filename_hash, files.iter().flat_map(|f| f.filename.clone()).collect::<Vec<_>>());
         }
     }
 }

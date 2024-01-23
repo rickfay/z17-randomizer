@@ -46,8 +46,7 @@ impl Sarc {
         let path = path.into();
         debug!("Reading {} from archive", &path);
         let archive = self.decompress()?;
-        let (start, end) =
-            archive.find(&path).map_err(|_| Error::new(format!("File not found: '{}'.", path)))?;
+        let (start, end) = archive.find(&path).map_err(|_| Error::new(format!("File not found: '{}'.", path)))?;
         let data = Ref::map(archive, |archive| &archive.files[start as usize..end as usize]);
         Ok(File::new(path, data))
     }
@@ -59,8 +58,7 @@ impl Sarc {
         let path = T::path(args);
         debug!("Reading {} from archive", &path);
         let archive = self.decompress()?;
-        let (start, end) =
-            archive.find(&path).map_err(|_| Error::new(format!("File not found: '{}'.", path)))?;
+        let (start, end) = archive.find(&path).map_err(|_| Error::new(format!("File not found: '{}'.", path)))?;
         let input = Ref::map(archive, |archive| &archive.files[start as usize..end as usize]);
         Ok(File::new(path, T::from_file(input)?))
     }
@@ -92,8 +90,7 @@ impl Sarc {
     {
         let path = T::path(args);
         let archive = self.decompress_mut()?;
-        let (start, end) =
-            archive.find(&path).map_err(|_| Error::new(format!("File not found: '{}'.", path)))?;
+        let (start, end) = archive.find(&path).map_err(|_| Error::new(format!("File not found: '{}'.", path)))?;
         let input = &mut archive.files[start as usize..end as usize];
         Ok(File::new(path, T::from_file(input)?))
     }
@@ -197,7 +194,7 @@ impl Archive {
         if let Ok((start, end)) = self.find(path) {
             Ok(&self.files[start as usize..end as usize])
         } else {
-            Err(Error::new("File not found."))
+            Err(Error::new(format!("File not found: {path}")))
         }
     }
 
@@ -205,7 +202,7 @@ impl Archive {
         if let Ok((start, end)) = self.find(path) {
             Ok(&mut self.files[start as usize..end as usize])
         } else {
-            Err(Error::new("File not found."))
+            Err(Error::new(format!("File not found: {path}")))
         }
     }
 
@@ -307,10 +304,10 @@ impl Archive {
 
                 //info!("Do we get here...");
                 //fail!();
-            }
+            },
             Err(_) => {
                 panic!("Can't update non-existent file: {}", file.path);
-            }
+            },
         }
     }
 
@@ -319,7 +316,7 @@ impl Archive {
         match self.search(self.hash(&file.path), 0, self.count - 1) {
             Ok(_) => {
                 debug!("Not adding duplicate file: {}", file.path);
-            }
+            },
             Err(i) => {
                 let i = i as usize * 0x10;
                 let File { path, inner } = file;
@@ -337,7 +334,7 @@ impl Archive {
                 node.extend_from_slice(&end.to_le_bytes());
                 self.nodes.splice(i..i, node);
                 self.count += 1;
-            }
+            },
         }
     }
 
@@ -346,7 +343,7 @@ impl Archive {
             Ok(v) => {
                 let (start, end, _) = v;
                 Ok((start, end))
-            }
+            },
             Err(v) => Err(v),
         }
     }
@@ -368,7 +365,7 @@ impl Archive {
                     } else {
                         self.search(hash, start, mid - 1)
                     }
-                }
+                },
                 Ordering::Equal => Ok((node.start, node.end, index / 0x10)),
                 Ordering::Greater => self.search(hash, mid + 1, end),
             }

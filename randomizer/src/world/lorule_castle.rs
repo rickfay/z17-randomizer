@@ -1,17 +1,18 @@
-use crate::legacy::path::Path;
-use crate::model::check::Check;
-use crate::model::filler_item::Goal;
-use crate::model::location::Location::{self, *};
-use crate::model::location_node::LocationNode;
-use crate::model::logic::Logic;
-use crate::regions;
-use crate::world::{check, edge, goal, location, portal_std};
+use crate::filler::check::Check;
+use crate::filler::filler_item::Goal;
+use crate::filler::location::Location::{self, *};
+use crate::filler::location_node::LocationNode;
+use crate::filler::logic::Logic;
+use crate::filler::path::Path;
+use crate::world::{check, edge, goal, location, portal_left, portal_right};
 use crate::LocationInfo;
+use crate::{regions, PortalMap};
 
+use crate::filler::portals::Portal::LoruleCastle;
 use std::collections::HashMap;
 
 /// Lorule Castle World Graph
-pub(crate) fn graph() -> HashMap<Location, LocationNode> {
+pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
     HashMap::from([
         (
             LoruleCastle1F,
@@ -19,7 +20,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                 "Lorule Castle 1F",
                 None,
                 vec![
-                    edge!(LoruleCastleField),
+                    edge!(LoruleCastleArea),
                     edge!(LoruleCastleEastLedge1F, |p| p.can_merge()),
                     edge!(LoruleCastle2F3F => {
                         normal: |p| p.can_attack(),
@@ -67,26 +68,23 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                         glitched: |p| p.has_boots(),
                         adv_glitched: |p| p.has_lorule_keys(3), // drop from 4F -> 3F -> 2F
                     }),
-                    check!("[LC] (3F) Bomb Trial Center Chest", regions::dungeons::lorule::castle::SUBREGION => {
+                    check!("[LC] Bomb Trial I", regions::dungeons::lorule::castle::SUBREGION => {
                         normal: |p| p.has_bombs(),
                         glitched: |p| p.has_ice_rod(),
                     }),
-                    check!("[LC] (3F) Big Bomb Flower Chest", regions::dungeons::lorule::castle::SUBREGION => {
+                    check!("[LC] Bomb Trial II", regions::dungeons::lorule::castle::SUBREGION => {
                         normal: |p| p.has_bombs() && p.can_merge(),
                         hard: |p| p.has_bombs() && p.has_bow(),
                     }),
-                    check!(
-                        "[LC] (3F) Merge Trial Free Chest",
-                        regions::dungeons::lorule::castle::SUBREGION
-                    ),
+                    check!("[LC] Tile Trial I", regions::dungeons::lorule::castle::SUBREGION),
                     goal!("Bomb Trial", Goal::LcBombTrial, |p| p.has_lorule_keys(5)
                         && p.can_hit_switch()
                         && p.can_attack()),
-                    check!("[LC] (3F) Spike Ball Chest", regions::dungeons::lorule::castle::SUBREGION => {
+                    check!("[LC] Tile Trial II", regions::dungeons::lorule::castle::SUBREGION => {
                         normal: |p| p.can_merge(),
                         adv_glitched: |p| p.has_tornado_rod() && p.has_sword(),
                     }),
-                    goal!("Ball Trial", Goal::LcBallTrial, |p| p.has_lorule_keys(5)
+                    goal!("Tile Trial", Goal::LcTileTrial, |p| p.has_lorule_keys(5)
                         && (p.can_attack() || p.has_hookshot())),
                 ],
                 vec![
@@ -109,7 +107,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
             location(
                 "Lorule Castle 4F 5F",
                 vec![
-                    check!("[LC] (4F) Lamp Trial Chest", regions::dungeons::lorule::castle::SUBREGION => {
+                    check!("[LC] Lamp Trial", regions::dungeons::lorule::castle::SUBREGION => {
                         normal: |p| p.has_fire_source(),
                         hard: |_| true, // you don't need it...
                     }),
@@ -117,16 +115,9 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                         normal: |p| p.has_lorule_keys(5) && p.has_fire_source() && p.can_attack(),
                         hard: |p| p.has_lorule_keys(5) && p.can_attack(),
                     }),
-                    check!(
-                        "[LC] (4F) Eyeball Chest",
-                        regions::dungeons::lorule::castle::SUBREGION,
-                        |p| p.has_hookshot() && (p.has_ice_rod() || p.can_merge())
-                    ),
-                    check!(
-                        "[LC] (4F) Lava Switch Chest",
-                        regions::dungeons::lorule::castle::SUBREGION,
-                        |p| p.has_hookshot()
-                    ),
+                    check!("[LC] Hook Trial II", regions::dungeons::lorule::castle::SUBREGION, |p| p.has_hookshot()
+                        && (p.has_ice_rod() || p.can_merge())),
+                    check!("[LC] Hook Trial I", regions::dungeons::lorule::castle::SUBREGION, |p| p.has_hookshot()),
                     goal!("Hookshot Trial", Goal::LcHookTrial, |p| p.has_lorule_keys(5)
                         && p.has_hookshot()
                         && p.can_attack()),
@@ -144,14 +135,20 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
             location(
                 "Hilda's Study",
                 None,
-                vec![edge!(LoruleCastle2F3F), portal_std(ZeldasStudy), edge!(ThroneRoom)],
+                vec![
+                    edge!(LoruleCastle2F3F, |p| p.has_completed_trials()),
+                    portal_left(LoruleCastle, portal_map),
+                    portal_right(LoruleCastle, portal_map),
+                    edge!(LoruleBlacksmith),
+                    edge!(ThroneRoom, |p| p.has_yuganon_requirement()),
+                ],
             ),
         ),
         (
             ThroneRoom,
             location(
                 "Throne Room",
-                vec![check!("Zelda", regions::dungeons::lorule::castle::SUBREGION => {
+                vec![check!("[LC] Zelda", regions::dungeons::lorule::castle::SUBREGION => {
                     normal: |p| p.has_yuganon_requirement() && (p.has_master_sword() || (p.swordless_mode() && p.has_net())),
                     hell: |p| p.has_yuganon_requirement() && p.has_sword(),
                 })],

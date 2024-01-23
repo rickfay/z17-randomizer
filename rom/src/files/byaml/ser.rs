@@ -2,8 +2,8 @@ use {
     super::Kind,
     crate::files::align,
     serde::ser::{
-        self, Impossible, Serialize, SerializeMap, SerializeSeq, SerializeStruct,
-        SerializeStructVariant, SerializeTuple, SerializeTupleStruct, SerializeTupleVariant,
+        self, Impossible, Serialize, SerializeMap, SerializeSeq, SerializeStruct, SerializeStructVariant,
+        SerializeTuple, SerializeTupleStruct, SerializeTupleVariant,
     },
     std::{
         collections::BTreeMap,
@@ -186,9 +186,7 @@ where
         Err(Self::invalid_root("unit variant"))
     }
 
-    fn serialize_newtype_struct<T: ?Sized>(
-        self, _name: &'static str, value: &T,
-    ) -> Result<Self::Ok, Self::Error>
+    fn serialize_newtype_struct<T: ?Sized>(self, _name: &'static str, value: &T) -> Result<Self::Ok, Self::Error>
     where
         T: Serialize,
     {
@@ -228,9 +226,7 @@ where
         self.map(len)
     }
 
-    fn serialize_struct(
-        self, _name: &'static str, len: usize,
-    ) -> Result<Self::SerializeStruct, Self::Error> {
+    fn serialize_struct(self, _name: &'static str, len: usize) -> Result<Self::SerializeStruct, Self::Error> {
         self.map(Some(len))
     }
 
@@ -349,9 +345,7 @@ where
         let mut values = vec![0u8; count as usize * 4];
         self.write(&values)?;
         self.end = self.position()?;
-        for (node, (kind_mut, value_mut)) in
-            array.into_iter().zip(kinds.iter_mut().zip(values.chunks_mut(4)))
-        {
+        for (node, (kind_mut, value_mut)) in array.into_iter().zip(kinds.iter_mut().zip(values.chunks_mut(4))) {
             let (kind, value) = self.write_node(node)?;
             *kind_mut = kind as u8;
             value_mut.copy_from_slice(&value);
@@ -398,11 +392,11 @@ where
             Node::Array(array) => {
                 let offset = self.write_array(array)?;
                 (Kind::Array, unsigned(offset))
-            }
+            },
             Node::Map(map) => {
                 let offset = self.write_map(map)?;
                 (Kind::Map, unsigned(offset))
-            }
+            },
             Node::Boolean(boolean) => (Kind::Boolean, unsigned(boolean.into())),
             Node::Integer(integer) => (Kind::Integer, signed(integer)),
             Node::Float(f) => (Kind::Float, float(f)),
@@ -545,9 +539,7 @@ where
     type Ok = ();
     type Error = Error;
 
-    fn serialize_field<T: ?Sized>(
-        &mut self, key: &'static str, value: &T,
-    ) -> Result<(), Self::Error>
+    fn serialize_field<T: ?Sized>(&mut self, key: &'static str, value: &T) -> Result<(), Self::Error>
     where
         T: Serialize,
     {
@@ -699,9 +691,7 @@ impl<'doc> ser::Serializer for &'doc mut Document {
         Err(ser::Error::custom("enum variant serialization not supported"))
     }
 
-    fn serialize_newtype_struct<T: ?Sized>(
-        self, _name: &'static str, value: &T,
-    ) -> Result<Self::Ok, Self::Error>
+    fn serialize_newtype_struct<T: ?Sized>(self, _name: &'static str, value: &T) -> Result<Self::Ok, Self::Error>
     where
         T: Serialize,
     {
@@ -741,9 +731,7 @@ impl<'doc> ser::Serializer for &'doc mut Document {
         BMap::new(self, len)
     }
 
-    fn serialize_struct(
-        self, _name: &'static str, len: usize,
-    ) -> Result<Self::SerializeStruct, Self::Error> {
+    fn serialize_struct(self, _name: &'static str, len: usize) -> Result<Self::SerializeStruct, Self::Error> {
         BMap::new(self, Some(len))
     }
 
@@ -958,9 +946,7 @@ impl<'doc> SerializeStruct for BMap<'doc> {
     type Ok = Node;
     type Error = Error;
 
-    fn serialize_field<T: ?Sized>(
-        &mut self, key: &'static str, value: &T,
-    ) -> Result<(), Self::Error>
+    fn serialize_field<T: ?Sized>(&mut self, key: &'static str, value: &T) -> Result<(), Self::Error>
     where
         T: Serialize,
     {
@@ -977,9 +963,7 @@ impl<'doc> SerializeStructVariant for BMap<'doc> {
     type Ok = Node;
     type Error = Error;
 
-    fn serialize_field<T: ?Sized>(
-        &mut self, key: &'static str, value: &T,
-    ) -> Result<(), Self::Error>
+    fn serialize_field<T: ?Sized>(&mut self, key: &'static str, value: &T) -> Result<(), Self::Error>
     where
         T: Serialize,
     {
@@ -1115,9 +1099,7 @@ impl<'doc> ser::Serializer for &'doc mut Strings {
         Err(Strings::invalid("unit variant"))
     }
 
-    fn serialize_newtype_struct<T: ?Sized>(
-        self, _name: &'static str, _value: &T,
-    ) -> Result<Self::Ok, Self::Error>
+    fn serialize_newtype_struct<T: ?Sized>(self, _name: &'static str, _value: &T) -> Result<Self::Ok, Self::Error>
     where
         T: Serialize,
     {
@@ -1157,9 +1139,7 @@ impl<'doc> ser::Serializer for &'doc mut Strings {
         Err(Strings::invalid("map"))
     }
 
-    fn serialize_struct(
-        self, _name: &'static str, _len: usize,
-    ) -> Result<Self::SerializeStruct, Self::Error> {
+    fn serialize_struct(self, _name: &'static str, _len: usize) -> Result<Self::SerializeStruct, Self::Error> {
         Err(Strings::invalid("struct"))
     }
 

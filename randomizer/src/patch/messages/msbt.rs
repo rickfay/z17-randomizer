@@ -49,26 +49,18 @@ impl MsbtFile {
         let hash = calc_hash(String::from(key), self.lbl1.num_slots) as usize;
         let hash_table_slot = self.lbl1.hash_table.get(hash).unwrap();
 
-        return hash_table_slot
-            .labels
-            .iter()
-            .find(|&label| label.label.eq(key))
-            .map(|label| label.item_index as usize);
+        return hash_table_slot.labels.iter().find(|&label| label.label.eq(key)).map(|label| label.item_index as usize);
     }
 
     #[allow(unused)]
-    pub(crate) fn debug(&self, edotor: bool) -> Vec<(String, String)> {
-        let mut labels =
-            self.lbl1.hash_table.iter().flat_map(|slot| slot.labels.iter()).collect::<Vec<_>>();
+    pub(crate) fn research(&self, edotor: bool) -> Vec<(String, String)> {
+        let mut labels = self.lbl1.hash_table.iter().flat_map(|slot| slot.labels.iter()).collect::<Vec<_>>();
         labels.sort_by(|this, that| this.item_index.cmp(&that.item_index));
 
         let results = labels
             .iter()
             .map(|label: &&Label| {
-                (
-                    label.label.clone(),
-                    self.txt2.messages.get(label.item_index as usize).unwrap().clone(),
-                )
+                (label.label.clone(), self.txt2.messages.get(label.item_index as usize).unwrap().clone())
             })
             .collect::<Vec<_>>();
 
@@ -124,8 +116,7 @@ impl MsbtFile {
         let mut prev_msg_len = 0;
         for message in &self.txt2.messages {
             msg_offset_buffer.extend_from_slice(&(msgs_init_offset + prev_msg_len).to_le_bytes());
-            let msg =
-                message.encode_utf16().flat_map(|thing| thing.to_le_bytes()).collect::<Vec<u8>>();
+            let msg = message.encode_utf16().flat_map(|thing| thing.to_le_bytes()).collect::<Vec<u8>>();
             msgs_buffer.extend_from_slice(&msg);
             prev_msg_len += msg.len() as u32;
         }
@@ -369,9 +360,7 @@ pub(crate) fn load_msbt(patcher: &mut Patcher, course: Course, file: &str) -> Re
             msg_idx + txt2.header.block_size as usize
         };
 
-        txt2.messages.push(unsafe {
-            String::from_utf16(raw[start_idx..end_idx].align_to::<u16>().1).unwrap()
-        });
+        txt2.messages.push(unsafe { String::from_utf16(raw[start_idx..end_idx].align_to::<u16>().1).unwrap() });
     }
 
     Ok(MsbtFile { filename, course, lbl1, atr1, txt2 })

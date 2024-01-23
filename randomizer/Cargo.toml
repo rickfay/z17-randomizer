@@ -1,6 +1,6 @@
 [package]
 name = "randomizer"
-version = "0.3.1"
+version = "0.4.0"
 authors = [
     "Kevin Marsolais <kevin@kevinmarsolais.co>",
     "Rick Fay <rickwithanh@gmail.com>",
@@ -27,3 +27,4 @@ serde_json = { workspace = true }
 strum = { workspace = true }
 tempfile = "3.7.1"
 try-insert-ext = "0.1.0"
+twox-hash = "1.6.3"

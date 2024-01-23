@@ -8,10 +8,10 @@ use std::{
 use json_comments::StripComments;
 use log::info;
 use macros::fail;
-use modinfo::Settings;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
 use crate::constants::CONFIG_FILE_NAME;
+use crate::SeedInfo;
 
 pub type Result<T, E = Error> = std::result::Result<T, E>;
 
@@ -50,7 +50,7 @@ impl From<io::Error> for Error {
 pub struct System;
 
 impl System {
-    pub fn load_preset(name: &str) -> Result<Settings> {
+    pub fn load_preset(name: &str) -> Result<SeedInfo> {
         let file = PathBuf::from("presets").join(format!("{}.json", name));
         info!("Loading preset from:            {}\n", file.display());
         Self::load_json(file)

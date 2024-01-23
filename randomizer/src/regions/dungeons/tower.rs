@@ -14,7 +14,7 @@ crate::region! {
             "[TH] (8F) Fairy Room": RupeePurple @Chest(1[838]),
             "[TH] (11F) Big Chest": KeyBoss @BigChest(1[741]),
             "[TH] Moldorm": HeartContainer @Heart(1[772]),
-            "Tower of Hera Prize": PendantPower @None(),
+            "[TH] Prize": PendantPower @None(),
         ],
     },
 }

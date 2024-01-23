@@ -4,6 +4,11 @@ crate::region! {
     color: Name,
     village {
         locations: [
+            "Stylish Woman Portal": None @Portal(IndoorLight 14[7] StylishWoman),
+            "Sahasrahla's House Portal": None @Portal(16[275] SahasrahlasHouse),
+
+            "Kakariko Village Weather Vane": None @WeatherVane(16[203] KakarikoVillageWV),
+
             "Bee Guy (1)": ItemInsectNet @Event(IndoorLight/FieldLight_18_InsectNet[0xB]),
             "Bee Guy (2)": BadgeBee @Event(IndoorLight/FieldLight_18_InsectNet[0x1F]),
             "Dodge the Cuccos": HeartPiece @Event(FieldLight_29_Kokko[0x67]),
@@ -23,7 +28,7 @@ crate::region! {
             "[Mai] Hyrule Rupee Rush Wall": Maiamai @Maiamai(45[46]),
             "[Mai] Kakariko Bush": Maiamai @Maiamai(16[304]),
             "[Mai] Kakariko Sand": Maiamai @Maiamai(16[393]),
-            "[Mai] Woman's Roof Rock": Maiamai @Maiamai(16[394]),
+            "[Mai] Woman's Roof": Maiamai @Maiamai(16[394]),
         ],
     },
 }

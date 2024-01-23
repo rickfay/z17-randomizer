@@ -8,36 +8,80 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
 
 ## Updates
 <details open="open">
-<summary>Version 0.3.2</summary>
+<summary>Version 0.4.0</summary>
 
-- New Active Weather Vane Options:
-  - Hyrule Weather Vanes Only
-  - Lorule Weather Vanes Only
-  - "Convenient" Weather Vanes Only (only those that don't affect logic)
-- Hint Ghosts will give out their Hints faster, and dialogue won't charge you "0 Rupees" if you set the price to free.
+- **Portal Shuffle**
+  - There are 56 Portals in the game split into 28 pairs--and now they can take you anywhere!
+  - Read the section for more deatils: [Portal Shuffle](#portal-shuffle)
+- **Weather Vanes**
+  - **Pair Shuffle**: Groups Weather Vanes into random pairs that unlock each other instead of themselves.
+  - **Convenient**: Activates the Vanes that don't affect logic
+  - Activate All Hyrule Weather Vanes
+  - Activate All Lorule Weather Vanes
+- Warp
+  - New ability to warp from anywhere to _____TODO_____
+  - Logic updated to no longer require "escape" items such as Scoot Fruit, Bell, Bombs, or Fire Rod.
+  - Replaces the "Quit" button on the Pause menu
+    - To return to the File Select Screen players can use the built-in soft reset feature by pressing L + R + START down at the same time.
+- Keysy
+  - Supports options for Small, Big, and All Keysy.
+- Ravio's Shop:
+  - Option to start the game with Ravio's Shop Open or Closed.
+- Faster Hints from Hint Ghosts, which no longer charge you "0 Rupees" if you set the price to free.
 - Treacherous Tower Intermediate will now be available without needing to complete the Beginner course.
 - Eastern Palace chest icons that would normally only appear after defeating the boss will now appear beforehand (if you have the Compass).
 - Rosso has been fixed, no more Crooked Chest in his house.
-- Path Hints will now explicitly list their underlying Path Item in the Spoiler Log.
+- Gameplay Changes:
+  - Charm
+    - The Charm is no longer a dungeon prize, and Hyrule Castle will no longer house a random dungeon prize as a reward.
+    - The Charm is still in the item pool, but does nothing. It is not progressive and is independent of the Pendant of Courage.
+    - Zelda will give out a random item in the Hyrule Castle throne room.
+  - RSE Nerfs:
+    - Impa no longer locks Hyrule Castle's front door.
+    - The Shady Guy Event (and its 2 related checks) are no longer locked by Oren.
+  - Inside Hyrule Castle
+    - No longer requires the Pendant of Courage (either) to enter, just Master Sword (and Impa if playing on RSE).
+    - The state of the Trials Door in Hilda's Study will now match the same in the Lorule Castle dungeon.
+    - If the player has not rescued all the Sages, the loading zone to Yuganon will instead drop the player at the Blacksmith's.
+      - Once all Sages are rescued the path to the Lorule Blacksmith remains open via newly placed green Warp.
+      - A courtesy "return" Warp will appear in the Lorule Blacksmith if it is entered from LC.
+  - Thieves' Hideout Big Key Chest:
+    - After defeating Stalblind the shield device used to reach the chest will activate automatically.
+    - Previously Thief Girl had been rigged to stick around to address this issue. That solution has been replaced by this one.
+  - Ice Ruins:
+    - A non-missable copy of the missable torch that opens the door on B3 has been added next to the East tongue statue.
+      - This is a QoL change made to address a randomizer-only problem where the 3rd Small Key Door is opened earlier than the vanilla game intends.
+      - This prevents players from needing to fall carefully to avoid the wind current.
+      - This has no impact on logic.
 - Logic Changes:
   - Normal:
     - Knucklemaster, Zaganaga, and Yuga Ganon each now logically require the Master Sword to defeat
+    - The Merge Chest on the right side of the Eastern Palace lobby now logically requires that dungeon's Compass.
+    - The Hidden Chest on Ice Ruins 1F now logically requires that dungeon's Compass.
     - The Ice Rod or Bombs are now considered viable ways to activate the Eastern Palace switch(es) that activate the bridge to the Boss Door.
     - The Misery Mire Ledge is now considered logically accessible with the Stamina Scroll as an alternative to the Sand Rod.
     - The Dark Palace right-side entrance chest no longer logically requires Lamp
+    - House of Gales 1F Northwest chest no longer requires Merge or an escape item.
+    - Ice Ruins logic updated to consider B3 crystal switch.
   - Glitched:
     - The new Sandcastling trick makes it possible to complete the Misery Mire Treasure dungeon without the Tornado Rod.
   - Hell:
     - The new Sand Hopping trick has been added. It allows completing the Hyrule portion of Desert Palace without Merge and reaching the 1F miniboss chest without the Titan's Mitt.
-- Various text improvments:
+- Rupees will now be named correctly in shops instead of being referred to as "Play Coins"
+- Eastern Palace map icons for "escape" chests will now appear before defeating the boss.
+- Path Hints will now explicitly list their underlying Path Item in the Spoiler Log.
+- Hints should overall generate more quickly.
+- Spoiler Logs can now be used as preset files to simplify seed sharing.
+- Misc. Text Improvments:
   - Bee Guy
-  - Hint Ghosts
+  - Hint Ghosts (sped up, less text if price is free)
   - Impa / Soldier
   - Mother Maiamai
   - Ravio
+  - Rosso
   - Stylish Woman
   - Thief Girl
-  - Turtle Rock Turtles
+  - TR Turtles (Tallo, Jillo, and Sabro)
   - Witch
   - Woman
 
@@ -562,6 +606,100 @@ For Citra (emulator):
 - All chests containing progression or unique items will become large, and others will be made small.
 - <u>Note</u>: Some large chests will have a reduced hitbox to prevent negative gameplay interference.
 
+## Portal Shuffle
+
+![Portal Shuffle Yay Woo](docs/portal_shuffle.jpg)
+
+There are 56 Portals (aka "fissures" or "cracks") in the game as 28 pairs that each connect an area of Hyrule with an area of Lorule.
+
+We shuffle them.
+
+| Setting              | Description                                                            |
+|----------------------|------------------------------------------------------------------------|
+| Cross Pairs          | All Portals will connect Hyrule + Lorule                               |
+| Full Pairs           | Any Portal can lead to any other Portal.                               |
+| Mirrored Cross Pairs | Same as Cross Pairs, but each pair's counterparts will also be paired. |
+| Mirrored Full Pairs  | Same as Full Pairs, but each pair's counterparts will also be paired.  |
+
+
+
+### Portal Appearance
+
+The destination of a Portal determines its appearance.
+
+![Portal Appearance Matches Destination](docs/portal_appearance_matches_destination.jpg)
+
+- White Portals lead to Hyrule
+- Black Portals lead to Lorule
+
+### Portal Pools
+
+![Portal Pools](docs/portal_pools.jpg)
+
+Most Portals in the game are "up" Portals, like the one in front of Link's House.
+
+However, there are 6 pairs of "down" Portals as well, that reside on the backs pillars, buildings, etc.
+For technical reasons, these Portals can only be shuffled amongst themselves.
+
+| Hyrule                | Lorule            | Lorule Area |
+|-----------------------|-------------------|-------------|
+| Sahasrahla's House    | n-Shaped House    | Skull Woods |
+| Eastern Ruins Pillar  | Dark Ruins Pillar | Dark Ruins  |
+| Zora's Domain         | Ku's Domain       | Dark Ruins  |
+| Paradox Left          | Paradox Left      | Central     |
+| Paradox Right         | Paradox Right     | Central     |
+| Southern Ruins Pillar | Swamp Pillar      | Central     |
+
+### Blocked Portals
+
+There are 4 Portals that are blocked by breakable walls:
+  - Eastern Ruins Southeast Portal
+  - Dark Ruins Southeast Portal
+  - Desert North Portal
+  - Graveyard Ledge (Lorule)
+
+Any Portal that gets redirected to any of these Portals will have a breakable wall in front of it that requires Bombs to blow up.
+
+TODO finish writing this...
+
+### Portals of Interest
+
+TODO finish writing this...
+
+#### Southwest Desert Portal
+
+Logic may require players to use the **Stamina Scroll** to have enough Energy to merge from the top part of the East wall going South to reach the Portal in the Southwest corner.
+
+Other than using the Portal itself (or glitches), this is actually the _only_ way to reach the Southwest Portal.
+
+#### Desert Palace Portal
+
+Shuffled Portals make it possible to enter Desert Palace from what should be the 3F exit.
+
+< TODO: To be continued >
+
+Going through the dungeon in reverse may be logically required, but players will need the Sand Rod and the Desert Palace Big Key to do anything.
+
+Some tweaks were made to make the dungeon not glitchy when played this way:
+  - The Boss Key door and two Small Key doors are now two-sided, meaning they require their respective keys to pass even if coming from reverse.
+    - This does *gnarly* things to key logic... good luck!
+  - The 2F miniboss room:
+    - The bridge will be deployed (only) when entering the room from the north, so the player can reach the enemies
+    - North door shutters added that close for the fight
+
+#### Zaganaga's Portal
+Fighting Zaganaga simply requires finding their portal
+
+#### Hyrule Castle Portal
+- IHC may need to be completed if the Portal after Twoga is the only logical access to somewhere important.
+- The Portal paired with HC's will be covered by the same curtain, making it easy to identify.
+
+#### Lorule Castle Portal
+
+Words and such
+
+TODO
+
 ## Hint System
 
 New with version v0.3.0 is the addition of hints!
@@ -806,18 +944,18 @@ It's all in the name: no logic is used to place items at all. Dungeon items are 
   - Not all item models have their transforms applied to them (rotation, scaling, etc.) and may look slightly odd.
   - Only the Items in Ravio's Shop and the Kakariko Street Merchant have had their models replaced -- all others will appear vanilla.
     - Except the Letter in a Bottle's vanilla location, which will always look like a Heart Piece.
+- Portal Shuffle:
+  - The player's location on the bottom screen may not be reflected accurately after exiting a same-world portal, until the player loads another area.
+  - Bonking on a breakable wall when using a Portal can sometimes result in janky behavior instead of neatly sending the player back to where they entered.
+  - In a handful of locations, the Portal Bonk can actually force a player into a region they shouldn't have access to.
 - Music:
   - Hyrule Castle overworld music may be missing until the player has either broken the barrier or obtained the Pendant of Courage.
-- Maiamai:
-  - Mother Maiamai item text is wrong, the text reflects the slots in Ravio's Shop. The pictures are correct, use those when selecting which item to upgrade.
-  - **Not Confirmed:** There has been a report of an elusive bug when playing Maiamai Madness that causes Mother Maiamai to not properly "bank" Maiamai that were turned in but not yet used for an upgrade. We have been unable to reproduce the issue -- if you encounter it, please let us know on the Discord!
 - Unintended Item Duplication:
   - Players can receive the final item from Zelda multiple times if they die and restart the fight.
   - Items from the Scared Hinox can be received multiple times if the player revisits the cave after a Save & Quit.
 - Miscellaneous:
   - Some text boxes will overflow
   - Players using the Pre-Activated Weather Vanes setting may encounter some Hilda dialog in the Lorule Graveyard if they visit it without completing the Hyrule Sanctuary Dungeon first.
-  - After giving the player the 3000 Rupee item, the Great Rupee Fairy herself does not actually appear to restore Link's health nor does she spawn any capturable Fairies like she does in vanilla.
 
 ## Special Thanks
 

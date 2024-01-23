@@ -8,8 +8,8 @@ use {
     bytey::*,
 };
 
-type Ref<'input> = ::core::cell::Ref<'input, [u8]>;
-type RefSized<'input, const N: usize> = ::core::cell::Ref<'input, [u8; N]>;
+type Ref<'input> = core::cell::Ref<'input, [u8]>;
+type RefSized<'input, const N: usize> = core::cell::Ref<'input, [u8; N]>;
 type RefMut<'input> = &'input mut [u8];
 
 type Next = Option<u16>;
@@ -58,14 +58,10 @@ impl<'input> FromFile for Flow<'input> {
         // If the number of branches is not a multiple of 8 (i.e. it doesn't fill up a line), that line
         // will be padded with "AB"
 
-        let header = List::<Ref, HEADER_LEN>::new(1, header)
-            .ok_or_else(|| Error::new("malformed header"))?;
-        let steps =
-            List::<Ref, STEP_LEN>::new(step_ct, steps).ok_or_else(|| Error::new("unimpl33"))?;
-        let branches = Branches(
-            List::<Ref, BRANCH_LEN>::new(branch_ct, branches)
-                .ok_or_else(|| Error::new("unimpl33"))?,
-        );
+        let header = List::<Ref, HEADER_LEN>::new(1, header).ok_or_else(|| Error::new("malformed header"))?;
+        let steps = List::<Ref, STEP_LEN>::new(step_ct, steps).ok_or_else(|| Error::new("unimpl33"))?;
+        let branches =
+            Branches(List::<Ref, BRANCH_LEN>::new(branch_ct, branches).ok_or_else(|| Error::new("unimpl33"))?);
 
         // Following the branches, the magic "FEN1" appears, followed by two bytes (size of remaining garbage?)
 
@@ -104,7 +100,7 @@ pub enum Step {
 
 impl Step {
     fn from_bytes(bytes: &[u8; STEP_LEN], branches: &Branches) -> Result<Self> {
-        bytey::typedef! { struct Inner: FromBytes<'_> [STEP_LEN] {
+        typedef! { struct Inner: FromBytes<'_> [STEP_LEN] {
             [0] kind: u8,
             [4] value: u32,
             [8] next: u16,
@@ -116,12 +112,7 @@ impl Step {
         let next = next(step.next);
         match step.kind {
             1 => Ok(Self::Text { next }),
-            2 => Self::branch(
-                branches,
-                Branch::new(step.command, step.value),
-                step.count,
-                step.branch,
-            ),
+            2 => Self::branch(branches, Branch::new(step.command, step.value), step.count, step.branch),
             3 => Ok(Self::Action { command: Action::new(step.command, step.value), next }),
             4 => Ok(Self::Start { next }),
             5 => Ok(Self::Goto { next }),
@@ -130,12 +121,7 @@ impl Step {
     }
 
     fn branch(branches: &Branches, command: Branch, count: u16, branch: u16) -> Result<Self> {
-        let branches = branches
-            .iter()
-            .skip(branch as usize)
-            .take(count as usize)
-            .map(next)
-            .collect::<Vec<_>>();
+        let branches = branches.iter().skip(branch as usize).take(count as usize).map(next).collect::<Vec<_>>();
         if branches.len() < count as usize {
             Err(Error::new(format!("Could not get {} branches.", count)))
         } else {
@@ -192,8 +178,8 @@ impl<'input> FlowMut<'input> {
         }
     }
 
-    /// Hacky debugging that prints out MSBF file info
-    pub fn debug(&self) {
+    /// Hacky thing that prints out MSBF file info
+    pub fn research(&self) {
         typedef! {
             struct Inner: FromBytes<'_> [STEP_LEN] {
             [0] kind: u8,
@@ -219,11 +205,8 @@ impl<'input> FlowMut<'input> {
         println!("index,kind,arg1,arg2,arg3,arg4,value,next,command,count,branch,0,1,notes");
         let mut step: Inner;
         for i in 0..(self.steps.inner.len() / STEP_LEN) {
-            step = unsafe {
-                Inner::from_slice_unchecked(
-                    &self.steps.inner[(i * STEP_LEN)..((i * STEP_LEN) + STEP_LEN)],
-                )
-            };
+            step =
+                unsafe { Inner::from_slice_unchecked(&self.steps.inner[(i * STEP_LEN)..((i * STEP_LEN) + STEP_LEN)]) };
             println!(
                 "[{: >3}],{},{},{},{},{},{},{},{},{},{}",
                 i,
@@ -242,9 +225,7 @@ impl<'input> FlowMut<'input> {
         println!("branches");
         let mut branch: InnerBranch;
         for i in 0..(&self.branches.inner.len() / 2) {
-            branch = unsafe {
-                InnerBranch::from_slice_unchecked(&self.branches.inner[(i * 2)..((i * 2) + 2)])
-            };
+            branch = unsafe { InnerBranch::from_slice_unchecked(&self.branches.inner[(i * 2)..((i * 2) + 2)]) };
             println!("[{}],{},{}", i, branch.arg0, branch.arg1);
         }
     }
@@ -276,18 +257,13 @@ impl<'input> FlowMut<'input> {
         // Find Branches first
         let mut branches: Vec<InnerBranch> = Vec::new();
         for i in 0..(&self.branches.inner.len() / 2) {
-            branches.push(unsafe {
-                InnerBranch::from_slice_unchecked(&self.branches.inner[(i * 2)..((i * 2) + 2)])
-            });
+            branches.push(unsafe { InnerBranch::from_slice_unchecked(&self.branches.inner[(i * 2)..((i * 2) + 2)]) });
         }
 
         println!("digraph {{");
         for i in 0..(self.steps.inner.len() / STEP_LEN) {
-            let step = unsafe {
-                Inner::from_slice_unchecked(
-                    &self.steps.inner[(i * STEP_LEN)..((i * STEP_LEN) + STEP_LEN)],
-                )
-            };
+            let step =
+                unsafe { Inner::from_slice_unchecked(&self.steps.inner[(i * STEP_LEN)..((i * STEP_LEN) + STEP_LEN)]) };
 
             match step.kind {
                 1 => {
@@ -317,13 +293,9 @@ impl<'input> FlowMut<'input> {
                     println!(
                         "    {} -> {}",
                         i,
-                        if step.next == 65535 {
-                            format!("END_{}", i)
-                        } else {
-                            step.next.to_string()
-                        }
+                        if step.next == 65535 { format!("END_{}", i) } else { step.next.to_string() }
                     );
-                }
+                },
                 2 => {
                     let label = if step.arg1 == 6 && step.command == 10 {
                         format!("Check Event Flag {}", Flag::get_true_flag(step.arg4))
@@ -337,24 +309,17 @@ impl<'input> FlowMut<'input> {
                         "???".to_owned()
                     };
 
-                    println!(
-                        "    {} [color=orange3, shape=diamond, label=\"{}\\n{}\"]",
-                        i, i, label
-                    );
+                    println!("    {} [color=orange3, shape=diamond, label=\"{}\\n{}\"]", i, i, label);
 
                     for j in 0..step.count {
                         let branch = branches.get((step.branch + j) as usize).unwrap();
                         println!(
                             "    {} -> {}",
                             i,
-                            if branch.arg0 == 65535 {
-                                format!("END_{}_{}", i, j)
-                            } else {
-                                branch.arg0.to_string()
-                            }
+                            if branch.arg0 == 65535 { format!("END_{}_{}", i, j) } else { branch.arg0.to_string() }
                         );
                     }
-                }
+                },
                 3 => {
                     let label = if step.arg1 == 6 && (step.command == 0 || step.command == 0xE) {
                         format!("Set Event Flag {}", Flag::get_true_flag(step.arg4))
@@ -372,40 +337,25 @@ impl<'input> FlowMut<'input> {
                     println!(
                         "    {} -> {}",
                         i,
-                        if step.next == 65535 {
-                            format!("END_{}", i)
-                        } else {
-                            step.next.to_string()
-                        }
+                        if step.next == 65535 { format!("END_{}", i) } else { step.next.to_string() }
                     );
-                }
+                },
                 4 => {
                     println!("    {} [color=cyan3, shape=doublecircle]", i);
                     println!(
                         "    {} -> {}",
                         i,
-                        if step.next == 65535 {
-                            format!("END_{}", i)
-                        } else {
-                            step.next.to_string()
-                        }
+                        if step.next == 65535 { format!("END_{}", i) } else { step.next.to_string() }
                     );
-                }
+                },
                 5 => {
-                    println!(
-                        "    {} [color=purple, shape=pentagon, label=\"{}\\nGOTO {}\"]",
-                        i, i, step.next
-                    );
+                    println!("    {} [color=purple, shape=pentagon, label=\"{}\\nGOTO {}\"]", i, i, step.next);
                     println!(
                         "    {} -> {}",
                         i,
-                        if step.next == 65535 {
-                            format!("END_{}", i)
-                        } else {
-                            step.next.to_string()
-                        }
+                        if step.next == 65535 { format!("END_{}", i) } else { step.next.to_string() }
                     );
-                }
+                },
                 _ => unreachable!(),
             }
         }
@@ -433,12 +383,9 @@ impl<'input> FromFile for FlowMut<'input> {
         let (header, body) = flw.split_at_mut(0x10);
         let (steps, branches) = body.split_at_mut(index);
 
-        let header =
-            List::<RefMut, HEADER_LEN>::new(1, header).ok_or_else(|| Error::new("unimpl33"))?;
-        let steps =
-            List::<RefMut, STEP_LEN>::new(step_ct, steps).ok_or_else(|| Error::new("unimpl33"))?;
-        let branches = List::<RefMut, BRANCH_LEN>::new(branch_ct, branches)
-            .ok_or_else(|| Error::new("unimpl33"))?;
+        let header = List::<RefMut, HEADER_LEN>::new(1, header).ok_or_else(|| Error::new("unimpl33"))?;
+        let steps = List::<RefMut, STEP_LEN>::new(step_ct, steps).ok_or_else(|| Error::new("unimpl33"))?;
+        let branches = List::<RefMut, BRANCH_LEN>::new(branch_ct, branches).ok_or_else(|| Error::new("unimpl33"))?;
         Ok(Self { header, steps, branches })
     }
 }
@@ -497,9 +444,7 @@ impl<'flow, 'input> StepMut<'flow, 'input> {
         }
     }
 
-    pub fn convert_into_branch(
-        mut self, count: u8, branch_index: u8,
-    ) -> Option<BranchMut<'flow, 'input>> {
+    pub fn convert_into_branch(mut self, count: u8, branch_index: u8) -> Option<BranchMut<'flow, 'input>> {
         Self::set_next(&mut self, None);
         let bytes = self.flow.steps.get_mut(self.index).unwrap();
 
@@ -532,12 +477,7 @@ impl<'flow, 'input> StepMut<'flow, 'input> {
 
     fn set_value(&mut self, value: u32) {
         unsafe {
-            self.flow
-                .steps
-                .get_mut(self.index)
-                .unwrap()
-                .get_unchecked_mut(4..8)
-                .copy_from_slice(&value.to_le_bytes());
+            self.flow.steps.get_mut(self.index).unwrap().get_unchecked_mut(4..8).copy_from_slice(&value.to_le_bytes());
         }
     }
 
@@ -547,12 +487,7 @@ impl<'flow, 'input> StepMut<'flow, 'input> {
     {
         let next = next.into().unwrap_or(0xFFFF);
         unsafe {
-            self.flow
-                .steps
-                .get_mut(self.index)
-                .unwrap()
-                .get_unchecked_mut(8..0xA)
-                .copy_from_slice(&next.to_le_bytes());
+            self.flow.steps.get_mut(self.index).unwrap().get_unchecked_mut(8..0xA).copy_from_slice(&next.to_le_bytes());
         }
     }
 
@@ -615,19 +550,14 @@ impl<'flow, 'input> BranchMut<'flow, 'input> {
     where
         N: Into<Next>,
     {
-        bytey::typedef! { struct Inner: FromBytes<'_> [STEP_LEN] {
+        typedef! { struct Inner: FromBytes<'_> [STEP_LEN] {
             [0xC] count: u16,
             [0xE] branch: u16,
         }}
         let inner: Inner = Inner::from_bytes(self.0.flow.steps.get_mut(self.0.index).unwrap());
         if index < inner.count {
             let index = inner.branch + index;
-            let branch = self
-                .0
-                .flow
-                .branches
-                .get_mut(index)
-                .ok_or_else(|| Error::new("Invalid branch index."))?;
+            let branch = self.0.flow.branches.get_mut(index).ok_or_else(|| Error::new("Invalid branch index."))?;
             branch.copy_from_slice(&to.into().unwrap_or(0xFFFF).to_le_bytes());
             Ok(())
         } else {
@@ -718,10 +648,7 @@ impl<'input, const SIZE: usize> List<Ref<'input>, SIZE> {
         if inner.len() < len {
             None
         } else {
-            Some(Self {
-                count,
-                inner: Ref::map(inner, |inner| unsafe { inner.get_unchecked(0..len) }),
-            })
+            Some(Self { count, inner: Ref::map(inner, |inner| unsafe { inner.get_unchecked(0..len) }) })
         }
     }
 
@@ -730,8 +657,7 @@ impl<'input, const SIZE: usize> List<Ref<'input>, SIZE> {
             Ref::map(Ref::clone(&self.inner), |inner| {
                 let start = SIZE * index as usize;
                 unsafe {
-                    let ptr =
-                        inner.get_unchecked(start..start + SIZE).as_ptr() as *const [u8; SIZE];
+                    let ptr = inner.get_unchecked(start..start + SIZE).as_ptr() as *const [u8; SIZE];
                     &*ptr
                 }
             })
@@ -764,8 +690,7 @@ impl<'input, const SIZE: usize> List<RefMut<'input>, SIZE> {
         if index <= self.count {
             let start = SIZE * index as usize;
             unsafe {
-                let ptr = self.inner.get_unchecked_mut(start..start + SIZE).as_mut_ptr()
-                    as *mut [u8; SIZE];
+                let ptr = self.inner.get_unchecked_mut(start..start + SIZE).as_mut_ptr() as *mut [u8; SIZE];
                 Some(&mut *ptr)
             }
         } else {
@@ -775,7 +700,7 @@ impl<'input, const SIZE: usize> List<RefMut<'input>, SIZE> {
 }
 
 fn get_flw(flw: &[u8]) -> Result<(u16, u16, usize)> {
-    bytey::typedef! { struct Header: FromBytes<'_> [0x10] {
+    typedef! { struct Header: FromBytes<'_> [0x10] {
         [0] steps: u16,
         [2] branches: u16,
     }}

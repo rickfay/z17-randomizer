@@ -1,16 +1,13 @@
-use std::collections::btree_map::BTreeMap;
-
-use game::{
-    Course::{self, *},
-    Item::{PendantPower, PendantWisdom},
-};
-use log::info;
-
+use crate::filler::filler_item::FillerItem::Item;
+use crate::filler::filler_item::Item::{PendantOfPower, PendantOfWisdom};
 use crate::{
     hints::{formatting::*, Hint},
     patch::messages::{hint_ghosts::HintGhost, msbt::load_msbt},
     LocationInfo, Patcher, Result, SeedInfo,
 };
+use game::Course::{self, *};
+use log::info;
+use std::collections::btree_map::BTreeMap;
 
 mod hint_ghosts;
 mod msbt;
@@ -20,11 +17,14 @@ pub fn patch_messages(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()>
     info!("Patching MSBT Files...");
 
     patch_file_select(patcher, seed_info)?;
+    // patch_pause_screen(patcher)?; TODO
+    patch_item_names(patcher)?;
+    patch_actions(patcher)?;
     // patch_ravio(patcher)?;
     patch_great_rupee_fairy(patcher)?;
     patch_thief_girl(patcher)?;
 
-    // patch_street_merchant(patcher, seed_info)?;
+    patch_street_merchant(patcher, seed_info)?;
     patch_sahasrahla(patcher, seed_info)?;
     patch_general_hint_ghosts(patcher, seed_info)?;
     patch_hint_ghosts(patcher, seed_info)?;
@@ -34,10 +34,8 @@ pub fn patch_messages(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()>
 }
 
 /// Prints out all String Values and their indexed Label Keys for a given MSBT File
-pub fn debug(
-    patcher: &mut Patcher, course: Course, file: &str, edotor: bool,
-) -> Vec<(String, String)> {
-    load_msbt(patcher, course, file).unwrap().debug(edotor)
+pub fn research(patcher: &mut Patcher, course: Course, file: &str, edotor: bool) -> Vec<(String, String)> {
+    load_msbt(patcher, course, file).unwrap().research(edotor)
 }
 
 fn patch_file_select(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
@@ -51,6 +49,58 @@ fn patch_file_select(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> 
     // file_select_t.set("T_FileNumber_00", format!("Hash: {:0>5}", seed_info.hash));
     // file_select_t.set("T_FileNumber_Hard_00", format!("Hash: {:0>5}", seed_info.hash));
     // patcher.update(file_select_t.dump())?;
+
+    Ok(())
+}
+
+/// Pause Screen
+#[allow(unused)]
+fn patch_pause_screen(patcher: &mut Patcher) -> Result<()> {
+    let mut msbt = load_msbt(patcher, LanguageBoot, "Gm_PauseT").unwrap();
+    msbt.set("L_Btn_01_T_GmOvr_00", "Warp");
+    msbt.set("T_Message_00", "Warp to Link's House?");
+    patcher.update(msbt.dump())?;
+
+    Ok(())
+}
+
+/// Item Names
+fn patch_item_names(patcher: &mut Patcher) -> Result<()> {
+    // Item names in textboxes
+    let mut item_name = load_msbt(patcher, LanguageBoot, "ItemName").unwrap();
+
+    // Repurpose unused strings as Rupee names so they show up in the shop
+    // FIXME - This is hacky, add these as new strings when size problem is fixed
+    item_name.set("item_name_tornaderod_rental", "Green Rupee");
+    item_name.set("item_name_icerod_rental", "Blue Rupee");
+    item_name.set("item_name_bfirerod_rental", "Red Rupee");
+    item_name.set("item_name_boomerang_rental", "Purple Rupee");
+    item_name.set("item_name_hookshot_rental", "Silver Rupee");
+    item_name.set("item_name_sandrod_rental", "Gold Rupee");
+
+    // Earthquake - Repurpose Triforce of Courage item
+    // item_name.set("item_name_triforce_courage", "Quake Medallion");
+
+    patcher.update(item_name.dump())?;
+
+    // Item descriptions when picked up
+    // let mut event_item_get = load_msbt(patcher, LanguageBoot, "EventItemGet").unwrap();
+    // event_item_get.set("triforce_courage", &format!("a thing happened")); // Earthquake
+    // patcher.update(event_item_get.dump())?;
+
+    // Item names in textboxes
+    // let mut item_name_upper = load_msbt(patcher, LanguageBoot, "ItemNameUpper").unwrap();
+    // item_name_upper.set("item_name_triforce_courage", "Earthquake");
+    // patcher.update(item_name_upper.dump())?;
+
+    Ok(())
+}
+
+/// Action icon text
+fn patch_actions(patcher: &mut Patcher) -> Result<()> {
+    let mut msbt = load_msbt(patcher, LanguageBoot, "Action").unwrap();
+    msbt.set("cmn_action_throw", "Yeet");
+    patcher.update(msbt.dump())?;
 
     Ok(())
 }
@@ -88,51 +138,35 @@ fn patch_thief_girl(patcher: &mut Patcher) -> Result<()> {
     let mut msbt = load_msbt(patcher, DungeonHagure, "Hagure").unwrap();
 
     // Shorten initial Thief Girl text to just the last textbox.
-    msbt.set(
-        "Hagure_girl_03",
-        "Come on. Let's hurry out of here. This\nplace gives me the chills.",
-    );
+    msbt.set("Hagure_girl_03", "Come on. Let's hurry out of here. This\nplace gives me the chills.");
     patcher.update(msbt.dump())?;
 
     Ok(())
 }
 
-#[allow(unused)]
+/// Street Merchant - Shorten text & show the item names
 fn patch_street_merchant(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
     let item_left = seed_info
         .layout
-        .get(&LocationInfo::new(
-            "Street Merchant (Left)",
-            crate::regions::hyrule::kakariko::village::SUBREGION,
-        ))
+        .get(&LocationInfo::new("Street Merchant (Left)", crate::regions::hyrule::kakariko::village::SUBREGION))
         .unwrap()
         .as_str();
     let item_right = seed_info
         .layout
-        .get(&LocationInfo::new(
-            "Street Merchant (Right)",
-            crate::regions::hyrule::kakariko::village::SUBREGION,
-        ))
+        .get(&LocationInfo::new("Street Merchant (Right)", crate::regions::hyrule::kakariko::village::SUBREGION))
         .unwrap()
         .as_str();
 
     let mut street_merchant = load_msbt(patcher, FieldLight, "FieldLight_18").unwrap();
     street_merchant.set(
         "lgt_NpcStand_BottleEmpty_00_select",
-        &format!(
-            "That's a {}.\nUseful for a bunch of things.\nHow about {}?{}",
-            name(item_left),
-            *PRICE,
-            *CHOICE_2
-        ),
+        &format!("That's a {}.\nUseful for a bunch of things.\nHow about {}?{}", name(item_left), *PRICE, *CHOICE_2),
     );
 
     street_merchant.set(
         "lgt_NpcStand_ZoraTreasure_00_select",
         &format!(
-            "Ah, yes! A {} \n\
-        of remarkable quality. Smooth as silk!\n\
-        And for you? Only {}!{}",
+            "Ah, yes! A {}\nof remarkable quality. Smooth as silk!\nAnd for you? Only {}!{}",
             name(item_right),
             *PRICE,
             *CHOICE_2
@@ -141,11 +175,7 @@ fn patch_street_merchant(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<
     street_merchant.set(
         "lgt_NpcStand_ZoraTreasure_01",
         &format!(
-            "Sorry to see it go, actually. I just\n\
-        couldn't stop touching that\n\
-        smooth, smooth {}.\n\
-        Oh it's so VERY smooth! I shouldn't\n\
-        have let it go at such a bargain.",
+            "Sorry to see it go, actually. I just\ncouldn't stop touching that\nsmooth, smooth {}.",
             name(item_right)
         ),
     );
@@ -158,18 +188,14 @@ fn patch_street_merchant(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<
 /// Sahasrahla gives out the locations of the Red & Blue Pendants
 #[allow(unused)]
 fn patch_sahasrahla(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
-    let (pow_region, _) = seed_info.layout.find_single(PendantWisdom).unwrap();
-    let (pop_region, _) = seed_info.layout.find_single(PendantPower).unwrap();
+    let (pow_region, _) = seed_info.layout.find_single(Item(PendantOfWisdom)).unwrap();
+    let (pop_region, _) = seed_info.layout.find_single(Item(PendantOfPower)).unwrap();
 
     let mut sahasrahla = load_msbt(patcher, FieldLight, "FieldLight_1B")?;
     sahasrahla.set(
         "lgt_NpcSahasrahla_Field1B_08",
         &format!(
-            "The {} has been\n\
-        enshrined in the {}.\n\
-        \n\
-        And the {}, in the\n\
-        {}.",
+            "The {} has been\nenshrined in the {}.\n\nAnd the {}, in the\n{}.",
             name("Pendant of Wisdom"),
             name(pow_region),
             attention("Pendant of Power"),
@@ -183,7 +209,7 @@ fn patch_sahasrahla(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
 }
 
 fn patch_general_hint_ghosts(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
-    let price = seed_info.settings.logic.hint_ghost_price;
+    let price = seed_info.settings.hint_ghost_price;
 
     let mut hint_ghost = load_msbt(patcher, LanguageBoot, "HintGhost")?;
     hint_ghost.set(
@@ -196,10 +222,7 @@ fn patch_general_hint_ghosts(patcher: &mut Patcher, seed_info: &SeedInfo) -> Res
         ),
     );
     hint_ghost.set("HintGhost_02_select_00", "Buy");
-    hint_ghost.set(
-        "HintGhost_07",
-        &format!("Looks like you don't have enough\n{}!", attention("Rupees")),
-    );
+    hint_ghost.set("HintGhost_07", &format!("Looks like you don't have enough\n{}!", attention("Rupees")));
     patcher.update(hint_ghost.dump())?;
     Ok(())
 }
@@ -224,9 +247,7 @@ fn patch_hint_ghosts(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> 
 
         for ghost in &path_hint.ghosts {
             let hint_ghost = HintGhost::from(*ghost);
-            let entry = msbt_hint_map
-                .entry((hint_ghost.course, hint_ghost.msbt_file))
-                .or_insert_with(BTreeMap::new);
+            let entry = msbt_hint_map.entry((hint_ghost.course, hint_ghost.msbt_file)).or_insert_with(BTreeMap::new);
             entry.insert(hint_ghost.msg_label, path_hint.get_hint());
         }
     }
@@ -238,9 +259,7 @@ fn patch_hint_ghosts(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> 
 
         for ghost in &always_hint.ghosts {
             let hint_ghost = HintGhost::from(*ghost);
-            let entry = msbt_hint_map
-                .entry((hint_ghost.course, hint_ghost.msbt_file))
-                .or_insert_with(BTreeMap::new);
+            let entry = msbt_hint_map.entry((hint_ghost.course, hint_ghost.msbt_file)).or_insert_with(BTreeMap::new);
             entry.insert(hint_ghost.msg_label, always_hint.get_hint());
         }
     }
@@ -252,9 +271,7 @@ fn patch_hint_ghosts(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> 
 
         for ghost in &sometimes_hint.ghosts {
             let hint_ghost = HintGhost::from(*ghost);
-            let entry = msbt_hint_map
-                .entry((hint_ghost.course, hint_ghost.msbt_file))
-                .or_insert_with(BTreeMap::new);
+            let entry = msbt_hint_map.entry((hint_ghost.course, hint_ghost.msbt_file)).or_insert_with(BTreeMap::new);
             entry.insert(hint_ghost.msg_label, sometimes_hint.get_hint());
         }
     }

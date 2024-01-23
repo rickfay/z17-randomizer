@@ -18,7 +18,7 @@ crate::region! {
             "[SP] (1F) Big Chest (Fire)": KeyBoss @BigChest(1[28]),
 
             "[SP] Arrghus": HeartContainer @Heart(1[129]),
-            "Swamp Palace Prize": None @None(),
+            "[SP] Prize": None @None(),
         ],
     },
 }

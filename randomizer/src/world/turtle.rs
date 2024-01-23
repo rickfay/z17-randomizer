@@ -1,9 +1,9 @@
-use crate::legacy::path::Path;
-use crate::model::check::Check;
-use crate::model::filler_item::Goal;
-use crate::model::location::Location::{self, *};
-use crate::model::location_node::LocationNode;
-use crate::model::logic::Logic;
+use crate::filler::check::Check;
+use crate::filler::filler_item::Goal;
+use crate::filler::location::Location::{self, *};
+use crate::filler::location_node::LocationNode;
+use crate::filler::logic::Logic;
+use crate::filler::path::Path;
 use crate::regions;
 use crate::world::{check, edge, fast_travel_lorule, goal, location, old_check, old_path};
 use crate::LocationInfo;
@@ -30,10 +30,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                 vec![
                     check!("[TR] (1F) Center", regions::dungeons::turtle::rock::SUBREGION),
                     old_check(
-                        LocationInfo::new(
-                            "[TR] (1F) Northeast Ledge",
-                            regions::dungeons::turtle::rock::SUBREGION,
-                        ),
+                        LocationInfo::new("[TR] (1F) Northeast Ledge", regions::dungeons::turtle::rock::SUBREGION),
                         Some(|p| p.can_merge() || p.has_boomerang() || p.has_hookshot()),
                         None,
                         None,
@@ -41,10 +38,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     old_check(
-                        LocationInfo::new(
-                            "[TR] (1F) Southeast Chest",
-                            regions::dungeons::turtle::rock::SUBREGION,
-                        ),
+                        LocationInfo::new("[TR] (1F) Southeast Chest", regions::dungeons::turtle::rock::SUBREGION),
                         Some(|p| p.can_merge()),
                         None,
                         Some(|p| p.has_nice_bombs() && p.has_tornado_rod()), // bombrod into warp tile
@@ -52,10 +46,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     old_check(
-                        LocationInfo::new(
-                            "[TR] (1F) Defeat Flamolas",
-                            regions::dungeons::turtle::rock::SUBREGION,
-                        ),
+                        LocationInfo::new("[TR] (1F) Defeat Flamolas", regions::dungeons::turtle::rock::SUBREGION),
                         Some(|p| p.can_merge()),
                         None,
                         None,
@@ -63,10 +54,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     old_check(
-                        LocationInfo::new(
-                            "[TR] (1F) Portal Room NW",
-                            regions::dungeons::turtle::rock::SUBREGION,
-                        ),
+                        LocationInfo::new("[TR] (1F) Portal Room NW", regions::dungeons::turtle::rock::SUBREGION),
                         Some(|p| p.can_merge()),
                         None,
                         None,
@@ -74,10 +62,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     old_check(
-                        LocationInfo::new(
-                            "[TR] (1F) Grate Chest",
-                            regions::dungeons::turtle::rock::SUBREGION,
-                        ),
+                        LocationInfo::new("[TR] (1F) Grate Chest", regions::dungeons::turtle::rock::SUBREGION),
                         Some(|p| p.can_merge()),
                         None,
                         None,
@@ -86,10 +71,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                     ),
                     check!("[TR] (B1) Northeast Room", regions::dungeons::turtle::rock::SUBREGION),
                     old_check(
-                        LocationInfo::new(
-                            "[TR] (B1) Grate Chest (Small)",
-                            regions::dungeons::turtle::rock::SUBREGION,
-                        ),
+                        LocationInfo::new("[TR] (B1) Grate Chest (Small)", regions::dungeons::turtle::rock::SUBREGION),
                         Some(|p| p.can_merge()),
                         None,
                         None,
@@ -97,23 +79,15 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     old_check(
-                        LocationInfo::new(
-                            "[TR] (B1) Big Chest (Top)",
-                            regions::dungeons::turtle::rock::SUBREGION,
-                        ),
-                        Some(|p| {
-                            p.has_turtle_keys(1) && p.can_merge() && p.can_hit_shielded_switch()
-                        }),
+                        LocationInfo::new("[TR] (B1) Big Chest (Top)", regions::dungeons::turtle::rock::SUBREGION),
+                        Some(|p| p.has_turtle_keys(1) && p.can_merge() && p.can_hit_shielded_switch()),
                         Some(|p| (p.has_turtle_keys(1) && p.can_merge())), // hit switch with pots
                         None,
                         None,
                         None,
                     ),
                     old_check(
-                        LocationInfo::new(
-                            "[TR] (B1) Big Chest (Center)",
-                            regions::dungeons::turtle::rock::SUBREGION,
-                        ),
+                        LocationInfo::new("[TR] (B1) Big Chest (Center)", regions::dungeons::turtle::rock::SUBREGION),
                         Some(|p| p.can_merge() && p.can_hit_shielded_switch()),
                         Some(|p| p.can_merge()), // hit switch with pots
                         None,
@@ -121,10 +95,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     old_check(
-                        LocationInfo::new(
-                            "[TR] (B1) Platform",
-                            regions::dungeons::turtle::rock::SUBREGION,
-                        ),
+                        LocationInfo::new("[TR] (B1) Platform", regions::dungeons::turtle::rock::SUBREGION),
                         Some(|p| p.can_merge()),
                         None,
                         None,
@@ -136,22 +107,8 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                 ],
                 vec![
                     old_path(TurtleRockFoyer, Some(|p| p.has_ice_rod()), None, None, None, None),
-                    old_path(
-                        TurtleRockLeftBalconyPath,
-                        Some(|p| p.can_merge()),
-                        None,
-                        None,
-                        None,
-                        None,
-                    ),
-                    old_path(
-                        TurtleRockRightBalconyPath,
-                        Some(|p| p.can_merge()),
-                        None,
-                        None,
-                        None,
-                        None,
-                    ),
+                    old_path(TurtleRockLeftBalconyPath, Some(|p| p.can_merge()), None, None, None, None),
+                    old_path(TurtleRockRightBalconyPath, Some(|p| p.can_merge()), None, None, None, None),
                     old_path(
                         TurtleRockBoss,
                         Some(|p| p.has_turtle_keys(3) && p.can_merge() && p.has_turtle_big_key()),
@@ -170,23 +127,16 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                 vec![],
                 vec![
                     old_path(TurtleRockMain, Some(|p| p.has_ice_rod()), None, None, None, None),
-                    old_path(
-                        TurtleRockLeftBalcony,
-                        Some(|p| p.has_ice_rod()),
-                        None,
-                        None,
-                        None,
-                        None,
-                    ),
+                    old_path(TurtleRockLeftBalcony, Some(|p| p.has_ice_rod()), None, None, None, None),
                 ],
             ),
         ),
         (
             TurtleRockLeftBalcony,
             location(
-                "Turtle Rock Left Balcony",
+                "[TR] Left Balcony",
                 vec![
-                    check!("Turtle Rock Left Balcony", regions::dungeons::turtle::rock::SUBREGION), // Do not use [TR] prefix
+                    check!("[TR] Left Balcony", regions::dungeons::turtle::rock::SUBREGION), // Do not use [TR] prefix
                 ],
                 vec![fast_travel_lorule(), edge!(TurtleRockLeftBalconyPath)],
             ),
@@ -198,14 +148,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                 vec![],
                 vec![
                     old_path(TurtleRockMain, Some(|p| p.has_ice_rod()), None, None, None, None),
-                    old_path(
-                        TurtleRockRightBalcony,
-                        Some(|p| p.has_ice_rod()),
-                        None,
-                        None,
-                        None,
-                        None,
-                    ),
+                    old_path(TurtleRockRightBalcony, Some(|p| p.has_ice_rod()), None, None, None, None),
                 ],
             ),
         ),
@@ -222,14 +165,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
             location(
                 "Turtle Rock Boss",
                 vec![],
-                vec![old_path(
-                    TurtleRockPostBoss,
-                    Some(|p| p.can_defeat_grinexx()),
-                    None,
-                    None,
-                    None,
-                    None,
-                )],
+                vec![old_path(TurtleRockPostBoss, Some(|p| p.can_defeat_grinexx()), None, None, None, None)],
             ),
         ),
         (
@@ -238,7 +174,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                 "Turtle Rock Post Boss",
                 vec![
                     check!("[TR] Grinexx", regions::dungeons::turtle::rock::SUBREGION),
-                    check!("Turtle Rock Prize", regions::dungeons::turtle::rock::SUBREGION),
+                    check!("[TR] Prize", regions::dungeons::turtle::rock::SUBREGION),
                     goal!("Grinexx", Goal::Grinexx),
                 ],
                 vec![],

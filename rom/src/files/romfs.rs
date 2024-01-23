@@ -50,16 +50,11 @@ where
                 let file = split.next().expect("Attempt to read empty file name.");
                 (self.find_dir(split.next(), 0)?, file)
             };
-            let (offset, length) = self
-                .find_file(parent, file)?
-                .ok_or_else(|| Error::new(format!("File not found: '{}'.", path)))?;
+            let (offset, length) =
+                self.find_file(parent, file)?.ok_or_else(|| Error::new(format!("File not found: '{}'.", path)))?;
             Ok(File::new(
                 path,
-                read_slice_from_offset(
-                    &mut self.file,
-                    self.file_data + offset as u32,
-                    length as usize,
-                )?,
+                read_slice_from_offset(&mut self.file, self.file_data + offset as u32, length as usize)?,
             ))
         }
     }
@@ -70,16 +65,14 @@ where
             let dirname = split.next().unwrap();
             let child = split.next();
             let i = (hash(dirname, parent) % self.directories.count) as usize;
-            let mut offset =
-                unsafe { u32::from_slice_unchecked(&self.directories.hashtable[i * 4..]) };
+            let mut offset = unsafe { u32::from_slice_unchecked(&self.directories.hashtable[i * 4..]) };
             while offset != 0xFFFFFFFF {
                 typedef! { struct Metadata: FromBytes<'_> [0x18] {
                     [0] parent: u32,
                     [0x10] next: u32,
                     [0x14] name_len: u32,
                 }}
-                let metadata =
-                    Metadata::read_from_offset(&mut self.file, self.directories.metadata + offset)?;
+                let metadata = Metadata::read_from_offset(&mut self.file, self.directories.metadata + offset)?;
                 let name = read_slice(&mut self.file, metadata.name_len as usize)?;
                 if metadata.parent == parent && path_eq(&name, dirname) {
                     return self.find_dir(child, offset);
@@ -104,8 +97,7 @@ where
                 [0x18] next: u32,
                 [0x1C] name_len: u32,
             }}
-            let metadata =
-                Metadata::read_from_offset(&mut self.file, self.files.metadata + offset)?;
+            let metadata = Metadata::read_from_offset(&mut self.file, self.files.metadata + offset)?;
             let name = read_slice(&mut self.file, metadata.name_len as usize)?;
             if metadata.parent == parent && path_eq(&name, filename) {
                 let offset = metadata.offset;
@@ -137,11 +129,8 @@ impl Section {
     where
         R: Read + Seek,
     {
-        let hashtable = read_slice_from_offset(
-            &mut file,
-            offset + header.hashtable_offset,
-            header.hashtable_len as usize,
-        )?;
+        let hashtable =
+            read_slice_from_offset(&mut file, offset + header.hashtable_offset, header.hashtable_len as usize)?;
         let count = header.hashtable_len / 4;
         let metadata = offset + header.metadata_offset;
         Ok(Self { hashtable, count, metadata })
@@ -149,9 +138,7 @@ impl Section {
 }
 
 fn hash(name: &str, seed: u32) -> u32 {
-    name.encode_utf16().fold(seed ^ 123456789, |hash, ch| {
-        (hash.wrapping_shr(5) | hash.wrapping_shl(27)) ^ (ch as u32)
-    })
+    name.encode_utf16().fold(seed ^ 123456789, |hash, ch| (hash.wrapping_shr(5) | hash.wrapping_shl(27)) ^ (ch as u32))
 }
 
 fn path_eq(this: &[u8], other: &str) -> bool {

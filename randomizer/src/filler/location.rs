@@ -6,8 +6,9 @@ pub enum Location {
     MaiamaiCave,
     EasternRuinsUpper,
     EasternRuinsEastLedge,
-    EasternFairyCave,    // todo
-    EasternBigFairyCave, // todo
+    EasternRuinsBlockedPortal,
+    EasternFairyCave,
+    EasternBigFairyCave,
     WitchCave,
     WitchHouse,
     RavioShop,
@@ -19,7 +20,7 @@ pub enum Location {
     EastRuinsBombCaveUpper,
     EastRuinsBombCaveLower,
     HouseOfGalesIsland,
-    RossoHouse,
+    RossosHouse,
     RossoCave,
     TornadoRodDungeon,
     GraveyardLedgeHyrule,
@@ -56,6 +57,14 @@ pub enum Location {
     SanctuaryChurch,
     CuccoDungeonLedge,
     CuccoDungeon,
+
+    ZoraRiver,
+    LakeHylia,
+    BridgeShallowWater,
+    DarkRuinsRiver,
+    MiseryMireLeftPillarMerged,
+    LoruleRiverPortalShallows,
+
     WaterfallLedge,
     CuccoHouse,
     CuccoHouseRear,
@@ -90,12 +99,12 @@ pub enum Location {
     BoulderingLedgeBottom,
     BoulderingLedgeRight,
     RossosOreMine,
-    RossosOreMineFairyCave, // todo
+    RossosOreMineFairyCave,
     FloatingIslandHyrule,
 
     // Lorule -------------------
     LoruleBellTravel,
-    LoruleCastleField,
+    LoruleCastleArea,
     ThievesTownItemShop,
     VeteranThiefsHouse,
     FortunesChoiceLorule,
@@ -118,8 +127,11 @@ pub enum Location {
     HauntedGroveLedge,
 
     Desert,
-    DesertFairyLedge, // todo
-    DesertFairyCave,  // todo
+    DesertNorthLedge,
+    DesertUseBlockedPortalRight,
+    DesertUseBlockedPortalLeft,
+    DesertFairyLedge,
+    DesertFairyCave,
     DesertCenterLedge,
     DesertSouthWestLedge,
     DesertPalaceWeatherVane,
@@ -139,10 +151,9 @@ pub enum Location {
     LoruleLakesideItemShop,
 
     DarkRuins,
+    DarkRuinsBlockedPortal,
     DarkMazeEntrance,
     DarkMazeHalfway,
-    DarkMazeJail1,
-    DarkMazeJail2,
     DarkPalaceWeatherVane,
     DarkRuinsShallowWater,
     HinoxCaveWater,
@@ -183,7 +194,7 @@ pub enum Location {
     HouseOfGalesBoss,
     HouseOfGalesPostBoss,
 
-    TowerOfHeraEntrancePegs, // todo
+    TowerOfHeraEntrancePegs,
     TowerOfHeraFoyer,
     TowerOfHeraBottom,
     TowerOfHeraMiddle,
@@ -219,9 +230,6 @@ pub enum Location {
     SkullWoodsSeresGrove,
 
     ThievesHideoutB1,
-    ThievesHideoutB2NorthWest,
-    ThievesHideoutB2Main,
-    ThievesHideoutEscape,
     ThievesBoss,
     ThievesPostBoss,
 

@@ -1,4 +1,4 @@
-use crate::model::{location::Location, logic::Logic, progress::Progress};
+use crate::filler::{location::Location, logic::Logic, progress::Progress};
 
 #[derive(Copy, Clone)]
 pub struct Path {

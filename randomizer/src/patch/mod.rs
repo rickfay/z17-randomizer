@@ -1,54 +1,49 @@
-use std::{collections::HashMap, fs, iter, path::Path};
-
+use crate::filler::filler_item::{FillerItem, Vane};
+use crate::filler::portals::Portal;
+use crate::{patch::util::*, Error, PortalMap, Result, SeedInfo};
+use code::Code;
 use fs_extra::dir::CopyOptions;
 use game::{
     Course::{self as CourseId, *},
-    Item,
+    Item, World,
 };
 use log::{debug, error, info};
 use macros::fail;
-use modinfo::Settings;
+use modinfo::settings::portal_shuffle::PortalShuffle;
+use modinfo::settings::weather_vanes::WeatherVanes::*;
 use path_absolutize::*;
+use rom::byaml::scene_env::SceneEnvFile;
+use rom::scene::{Transform, Vec3};
 use rom::{
-    demo::Timed,
     flow::FlowMut,
     scene::{Arg, Obj, Rail, SceneMeta},
-    Demo, File, IntoBytes, Language, Rom, Scene,
+    File, IntoBytes, Language, Rom, Scene,
 };
 use serde::Serialize;
+use std::{collections::HashMap, fs, path::Path};
 use tempfile::tempdir;
 use try_insert_ext::EntryInsertExt;
 
-use crate::{patch::util::*, Error, ItemExt, Result, SeedInfo};
-
-use code::Code;
-use modinfo::settings::active_weather_vanes::ActiveWeatherVanes::*;
-use rom::byaml::scene_env::SceneEnvFile;
-use rom::flag::Flag;
-
+mod byaml;
 mod code;
-mod flow;
-mod maps;
+mod demo;
+pub mod lms;
 mod messages;
-pub mod msbf;
 mod prizes;
-mod scene_env;
-mod scenes;
 pub mod util;
 
 #[non_exhaustive]
 pub struct DungeonPrizes {
-    ep_prize: Item,
-    hg_prize: Item,
-    th_prize: Item,
-    hc_prize: Item,
-    pd_prize: Item,
-    sp_prize: Item,
-    sw_prize: Item,
-    tt_prize: Item,
-    tr_prize: Item,
-    dp_prize: Item,
-    ir_prize: Item,
+    ep_prize: FillerItem,
+    hg_prize: FillerItem,
+    th_prize: FillerItem,
+    pd_prize: FillerItem,
+    sp_prize: FillerItem,
+    sw_prize: FillerItem,
+    tt_prize: FillerItem,
+    tr_prize: FillerItem,
+    dp_prize: FillerItem,
+    ir_prize: FillerItem,
 }
 
 #[derive(Debug)]
@@ -85,19 +80,73 @@ impl Patcher {
         self.scene(id, stage_index - 1).unwrap().stage_mut().get_mut().add_system(obj);
     }
 
-    fn modify_objs(
-        &mut self, id: CourseId, stage_index: u16, actions: &[(u16, Box<dyn Fn(&mut Obj)>)],
-    ) {
+    /// Finds the lowest UNQ and SER
+    fn find_objs_unq_ser(&mut self, id: CourseId, stage_index: u16) -> (u16, Option<u16>) {
+        let unq_ser = (self.find_objs_unq(id, stage_index), self.find_objs_ser(id, stage_index));
+        debug!("Unused {:?}{} Objs UNQ: {}, SER: {:?}", id, stage_index, unq_ser.0, unq_ser.1);
+        unq_ser
+    }
+
+    /// Finds the lowest currently unused UNQ
+    fn find_objs_unq(&mut self, id: CourseId, stage_index: u16) -> u16 {
+        self.scene(id, stage_index - 1).unwrap().stage().get().find_objs_unq()
+    }
+
+    /// Finds the lowest currently unused SER
+    fn find_objs_ser(&mut self, id: CourseId, stage_index: u16) -> Option<u16> {
+        Some(self.scene(id, stage_index - 1).unwrap().stage().get().find_objs_ser())
+    }
+
+    /// Finds the lowest currently unused Rails UNQ
+    #[allow(unused)]
+    fn find_rails_unq(&mut self, id: CourseId, stage_index: u16) -> u16 {
+        let unq = self.scene(id, stage_index - 1).unwrap().stage().get().find_rails_unq();
+        debug!("Unused {:?}{} Rails UNQ: {}", id, stage_index, unq);
+        unq
+    }
+
+    /// Finds the lowest UNQ and SER
+    #[allow(unused)]
+    fn find_system_unq_ser(&mut self, id: CourseId, stage_index: u16) -> (u16, Option<u16>) {
+        let unq_ser = (self.find_system_unq(id, stage_index), self.find_system_ser(id, stage_index));
+        debug!("Unused {:?}{} System UNQ: {}, SER: {:?}", id, stage_index, unq_ser.0, unq_ser.1);
+        unq_ser
+    }
+
+    /// Finds the lowest currently unused UNQ
+    #[allow(unused)]
+    fn find_system_unq(&mut self, id: CourseId, stage_index: u16) -> u16 {
+        self.scene(id, stage_index - 1).unwrap().stage().get().find_system_unq()
+    }
+
+    /// Finds the lowest currently unused SER
+    #[allow(unused)]
+    fn find_system_ser(&mut self, id: CourseId, stage_index: u16) -> Option<u16> {
+        Some(self.scene(id, stage_index - 1).unwrap().stage().get().find_system_ser())
+    }
+
+    fn read_obj(&mut self, id: CourseId, stage_index: u16, unq: u16) -> &Obj {
         let stage = self.scene(id, stage_index - 1).unwrap().stage_mut().get_mut();
-        for (unq, action) in actions {
+        stage.get_obj(unq).expect(&format!(
+            "Failed to read Portal Objs entry with UNQ: {} from World/Byaml/{:?}{}_stage.byaml",
+            unq, id, stage_index
+        ))
+    }
+
+    fn modify_objs<A>(&mut self, course_id: CourseId, stage_index: u16, actions: A)
+    where
+        A: Into<Vec<(u16, Box<dyn Fn(&mut Obj)>)>>,
+    {
+        let stage = self.scene(course_id, stage_index - 1).unwrap().stage_mut().get_mut();
+        for (unq, action) in actions.into() {
             action(
                 stage
-                    .get_obj_mut(*unq)
+                    .get_obj_mut(unq)
                     .ok_or_else(|| {
                         Error::game(format!(
                             "Could not find [Objs] UNQ {} in {}{}",
                             unq,
-                            id.as_str(),
+                            course_id.as_str(),
                             stage_index
                         ))
                     })
@@ -106,42 +155,34 @@ impl Patcher {
         }
     }
 
-    fn modify_rails(
-        &mut self, id: CourseId, stage_index: u16, actions: &[(u16, Box<dyn Fn(&mut Rail)>)],
-    ) {
+    fn modify_rails<A>(&mut self, id: CourseId, stage_index: u16, actions: A)
+    where
+        A: Into<Vec<(u16, Box<dyn Fn(&mut Rail)>)>>,
+    {
         let stage = self.scene(id, stage_index - 1).unwrap().stage_mut().get_mut();
-        for (unq, action) in actions {
+        for (unq, action) in actions.into() {
             action(
                 stage
-                    .get_rails_mut(*unq)
+                    .get_rails_mut(unq)
                     .ok_or_else(|| {
-                        Error::game(format!(
-                            "Could not find [Rails] UNQ {} in {}{}",
-                            unq,
-                            id.as_str(),
-                            stage_index
-                        ))
+                        Error::game(format!("Could not find [Rails] UNQ {} in {}{}", unq, id.as_str(), stage_index))
                     })
                     .unwrap(),
             );
         }
     }
 
-    fn modify_system(
-        &mut self, id: CourseId, stage_index: u16, actions: &[(u16, Box<dyn Fn(&mut Obj)>)],
-    ) {
+    fn modify_system<A>(&mut self, id: CourseId, stage_index: u16, actions: A)
+    where
+        A: Into<Vec<(u16, Box<dyn Fn(&mut Obj)>)>>,
+    {
         let stage = self.scene(id, stage_index - 1).unwrap().stage_mut().get_mut();
-        for (unq, action) in actions {
+        for (unq, action) in actions.into() {
             action(
                 stage
-                    .get_system_mut(*unq)
+                    .get_system_mut(unq)
                     .ok_or_else(|| {
-                        Error::game(format!(
-                            "Could not find [System] UNQ {} in {}{}",
-                            unq,
-                            id.as_str(),
-                            stage_index
-                        ))
+                        Error::game(format!("Could not find [System] UNQ {} in {}{}", unq, id.as_str(), stage_index))
                     })
                     .unwrap(),
             );
@@ -164,6 +205,7 @@ impl Patcher {
         Ok(courses.entry(course).or_insert(Self::load_course(game, course)))
     }
 
+    /// Subtract 1 from stage
     fn scene(&mut self, course: CourseId, stage: u16) -> Result<&mut Scene> {
         let Self { game, ref mut courses, .. } = self;
         courses
@@ -177,8 +219,7 @@ impl Patcher {
 
     fn scene_meta(&mut self, course: CourseId) -> &mut SceneMeta {
         let Self { game, ref mut courses, .. } = self;
-        let Course { ref mut scene_meta, .. } =
-            courses.entry(course).or_insert(Self::load_course(game, course));
+        let Course { ref mut scene_meta, .. } = courses.entry(course).or_insert(Self::load_course(game, course));
         scene_meta.as_mut().unwrap()
     }
 
@@ -191,9 +232,7 @@ impl Patcher {
         Ok(())
     }
 
-    fn inject_msbf(
-        &mut self, course: CourseId, msbf: Option<&(&str, File<Box<[u8]>>)>,
-    ) -> Result<()> {
+    fn inject_msbf(&mut self, course: CourseId, msbf: Option<&(&str, File<Box<[u8]>>)>) -> Result<()> {
         if let Some((msbf_key, msbf_file)) = msbf {
             self.language(course)?.flow_inject(msbf_key, msbf_file.clone())?;
         }
@@ -205,11 +244,7 @@ impl Patcher {
     where
         C: Into<Option<CourseId>>,
     {
-        Ok(if let Some(course) = course.into() {
-            &mut self.course(course)?.language
-        } else {
-            &mut self.boot
-        })
+        Ok(if let Some(course) = course.into() { &mut self.course(course)?.language } else { &mut self.boot })
     }
 
     fn flow<C>(&mut self, course: C) -> Result<rom::language::LoadedMut<FlowMut>>
@@ -219,81 +254,37 @@ impl Patcher {
         Ok(self.language(course)?.flow_mut())
     }
 
-    fn parse_args(&mut self, course: CourseId, stage: u16, unq: u16) -> &mut Arg {
-        self.scene(course, stage)
-            .unwrap()
-            .stage_mut()
-            .get_mut()
-            .get_obj_mut(unq)
-            .ok_or_else(|| {
-                Error::game(format!("{}{} [{}] not found", course.as_str(), stage + 1, unq))
-            })
-            .unwrap()
-            .arg_mut()
-    }
-
-    fn prep_chest(
-        &mut self, item: Item, course: CourseId, stage: u16, unq: u16, is_big: bool,
-        settings: &Settings,
-    ) -> Result<()> {
-        // Set contents
-        self.parse_args(course, stage, unq).0 = item as i32;
-
-        let small_chest = (35, "TreasureBoxS");
-        let large_chest = (34, "TreasureBoxL");
-
-        let chest_data = if settings.options.chest_size_matches_contents {
-            if item.goes_in_csmc_large_chest() {
-                large_chest
-            } else {
-                small_chest
-            }
-        } else if is_big {
-            large_chest
-        } else {
-            small_chest
-        };
-
-        // Forcibly set ID
-        self.scene(course, stage)
-            .unwrap()
-            .stage_mut()
-            .get_mut()
-            .get_obj_mut(unq)
-            .unwrap()
-            .set_id(chest_data.0);
-
-        // Add Actor if scene doesn't already have it
-        if !self.scene(course, stage).unwrap().actors().contains(chest_data.1) {
-            debug!("Adding {} to {}{}", chest_data.1, course.as_str(), stage + 1);
-            let actor = self.scene(DungeonHera, 0)?.actors().get_actor_bch(chest_data.1)?;
-            self.scene(course, stage).unwrap().actors_mut().add(actor)?;
-        }
-
-        Ok(())
-    }
-
-    fn apply(&mut self, patch: Patch, item: Item, settings: &Settings) -> Result<()> {
+    /// Perform patching operations for each patch, depending on what type it is.
+    fn apply<F>(&mut self, patch: Patch, seed_info: &SeedInfo, filler_item: F) -> Result<()>
+    where
+        F: Into<Option<FillerItem>> + Clone,
+    {
         match patch {
             Patch::Chest { course, stage, unq } => {
-                self.prep_chest(item, course, stage, unq, false, settings)?;
-            }
+                self.prep_chest(filler_item.into().unwrap(), course, stage, unq, false, seed_info)?;
+            },
             Patch::BigChest { course, stage, unq } => {
-                self.prep_chest(item, course, stage, unq, true, settings)?;
-            }
+                self.prep_chest(filler_item.into().unwrap(), course, stage, unq, true, seed_info)?;
+            },
             Patch::Heart { course, scene, unq }
             | Patch::Key { course, scene, unq }
             | Patch::SilverRupee { course, scene, unq }
             | Patch::GoldRupee { course, scene, unq } => {
-                self.parse_args(course, scene, unq).1 = item as i32;
-            }
+                self.parse_args(course, scene, unq).1 = filler_item.into().unwrap().as_item_index() as i32;
+            },
+            Patch::Portal { course, scene, unq, portal } => {
+                self.patch_portal(&seed_info.portal_map, course, scene + 1, unq, portal, seed_info)?;
+            },
+            Patch::WeatherVane { course, scene, unq, vane } => {
+                self.patch_weather_vane(filler_item.into().unwrap(), course, scene, unq, vane, seed_info)?;
+            },
             Patch::Maiamai { course, scene, unq } => {
-                self.parse_args(course, scene, unq).2 = item as i32;
-            }
+                self.parse_args(course, scene, unq).2 = filler_item.into().unwrap().as_item_index() as i32;
+            },
             Patch::Event { course, name, index } => {
                 self.flow(course)?
                     .get_mut(name)
-                    .ok_or_else(|| Error::game("File not found."))??
+                    .ok_or_else(|| Error::game(format!("File not found: {name}")))??
                     .get_mut()
                     .get_mut(index)
                     .ok_or_else(|| {
@@ -306,21 +297,304 @@ impl Patcher {
                     })?
                     .into_action()
                     .ok_or_else(|| Error::game("Not an action."))?
-                    .set_value(item as u32);
-            }
+                    .set_value(filler_item.into().unwrap().as_item_index());
+            },
             Patch::Shop(Shop::Ravio(index)) => {
-                self.rentals[index as usize] = item;
-            }
+                self.rentals[index as usize] = filler_item.into().unwrap().as_item().unwrap().to_game_item();
+            },
             Patch::Shop(Shop::Merchant(index)) => {
-                self.merchant[index as usize] = item;
-            }
+                self.merchant[index as usize] = filler_item.into().unwrap().as_item().unwrap().to_game_item();
+            },
             Patch::Multi(patches) => {
                 for patch in patches {
-                    self.apply(patch, item, settings)?;
+                    self.apply(patch, seed_info, filler_item.clone())?;
                 }
-            }
-            Patch::None => {}
+            },
+            Patch::None => {},
         }
+        Ok(())
+    }
+
+    fn parse_args(&mut self, course: CourseId, stage: u16, unq: u16) -> &mut Arg {
+        self.scene(course, stage)
+            .unwrap()
+            .stage_mut()
+            .get_mut()
+            .get_obj_mut(unq)
+            .ok_or_else(|| Error::game(format!("{}{} [{}] not found", course.as_str(), stage + 1, unq)))
+            .unwrap()
+            .arg_mut()
+    }
+
+    /// Patch Chest actors and swap their size if needed for CSMC.
+    fn prep_chest(
+        &mut self, item: FillerItem, course: CourseId, stage: u16, unq: u16, is_big: bool,
+        SeedInfo { settings, .. }: &SeedInfo,
+    ) -> Result<()> {
+        // Set contents
+        self.parse_args(course, stage, unq).0 = item.as_item_index() as i32;
+
+        let small_chest = (35, "TreasureBoxS");
+        let large_chest = (34, "TreasureBoxL");
+
+        let chest_data = if settings.chest_size_matches_contents {
+            if item.goes_in_csmc_large_chest(settings) {
+                large_chest
+            } else {
+                small_chest
+            }
+        } else if is_big {
+            large_chest
+        } else {
+            small_chest
+        };
+
+        // Forcibly set ID
+        self.scene(course, stage).unwrap().stage_mut().get_mut().get_obj_mut(unq).unwrap().set_id(chest_data.0);
+
+        // Add Actor if scene doesn't already have it
+        if !self.scene(course, stage).unwrap().actors().contains(chest_data.1) {
+            debug!("Adding {} to {}{}", chest_data.1, course.as_str(), stage + 1);
+            let actor = self.scene(DungeonHera, 0)?.actors().get_actor_bch(chest_data.1)?;
+            self.scene(course, stage).unwrap().actors_mut().add(actor)?;
+        }
+
+        Ok(())
+    }
+
+    /// Portals!
+    fn patch_portal(
+        &mut self, portal_map: &PortalMap, course: CourseId, scene: u16, unq: u16, here_portal: Portal,
+        SeedInfo { settings, .. }: &SeedInfo,
+    ) -> Result<()> {
+        if settings.portal_shuffle == PortalShuffle::Off {
+            return Ok(());
+        }
+
+        let there_portal = portal_map.get(&here_portal).expect(&format!("No portal_map entry for: {:?}", here_portal));
+        let there_flag = there_portal.get_flag();
+        let there_sp = there_portal.get_spawn_point();
+
+        // let here_arg2 = here_portal.get_arg2_for(there_portal);
+        // let here_arg2 = there_portal.get_vanilla().get_vanilla_type();
+        let here_arg2 = if here_portal.get_world() == there_portal.get_world() {
+            here_portal.get_reverse_type()
+        } else {
+            here_portal.get_type()
+        };
+
+        // Redirect Portal to new destination, and set correct flag to update destination icon on lower screen
+        self.modify_objs(
+            course,
+            scene,
+            [call(unq, move |obj| {
+                obj.redirect(there_sp);
+                obj.arg.2 = here_arg2;
+                obj.arg.7 = there_flag.get_value();
+            })],
+        );
+
+        // Update Curtain flag to match destination Portal Icon Flag
+        if here_portal == Portal::HyruleCastle {
+            self.modify_objs(
+                IndoorLight,
+                7,
+                [
+                    set_46_args(26, there_flag),      // Curtain
+                    set_46_args(29, there_flag),      // AreaDisableWallIn
+                    set_disable_flag(29, there_flag), // AreaDisableWallIn
+                ],
+            );
+        }
+
+        // TODO angle of Portal Blockages can't seem to be changed, no point in this function until the game respects
+        // the x-component of the MojWallBreakFieldLight/MojWallBreakFieldDark's rotation.
+        //self.block_portals(course, scene, unq, here_portal, *there_portal)?;
+
+        Ok(())
+    }
+
+    /// For portals that now lead to blocked portals, add matching blockages on that side of the portal
+    #[allow(unused)]
+    fn block_portals(
+        &mut self, course: CourseId, scene: u16, unq: u16, here_portal: Portal, there_portal: Portal,
+    ) -> Result<()> {
+        // Already blocked Portals can be left alone
+        match here_portal {
+            Portal::DesertNorth
+            | Portal::EasternRuinsSE
+            | Portal::DarkRuinsSE
+            | Portal::GraveyardLedgeLorule
+            | Portal::HyruleCastle => {
+                return Ok(());
+            },
+            _ => {},
+        }
+
+        match there_portal {
+            // Blocked portals
+            Portal::DesertNorth | Portal::EasternRuinsSE | Portal::GraveyardLedgeLorule | Portal::DarkRuinsSE => {
+                // Read vanilla Portal data, use it to add blockages relative to Portals
+                let obj_portal = self.read_obj(course, scene, unq);
+                let clp = obj_portal.clp;
+                let translate = obj_portal.srt.translate;
+                let (wall_unq, wall_ser) = self.find_objs_unq_ser(course, scene);
+
+                // Attach blockage to Portal (keeps light/dark fog from appearing until breakage is gone)
+                self.modify_objs(course, scene, [call(unq, move |obj| obj.lnk = vec![(wall_unq, 0, 0)])]);
+
+                // Different actors for WallBreakFieldLight and WallBreakFieldDark
+                match there_portal {
+                    Portal::DesertNorth | Portal::EasternRuinsSE => {
+                        self.add_obj(
+                            course,
+                            scene,
+                            Obj::wall_break_field_light(here_portal.get_flag(), clp, wall_ser, wall_unq, translate),
+                        );
+                        self.copy_bch("WallBreakFieldLight", (FieldLight, 30), (course, scene))?;
+                    },
+                    Portal::GraveyardLedgeLorule | Portal::DarkRuinsSE => {
+                        self.add_obj(
+                            course,
+                            scene,
+                            Obj::wall_break_field_dark(here_portal.get_flag(), clp, wall_ser, wall_unq, translate),
+                        );
+                        self.copy_bch("WallBreakFieldDark", (FieldDark, 30), (course, scene))?;
+                    },
+                    _ => unreachable!(),
+                }
+            },
+            // Hyrule Castle Curtain
+            Portal::HyruleCastle => {
+                // Read vanilla Portal data, use it to add the Curtain and WallDisableIn actors
+                let obj_portal = self.read_obj(course, scene, unq);
+                let clp = obj_portal.clp;
+                let t_curtain = obj_portal.srt.translate.add(Vec3 { x: 0.0, y: 0.0, z: 1.0 });
+                let t_wall = obj_portal.srt.translate.add(Vec3 { x: -0.02731, y: -0.00001, z: 0.96672 });
+                let (curtain_unq, curtain_ser) = self.find_objs_unq_ser(course, scene);
+
+                // Attach Curtain to Portal (keeps light from appearing until Curtain is gone)
+                self.modify_objs(course, scene, [call(unq, move |obj| obj.lnk = vec![(curtain_unq, 0, 0)])]);
+
+                let flag = here_portal.get_flag();
+
+                // Curtain
+                self.add_obj(
+                    course,
+                    scene,
+                    Obj {
+                        arg: Arg(0, 0, 0, 0, flag.get_type(), 0, flag.get_value(), 0, 0, 0, 0, 0, 0, 0.0),
+                        clp,
+                        flg: (0, 0, 0, 0),
+                        id: 550,
+                        lnk: vec![],
+                        nme: None,
+                        ril: vec![],
+                        ser: curtain_ser,
+                        srt: Transform {
+                            scale: Vec3 { x: 1.0, y: 16.0, z: 1.0 },
+                            rotate: Vec3 { x: 339.37350, y: 0.0, z: 0.0 },
+                            translate: t_curtain,
+                        },
+                        typ: 1,
+                        unq: curtain_unq,
+                    },
+                );
+
+                // WallDisableIn
+                let (disable_merge_unq, disable_merge_ser) = self.find_objs_unq_ser(course, scene);
+                self.add_obj(
+                    course,
+                    scene,
+                    Obj {
+                        arg: Arg(0, 0, 0, 0, flag.get_type(), 0, flag.get_value(), 0, 0, 0, 0, 0, 0, 0.0),
+                        clp,
+                        flg: (0, flag.get_type(), 0, flag.get_value()),
+                        id: 568,
+                        lnk: vec![],
+                        nme: None,
+                        ril: vec![],
+                        ser: disable_merge_ser,
+                        srt: Transform {
+                            scale: Vec3 { x: 5.25577, y: 1.0, z: 2.43051 },
+                            rotate: Vec3::ZERO,
+                            translate: t_wall,
+                        },
+                        typ: 6,
+                        unq: disable_merge_unq,
+                    },
+                );
+
+                self.copy_bch("Curtain", (IndoorLight, 7), (course, scene))?;
+            },
+            _ => return Ok(()),
+        };
+
+        Ok(())
+    }
+
+    /// Copies an actor .bch file from a given stage to a different stage, if it doesn't already have it.
+    fn copy_bch(
+        &mut self, actor_name: &str, (from_course, from_stage): (CourseId, u16), (to_course, to_stage): (CourseId, u16),
+    ) -> Result<()> {
+        if !self.scene(to_course, to_stage - 1).unwrap().actors().contains(actor_name) {
+            debug!(
+                "Copying {} from {}{} to {}{}",
+                actor_name,
+                from_course.as_str(),
+                from_stage,
+                to_course.as_str(),
+                to_stage
+            );
+            let actor = self.scene(from_course, from_stage - 1)?.actors().get_actor_bch(actor_name)?;
+            self.scene(to_course, to_stage - 1).unwrap().actors_mut().add(actor)?;
+        }
+
+        Ok(())
+    }
+
+    /// Weather Vanes
+    fn patch_weather_vane(
+        &mut self, item: FillerItem, course: CourseId, scene: u16, unq: u16, vane: Vane,
+        SeedInfo { settings, .. }: &SeedInfo,
+    ) -> Result<()> {
+        if settings.weather_vanes != Shuffled {
+            return Ok(());
+        }
+
+        let wv_flag = match item {
+            FillerItem::Vane(vane) => vane.flag().get_value(),
+            _ => unreachable!(),
+        };
+
+        // Set Weather Vane flag to randomized value
+        self.parse_args(course, scene, unq).6 = wv_flag;
+
+        let wv_world_dest = Vane::get_world(item.into());
+        let wv_world_vane = Vane::get_world(vane);
+
+        // Actor info for model swaps
+        let wv_config_info = match wv_world_dest {
+            World::Hyrule => (165, "Telephone", FieldLight),
+            World::Lorule => (464, "TelephoneDark", FieldDark),
+        };
+
+        // Forcibly set ID
+        self.scene(course, scene).unwrap().stage_mut().get_mut().get_obj_mut(unq).unwrap().set_id(wv_config_info.0);
+
+        // Swap the Weather Vane model if it's from the opposite world
+        if wv_world_vane != wv_world_dest {
+            Self::copy_bch(self, wv_config_info.1, (wv_config_info.2, 16), (course, scene + 1))?;
+        }
+        //     Add Actor if scene doesn't already have it
+        //     if !self.scene(course, scene).unwrap().actors().contains(wv_config_info.1) {
+        //         debug!("Adding {} to {}{}", wv_config_info.1, course.as_str(), scene + 1);
+        //         let actor =
+        //             self.scene(wv_config_info.2, 15)?.actors().get_actor_bch(wv_config_info.1)?;
+        //         self.scene(course, scene).unwrap().actors_mut().add(actor)?;
+        //     }
+        // }
+
         Ok(())
     }
 
@@ -347,9 +621,11 @@ impl Patcher {
         self.scene(DungeonWater, 1)?.actors_mut().add(warp_tile.clone())?; // Swamp Palace B1
         self.scene(DungeonDokuro, 1)?.actors_mut().add(warp_tile)?; // Skull Woods B2
 
-        // Add Ravio to Hilda's Study to give out Bow of Light Hint
-        let hint_ghost = self.scene(IndoorDark, 15)?.actors().get_actor_bch("HintGhost")?;
-        self.scene(IndoorDark, 4)?.actors_mut().add(hint_ghost)?;
+        // Add Hint Ghost to Hilda's Study to give out Bow of Light Hint
+        if !seed_info.settings.progressive_bow_of_light {
+            let hint_ghost = self.scene(IndoorDark, 15)?.actors().get_actor_bch("HintGhost")?;
+            self.scene(IndoorDark, 4)?.actors_mut().add(hint_ghost)?;
+        }
 
         // Add Heart Piece actor to vanilla Letter in a Bottle area
         let heart_piece = self.scene(FieldLight, 29)?.actors().get_actor_bch("HeartPiece")?;
@@ -370,23 +646,21 @@ impl Patcher {
         // let sarc = jack::open_szs(&self.game, "Archive/ActorProfile.szs");
 
         let prizes = get_dungeon_prizes(&seed_info.layout);
-        let free = self.rentals[8];
-        flow::apply(&mut self, free, seed_info.settings)?;
+        lms::msbf::patch(&mut self, &seed_info.settings)?;
         messages::patch_messages(&mut self, seed_info)?;
-        prizes::patch_dungeon_prizes(&mut self, &prizes, seed_info.settings);
-        maps::patch_maps(&mut self, &prizes);
-        scenes::patch_byaml_files(&mut self, seed_info.settings)?;
-        let scene_env_file = scene_env::patch_scene_env(&mut self, seed_info.settings);
+        prizes::patch_dungeon_prizes(&mut self, &prizes, &seed_info.settings);
+        byaml::course::patch(&mut self, &prizes, &seed_info.settings);
+        byaml::stage::patch(&mut self, &seed_info.settings)?;
+        let scene_env_file = byaml::scene_env::patch(&mut self, &seed_info.settings);
+        let cutscenes = demo::build_replacement_cutscenes(&seed_info.settings)?;
 
         {
             let Self { ref rentals, ref merchant, ref mut courses, .. } = self;
-            let your_house_actors =
-                courses.get_mut(&IndoorLight).unwrap().scenes.get_mut(&0).unwrap().actors_mut();
-            for actor in rentals.iter().filter_map(|item| item_actors.get(item)) {
+            let your_house_actors = courses.get_mut(&IndoorLight).unwrap().scenes.get_mut(&0).unwrap().actors_mut();
+            for actor in rentals.iter().filter_map(|item| item_actors.get(&item)) {
                 your_house_actors.add(actor.clone())?;
             }
-            let kakariko_actors =
-                courses.get_mut(&FieldLight).unwrap().scenes.get_mut(&15).unwrap().actors_mut();
+            let kakariko_actors = courses.get_mut(&FieldLight).unwrap().scenes.get_mut(&15).unwrap().actors_mut();
             kakariko_actors.add(item_actors.get(&merchant[0]).unwrap().clone())?;
             kakariko_actors.add(item_actors.get(&merchant[2]).unwrap().clone())?;
         }
@@ -417,24 +691,23 @@ impl Patcher {
                 romfs.add_serialize(stage);
             }
         }
-        for cutscene in cutscenes(&game, seed_info.settings) {
-            romfs.add(cutscene?);
+        for cutscene in cutscenes {
+            romfs.add(cutscene);
         }
         Ok(Patches { game, code, romfs })
     }
 }
 
-/// Debugging for MSBF and MSBT Files
+/// Research MSBF and MSBT Files
 #[allow(unused)]
 #[deprecated]
-pub fn debug_msbf_msbt<C>(
-    patcher: &mut Patcher, msbf_course: C, msbf_file: &str, msbt_course: game::Course,
-    msbt_file: &str, edotor: bool,
+pub fn research_msbf_msbt<C>(
+    patcher: &mut Patcher, msbf_course: C, msbf_file: &str, msbt_course: game::Course, msbt_file: &str, edotor: bool,
 ) where
     C: Into<Option<game::Course>>,
 {
-    let labels = messages::debug(patcher, msbt_course, msbt_file, edotor);
-    flow::debug(patcher, msbf_course, msbf_file, labels, edotor);
+    let labels = messages::research(patcher, msbt_course, msbt_file, edotor);
+    lms::msbf::research(patcher, msbf_course, msbf_file, labels, edotor);
 
     info!("Early Debug Exit");
     std::process::exit(0);
@@ -457,14 +730,19 @@ pub enum Patch {
     Maiamai { course: CourseId, scene: u16, unq: u16 },
     SilverRupee { course: CourseId, scene: u16, unq: u16 },
     GoldRupee { course: CourseId, scene: u16, unq: u16 },
+    Portal { course: CourseId, scene: u16, unq: u16, portal: Portal },
+    WeatherVane { course: CourseId, scene: u16, unq: u16, vane: Vane },
     Shop(Shop),
     Multi(Vec<Patch>),
     None, // Workaround until everything is shufflable
 }
 
 impl Patch {
-    pub fn apply(self, patcher: &mut Patcher, item: Item, settings: &Settings) -> Result<()> {
-        patcher.apply(self, item, settings)
+    pub fn apply<F>(self, patcher: &mut Patcher, seed_info: &SeedInfo, filler_item: F) -> Result<()>
+    where
+        F: Into<Option<FillerItem>>,
+    {
+        patcher.apply(self, seed_info, filler_item.into())
     }
 }
 
@@ -496,25 +774,17 @@ impl Patches {
         }
         let path = path.as_ref();
         println!();
-        info!(
-            "Writing Patch Files to:         {}\\{:016X}",
-            &path.absolutize()?.display(),
-            self.game.id()
-        );
+        info!("Writing Patch Files to:         {}\\{:016X}", &path.absolutize()?.display(), self.game.id());
 
-        match fs_extra::copy_items(
-            &[moddir],
-            path,
-            &CopyOptions { overwrite: true, ..Default::default() },
-        )
-        .map_err(Error::io)
+        match fs_extra::copy_items(&[moddir], path, &CopyOptions { overwrite: true, ..Default::default() })
+            .map_err(Error::io)
         {
             Ok(_) => Ok(()),
             Err(_) => {
                 error!("Couldn't write to:              {}", path.display());
                 error!("Please check that config.json points to a valid output destination.");
                 fail!();
-            }
+            },
         }
     }
 }
@@ -536,150 +806,4 @@ impl Files {
     {
         self.0.push(file.serialize());
     }
-}
-
-/// Removes extraneous events from all important cutscenes.
-fn cutscenes<'game>(
-    game: &'game Rom, settings: &Settings,
-) -> impl Iterator<Item = Result<File<Demo>>> + 'game {
-    info!("Patching Cutscenes...");
-    let Settings { logic, options, .. } = settings.clone();
-    let early = iter::once_with(move || {
-        let mut opening = game.demo(0)?.map(truncate_cutscene);
-        {
-            let opening = opening.get_mut();
-
-            for flag in IntoIterator::into_iter([
-                7, 9, 10,  // Skip Gulley in prologue
-                11,  // Fix Hyrule lighting, skip Gulley dialogue at Blacksmith
-                20,  // Disable Gulley's callback
-                55,  // ?
-                84,  // Enable Dampe + Seres conversation
-                107, // Spawn enemies
-                110, // Post Sanctuary
-                131, // Suppress Ravio's Gift
-                210, // Skip Thanks item
-                223, // Skip Hyrule Castle Art Gallery Event
-                225, // Correct field music
-                231, // Skip Hyrule Castle events
-                232, // Enable Ravio's freebie
-                233, // Ravio's Shop fully opened
-                //235, // Suppress Ravio's Signs, Huh? Not Interested? text, but also Freebie =\
-                236, // Enable Stamina bar
-                239, // Ravio Sign Trigger
-                241, // Skip Osfala intro
-                //246, // Skip Irene, make Hyrule Hotfoot appear, spawns certain enemies
-                248, // Skip Yuga killing Osfala
-                //250, // Yuga 1 Defeated
-                //251, // Set in Post-EP FieldLight20 cutscene, being used as PoC Flag
-                310, // Watched HC Post-EP cutscene, fixes overworld music issues
-                315, // Shop open???
-                // 320, // Shady Guy Trigger
-                321, 322, // Skip first Oren cutscenes
-                374, // Fix Post-Gales and Post-Hera music by marking Sahasrahla telepathy as seen
-                415, // Skip Yuga capturing Zelda
-                430, // Fix Chamber of Sages Softlock
-                510, // Open Portals, Activate Hyrule Castle Midway
-                522, // Blacksmith Hilda Text, enable Map Swap icon, skip introductory Lorule music
-                524, 560, 600, 620, 640, // Skip Hilda Text, enable Lorule overworld music
-                525, // Skip Sahasrahla outside Link's House, make Hyrule Hotfoot appear
-                // 536, 537, // Gulley Flags
-                // 556, 557, // Oren Flags
-                // 576, 577, // Seres Flags
-                // 596, 597, // Osfala Flags
-                // 616, 617, // Rosso Flags
-                // 636, 637, // Irene Flags
-                // 656, 657, // Impa Flags
-                542, 543, // Skip Bomb-Shop Man dialogue
-                599, // Disable Sand Rod return
-                897, // Big Special Something
-                899, // Enable Quick Equip
-                902, // StreetPass Tree
-                906, // Monster Guts
-                907, // Monster Tail
-                908, // Monster Horn
-                919, // Skip Hint Ghost tutorial
-                920, // Link's House Weather Vane
-                940, // Vacant House Weather Vane
-                950, // Maiamai
-                955, // Master Ore Icon
-                960, // Blacksmith's Wife
-                965, // Suppress Energy Potion
-            ]) {
-                opening.add_event_flag(flag);
-            }
-
-            // Enable opening Lorule Castle from start
-            if logic.lc_requirement == 0 {
-                opening.add_event_flag(670);
-            }
-
-            // Night Mode
-            if options.night_mode {
-                opening.add_event_flag(964);
-            }
-
-            // Weather Vanes
-            let wv_flags = match logic.active_weather_vanes {
-                Standard => None,
-                Convenient => Flag::get_convenient_weather_vane_flags(),
-                Hyrule => Flag::get_hyrule_weather_vane_flags(),
-                Lorule => Flag::get_lorule_weather_vane_flags(),
-                All => Flag::get_all_weather_vane_flags(),
-            };
-            wv_flags.iter().flatten().for_each(|flag| opening.add_event_flag(flag.get_value()));
-
-            // Swordless Mode - Tear down Barrier at game start
-            if logic.swordless_mode {
-                opening.add_event_flag(410);
-            }
-
-            // Trial's Skip
-            // Set flags to auto-complete the trials, advanced LC music, and show doors opening.
-            // Intentionally not setting 713 (lower-right square) so door will do check and open itself.
-            if logic.skip_trials {
-                for flag in
-                    IntoIterator::into_iter([710, 711, 712, /*713,*/ 714, 715, 716, 717])
-                {
-                    opening.add_event_flag(flag);
-                }
-            }
-
-            // Big Bomb Flower Skip
-            // Removes the Big Rock (FieldDark33) to drain the water (CaveDark1)
-            if logic.skip_big_bomb_flower {
-                opening.add_event_flag(541);
-            }
-
-            // Reverse Sage Events
-            if !logic.reverse_sage_events {
-                opening.add_event_flag(222); // Open Hyrule Castle Front Door
-            }
-        }
-
-        Ok(opening)
-    })
-    .chain((1..4).map(move |i| Ok(game.demo(i)?.map(truncate_cutscene))));
-    let late = iter::once_with(move || {
-        let mut midgame = game.demo(4)?.map(truncate_cutscene);
-        {
-            let opening = midgame.get_mut();
-            for flag in IntoIterator::into_iter([
-                510, // Skip Lorule Blacksmith's Wife dialogue
-                524, 560, 600, 620, 640, // Skip Hilda telepathy
-            ]) {
-                opening.add_event_flag(flag);
-            }
-        }
-        Ok(midgame)
-    })
-    .chain((5..8).map(move |i| Ok(game.demo(i)?.map(truncate_cutscene))));
-    early.chain(late)
-}
-
-/// Removes all extraneous events and sets the Finish timestamp to 0.
-fn truncate_cutscene(mut demo: Demo) -> Demo {
-    demo.retain(Timed::is_known);
-    demo.finish_mut().set_timestamp(0);
-    demo
 }

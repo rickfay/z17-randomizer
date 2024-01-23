@@ -4,6 +4,9 @@ crate::region! {
     color: Purple,
     hyrule {
         locations: [
+            "Sanctuary Portal": None @Portal(IndoorLight 11[21] Sanctuary),
+            "Hyrule Graveyard Ledge Portal": None @Portal(12[107] GraveyardLedgeHyrule),
+
             "Dampe": ItemSwordLv1 @Event(FieldLight_13_Sister[0x1D]),
             "Graveyard Ledge Cave": HeartPiece @Heart(CaveLight 5[2]),
             "Sanctuary Pegs": RupeeSilver @Chest(11[89]),
@@ -17,6 +20,11 @@ crate::region! {
     },
     lorule {
         locations: [
+            "Philosopher's Cave Portal": None @Portal(CaveDark 5[8] Philosopher),
+            "Lorule Graveyard Ledge Portal": None @Portal(FieldDark 12[20] GraveyardLedgeLorule),
+
+            "Graveyard Weather Vane": None @WeatherVane(FieldDark 12[97] GraveyardWV),
+
             "Graveyard Peninsula": RupeeSilver @Chest(FieldDark 19[68]),
             "Philosopher's Cave": OreRed @BigChest(CaveDark 5[18]),
             "[LS] Entrance Chest": RupeeG @Chest(AttractionDark 2[219]),

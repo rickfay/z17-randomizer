@@ -4,7 +4,7 @@ use modinfo::Settings;
 use rom::byaml::scene_env::SceneEnvFile;
 
 /// Patch the SceneEnv.byaml file
-pub fn patch_scene_env(patcher: &mut Patcher, settings: &Settings) -> Option<SceneEnvFile> {
+pub fn patch(patcher: &mut Patcher, settings: &Settings) -> Option<SceneEnvFile> {
     // TODO not using this for anything yet
     if !&settings.dev_mode {
         return None;

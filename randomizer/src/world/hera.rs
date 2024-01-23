@@ -1,9 +1,9 @@
-use crate::legacy::path::Path;
-use crate::model::check::Check;
-use crate::model::filler_item::Goal;
-use crate::model::location::Location::{self, *};
-use crate::model::location_node::LocationNode;
-use crate::model::logic::Logic;
+use crate::filler::check::Check;
+use crate::filler::filler_item::Goal;
+use crate::filler::location::Location::{self, *};
+use crate::filler::location_node::LocationNode;
+use crate::filler::logic::Logic;
+use crate::filler::path::Path;
 use crate::regions;
 use crate::world::{check, edge, goal, location, old_check, old_path};
 use crate::LocationInfo;
@@ -29,10 +29,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                 "Tower of Hera Bottom",
                 vec![
                     old_check(
-                        LocationInfo::new(
-                            "[TH] (1F) Outside",
-                            regions::dungeons::tower::hera::SUBREGION,
-                        ),
+                        LocationInfo::new("[TH] (1F) Outside", regions::dungeons::tower::hera::SUBREGION),
                         Some(|p| p.can_merge()),
                         None,
                         None,
@@ -40,10 +37,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     old_check(
-                        LocationInfo::new(
-                            "[TH] (1F) Center",
-                            regions::dungeons::tower::hera::SUBREGION,
-                        ),
+                        LocationInfo::new("[TH] (1F) Center", regions::dungeons::tower::hera::SUBREGION),
                         Some(|p| p.can_merge()),
                         None,
                         None,
@@ -51,10 +45,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     old_check(
-                        LocationInfo::new(
-                            "[TH] (3F) Platform",
-                            regions::dungeons::tower::hera::SUBREGION,
-                        ),
+                        LocationInfo::new("[TH] (3F) Platform", regions::dungeons::tower::hera::SUBREGION),
                         Some(|p| p.can_merge()),
                         None,
                         None,
@@ -80,10 +71,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
             location(
                 "Tower of Hera Middle",
                 vec![
-                    check!(
-                        "[TH] (5F) Red/Blue Switches",
-                        regions::dungeons::tower::hera::SUBREGION
-                    ),
+                    check!("[TH] (5F) Red/Blue Switches", regions::dungeons::tower::hera::SUBREGION),
                     check!("[TH] (6F) Right Mole", regions::dungeons::tower::hera::SUBREGION),
                     check!("[TH] (6F) Left Mole", regions::dungeons::tower::hera::SUBREGION),
                 ],
@@ -111,14 +99,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                 ],
                 vec![
                     edge!(TowerOfHeraMiddle),
-                    old_path(
-                        TowerOfHeraBoss,
-                        Some(|p| p.has_hera_big_key()),
-                        None,
-                        None,
-                        None,
-                        None,
-                    ),
+                    old_path(TowerOfHeraBoss, Some(|p| p.has_hera_big_key()), None, None, None, None),
                 ],
             ),
         ),
@@ -127,14 +108,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
             location(
                 "Tower of Hera Boss",
                 vec![],
-                vec![old_path(
-                    TowerOfHeraPostBoss,
-                    Some(|p| p.can_defeat_moldorm()),
-                    None,
-                    None,
-                    None,
-                    None,
-                )],
+                vec![old_path(TowerOfHeraPostBoss, Some(|p| p.can_defeat_moldorm()), None, None, None, None)],
             ),
         ),
         (
@@ -143,7 +117,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                 "Tower of Hera Post Boss",
                 vec![
                     check!("[TH] Moldorm", regions::dungeons::tower::hera::SUBREGION),
-                    check!("Tower of Hera Prize", regions::dungeons::tower::hera::SUBREGION),
+                    check!("[TH] Prize", regions::dungeons::tower::hera::SUBREGION),
                     goal!("Moldorm", Goal::Moldorm),
                 ],
                 vec![],

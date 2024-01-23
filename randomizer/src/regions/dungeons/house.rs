@@ -15,7 +15,7 @@ crate::region! {
             "[HG] (3F) Rat Room": KeySmall @Chest(3[405]),
             "[HG] (3F) Fire Bubbles": RupeePurple @Chest(3[548]),
             "[HG] Margomill": HeartContainer @Heart(3[458]),
-            "House of Gales Prize": PendantWisdom @None(),
+            "[HG] Prize": PendantWisdom @None(),
         ],
     },
 }
