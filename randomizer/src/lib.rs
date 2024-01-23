@@ -1,4 +1,27 @@
-use std::collections::btree_map::BTreeMap;
+use crate::filler::filler_item::Vane;
+use crate::filler::{filler_item, portals, vanes};
+use crate::world::WorldGraph;
+use crate::{
+    constants::VERSION,
+    hints::{formatting::*, Hints},
+    metrics::Metrics,
+    patch::lms::msbf::MsbfKey,
+    system::UserConfig,
+};
+use filler::filler_item::FillerItem;
+use filler::portals::Portal;
+use game::Item::{self};
+use log::{debug, error, info};
+use macros::fail;
+use modinfo::Settings;
+use patch::Patcher;
+use path_absolutize::*;
+use rand::{rngs::StdRng, SeedableRng};
+use regions::Subregion;
+use rom::Rom;
+use serde::{ser::SerializeMap, Deserialize, Serialize, Serializer};
+use std::collections::{BTreeMap, HashMap, HashSet};
+use std::hash::BuildHasherDefault;
 use std::{
     collections::hash_map::DefaultHasher,
     error::Error as StdError,
@@ -7,36 +30,12 @@ use std::{
     io::{self, Write},
     ops::Deref,
 };
-
-use game::Item::{self, *};
-use log::{debug, error, info};
-use macros::fail;
-use model::filler_item::FillerItem;
-use modinfo::Settings;
-use patch::Patcher;
-use path_absolutize::*;
-use rand::{rngs::StdRng, SeedableRng};
-use regions::Subregion;
-use rom::Rom;
-use serde::{ser::SerializeMap, Serialize, Serializer};
-
-use crate::{
-    constants::VERSION,
-    hints::{formatting::*, Hints},
-    metrics::Metrics,
-    patch::msbf::MsbfKey,
-    system::UserConfig,
-};
+use twox_hash::XxHash;
 
 pub mod constants;
-mod entrance_rando;
-mod filler;
-mod filler_util;
+pub mod filler;
 mod hints;
-mod item_pools;
-mod legacy;
 mod metrics;
-pub mod model;
 mod patch;
 pub mod regions;
 pub mod system;
@@ -51,6 +50,13 @@ pub struct Error {
 }
 
 impl Error {
+    fn internal<S>(err: S) -> Self
+    where
+        S: Into<Box<dyn StdError + Send + Sync + 'static>>,
+    {
+        Self { kind: ErrorKind::Internal, inner: err.into() }
+    }
+
     fn game<S>(err: S) -> Self
     where
         S: Into<Box<dyn StdError + Send + Sync + 'static>>,
@@ -94,13 +100,13 @@ impl From<io::Error> for Error {
 
 impl From<system::Error> for Error {
     fn from(err: system::Error) -> Self {
-        Self { kind: ErrorKind::Sys, inner: err.into() }
+        Self { kind: ErrorKind::Internal, inner: err.into() }
     }
 }
 
 #[derive(Debug)]
 pub enum ErrorKind {
-    Sys,
+    Internal,
     Game,
     Io,
 }
@@ -136,16 +142,16 @@ impl LocationInfo {
 /// A world layout for the patcher.
 #[derive(Clone, Debug, Default, Serialize)]
 pub struct Layout {
-    #[serde(rename = "Hyrule", serialize_with = "serialize_world")]
-    hyrule: World,
-    #[serde(rename = "Lorule", serialize_with = "serialize_world")]
-    lorule: World,
-    #[serde(rename = "Dungeons", serialize_with = "serialize_world")]
-    dungeons: World,
+    #[serde(rename = "Hyrule", serialize_with = "serialize_category")]
+    hyrule: Category,
+    #[serde(rename = "Lorule", serialize_with = "serialize_category")]
+    lorule: Category,
+    #[serde(rename = "Dungeons", serialize_with = "serialize_category")]
+    dungeons: Category,
 }
 
 impl Layout {
-    fn world(&self, id: regions::World) -> &World {
+    fn category(&self, id: regions::World) -> &Category {
         match id {
             regions::World::Hyrule => &self.hyrule,
             regions::World::Lorule => &self.lorule,
@@ -153,7 +159,7 @@ impl Layout {
         }
     }
 
-    fn world_mut(&mut self, id: regions::World) -> &mut World {
+    fn category_mut(&mut self, id: regions::World) -> &mut Category {
         match id {
             regions::World::Hyrule => &mut self.hyrule,
             regions::World::Lorule => &mut self.lorule,
@@ -161,17 +167,17 @@ impl Layout {
         }
     }
 
-    fn get_node_mut(&mut self, node: &'static Subregion) -> &mut BTreeMap<&'static str, Item> {
-        self.world_mut(node.world()).entry(node.name()).or_insert_with(Default::default)
+    fn get_node_mut(&mut self, node: &'static Subregion) -> &mut DashMap<&'static str, FillerItem> {
+        self.category_mut(node.world()).entry(node.name()).or_insert_with(Default::default)
     }
 
-    fn get(&self, location: &LocationInfo) -> Option<Item> {
+    fn get(&self, location: &LocationInfo) -> Option<FillerItem> {
         let LocationInfo { subregion: node, name } = location;
-        self.world(node.world()).get(node.name()).and_then(|region| region.get(name).copied())
+        self.category(node.world()).get(node.name()).and_then(|region| region.get(name).copied())
     }
 
     #[allow(unused)]
-    fn get_item(&self, name: &'static str, subregion: &'static Subregion) -> Item {
+    fn get_item(&self, name: &'static str, subregion: &'static Subregion) -> FillerItem {
         self.get(&LocationInfo::new(name, subregion)).unwrap()
     }
 
@@ -182,7 +188,7 @@ impl Layout {
 
     /// This just highlights why we need to redo [`Layout`]
     #[allow(unused)]
-    fn find_single(&self, find_item: Item) -> Option<(&'static str, &'static str)> {
+    fn find_single(&self, find_item: FillerItem) -> Option<(&'static str, &'static str)> {
         for (region_name, region) in &self.hyrule {
             for (loc_name, item) in region {
                 if find_item.eq(item) {
@@ -210,256 +216,45 @@ impl Layout {
         None
     }
 
-    pub fn set(&mut self, location: LocationInfo, item: Item) {
+    pub fn set(&mut self, location: LocationInfo, item: FillerItem) {
         let LocationInfo { subregion: node, name } = location;
-        self.get_node_mut(node).insert(name, item.normalize());
-        debug!(
-            "Placed {} in {}/{}",
-            item.normalize().as_str(),
-            location.subregion.name(),
-            location.name
-        );
+        self.get_node_mut(node).insert(name, item);
+        debug!("Placed {} in {}/{}", item.as_str(), location.subregion.name(), location.name);
+    }
+
+    pub fn set_item(&mut self, location: &'static str, subregion: &'static Subregion, item: filler_item::Item) {
+        self.set(LocationInfo::new(location, subregion), FillerItem::Item(item));
     }
 }
 
-pub type World = BTreeMap<&'static str, BTreeMap<&'static str, Item>>;
+pub type Category = DashMap<&'static str, DashMap<&'static str, FillerItem>>;
 
-fn serialize_world<S>(region: &World, ser: S) -> Result<S::Ok, S::Error>
+fn serialize_category<S>(region: &Category, ser: S) -> Result<S::Ok, S::Error>
 where
     S: Serializer,
 {
-    struct Wrap<'a>(&'a BTreeMap<&'static str, Item>);
+    struct Wrap<'a>(&'a DashMap<&'static str, FillerItem>);
 
     impl<'a> Serialize for Wrap<'a> {
         fn serialize<S>(&self, ser: S) -> Result<S::Ok, S::Error>
         where
             S: Serializer,
         {
-            let mut map = ser.serialize_map(Some(self.0.len()))?;
-            for (k, v) in self.0 {
-                map.serialize_entry(k, item_to_str(v))?;
+            let ordered = self.0.iter().map(|(&k, &v)| (k, v)).collect::<BTreeMap<_, _>>();
+            let mut map = ser.serialize_map(Some(ordered.len()))?;
+            for (k, v) in ordered {
+                map.serialize_entry(k, v.as_str())?;
             }
             map.end()
         }
     }
 
-    let mut map = ser.serialize_map(Some(region.len()))?;
-    for (k, v) in region {
+    let ordered = region.iter().map(|(&k, v)| (k, v)).collect::<BTreeMap<_, _>>();
+    let mut map = ser.serialize_map(Some(ordered.len()))?;
+    for (k, v) in ordered {
         map.serialize_entry(k, &Wrap(v))?;
     }
     map.end()
-}
-
-fn item_to_str(item: &Item) -> &'static str {
-    match item {
-        KeySmall => "Small Key",
-        KeyBoss => "Big Key",
-        Compass => "Compass",
-        HeartContainer => "Heart Container",
-        RupeeR => "Red Rupee",
-        RupeeG => "Green Rupee",
-        RupeeB => "Blue Rupee",
-        HeartPiece => "Piece of Heart",
-        ItemIceRod => "Ice Rod+",
-        ItemIceRodLv2 => "Nice Ice Rod",
-        ItemSandRod => "Sand Rod+",
-        ItemSandRodLv2 => "Nice Sand Rod",
-        ItemTornadeRod => "Tornado Rod+",
-        ItemTornadeRodLv2 => "Nice Tornado Rod",
-        ItemBomb => "Bombs+",
-        ItemBombLv2 => "Nice Bombs",
-        ItemFireRod => "Fire Rod+",
-        ItemFireRodLv2 => "Nice Fire Rod",
-        ItemHookShot => "Hookshot+",
-        ItemHookShotLv2 => "Nice Hookshot",
-        ItemBoomerang => "Boomerang+",
-        ItemBoomerangLv2 => "Nice Boomerang",
-        ItemHammer => "Hammer+",
-        ItemHammerLv2 => "Nice Hammer",
-        ItemBow => "Bow+",
-        ItemBowLv2 => "Nice Bow",
-        ItemShield => "Shield",
-        ItemBottle => "Empty Bottle",
-        ItemStoneBeauty => "Smooth Gem",
-        ItemKandelaar => "Lamp+",
-        ItemKandelaarLv2 => "Super Lamp",
-        ItemSwordLv1 | ItemSwordLv2 | ItemSwordLv3 | ItemSwordLv4 => "Sword+",
-        ItemMizukaki => "Zora's Flippers",
-        RingRental => "Ravio's Bracelet+",
-        RingHekiga => "Ravio's Bracelet",
-        ItemBell => "Bell",
-        RupeeGold => "Gold Rupee",
-        RupeeSilver => "Silver Rupee",
-        PowerGlove => "Strength+",
-        ItemInsectNet => "Net+",
-        ItemInsectNetLv2 => "Super Net",
-        Kinsta => "Lost Maiamai",
-        BadgeBee => "Bee Badge",
-        HintGlasses => "Hint Glasses",
-        LiverBlue => "Monster Tail",
-        LiverPurple => "Monster Guts",
-        LiverYellow => "Monster Horn",
-        ClothesBlue | ClothesRed => "Mail+",
-        HyruleShield => "Hylian Shield",
-        OreYellow => "Master Ore",
-        OreGreen => "Master Ore",
-        OreBlue => "Master Ore",
-        GanbariPowerUp => "Stamina Scroll",
-        Pouch => "Pouch",
-        DashBoots => "Pegasus Boots",
-        OreRed => "Master Ore",
-        MessageBottle => "Letter in a Bottle",
-        MilkMatured => "Premium Milk",
-        SpecialMove => "Great Spin",
-        GanbariTubo => "Energy Potion",
-        RupeePurple => "Purple Rupee",
-        ItemBowLight => "Bow of Light",
-        Heart => "Heart",
-
-        Empty => "Nothing",
-
-        PendantPower => "Pendant of Power",
-        PendantWisdom => "Pendant of Wisdom",
-        ZeldaAmulet | PendantCourage => "Pendant of Courage+",
-
-        SageGulley => "Sage Gulley",
-        SageOren => "Sage Oren",
-        SageSeres => "Sage Seres",
-        SageOsfala => "Sage Osfala",
-        SageImpa => "Sage Impa",
-        SageIrene => "Sage Irene",
-        SageRosso => "Sage Rosso",
-
-        TriforceCourage => "Triforce of Courage",
-
-        ItemPotShopRed => "Red Potion",
-        ItemPotShopBlue => "Blue Potion",
-        ItemPotShopPurple => "Purple Potion",
-        ItemPotShopYellow => "Yellow Potion",
-
-        EscapeFruit => "Scoot Fruit",
-        StopFruit => "Foul Fruit",
-        Bee => "Bee",
-        GoldenBeeForSale => "Golden Bee",
-        Fairy => "Fairy",
-        Milk => "Milk",
-
-        ItemRentalIceRod => "Rented Ice Rod",
-        ItemRentalSandRod => "Rented Sand Rod",
-        ItemRentalTornadeRod => "Rented Tornado Rod",
-        ItemRentalBomb => "Rented Bomb Rod",
-        ItemRentalFireRod => "Rented Fire Rod",
-        ItemRentalHookShot => "Rented Hookshot",
-        ItemRentalBoomerang => "Rented Boomerang",
-        ItemRentalHammer => "Rented Hammer",
-        ItemRentalBow => "Rented Bow",
-        ItemRentalShield => "Rented Shield",
-        ItemRentalSandRodFirst => "Rented Sand Rod (Osfala)",
-        PowerfulGlove => "Titan's Mitt",
-        GoldenBee => "Golden Bee",
-        PackageSword => "Captain's Sword",
-    }
-}
-
-trait ItemExt {
-    fn normalize(self) -> Self;
-    fn goes_in_csmc_large_chest(&self) -> bool;
-    fn msbf_key(self) -> Option<&'static str>;
-
-    // fn is_dungeon(&self) -> bool;
-    // fn is_sword(&self) -> bool;
-    // fn is_super(&self) -> bool;
-    // fn is_ore(&self) -> bool;
-}
-
-impl ItemExt for Item {
-    fn normalize(self) -> Self {
-        match self {
-            PackageSword | ItemSwordLv1 | ItemSwordLv3 | ItemSwordLv4 => ItemSwordLv2,
-            ItemRentalIceRod => ItemIceRod,
-            ItemRentalSandRod => ItemSandRod,
-            ItemRentalTornadeRod => ItemTornadeRod,
-            ItemRentalBomb => ItemBomb,
-            ItemRentalFireRod => ItemFireRod,
-            ItemRentalHookShot => ItemHookShot,
-            ItemRentalBoomerang => ItemBoomerang,
-            ItemRentalHammer => ItemHammer,
-            ItemRentalBow => ItemBow,
-            PowerfulGlove => PowerGlove,
-            ClothesRed => ClothesBlue,
-            // RingRental => RingHekiga,
-            ItemKandelaarLv2 => ItemKandelaar,
-            ItemInsectNetLv2 => ItemInsectNet,
-            item => item,
-        }
-    }
-
-    fn goes_in_csmc_large_chest(&self) -> bool {
-        matches!(
-            self,
-            // Empty |
-            KeySmall | KeyBoss |
-            // Compass |
-            // HeartContainer | HeartPiece |
-            // RupeeR | RupeeG | RupeeB | RupeeGold | RupeeSilver | RupeePurple |
-            ItemIceRod | ItemRentalIceRod | ItemIceRodLv2 |
-            ItemSandRod | ItemRentalSandRod | ItemSandRodLv2 | ItemRentalSandRodFirst |
-            ItemTornadeRod | ItemRentalTornadeRod | ItemTornadeRodLv2 |
-            ItemBomb | ItemRentalBomb | ItemBombLv2 |
-            ItemFireRod | ItemRentalFireRod | ItemFireRodLv2 |
-            ItemHookShot | ItemRentalHookShot | ItemHookShotLv2 |
-            ItemBoomerang | ItemRentalBoomerang | ItemBoomerangLv2 |
-            ItemHammer | ItemRentalHammer | ItemHammerLv2 |
-            ItemBow | ItemRentalBow | ItemBowLv2 |
-            ItemShield | ItemRentalShield | HyruleShield |
-            ItemBottle |
-            // ItemPotShopRed | ItemPotShopBlue | ItemPotShopPurple | ItemPotShopYellow | Milk |
-            ItemStoneBeauty |
-            PendantPower | PendantWisdom | PendantCourage |
-            ZeldaAmulet |
-            ItemKandelaar | ItemKandelaarLv2 |
-            ItemSwordLv1 | ItemSwordLv2 | ItemSwordLv3 | ItemSwordLv4 | PackageSword |
-            ItemMizukaki |
-            RingRental | RingHekiga |
-            ItemBell |
-            PowerGlove | PowerfulGlove |
-            ItemInsectNet | ItemInsectNetLv2 |
-            // Kinsta |
-            BadgeBee |
-            GoldenBee |
-            // Bee | Fairy | GoldenBeeForSale |
-            HintGlasses |
-            EscapeFruit |
-            StopFruit |
-            // LiverBlue | LiverPurple | LiverYellow |
-            ClothesBlue | ClothesRed |
-            OreYellow | OreGreen | OreBlue | OreRed |
-            GanbariPowerUp |
-            // GanbariTubo |
-            Pouch |
-            DashBoots |
-            MessageBottle | MilkMatured |
-            SpecialMove |
-            ItemBowLight |
-            // TriforceCourage |
-            // Heart |
-            SageGulley | SageOren | SageSeres | SageOsfala | SageImpa | SageIrene | SageRosso
-        )
-    }
-
-    fn msbf_key(self) -> Option<&'static str> {
-        match self {
-            SageGulley => Some(MsbfKey::Dark),
-            SageOren => Some(MsbfKey::Water),
-            SageSeres => Some(MsbfKey::Dokuro),
-            SageOsfala => Some(MsbfKey::Hagure),
-            SageIrene => Some(MsbfKey::Sand),
-            SageRosso => Some(MsbfKey::Ice),
-            SageImpa => None, // Impa special
-            PendantPower | PendantWisdom | PendantCourage | ZeldaAmulet => None,
-            _ => fail!(),
-        }
-    }
 }
 
 /// Align JSON Key-Values for readability
@@ -494,36 +289,96 @@ fn align_json_values(json: &mut String) {
 
         let spaces_to_add = KEY_ALIGNMENT - line_length_up_to_value;
 
-        json.insert_str(
-            &index_colon + 1,
-            (0..spaces_to_add).map(|_| " ").collect::<String>().as_str(),
-        );
+        json.insert_str(&index_colon + 1, (0..spaces_to_add).map(|_| " ").collect::<String>().as_str());
         index_colon += 1;
     }
 }
 
-#[derive(Serialize)]
-pub struct SeedInfo<'s> {
+#[derive(Serialize, Deserialize)]
+pub struct SeedInfo {
+    #[serde(default)]
     pub seed: u32,
-    pub version: &'static str,
+
+    pub version: String,
+
+    #[serde(skip_deserializing)]
     pub hash: SeedHash,
-    pub settings: &'s Settings,
+
+    pub settings: Settings,
+
+    #[serde(skip_deserializing)]
     pub layout: Layout,
+
+    #[serde(skip_deserializing)]
+    pub portal_map: PortalMap,
+
+    #[serde(skip_deserializing, rename = "weather_vane_map")]
+    pub vane_map: VaneMap,
+
+    #[serde(skip_deserializing)]
     pub metrics: Metrics,
+
+    #[serde(skip_deserializing)]
     pub hints: Hints,
+
+    #[serde(skip_deserializing, skip_serializing)]
+    pub world_graph: WorldGraph,
+}
+
+impl SeedInfo {
+    fn new(
+        seed: u32, hash: SeedHash, settings: Settings, portal_map: PortalMap, vane_map: VaneMap,
+        world_graph: WorldGraph,
+    ) -> Self {
+        Self {
+            seed,
+            version: VERSION.to_owned(),
+            hash,
+            settings,
+            vane_map,
+            portal_map,
+            layout: Default::default(),
+            metrics: Default::default(),
+            hints: Default::default(),
+            world_graph,
+        }
+    }
+
+    pub fn is_excluded(&self, check_name: &str) -> bool {
+        self.settings.exclusions.contains(check_name)
+    }
+}
+
+impl Default for SeedInfo {
+    fn default() -> Self {
+        Self {
+            seed: 0,
+            version: "".to_owned(),
+            hash: Default::default(),
+            settings: Default::default(),
+            portal_map: Default::default(),
+            vane_map: Default::default(),
+            layout: Default::default(),
+            metrics: Default::default(),
+            hints: Default::default(),
+            world_graph: Default::default(),
+        }
+    }
 }
 
 /// Main entry point to generate one ALBWR Seed.
 pub fn generate_seed(
-    seed: u32, settings: &Settings, user_config: &UserConfig, no_patch: bool, no_spoiler: bool,
+    seed: u32, settings: Settings, user_config: &UserConfig, no_patch: bool, no_spoiler: bool,
 ) -> Result<()> {
-    validate_settings(settings)?;
+    validate_settings(&settings)?;
 
     let rng = &mut StdRng::seed_from_u64(seed.clone() as u64);
-    let hash = SeedHash::new(seed.clone(), settings);
 
-    info!("Hash:                           {}\n", hash.text_hash);
-    settings.log_settings();
+    let hash = SeedHash::new(seed.clone(), &settings);
+
+    info!("Hash:                           {}", hash.text_hash);
+
+    // settings.log_settings();
 
     let seed_info = &calculate_seed_info(seed, settings, hash, rng)?;
     patch_seed(seed_info, user_config, no_patch, no_spoiler)?;
@@ -535,6 +390,7 @@ pub fn generate_seed(
 ///
 /// The hash is calculated as `u64`, truncated to `u16` (5 digits), then converted to a Symbolic form that can be
 /// displayed in-game as well as in the spoiler log.
+#[derive(Default)]
 pub struct SeedHash {
     item_hash: String,
     text_hash: String,
@@ -557,8 +413,8 @@ impl SeedHash {
             (R_BUTTON.deref(), "(R)"),
             (RAVIO.deref(), "(Ravio)"),
             (BOW.deref(), "(Bow)"),
-            (BOMBS.deref(), "(Bombs)"),
-            (FIRE_ROD.deref(), "(Fire Rod)"),
+            (BOMBS.deref(), "(Bomb)"),
+            (FIRE_ROD.deref(), "(Fire)"),
         ];
 
         const HASH_LEN: usize = 5;
@@ -568,10 +424,8 @@ impl SeedHash {
             hash /= 10;
         }
 
-        let item_hash =
-            format!("{} {} {} {} {}", digit[4].0, digit[3].0, digit[2].0, digit[1].0, digit[0].0);
-        let text_hash =
-            format!("{} {} {} {} {}", digit[4].1, digit[3].1, digit[2].1, digit[1].1, digit[0].1);
+        let item_hash = format!("{} {} {} {} {}", digit[4].0, digit[3].0, digit[2].0, digit[1].0, digit[0].0);
+        let text_hash = format!("{} {} {} {} {}", digit[4].1, digit[3].1, digit[2].1, digit[1].1, digit[0].1);
 
         Self { item_hash, text_hash }
     }
@@ -589,11 +443,8 @@ impl Serialize for SeedHash {
 /// Validates the Settings to make sure the user hasn't made incompatible selections
 fn validate_settings(settings: &Settings) -> Result<()> {
     // LC Requirement
-    if !(0..=7).contains(&settings.logic.lc_requirement) {
-        fail!(
-            "Invalid Lorule Castle Requirement: \"{}\" was not between 0-7, inclusive.",
-            settings.logic.lc_requirement
-        );
+    if !(0..=7).contains(&settings.lc_requirement) {
+        fail!("Invalid Lorule Castle Requirement: \"{}\" was not between 0-7, inclusive.", settings.lc_requirement);
     }
 
     // Yuganon Requirement
@@ -601,24 +452,27 @@ fn validate_settings(settings: &Settings) -> Result<()> {
     //     fail!("Invalid Yuga Ganon Requirement: \"{}\" was not between 0-7, inclusive.", settings.logic.yuganon_requirement);
     // }
 
-    if settings.logic.yuganon_requirement != settings.logic.lc_requirement {
+    if settings.yuganon_requirement != settings.lc_requirement {
         fail!(
             "Yuga Ganon Requirement: \"{}\" is different than Lorule Castle Requirement: \"{}\"\n\
         Different values for these settings are not yet supported!",
-            settings.logic.yuganon_requirement,
-            settings.logic.lc_requirement
+            settings.yuganon_requirement,
+            settings.lc_requirement
         );
     }
 
+    // Progressive Bow of Light
+    if settings.progressive_bow_of_light && settings.bow_of_light_in_castle {
+        fail!("The progressive_bow_of_light and bow_of_light_in_castle settings cannot both be enabled.");
+    }
+
     // Swords
-    if settings.logic.sword_in_shop && settings.logic.swordless_mode {
+    if settings.sword_in_shop && settings.swordless_mode {
         fail!("The sword_in_shop and swordless_mode settings cannot both be enabled.");
     }
 
     // Assured Weapons
-    if settings.logic.assured_weapon
-        && (settings.logic.sword_in_shop || settings.logic.boots_in_shop)
-    {
+    if settings.assured_weapon && (settings.sword_in_shop || settings.boots_in_shop) {
         fail!(
             "The assured_weapon setting cannot be enabled when either sword_in_shop or boots_in_shop is also enabled."
         );
@@ -627,39 +481,48 @@ fn validate_settings(settings: &Settings) -> Result<()> {
     Ok(())
 }
 
-pub type CheckMap = BTreeMap<String, Option<FillerItem>>;
+/// "Deterministic `HashMap`" that uses a hashing algorithm not based on any random number generation, unlike the Rust
+/// default which is non-deterministic for security reasons not relevant for our purposes.
+pub type DashMap<K, V> = HashMap<K, V, BuildHasherDefault<XxHash>>;
 
-fn calculate_seed_info<'s>(
-    seed: u32, settings: &'s Settings, hash: SeedHash, rng: &mut StdRng,
-) -> Result<SeedInfo<'s>> {
+/// "Deterministic `HashSet`" that uses a hashing algorithm not based on any random number generation, unlike the Rust
+/// default which is non-deterministic for security reasons not relevant for our purposes.
+pub type DashSet<T> = HashSet<T, BuildHasherDefault<XxHash>>;
+
+/// Map of all checks (as Strings) to their held item
+pub type CheckMap = DashMap<String, Option<FillerItem>>;
+
+/// Map of all Portals to their destination Portals. Map is not bidirectional to allow for (eventual) decoupled shuffle,
+/// so each Portal and its destination must have a corresponding reversed entry.
+pub type PortalMap = BTreeMap<Portal, Portal>;
+
+/// Map of all Weather Vanes to the destination Vanes they unlock.
+pub type VaneMap = BTreeMap<Vane, Vane>;
+
+fn calculate_seed_info(seed: u32, settings: Settings, hash: SeedHash, rng: &mut StdRng) -> Result<SeedInfo> {
     println!();
     info!("Calculating Seed Info...");
 
-    // Build World Graph
-    let world_graph = &mut world::build_world_graph();
-    let check_map = &mut filler::prefill_check_map(world_graph);
-    let (mut progression, mut junk) = item_pools::get_item_pools(settings, rng);
+    let portal_map = portals::build_portal_map(&settings, rng)?;
+    let vane_map = vanes::build_vanes_map(&settings, rng)?;
+    let world_graph = world::build_world_graph(&portal_map);
+
+    let mut seed_info = SeedInfo::new(seed, hash, settings, portal_map, vane_map, world_graph);
+
+    // Check Map and Item Pools
+    let check_map = &mut filler::prefill_check_map(&mut seed_info.world_graph);
 
     // Filler Algorithm
-    let filled: Vec<(LocationInfo, Item)> = filler::fill_all_locations_reachable(
-        world_graph, check_map, &mut progression, &mut junk, settings, rng,
-    );
+    filler::fill_all_locations_reachable(rng, &mut seed_info, check_map)?;
 
-    // Build legacy Layout object
-    let mut layout = Layout::default();
-    for (location_info, item) in filled {
-        layout.set(location_info, item);
-    }
+    // Post-analysis: Metrics and Hints
+    metrics::calculate_metrics(&mut seed_info, check_map)?;
+    hints::generate_hints(rng, &mut seed_info, check_map)?;
 
-    let metrics = metrics::calculate_metrics(world_graph, check_map, settings);
-    let hints = hints::generate_hints(world_graph, check_map, settings, rng);
-
-    Ok(SeedInfo { seed, version: VERSION, hash, settings, layout, metrics, hints })
+    Ok(seed_info)
 }
 
-pub fn patch_seed(
-    seed_info: &SeedInfo, user_config: &UserConfig, no_patch: bool, no_spoiler: bool,
-) -> Result<()> {
+pub fn patch_seed(seed_info: &SeedInfo, user_config: &UserConfig, no_patch: bool, no_spoiler: bool) -> Result<()> {
     println!();
 
     if !no_patch {
@@ -670,16 +533,12 @@ pub fn patch_seed(
 
         info!("ROM Loaded.\n");
 
-        // patch::debug_msbf_msbt(
-        //     &mut patcher,
-        //     game::Course::IndoorLight,
-        //     "FieldLight_2C_Rental",
-        //     game::Course::IndoorLight,
-        //     "FieldLight_2C",
-        //     true,
-        // );
+        // patch::research_msbf_msbt(&mut patcher,
+        //     game::Course::IndoorDark, "FiledDark_22_BlackSmithWifeUra", // MSBF
+        //     game::Course::IndoorDark, "FieldDark_22", // MSBT
+        //     true);
 
-        regions::patch(&mut patcher, &seed_info.layout, seed_info.settings)?;
+        regions::patch(&mut patcher, seed_info)?;
         let patches = patcher.prepare(seed_info)?;
         patches.dump(user_config.output())?;
     }

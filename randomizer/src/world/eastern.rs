@@ -1,9 +1,9 @@
-use crate::legacy::path::Path;
-use crate::model::check::Check;
-use crate::model::filler_item::Goal;
-use crate::model::location::Location::{self, *};
-use crate::model::location_node::LocationNode;
-use crate::model::logic::Logic;
+use crate::filler::check::Check;
+use crate::filler::filler_item::Goal;
+use crate::filler::location::Location::{self, *};
+use crate::filler::location_node::LocationNode;
+use crate::filler::logic::Logic;
+use crate::filler::path::Path;
 use crate::regions;
 use crate::world::{check, edge, goal, location};
 use crate::LocationInfo;
@@ -17,11 +17,8 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
             EasternPalaceFoyer,
             location(
                 "Eastern Palace",
-                vec![check!(
-                    "[EP] (1F) Merge Chest",
-                    regions::dungeons::eastern::palace::SUBREGION,
-                    |p| p.can_merge()
-                )],
+                vec![check!("[EP] (1F) Merge Chest", regions::dungeons::eastern::palace::SUBREGION, |p| p.can_merge()
+                    && p.has_eastern_compass())],
                 vec![
                     edge!(EasternRuinsUpper),
                     edge!(EasternPalace1F => {
@@ -138,7 +135,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                 vec![
                     check!("[EP] Yuga (1)", regions::dungeons::eastern::palace::SUBREGION),
                     check!("[EP] Yuga (2)", regions::dungeons::eastern::palace::SUBREGION),
-                    check!("Eastern Palace Prize", regions::dungeons::eastern::palace::SUBREGION),
+                    check!("[EP] Prize", regions::dungeons::eastern::palace::SUBREGION),
                     goal!("Eastern Palace Complete", Goal::Yuga),
                 ],
                 vec![edge!(EasternPalace2F), edge!(EasternPalaceEscape, |p| p.can_merge())],

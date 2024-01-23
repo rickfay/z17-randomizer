@@ -2,7 +2,7 @@ use std::fmt::{Debug, Formatter};
 
 use modinfo::settings::logic::LogicMode::*;
 
-use crate::model::progress::Progress;
+use crate::filler::progress::Progress;
 
 // TODO I'd eventually like to externalize the logic, both for organization purposes and to allow users to write custom logic. But this is fine for now.
 
@@ -60,17 +60,15 @@ impl Logic {
 
     pub fn can_access(self, progress: &Progress) -> bool {
         // Progression is available if the current logic or a lower tiered logic passes
-        for logic in match progress.get_settings().logic.logic_mode {
+        for logic in match progress.get_settings().logic_mode {
             Normal => Vec::from([self.normal]),
             Hard => Vec::from([self.normal, self.hard]),
             Glitched => Vec::from([self.normal, self.hard, self.glitched]),
             AdvGlitched => Vec::from([self.normal, self.hard, self.glitched, self.adv_glitched]),
-            Hell => {
-                Vec::from([self.normal, self.hard, self.glitched, self.adv_glitched, self.hell])
-            }
+            Hell => Vec::from([self.normal, self.hard, self.glitched, self.adv_glitched, self.hell]),
             NoLogic => {
                 return true;
-            }
+            },
         } {
             if logic.is_some() && (logic.unwrap())(progress) {
                 return true;

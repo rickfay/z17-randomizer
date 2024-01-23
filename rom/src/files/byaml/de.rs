@@ -2,10 +2,7 @@ use {
     super::Kind,
     crate::{files::align, Error, Result},
     bytey::*,
-    serde::de::{
-        self, value::BorrowedBytesDeserializer, DeserializeSeed, MapAccess, SeqAccess, Unexpected,
-        Visitor,
-    },
+    serde::de::{self, value::BorrowedBytesDeserializer, DeserializeSeed, MapAccess, SeqAccess, Unexpected, Visitor},
     std::{
         convert::{TryFrom, TryInto},
         fmt::{self, Display, Formatter},
@@ -70,8 +67,7 @@ impl<'de> de::Deserializer<'de> for Deserializer<'de> {
         V: Visitor<'de>,
     {
         if let Some(root) = NonZeroU32::new(self.document()?.root) {
-            let kind =
-                (*self.source.get(root.get() as usize).ok_or_else(Error::eof)?).try_into()?;
+            let kind = (*self.source.get(root.get() as usize).ok_or_else(Error::eof)?).try_into()?;
             let document = self.document()?;
             match kind {
                 Kind::Array => visitor.visit_seq(self.array(&document)?),
@@ -216,18 +212,14 @@ impl<'de> de::Deserializer<'de> for Deserializer<'de> {
         visitor.visit_unit()
     }
 
-    fn deserialize_unit_struct<V>(
-        self, _name: &'static str, visitor: V,
-    ) -> Result<V::Value, Self::Error>
+    fn deserialize_unit_struct<V>(self, _name: &'static str, visitor: V) -> Result<V::Value, Self::Error>
     where
         V: Visitor<'de>,
     {
         visitor.visit_unit()
     }
 
-    fn deserialize_newtype_struct<V>(
-        self, _name: &'static str, visitor: V,
-    ) -> Result<V::Value, Self::Error>
+    fn deserialize_newtype_struct<V>(self, _name: &'static str, visitor: V) -> Result<V::Value, Self::Error>
     where
         V: Visitor<'de>,
     {
@@ -249,9 +241,7 @@ impl<'de> de::Deserializer<'de> for Deserializer<'de> {
         self.deserialize_seq(visitor)
     }
 
-    fn deserialize_tuple_struct<V>(
-        self, _name: &'static str, _len: usize, visitor: V,
-    ) -> Result<V::Value, Self::Error>
+    fn deserialize_tuple_struct<V>(self, _name: &'static str, _len: usize, visitor: V) -> Result<V::Value, Self::Error>
     where
         V: Visitor<'de>,
     {
@@ -439,10 +429,7 @@ impl<'doc, 'de> de::Deserializer<'de> for Node<'doc, 'de> {
             Kind::Integer => visitor.visit_i32(self.integer()?),
             Kind::Float => visitor.visit_f32(self.float()?),
             Kind::Null => visitor.visit_none(),
-            kind => Err(de::Error::invalid_value(
-                Unexpected::Unsigned(kind as u8 as u64),
-                &"a supported node type",
-            )),
+            kind => Err(de::Error::invalid_value(Unexpected::Unsigned(kind as u8 as u64), &"a supported node type")),
         }
     }
 
@@ -576,18 +563,14 @@ impl<'doc, 'de> de::Deserializer<'de> for Node<'doc, 'de> {
         visitor.visit_unit()
     }
 
-    fn deserialize_unit_struct<V>(
-        self, _name: &'static str, visitor: V,
-    ) -> Result<V::Value, Self::Error>
+    fn deserialize_unit_struct<V>(self, _name: &'static str, visitor: V) -> Result<V::Value, Self::Error>
     where
         V: Visitor<'de>,
     {
         visitor.visit_unit()
     }
 
-    fn deserialize_newtype_struct<V>(
-        self, _name: &'static str, visitor: V,
-    ) -> Result<V::Value, Self::Error>
+    fn deserialize_newtype_struct<V>(self, _name: &'static str, visitor: V) -> Result<V::Value, Self::Error>
     where
         V: Visitor<'de>,
     {
@@ -608,9 +591,7 @@ impl<'doc, 'de> de::Deserializer<'de> for Node<'doc, 'de> {
         self.deserialize_seq(visitor)
     }
 
-    fn deserialize_tuple_struct<V>(
-        self, _name: &'static str, _len: usize, visitor: V,
-    ) -> Result<V::Value, Self::Error>
+    fn deserialize_tuple_struct<V>(self, _name: &'static str, _len: usize, visitor: V) -> Result<V::Value, Self::Error>
     where
         V: Visitor<'de>,
     {
@@ -822,10 +803,7 @@ fn expect_kind(kind: Kind, expected: Kind) -> Result<()> {
     if kind == expected {
         Ok(())
     } else {
-        Err(de::Error::invalid_value(
-            Unexpected::Unsigned(kind as u64),
-            &expected.to_string().as_str(),
-        ))
+        Err(de::Error::invalid_value(Unexpected::Unsigned(kind as u64), &expected.to_string().as_str()))
     }
 }
 
@@ -856,10 +834,7 @@ mod tests {
 
     #[test]
     fn it_deserializes_nested_array() {
-        assert_eq!(
-            super::from_bytes::<Vec<Vec<i32>>>(data::NESTED_ARRAY).unwrap(),
-            vec![vec![0x01234567]]
-        )
+        assert_eq!(super::from_bytes::<Vec<Vec<i32>>>(data::NESTED_ARRAY).unwrap(), vec![vec![0x01234567]])
     }
 
     #[test]
@@ -884,10 +859,8 @@ mod tests {
 
     #[test]
     fn it_reads_strings() {
-        let data = &[
-            0xC2, 0x02, 0, 0, 0x10, 0, 0, 0, 0x14, 0, 0, 0, 0x18, 0, 0, 0, b'B', b'a', b'r', 0,
-            b'F', b'o', b'o', 0,
-        ];
+        let data =
+            &[0xC2, 0x02, 0, 0, 0x10, 0, 0, 0, 0x14, 0, 0, 0, 0x18, 0, 0, 0, b'B', b'a', b'r', 0, b'F', b'o', b'o', 0];
         let strings = super::read_strings(data).unwrap();
         assert_eq!(strings[0], b"Bar");
         assert_eq!(strings[1], b"Foo");

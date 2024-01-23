@@ -19,7 +19,7 @@ crate::region! {
             "[IR] (B2) Long Merge Chest": RupeeSilver @Chest(1[838]),
             "[IR] (B4) Southeast Chest (Fall)": KeySmall @Chest(1[273]),
             "[IR] Dharkstare": HeartContainer @Heart(1[554]),
-            "Ice Ruins Prize": None @None(),
+            "[IR] Prize": None @None(),
         ],
     },
 }

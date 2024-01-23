@@ -1,12 +1,10 @@
+pub use courses::Course;
+pub use items::Item;
 use std::error::Error as StdError;
 
 mod courses;
-mod ghosts;
+pub mod ghosts;
 mod items;
-
-pub use courses::Course;
-pub use ghosts::HintGhost;
-pub use items::Item;
 
 /// An error resulting from trying to read the ROM file.
 #[derive(Debug)]
@@ -26,6 +24,13 @@ impl Error {
     pub fn into_inner(self) -> Box<dyn StdError + Send + Sync + 'static> {
         self.inner
     }
+}
+
+/// Simple world enum
+#[derive(Eq, PartialEq)]
+pub enum World {
+    Hyrule,
+    Lorule,
 }
 
 #[doc(hidden)]

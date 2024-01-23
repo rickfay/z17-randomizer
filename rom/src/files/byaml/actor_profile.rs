@@ -17,12 +17,7 @@ impl ActorProfiles {
     }
 
     pub fn get_actor_profile(&mut self, profile: &str) -> File<ActorProfile> {
-        self.archive
-            .get()
-            .read(format!("{}.byaml", profile))
-            .unwrap()
-            .try_map(|data| byaml::from_bytes(&data))
-            .unwrap()
+        self.archive.get().read(format!("{}.byaml", profile)).unwrap().try_map(|data| byaml::from_bytes(&data)).unwrap()
     }
 
     pub fn into_archive(self) -> File<Sarc> {

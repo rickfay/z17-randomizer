@@ -13,7 +13,7 @@ dependencies = [
 
 [[package]]
 name = "albw-randomizer"
-version = "0.3.1"
+version = "0.4.0"
 dependencies = [
  "cli",
  "game",
@@ -124,7 +124,7 @@ dependencies = [
 
 [[package]]
 name = "cli"
-version = "0.3.1"
+version = "0.4.0"
 dependencies = [
  "log",
  "modinfo",
@@ -243,7 +243,7 @@ checksum = "af150ab688ff2122fcef229be89cb50dd66af9e01a4ff320cc137eecc9bacc38"
 
 [[package]]
 name = "jack"
-version = "0.3.1"
+version = "0.4.0"
 dependencies = [
  "byteorder",
  "cli",
@@ -295,7 +295,7 @@ checksum = "b06a4cde4c0f271a446782e3eff8de789548ce57dbc8eca9292c27f4a42004b4"
 
 [[package]]
 name = "macros"
-version = "0.3.1"
+version = "0.4.0"
 
 [[package]]
 name = "memchr"
@@ -305,7 +305,7 @@ checksum = "2dffe52ecf27772e601905b7522cb4ef790d2cc203488bbd0e2fe85fcb74566d"
 
 [[package]]
 name = "modinfo"
-version = "0.3.1"
+version = "0.4.0"
 dependencies = [
  "log",
  "macros",
@@ -433,7 +433,7 @@ dependencies = [
 
 [[package]]
 name = "randomizer"
-version = "0.3.1"
+version = "0.4.0"
 dependencies = [
  "byteorder",
  "cli",
@@ -453,6 +453,7 @@ dependencies = [
  "strum",
  "tempfile",
  "try-insert-ext",
+ "twox-hash",
 ]
 
 [[package]]
@@ -609,6 +610,12 @@ name = "spin"
 version = "0.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6e63cff320ae2c57904679ba7cb63280a3dc4613885beafb148ee7bf9aa9042d"
+
+[[package]]
+name = "static_assertions"
+version = "1.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
 
 [[package]]
 name = "strsim"
@@ -778,6 +785,17 @@ name = "try-insert-ext"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "213664d0ee69fc59a5fb6cdf16786db532bd0aba3792091e3e874cd581dc0ed2"
+
+[[package]]
+name = "twox-hash"
+version = "1.6.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "97fee6b57c6a41524a810daee9286c02d7752c4253064d0b05472833a438f675"
+dependencies = [
+ "cfg-if",
+ "rand",
+ "static_assertions",
+]
 
 [[package]]
 name = "unicode-ident"

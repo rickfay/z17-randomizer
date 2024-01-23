@@ -98,12 +98,8 @@ where
     P: Into<Operand>,
 {
     match addressing_mode.into() {
-        Operand::AddressingMode(addressing_mode) => {
-            instruction(addressing_mode.code(), false, true, rd)
-        }
-        Operand::Pseudo(expr) => {
-            Instruction::Pseudo(Default::default(), Pseudo { rt: rd, expr }.into())
-        }
+        Operand::AddressingMode(addressing_mode) => instruction(addressing_mode.code(), false, true, rd),
+        Operand::Pseudo(expr) => Instruction::Pseudo(Default::default(), Pseudo { rt: rd, expr }.into()),
     }
 }
 

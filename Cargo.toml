@@ -1,6 +1,6 @@
 [package]
 name = "albw-randomizer"
-version = "0.3.1"
+version = "0.4.0"
 authors = [
     "Kevin Marsolais <kevin@kevinmarsolais.co>",
     "Rick Fay <rickwithanh@gmail.com>",

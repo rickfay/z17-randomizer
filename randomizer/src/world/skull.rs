@@ -1,9 +1,9 @@
-use crate::legacy::path::Path;
-use crate::model::check::Check;
-use crate::model::filler_item::Goal;
-use crate::model::location::Location::{self, *};
-use crate::model::location_node::LocationNode;
-use crate::model::logic::Logic;
+use crate::filler::check::Check;
+use crate::filler::filler_item::Goal;
+use crate::filler::location::Location::{self, *};
+use crate::filler::location_node::LocationNode;
+use crate::filler::logic::Logic;
+use crate::filler::path::Path;
 use crate::regions;
 use crate::world::{check, edge, fast_travel_lorule, goal, location};
 use crate::LocationInfo;
@@ -18,10 +18,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
             location(
                 "Skull Woods Foyer",
                 None,
-                vec![
-                    edge!(SkullWoodsOverworld),
-                    edge!(SkullWoodsMain, |p| p.has_lamp() || p.lampless()),
-                ],
+                vec![edge!(SkullWoodsOverworld), edge!(SkullWoodsMain, |p| p.has_lamp() || p.lampless())],
             ),
         ),
         (
@@ -30,21 +27,11 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                 "Skull Woods",
                 vec![
                     check!("[SW] (B1) South Chest", regions::dungeons::skull::woods::SUBREGION),
-                    check!(
-                        "[SW] (B1) Gibdo Room (Lower)",
-                        regions::dungeons::skull::woods::SUBREGION
-                    ),
-                    check!(
-                        "[SW] (B1) Gibdo Room (Hole)",
-                        regions::dungeons::skull::woods::SUBREGION,
-                        |p| p.has_skull_keys(1)
-                    ),
-                    check!(
-                        "[SW] (B1) Grate Room",
-                        regions::dungeons::skull::woods::SUBREGION,
-                        |p| p.has_skull_keys(1)
-                            && (p.progression_enemies() || p.break_floor_tiles())
-                    ),
+                    check!("[SW] (B1) Gibdo Room (Lower)", regions::dungeons::skull::woods::SUBREGION),
+                    check!("[SW] (B1) Gibdo Room (Hole)", regions::dungeons::skull::woods::SUBREGION, |p| p
+                        .has_skull_keys(1)),
+                    check!("[SW] (B1) Grate Room", regions::dungeons::skull::woods::SUBREGION, |p| p.has_skull_keys(1)
+                        && (p.progression_enemies() || p.break_floor_tiles())),
                 ],
                 vec![
                     edge!(SkullWoodsFoyer),
@@ -75,10 +62,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
             SkullWoodsElevatorHallway,
             location(
                 "Skull Woods Elevator Hallway",
-                vec![check!(
-                    "[SW] (B2) Moving Platform Room",
-                    regions::dungeons::skull::woods::SUBREGION
-                )],
+                vec![check!("[SW] (B2) Moving Platform Room", regions::dungeons::skull::woods::SUBREGION)],
                 vec![edge!(SkullWoodsB2), edge!(SkullWoodsBossHallway, |p| p.has_skull_keys(3))],
             ),
         ),
@@ -123,7 +107,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
             location(
                 "Skull Woods Seres Grove",
                 vec![
-                    check!("Skull Woods Prize", regions::dungeons::skull::woods::SUBREGION),
+                    check!("[SW] Prize", regions::dungeons::skull::woods::SUBREGION),
                     goal!("Knucklemaster", Goal::Knucklemaster),
                 ],
                 vec![edge!(SkullWoodsBossRoom)],
@@ -143,11 +127,8 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                 "Skull Woods East B1 North",
                 vec![
                     // Eyeball dupe cannot be considered as it cannot be retried if missed
-                    check!(
-                        "[SW] (B1) Big Chest (Eyes)",
-                        regions::dungeons::skull::woods::SUBREGION,
-                        |p| p.has_skull_eyes()
-                    ),
+                    check!("[SW] (B1) Big Chest (Eyes)", regions::dungeons::skull::woods::SUBREGION, |p| p
+                        .has_skull_eyes()),
                     goal!("Skull Eye Right", Goal::SkullEyeRight),
                 ],
                 vec![
@@ -180,11 +161,8 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
             location(
                 "Skull Woods East B1 South Ledges",
                 vec![
-                    check!(
-                        "[SW] (B1) Big Chest (Upper)",
-                        regions::dungeons::skull::woods::SUBREGION,
-                        |p| p.can_merge()
-                    ),
+                    check!("[SW] (B1) Big Chest (Upper)", regions::dungeons::skull::woods::SUBREGION, |p| p
+                        .can_merge()),
                     goal!("Skull Eye Left", Goal::SkullEyeLeft, |p| p.can_merge()),
                 ],
                 vec![edge!(SkullWoodsEastB1South)],
@@ -197,11 +175,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                 vec![
                     check!("Skull Woods Outdoor Chest", regions::dungeons::skull::woods::SUBREGION), // Do not use [SW] prefix
                 ],
-                vec![
-                    fast_travel_lorule(),
-                    edge!(SkullWoodsEastB1SouthFoyer),
-                    edge!(SkullWoodsEastB1SouthLedges),
-                ],
+                vec![fast_travel_lorule(), edge!(SkullWoodsEastB1SouthFoyer), edge!(SkullWoodsEastB1SouthLedges)],
             ),
         ),
     ])

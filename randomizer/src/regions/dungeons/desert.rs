@@ -24,8 +24,8 @@ crate::region! {
             "[DP] (3F) Behind Falling Sand": RupeeSilver @Chest(3[195]),
             "[DP] (3F) Armos Room": KeySmall @Chest(3[110]),
 
-            "Zaganaga": HeartContainer @Heart(FieldDark 31[83]),
-            "Desert Palace Prize": None @None(),
+            "[DP] Zaganaga": HeartContainer @Heart(FieldDark 31[83]),
+            "[DP] Prize": None @None(),
         ],
     },
 }

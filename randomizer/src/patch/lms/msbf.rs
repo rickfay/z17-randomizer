@@ -1,9 +1,62 @@
-use game::{Course, Item};
-use log::info;
-use modinfo::Settings;
-
-use super::Patcher;
+use crate::patch::Patcher;
 use crate::Result;
+use game::Course;
+use log::info;
+use modinfo::settings::keysy::Keysy;
+use modinfo::Settings;
+use rom::string_constants;
+
+pub fn patch(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
+    info!("Patching MSBF Files...");
+
+    // research(patcher, None, "GameOver", None, true)?;
+
+    patch_ravio_shop(patcher)?;
+    patch_thieves_hideout(patcher, settings)?;
+    patch_turtles(patcher)?;
+    patch_hyrule_castle_zelda(patcher)?;
+    patch_lorule_castle_requirements(patcher, settings)?;
+    patch_castle_connection(patcher, settings)?;
+    patch_final_boss(patcher)?;
+    patch_hint_ghosts(patcher, settings)?;
+    patch_weather_vanes(patcher)?;
+    patch_rosso(patcher)?;
+    patch_mother_maiamai(patcher)?;
+    // patch_gameover(patcher)?;
+    patch_stylish_woman(patcher)?;
+    patch_woman(patcher)?;
+    patch_treacherous_tower(patcher)?;
+    patch_bee_guy(patcher)?;
+    patch_impa(patcher)?;
+
+    legacy_patches(patcher)
+}
+
+/// Dev research, prints the contents of an MSBF file in a format for spreadsheets. Don't leave this on.
+pub fn research<C, M>(patcher: &mut Patcher, course: C, file_name: &str, labels: M, edotor: bool) -> Result<()>
+where
+    C: Into<Option<Course>>,
+    M: Into<Option<Vec<(String, String)>>>,
+{
+    let course = course.into();
+
+    if let Some(file) = patcher.flow(course)?.get_mut(file_name) {
+        if edotor {
+            file?.get().edotor(labels.into().expect("No MSBT Message Info provided"));
+        } else {
+            file?.get().research();
+        }
+    } else {
+        macros::fail!(
+            "File not found: US{}.szs -> World/Flow/{}.msbf",
+            if course.is_some() { "_English/".to_owned() + course.unwrap().as_str() } else { "/RegionBoot".to_owned() },
+            file_name
+        );
+    };
+
+    info!("Finished MSBF Research");
+    Ok(())
+}
 
 /*
  * TODO - Want to rewrite this entire subsystem
@@ -89,21 +142,58 @@ macro_rules! action {
     };
 }
 
-fn patch_ravio_shop(_patcher: &mut Patcher) -> Result<()> {
-    // apply!(patcher,
-    //     IndoorLight/FieldLight_2C_Rental {
-    //
-    //     },
-    // );
+/// Ravio's Shop
+fn patch_ravio_shop(patcher: &mut Patcher) -> Result<()> {
+    let bow_slot_item = patcher.rentals[8];
+
+    apply!(patcher,
+        IndoorLight/FieldLight_2C_Rental {
+            [766 into_start] => 312, // 312 starts music
+            [312] => 237, // 237 gives item
+            [237] => None,
+
+            // ???
+            [192 into_start] => 319,
+            [204 into_start] => 630,
+
+            // ???
+            [183 into_start] => 553,
+            [553] value(bow_slot_item as u32),
+            [554] each [
+                = 30,
+                value(3244),
+                => 199,
+            ],
+        },
+    );
 
     Ok(())
 }
 
-fn patch_thieves_hideout(patcher: &mut Patcher) -> Result<()> {
+fn patch_thieves_hideout(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
+    // Small Keysy patch for Thief Girl. She will look at the Flag for the locked door (course flag 67) to determine if
+    // she should follow Link or continue to sass him. Because Small Keysy removes the door altogether, the flag is
+    // never actually set. This adjusts the flowchart to skip Flag 3067 checks and assume it's been set.
+    // TODO Devise a mechanism to preset Course Flags.
+    match settings.keysy {
+        Keysy::SmallKeysy | Keysy::AllKeysy => {
+            apply!(patcher,
+                DungeonHagure / Hagure {
+                    [6 into_branch] switch [[1] => 35,],
+                    [7] => 70,
+                },
+            );
+        },
+        _ => {},
+    }
+
     apply!(patcher,
         DungeonHagure / Hagure {
-            [17] => None, // Skip 16, 18 "We're locked in!" and camera pan
-            [100] => None, // Skip 91, 93 "We're locked in!" and camera pan
+            [17] => 18, // Skip 16 "We're locked in!"
+            [100] => 93, // Skip 91 "We're locked in!"
+
+            // [17] => None, // Skip 16, 18 "We're locked in!" and camera pan
+            // [100] => None, // Skip 91, 93 "We're locked in!" and camera pan
 
             [23] => None, // Skip 25, 24 "We're cut off!" and camera pan
             [113] => None, // Skip 105, 149, 153 "We're cut off!" and camera pan
@@ -120,6 +210,8 @@ fn patch_thieves_hideout(patcher: &mut Patcher) -> Result<()> {
                 count(0),
             ],
         },
+
+
 
         FieldDark/FieldDark_16_HagureHouse {
             [46] => 41, // Skip 42 text in Thieves' Town "You're looking for that painting, yah?"
@@ -147,8 +239,100 @@ fn patch_turtles(patcher: &mut Patcher) -> Result<()> {
     Ok(())
 }
 
+/// Mother Maiamai Cave and Rewards
+fn patch_mother_maiamai(patcher: &mut Patcher) -> Result<()> {
+    apply!(patcher,
+        CaveLight/FieldLight_35_Kinsta {
+
+            // --------------------------------------------------------------------
+            // 16 START
+            // --------------------------------------------------------------------
+
+            //[16 into_start] => 15, // Skip 137 (?)
+            // [109] => 20, // Hard lock (don't do this)
+            [63] => 19, // Skip 17
+            [58] => 68, // Skip 54
+
+            // --------------------------------------------------------------------
+            // 30 START
+            // --------------------------------------------------------------------
+
+            [31 into_branch] switch [[0] => 24,],
+            [35 into_branch] switch [[1] => 94,],
+            [25] => 94,
+
+            // --------------------------------------------------------------------
+            // 39 START
+            // --------------------------------------------------------------------
+
+            // Skip various "I can make your item nicer" texts
+            [89] => 45,
+            [90 into_branch] switch [[1] => 45,],
+            [72] => 45,
+            [73 into_branch] switch [[1] => 45,],
+
+            // Item Selection Cancel Text
+            [43 into_branch] switch [
+                [1] => 46,
+                [2] => 46,
+                [3] => 46,
+            ],
+
+            // Cancel quicker, Skips going back down 77 START
+            [42] => 69,
+            [76 into_branch] switch [[1] => 69,],
+
+            [133 into_branch] switch [[0] => 47,], // Skip 139,50,48
+            [47] => 83, // Skip 51,49
+            //[47] => 81, // Skip 51,49,83,84 (10x Maiamai jump to water)
+
+            // --------------------------------------------------------------------
+            // 77 START
+            // --------------------------------------------------------------------
+
+            // Skip advice on finding Maiamai
+            [140 into_branch] switch [[1] => 80,],
+            [141] => 80,
+            [111 into_branch] switch [[0] => 80,],
+            [110 into_branch] switch [[1] => 80,],
+        },
+    );
+
+    Ok(())
+}
+
+fn patch_hyrule_castle_zelda(patcher: &mut Patcher) -> Result<()> {
+    apply!(patcher,
+        IndoorLight/FieldLight_1B_Zelda {
+            [18] => 16, // Skip 23 - Fancy cutscene of Zelda spinning around
+
+            [17] => 57,
+
+            // [17] => 72, // Skip 9 "I bid you fondest..."
+            // [70] => 19, // Skip 24, 25 "Ah, while your name..."
+            // [41] => 42, // Skip 10 "Seres has been..."
+            // [42] => 39, // Skip 68 "I sense a terrible..."
+            // [43] => 46, // Skip 11 "Oh, Impa, I fear..."
+            // [32] => 78, // Skip 26 "Fret not, Princess. I'd..."
+            // [44] => 80, // Skip 27, 31 "Yes, of course. That's..."
+            // [81] => 12, // Skip 72 "I am certain he will..."
+            // // 12 sets Event Flag 225
+            // [45] => 54, // Skip 29 "Now there's just one more..."
+            // [54] => 48, // Skip 53 "It's a rather special charm."
+            // [34] => 49, // Skip 28 "Are you sure about..."
+            // [35] => 56, // Skip 30 "Quit sure..."
+            // [56] => 57, // Skip 55 "This has been in my safekeeping..."
+
+            // 36 gives Charm
+            [66] => 88, // Skip 37 "Please, tell Sahasrahla..."
+        },
+    );
+
+    Ok(())
+}
+
 fn patch_lorule_castle_requirements(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
-    let lc_requirement = settings.logic.lc_requirement as u32;
+    let lc_requirement = settings.lc_requirement as u32;
 
     apply!(patcher,
 
@@ -213,7 +397,7 @@ fn patch_castle_connection(patcher: &mut Patcher, _settings: &Settings) -> Resul
 }
 
 fn patch_hint_ghosts(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
-    let price = settings.logic.hint_ghost_price;
+    let price = settings.hint_ghost_price;
 
     if price == 0 {
         apply!(patcher,
@@ -271,7 +455,8 @@ fn patch_weather_vanes(patcher: &mut Patcher) -> Result<()> {
         Boot/Telephone {
 
             // Cut out as much as possible from 1st time activation
-            [2] => None,
+            //[2] => None, FIXME DONT LEAVE LIEK THS
+            //[19 into_text] => None, // bad - leaves WV screen open unable to be closed
 
             // Never show "You've been playing for a while..." text
             [4 into_branch] switch [[1] => None,],
@@ -419,89 +604,50 @@ fn patch_impa(patcher: &mut Patcher) -> Result<()> {
 
 /// Quit / Game Over dialog
 #[allow(unused)]
-fn patch_gameover(_patcher: &mut Patcher) -> Result<()> {
-    // apply!(patcher,
-    //     Boot/GameOver {
-    // [9] => 1, // Should cause Death -> choose Quit? (actually caused Fairy revival but no text, stuck in dialog with no dialog)
-    //[9] => 12, // Should cause... nothing. He just lies there...?
+fn patch_gameover(patcher: &mut Patcher) -> Result<()> {
+    apply!(patcher,
+        Boot/GameOver {
 
-    // [10 into_branch] switch [
-    //     [0] => 5,
-    //     [1] => 5,
-    // ],
+            // 9 => Fairy Revival? Only if player has fairy (actually caused Fairy revival but no text, stuck in dialog with no dialog)
+            // 12 => He just lies there...?
 
-    // [11 into_branch] switch [
-    //     [0] => 1,
-    //     [1] => 1,
-    // ],
-    //
-    // [13 into_branch] switch [
-    //     [0] => 1,
-    //     [1] => 1,
-    // ],
+            [10 into_branch] switch [
+                [0] => 13,
+                [1] => 13,
+            ],
 
-    // [9] => 5,
-    // [9] => 8,
-    //     },
-    // );
+            [13 into_branch] switch [
+                [0] => 4,
+                [1] => 4,
+            ],
+
+            [4 into_branch] switch [
+                [0] => 5,
+                [1] => 5,
+            ],
+
+            [14 into_branch] switch [
+                [0] => 2,
+                [1] => 2,
+            ],
+
+            [2 into_branch] switch [
+                [0] => 15,
+                [1] => 15,
+            ],
+
+            // 9-10-13-4-5-14-8 = Rental Items drop, [Quit, Continue], Hit continue => Nothing
+            // 9-10-13-4-5-14-2 = Rental Items drop, [Quit, Continue], Hit Quit, "Sorry buddy...", take items, success respawn (dungeon death also works as expected)
+
+
+        },
+    );
 
     Ok(())
 }
 
-/// Dev debugging, prints the contents of an MSBF file in a format for spreadsheets. Don't leave this on.
-pub fn debug<C, M>(
-    patcher: &mut Patcher, course: C, file_name: &str, labels: M, edotor: bool,
-) -> Result<()>
-where
-    C: Into<Option<Course>>,
-    M: Into<Option<Vec<(String, String)>>>,
-{
-    let course = course.into();
-
-    if let Some(file) = patcher.flow(course)?.get_mut(file_name) {
-        if edotor {
-            file?.get().edotor(labels.into().expect("No MSBT Message Info provided"));
-        } else {
-            file?.get().debug();
-        }
-    } else {
-        macros::fail!(
-            "File not found: US{}.szs -> World/Flow/{}.msbf",
-            if course.is_some() {
-                "_English/".to_owned() + course.unwrap().as_str()
-            } else {
-                "/RegionBoot".to_owned()
-            },
-            file_name
-        );
-    };
-
-    info!("Finished MSBF Debug");
-    Ok(())
-}
-
-pub fn apply(patcher: &mut Patcher, free: Item, settings: &Settings) -> Result<()> {
-    info!("Patching MSBF Files...");
-
-    // debug(patcher, None, "GameOver")?;
-
-    patch_ravio_shop(patcher)?;
-    patch_thieves_hideout(patcher)?;
-    patch_turtles(patcher)?;
-    patch_lorule_castle_requirements(patcher, settings)?;
-    patch_castle_connection(patcher, settings)?;
-    patch_final_boss(patcher)?;
-    patch_hint_ghosts(patcher, settings)?;
-    patch_weather_vanes(patcher)?;
-    patch_rosso(patcher)?;
-    // patch_mother_maiamai(patcher)?;
-    // patch_gameover(patcher)?;
-    patch_stylish_woman(patcher)?;
-    patch_woman(patcher)?;
-    patch_treacherous_tower(patcher)?;
-    patch_bee_guy(patcher)?;
-    patch_impa(patcher)?;
-
+/// Mostly a bucket for patches from the OG rando with some misc. unsorted patches mixed in.
+pub fn legacy_patches(patcher: &mut Patcher) -> Result<()> {
     apply!(patcher,
 
         // Irene Bell Text
@@ -803,16 +949,6 @@ pub fn apply(patcher: &mut Patcher, free: Item, settings: &Settings) -> Result<(
             [3 into_start] => 4, // Skip to item get
             [4] => None,
         },
-        // Zelda
-        IndoorLight/FieldLight_1B_Zelda {
-            // ZeldaFirstTimeEvent_01
-            [3 into_start] => 0x0C, // Skip to event flag
-            [0x3E] each [
-                value(0x81),
-                => 0x24, // Skip to item get
-            ],
-            [0x24] => None,
-        },
         // Blacksmith (Hyrule)
         IndoorLight/FieldLight_22_BlackSmith {
             [2] => None,
@@ -827,21 +963,6 @@ pub fn apply(patcher: &mut Patcher, free: Item, settings: &Settings) -> Result<(
                 [0] => 0x16, // skip to item get
             ],
             [0xE9] => None,
-        },
-        // Ravio
-        IndoorLight/FieldLight_2C_Rental {
-            [0x2F] => 0xEE,
-            [0xB7 into_start] => 0x229,
-            [0xC0 into_start] => 0x13F,
-            [0xCC into_start] => 0x276,
-            [0xED] => None,
-            [0xEE] => 0xED,
-            [0x229] value(free as u32),
-            [0x22A] each [
-                = 0x1E,
-                value(0xCAC),
-                => 0xC7,
-            ],
         },
         // Oren
         CaveLight/FieldLight_0F_Zora {
@@ -889,3 +1010,171 @@ pub fn apply(patcher: &mut Patcher, free: Item, settings: &Settings) -> Result<(
 //         apply(&mut patcher, Item::KeySmall)
 //     }
 // }
+
+string_constants! {
+    #[allow(non_upper_case_globals)]
+    MsbfKey {
+        Castle,
+        CatchInsect,
+        Cave,
+        CaveDark10,
+        cl_Church_UG,
+        CrossBattle,
+        CrossBoard,
+        CrossForceTalk,
+        CrossOldMan,
+        Dark,
+        Dokuro,
+        DoorHouse,
+        E3_flow,
+        East,
+        Ending,
+        FieldDark_00_GoldenBeeShop,
+        FieldDark_05_GameTower,
+        FieldDark_0F_Namazu,
+        FieldDark_13_Sinpu,
+        FieldDark_14_Danpei,
+        FieldDark_16_HagureHouse,
+        FieldDark_16_MagicShop,
+        FieldDark_17_NpcHinox,
+        FieldDark_18_BakudanTouzoku,
+        FieldDark_18_BoxManDark,
+        FieldDark_18_ItemShop,
+        FieldDark_1A_FortuneGirlUra,
+        FieldDark_1B_Bakudanya,
+        FieldDark_1B_Hilda,
+        FieldDark_1E_Sennyukun,
+        FieldDark_28_Minigame,
+        FieldDark_29_BakudanShop,
+        FieldDark_29_HappyFairy,
+        FieldDark_2A_GameMaster,
+        FieldDark_2C_RaviosDiary,
+        FieldDark_33_Daibakudankabe,
+        FieldDark_33_Touzoku,
+        FieldDark_35_ItemShop,
+        FieldDark_35_Kame,
+        FieldDark_3A_CrazyMan,
+        FieldDark_Tennokoe,
+        FieldLight_00_JyohoShop,
+        FieldLight_00_Mayoinomori,
+        FieldLight_02_KikoriMan,
+        FieldLight_03_Kanban,
+        FieldLight_05_Climber,
+        FieldLight_0A_Kanban,
+        FieldLight_0F_Kanban,
+        FieldLight_0F_Zora,
+        FieldLight_11_FortuneGirl,
+        FieldLight_11_Maple,
+        FieldLight_12_Maple,
+        FieldLight_12_SignBoard,
+        FieldLight_13_Danpei,
+        FieldLight_13_Medium,
+        FieldLight_13_SignBoard,
+        FieldLight_13_Sinpu,
+        FieldLight_13_Sister,
+        FieldLight_14_Danpei,
+        FieldLight_14_Maple,
+        FieldLight_16_Ending,
+        FieldLight_16_MagicShop,
+        FieldLight_16_Obaba,
+        FieldLight_16_SignBoard,
+        FieldLight_17_Kanban,
+        FieldLight_18_Bard,
+        FieldLight_18_BoxMan,
+        FieldLight_18_ClosedHouse,
+        FieldLight_18_InsectNet,
+        FieldLight_18_ItemShop,
+        FieldLight_18_Kakarikoboy,
+        FieldLight_18_KakarikoGirl,
+        FieldLight_18_MaidSahasulala,
+        FieldLight_18_MiddleLady,
+        FieldLight_18_MiddleMan,
+        FieldLight_18_MilkbarMaster,
+        FieldLight_18_MilkbarSoldier,
+        FieldLight_18_Rotenshonin,
+        FieldLight_18_SahasPupil,
+        FieldLight_18_SignBoard,
+        FieldLight_18_Soldier,
+        FieldLight_18_StandItem,
+        FieldLight_18_Touzoku,
+        FieldLight_1A_Maple,
+        FieldLight_1A_SignBoard,
+        FieldLight_1B_BlackSmithKid,
+        FieldLight_1B_Commander,
+        FieldLight_1B_Hekiga,
+        FieldLight_1B_Impa,
+        FieldLight_1B_Rakcha,
+        FieldLight_1B_Sahasrahla,
+        FieldLight_1B_Soldier,
+        FieldLight_1B_Zelda,
+        FieldLight_1E_Sahasrahla,
+        FieldLight_22_BlackSmith,
+        FieldLight_22_BlackSmithKid,
+        FieldLight_22_BlackSmithWife,
+        FieldLight_22_Dwarf,
+        FieldLight_22_Maple,
+        FieldLight_28_Minigame,
+        FieldLight_29_Kokko,
+        FieldLight_2A_BlacksmithKid,
+        FieldLight_2A_BlacksmithWife,
+        FieldLight_2B_AppleTree,
+        FieldLight_2B_BlackSmithKid,
+        FieldLight_2B_Maple,
+        FieldLight_2C_BlackSmithKid,
+        FieldLight_2C_GanbariTutorial,
+        FieldLight_2C_Rental,
+        FieldLight_2C_RentalItem,
+        FieldLight_2C_SahasPupil,
+        FieldLight_2C_Sahasrahla,
+        FieldLight_2C_SignBoard,
+        FieldLight_2C_Soldier,
+        FieldLight_2D_Maple,
+        FieldLight_2D_UnderBridgeStranger,
+        FieldLight_2E_Maple,
+        FieldLight_33_Douguya,
+        FieldLight_35_Douguya,
+        FieldLight_35_ItemShop,
+        FieldLight_35_Kinsta,
+        FieldLight_35_Marutakun,
+        FieldLight_35_Zora,
+        FieldLight_37_MessageBottle,
+        FieldLight_BlacksmithWife,
+        FieldLight_HyruleRace,
+        FieldLight_Tennokoe,
+        FieldLight_WarpEvent,
+        FiledDark_22_BlackSmithUra,
+        FiledDark_22_BlackSmithWifeUra,
+        GameOver,
+        Ganon,
+        GirigiriGameTest,
+        Hagure,
+        Hera,
+        HintGhost,
+        Ice,
+        IndoorDark1_ZoraQueen,
+        IndoorDark2_Demo080,
+        Kame,
+        MessageBoard,
+        MiniDungeon_FieldDark_2B,
+        MiniDungeon_FieldLight_07,
+        MiniDungeon_FieldLight_15,
+        MiniDungeon_FieldLight_1E,
+        MiniDungeon_FieldLight_32,
+        MiniDungeon_FieldLight_33,
+        NpcClimberTest,
+        NpcHinox,
+        NpcShadowLink,
+        NpcStand,
+        npcTest00,
+        NpcTestIwata,
+        NpcTownEtc,
+        Sand,
+        Telephone,
+        test,
+        ToRentalShopBoard,
+        Water,
+        Wind,
+        yamazaki,
+        yamazaki2,
+    }
+}

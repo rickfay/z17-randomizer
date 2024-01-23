@@ -1,12 +1,9 @@
+use crate::{hints::hint_color::HintColor, patch::Patcher, SeedInfo};
+use log::info;
 use std::{
     fmt::{self, Debug, Formatter},
     hash::{Hash, Hasher},
 };
-
-use log::info;
-use modinfo::Settings;
-
-use crate::{hints::hint_color::HintColor, patch::Patcher};
 
 pub struct Subregion {
     name: &'static str,
@@ -31,11 +28,7 @@ impl Subregion {
 
 impl Debug for Subregion {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        f.debug_struct("Subregion")
-            .field("name", &self.name)
-            .field("world", &self.world)
-            .field("id", &self.id)
-            .finish()
+        f.debug_struct("Subregion").field("name", &self.name).field("world", &self.world).field("id", &self.id).finish()
     }
 }
 
@@ -61,24 +54,6 @@ pub enum World {
     Lorule,
     Dungeons,
 }
-
-// macro_rules! regions {
-//     ($($world:ident($variant:ident) {
-//         $($region:ident;)+
-//     })+) => {
-//         use crate::patch::Patcher;
-//
-//         $(pub(crate) mod $world {
-//             pub const WORLD: super::World = super::World::$variant;
-//             $(pub(crate) mod $region;)+
-//         })+
-//
-//         pub(crate) fn patch(patcher: &mut Patcher, layout: &crate::Layout, settings: &$crate::Settings) -> crate::Result<()> {
-//             $($($world::$region::patch(patcher, layout, settings)?;)+)+
-//             Ok(())
-//         }
-//     };
-// }
 
 pub mod dungeons {
     pub const WORLD: super::World = super::World::Dungeons;
@@ -106,6 +81,7 @@ pub mod hyrule {
     pub mod kakariko;
     pub mod lake;
     pub mod lost;
+    pub mod ravio;
     pub mod southern;
     pub mod zora;
 }
@@ -120,83 +96,45 @@ pub mod lorule {
     pub mod skull;
 }
 
-pub(crate) fn patch(
-    patcher: &mut Patcher, layout: &crate::Layout, settings: &Settings,
-) -> crate::Result<()> {
+pub(crate) fn patch(patcher: &mut Patcher, seed_info: &SeedInfo) -> crate::Result<()> {
     info!("Patching Randomized Checks...");
 
     // todo unravel this
-    dungeons::dark::patch(patcher, layout, settings)?;
-    dungeons::desert::patch(patcher, layout, settings)?;
-    dungeons::eastern::patch(patcher, layout, settings)?;
-    dungeons::graveyards::patch(patcher, layout, settings)?;
-    dungeons::house::patch(patcher, layout, settings)?;
-    dungeons::hyrule::patch(patcher, layout, settings)?;
-    dungeons::ice::patch(patcher, layout, settings)?;
-    dungeons::lorule::patch(patcher, layout, settings)?;
-    dungeons::skull::patch(patcher, layout, settings)?;
-    dungeons::swamp::patch(patcher, layout, settings)?;
-    dungeons::thieves::patch(patcher, layout, settings)?;
-    dungeons::tower::patch(patcher, layout, settings)?;
-    dungeons::turtle::patch(patcher, layout, settings)?;
-    hyrule::death::patch(patcher, layout, settings)?;
-    hyrule::desert::patch(patcher, layout, settings)?;
-    hyrule::eastern::patch(patcher, layout, settings)?;
-    hyrule::field::patch(patcher, layout, settings)?;
-    hyrule::irene::patch(patcher, layout, settings)?;
-    hyrule::kakariko::patch(patcher, layout, settings)?;
-    hyrule::lake::patch(patcher, layout, settings)?;
-    hyrule::lost::patch(patcher, layout, settings)?;
-    hyrule::southern::patch(patcher, layout, settings)?;
-    hyrule::zora::patch(patcher, layout, settings)?;
-    lorule::chamber::patch(patcher, layout, settings)?;
-    lorule::dark::patch(patcher, layout, settings)?;
-    lorule::death::patch(patcher, layout, settings)?;
-    lorule::field::patch(patcher, layout, settings)?;
-    lorule::lake::patch(patcher, layout, settings)?;
-    lorule::misery::patch(patcher, layout, settings)?;
-    lorule::skull::patch(patcher, layout, settings)?;
+    dungeons::dark::patch(patcher, seed_info)?;
+    dungeons::desert::patch(patcher, seed_info)?;
+    dungeons::eastern::patch(patcher, seed_info)?;
+    dungeons::graveyards::patch(patcher, seed_info)?;
+    dungeons::house::patch(patcher, seed_info)?;
+    dungeons::hyrule::patch(patcher, seed_info)?;
+    dungeons::ice::patch(patcher, seed_info)?;
+    dungeons::lorule::patch(patcher, seed_info)?;
+    dungeons::skull::patch(patcher, seed_info)?;
+    dungeons::swamp::patch(patcher, seed_info)?;
+    dungeons::thieves::patch(patcher, seed_info)?;
+    dungeons::tower::patch(patcher, seed_info)?;
+    dungeons::turtle::patch(patcher, seed_info)?;
+
+    hyrule::death::patch(patcher, seed_info)?;
+    hyrule::desert::patch(patcher, seed_info)?;
+    hyrule::eastern::patch(patcher, seed_info)?;
+    hyrule::field::patch(patcher, seed_info)?;
+    hyrule::irene::patch(patcher, seed_info)?;
+    hyrule::kakariko::patch(patcher, seed_info)?;
+    hyrule::lake::patch(patcher, seed_info)?;
+    hyrule::lost::patch(patcher, seed_info)?;
+    hyrule::ravio::patch(patcher, seed_info)?;
+    hyrule::southern::patch(patcher, seed_info)?;
+    hyrule::zora::patch(patcher, seed_info)?;
+
+    lorule::chamber::patch(patcher, seed_info)?;
+    lorule::dark::patch(patcher, seed_info)?;
+    lorule::death::patch(patcher, seed_info)?;
+    lorule::field::patch(patcher, seed_info)?;
+    lorule::lake::patch(patcher, seed_info)?;
+    lorule::misery::patch(patcher, seed_info)?;
+    lorule::skull::patch(patcher, seed_info)?;
     Ok(())
 }
-
-// regions! {
-//     dungeons(Dungeons) {
-//         dark;
-//         desert;
-//         eastern;
-//         graveyards;
-//         house;
-//         hyrule;
-//         ice;
-//         lorule;
-//         skull;
-//         swamp;
-//         thieves;
-//         tower;
-//         turtle;
-//     }
-//     hyrule(Hyrule) {
-//         death;
-//         desert;
-//         eastern;
-//         field;
-//         irene;
-//         kakariko;
-//         lake;
-//         lost;
-//         southern;
-//         zora;
-//     }
-//     lorule(Lorule) {
-//         chamber;
-//         dark;
-//         death;
-//         field;
-//         lake;
-//         misery;
-//         skull;
-//     }
-// }
 
 #[doc(hidden)]
 #[macro_export]
@@ -210,9 +148,9 @@ macro_rules! region {
     ) => {
 
         #[inline]
-        pub fn patch(patcher: &mut $crate::patch::Patcher, layout: &$crate::Layout, settings: &$crate::Settings) -> $crate::Result<()> {
-            $start::patch(patcher, layout, settings)?;
-            $($id::patch(patcher, layout, settings)?;)*
+        pub fn patch(patcher: &mut $crate::patch::Patcher, seed_info: &$crate::SeedInfo) -> $crate::Result<()> {
+            $start::patch(patcher, seed_info)?;
+            $($id::patch(patcher, seed_info)?;)*
             Ok(())
         }
 
@@ -259,14 +197,13 @@ macro_rules! subregion {
 
             #[allow(unused)]
             #[inline]
-            pub fn patch(patcher: &mut Patcher, layout: &$crate::Layout, settings: &$crate::Settings) -> $crate::Result<()> {
+            pub fn patch(patcher: &mut Patcher, seed_info: &$crate::SeedInfo) -> $crate::Result<()> {
                 $(use $crate::patch::Patch;
                 $($crate::patch!($variant $props).apply(
                     patcher,
-                    layout
+                    seed_info,
+                    seed_info.layout
                         .get(&$crate::LocationInfo::new($key, SUBREGION))
-                        .unwrap_or_else(|| unreachable!(stringify!($key))),
-                    settings,
                 )?;)*)?
                 Ok(())
             }
@@ -341,6 +278,18 @@ macro_rules! patch {
     };
     (GoldRupee($scene:literal[$unq:literal])) => {
         Patch::GoldRupee { course: COURSE, scene: $scene - 1, unq: $unq }
+    };
+    (Portal($course:ident $scene:literal[$unq:literal] $portal:ident)) => {
+        Patch::Portal { course: ::game::Course::$course, scene: $scene - 1, unq: $unq, portal: crate::Portal::$portal }
+    };
+    (Portal($scene:literal[$unq:literal] $portal:ident)) => {
+        Patch::Portal { course: COURSE, scene: $scene - 1, unq: $unq, portal: crate::Portal::$portal }
+    };
+    (WeatherVane($course:ident $scene:literal[$unq:literal] $vane:ident)) => {
+        Patch::WeatherVane { course: ::game::Course::$course, scene: $scene - 1, unq: $unq, vane: crate::filler::filler_item::Vane::$vane }
+    };
+    (WeatherVane($scene:literal[$unq:literal] $vane:ident)) => {
+        Patch::WeatherVane { course: COURSE, scene: $scene - 1, unq: $unq, vane: crate::filler::filler_item::Vane::$vane }
     };
     (Shop($variant:ident$($args:tt)?)) => {
         Patch::Shop($crate::patch::Shop::$variant $($args)?)

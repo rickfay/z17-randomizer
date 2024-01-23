@@ -16,10 +16,10 @@ macro_rules! hint_ghost_from {
         $($ghost:ident => $course:ident, $msbt_file:literal, $msg_label:literal;)+
     ) => {
         $(#[$attr])*
-        impl<'hg> From<::game::HintGhost> for HintGhost<'hg> {
-            fn from(value: ::game::HintGhost) -> Self {
+        impl<'hg> From<::game::ghosts::HintGhost> for HintGhost<'hg> {
+            fn from(value: ::game::ghosts::HintGhost) -> Self {
                 match value {
-                    $(::game::HintGhost::$ghost => Self { course: $course, msbt_file: $msbt_file, msg_label: $msg_label },)+
+                    $(::game::ghosts::HintGhost::$ghost => Self { course: $course, msbt_file: $msbt_file, msg_label: $msg_label },)+
                 }
             }
         }

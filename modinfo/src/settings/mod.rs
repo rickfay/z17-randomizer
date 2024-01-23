@@ -1,16 +1,21 @@
-use std::collections::btree_map::BTreeMap;
-use std::collections::btree_set::BTreeSet;
-use std::hash::{Hash, Hasher};
-
+use crate::settings::keysy::Keysy;
+use crate::settings::logic::LogicMode;
+use crate::settings::pedestal::PedestalSetting;
+use crate::settings::portal_shuffle::PortalShuffle;
+use crate::settings::ravios_shop::RaviosShop;
+use crate::settings::weather_vanes::WeatherVanes;
 use log::info;
-use logic::{Logic, LogicMode::*};
+use logic::LogicMode::*;
 use serde::{Deserialize, Serialize};
+use std::collections::btree_set::BTreeSet;
+use std::hash::Hash;
 
-pub mod active_weather_vanes;
-pub mod entrance_shuffle;
-pub mod hyrule_castle;
+pub mod keysy;
 pub mod logic;
 pub mod pedestal;
+pub mod portal_shuffle;
+pub mod ravios_shop;
+pub mod weather_vanes;
 
 /// Logic and behavior settings.
 #[derive(Clone, Debug, Default, Deserialize, Hash, Serialize)]
@@ -18,20 +23,137 @@ pub mod pedestal;
 pub struct Settings {
     #[serde(skip_serializing_if = "is_false")]
     pub dev_mode: bool,
-    pub logic: Logic,
-    pub options: Options,
-    pub exclusions: Exclusion,
-    #[serde(skip_serializing_if = "Exclude::is_empty")]
-    pub exclude: Exclude,
+
+    /// The number of Portraits needed to trigger the Hilda cutscene to open Lorule Castle
+    #[serde(default = "seven")]
+    pub lc_requirement: u8,
+
+    /// The number of Portraits needed to fight Yuga Ganon
+    #[serde(default = "seven", skip_serializing)]
+    pub yuganon_requirement: u8,
+
+    /// Configure which Pendants are required to reach the Master Sword Pedestal
+    #[serde(default)]
+    pub ped_requirement: PedestalSetting,
+
+    /// Logic to use for item placement (Normal, Hard, Glitched, Adv. Glitched, Hell, No Logic)
+    #[serde(default)]
+    pub logic_mode: LogicMode,
+
+    /// Makes Sage related checks and events be tied to rescuing the respective Sage
+    #[serde(default)]
+    pub reverse_sage_events: bool,
+
+    /// Dark Room Lamp Requirement. If enabled, the player may have to cross dark rooms without Lamp
+    #[serde(default)]
+    pub dark_rooms_lampless: bool,
+
+    /// Randomizes the Pendants and Portraits between Hyrule and Lorule dungeons
+    #[serde(default = "r#true")]
+    pub dungeon_prize_shuffle: bool,
+
+    /// Maiamai Madness
+    #[serde(default)]
+    pub maiamai_madness: bool,
+
+    /// Shuffles Nice Items into the general item pool as progressive upgrades (temporary: removes Maiamai cave)
+    #[serde(default)]
+    pub nice_mode: bool,
+
+    /// Shuffle Super Lamp and Super Net
+    #[serde(default)]
+    pub super_mode: bool,
+
+    /// Shuffles the Portal destinations amongst each other
+    #[serde(default)]
+    pub portal_shuffle: PortalShuffle,
+
+    /// Weather Vanes behavior and activation setting.
+    #[serde(default)]
+    pub weather_vanes: WeatherVanes,
+
+    /// Ravio's Shop
+    #[serde(default)]
+    pub ravios_shop: RaviosShop,
+
+    /// Guarantees Bow of Light will be placed in Lorule Castle
+    #[serde(default)]
+    pub bow_of_light_in_castle: bool,
+
+    /// Removes Enemies from dungeons that are themselves Progression (e.g.: Bawbs, the bomb enemy).
+    /// Logic will be adjusted to require the player's items instead.
+    #[serde(default)]
+    pub no_progression_enemies: bool,
+
+    /// Keysy
+    #[serde(default)]
+    pub keysy: Keysy,
+
+    /// Makes the Bow of Light the third upgrade for the Bow
+    #[serde(default)]
+    pub progressive_bow_of_light: bool,
+
+    /// Swordless Mode
+    /// Not available if [`sword_in_shop`] option is enabled.
+    #[serde(default)]
+    pub swordless_mode: bool,
+
+    /// Start with the ability to Merge into walls, without Ravio's Bracelet.
+    #[serde(default)]
+    pub start_with_merge: bool,
+
+    /// Start with a usable X button
+    #[serde(default)]
+    pub start_with_pouch: bool,
+
+    /// Places the Bell in Ravio's Shop
+    #[serde(default)]
+    pub bell_in_shop: bool,
+
+    /// Places a Sword in Ravio's Shop. Disables the ability to play in Swordless Mode.
+    #[serde(default)]
+    pub sword_in_shop: bool,
+
+    /// Places the Pegasus Boots in Ravio's Shop
+    #[serde(default)]
+    pub boots_in_shop: bool,
+
+    /// Guarantees a Weapon is placed in Ravio's Shop.
+    /// Not available if [`boots_in_shop`] or [`sword_in_shop`] are enabled as they already are weapons.
+    #[serde(default)]
+    pub assured_weapon: bool,
+
+    /// Alters treasure chest sizes depending on their contents: Large for Progression items, Small for everything else.
+    pub chest_size_matches_contents: bool,
+
+    /// Excludes Cucco Ranch, both Rupee Rushes, Treacherous Tower, Octoball Derby, and Hyrule Hotfoot (both races)
+    #[serde(default)]
+    pub minigames_excluded: bool,
+
+    /// Skips the Big Bomb Flower by removing the 5 Big Rocks in Lorule Field (Does not affect Lorule Castle Bomb Trial)
+    #[serde(default)]
+    pub skip_big_bomb_flower: bool,
+
+    /// Skip Trials Door in Lorule Castle
+    #[serde(default)]
+    pub skip_trials: bool,
+
+    /// Price of Hints from Hint Ghosts
+    #[serde(default)]
+    pub hint_ghost_price: u16,
+
+    /// Experimental: Change Hyrule to the nighttime color scheme (until visiting Lorule)
+    pub night_mode: bool,
+
+    /// Set of locations to be excluded from having progression.
+    pub exclusions: BTreeSet<String>,
 }
 
 impl Settings {
     pub fn log_settings(&self) {
-        let Settings { logic, options, .. } = self;
-
         info!(
             "Logic Mode:                     {}",
-            match logic.logic_mode {
+            match self.logic_mode {
                 Normal => "Normal",
                 Hard => "Hard",
                 Glitched => "Glitched",
@@ -42,48 +164,26 @@ impl Settings {
         );
         info!(
             "Dungeon Prizes:                 {}",
-            if logic.randomize_dungeon_prizes { "Randomized" } else { "Not Randomized" }
+            if self.dungeon_prize_shuffle { "Randomized" } else { "Not Randomized" }
         );
-        if logic.randomize_dungeon_prizes {
-            info!(
-                "Charm:                          {}",
-                if logic.vanilla_charm { "Vanilla" } else { "Randomized" }
-            );
-        }
-        info!("Lorule Castle Requirement:      {} Portraits", logic.lc_requirement);
-        info!("Yuga Ganon Requirement:         {} Portraits", logic.yuganon_requirement);
-        info!("Pedestal Requirement:           {}", logic.ped_requirement);
-        info!("Hyrule Castle Setting:          {}", logic.hyrule_castle_setting);
+        info!("Lorule Castle Requirement:      {} Portraits", self.lc_requirement);
+        info!("Yuga Ganon Requirement:         {} Portraits", self.yuganon_requirement);
+        info!("Pedestal Requirement:           {}", self.ped_requirement);
 
-        info!("Nice Mode:                      {}", if logic.nice_mode { "ON" } else { "OFF" });
-        info!(
-            "Super Items:                    {}",
-            if logic.super_items { "Shuffled" } else { "Not Shuffled" }
-        );
-        info!(
-            "Reverse Sage Events:            {}",
-            if logic.reverse_sage_events { "ON" } else { "OFF" }
-        );
-        info!(
-            "Progression-Granting Enemies:   {}",
-            if logic.no_progression_enemies { "Removed" } else { "Vanilla" }
-        );
+        info!("Nice Mode:                      {}", if self.nice_mode { "ON" } else { "OFF" });
+        info!("Super Items:                    {}", if self.super_mode { "Shuffled" } else { "Not Shuffled" });
+        info!("Reverse Sage Events:            {}", if self.reverse_sage_events { "ON" } else { "OFF" });
+        info!("Progression-Granting Enemies:   {}", if self.no_progression_enemies { "Removed" } else { "Vanilla" });
 
-        info!(
-            "Maiamai:                        {}",
-            if logic.maiamai_madness { "Madness" } else { "Not Randomized" }
-        );
+        info!("Maiamai:                        {}", if self.maiamai_madness { "Madness" } else { "Not Randomized" });
 
-        info!(
-            "Start with Merge:               {}",
-            if logic.start_with_merge { "Yes" } else { "No" }
-        );
+        info!("Start with Merge:               {}", if self.start_with_merge { "Yes" } else { "No" });
+        info!("Start with Pouch:               {}", if self.start_with_pouch { "Yes" } else { "No" });
         let shop_items = vec![
-            (&logic.bell_in_shop, "Bell"),
-            (&logic.pouch_in_shop, "Pouch"),
-            (&logic.sword_in_shop, "Sword"),
-            (&logic.boots_in_shop, "Pegasus Boots"),
-            (&logic.assured_weapon, "Weapon"),
+            (&self.bell_in_shop, "Bell"),
+            (&self.sword_in_shop, "Sword"),
+            (&self.boots_in_shop, "Pegasus Boots"),
+            (&self.assured_weapon, "Weapon"),
         ]
         .iter()
         .flat_map(|(setting, str)| if **setting { Some(*str) } else { None })
@@ -92,147 +192,44 @@ impl Settings {
         if !shop_items.is_empty() {
             info!("Starting Shop Items:            {}", shop_items);
         }
-        info!(
-            "Minigames:                      {}",
-            if logic.minigames_excluded { "Excluded" } else { "Included" }
-        );
-        info!(
-            "Trials:                         {}",
-            if logic.skip_trials { "Skipped" } else { "Normal" }
-        );
-        info!(
-            "Bow of Light:                   {}",
-            if logic.bow_of_light_in_castle { "Tournament" } else { "Normal" }
-        );
-        info!("Active Weather Vanes:           {}", logic.active_weather_vanes);
+        info!("Minigames:                      {}", if self.minigames_excluded { "Excluded" } else { "Included" });
+        info!("Trials:                         {}", if self.skip_trials { "Skipped" } else { "Normal" });
+        info!("Bow of Light:                   {}", if self.bow_of_light_in_castle { "Tournament" } else { "Normal" });
+        info!("Weather Vanes:                  {}", self.weather_vanes);
         info!(
             "Dark Room Crossing:             {}",
-            if logic.dark_rooms_lampless { "Lamp Not Required" } else { "Lamp Required" }
+            if self.dark_rooms_lampless { "Lamp Not Required" } else { "Lamp Required" }
         );
         info!(
             "Swords:                         {}",
-            if logic.swordless_mode { "Swordless Mode - NO SWORDS" } else { "Normal" }
+            if self.swordless_mode { "Swordless Mode - NO SWORDS" } else { "Normal" }
         );
         info!(
             "Chest Size:                     {}",
-            if options.chest_size_matches_contents { "Matches Contents" } else { "Normal" }
+            if self.chest_size_matches_contents { "Matches Contents" } else { "Normal" }
         );
         info!(
-            "Hint Ghost Price:               {} {}",
-            logic.hint_ghost_price,
-            if logic.hint_ghost_price == 1 { "Rupee" } else { "Rupees" }
+            "Hint Ghost Price:               {}",
+            if self.hint_ghost_price == 0 {
+                "Free".to_owned()
+            } else if self.hint_ghost_price == 1 {
+                format!("{} Rupee", self.hint_ghost_price)
+            } else {
+                format!("{} Rupees", self.hint_ghost_price)
+            }
         );
-        println!();
+        info!("Portal Shuffle:                 {}", self.portal_shuffle)
     }
-}
-
-/// Settings to change the randomizer's logic checks.
-#[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq, Deserialize, Serialize)]
-#[serde(default, deny_unknown_fields)]
-pub struct Options {
-    /// Alters treasure chest sizes depending on their contents: Large for Progression items, Small for everything else.
-    pub chest_size_matches_contents: bool,
-    /// Experimental: Change Hyrule to the nighttime color scheme (until visiting Lorule)
-    pub night_mode: bool,
-}
-
-/// A setting for progression items.
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Deserialize, Serialize)]
-pub enum Progression {
-    Unchanged,
-    Shuffled,
-}
-
-impl Progression {
-    pub fn is_shuffled(&self) -> bool {
-        *self == Self::Shuffled
-    }
-}
-
-impl Default for Progression {
-    fn default() -> Self {
-        Self::Unchanged
-    }
-}
-
-/// A setting for the castle barrier.
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Deserialize, Serialize)]
-pub enum Barrier {
-    Unchanged,
-    Start,
-}
-
-impl Barrier {
-    pub fn is_start(&self) -> bool {
-        *self == Self::Start
-    }
-}
-
-impl Default for Barrier {
-    fn default() -> Self {
-        Self::Unchanged
-    }
-}
-
-#[derive(Clone, Debug, Default, Deserialize, Hash, Serialize)]
-#[serde(default, deny_unknown_fields)]
-pub struct Exclude {
-    #[serde(rename = "Hyrule", skip_serializing_if = "World::is_empty")]
-    pub hyrule: World,
-    #[serde(rename = "Lorule", skip_serializing_if = "World::is_empty")]
-    pub lorule: World,
-    #[serde(rename = "Dungeons", skip_serializing_if = "World::is_empty")]
-    pub dungeons: World,
-}
-
-impl Exclude {
-    pub fn new() -> Self {
-        Self { ..Default::default() }
-    }
-
-    fn is_empty(&self) -> bool {
-        self.hyrule.is_empty() && self.lorule.is_empty() && self.dungeons.is_empty()
-    }
-}
-
-#[derive(Clone, Debug, Default, Deserialize, Serialize)]
-pub struct Exclusion(pub BTreeMap<String, BTreeSet<String>>);
-
-impl Hash for Exclusion {
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        for (key, value) in self.0.iter() {
-            key.hash(state);
-            for location in value.iter() {
-                location.hash(state);
-            }
-        }
-    }
-}
-
-#[derive(Clone, Debug, Default, Deserialize, Serialize)]
-pub struct World(pub(crate) BTreeMap<String, BTreeSet<String>>);
-
-impl World {
-    fn is_empty(&self) -> bool {
-        self.0.is_empty()
-    }
-}
-
-impl Hash for World {
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        for (key, value) in self.0.iter() {
-            key.hash(state);
-            for location in value.iter() {
-                location.hash(state);
-            }
-        }
-    }
-}
-
-pub fn open_default() -> Settings {
-    Settings { ..Default::default() }
 }
 
 const fn is_false(b: &bool) -> bool {
     !(*b)
+}
+
+const fn seven() -> u8 {
+    7
+}
+
+const fn r#true() -> bool {
+    true
 }

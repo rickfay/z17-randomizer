@@ -13,7 +13,7 @@ crate::region! {
             "Skull Woods Outdoor Chest": RupeePurple @Chest(FieldDark 1[515]),
             "[SW] (B1) Big Chest (Eyes)": KeyBoss @BigChest(1[289]),
             "[SW] Knucklemaster": HeartContainer @Heart(2[404]),
-            "Skull Woods Prize": None @None(),
+            "[SW] Prize": None @None(),
         ],
     },
 }

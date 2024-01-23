@@ -18,7 +18,7 @@ fn strip_lifetime_inner(input: Box<Type>) -> TokenStream {
         Type::Group(TypeGroup { elem, .. }) => strip_lifetime_inner(elem),
         Type::Reference(TypeReference { and_token, mutability, elem, .. }) => {
             quote!(#and_token #mutability #elem)
-        }
+        },
         input => quote!(#input),
     }
 }

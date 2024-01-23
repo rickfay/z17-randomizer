@@ -35,10 +35,7 @@ where
     }
 
     pub fn exheader(&mut self) -> Result<ExHeader> {
-        Ok(ExHeader::read_from_offset(
-            &mut self.file,
-            self.offset + SIGNATURE_LEN as u32 + HEADER_LEN as u32,
-        )?)
+        Ok(ExHeader::read_from_offset(&mut self.file, self.offset + SIGNATURE_LEN as u32 + HEADER_LEN as u32)?)
     }
 
     pub fn try_into_romfs(mut self) -> Result<RomFs<R>> {
@@ -66,10 +63,10 @@ impl Cxi<fs::File> {
                 error!("Please check that config.json points to a valid ROM.");
                 pause();
                 exit(1);
-            }
+            },
         };
 
-        validate_rom(&file);
+        //validate_rom(&file);
 
         bytey::typedef! { struct NCSD: TryFromBytes<'_> [HEADER_LEN] {
             #b"NCSD",
@@ -90,6 +87,7 @@ impl Cxi<fs::File> {
     }
 }
 
+#[allow(unused)]
 fn validate_rom(file: &fs::File) {
     //info!("Calculating Checksum...");
 
@@ -198,8 +196,7 @@ where
 {
     pub fn serialize(self) -> File<Box<[u8]>> {
         let mut buf = vec![];
-        byaml::to_writer(std::io::Cursor::new(&mut buf), &self.inner)
-            .expect("Could not serialize.");
+        byaml::to_writer(std::io::Cursor::new(&mut buf), &self.inner).expect("Could not serialize.");
         File { path: self.path, inner: buf.into() }
     }
 }

@@ -158,9 +158,25 @@ impl Stage {
         self.system.push(obj);
     }
 
+    pub fn get_obj(&mut self, unq: u16) -> Option<&Obj> {
+        if let Some(i) = self.objs.iter().position(|obj| obj.unq == unq) {
+            self.objs.get(i)
+        } else {
+            None
+        }
+    }
+
     pub fn get_obj_mut(&mut self, unq: u16) -> Option<&mut Obj> {
         if let Some(i) = self.objs.iter().position(|obj| obj.unq == unq) {
             self.objs.get_mut(i)
+        } else {
+            None
+        }
+    }
+
+    pub fn get_rail(&mut self, unq: u16) -> Option<&Rail> {
+        if let Some(i) = self.rails.iter().position(|obj| obj.unq == unq) {
+            self.rails.get(i)
         } else {
             None
         }
@@ -174,12 +190,59 @@ impl Stage {
         }
     }
 
+    pub fn get_system(&mut self, unq: u16) -> Option<&Obj> {
+        if let Some(i) = self.system.iter().position(|obj| obj.unq == unq) {
+            self.system.get(i)
+        } else {
+            None
+        }
+    }
+
     pub fn get_system_mut(&mut self, unq: u16) -> Option<&mut Obj> {
         if let Some(i) = self.system.iter().position(|sys| sys.unq == unq) {
             self.system.get_mut(i)
         } else {
             None
         }
+    }
+
+    /// Finds the lowest currently unused Objs UNQ
+    pub fn find_objs_unq(&self) -> u16 {
+        self.objs.iter().fold(0, |max_unq, obj| if obj.unq > max_unq { obj.unq } else { max_unq }) + 1
+    }
+
+    /// Finds the lowest currently unused Objs SER
+    pub fn find_objs_ser(&self) -> u16 {
+        self.objs.iter().fold(0, |max_ser, obj| {
+            let ser = obj.ser.unwrap();
+            if ser > max_ser {
+                ser
+            } else {
+                max_ser
+            }
+        }) + 1
+    }
+
+    /// Finds the lowest currently unused Rails UNQ
+    pub fn find_rails_unq(&self) -> u16 {
+        self.rails.iter().fold(0, |max_unq, rail| if rail.unq > max_unq { rail.unq } else { max_unq }) + 1
+    }
+
+    /// Finds the lowest currently unused System UNQ
+    pub fn find_system_unq(&self) -> u16 {
+        self.system.iter().fold(0, |max_unq, obj| if obj.unq > max_unq { obj.unq } else { max_unq }) + 1
+    }
+
+    /// Finds the lowest currently unused System SER
+    pub fn find_system_ser(&self) -> u16 {
+        self.system.iter().fold(0, |max_ser, obj| {
+            let ser = obj.ser.unwrap();
+            if ser > max_ser {
+                ser
+            } else {
+                max_ser
+            }
+        }) + 1
     }
 }
 
@@ -247,6 +310,7 @@ impl Obj {
     }
 
     /// Generate a new AreaSwitchCube trigger object
+    /// ID: 14
     pub fn trigger_cube(trigger_flag: Flag, clp: i16, ser: u16, unq: u16, translate: Vec3) -> Self {
         let (arg4, arg6) = trigger_flag.into_pair();
         Self {
@@ -282,6 +346,54 @@ impl Obj {
         }
     }
 
+    /// Breakable Walls in Lorule Field
+    pub fn wall_break_field_light<S>(flag: Flag, clp: i16, ser: S, unq: u16, translate: Vec3) -> Self
+    where
+        S: Into<Option<u16>>,
+    {
+        Self {
+            arg: Arg(0, 0, 0, 0, flag.get_type(), 0, flag.get_value(), 0, 0, 0, 0, 0, 0, 0.0),
+            clp,
+            flg: (0, flag.get_type(), 0, flag.get_value()),
+            id: 239,
+            lnk: vec![],
+            nme: None,
+            ril: vec![],
+            ser: ser.into(),
+            srt: Transform {
+                scale: Vec3::UNIT,
+                rotate: Vec3::ZERO,
+                translate: translate.add(Vec3 { x: 0.0, y: 0.0, z: 1.0 }),
+            },
+            typ: 1,
+            unq,
+        }
+    }
+
+    /// Breakable Walls in Lorule Field
+    pub fn wall_break_field_dark<S>(flag: Flag, clp: i16, ser: S, unq: u16, translate: Vec3) -> Self
+    where
+        S: Into<Option<u16>>,
+    {
+        Self {
+            arg: Arg(0, 0, 0, 0, flag.get_type(), 0, flag.get_value(), 0, 0, 0, 0, 0, 0, 0.0),
+            clp,
+            flg: (0, flag.get_type(), 0, flag.get_value()),
+            id: 240,
+            lnk: vec![],
+            nme: None,
+            ril: vec![],
+            ser: ser.into(),
+            srt: Transform {
+                scale: Vec3::UNIT,
+                rotate: Vec3::ZERO,
+                translate: translate.add(Vec3 { x: 0.0, y: 0.0, z: 1.0 }),
+            },
+            typ: 1,
+            unq,
+        }
+    }
+
     /// Generate a new Raft object
     /// Remember to import the actor: `Raft`
     pub fn raft(clp: i16, ser: u16, unq: u16, translate: Vec3) -> Self {
@@ -303,42 +415,37 @@ impl Obj {
     /// Generate a new Warp Tile object
     /// Remember to import the actor: `WarpTile`
     pub fn warp_tile(
-        activation_flag: Flag, clp: i16, ser: u16, unq: u16, spawn: i32, scene: i32,
-        scene_index: i32, translate: Vec3,
+        activation_flag: Flag, clp: i16, ser: Option<u16>, unq: u16, sp: SpawnPoint, translate: Vec3,
     ) -> Self {
-        Self::warp(208, 1, activation_flag, clp, ser, unq, spawn, scene, scene_index, translate)
+        Self::warp(208, 1, activation_flag, clp, ser, unq, sp, translate)
     }
 
     /// Generate a new Blue Warp object
-    pub fn blue_warp(
-        activation_flag: Flag, clp: i16, ser: u16, unq: u16, spawn: i32, scene: i32,
-        scene_index: i32, translate: Vec3,
-    ) -> Self {
-        Self::warp(469, 0, activation_flag, clp, ser, unq, spawn, scene, scene_index, translate)
+    pub fn blue_warp(activation_flag: Flag, clp: i16, ser: u16, unq: u16, sp: SpawnPoint, translate: Vec3) -> Self {
+        Self::warp(469, 0, activation_flag, clp, Some(ser), unq, sp, translate)
     }
 
     /// Generate a new Green Warp object
     pub fn green_warp(
-        activation_flag: Flag, clp: i16, ser: u16, unq: u16, spawn: i32, scene: i32,
-        scene_index: i32, translate: Vec3,
+        activation_flag: Flag, clp: i16, ser: Option<u16>, unq: u16, sp: SpawnPoint, translate: Vec3,
     ) -> Self {
-        Self::warp(19, 0, activation_flag, clp, ser, unq, spawn, scene, scene_index, translate)
+        Self::warp(19, 0, activation_flag, clp, ser, unq, sp, translate)
     }
 
     fn warp(
-        id: i16, arg1: i32, activation_flag: Flag, clp: i16, ser: u16, unq: u16, spawn: i32,
-        scene: i32, scene_index: i32, translate: Vec3,
+        id: i16, arg1: i32, activation_flag: Flag, clp: i16, ser: Option<u16>, unq: u16, sp: SpawnPoint,
+        translate: Vec3,
     ) -> Self {
         let (arg4, arg6) = activation_flag.into_pair();
         Self {
-            arg: Arg(spawn, arg1, 0, 0, arg4, 0, arg6, 0, 0, 0, scene, scene_index, 0, 0.0),
+            arg: Arg(sp.spawn, arg1, 0, 0, arg4, 0, arg6, 0, 0, 0, sp.course as i32, sp.scene - 1, 0, 0.0),
             clp,
             flg: (0, 0, 0, 0),
             id,
             lnk: vec![],
             nme: None,
             ril: vec![],
-            ser: Some(ser),
+            ser,
             srt: Transform { scale: Vec3::UNIT, rotate: Vec3::ZERO, translate },
             typ: 6,
             unq,
@@ -348,8 +455,7 @@ impl Obj {
     /// Generate a new Obj to act as a Dungeon Reward trigger <br />
     /// Remember to import the actor: `TreasureBoxS`
     pub fn pendant_chest(
-        prize: Item, active_flag: Flag, pendant_flag: Flag, clp: i16, ser: u16, unq: u16,
-        translate: Vec3,
+        prize: Item, active_flag: Flag, pendant_flag: Flag, clp: i16, ser: u16, unq: u16, translate: Vec3,
     ) -> Self {
         let (arg4, arg6) = Flag::into_pair(active_flag);
         let (arg5, arg7) = Flag::into_pair(pendant_flag);
@@ -515,10 +621,10 @@ impl Obj {
         self.arg.11 = scene_index;
     }
 
-    pub fn redirect(&mut self, dest: Dest) {
-        self.arg.0 = dest.spawn_point;
-        self.arg.10 = dest.scene as i32;
-        self.arg.11 = dest.scene_index - 1;
+    pub fn redirect(&mut self, sp: SpawnPoint) {
+        self.arg.0 = sp.spawn;
+        self.arg.10 = sp.course as i32;
+        self.arg.11 = sp.scene - 1;
     }
 }
 
@@ -556,14 +662,14 @@ pub struct Transform {
     pub translate: Vec3,
 }
 
-impl Transform {
-    /// Adds the values of another Transform to this one
-    pub fn add(&mut self, other: Transform) {
-        self.scale.add(other.scale);
-        self.rotate.add(other.rotate);
-        self.translate.add(other.translate);
-    }
-}
+// impl Transform {
+//     /// Adds the values of another Transform to this one
+//     pub fn add(&mut self, other: Transform) {
+//         self.scale.add(other.scale);
+//         self.rotate.add(other.rotate);
+//         self.translate.add(other.translate);
+//     }
+// }
 
 impl<'de> Deserialize<'de> for Transform {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
@@ -627,15 +733,15 @@ impl Serialize for Transform {
 }
 
 #[derive(Debug, Copy, Clone)]
-pub struct Dest {
-    pub scene: Course,
-    pub scene_index: i32,
-    pub spawn_point: i32,
+pub struct SpawnPoint {
+    pub course: Course,
+    pub scene: i32,
+    pub spawn: i32,
 }
 
-impl Dest {
-    pub fn new(scene: Course, scene_index: i32, spawn_point: i32) -> Self {
-        Self { scene, scene_index, spawn_point }
+impl SpawnPoint {
+    pub fn new(course: Course, scene: i32, spawn: i32) -> Self {
+        Self { course, scene, spawn }
     }
 }
 
@@ -650,11 +756,12 @@ impl Vec3 {
     pub const UNIT: Self = Self { x: 1.0, y: 1.0, z: 1.0 };
     pub const ZERO: Self = Self { x: 0.0, y: 0.0, z: 0.0 };
 
-    /// Adds the values of `other` to this Vec3
-    pub fn add(&mut self, other: Vec3) {
+    /// Adds the values of `other` to this Vec3, consuming the original and returning the sum
+    pub fn add(mut self, other: Vec3) -> Self {
         self.x += other.x;
         self.y += other.y;
         self.z += other.z;
+        self
     }
 }
 

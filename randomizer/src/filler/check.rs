@@ -1,6 +1,6 @@
 use {
     crate::{
-        model::{logic::Logic, progress::Progress},
+        filler::{logic::Logic, progress::Progress},
         FillerItem, LocationInfo,
     },
     std::hash::{Hash, Hasher},
@@ -17,8 +17,7 @@ pub struct Check {
 
 impl Check {
     pub fn new(
-        name: &'static str, logic: Logic, quest: Option<FillerItem>,
-        location_info: Option<LocationInfo>,
+        name: &'static str, logic: Logic, quest: Option<FillerItem>, location_info: Option<LocationInfo>,
     ) -> Self {
         Self { name, logic, quest, location_info }
     }

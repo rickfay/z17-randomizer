@@ -24,11 +24,8 @@ impl<'file, const SECTIONS: usize> MsgBn<Ref<'file>, SECTIONS> {
 
     pub fn get(&self, magic: &'static [u8; 4]) -> Option<Ref<'file>> {
         self.sections.iter().find_map(|(section_magic, section)| {
-            (magic == section_magic).then(|| {
-                Ref::map(Ref::clone(&self.file), |file| unsafe {
-                    file.get_unchecked(section.clone())
-                })
-            })
+            (magic == section_magic)
+                .then(|| Ref::map(Ref::clone(&self.file), |file| unsafe { file.get_unchecked(section.clone()) }))
         })
     }
 }
@@ -40,10 +37,8 @@ impl<'file, const SECTIONS: usize> MsgBn<RefMut<'file>, SECTIONS> {
     }
 
     pub fn into_section(self, magic: &'static [u8; 4]) -> Option<RefMut<'file>> {
-        if let Some(section) = self
-            .sections
-            .iter()
-            .find_map(|(section_magic, section)| (magic == section_magic).then_some(section))
+        if let Some(section) =
+            self.sections.iter().find_map(|(section_magic, section)| (magic == section_magic).then_some(section))
         {
             unsafe { Some(self.file.get_unchecked_mut(section.clone())) }
         } else {
@@ -52,9 +47,7 @@ impl<'file, const SECTIONS: usize> MsgBn<RefMut<'file>, SECTIONS> {
     }
 }
 
-pub fn sections<const SECTIONS: usize>(
-    file: &[u8], magic: &'static [u8; 8],
-) -> Result<Sections<SECTIONS>> {
+pub fn sections<const SECTIONS: usize>(file: &[u8], magic: &'static [u8; 8]) -> Result<Sections<SECTIONS>> {
     typedef! { struct Header<'h>: TryFromBytes<'h> [0x20] {
         [0] magic: &'h [u8; 8],
         [8] bom: u16 where bom == 0xFEFF,

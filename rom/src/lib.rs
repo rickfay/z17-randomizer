@@ -49,7 +49,7 @@ pub struct Error {
 }
 
 impl Error {
-    fn new<T>(err: T) -> Self
+    pub fn new<T>(err: T) -> Self
     where
         T: Into<Box<dyn StdError + Send + Sync + 'static>>,
     {
@@ -125,18 +125,12 @@ impl Rom {
             let exheader = cxi.exheader()?;
             let mut romfs = cxi.try_into_romfs()?;
             let region_boot = romfs.read("US/RegionBoot.szs")?.map(Sarc::from);
-            let flow_chart = region_boot
-                .get()
-                .read("World/Byaml/FlowChart.byaml")?
-                .try_map(|data| byaml::from_bytes(&data))?;
-            let get_item = region_boot
-                .get()
-                .read("World/Byaml/GetItem.byaml")?
-                .try_map(|data| byaml::from_bytes(&data))?;
-            let message = region_boot
-                .get()
-                .read("World/Byaml/Message.byaml")?
-                .try_map(|data| byaml::from_bytes(&data))?;
+            let flow_chart =
+                region_boot.get().read("World/Byaml/FlowChart.byaml")?.try_map(|data| byaml::from_bytes(&data))?;
+            let get_item =
+                region_boot.get().read("World/Byaml/GetItem.byaml")?.try_map(|data| byaml::from_bytes(&data))?;
+            let message =
+                region_boot.get().read("World/Byaml/Message.byaml")?.try_map(|data| byaml::from_bytes(&data))?;
             Ok(Self { id, exheader, romfs: RefCell::new(romfs), flow_chart, get_item, message })
         } else {
             Err(Error::new("Invalid ROM ID."))
@@ -196,29 +190,21 @@ impl Rom {
         Course::new(self, id)
     }
 
-    pub fn demo(&self, index: u16) -> Result<File<Demo>> {
-        self.romfs
-            .borrow_mut()
-            .read(format!("World/Demo/Demo{}.csv", index + 1))?
-            .try_map(Demo::try_read)
-    }
+    // pub fn demo(&self, index: u16) -> Result<File<Demo>> {
+    //     self.romfs.borrow_mut().read(format!("World/Demo/Demo{}.csv", index))?.try_map(Demo::try_read)
+    // }
 
     pub fn language(&self, course: CourseId) -> Result<Language> {
         let flow = self.flow_chart.get().load().course(course).unwrap_or_default().iter().cloned();
-        let archive = self
-            .romfs
-            .borrow_mut()
-            .read(format!("US_English/{}.szs", course.as_str()))?
-            .map(Sarc::from);
+        let archive = self.romfs.borrow_mut().read(format!("US_English/{}.szs", course.as_str()))?.map(Sarc::from);
         Ok(Language::new(flow, archive))
     }
 
     pub(crate) fn scene(&self, course: CourseId, stage: u16) -> Result<Scene> {
         let name = format!("{}{}", course.as_str(), stage + 1);
         let mut romfs = self.romfs.borrow_mut();
-        let stage = romfs
-            .read(format!("World/Byaml/{}_stage.byaml", name))?
-            .try_map(|data| byaml::from_bytes(&data))?;
+        let stage =
+            romfs.read(format!("World/Byaml/{}_stage.byaml", name))?.try_map(|data| byaml::from_bytes(&data))?;
         let actors = romfs.read(format!("Archive/{}.szs", name))?.map(Sarc::from);
         Ok(Scene::new(stage, actors))
     }
@@ -239,17 +225,13 @@ impl Rom {
 
     pub fn scene_env(&self) -> Result<SceneEnvFile> {
         let mut romfs = self.romfs.borrow_mut();
-        let scene_env =
-            romfs.read("World/Byaml/SceneEnv.byaml")?.try_map(|data| byaml::from_bytes(&data))?;
+        let scene_env = romfs.read("World/Byaml/SceneEnv.byaml")?.try_map(|data| byaml::from_bytes(&data))?;
         Ok(SceneEnvFile::new(scene_env))
     }
 
     pub fn stage(&self, course: CourseId, stage: u16) -> Result<Stage> {
         byaml::from_bytes(
-            self.romfs
-                .borrow_mut()
-                .read(format!("World/Byaml/{}{}_stage.byaml", course.as_str(), stage + 1))?
-                .get(),
+            self.romfs.borrow_mut().read(format!("World/Byaml/{}{}_stage.byaml", course.as_str(), stage + 1))?.get(),
         )
     }
 }

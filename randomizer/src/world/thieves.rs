@@ -1,9 +1,9 @@
-use crate::legacy::path::Path;
-use crate::model::check::Check;
-use crate::model::filler_item::Goal;
-use crate::model::location::Location::{self, *};
-use crate::model::location_node::LocationNode;
-use crate::model::logic::Logic;
+use crate::filler::check::Check;
+use crate::filler::filler_item::Goal;
+use crate::filler::location::Location::{self, *};
+use crate::filler::location_node::LocationNode;
+use crate::filler::logic::Logic;
+use crate::filler::path::Path;
 use crate::regions;
 use crate::world::{check, edge, goal, location, old_check, old_path};
 use crate::LocationInfo;
@@ -18,24 +18,14 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                 "Thieves' Hideout",
                 vec![
                     /* B1 */
-                    check!(
-                        "[T'H] (B1) Grate Chest",
-                        regions::dungeons::thieves::hideout::SUBREGION
-                    ),
+                    check!("[TT] (B1) Grate Chest", regions::dungeons::thieves::hideout::SUBREGION),
                     old_check(
-                        LocationInfo::new(
-                            "[T'H] (B1) Jail Cell",
-                            regions::dungeons::thieves::hideout::SUBREGION,
-                        ),
+                        LocationInfo::new("[TT] (B1) Jail Cell", regions::dungeons::thieves::hideout::SUBREGION),
                         Some(|p| p.can_merge()),
                         None,
                         Some(|p| p.has_boots()), // jailbreak
                         None,
-                        Some(|p| {
-                            p.hell_thieves_statue_clip()
-                                && p.has_tornado_rod()
-                                && p.can_escape_dungeon()
-                        }),
+                        Some(|p| p.hell_thieves_statue_clip() && p.has_tornado_rod() && p.can_escape_dungeon()),
                     ),
                     goal!("Thieves' Hideout B1 Door Open", Goal::ThievesB1DoorOpen => {
                         normal: |p| p.can_merge() && p.can_hit_switch(),
@@ -45,7 +35,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                     /* B2 */
                     old_check(
                         LocationInfo::new(
-                            "[T'H] (B2) Grate Chest (Fall)",
+                            "[TT] (B2) Grate Chest (Fall)",
                             regions::dungeons::thieves::hideout::SUBREGION,
                         ),
                         Some(|p| p.thieves_b1_door_open()),
@@ -60,10 +50,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                         hell: |p| p.has_bombs(),
                     }),
                     old_check(
-                        LocationInfo::new(
-                            "[T'H] (B2) Jail Cell",
-                            regions::dungeons::thieves::hideout::SUBREGION,
-                        ),
+                        LocationInfo::new("[TT] (B2) Jail Cell", regions::dungeons::thieves::hideout::SUBREGION),
                         Some(|p| p.thieves_b1b2_doors_open() && p.can_merge()),
                         None,
                         None,
@@ -72,7 +59,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                     ),
                     old_check(
                         LocationInfo::new(
-                            "[T'H] (B2) Switch Puzzle Room",
+                            "[TT] (B2) Switch Puzzle Room",
                             regions::dungeons::thieves::hideout::SUBREGION,
                         ),
                         Some(|p| p.thieves_b1b2_doors_open()),
@@ -82,10 +69,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                         Some(|p| p.hell_thieves_statue_clip()),
                     ),
                     old_check(
-                        LocationInfo::new(
-                            "[T'H] (B2) Eyegores",
-                            regions::dungeons::thieves::hideout::SUBREGION,
-                        ),
+                        LocationInfo::new("[TT] (B2) Eyegores", regions::dungeons::thieves::hideout::SUBREGION),
                         Some(|p| {
                             p.thieves_b1b2_doors_open()
                                 && p.can_merge()
@@ -101,9 +85,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                                 && (p.can_attack() || p.has_lamp_or_net())
                         }),
                         None,
-                        Some(|p| {
-                            p.adv_thieves_statue_clip() && (p.has_boots() || p.has_tornado_rod())
-                        }),
+                        Some(|p| p.adv_thieves_statue_clip() && (p.has_boots() || p.has_tornado_rod())),
                         None,
                     ),
                     /* Escape */
@@ -126,8 +108,16 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                         hell: |p| p.hell_thieves_statue_clip() && p.has_tornado_rod(),
                     }),
                     old_check(
+                        LocationInfo::new("[TT] (B3) Underwater", regions::dungeons::thieves::hideout::SUBREGION),
+                        Some(|p| p.thieves_escape_equipment() && p.can_attack()),
+                        Some(|p| p.thieves_escape_equipment() && p.has_lamp_or_net()),
+                        None,
+                        Some(|p| p.adv_thieves_statue_clip() && p.has_tornado_rod()),
+                        Some(|p| p.hell_thieves_statue_clip() && p.has_tornado_rod()),
+                    ),
+                    old_check(
                         LocationInfo::new(
-                            "[T'H] (B3) Underwater",
+                            "[TT] (B3) Big Chest (Hidden)",
                             regions::dungeons::thieves::hideout::SUBREGION,
                         ),
                         Some(|p| p.thieves_escape_equipment() && p.can_attack()),
@@ -137,34 +127,16 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                         Some(|p| p.hell_thieves_statue_clip() && p.has_tornado_rod()),
                     ),
                     old_check(
-                        LocationInfo::new(
-                            "[T'H] (B3) Big Chest (Hidden)",
-                            regions::dungeons::thieves::hideout::SUBREGION,
-                        ),
-                        Some(|p| p.thieves_escape_equipment() && p.can_attack()),
-                        Some(|p| p.thieves_escape_equipment() && p.has_lamp_or_net()),
-                        None,
-                        Some(|p| p.adv_thieves_statue_clip() && p.has_tornado_rod()),
-                        Some(|p| p.hell_thieves_statue_clip() && p.has_tornado_rod()),
-                    ),
-                    old_check(
-                        LocationInfo::new(
-                            "[T'H] (B1) Behind Wall",
-                            regions::dungeons::thieves::hideout::SUBREGION,
-                        ),
+                        LocationInfo::new("[TT] (B1) Behind Wall", regions::dungeons::thieves::hideout::SUBREGION),
                         Some(|p| p.thieves_escape_equipment() && p.can_attack()),
                         Some(|p| p.thieves_escape_equipment() && p.has_lamp_or_net()),
                         None,
                         None, // I'm just not including this
-                        Some(|p| {
-                            p.hell_thieves_statue_clip()
-                                && p.has_tornado_rod()
-                                && p.can_escape_dungeon()
-                        }),
+                        Some(|p| p.hell_thieves_statue_clip() && p.has_tornado_rod() && p.can_escape_dungeon()),
                     ),
                     old_check(
                         LocationInfo::new(
-                            "[T'H] (B1) Big Chest (Entrance)",
+                            "[TT] (B1) Big Chest (Entrance)",
                             regions::dungeons::thieves::hideout::SUBREGION,
                         ),
                         Some(|p| p.thieves_escape_equipment() && p.can_attack()),
@@ -175,7 +147,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                     ),
                 ],
                 vec![
-                    edge!(LoruleCastleField),
+                    edge!(LoruleCastleArea),
                     old_path(
                         ThievesBoss,
                         Some(|p| {
@@ -219,11 +191,8 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
             location(
                 "Thieves' Hideout Post Boss",
                 vec![
-                    check!("Stalblind", regions::dungeons::thieves::hideout::SUBREGION),
-                    check!(
-                        "Thieves' Hideout Prize",
-                        regions::dungeons::thieves::hideout::SUBREGION
-                    ),
+                    check!("[TT] Stalblind", regions::dungeons::thieves::hideout::SUBREGION),
+                    check!("[TT] Prize", regions::dungeons::thieves::hideout::SUBREGION),
                     goal!("Stalblind Defeated", Goal::Stalblind),
                 ],
                 vec![],

@@ -1,7 +1,8 @@
+use log::warn;
+use randomizer::SeedInfo;
 use {
     log::{error, info},
     macros::fail,
-    modinfo::Settings,
     randomizer::{
         constants::VERSION,
         system::{System, UserConfig},
@@ -10,7 +11,7 @@ use {
     structopt::StructOpt,
 };
 
-#[derive(Debug, StructOpt)]
+#[derive(Debug, StructOpt, Clone)]
 struct Opt {
     #[structopt(long)]
     seed: Option<u32>,
@@ -25,39 +26,17 @@ struct Opt {
     no_spoiler: bool,
 }
 
-/**
- * THE LEGEND OF ZELDA: A LINK BETWEEN WORLDS RANDOMIZER
- */
+/// THE LEGEND OF ZELDA: A LINK BETWEEN WORLDS RANDOMIZER
 fn main() {
     let opt = Opt::from_args();
 
-    SimpleLogger::init(LevelFilter::Info, Default::default())
-        .expect("Could not initialize logger.");
+    SimpleLogger::init(LevelFilter::Info, Default::default()).expect("Could not initialize logger.");
 
     info!("Initializing ALBW Randomizer...");
 
-    // Get Settings, either from a preset or the CLI
-    let (preset_name, mut settings): (&str, Settings) =
-        if let Some(preset_name) = opt.preset.as_ref() {
-            (
-                preset_name,
-                System::load_preset(preset_name).unwrap_or_else(|err| {
-                    fail!("Failed to load preset: {}\nError: {}", preset_name, err);
-                }),
-            )
-        } else {
-            (
-                "<None>",
-                cli::get_seed_settings().unwrap_or_else(|err| {
-                    fail!("Failed to create Settings: {}", err);
-                }),
-            )
-        };
-    settings.logic.yuganon_requirement = settings.logic.lc_requirement; // FIXME Temporary: Force Yuganon Requirement to be equal to LC Requirement
+    let (preset_name, seeded, SeedInfo { mut seed, mut settings, .. }) = determine_settings(opt.preset, opt.seed);
 
-    // Determine Seed
-    let (seeded, mut seed): (bool, u32) =
-        if let Some(seed) = opt.seed { (true, seed) } else { (false, rand::random()) };
+    settings.yuganon_requirement = settings.lc_requirement; // FIXME Temporary: Force Yuganon Requirement to be equal to LC Requirement
 
     // Load User Config
     let user_config: UserConfig = System::load_config().unwrap_or_else(|error| {
@@ -70,21 +49,25 @@ fn main() {
     const MAX_RETRIES: u16 = 100;
     for x in 0..MAX_RETRIES {
         info!("Attempt:                        #{}", x + 1);
-        info!("Preset:                         {}", preset_name);
+        info!(
+            "Preset File:                    {}",
+            if let Some(preset_name) = preset_name.clone() { preset_name } else { "<None>".to_owned() }
+        );
         info!("Version:                        {}", VERSION);
+        info!("Seed:                           {:0>10}", seed);
 
-        match randomizer::generate_seed(seed, &settings, &user_config, opt.no_patch, opt.no_spoiler)
-        {
+        let stopwatch = std::time::Instant::now();
+        match randomizer::generate_seed(seed, settings.clone(), &user_config, opt.no_patch, opt.no_spoiler) {
             Ok(_) => {
                 println!();
-                info!("Successfully Generated ALBWR Seed: {}", seed);
+                info!("Successfully Generated ALBWR Seed {} in {} seconds.", seed, stopwatch.elapsed().as_secs());
                 break;
-            }
+            },
             Err(err) => {
                 error!("{:?}", err);
                 if x < MAX_RETRIES {
                     if !seeded {
-                        info!("Seed was not completable (this is normal). Retrying...\n");
+                        info!("Seed was not completable. Retrying...\n");
                         seed = rand::random();
                     } else {
                         fail!("Couldn't generate Seed: \"{}\" with the given settings.", seed);
@@ -92,10 +75,56 @@ fn main() {
                 } else {
                     fail!("Too many retry attempts have failed. Aborting...");
                 }
-            }
+            },
         }
     }
 
     println!();
     cli::pause();
+}
+
+/// Get Settings, either from a preset or the CLI
+fn determine_settings(opt_preset: Option<String>, opt_seed: Option<u32>) -> (Option<String>, bool, SeedInfo) {
+    if let Some(preset_name) = opt_preset {
+        let preset_name = preset_name.clone();
+        let mut seed_info = System::load_preset(&(preset_name.clone())).unwrap_or_else(|err| {
+            fail!("Failed to load preset: {}\nError: {}", preset_name, err);
+        });
+
+        if seed_info.version != VERSION {
+            fail!("There was a Version mismatch between the Randomizer and the Preset file.\nRandomizer Version: \"{}\"\nPreset Version:     \"{}\"", VERSION, seed_info.version);
+        }
+
+        let mut seeded = false;
+        if let Some(seed) = opt_seed {
+            if seed_info.seed != 0 {
+                warn!("Two seed numbers provided! Defaulting to the command line argument.\n");
+            }
+
+            seed_info.seed = seed;
+            seeded = true;
+        } else if seed_info.seed != 0 {
+            seeded = true;
+        } else {
+            seed_info.seed = rand::random();
+        }
+
+        (Some(preset_name), seeded, seed_info)
+    } else {
+        let (seeded, seed): (bool, u32) =
+            if let Some(seed) = opt_seed { (true, seed) } else { (false, rand::random()) };
+
+        (
+            None,
+            seeded,
+            SeedInfo {
+                seed,
+                version: VERSION.to_owned(),
+                settings: cli::get_seed_settings().unwrap_or_else(|err| {
+                    fail!("Failed to create Settings: {}", err);
+                }),
+                ..Default::default()
+            },
+        )
+    }
 }

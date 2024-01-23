@@ -33,9 +33,7 @@ impl<const N: usize> Bytes for [u8; N] {
 
     #[inline]
     fn from_slice(slice: &[u8]) -> Result<(&Self, &[u8])> {
-        let buf = slice
-            .get(0..N)
-            .ok_or_else(|| Error::new(ErrorKind::UnexpectedEof, "failed to fill whole buffer"))?;
+        let buf = slice.get(0..N).ok_or_else(|| Error::new(ErrorKind::UnexpectedEof, "failed to fill whole buffer"))?;
         unsafe { Ok((Bytes::from_slice_unchecked(buf), slice.get_unchecked(N..))) }
     }
 

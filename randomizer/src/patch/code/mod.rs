@@ -1,18 +1,19 @@
+use super::Patcher;
+use crate::filler::filler_item::FillerItem;
+use crate::filler::filler_item::Item::*;
+use crate::{patch::util::prize_flag, regions, Layout, Result, SeedInfo};
+use arm::*;
+use game::Item::*;
+use modinfo::settings::{pedestal::PedestalSetting::*, Settings};
+use rom::flag::Flag;
+use rom::scene::SpawnPoint;
+use rom::ExHeader;
 use std::{
     collections::HashMap,
     fs::{self, File},
     io::Write,
     path::Path,
 };
-
-use arm::*;
-use game::Item::{self, *};
-use modinfo::settings::{pedestal::PedestalSetting::*, Settings};
-use rom::flag::Flag;
-use rom::ExHeader;
-
-use super::Patcher;
-use crate::{patch::util::prize_flag, Result, SeedInfo};
 
 mod arm;
 
@@ -45,6 +46,11 @@ impl Code {
         let len = code.len() as u32;
         self.overwrite(addr, code);
         len
+    }
+
+    #[allow(unused)]
+    pub fn addr(&mut self, addr: u32, data: u32) {
+        self.overwrite(addr, u32::to_le_bytes(data));
     }
 
     pub fn overwrite<T>(&mut self, addr: u32, data: T)
@@ -144,22 +150,39 @@ impl Ips {
     }
 }
 
-pub fn create(patcher: &Patcher, seed_info: &SeedInfo) -> Code {
+pub fn create(patcher: &Patcher, SeedInfo { layout, settings, .. }: &SeedInfo) -> Code {
     let mut code = Code::new(patcher.game.exheader());
+
+    // Start with Pouch
+    if settings.start_with_pouch {
+        code.text().patch(0x47b28c, [mov(R0, 1)]);
+    }
 
     // Enable Y Button
     code.text().patch(0x47B2C8, [mov(R0, 1)]);
 
     // instant text
     code.overwrite(0x17A430, [0xFF]);
+
     rental_items(&mut code);
     progressive_items(&mut code);
-    bracelet(&mut code, seed_info.settings);
+    bracelet(&mut code, settings);
     ore_progress(&mut code);
     merchant(&mut code);
-    configure_pedestal_requirements(&mut code, seed_info.settings);
-    night_mode(&mut code, seed_info.settings);
+    configure_pedestal_requirements(&mut code, settings);
+    night_mode(&mut code, settings);
     show_hint_ghosts(&mut code);
+    // earthquake(&mut code);
+    mother_maiamai(&mut code, &layout);
+    pause_menu_warp(&mut code);
+    // golden_bees(&mut code);
+    // file_select_screen_background(&mut code);
+
+    // Show Maiamai on Gear Screen even when you have zero
+    code.patch(0x426490, [b(0x4264a0)]);
+
+    // Correct Master Ore display count
+    code.patch(0x4637b4, [b(0x463800)]);
 
     // fix castle barrier?
     let master_sword_flag = code.text().define([
@@ -261,7 +284,7 @@ pub fn create(patcher: &Patcher, seed_info: &SeedInfo) -> Code {
     code.patch(0x1D6DBC, [ldr(R1, (R4, 0x2E)), mov(R0, R0)]);
 
     // Premium Milk
-    if seed_info.layout.find_single(MessageBottle).is_none() {
+    if layout.find_single(FillerItem::Item(LetterInABottle)).is_none() {
         // This code makes the Premium Milk work correctly when picked up without having first picked up the Letter.
         // This patch is only applied when the Milk is shuffled in the rando instead of the Letter.
         // If it's desired to have both shuffled at once then this code needs to be re-written.
@@ -289,7 +312,7 @@ pub fn create(patcher: &Patcher, seed_info: &SeedInfo) -> Code {
     let set_courage_flag = code.text().define([
         ldr(R0, EVENT_FLAG_PTR),
         mov(R2, 1),
-        ldr(R1, prize_flag(PendantCourage).get_value() as u32),
+        ldr(R1, Flag::EASTERN_COMPLETE.get_value()),
         ldr(R0, (R0, 0)),
         bl(FN_SET_EVENT_FLAG),
         b(0x344F00),
@@ -297,16 +320,180 @@ pub fn create(patcher: &Patcher, seed_info: &SeedInfo) -> Code {
     code.patch(0x344d9c, [b(set_courage_flag)]);
 
     // Great Spin Fix to work with and not disappear when obtaining Forgotten Sword
-    let great_spin_fix = code.text().define([
-        ldr(R0, (R4, 0x4E4)),
-        cmp(R0, 0x3),
-        mov(R2, 0x2).ne(),
-        mov(R2, 0x3).eq(),
-        b(0x344df0),
-    ]);
+    let great_spin_fix =
+        code.text().define([ldr(R0, (R4, 0x4E4)), cmp(R0, 0x3), mov(R2, 0x2).ne(), mov(R2, 0x3).eq(), b(0x344df0)]);
     code.patch(0x344dec, [b(great_spin_fix)]);
 
     code
+}
+
+/// File Select Screen Background
+/// TODO Figure out how to make background permanent
+#[allow(unused)]
+fn file_select_screen_background(code: &mut Code) {
+    let sp = SpawnPoint::new(game::Course::Demo, 5, 0); // TODO use argument
+
+    //code.text().patch(0x29d2c0, [mov(R10, 0x0)]); // Standstill camera on FSS over spawn point (ehh)
+    code.text().patch(0x29d258, [mov(R0, 0x1)]); // Force always show same scene on FSS
+    code.text().patch(0x29d270, [mov(R1, sp.course as u32)]);
+    code.text().patch(0x29d278, [mov(R2, sp.scene as u32 - 1)]);
+    code.text().patch(0x29d260, [mov(R6, sp.spawn as u32)]);
+    let reset_r6 = code.text().define([mov(R6, 0x0), b(0x29d2a4)]);
+    code.text().patch(0x29d284, [b(reset_r6)]);
+}
+
+/// Create new Earthquake item that sets Flag 510
+#[allow(unused)]
+fn earthquake(code: &mut Code) {
+    let earthquake = code.text().define([
+        // TODO Play Earthquake Noise:
+        // 0x6f8f24 - SE_EVENT_EARTQAUAKE
+        // 0x587f74 - PlaySoundEffect Function
+
+        // Set Flag
+        ldr(R0, EVENT_FLAG_PTR),
+        mov(R2, 0x1),
+        ldr(R1, Flag::EARTHQUAKE.get_value()),
+        ldr(R0, (R0, 0x0)),
+        bl(FN_SET_EVENT_FLAG),
+        b(0x344f00),
+    ]);
+    code.addr(0x3448ec, earthquake); // Rented Shield -> Earthquake
+}
+
+/// Mother Maiamai Stuff
+fn mother_maiamai(code: &mut Code, layout: &Layout) {
+    code.patch(0x30ffe4, [mov(R0, 1)]); // Skip FUN_00583b1c - Suck/Spit Old/New Item Animation
+
+    let _fn_received_maiamai_item = code.text().define([
+        mov(R8, R1),     // save R1
+        add(R1, R1, 50), // arbitrary - just need 9 unused flags, using 302-311 (not 305)
+        //ldr(R0, 0x1e70e8),
+        //ldr(R0, (R0, 0x0)),
+        ldr(R0, 0x70c8e0),
+        ldr(R0, (R0, 0x0)),
+        ldr(R0, (R0, 0x40)),
+        // ldr(R2, 0x3),
+
+        // bl(0x5822a0),
+        bl(FN_GET_LOCAL_FLAG_3),
+        mov(R1, R8), // restore R1
+        cmp(R0, 0x0),
+        b(0x46d848).eq(),
+        b(0x46d888),
+    ]);
+    code.patch(0x46d844, [b(0x46d888).lt()]);
+    //code.patch(0x46d844, [b(fn_received_maiamai_item)]);
+
+    code.patch(0x30feb4, [mov(R0, 0).eq()]); // Allow Nice Items to give rewards
+                                             // code.patch(0x30fe9c, [mov(R0, 0).eq()]); // Allow Rented Items to give rewards
+    code.patch(0x3105c8, [mov(R0, 0x0)]); // Skip Sound: SE_ShopManKinSta_VACUUM
+
+    // vvv--- Stuff that didn't work below ---vvv
+
+    // Ingoing Item Model
+    // code.patch(0x30FF8C, [mov(R1, 0x11)]);
+    // code.patch(0x30FF94, [mov(R1, 0x11)]);
+    // code.patch(0x30FF9C, [mov(R1, 0x11)]);
+    // code.patch(0x30FFA4, [mov(R1, 0x11)]);
+    // code.patch(0x30FFAC, [mov(R1, 0x11)]);
+    // code.patch(0x30FFB4, [mov(R1, 0x11)]);
+    // code.patch(0x30FFBC, [mov(R1, 0x11)]);
+    // code.patch(0x30FFC4, [mov(R1, 0x11)]);
+    // code.patch(0x30FFCC, [mov(R1, 0x11)]);
+
+    // Show even if we have Nice item of that slot
+    // code.patch(0x300feb0, [mov(R0, R0)]);
+    // code.patch(0x300feb4, [mov(R0, 0)]);
+    // code.patch(0x300feb8, [b(0x30fec0)]);
+
+    // Don't hide slots for Items where we have the Nice version
+    //code.patch(0x30feb4, [mov(R0, 0).eq()]); // TODO TEST ??? (Result = failed)
+    // code.patch(0x194b74, [b(0x194b78).ne()]); // TODO TEST ??? (failed...)
+    // code.patch(0x194b78, [mov(R5, 0x0)]); (todo nada...)
+
+    //  (todo apparently just made Cancel not work)
+    // code.patch(0x30fdf8, [b(0x30fef0),]);
+    // code.patch(0x30fe6c, [b(0x30fef0), ]);
+
+    // Makes Cancel option act like an Item was selected (Bombs in testing)
+    // code.patch(0x30fe6c, [b(0x30febc)]);
+    // code.patch(0x30febc, [mov(R0, 0x0)]);
+
+    // Skip FUN_00625250
+    // code.patch(0x310148, [mov(R0, R0)]);
+
+    // Skip FUN_003931ec (bad idea)
+    // code.patch(0x6252c4, [mov(R0, R0)]);
+
+    let ice = layout.get_item("Maiamai Ice Rod Upgrade", regions::hyrule::lake::hylia::SUBREGION);
+    let sand = layout.get_item("Maiamai Sand Rod Upgrade", regions::hyrule::lake::hylia::SUBREGION);
+    let torn = layout.get_item("Maiamai Tornado Rod Upgrade", regions::hyrule::lake::hylia::SUBREGION);
+    let bomb = layout.get_item("Maiamai Bombs Upgrade", regions::hyrule::lake::hylia::SUBREGION);
+    let fire = layout.get_item("Maiamai Fire Rod Upgrade", regions::hyrule::lake::hylia::SUBREGION);
+    let hook = layout.get_item("Maiamai Hookshot Upgrade", regions::hyrule::lake::hylia::SUBREGION);
+    let rang = layout.get_item("Maiamai Boomerang Upgrade", regions::hyrule::lake::hylia::SUBREGION);
+    let hamm = layout.get_item("Maiamai Hammer Upgrade", regions::hyrule::lake::hylia::SUBREGION);
+    let bow = layout.get_item("Maiamai Bow Upgrade", regions::hyrule::lake::hylia::SUBREGION);
+
+    ice.as_item().unwrap().to_game_item();
+
+    // Item
+    code.patch(0x310118, [mov(R0, ice.as_item_index())]); // 0x4D - Nice Ice Rod
+    code.patch(0x310108, [mov(R0, sand.as_item_index())]); // 0x4E - Nice Sand Rod
+    code.patch(0x310120, [mov(R0, torn.as_item_index())]); // 0x4F - Nice Torando Rod
+    code.patch(0x310130, [mov(R0, bomb.as_item_index())]); // 0x50 - Nice Bombs
+    code.patch(0x310110, [mov(R0, fire.as_item_index())]); // 0x51 - Nice Fire Rod
+    code.patch(0x310128, [mov(R0, hook.as_item_index())]); // 0x52 - Nice Hookshot
+    code.patch(0x3100F0, [mov(R0, rang.as_item_index())]); // 0x53 - Nice Boomerang
+    code.patch(0x310100, [mov(R0, hamm.as_item_index())]); // 0x54 - Nice Hammer
+    code.patch(0x3100F8, [mov(R0, bow.as_item_index())]); // 0x55 - Nice Bow
+}
+
+fn pause_menu_warp(code: &mut Code) {
+    // Pause Menu...?
+    // code.patch(0x441ee8, [mov(R0, R0)]); // Don't call function to return to FSS?
+    // code.patch(0x441eec, [mov(R0, R0)]); // Don't call function to return to FSS?
+
+    let _fn_load_scene_links_house = code.text().define([
+        mov(R0, 0x0),
+        bl(0x4eefa0),
+        mov(R0, 0x1), // ???
+        strb(R0, (SP, 0xA)),
+        mov(R0, 0x2), // scene = IndoorLight
+        str_(R0, (SP, 0x0)),
+        mov(R0, 0x0), // index = 1
+        str_(R0, (SP, 0x4)),
+        mov(R0, 0x1), // spawn = 0
+        strb(R0, (SP, 0x8)),
+        mov(R3, 0x0),
+        mov(R2, 0x0),
+        mov(R1, SP),
+        ldr(R0, 0x709df8),
+        // ldr(R0, (R0, 0x0)),
+        bl(0x4ef418), // Load Scene Function
+        b(0x441eec),
+    ]);
+
+    // code.patch(0x441ee8, [b(fn_load_scene_links_house)]);
+
+    // different attempt...
+    // let fn_death_warp = code.text().define([
+    //     ldr(R0, (R4, 0x0)), // ???
+    //     bl(0x502d24),
+    // ]);
+    //
+    // code.patch(0x441edc, [b(fn_death_warp)]);
+    //
+    // code.patch(0x0, 0x0);
+}
+
+/// Golden Bee stuff
+#[allow(unused)]
+fn golden_bees(code: &mut Code) {
+    // Alter Odds of a bee being a golden bee
+    let golden_bee_chance = 3; // Choose percentage chance 0-100 (in vanilla it's 3)
+    code.patch(0x4cbb8c, [cmp(R0, golden_bee_chance)]);
 }
 
 /// Show Hint Ghosts always, without the need for the Hint Glasses
@@ -323,7 +510,7 @@ fn show_hint_ghosts(code: &mut Code) {
 }
 
 fn night_mode(code: &mut Code, settings: &Settings) {
-    if settings.options.night_mode {
+    if settings.night_mode {
         // Keeps Flag 964 from being unset
         code.patch(0x3a8624, [mov(R2, 0x1)]);
     }
@@ -333,20 +520,20 @@ fn configure_pedestal_requirements(code: &mut Code, settings: &Settings) {
     const FLAG_PEDESTAL: u32 = 375;
     const RETURN_LABEL: u32 = 0x1439c8;
 
-    let ped_instructions = match settings.logic.ped_requirement {
+    let ped_instructions = match settings.ped_requirement {
         Vanilla => {
             code.text().define([
                 // Power
                 ldr(R0, EVENT_FLAG_PTR),
                 ldr(R0, (R0, 0x0)),
-                ldr(R1, prize_flag(PendantPower).get_value() as u32),
+                ldr(R1, prize_flag(PendantOfPower.into()).get_value() as u32),
                 bl(FN_GET_EVENT_FLAG),
                 cmp(R0, 0x0),
                 b(RETURN_LABEL).eq(),
                 // Wisdom
                 ldr(R0, EVENT_FLAG_PTR),
                 ldr(R0, (R0, 0x0)),
-                ldr(R1, prize_flag(PendantWisdom).get_value() as u32),
+                ldr(R1, prize_flag(PendantOfWisdom.into()).get_value() as u32),
                 bl(FN_GET_EVENT_FLAG),
                 cmp(R0, 0x0),
                 b(RETURN_LABEL).eq(),
@@ -358,59 +545,27 @@ fn configure_pedestal_requirements(code: &mut Code, settings: &Settings) {
                 bl(FN_SET_EVENT_FLAG),
                 b(RETURN_LABEL),
             ])
-        }
-        Charmed => {
-            code.text().define([
-                // Power
-                ldr(R0, EVENT_FLAG_PTR),
-                ldr(R0, (R0, 0x0)),
-                ldr(R1, prize_flag(PendantPower).get_value() as u32),
-                bl(FN_GET_EVENT_FLAG),
-                cmp(R0, 0x0),
-                b(RETURN_LABEL).eq(),
-                // Wisdom
-                ldr(R0, EVENT_FLAG_PTR),
-                ldr(R0, (R0, 0x0)),
-                ldr(R1, prize_flag(PendantWisdom).get_value() as u32),
-                bl(FN_GET_EVENT_FLAG),
-                cmp(R0, 0x0),
-                b(RETURN_LABEL).eq(),
-                // Charm
-                ldr(R0, PLAYER_OBJECT_SINGLETON),
-                ldr(R0, (R0, 0x0)),
-                mov(R1, 0x1B),
-                bl(FN_GET_ITEM_LEVEL),
-                cmp(R0, 0x0),
-                b(RETURN_LABEL).eq(),
-                // Set Flag
-                ldr(R0, EVENT_FLAG_PTR),
-                mov(R2, 0x1),
-                ldr(R1, FLAG_PEDESTAL),
-                ldr(R0, (R0, 0x0)),
-                bl(FN_SET_EVENT_FLAG),
-                b(RETURN_LABEL),
-            ])
-        }
+        },
         Standard => {
             code.text().define([
                 // Power
                 ldr(R0, EVENT_FLAG_PTR),
                 ldr(R0, (R0, 0x0)),
-                ldr(R1, prize_flag(PendantPower).get_value() as u32),
+                ldr(R1, prize_flag(FillerItem::Item(PendantOfPower)).get_value() as u32),
                 bl(FN_GET_EVENT_FLAG),
                 cmp(R0, 0x0),
                 b(RETURN_LABEL).eq(),
                 // Wisdom
                 ldr(R0, EVENT_FLAG_PTR),
                 ldr(R0, (R0, 0x0)),
-                ldr(R1, prize_flag(PendantWisdom).get_value() as u32),
+                ldr(R1, prize_flag(FillerItem::Item(PendantOfWisdom)).get_value() as u32),
                 bl(FN_GET_EVENT_FLAG),
                 cmp(R0, 0x0),
                 b(RETURN_LABEL).eq(),
                 // Courage
                 ldr(R0, EVENT_FLAG_PTR),
                 ldr(R0, (R0, 0x0)),
-                ldr(R1, prize_flag(PendantCourage).get_value() as u32),
+                ldr(R1, prize_flag(FillerItem::Item(PendantOfCourage)).get_value() as u32),
                 bl(FN_GET_EVENT_FLAG),
                 cmp(R0, 0x0),
                 b(RETURN_LABEL).eq(),
@@ -422,18 +577,14 @@ fn configure_pedestal_requirements(code: &mut Code, settings: &Settings) {
                 bl(FN_SET_EVENT_FLAG),
                 b(RETURN_LABEL),
             ])
-        }
+        },
     };
     code.patch(0x143968, [b(ped_instructions)]);
 }
 
 fn merchant(code: &mut Code) {
-    let get_merchant_event_flag = code.text().define([
-        ldr(R0, EVENT_FLAG_PTR),
-        ldr(R0, (R0, 0)),
-        ldr(R1, 0x143),
-        b(FN_GET_EVENT_FLAG),
-    ]);
+    let get_merchant_event_flag =
+        code.text().define([ldr(R0, EVENT_FLAG_PTR), ldr(R0, (R0, 0)), ldr(R1, 0x143), b(FN_GET_EVENT_FLAG)]);
     code.patch(0x19487C, [bl(get_merchant_event_flag)]);
 }
 
@@ -546,8 +697,11 @@ fn progressive_items(code: &mut Code) {
         b(progressive_lamp).ne(),
         ldr(R0, (R0, 0x444)),
         cmp(R0, 0),
-        mov(R5, 0x11).eq(),
-        mov(R5, 0x55).ne(),
+        mov(R5, 0x11).eq(), // Bow
+        b(return_label).eq(),
+        cmp(R0, 2),
+        mov(R5, 0x55).eq(), // Nice Bow
+        mov(R5, 0x5C).ne(), // Bow of Light
         b(return_label),
     ]);
     let progressive_boomerang = code.text().define([
@@ -632,7 +786,7 @@ fn progressive_items(code: &mut Code) {
         b(return_label),
     ]);
     let progressive_charm = code.text().define([
-        cmp(R5, 0x19),
+        cmp(R5, 0x3E),
         b(progressive_net).ne(),
         ldr(R0, (R0, 0x4A0)),
         cmp(R0, 0),
@@ -645,7 +799,7 @@ fn progressive_items(code: &mut Code) {
 }
 
 fn bracelet(code: &mut Code, settings: &Settings) {
-    if settings.logic.start_with_merge {
+    if settings.start_with_merge {
         // Check Flag 1 (always set) instead of Flag 250 to see if we can merge.
         code.patch(0x4266c8, [mov(R1, 0x1)]);
         code.patch(0x537c40, [mov(R1, 0x1)]);
@@ -714,7 +868,7 @@ fn ore_progress(code: &mut Code) {
     code.patch(0x4637B8, [bl(get_sword_fake)]);
 }
 
-fn actor_names(code: &mut Code) -> HashMap<Item, u32> {
+fn actor_names(code: &mut Code) -> HashMap<game::Item, u32> {
     let mut map = IntoIterator::into_iter(ACTOR_NAME_OFFSETS).collect::<HashMap<_, _>>();
     map.extend(IntoIterator::into_iter(ACTOR_NAMES).map(|(item, name)| {
         let name = format!("{}\0", name);
@@ -723,7 +877,7 @@ fn actor_names(code: &mut Code) -> HashMap<Item, u32> {
     map
 }
 
-fn item_names(code: &mut Code) -> HashMap<Item, u32> {
+fn item_names(code: &mut Code) -> HashMap<game::Item, u32> {
     let mut map = IntoIterator::into_iter(ITEM_NAME_OFFSETS).collect::<HashMap<_, _>>();
     map.extend(IntoIterator::into_iter(ITEM_NAMES).map(|(item, name)| {
         let name = format!("item_name_{}\0", name);
@@ -732,7 +886,7 @@ fn item_names(code: &mut Code) -> HashMap<Item, u32> {
     map
 }
 
-const ACTOR_NAME_OFFSETS: [(Item, u32); 33] = [
+const ACTOR_NAME_OFFSETS: [(game::Item, u32); 33] = [
     (ItemStoneBeauty, 0x5D2060),
     (RupeeR, 0x5D639C),
     (RupeeG, 0x5D639C),
@@ -751,7 +905,7 @@ const ACTOR_NAME_OFFSETS: [(Item, u32); 33] = [
     (ItemBow, 0x5D6B6C),
     (ItemShield, 0x5D6B78),
     (ItemBottle, 0x5D7048),
-    (HintGlasses, 0x5D70AC),
+    (game::Item::HintGlasses, 0x5D70AC),
     (RupeeGold, 0x5D7144),
     (ItemSwordLv1, 0x5D7178),
     (ItemSwordLv2, 0x5D7178),
@@ -762,14 +916,15 @@ const ACTOR_NAME_OFFSETS: [(Item, u32); 33] = [
     (LiverBlue, 0x5D7654),
     (MessageBottle, 0x5D76A0),
     (MilkMatured, 0x5D76A0),
-    (Pouch, 0x5D7734),
+    (game::Item::Pouch, 0x5D7734),
     (ItemBowLight, 0x5D776C),
     (HeartContainer, 0x5D7B7C),
     (HeartPiece, 0x5D7B94),
 ];
 
-const ACTOR_NAMES: [(Item, &str); 43] = [
+const ACTOR_NAMES: [(game::Item, &str); 44] = [
     (KeyBoss, "KeyBoss"),
+    (TriforceCourage, "BadgeBee"),
     (Compass, "Compass"),
     (ItemKandelaar, "GtEvKandelaar"),
     (ItemKandelaarLv2, "GtEvKandelaar"),
@@ -784,12 +939,12 @@ const ACTOR_NAMES: [(Item, &str); 43] = [
     (ClothesBlue, "GtEvCloth"),
     (Heart, "Heart"),
     (HyruleShield, "GtEvShieldB"),
-    (OreYellow, "OreSword"),
-    (OreGreen, "OreSword"),
-    (OreBlue, "OreSword"),
+    (game::Item::OreYellow, "OreSword"),
+    (game::Item::OreGreen, "OreSword"),
+    (game::Item::OreBlue, "OreSword"),
     (GanbariPowerUp, "PowerUp"),
     (DashBoots, "GtEvBoots"),
-    (OreRed, "OreSword"),
+    (game::Item::OreRed, "OreSword"),
     (ItemIceRodLv2, "GtEvRodIceB"),
     (ItemSandRodLv2, "GtEvRodSandB"),
     (ItemTornadeRodLv2, "GtEvTornadoB"),
@@ -805,7 +960,7 @@ const ACTOR_NAMES: [(Item, &str); 43] = [
     (PendantWisdom, "Pendant"),
     (PendantCourage, "Pendant"),
     (ZeldaAmulet, "Pendant"),
-    (Empty, "DeliverSwordBroken"),
+    (game::Item::Empty, "DeliverSwordBroken"),
     (EscapeFruit, "FruitEscape"),
     (StopFruit, "FruitStop"),
     (SpecialMove, "SwordD"),
@@ -814,7 +969,7 @@ const ACTOR_NAMES: [(Item, &str); 43] = [
     (GoldenBee, "GtEvBottleBee"),
 ];
 
-const ITEM_NAME_OFFSETS: [(Item, u32); 14] = [
+const ITEM_NAME_OFFSETS: [(game::Item, u32); 14] = [
     (ItemBomb, 0x6F9A9A),
     (ItemSandRod, 0x6F9AD0),
     (ItemIceRod, 0x6F9AE2),
@@ -831,7 +986,7 @@ const ITEM_NAME_OFFSETS: [(Item, u32); 14] = [
     (ItemStoneBeauty, 0x6F9D56),
 ];
 
-const ITEM_NAMES: [(Item, &str); 62] = [
+const ITEM_NAMES: [(game::Item, &str); 63] = [
     (BadgeBee, "beebadge"),
     (Compass, "compass"),
     (ItemBell, "bell"),
@@ -841,18 +996,19 @@ const ITEM_NAMES: [(Item, &str); 62] = [
     (ClothesBlue, "clothes_blue"),
     (EscapeFruit, "doron"),
     (StopFruit, "durian"),
-    (RupeeR, "gamecoin"),
-    (RupeeG, "gamecoin"),
-    (RupeeB, "gamecoin"),
-    (RupeePurple, "gamecoin"),
-    (RupeeSilver, "gamecoin"),
-    (RupeeGold, "gamecoin"),
+    (RupeeR, "bfirerod_rental"),       // renamed
+    (RupeeG, "tornaderod_rental"),     // renamed
+    (RupeeB, "icerod_rental"),         // renamed
+    (RupeePurple, "boomerang_rental"), // renamed
+    (RupeeSilver, "hookshot_rental"),  // renamed
+    (RupeeGold, "sandrod_rental"),     // renamed
     (GanbariPowerUp, "ganbari_power_up"),
     (HeartContainer, "heartcontioner"),
     (HeartPiece, "heartpiece"),
-    (HintGlasses, "hintglass"),
+    (game::Item::HintGlasses, "hintglass"),
     (HyruleShield, "hyrule_shield"),
     (KeyBoss, "keyboss"),
+    (TriforceCourage, "triforce_courage"),
     (KeySmall, "keysmall"),
     (Kinsta, "kinsta"),
     (ItemKandelaar, "lantern"),
@@ -861,22 +1017,22 @@ const ITEM_NAMES: [(Item, &str); 62] = [
     (ItemSwordLv2, "mastersword"),
     (ItemSwordLv3, "mastersword"),
     (ItemSwordLv4, "mastersword"),
-    (Empty, "mastersword"),
+    (game::Item::Empty, "mastersword"),
     (MessageBottle, "messagebottle"),
     (Milk, "milk"),
     (MilkMatured, "milk_matured"),
     (ItemInsectNet, "net"),
     (ItemInsectNetLv2, "net_lv2"),
-    (OreYellow, "ore"),
-    (OreGreen, "ore"),
-    (OreBlue, "ore"),
-    (OreRed, "ore"),
+    (game::Item::OreYellow, "ore"),
+    (game::Item::OreGreen, "ore"),
+    (game::Item::OreBlue, "ore"),
+    (game::Item::OreRed, "ore"),
     (DashBoots, "pegasus"),
     (Heart, "potshop_heart"),
     (PendantCourage, "courage"),
     (PendantPower, "power"),
     (PendantWisdom, "wisdom"),
-    (Pouch, "pouch"),
+    (game::Item::Pouch, "pouch"),
     (PowerGlove, "powergloves"),
     (ItemShield, "shield"),
     (SpecialMove, "special_move"),
@@ -900,5 +1056,17 @@ const EVENT_FLAG_PTR: u32 = 0x70B728;
 const FN_GET_ITEM_LEVEL: u32 = 0x55696C;
 const FN_GET_EVENT_FLAG: u32 = 0x584B94;
 const FN_SET_EVENT_FLAG: u32 = 0x4CDF40;
+
+/// r0: PlayerObjectSingleton <br />
+/// r1: flag index
+const FN_GET_LOCAL_FLAG_3: u32 = 0x52a05c;
+
+/// r0: PlayerObjectSingleton <br />
+/// r1: flag index <br />
+/// r2: new flag value (0 or 1)
+// const FN_SET_LOCAL_FLAG_3: u32 = 0x1bb724;
+
+// const MAP_MANAGER_INSTANCE: u32 = 0x70c8e0;
+// const PTR_MAP_MANAGER_INSTANCE: u32 = 0x27320c;
 const PLAYER_OBJECT_SINGLETON: u32 = 0x70FB60;
 const VTABLE_STRING: u32 = 0x6F5988;

@@ -1,22 +1,23 @@
-use std::collections::HashMap;
-
-use game::HintGhost;
-
-use crate::legacy::path::Path;
-use crate::model::check::Check;
-use crate::model::filler_item::Goal;
-use crate::model::location::Location::{self, *};
-use crate::model::location_node::LocationNode;
-use crate::model::logic::Logic;
-use crate::regions;
+use crate::filler::check::Check;
+use crate::filler::filler_item::Goal;
+use crate::filler::filler_item::Vane::*;
+use crate::filler::location::Location::{self, *};
+use crate::filler::location_node::LocationNode;
+use crate::filler::logic::Logic;
+use crate::filler::path::Path;
+use crate::filler::portals::Portal;
+use crate::filler::portals::Portal::*;
 use crate::world::{
-    check, edge, fast_travel_hyrule, fast_travel_lorule, ghost, goal, location, old_check,
-    old_path, out_of_logic, portal_std,
+    check, edge, fast_travel_hyrule, fast_travel_lorule, ghost, goal, location, old_check, old_path, out_of_logic,
+    portal_left, portal_right,
 };
 use crate::LocationInfo;
+use crate::{regions, PortalMap};
+use game::ghosts::HintGhost;
+use std::collections::HashMap;
 
 /// Lorule
-pub(crate) fn graph() -> HashMap<Location, LocationNode> {
+pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
     HashMap::from([
         (
             LoruleBellTravel,
@@ -24,92 +25,54 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                 "Lorule Bell Travel",
                 vec![],
                 vec![
-                    edge!(LoruleCastleField),
-                    edge!(SkullWoodsOverworld),
-                    edge!(MiseryMire),
-                    edge!(SwampPalaceOutside),
-                    edge!(LoruleDeathWest),
-                    edge!(LoruleGraveyard),
-                    edge!(RossosOreMineLorule),
-                    edge!(TurtleRockWeatherVane),
-                    edge!(LoruleDeathEastTop),
-                    edge!(DarkRuins),
+                    edge!(LoruleCastleArea, |p| p.has_weather_vane(VacantHouseWV)
+                        || p.has_weather_vane(BlacksmithWV)
+                        || p.has_weather_vane(ThievesTownWV)
+                        || p.has_weather_vane(LoruleCastleWV)
+                        || p.has_weather_vane(SwampPalaceWV)),
+                    edge!(SkullWoodsOverworld, |p| p.has_weather_vane(SkullWoodsWV)),
+                    edge!(MiseryMire, |p| p.has_weather_vane(MiseryMireWV)),
+                    edge!(SwampPalaceOutside, |p| p.has_weather_vane(SwampPalaceWV)),
+                    edge!(LoruleDeathWest, |p| p.has_weather_vane(TreacherousTowerWV)),
+                    edge!(LoruleGraveyard, |p| p.has_weather_vane(GraveyardWV)),
+                    edge!(RossosOreMineLorule, |p| p.has_weather_vane(DeathMountainLoruleWV)),
+                    edge!(TurtleRockWeatherVane, |p| p.has_weather_vane(TurtleRockWV)),
+                    edge!(LoruleDeathEastTop, |p| p.has_weather_vane(IceRuinsWV)),
+                    edge!(DarkPalaceWeatherVane, |p| p.has_weather_vane(DarkPalaceWV)),
                 ],
             ),
         ),
         (
-            LoruleCastleField,
+            LoruleCastleArea,
             location(
-                "Lorule Castle Field",
+                "Lorule Castle Area",
                 vec![
+                    // check!("Vacant House Portal", regions::lorule::field::main::SUBREGION, |p| p.can_merge()),
+                    check!("Vacant House Weather Vane", regions::lorule::field::main::SUBREGION),
+                    check!("Blacksmith Weather Vane", regions::lorule::field::main::SUBREGION),
+                    check!("Lorule Castle Weather Vane", regions::lorule::field::main::SUBREGION),
+                    check!("Thieves' Town Weather Vane", regions::lorule::field::main::SUBREGION),
                     check!("Rupee Rush (Lorule)", regions::lorule::field::main::SUBREGION),
                     check!("Octoball Derby", regions::lorule::field::main::SUBREGION),
                     goal!("Access Hilda Barrier", Goal::AccessLoruleCastleField),
                     check!("Fortune's Choice", regions::lorule::field::main::SUBREGION),
-                    check!(
-                        "[Mai] Lorule Castle Wall",
-                        regions::lorule::field::main::SUBREGION,
-                        |p| p.can_merge()
-                    ),
-                    check!(
-                        "[Mai] Lorule Castle Tree",
-                        regions::lorule::field::main::SUBREGION,
-                        |p| p.has_boots()
-                    ),
-                    check!(
-                        "[Mai] Thieves' Town Wall",
-                        regions::lorule::field::main::SUBREGION,
-                        |p| p.can_merge()
-                    ),
-                    check!(
-                        "[Mai] Near Lorule Fortune-Teller",
-                        regions::lorule::field::main::SUBREGION,
-                        |p| p.has_titans_mitt()
-                    ),
-                    check!(
-                        "[Mai] Lorule Blacksmith Wall",
-                        regions::lorule::field::main::SUBREGION,
-                        |p| p.can_merge()
-                    ),
-                    check!(
-                        "[Mai] Lorule Rupee Rush Wall",
-                        regions::lorule::field::main::SUBREGION,
-                        |p| p.can_merge()
-                    ),
+                    check!("[Mai] Lorule Castle Wall", regions::lorule::field::main::SUBREGION, |p| p.can_merge()),
+                    check!("[Mai] Lorule Castle Tree", regions::lorule::field::main::SUBREGION, |p| p.has_boots()),
+                    check!("[Mai] Thieves' Town Wall", regions::lorule::field::main::SUBREGION, |p| p.can_merge()),
+                    check!("[Mai] Lorule Fortune-Teller Rock", regions::lorule::field::main::SUBREGION, |p| p
+                        .has_titans_mitt()),
+                    check!("[Mai] Lorule Blacksmith Wall", regions::lorule::field::main::SUBREGION, |p| p.can_merge()),
+                    check!("[Mai] Lorule Rupee Rush Wall", regions::lorule::field::main::SUBREGION, |p| p.can_merge()),
                     check!("[Mai] Octoball Derby Skull", regions::lorule::field::main::SUBREGION => {
                         normal: |p| p.can_destroy_skull(),
                         hard: |_| true, // throw bush at skull
                     }),
-                    check!(
-                        "[Mai] Vacant House Big Rock",
-                        regions::lorule::field::main::SUBREGION,
-                        |p| p.has_titans_mitt()
-                    ),
-                    check!(
-                        "[Mai] Behind Vacant House",
-                        regions::lorule::field::main::SUBREGION,
-                        |p| p.can_merge()
-                    ),
-                    check!(
-                        "[Mai] Lorule S Ruins Pillars",
-                        regions::lorule::field::main::SUBREGION,
-                        |p| p.has_boots()
-                    ),
-                    check!(
-                        "[Mai] Lorule S Ruins Wall",
-                        regions::lorule::field::main::SUBREGION,
-                        |p| p.can_merge()
-                    ),
-                    check!(
-                        "[Mai] Lorule S Ruins Water",
-                        regions::lorule::field::main::SUBREGION,
-                        |p| p.has_flippers()
-                    ),
-                    check!(
-                        "[Mai] Thieves' Town Tree",
-                        regions::lorule::field::main::SUBREGION,
-                        |p| p.has_boots()
-                    ),
+                    check!("[Mai] Vacant House Rock", regions::lorule::field::main::SUBREGION, |p| p.has_titans_mitt()),
+                    check!("[Mai] Behind Vacant House", regions::lorule::field::main::SUBREGION, |p| p.can_merge()),
+                    check!("[Mai] Lorule S Ruins Pillars", regions::lorule::field::main::SUBREGION, |p| p.has_boots()),
+                    check!("[Mai] Lorule S Ruins Wall", regions::lorule::field::main::SUBREGION, |p| p.can_merge()),
+                    check!("[Mai] Lorule S Ruins Water", regions::lorule::field::main::SUBREGION, |p| p.has_flippers()),
+                    check!("[Mai] Thieves' Town Tree", regions::lorule::field::main::SUBREGION, |p| p.has_boots()),
                     ghost(HintGhost::FortuneTellerLorule),
                     ghost(HintGhost::RupeeRushLorule),
                     ghost(HintGhost::GreatRupeeFairy),
@@ -119,6 +82,14 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                     ghost(HintGhost::SwampPalaceOutsideRight),
                 ],
                 vec![
+                    portal_left(VacantHouse, portal_map),
+                    portal_right(VacantHouse, portal_map),
+                    portal_left(ThievesTown, portal_map),
+                    portal_right(ThievesTown, portal_map),
+                    portal_left(ParadoxLeftLorule, portal_map),
+                    portal_right(ParadoxLeftLorule, portal_map),
+                    portal_left(SwampPillarLorule, portal_map),
+                    portal_right(SwampPillarLorule, portal_map),
                     fast_travel_lorule(),
                     edge!(GreatRupeeFairyCave, |p| p.has_bomb_flower()),
                     edge!(LoruleBlacksmith),
@@ -145,15 +116,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     edge!(ThievesHideoutB1),
-                    old_path(
-                        LoruleCastle1F,
-                        Some(|p| p.has_lc_requirement()),
-                        None,
-                        None,
-                        None,
-                        None,
-                    ),
-                    portal_std(StylishWomanHouse),
+                    old_path(LoruleCastle1F, Some(|p| p.has_lc_requirement()), None, None, None, None),
                     edge!(BigBombFlowerShop),
                     old_path(
                         BigBombFlowerField,
@@ -163,7 +126,6 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                         None,
                         None,
                     ),
-                    portal_std(CuccoDungeonLedge),
                     edge!(ThievesTownItemShop),
                     edge!(VeteranThiefsHouse),
                     edge!(FortunesChoiceLorule),
@@ -172,18 +134,14 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
         ),
         (
             VeteranThiefsHouse,
-            location(
-                "Veteran Thief's House",
-                vec![ghost(HintGhost::VeteranThief)],
-                vec![edge!(LoruleCastleField)],
-            ),
+            location("Veteran Thief's House", vec![ghost(HintGhost::VeteranThief)], vec![edge!(LoruleCastleArea)]),
         ),
         (
             FortunesChoiceLorule,
             location(
                 "Fortune's Choice (Lorule)",
                 vec![ghost(HintGhost::FortunesChoice)],
-                vec![edge!(LoruleCastleField)],
+                vec![edge!(LoruleCastleArea)],
             ),
         ),
         (
@@ -192,23 +150,16 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                 "Thieves' Town Item Shop",
                 vec![
                     check!("Thieves' Town Item Shop (1)", regions::lorule::field::main::SUBREGION),
-                    out_of_logic(
-                        "Thieves' Town Item Shop (2)",
-                        regions::lorule::field::main::SUBREGION,
-                    ),
+                    out_of_logic("Thieves' Town Item Shop (2)", regions::lorule::field::main::SUBREGION),
                     check!("Thieves' Town Item Shop (3)", regions::lorule::field::main::SUBREGION),
                     check!("Thieves' Town Item Shop (4)", regions::lorule::field::main::SUBREGION),
                 ],
-                vec![edge!(LoruleCastleField)],
+                vec![edge!(LoruleCastleArea)],
             ),
         ),
         (
             BigBombFlowerShop,
-            location(
-                "Big Bomb Flower Shop",
-                vec![],
-                vec![edge!(LoruleCastleField), edge!(BigBombFlowerField)],
-            ),
+            location("Big Bomb Flower Shop", vec![], vec![edge!(LoruleCastleArea), edge!(BigBombFlowerField)]),
         ),
         (
             BigBombFlowerField,
@@ -221,14 +172,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                 vec![
                     fast_travel_lorule(),
                     edge!(BigBombFlowerShop),
-                    old_path(
-                        LoruleCastleField,
-                        Some(|p| p.has_bomb_flower()),
-                        None,
-                        None,
-                        None,
-                        None,
-                    ),
+                    old_path(LoruleCastleArea, Some(|p| p.has_bomb_flower()), None, None, None, None),
                 ],
             ),
         ),
@@ -237,6 +181,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
             location(
                 "Lorule Graveyard",
                 vec![
+                    check!("Graveyard Weather Vane", regions::dungeons::graveyards::lorule::SUBREGION),
                     check!("Graveyard Peninsula", regions::dungeons::graveyards::lorule::SUBREGION),
                     old_check(
                         LocationInfo::new(
@@ -276,37 +221,28 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                 vec![
                     fast_travel_lorule(),
                     edge!(LoruleSanctuaryCaveLower),
-                    old_path(
-                        LoruleSanctuary,
-                        Some(|p| p.has_titans_mitt()),
-                        None,
-                        None,
-                        None,
-                        None,
-                    ),
+                    old_path(LoruleSanctuary, Some(|p| p.has_titans_mitt()), None, None, None, None),
                     old_path(
                         DarkRuins,
                         None,
                         None,
                         Some(|p| (p.has_fire_rod() || p.has_nice_bombs()) && p.has_flippers()),
-                        Some(|p| {
-                            (p.has_fire_rod() || p.has_nice_bombs())
-                                && (p.has_flippers() || p.has_hookshot())
-                        }), // Hookshot trick
+                        Some(|p| (p.has_fire_rod() || p.has_nice_bombs()) && (p.has_flippers() || p.has_hookshot())), // Hookshot trick
                         Some(|p| p.has_flippers() || p.has_hookshot()), // Bee Boost
                     ),
-                    old_path(GraveyardLedgeLorule, Some(|p| p.has_bombs()), None, None, None, None),
+                    old_path(Location::GraveyardLedgeLorule, Some(|p| p.has_bombs()), None, None, None, None),
                 ],
             ),
         ),
         (
-            GraveyardLedgeLorule,
+            Location::GraveyardLedgeLorule,
             location(
                 "Graveyard Ledge Lorule",
                 vec![],
                 vec![
                     fast_travel_lorule(),
-                    portal_std(GraveyardLedgeHyrule),
+                    portal_left(Portal::GraveyardLedgeLorule, portal_map),
+                    portal_right(Portal::GraveyardLedgeLorule, portal_map),
                     edge!(LoruleGraveyard),
                 ],
             ),
@@ -317,10 +253,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                 "Lorule Sanctuary",
                 vec![
                     old_check(
-                        LocationInfo::new(
-                            "[LS] Entrance Chest",
-                            regions::dungeons::graveyards::lorule::SUBREGION,
-                        ),
+                        LocationInfo::new("[LS] Entrance Chest", regions::dungeons::graveyards::lorule::SUBREGION),
                         Some(|p| p.has_lamp() || p.lampless()),
                         None,
                         None,
@@ -328,10 +261,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     old_check(
-                        LocationInfo::new(
-                            "[LS] Lower Chest",
-                            regions::dungeons::graveyards::lorule::SUBREGION,
-                        ),
+                        LocationInfo::new("[LS] Lower Chest", regions::dungeons::graveyards::lorule::SUBREGION),
                         Some(|p| p.has_lamp() || (p.has_fire_rod() && p.lampless())),
                         None,
                         None,
@@ -339,10 +269,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     old_check(
-                        LocationInfo::new(
-                            "[LS] Upper Chest",
-                            regions::dungeons::graveyards::lorule::SUBREGION,
-                        ),
+                        LocationInfo::new("[LS] Upper Chest", regions::dungeons::graveyards::lorule::SUBREGION),
                         Some(|p| p.has_lamp() || (p.has_fire_rod() && p.lampless())),
                         None,
                         None,
@@ -350,13 +277,8 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     old_check(
-                        LocationInfo::new(
-                            "[LS] Ledge",
-                            regions::dungeons::graveyards::lorule::SUBREGION,
-                        ),
-                        Some(|p| {
-                            p.can_merge() && (p.has_lamp() || (p.has_fire_rod() && p.lampless()))
-                        }),
+                        LocationInfo::new("[LS] Ledge", regions::dungeons::graveyards::lorule::SUBREGION),
+                        Some(|p| p.can_merge() && (p.has_lamp() || (p.has_fire_rod() && p.lampless()))),
                         None,
                         None,
                         None,
@@ -385,7 +307,11 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
             location(
                 "Philosopher's Cave Lower",
                 vec![],
-                vec![portal_std(SanctuaryChurch), edge!(LoruleGraveyard)],
+                vec![
+                    portal_left(Philosopher, portal_map),
+                    portal_right(Philosopher, portal_map),
+                    edge!(LoruleGraveyard),
+                ],
             ),
         ),
         (
@@ -393,10 +319,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
             location(
                 "Philosopher's Cave Upper",
                 vec![old_check(
-                    LocationInfo::new(
-                        "Philosopher's Cave",
-                        regions::dungeons::graveyards::lorule::SUBREGION,
-                    ),
+                    LocationInfo::new("Philosopher's Cave", regions::dungeons::graveyards::lorule::SUBREGION),
                     Some(|p| p.can_merge()),
                     None,
                     None,
@@ -418,66 +341,41 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                     None,
                     Some(|_| true), // suffer lol
                 )],
-                vec![edge!(LoruleCastleField)],
+                vec![edge!(LoruleCastleArea)],
             ),
         ),
         (
             LoruleBlacksmith,
             location(
                 "Lorule Blacksmith",
-                vec![old_check(
-                    LocationInfo::new(
-                        "Blacksmith (Lorule)",
-                        regions::lorule::field::main::SUBREGION,
-                    ),
-                    Some(|p| {
-                        p.has_master_ore(4)
-                            && p.can_access_hyrule_blacksmith()
-                            && p.can_access_lorule_castle_field()
-                    }),
-                    None,
-                    None,
-                    None,
-                    None,
-                )],
-                vec![edge!(LoruleCastleField)],
+                vec![check!("Blacksmith (Lorule)", regions::lorule::field::main::SUBREGION, |p| {
+                    p.has_master_ore(4) && p.can_access_hyrule_blacksmith() && p.can_access_lorule_castle_field()
+                })],
+                vec![edge!(LoruleCastleArea)],
             ),
         ),
         (
             BootsDungeon,
             location(
-                "Lorule Field Treasure Dungeon",
-                vec![old_check(
-                    LocationInfo::new(
-                        "Lorule Field Treasure Dungeon",
-                        regions::lorule::field::main::SUBREGION,
-                    ),
-                    Some(|p| p.has_boots()),
-                    Some(|p| p.has_master_sword() || p.has_bombs() || p.has_boomerang()), // we're not set up for Nice Ice Rod or Nice Bow yet...
-                    None,
-                    None,
-                    None,
-                )],
-                vec![edge!(LoruleCastleField)],
+                "Pegasus Boots Pyramid",
+                vec![check!("Pegasus Boots Pyramid", regions::lorule::field::main::SUBREGION => {
+                    normal: |p| p.has_boots() && p.can_hit_switch_bootless(),
+                    hard: |p| p.has_master_sword() || p.has_bombs(),
+                    hell: |p| p.has_boomerang() || p.has_nice_bow() || p.has_nice_ice_rod(),
+                })],
+                vec![edge!(LoruleCastleArea)],
             ),
         ),
-        (
-            VacantHouseBottom,
-            location("Vacant House (Bottom)", vec![], vec![edge!(LoruleCastleField)]),
-        ),
+        (VacantHouseBottom, location("Vacant House (Bottom)", vec![], vec![edge!(LoruleCastleArea)])),
         (
             VacantHouseTop,
             location(
                 "Vacant House (Top)",
                 vec![check!("Vacant House", regions::lorule::field::main::SUBREGION)],
-                vec![old_path(
-                    LoruleCastleField,
-                    Some(|p| p.has_bombs()),
-                    Some(|p| p.has_bomb_flower()),
-                    None,
-                    None,
-                    None,
-                )],
+                vec![edge!(LoruleCastleArea => {
+                    normal: |p| p.has_bombs(),
+                    hard: |p| p.has_bomb_flower(),
+                })],
             ),
         ),
         (
@@ -492,7 +390,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                     None,
                     None,
                 )],
-                vec![edge!(LoruleCastleField)],
+                vec![edge!(LoruleCastleArea)],
             ),
         ),
         (
@@ -504,7 +402,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                     check!("Swamp Cave (Middle)", regions::lorule::field::main::SUBREGION),
                     check!("Swamp Cave (Right)", regions::lorule::field::main::SUBREGION),
                 ],
-                vec![edge!(LoruleCastleField)],
+                vec![edge!(LoruleCastleArea)],
             ),
         ),
         (
@@ -512,7 +410,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
             location(
                 "Haunted Grove Big Bomb Cave",
                 vec![check!("Big Bomb Flower Cave", regions::lorule::field::main::SUBREGION)],
-                vec![edge!(LoruleCastleField)],
+                vec![edge!(LoruleCastleArea)],
             ),
         ),
         (
@@ -521,10 +419,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                 "Haunted Grove Upper Ledge",
                 vec![
                     old_check(
-                        LocationInfo::new(
-                            "Lorule Field Hookshot Chest",
-                            regions::lorule::field::main::SUBREGION,
-                        ),
+                        LocationInfo::new("Lorule Field Hookshot Chest", regions::lorule::field::main::SUBREGION),
                         Some(|p| p.has_hookshot()),
                         None,
                         None,
@@ -532,10 +427,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     old_check(
-                        LocationInfo::new(
-                            "[Mai] Lorule Haunted Grove Wall",
-                            regions::lorule::field::main::SUBREGION,
-                        ),
+                        LocationInfo::new("[Mai] Lorule Haunted Grove Wall", regions::lorule::field::main::SUBREGION),
                         Some(|p| p.can_merge()),
                         None,
                         None,
@@ -543,7 +435,12 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                 ],
-                vec![fast_travel_lorule(), edge!(LoruleCastleField), portal_std(HyruleField)],
+                vec![
+                    fast_travel_lorule(),
+                    edge!(LoruleCastleArea),
+                    portal_left(ParadoxRightLorule, portal_map),
+                    portal_right(ParadoxRightLorule, portal_map),
+                ],
             ),
         ),
         // Desert / Misery Mire
@@ -553,10 +450,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                 "Desert",
                 vec![
                     old_check(
-                        LocationInfo::new(
-                            "[Mai] Buried in the Desert",
-                            regions::hyrule::desert::mystery::SUBREGION,
-                        ),
+                        LocationInfo::new("[Mai] Buried in the Desert", regions::hyrule::desert::mystery::SUBREGION),
                         Some(|p| p.has_sand_rod()),
                         None,
                         None,
@@ -567,39 +461,58 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                 ],
                 vec![
                     fast_travel_hyrule(),
-                    portal_std(MiseryMire),
-                    old_path(
-                        MiseryMireLedge, // todo portal-ify
-                        Some(|p| {
-                            p.can_merge()
-                                && p.has_bombs()
-                                && (p.has_sand_rod() || p.has_stamina_scroll())
-                        }),
-                        None,
-                        Some(|p| {
-                            p.can_merge()
-                                && (p.has_nice_bombs() || (p.has_fire_rod() && p.has_bombs()))
-                        }),
-                        Some(|p| p.can_merge() && p.has_bombs()), // Vulture Boost
-                        None,
-                    ),
-                    old_path(DesertCenterLedge, Some(|p| p.has_sand_rod()), None, None, None, None),
-                    old_path(
-                        DesertSouthWestLedge,
-                        None,
-                        Some(|p| p.has_stamina_scroll()),
-                        Some(|p| p.has_fire_rod() || p.has_nice_bombs()),
-                        Some(|_| true), // vulture boost
-                        None,
-                    ),
-                    old_path(
-                        DesertPalaceWeatherVane,
-                        None,
-                        None,
-                        Some(|_| true), // vulture clip
-                        None,
-                        None,
-                    ),
+                    portal_left(DesertPillarRight, portal_map),
+                    portal_right(DesertPillarRight, portal_map),
+                    portal_left(DesertPillarLeft, portal_map),
+                    portal_right(DesertPillarLeft, portal_map),
+                    edge!(DesertNorthLedge => {
+                        normal: |p| p.can_merge() && (p.has_sand_rod() || p.has_stamina_scroll()),
+                        glitched: |p| p.has_nice_bombs() || p.has_fire_rod(),
+                        hell: |_| true, // Vulture Boost
+                    }),
+                    edge!(DesertCenterLedge, |p| p.has_sand_rod()),
+                    edge!(DesertSouthWestLedge => {
+                        hard: |p| p.has_stamina_scroll(),
+                        glitched: |p| p.has_fire_rod() || p.has_nice_bombs(),
+                        adv_glitched: |_| true, // vulture boost
+                    }),
+                    edge!(DesertPalaceWeatherVane => {
+                        glitched: |_| true, // vulture clip
+                    }),
+                ],
+            ),
+        ),
+        (
+            DesertNorthLedge,
+            location(
+                "Desert North Ledge",
+                None,
+                vec![
+                    edge!(Desert),
+                    edge!(DesertUseBlockedPortalRight, |p| p.has_bombs()),
+                    edge!(DesertUseBlockedPortalLeft, |p| p.has_bombs() && p.has_sand_rod()),
+                ],
+            ),
+        ),
+        (
+            DesertUseBlockedPortalRight,
+            location(
+                "Desert Use Blocked Portal Right",
+                None,
+                vec![
+                    // portal is blocked, no return paths
+                    portal_right(DesertNorth, portal_map),
+                ],
+            ),
+        ),
+        (
+            DesertUseBlockedPortalLeft,
+            location(
+                "Desert Use Blocked Portal Left",
+                None,
+                vec![
+                    // portal is blocked, no return paths
+                    portal_left(DesertNorth, portal_map),
                 ],
             ),
         ),
@@ -608,7 +521,11 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
             location(
                 "Desert Center Ledge",
                 vec![ghost(HintGhost::DesertCenter)],
-                vec![edge!(Desert), portal_std(MiseryMireBridge)],
+                vec![
+                    edge!(Desert),
+                    // portal_left unpossible
+                    portal_right(DesertMiddle, portal_map),
+                ],
             ),
         ),
         (
@@ -618,16 +535,10 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                 vec![ghost(HintGhost::DesertSouthWest)],
                 vec![
                     fast_travel_hyrule(),
+                    portal_left(DesertSW, portal_map),
+                    portal_right(DesertSW, portal_map),
                     edge!(Desert),
-                    portal_std(MiseryMireBridge),
-                    old_path(
-                        DesertPalaceWeatherVane,
-                        Some(|p| p.has_sand_rod()),
-                        None,
-                        None,
-                        None,
-                        None,
-                    ),
+                    edge!(DesertPalaceWeatherVane, |p| p.has_sand_rod()),
                 ],
             ),
         ),
@@ -635,22 +546,12 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
             DesertPalaceWeatherVane,
             location(
                 "Desert Palace Weather Vane",
-                vec![old_check(
-                    LocationInfo::new(
-                        "[Mai] Buried near Desert Palace",
-                        regions::hyrule::desert::mystery::SUBREGION,
-                    ),
-                    Some(|p| p.has_sand_rod()),
-                    None,
-                    None,
-                    None,
-                    None,
-                )],
                 vec![
-                    fast_travel_hyrule(),
-                    edge!(Desert),
-                    old_path(DesertPalaceFoyer, Some(|p| p.has_sand_rod()), None, None, None, None),
+                    check!("Desert Palace Weather Vane", regions::hyrule::desert::mystery::SUBREGION),
+                    check!("[Mai] Buried near Desert Palace", regions::hyrule::desert::mystery::SUBREGION, |p| p
+                        .has_sand_rod()),
                 ],
+                vec![fast_travel_hyrule(), edge!(Desert), edge!(DesertPalaceFoyer, |p| p.has_sand_rod())],
             ),
         ),
         (
@@ -658,11 +559,9 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
             location(
                 "Misery Mire",
                 vec![
+                    check!("Misery Mire Weather Vane", regions::lorule::misery::mire::SUBREGION),
                     old_check(
-                        LocationInfo::new(
-                            "[Mai] Misery Mire Wall",
-                            regions::lorule::misery::mire::SUBREGION,
-                        ),
+                        LocationInfo::new("[Mai] Misery Mire Wall", regions::lorule::misery::mire::SUBREGION),
                         Some(|p| p.can_merge()),
                         None,
                         None,
@@ -670,10 +569,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     old_check(
-                        LocationInfo::new(
-                            "[Mai] Misery Mire Water",
-                            regions::lorule::misery::mire::SUBREGION,
-                        ),
+                        LocationInfo::new("[Mai] Misery Mire Water", regions::lorule::misery::mire::SUBREGION),
                         Some(|p| p.has_flippers()),
                         None,
                         None,
@@ -681,10 +577,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     old_check(
-                        LocationInfo::new(
-                            "[Mai] Misery Mire Big Rock",
-                            regions::lorule::misery::mire::SUBREGION,
-                        ),
+                        LocationInfo::new("[Mai] Misery Mire Rock", regions::lorule::misery::mire::SUBREGION),
                         Some(|p| p.has_titans_mitt()),
                         None,
                         None,
@@ -697,7 +590,12 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                 vec![
                     fast_travel_lorule(),
                     edge!(SandRodDungeon),
-                    portal_std(Desert),
+                    // no way to enter left pillar portal
+                    // no way to enter mire north portal
+                    portal_left(MiseryMireExit, portal_map),
+                    portal_right(MiseryMireExit, portal_map),
+                    portal_left(MirePillarRight, portal_map),
+                    portal_right(MirePillarRight, portal_map),
                     old_path(
                         MiseryMireOoB,
                         None,
@@ -726,6 +624,20 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
             ),
         ),
         (
+            // This is the useless portal surrounded by water
+            // Psst... it can be used to reverse the side of the portal you entered
+            MiseryMireLeftPillarMerged,
+            location(
+                "Misery Mire Left Pillar Merged",
+                None,
+                vec![
+                    edge!(MiseryMire, |p| p.has_flippers()),
+                    portal_left(MirePillarLeft, portal_map),
+                    portal_right(MirePillarLeft, portal_map),
+                ],
+            ),
+        ),
+        (
             MiseryMireBridge,
             location(
                 "Misery Mire Bridge",
@@ -733,8 +645,10 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                 vec![
                     fast_travel_lorule(),
                     edge!(MiseryMire),
-                    portal_std(DesertCenterLedge),
-                    portal_std(DesertSouthWestLedge),
+                    portal_left(MireMiddle, portal_map),
+                    portal_right(MireMiddle, portal_map),
+                    portal_left(MireSW, portal_map),
+                    portal_right(MireSW, portal_map),
                     old_path(
                         MiseryMireOoB,
                         None,
@@ -755,29 +669,21 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                     fast_travel_lorule(),
                     edge!(MiseryMire),
                     edge!(MiseryMireBridge),
-                    portal_std(DesertZaganagaLedge),
+                    portal_left(Zaganaga, portal_map),
+                    portal_right(Zaganaga, portal_map),
                     edge!(ZaganagasArena),
-                    old_path(
-                        MiseryMireRewardBasket,
-                        None,
-                        None,
-                        None,
-                        Some(|p| p.has_boots()),
-                        None,
-                    ),
+                    old_path(MiseryMireRewardBasket, None, None, None, Some(|p| p.has_boots()), None),
                 ],
             ),
         ),
         (
             SandRodDungeon,
             location(
-                "Misery Mire Treasure Dungeon",
-                vec![
-                    check!("Misery Mire Treasure Dungeon", regions::lorule::misery::mire::SUBREGION => {
-                        normal: |p| p.has_sand_rod() && p.has_tornado_rod(),
-                        glitched: |p| p.has_sand_rod(),
-                    }),
-                ],
+                "Sand Mini-Dungeon",
+                vec![check!("Sand Mini-Dungeon", regions::lorule::misery::mire::SUBREGION => {
+                    normal: |p| p.has_sand_rod() && p.has_tornado_rod(),
+                    glitched: |p| p.has_sand_rod(),
+                })],
                 vec![edge!(MiseryMire)],
             ),
         ),
@@ -796,10 +702,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                 "Lorule Lake East",
                 vec![
                     old_check(
-                        LocationInfo::new(
-                            "[Mai] Lorule Lake SE Wall",
-                            regions::lorule::lake::lorule::SUBREGION,
-                        ),
+                        LocationInfo::new("[Mai] Lorule Lake SE Wall", regions::lorule::lake::lorule::SUBREGION),
                         Some(|p| p.can_merge()),
                         None,
                         None,
@@ -807,10 +710,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     old_check(
-                        LocationInfo::new(
-                            "[Mai] Lorule Lake Skull",
-                            regions::lorule::lake::lorule::SUBREGION,
-                        ),
+                        LocationInfo::new("[Mai] Lorule Lake Skull", regions::lorule::lake::lorule::SUBREGION),
                         Some(|p| p.can_merge() && p.can_destroy_skull()),
                         Some(|p| p.can_merge()),
                         None,
@@ -820,7 +720,8 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                 ],
                 vec![
                     fast_travel_lorule(),
-                    portal_std(HyruleField),
+                    portal_left(LoruleColdfoot, portal_map),
+                    portal_right(LoruleColdfoot, portal_map),
                     old_path(
                         LoruleLakeWater,
                         Some(|p| p.has_flippers()),
@@ -848,10 +749,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                     goal!("Turtle (wall)", Goal::TurtleWall, |p| p.can_merge()),
                     check!("Lorule Lake Chest", regions::lorule::lake::lorule::SUBREGION),
                     old_check(
-                        LocationInfo::new(
-                            "[Mai] Lorule Lake West Wall",
-                            regions::lorule::lake::lorule::SUBREGION,
-                        ),
+                        LocationInfo::new("[Mai] Lorule Lake West Wall", regions::lorule::lake::lorule::SUBREGION),
                         Some(|p| p.can_merge()),
                         None,
                         None,
@@ -862,7 +760,8 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                 ],
                 vec![
                     fast_travel_lorule(),
-                    portal_std(HyruleField),
+                    portal_left(LoruleLake, portal_map),
+                    portal_right(LoruleLake, portal_map),
                     edge!(LoruleLakesideItemShop),
                     old_path(LoruleLakeSouthWest, Some(|p| p.can_merge()), None, None, None, None),
                     old_path(LoruleLakeWater, Some(|p| p.has_flippers()), None, None, None, None),
@@ -876,10 +775,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                 vec![
                     goal!("Turtle (flipped)", Goal::TurtleFlipped),
                     old_check(
-                        LocationInfo::new(
-                            "[Mai] Lorule Lake Big Rock",
-                            regions::lorule::lake::lorule::SUBREGION,
-                        ),
+                        LocationInfo::new("[Mai] Lorule Lake Rock", regions::lorule::lake::lorule::SUBREGION),
                         Some(|p| p.has_titans_mitt()),
                         None,
                         None,
@@ -898,24 +794,25 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
             location(
                 "Lorule Lakeside Item Shop",
                 vec![
-                    check!(
-                        "Lorule Lakeside Item Shop (1)",
-                        regions::lorule::lake::lorule::SUBREGION
-                    ),
-                    out_of_logic(
-                        "Lorule Lakeside Item Shop (2)",
-                        regions::lorule::lake::lorule::SUBREGION,
-                    ),
-                    check!(
-                        "Lorule Lakeside Item Shop (3)",
-                        regions::lorule::lake::lorule::SUBREGION
-                    ),
-                    check!(
-                        "Lorule Lakeside Item Shop (4)",
-                        regions::lorule::lake::lorule::SUBREGION
-                    ),
+                    check!("Lorule Lakeside Item Shop (1)", regions::lorule::lake::lorule::SUBREGION),
+                    out_of_logic("Lorule Lakeside Item Shop (2)", regions::lorule::lake::lorule::SUBREGION),
+                    check!("Lorule Lakeside Item Shop (3)", regions::lorule::lake::lorule::SUBREGION),
+                    check!("Lorule Lakeside Item Shop (4)", regions::lorule::lake::lorule::SUBREGION),
                 ],
                 vec![edge!(LoruleLakeNorthWest)],
+            ),
+        ),
+        (
+            LoruleRiverPortalShallows,
+            location(
+                "Lorule River Portal Shallows",
+                None,
+                vec![
+                    fast_travel_lorule(),
+                    portal_left(RiverLorule, portal_map),
+                    portal_right(RiverLorule, portal_map),
+                    edge!(LoruleLakeWater, |p| p.has_flippers()),
+                ],
             ),
         ),
         // This location assumes the player is already swimming, real or fake
@@ -936,22 +833,14 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                     edge!(LoruleLakeNorthWest),
                     edge!(LoruleLakeSouthWest),
                     edge!(LoruleLakeEast),
-                    old_path(
-                        TurtleRockWeatherVane,
-                        Some(|p| p.can_rescue_turtles()),
-                        None,
-                        Some(|p| p.has_tornado_rod()),
-                        None,
-                        None,
-                    ),
-                    old_path(
-                        TurtleRockFrontDoor,
-                        None,
-                        None,
-                        Some(|p| p.has_tornado_rod()),
-                        None,
-                        None,
-                    ),
+                    edge!(LoruleRiverPortalShallows),
+                    edge!(TurtleRockWeatherVane => {
+                        normal: |p| p.can_rescue_turtles(),
+                        glitched: |p| p.has_tornado_rod(),
+                    }),
+                    edge!(TurtleRockFrontDoor => {
+                        glitched: |p| p.has_tornado_rod(),
+                    }),
                 ],
             ),
         ),
@@ -959,17 +848,13 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
             TurtleRockWeatherVane,
             location(
                 "Turtle Rock Weather Vane",
-                vec![ghost(HintGhost::TurtleRockOutside)],
+                vec![
+                    check!("Turtle Rock Weather Vane", regions::lorule::lake::lorule::SUBREGION),
+                    ghost(HintGhost::TurtleRockOutside),
+                ],
                 vec![
                     fast_travel_lorule(),
-                    old_path(
-                        TurtleRockFrontDoor,
-                        Some(|p| p.has_ice_rod() && p.can_merge()),
-                        None,
-                        None,
-                        None,
-                        None,
-                    ),
+                    old_path(TurtleRockFrontDoor, Some(|p| p.has_ice_rod() && p.can_merge()), None, None, None, None),
                     old_path(LoruleLakeWater, Some(|p| p.has_flippers()), None, None, None, None),
                 ],
             ),
@@ -982,14 +867,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                 vec![
                     fast_travel_lorule(),
                     edge!(TurtleRockFoyer),
-                    old_path(
-                        TurtleRockWeatherVane,
-                        Some(|p| p.has_ice_rod() && p.can_merge()),
-                        None,
-                        None,
-                        None,
-                        None,
-                    ),
+                    old_path(TurtleRockWeatherVane, Some(|p| p.has_ice_rod() && p.can_merge()), None, None, None, None),
                     old_path(LoruleLakeWater, Some(|p| p.has_flippers()), None, None, None, None),
                 ],
             ),
@@ -1002,10 +880,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                 vec![
                     check!("Dark Ruins Lakeview Chest", regions::lorule::dark::ruins::SUBREGION),
                     old_check(
-                        LocationInfo::new(
-                            "[Mai] Dark Ruins Waterfall",
-                            regions::lorule::dark::ruins::SUBREGION,
-                        ),
+                        LocationInfo::new("[Mai] Dark Ruins Waterfall", regions::lorule::dark::ruins::SUBREGION),
                         Some(|p| p.has_flippers()),
                         None,
                         None,
@@ -1013,10 +888,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                         Some(|p| p.has_boots()),
                     ),
                     old_check(
-                        LocationInfo::new(
-                            "[Mai] Dark Maze Entrance Wall",
-                            regions::lorule::dark::ruins::SUBREGION,
-                        ),
+                        LocationInfo::new("[Mai] Dark Maze Entrance Wall", regions::lorule::dark::ruins::SUBREGION),
                         Some(|p| p.can_merge()),
                         None,
                         None,
@@ -1024,10 +896,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     old_check(
-                        LocationInfo::new(
-                            "[Mai] Atop Dark Ruins Rocks",
-                            regions::lorule::dark::ruins::SUBREGION,
-                        ),
+                        LocationInfo::new("[Mai] Dark Ruins Bonk Rocks", regions::lorule::dark::ruins::SUBREGION),
                         Some(|p| p.has_boots()),
                         None,
                         None,
@@ -1035,10 +904,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     old_check(
-                        LocationInfo::new(
-                            "[Mai] Dark Ruins West Tree",
-                            regions::lorule::dark::ruins::SUBREGION,
-                        ),
+                        LocationInfo::new("[Mai] Dark Ruins West Tree", regions::lorule::dark::ruins::SUBREGION),
                         Some(|p| p.has_boots()),
                         None,
                         None,
@@ -1046,10 +912,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     old_check(
-                        LocationInfo::new(
-                            "[Mai] Dark Ruins East Tree",
-                            regions::lorule::dark::ruins::SUBREGION,
-                        ),
+                        LocationInfo::new("[Mai] Dark Ruins East Tree", regions::lorule::dark::ruins::SUBREGION),
                         Some(|p| p.has_boots()),
                         None,
                         None,
@@ -1057,10 +920,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     old_check(
-                        LocationInfo::new(
-                            "[Mai] Dark Ruins South Area Wall",
-                            regions::lorule::dark::ruins::SUBREGION,
-                        ),
+                        LocationInfo::new("[Mai] Dark Ruins South Wall", regions::lorule::dark::ruins::SUBREGION),
                         Some(|p| p.can_merge()),
                         None,
                         None,
@@ -1071,29 +931,34 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                 ],
                 vec![
                     fast_travel_lorule(),
-                    portal_std(HyruleField),
+                    portal_left(DarkRuinsPillar, portal_map),
+                    portal_right(DarkRuinsPillar, portal_map),
+                    edge!(DarkRuinsBlockedPortal, |p| p.has_bombs()),
                     edge!(DarkMazeEntrance),
-                    old_path(KusDomainSouth, Some(|p| p.can_merge()), None, None, None, None),
+                    edge!(KusDomainSouth, |p| p.can_merge()),
                     edge!(DarkRuinsShallowWater),
-                    old_path(
-                        LoruleLakeWater,
-                        None,
-                        None,
-                        Some(|p| p.has_flippers() && (p.has_fire_rod() || p.has_nice_bombs())),
-                        Some(|p| p.has_boots() && (p.has_fire_rod() || p.has_nice_bombs())), // fake flipper
-                        Some(|p| p.has_boots()), // Bee boost
-                    ),
-                    old_path(
-                        LoruleLakeEast,
-                        None,
-                        None,
-                        Some(|p| {
-                            p.has_stamina_scroll() && (p.has_fire_rod() || p.has_nice_bombs())
-                        }), // long merge
-                        None,
-                        Some(|p| p.has_stamina_scroll()), // Bee Boost
-                    ),
+                    edge!(LoruleRiverPortalShallows => {
+                        glitched: |p| p.has_fire_rod() || p.has_nice_bombs(),
+                        hell: |_| true, // Bee Boost
+                    }),
+                    edge!(LoruleLakeWater => {
+                        glitched: |p| p.has_flippers() && (p.has_fire_rod() || p.has_nice_bombs()),
+                        adv_glitched: |p| p.has_boots() && (p.has_fire_rod() || p.has_nice_bombs()), // fake flipper
+                        hell: |p| p.has_boots(), // Bee boost
+                    }),
+                    edge!(LoruleLakeEast => {
+                        glitched: |p| p.has_stamina_scroll() && (p.has_fire_rod() || p.has_nice_bombs()), // long merge
+                        hell: |p| p.has_stamina_scroll(), // Bee Boost
+                    }),
                 ],
+            ),
+        ),
+        (
+            DarkRuinsBlockedPortal,
+            location(
+                "Dark Ruins Blocked Portal",
+                None,
+                vec![edge!(DarkRuins), portal_left(DarkRuinsSE, portal_map), portal_right(DarkRuinsSE, portal_map)],
             ),
         ),
         (
@@ -1136,10 +1001,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                 vec![
                     check!("Dark Maze Ledge", regions::lorule::dark::ruins::SUBREGION),
                     old_check(
-                        LocationInfo::new(
-                            "[Mai] Dark Maze Center Wall",
-                            regions::lorule::dark::ruins::SUBREGION,
-                        ),
+                        LocationInfo::new("[Mai] Dark Maze Center Wall", regions::lorule::dark::ruins::SUBREGION),
                         Some(|p| p.can_merge()),
                         None,
                         None,
@@ -1172,53 +1034,37 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
             DarkPalaceWeatherVane,
             location(
                 "Dark Ruins Weather Vane",
-                vec![ghost(HintGhost::DarkPalaceOutside)],
                 vec![
-                    old_path(
-                        DarkMazeEntrance,
-                        Some(|p| p.can_merge() || p.has_sage_gulley()),
-                        None,
-                        None,
-                        None,
-                        None,
-                    ),
-                    old_path(
-                        DarkMazeHalfway,
-                        Some(|p| p.can_merge() || p.has_sage_gulley()),
-                        None,
-                        None,
-                        None,
-                        None,
-                    ),
+                    check!("Dark Palace Weather Vane", regions::lorule::dark::ruins::SUBREGION),
+                    ghost(HintGhost::DarkPalaceOutside),
+                ],
+                vec![
+                    old_path(DarkMazeEntrance, Some(|p| p.can_merge() || p.has_sage_gulley()), None, None, None, None),
+                    old_path(DarkMazeHalfway, Some(|p| p.can_merge() || p.has_sage_gulley()), None, None, None, None),
                     old_path(DarkPalaceFoyer, Some(|p| p.has_bombs()), None, None, None, None),
                 ],
+            ),
+        ),
+        (
+            DarkRuinsRiver,
+            location(
+                "Dark Ruins River",
+                None,
+                vec![edge!(DarkRuins, |p| p.has_flippers()), edge!(DarkRuinsShallowWater, |p| p.has_flippers())],
             ),
         ),
         (
             DarkRuinsShallowWater,
             location(
                 "Dark Ruins Shallow Water",
-                vec![],
+                None,
                 vec![
                     fast_travel_lorule(),
-                    // todo figure out waterfall portal
-                    old_path(
-                        HinoxCaveWater,
-                        Some(|p| p.can_merge() && p.has_flippers()),
-                        None,
-                        None,
-                        None,
-                        None,
-                    ),
-                    old_path(
-                        HinoxCaveShallowWater,
-                        Some(|p| p.can_merge()),
-                        None,
-                        None,
-                        None,
-                        None,
-                    ),
-                    old_path(DarkRuins, Some(|p| p.has_flippers()), None, None, None, None),
+                    // portal_left unpossible
+                    portal_right(WaterfallLorule, portal_map),
+                    edge!(HinoxCaveWater, |p| p.can_merge() && p.has_flippers()),
+                    edge!(HinoxCaveShallowWater, |p| p.can_merge()),
+                    edge!(DarkRuins, |p| p.has_flippers()),
                 ],
             ),
         ),
@@ -1227,10 +1073,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
             location(
                 "Ku's Domain South",
                 vec![old_check(
-                    LocationInfo::new(
-                        "[Mai] Ku's Domain Grass",
-                        regions::lorule::dark::ruins::SUBREGION,
-                    ),
+                    LocationInfo::new("[Mai] Ku's Domain Grass", regions::lorule::dark::ruins::SUBREGION),
                     Some(|p| p.can_merge() && p.can_cut_grass()),
                     None,
                     None,
@@ -1239,7 +1082,8 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                 )],
                 vec![
                     fast_travel_lorule(),
-                    portal_std(ZoraDomainArea),
+                    portal_left(Portal::KusDomain, portal_map),
+                    portal_right(Portal::KusDomain, portal_map),
                     old_path(
                         HinoxCaveWater,
                         Some(|p| p.has_flippers()),
@@ -1256,28 +1100,18 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                         None,
                         None,
                     ),
-                    old_path(
-                        DarkRuins,
-                        Some(|p| p.can_merge()),
-                        Some(|p| p.has_hookshot()),
-                        None,
-                        None,
-                        None,
-                    ),
-                    old_path(KusDomain, Some(|p| p.can_merge()), None, None, None, None),
+                    old_path(DarkRuins, Some(|p| p.can_merge()), Some(|p| p.has_hookshot()), None, None, None),
+                    old_path(Location::KusDomain, Some(|p| p.can_merge()), None, None, None, None),
                 ],
             ),
         ),
         (
-            KusDomain,
+            Location::KusDomain,
             location(
                 "Ku's Domain",
                 vec![
                     old_check(
-                        LocationInfo::new(
-                            "Ku's Domain Fight",
-                            regions::lorule::dark::ruins::SUBREGION,
-                        ),
+                        LocationInfo::new("Ku's Domain Fight", regions::lorule::dark::ruins::SUBREGION),
                         Some(|p| {
                             p.has_bow()
                                 || p.has_bombs()
@@ -1291,10 +1125,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     old_check(
-                        LocationInfo::new(
-                            "[Mai] Ku's Domain Water",
-                            regions::lorule::dark::ruins::SUBREGION,
-                        ),
+                        LocationInfo::new("[Mai] Ku's Domain Water", regions::lorule::dark::ruins::SUBREGION),
                         Some(|p| p.has_flippers()),
                         None,
                         None,
@@ -1325,14 +1156,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                     fast_travel_lorule(),
                     edge!(HinoxCave),
                     old_path(HinoxCaveWater, Some(|p| p.has_flippers()), None, None, None, None),
-                    old_path(
-                        DarkRuinsShallowWater,
-                        Some(|p| p.can_merge()),
-                        None,
-                        None,
-                        None,
-                        None,
-                    ),
+                    old_path(DarkRuinsShallowWater, Some(|p| p.can_merge()), None, None, None, None),
                 ],
             ),
         ),
@@ -1357,11 +1181,9 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
             location(
                 "Skull Woods (Overworld)",
                 vec![
+                    check!("Skull Woods Weather Vane", regions::lorule::skull::overworld::SUBREGION),
                     old_check(
-                        LocationInfo::new(
-                            "Canyon House",
-                            regions::lorule::skull::overworld::SUBREGION,
-                        ),
+                        LocationInfo::new("n-Shaped House", regions::lorule::skull::overworld::SUBREGION),
                         Some(|p| p.can_merge()),
                         None,
                         None,
@@ -1370,10 +1192,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                     ),
                     check!("Destroyed House", regions::lorule::skull::overworld::SUBREGION),
                     old_check(
-                        LocationInfo::new(
-                            "[Mai] Skull Woods Grass",
-                            regions::lorule::skull::overworld::SUBREGION,
-                        ),
+                        LocationInfo::new("[Mai] Skull Woods Grass", regions::lorule::skull::overworld::SUBREGION),
                         Some(|p| p.can_cut_grass()),
                         None,
                         None,
@@ -1381,10 +1200,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     old_check(
-                        LocationInfo::new(
-                            "[Mai] Skull Woods Skull",
-                            regions::lorule::skull::overworld::SUBREGION,
-                        ),
+                        LocationInfo::new("[Mai] Skull Woods Skull", regions::lorule::skull::overworld::SUBREGION),
                         Some(|p| p.can_destroy_skull()),
                         None,
                         None,
@@ -1392,10 +1208,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     old_check(
-                        LocationInfo::new(
-                            "[Mai] Skull Woods Shack Tree",
-                            regions::lorule::skull::overworld::SUBREGION,
-                        ),
+                        LocationInfo::new("[Mai] Destroyed House Tree", regions::lorule::skull::overworld::SUBREGION),
                         Some(|p| p.has_boots()),
                         None,
                         None,
@@ -1404,10 +1217,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                     ),
                     check!("[Mai] Skull Woods Bush", regions::lorule::skull::overworld::SUBREGION),
                     old_check(
-                        LocationInfo::new(
-                            "[Mai] Skull Woods Big Rock",
-                            regions::lorule::skull::overworld::SUBREGION,
-                        ),
+                        LocationInfo::new("[Mai] Skull Woods Rock", regions::lorule::skull::overworld::SUBREGION),
                         Some(|p| p.has_titans_mitt()),
                         None,
                         None,
@@ -1426,10 +1236,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     old_check(
-                        LocationInfo::new(
-                            "[Mai] Skull Woods Dry Pond",
-                            regions::lorule::skull::overworld::SUBREGION,
-                        ),
+                        LocationInfo::new("[Mai] Skull Woods Dry Pond", regions::lorule::skull::overworld::SUBREGION),
                         Some(|p| p.can_merge()),
                         None,
                         None,
@@ -1437,10 +1244,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     old_check(
-                        LocationInfo::new(
-                            "[Mai] Canyon House Wall",
-                            regions::lorule::skull::overworld::SUBREGION,
-                        ),
+                        LocationInfo::new("[Mai] n-Shaped House Wall", regions::lorule::skull::overworld::SUBREGION),
                         Some(|p| p.can_merge()),
                         None,
                         None,
@@ -1452,9 +1256,13 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                 ],
                 vec![
                     fast_travel_lorule(),
-                    portal_std(RossoHouse),
+                    portal_left(DestroyedHouse, portal_map),
+                    portal_right(DestroyedHouse, portal_map),
+                    portal_left(NShapedHouse, portal_map),
+                    portal_right(NShapedHouse, portal_map),
+                    portal_left(SkullWoodsPillar, portal_map),
+                    portal_right(SkullWoodsPillar, portal_map),
                     edge!(MysteriousManCave),
-                    portal_std(HyruleField),
                     edge!(SkullWoodsFoyer),
                 ],
             ),
@@ -1464,10 +1272,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
             location(
                 "Mysterious Man Cave",
                 vec![old_check(
-                    LocationInfo::new(
-                        "Mysterious Man",
-                        regions::lorule::skull::overworld::SUBREGION,
-                    ),
+                    LocationInfo::new("Mysterious Man", regions::lorule::skull::overworld::SUBREGION),
                     Some(|p| p.has_bottle()),
                     None,
                     None,
@@ -1483,11 +1288,9 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
             location(
                 "Lorule Death Mountain West",
                 vec![
+                    check!("Treacherous Tower Weather Vane", regions::lorule::death::mountain::SUBREGION),
                     old_check(
-                        LocationInfo::new(
-                            "Ice Gimos Fight",
-                            regions::lorule::death::mountain::SUBREGION,
-                        ),
+                        LocationInfo::new("Ice Gimos Fight", regions::lorule::death::mountain::SUBREGION),
                         Some(|p| p.can_defeat_margomill()),
                         None,
                         None,
@@ -1495,10 +1298,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     old_check(
-                        LocationInfo::new(
-                            "Lorule Mountain W Ledge",
-                            regions::lorule::death::mountain::SUBREGION,
-                        ),
+                        LocationInfo::new("Lorule Mountain W Ledge", regions::lorule::death::mountain::SUBREGION),
                         Some(|p| p.can_merge()),
                         None,
                         Some(|p| p.has_nice_bombs()),
@@ -1514,28 +1314,15 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                             (p.has_sword() || (p.swordless_mode() && p.can_attack()))
                                 && (p.has_bombs() || p.has_hammer() || p.has_tornado_rod())
                         }),
-                        Some(|p| {
-                            p.has_bombs()
-                                || p.has_hammer()
-                                || (p.has_tornado_rod() && p.has_lamp_or_net())
-                        }),
+                        Some(|p| p.has_bombs() || p.has_hammer() || (p.has_tornado_rod() && p.has_lamp_or_net())),
                         None,
                         None,
                         None,
                     ),
-                    out_of_logic(
-                        "Treacherous Tower Advanced (1)",
-                        regions::lorule::death::mountain::SUBREGION,
-                    ),
-                    out_of_logic(
-                        "Treacherous Tower Advanced (2)",
-                        regions::lorule::death::mountain::SUBREGION,
-                    ),
+                    out_of_logic("Treacherous Tower Advanced (1)", regions::lorule::death::mountain::SUBREGION),
+                    out_of_logic("Treacherous Tower Advanced (2)", regions::lorule::death::mountain::SUBREGION),
                     old_check(
-                        LocationInfo::new(
-                            "[Mai] Lorule Mountain W Skull",
-                            regions::lorule::death::mountain::SUBREGION,
-                        ),
+                        LocationInfo::new("[Mai] Lorule Mountain W Skull", regions::lorule::death::mountain::SUBREGION),
                         Some(|p| p.can_destroy_skull()),
                         Some(|p| p.can_merge()),
                         None,
@@ -1568,15 +1355,13 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                 ],
                 vec![
                     fast_travel_lorule(),
-                    portal_std(DeathMountainBase),
+                    portal_left(DeathWestLorule, portal_map),
+                    portal_right(DeathWestLorule, portal_map),
                     old_path(
-                        RossosOreMineLorule,
+                        Location::RossosOreMineLorule,
                         None,
                         None,
-                        Some(|p| {
-                            p.has_hookshot()
-                                && (p.has_fire_rod() || p.has_nice_bombs() || p.has_tornado_rod())
-                        }),
+                        Some(|p| p.has_hookshot() && (p.has_fire_rod() || p.has_nice_bombs() || p.has_tornado_rod())),
                         None,
                         None,
                     ),
@@ -1584,23 +1369,24 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
             ),
         ),
         (
-            RossosOreMineLorule,
+            Location::RossosOreMineLorule,
             location(
                 "Rosso's Ore Mine Lorule",
-                vec![old_check(
-                    LocationInfo::new(
-                        "[Mai] Lorule Mountain E Wall",
-                        regions::lorule::death::mountain::SUBREGION,
+                vec![
+                    check!("Death Mountain (Lorule) Weather Vane", regions::lorule::death::mountain::SUBREGION),
+                    old_check(
+                        LocationInfo::new("[Mai] Lorule Mountain E Wall", regions::lorule::death::mountain::SUBREGION),
+                        Some(|p| p.can_merge()),
+                        None,
+                        None,
+                        None,
+                        None,
                     ),
-                    Some(|p| p.can_merge()),
-                    None,
-                    None,
-                    None,
-                    None,
-                )],
+                ],
                 vec![
                     fast_travel_lorule(),
-                    portal_std(RossosOreMine),
+                    portal_left(Portal::RossosOreMineLorule, portal_map),
+                    portal_right(Portal::RossosOreMineLorule, portal_map),
                     old_path(LoruleDeathWest, Some(|p| p.has_hookshot()), None, None, None, None),
                     edge!(IceCaveEast),
                 ],
@@ -1655,22 +1441,8 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                 vec![],
                 vec![
                     edge!(IceCaveCenter),
-                    old_path(
-                        IceCaveNorthWest,
-                        Some(|p| p.has_tornado_rod()),
-                        None,
-                        None,
-                        None,
-                        None,
-                    ),
-                    old_path(
-                        IceCaveSouthWest,
-                        Some(|p| p.has_tornado_rod()),
-                        None,
-                        None,
-                        None,
-                        None,
-                    ),
+                    old_path(IceCaveNorthWest, Some(|p| p.has_tornado_rod()), None, None, None, None),
+                    old_path(IceCaveSouthWest, Some(|p| p.has_tornado_rod()), None, None, None, None),
                 ],
             ),
         ),
@@ -1681,46 +1453,33 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                 vec![],
                 vec![
                     edge!(FloatingIslandLorule),
-                    old_path(
-                        IceCaveWest,
-                        Some(|p| p.has_tornado_rod()),
-                        None,
-                        Some(|p| p.has_boots()),
-                        None,
-                        None,
-                    ),
+                    old_path(IceCaveWest, Some(|p| p.has_tornado_rod()), None, Some(|p| p.has_boots()), None, None),
                 ],
             ),
         ),
         (
-            FloatingIslandLorule,
+            Location::FloatingIslandLorule,
             location(
                 "Floating Island Lorule",
                 vec![],
                 vec![
                     fast_travel_lorule(),
                     edge!(IceCaveNorthWest),
-                    portal_std(FloatingIslandHyrule),
+                    portal_left(Portal::FloatingIslandLorule, portal_map),
+                    portal_right(Portal::FloatingIslandLorule, portal_map),
                 ],
             ),
         ),
         (
             IceCaveSouthWest,
-            location(
-                "Ice Cave South West",
-                vec![],
-                vec![edge!(IceCaveWest), edge!(LoruleDeathEastLedgeUpper)],
-            ),
+            location("Ice Cave South West", vec![], vec![edge!(IceCaveWest), edge!(LoruleDeathEastLedgeUpper)]),
         ),
         (
             LoruleDeathEastLedgeUpper,
             location(
                 "Lorule Death Mountain East Upper Ledge",
                 vec![old_check(
-                    LocationInfo::new(
-                        "Lorule Mountain E Ledge",
-                        regions::lorule::death::mountain::SUBREGION,
-                    ),
+                    LocationInfo::new("Ice Cave Ledge", regions::lorule::death::mountain::SUBREGION),
                     Some(|p| p.can_merge()),
                     None,
                     None,
@@ -1731,14 +1490,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                     fast_travel_lorule(),
                     edge!(IceCaveWest),
                     edge!(LoruleDeathEastLedgeLower),
-                    old_path(
-                        RossosOreMineLorule,
-                        None,
-                        None,
-                        Some(|p| p.has_nice_bombs()),
-                        None,
-                        None,
-                    ),
+                    old_path(Location::RossosOreMineLorule, None, None, Some(|p| p.has_nice_bombs()), None, None),
                 ],
             ),
         ),
@@ -1747,10 +1499,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
             location(
                 "Lorule Death Mountain East Lower Ledge",
                 vec![old_check(
-                    LocationInfo::new(
-                        "[Mai] Lorule Mountain E Skull",
-                        regions::lorule::death::mountain::SUBREGION,
-                    ),
+                    LocationInfo::new("[Mai] Ice Cave Ledge", regions::lorule::death::mountain::SUBREGION),
                     Some(|p| p.can_destroy_skull()),
                     None,
                     None,
@@ -1765,11 +1514,9 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
             location(
                 "Lorule Death Mountain East Top",
                 vec![
+                    check!("Ice Ruins Weather Vane", regions::lorule::death::mountain::SUBREGION),
                     old_check(
-                        LocationInfo::new(
-                            "Behind Ice Gimos",
-                            regions::lorule::death::mountain::SUBREGION,
-                        ),
+                        LocationInfo::new("Behind Ice Gimos", regions::lorule::death::mountain::SUBREGION),
                         Some(|p| p.has_fire_rod()),
                         None,
                         None,
@@ -1777,10 +1524,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     old_check(
-                        LocationInfo::new(
-                            "[Mai] Outside Ice Ruins",
-                            regions::lorule::death::mountain::SUBREGION,
-                        ),
+                        LocationInfo::new("[Mai] Outside Ice Ruins", regions::lorule::death::mountain::SUBREGION),
                         Some(|p| p.can_merge()),
                         None,
                         None,

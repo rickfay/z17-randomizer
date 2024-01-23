@@ -1,9 +1,6 @@
-use std::collections::HashMap;
-
+use crate::filler::location::{Location, Location::*};
 use game::Course::{self, *};
-
-use crate::model::location::{Location, Location::*};
-
+use std::collections::HashMap;
 use LoadingZoneId::*;
 
 /**
