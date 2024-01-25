@@ -23,14 +23,13 @@ use serde::{ser::SerializeMap, Deserialize, Serialize, Serializer};
 use std::collections::{BTreeMap, HashMap, HashSet};
 use std::hash::BuildHasherDefault;
 use std::{
-    collections::hash_map::DefaultHasher,
     error::Error as StdError,
     fs::File,
     hash::{Hash, Hasher},
     io::{self, Write},
     ops::Deref,
 };
-use twox_hash::XxHash;
+use twox_hash::{XxHash, XxHash64};
 
 pub mod constants;
 pub mod filler;
@@ -399,7 +398,7 @@ pub struct SeedHash {
 impl SeedHash {
     pub fn new(seed: u32, settings: &Settings) -> Self {
         // Calculate underlying Hash
-        let mut hasher = DefaultHasher::new();
+        let mut hasher = XxHash64::default();
         (seed, settings, VERSION).hash(&mut hasher);
         let mut hash = hasher.finish() % 100_000;
 
