@@ -10,6 +10,7 @@ use crate::{
 };
 use filler::filler_item::FillerItem;
 use filler::portals::Portal;
+use game::tower_stage::TowerStage;
 use game::Item::{self};
 use log::{debug, error, info};
 use macros::fail;
@@ -29,7 +30,7 @@ use std::{
     io::{self, Write},
     ops::Deref,
 };
-use twox_hash::{XxHash, XxHash64};
+use twox_hash::XxHash64;
 
 pub mod constants;
 pub mod filler;
@@ -309,6 +310,9 @@ pub struct SeedInfo {
     pub layout: Layout,
 
     #[serde(skip_deserializing)]
+    pub treacherous_tower_floors: Vec<TowerStage>,
+
+    #[serde(skip_deserializing)]
     pub portal_map: PortalMap,
 
     #[serde(skip_deserializing, rename = "weather_vane_map")]
@@ -327,7 +331,7 @@ pub struct SeedInfo {
 impl SeedInfo {
     fn new(
         seed: u32, hash: SeedHash, settings: Settings, portal_map: PortalMap, vane_map: VaneMap,
-        world_graph: WorldGraph,
+        world_graph: WorldGraph, treacherous_tower_floors: Vec<TowerStage>,
     ) -> Self {
         Self {
             seed,
@@ -340,6 +344,7 @@ impl SeedInfo {
             metrics: Default::default(),
             hints: Default::default(),
             world_graph,
+            treacherous_tower_floors,
         }
     }
 
@@ -361,6 +366,7 @@ impl Default for SeedInfo {
             metrics: Default::default(),
             hints: Default::default(),
             world_graph: Default::default(),
+            treacherous_tower_floors: Default::default(),
         }
     }
 }
@@ -482,11 +488,11 @@ fn validate_settings(settings: &Settings) -> Result<()> {
 
 /// "Deterministic `HashMap`" that uses a hashing algorithm not based on any random number generation, unlike the Rust
 /// default which is non-deterministic for security reasons not relevant for our purposes.
-pub type DashMap<K, V> = HashMap<K, V, BuildHasherDefault<XxHash>>;
+pub type DashMap<K, V> = HashMap<K, V, BuildHasherDefault<XxHash64>>;
 
 /// "Deterministic `HashSet`" that uses a hashing algorithm not based on any random number generation, unlike the Rust
 /// default which is non-deterministic for security reasons not relevant for our purposes.
-pub type DashSet<T> = HashSet<T, BuildHasherDefault<XxHash>>;
+pub type DashSet<T> = HashSet<T, BuildHasherDefault<XxHash64>>;
 
 /// Map of all checks (as Strings) to their held item
 pub type CheckMap = DashMap<String, Option<FillerItem>>;
@@ -505,8 +511,9 @@ fn calculate_seed_info(seed: u32, settings: Settings, hash: SeedHash, rng: &mut 
     let portal_map = portals::build_portal_map(&settings, rng)?;
     let vane_map = vanes::build_vanes_map(&settings, rng)?;
     let world_graph = world::build_world_graph(&portal_map);
+    let tower_floors = filler::tower::choose_tower_floors(&settings, rng)?;
 
-    let mut seed_info = SeedInfo::new(seed, hash, settings, portal_map, vane_map, world_graph);
+    let mut seed_info = SeedInfo::new(seed, hash, settings, portal_map, vane_map, world_graph, tower_floors);
 
     // Check Map and Item Pools
     let check_map = &mut filler::prefill_check_map(&mut seed_info.world_graph);
@@ -533,8 +540,8 @@ pub fn patch_seed(seed_info: &SeedInfo, user_config: &UserConfig, no_patch: bool
         info!("ROM Loaded.\n");
 
         // patch::research_msbf_msbt(&mut patcher,
-        //     game::Course::IndoorDark, "FiledDark_22_BlackSmithWifeUra", // MSBF
-        //     game::Course::IndoorDark, "FieldDark_22", // MSBT
+        //     game::Course::FieldDark, "FieldDark_05_GameTower", // MSBF
+        //     game::Course::FieldDark, "FieldDark_05",           // MSBT
         //     true);
 
         regions::patch(&mut patcher, seed_info)?;

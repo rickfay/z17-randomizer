@@ -646,11 +646,11 @@ impl Patcher {
         // let sarc = jack::open_szs(&self.game, "Archive/ActorProfile.szs");
 
         let prizes = get_dungeon_prizes(&seed_info.layout);
-        lms::msbf::patch(&mut self, &seed_info.settings)?;
+        lms::msbf::patch(&mut self, &seed_info)?;
         messages::patch_messages(&mut self, seed_info)?;
         prizes::patch_dungeon_prizes(&mut self, &prizes, &seed_info.settings);
         byaml::course::patch(&mut self, &prizes, &seed_info.settings);
-        byaml::stage::patch(&mut self, &seed_info.settings)?;
+        byaml::stage::patch(&mut self, &seed_info)?;
         let scene_env_file = byaml::scene_env::patch(&mut self, &seed_info.settings);
         let cutscenes = demo::build_replacement_cutscenes(&seed_info.settings)?;
 

@@ -5,6 +5,7 @@ use std::error::Error as StdError;
 mod courses;
 pub mod ghosts;
 mod items;
+pub mod tower_stage;
 
 /// An error resulting from trying to read the ROM file.
 #[derive(Debug)]

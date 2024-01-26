@@ -479,9 +479,7 @@ fn build_layout() -> Layout {
     layout.set_item("Behind Ice Gimos", regions::lorule::death::mountain::SUBREGION, Empty);
     layout.set_item("Lorule Mountain W Ledge", regions::lorule::death::mountain::SUBREGION, Empty);
     layout.set_item("Ice Gimos Fight", regions::lorule::death::mountain::SUBREGION, Empty);
-    layout.set_item("Treacherous Tower Intermediate", regions::lorule::death::mountain::SUBREGION, Empty);
-    layout.set_item("Treacherous Tower Advanced (1)", regions::lorule::death::mountain::SUBREGION, Empty);
-    layout.set_item("Treacherous Tower Advanced (2)", regions::lorule::death::mountain::SUBREGION, Empty);
+    layout.set_item("Treacherous Tower", regions::lorule::death::mountain::SUBREGION, Empty);
     layout.set_item("[Mai] Lorule Mountain W Skull", regions::lorule::death::mountain::SUBREGION, Maiamai0);
     layout.set_item("[Mai] Lorule Mountain W Big Rock", regions::lorule::death::mountain::SUBREGION, Maiamai0);
     layout.set_item("[Mai] Ice Cave Ledge", regions::lorule::death::mountain::SUBREGION, Maiamai0);

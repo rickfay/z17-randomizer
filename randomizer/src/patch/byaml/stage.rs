@@ -1,5 +1,6 @@
 use crate::patch::Patcher;
-use crate::{patch::util::*, Result};
+use crate::{patch::util::*, Result, SeedInfo};
+use game::tower_stage::TowerStage;
 use game::Course::{self, *};
 use log::info;
 use macros::fail;
@@ -89,13 +90,16 @@ macro_rules! action {
 }
 
 /// Patch Stage BYAML Files
-pub fn patch(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
+pub fn patch(
+    patcher: &mut Patcher, SeedInfo { settings, treacherous_tower_floors: tower_floors, .. }: &SeedInfo,
+) -> Result<()> {
     info!("Patching BYAML Files...");
 
     do_dev_stuff(patcher, settings)?;
     patch_ravios_shop(patcher)?;
     // patch_portals(patcher);
     patch_maiamai_cave(patcher);
+    patch_treacherous_tower(patcher, tower_floors)?;
     patch_big_problem_chests(patcher, settings);
     patch_blacksmith_hyrule(patcher);
     patch_castles(patcher);
@@ -539,6 +543,28 @@ fn patch_ravios_shop(patcher: &mut Patcher) -> Result<()> {
             disable(59), // Disable Ravio's welcome
         ],
     );
+
+    Ok(())
+}
+
+fn patch_treacherous_tower(patcher: &mut Patcher, tower_floors: &Vec<TowerStage>) -> Result<()> {
+    let mut i = 1;
+    while i < tower_floors.len() {
+        // i - 1 = previous floor, i = current floor
+        let floor_prev = tower_floors.get(i - 1).unwrap();
+        let floor_cur = tower_floors.get(i).unwrap();
+
+        patcher.modify_objs(
+            floor_prev.course,
+            floor_prev.stage as u16,
+            [redirect(10, SpawnPoint::new(floor_cur.course, floor_cur.stage as i32, 0))],
+        );
+
+        i += 1;
+    }
+
+    // Give 1000 rupee prize instead of 5000
+    patcher.modify_objs(EnemyAttackL, 50, [call(23, |obj| obj.arg.0 = 1)]);
 
     Ok(())
 }

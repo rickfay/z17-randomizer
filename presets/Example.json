@@ -1,9 +1,8 @@
 {
-  // "Visit the project GitHub for details about each option: https://github.com/rickfay/z17-randomizer"
+  // "Visit the project GitHub for details about each option: https://github.com/rickfay/z17-randomizer/tree/dev#game-options"
   "seed": 0,
   "version": "v0.4.0 - SNAPSHOT",
   "settings": {
-
     "lc_requirement":              7,                         // Sage Portraits needed to enter Lorule Castle's front door,
     "ped_requirement":             "Standard",                // MS Pedestal Pendant requirement: (2) "Vanilla", (3) "Charmed", or (4) "Standard"
 
@@ -14,14 +13,15 @@
     "dungeon_prize_shuffle":       true,                      // This shuffles all Sage Portraits, Pendants, and the Charm among themselves.
     "maiamai_madness":             false,                     // This shuffles Maiamai into the pool, adding 100 more locations.
     "portal_shuffle":              "Off",                     // "Off", "CrossWorldPairs", "AnyWorldPairs", "MirroredCrossWorldPairs", "MirroredAnyWorldPairs"
-    "nice_items":                  false,                     // This shuffles a second progressive copy of each Ravio Item into the general item pool.,
-    "super_items":                 true,                      // This shuffles a second progressive copy of the Lamp and Net into the general item pool.,
+    "nice_mode":                   false,                     // This shuffles a second progressive copy of each Ravio Item into the general item pool.,
+    "super_mode":                  true,                      // This shuffles a second progressive copy of the Lamp and Net into the general item pool.,
     "weather_vanes":               "Hyrule",                  // Choose initially active Weather Vanes: "Standard", "Shuffled", "Convenient", "Hyrule", "Lorule", "All"
     "ravios_shop":                 "Open",                    // "Closed", "Open"
 
     "bow_of_light_in_castle":      false,                     // Limits the Bow of Light's placement to somewhere in Lorule Castle (including possibly Zelda).
     "no_progression_enemies":      false,                     // Removes Enemies from dungeons that are themselves Progression (e.g.: Bawbs, the bomb enemy)
     "keysy":                       "Off",                     // "Off", "SmallKeysy", "BigKeysy", "AllKeysy"
+    "progressive_bow_of_light":    false,                     // Makes the Bow of Light the third upgrade for the Bow.
     "swordless_mode":              false,                     // Removes *ALL* Swords from the game.
 
     "start_with_merge":            false,                     // Start with the ability to Merge into walls, without Ravio's Bracelet.,
@@ -37,6 +37,7 @@
     "skip_trials":                 true,                      // Automatically opens the Lorule Castle Trials door.
 
     "hint_ghost_price":            0,                         // Price of Hints from Hint Ghosts. Can be any integer between 0 and 9999 (Recommended: 30).
+    "treacherous_tower_floors":    5,                         // The number (any integer between 2 and 66) of floors the Treacherous Tower minigame will have.
 
     "night_mode":                  false,                     // Enables certain shaders on the overworld that make it look like nighttime in Hyrule.
 
@@ -47,8 +48,8 @@
       "Hyrule Hotfoot 65s",
       "Rupee Rush (Hyrule)",
       "Rupee Rush (Lorule)",
-      "Octoball Derby",
-      "Treacherous Tower Intermediate"
+      "Octoball Derby"
+      // "Treacherous Tower"
     ]
   }
 }

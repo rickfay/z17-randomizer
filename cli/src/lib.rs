@@ -188,6 +188,13 @@ pub fn get_seed_settings() -> Result<Settings, String> {
         print!("\nNice.\n");
     }
 
+    let treacherous_tower_floors = prompt_u16_in_range(
+        "Treacherous Tower Floors",
+        "How many floors should Treacherous Tower have? (2-68)\nRecommended: 5",
+        2,
+        68,
+    ) as usize;
+
     let keysy = Keysy::try_from(prompt_u8_in_range(
         "Keysy",
         "This setting removes locked keys and doors from dungeons if enabled.\n\
@@ -234,6 +241,7 @@ pub fn get_seed_settings() -> Result<Settings, String> {
         skip_big_bomb_flower,
         skip_trials,
         hint_ghost_price,
+        treacherous_tower_floors,
         night_mode: false,
     })
 }

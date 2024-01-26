@@ -339,11 +339,8 @@ fn generate_always_hints(
     let mut always_checks = vec![
         "Master Sword Pedestal", "Great Rupee Fairy", "Blacksmith (Lorule)", "Bouldering Guy", "Irene", "Rosso I",
         "Rosso II", "Osfala", "Haunted Grove Stump", "Queen Oren", "Shady Guy", "Street Merchant (Right)",
+        "Octoball Derby", "Treacherous Tower",
     ];
-
-    if !seed_info.settings.minigames_excluded {
-        always_checks.extend(vec!["Octoball Derby", "Treacherous Tower Intermediate"]);
-    }
 
     always_checks.retain(|check| !taken_checks.contains(&check.to_string()));
 
