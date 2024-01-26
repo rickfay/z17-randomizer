@@ -221,6 +221,10 @@ impl Flag {
         943: WV_TURTLE_ROCK,
         944: WV_DEATH_MTN_LORULE,
         // ...
+        956: TREACHEROUS_TOWER_BEGINNER_WON,
+        957: TREACHEROUS_TOWER_INTERMEDIATE_WON,
+        958: TREACHEROUS_TOWER_ADVANCED_WON,
+        // ...
         // 1017: LAST_FLAG,
     }
 

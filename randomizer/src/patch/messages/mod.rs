@@ -22,6 +22,7 @@ pub fn patch_messages(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()>
     patch_actions(patcher)?;
     // patch_ravio(patcher)?;
     patch_great_rupee_fairy(patcher)?;
+    patch_treacherous_tower(patcher, seed_info)?;
     patch_thief_girl(patcher)?;
 
     patch_street_merchant(patcher, seed_info)?;
@@ -129,6 +130,34 @@ fn patch_great_rupee_fairy(patcher: &mut Patcher) -> Result<()> {
     grf.set("CaveDark29_LuckyFairy_02", "Don't throw any");
     grf.set("CaveDark29_LuckyFairy_03", "1234567"); // shorten string so file matches OG size FIXME
     patcher.update(grf.dump())?;
+
+    Ok(())
+}
+
+/// Treacherous Tower
+fn patch_treacherous_tower(patcher: &mut Patcher, SeedInfo { settings, .. }: &SeedInfo) -> Result<()> {
+    let mut msbt = load_msbt(patcher, FieldDark, "FieldDark_05").unwrap();
+
+    msbt.set(
+        "fd_GameTower_expert_select",
+        &format!(
+            "Sword boy is gonna be the next\ncontestant on the Random course,\nright?! Ya ready for this?{}",
+            *CHOICE_2
+        ),
+    );
+    msbt.set("fd_GameTower_expert_select_00", "Pay 200");
+    msbt.set("fd_GameTower_expert_select_01", "I'll pass");
+    msbt.set("fd_GameTower_expert_select_02", ""); // clear unused
+    msbt.set("fd_GameTower_expert_select_03", ""); // clear unused
+    msbt.set(
+        "fd_GameTower_expert_00",
+        &format!(
+            "Well, well, well! Double boom in the\nroom! I'm so impressed! The\nRandom course has {}!",
+            name(&format!("{} floors", settings.treacherous_tower_floors))
+        ),
+    );
+
+    patcher.update(msbt.dump())?;
 
     Ok(())
 }

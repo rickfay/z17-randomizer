@@ -1305,22 +1305,10 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
                         None,
                         Some(|p| p.has_bombs()),
                     ),
-                    old_check(
-                        LocationInfo::new(
-                            "Treacherous Tower Intermediate",
-                            regions::lorule::death::mountain::SUBREGION,
-                        ),
-                        Some(|p| {
-                            (p.has_sword() || (p.swordless_mode() && p.can_attack()))
-                                && (p.has_bombs() || p.has_hammer() || p.has_tornado_rod())
-                        }),
-                        Some(|p| p.has_bombs() || p.has_hammer() || (p.has_tornado_rod() && p.has_lamp_or_net())),
-                        None,
-                        None,
-                        None,
-                    ),
-                    out_of_logic("Treacherous Tower Advanced (1)", regions::lorule::death::mountain::SUBREGION),
-                    out_of_logic("Treacherous Tower Advanced (2)", regions::lorule::death::mountain::SUBREGION),
+                    check!("Treacherous Tower",regions::lorule::death::mountain::SUBREGION => {
+                        normal: |p| (p.has_sword() || (p.swordless_mode() && p.can_attack())) && (p.has_bombs() || p.has_hammer() || p.has_tornado_rod()),
+                        hard: |p| p.has_bombs() || p.has_hammer() || (p.has_tornado_rod() && p.has_lamp_or_net()),
+                    }),
                     old_check(
                         LocationInfo::new("[Mai] Lorule Mountain W Skull", regions::lorule::death::mountain::SUBREGION),
                         Some(|p| p.can_destroy_skull()),

@@ -142,6 +142,10 @@ pub struct Settings {
     #[serde(default)]
     pub hint_ghost_price: u16,
 
+    /// Number of floors in Treacherous Tower
+    #[serde(default = "five")]
+    pub treacherous_tower_floors: usize,
+
     /// Experimental: Change Hyrule to the nighttime color scheme (until visiting Lorule)
     pub night_mode: bool,
 
@@ -224,6 +228,10 @@ impl Settings {
 
 const fn is_false(b: &bool) -> bool {
     !(*b)
+}
+
+const fn five() -> usize {
+    5
 }
 
 const fn seven() -> u8 {

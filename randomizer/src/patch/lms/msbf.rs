@@ -1,15 +1,17 @@
 use crate::patch::Patcher;
-use crate::Result;
+use crate::{Result, SeedInfo};
 use game::Course;
 use log::info;
 use modinfo::settings::keysy::Keysy;
 use modinfo::Settings;
 use rom::string_constants;
 
-pub fn patch(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
+pub fn patch(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
     info!("Patching MSBF Files...");
 
     // research(patcher, None, "GameOver", None, true)?;
+
+    let settings = &seed_info.settings;
 
     patch_ravio_shop(patcher)?;
     patch_thieves_hideout(patcher, settings)?;
@@ -25,7 +27,7 @@ pub fn patch(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
     // patch_gameover(patcher)?;
     patch_stylish_woman(patcher)?;
     patch_woman(patcher)?;
-    patch_treacherous_tower(patcher)?;
+    patch_treacherous_tower(patcher, seed_info)?;
     patch_bee_guy(patcher)?;
     patch_impa(patcher)?;
 
@@ -546,10 +548,49 @@ fn patch_woman(patcher: &mut Patcher) -> Result<()> {
 }
 
 /// Treacherous Tower
-fn patch_treacherous_tower(patcher: &mut Patcher) -> Result<()> {
+fn patch_treacherous_tower(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
+    let first_course = seed_info.treacherous_tower_floors.get(0).unwrap().course as u32;
+
     apply!(patcher,
         FieldDark / FieldDark_05_GameTower {
-            [62 into_branch] switch [[0] => 65,], // Unlock Intermediate from the start
+            // --- Before Game dialog --- //
+            [14] => 203, // Skip 62, 202
+            // 66 is Question dialog
+            [71 into_branch] each [
+                count(2), // Only allow 2 options
+                switch [
+                    [1] => 201, // 2nd option becomes "I'll pass", Skip 72
+                ],
+            ],
+            [92 into_branch] each [
+                value(200), // Check intermediate price of 200 (advanced is 300)
+            ],
+            // 91 tells how many floors
+            [99] each [
+                value(-200i32 as u32), // Charge intermediate price of 200 (advanced is 300)
+            ],
+            [104] => 108, // Skip 100
+            [98] => 97, // Skip 94
+            [97] => 110, // Skip 95, 112, 153
+            [96] each [
+                value(first_course),
+            ],
+            [102] each [
+                value(first_course),
+            ],
+
+            // --- After Game dialog --- //
+            [19] => 118,
+            [142 into_branch] switch [
+                [0] => 141, // Skip 137
+            ],
+            // 141 is ItemKandelaarLv2
+            [141] => 143, // Skip 146
+            [136 into_branch] switch [
+                [1] => 143, // Skip Super Net stuff
+            ],
+            [140] => 143, // Skip Super Net stuff
+            [209 into_start] => 210, // Skip 208
         },
     );
 

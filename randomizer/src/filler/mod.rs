@@ -24,6 +24,7 @@ pub mod logic;
 pub mod path;
 pub mod portals;
 pub mod progress;
+pub(crate) mod tower;
 pub mod util;
 pub mod vanes;
 
@@ -201,12 +202,6 @@ fn preplace_items(
     place_static(check_map, progression, Item::Fairy02, "Lorule Lakeside Item Shop (3)");
     place_static(check_map, progression, Item::Shield04, "Lorule Lakeside Item Shop (4)");
 
-    // Super Items
-    if !settings.super_mode {
-        place_static(check_map, progression, Item::Lamp02, "Treacherous Tower Advanced (1)");
-        place_static(check_map, progression, Item::Net02, "Treacherous Tower Advanced (2)");
-    }
-
     // Nice Mode
     if !&settings.nice_mode {
         place_static(check_map, progression, Item::Bow02, "Maiamai Bow Upgrade");
@@ -311,12 +306,6 @@ fn handle_exclusions(
 ) {
     settings.exclusions.insert("100 Maiamai".to_string());
 
-    // Super Items
-    if settings.super_mode {
-        settings.exclusions.insert("Treacherous Tower Advanced (1)".to_string());
-        settings.exclusions.insert("Treacherous Tower Advanced (2)".to_string());
-    }
-
     // Exclude Minigames
     if settings.minigames_excluded {
         settings.exclusions.insert("Dodge the Cuccos".to_string());
@@ -325,7 +314,7 @@ fn handle_exclusions(
         settings.exclusions.insert("Rupee Rush (Hyrule)".to_string());
         settings.exclusions.insert("Rupee Rush (Lorule)".to_string());
         settings.exclusions.insert("Octoball Derby".to_string());
-        settings.exclusions.insert("Treacherous Tower Intermediate".to_string());
+        settings.exclusions.insert("Treacherous Tower".to_string());
 
         // For Maiamai Madness, also turn the rupee rush maiamai into random junk
         if settings.maiamai_madness {
@@ -660,32 +649,13 @@ fn verify_all_locations_accessible(
     const STANDARD_CHECKS: usize = 265;
     const MAIAMAI: usize = 100;
     const DUNGEON_PRIZES: usize = 10;
-
-    // 20 Statically Placed Items:
-    // - 12x Shop Items (not including 9,999 items)
-    // - 3x Obscure Gold/Silver Rupees
-    // - Mysterious Man
-    // - Bouldering Guy Bottle
-    // - TODO: Premium Milk
-    // - TODO: Hyrule Hotfoot Second Race
-    // - TODO: Fortune's Choice
     const STATIC_ITEMS: usize = 20;
-
-    /**
-     * 4 Out-of-Logic checks NOT included:
-     * - 2 Golden Bees for 9,999 Rupees
-     * - 2 Treacherous Tower Advanced
-     */
-    const IN_LOGIC_CHECKS: usize = STANDARD_CHECKS + MAIAMAI + DUNGEON_PRIZES + STATIC_ITEMS;
-
-    /// "Progression Events" (non-item checks that are still progression)
-    const PROGRESSION_EVENTS: usize = 36;
-
-    /// Weather Vanes
+    const PROGRESSION_EVENTS: usize = 36; // "Progression Events" (non-item checks that are still progression)
     const WEATHER_VANES: usize = 22;
+    const HINT_GHOSTS_OW: usize = 58; // Hint Ghosts (Overworld)
 
-    /// Hint Ghosts (Overworld)
-    const HINT_GHOSTS_OW: usize = 58;
+    // (2 Golden Bees for 9,999 Rupees NOT included)
+    const IN_LOGIC_CHECKS: usize = STANDARD_CHECKS + MAIAMAI + DUNGEON_PRIZES + STATIC_ITEMS;
 
     /// Total count of expected, reachable checks
     const EXPECTED_REACHABLE: usize = IN_LOGIC_CHECKS + PROGRESSION_EVENTS + WEATHER_VANES + HINT_GHOSTS_OW;

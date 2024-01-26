@@ -31,6 +31,15 @@ pub(crate) fn get_item_pools(rng: &mut StdRng, SeedInfo { settings, .. }: &SeedI
     // Choose either Letter in a Bottle or Premium Milk to include in the seed
     progression_items.push(choose_trade_item(rng));
 
+    // Super Mode replaces two pieces of junk with an extra Lamp and Net
+    if settings.super_mode {
+        junk_pool.remove(rng.gen_range(0..junk_pool.len()));
+        junk_pool.remove(rng.gen_range(0..junk_pool.len()));
+
+        progression_items.push(Lamp02);
+        progression_items.push(Net02);
+    }
+
     // Remove the Bee Badge from Hell Logic to keep Bee Boosting viable
     match settings.logic_mode {
         LogicMode::Hell => junk_pool.push(Empty),
@@ -71,12 +80,12 @@ fn choose_trade_item(rng: &mut StdRng) -> Item {
 
 fn get_base_progression_pool() -> Vec<Item> {
     let mut progression_pool = vec![
-        GreatSpin, Lamp01, Lamp02, Bow01, Bow02, Boomerang01, Boomerang02, Hookshot01, Hookshot02, Hammer01, Hammer02,
-        Bombs01, Bombs02, FireRod01, FireRod02, IceRod01, IceRod02, TornadoRod01, TornadoRod02, SandRod01, SandRod02,
-        Net01, Net02, HintGlasses, Bottle01, Bottle02, Bottle03, Bottle04, RaviosBracelet01, RaviosBracelet02, Bell,
-        StaminaScroll, PegasusBoots, Flippers, HylianShield, SmoothGem, Pouch, Glove01, Glove02, Mail01, Mail02,
-        OreYellow, OreGreen, OreBlue, OreRed, ScootFruit01, ScootFruit02, FoulFruit01, FoulFruit02, Shield01, Shield02,
-        Shield03, Shield04, GoldBee01, Charm,
+        GreatSpin, Lamp01, Bow01, Bow02, Boomerang01, Boomerang02, Hookshot01, Hookshot02, Hammer01, Hammer02, Bombs01,
+        Bombs02, FireRod01, FireRod02, IceRod01, IceRod02, TornadoRod01, TornadoRod02, SandRod01, SandRod02, Net01,
+        HintGlasses, Bottle01, Bottle02, Bottle03, Bottle04, RaviosBracelet01, RaviosBracelet02, Bell, StaminaScroll,
+        PegasusBoots, Flippers, HylianShield, SmoothGem, Pouch, Glove01, Glove02, Mail01, Mail02, OreYellow, OreGreen,
+        OreBlue, OreRed, ScootFruit01, ScootFruit02, FoulFruit01, FoulFruit02, Shield01, Shield02, Shield03, Shield04,
+        GoldBee01, Charm,
     ];
 
     progression_pool.extend(get_health_pool());

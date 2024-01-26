@@ -39,6 +39,11 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
   - RSE Nerfs:
     - Impa no longer locks Hyrule Castle's front door.
     - The Shady Guy Event (and its 2 related checks) are no longer locked by Oren.
+  - Ice Ruins:
+    - A non-missable copy of the missable torch that opens the door on B3 has been added next to the East tongue statue.
+      - This is a QoL change made to address a randomizer-only problem where the 3rd Small Key Door is opened earlier than the vanilla game intends.
+      - This prevents players from needing to fall carefully to avoid the wind current.
+      - This has no impact on logic.
   - Inside Hyrule Castle
     - No longer requires the Pendant of Courage (either) to enter, just Master Sword (and Impa if playing on RSE).
     - The state of the Trials Door in Hilda's Study will now match the same in the Lorule Castle dungeon.
@@ -48,11 +53,9 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
   - Thieves' Hideout Big Key Chest:
     - After defeating Stalblind the shield device used to reach the chest will activate automatically.
     - Previously Thief Girl had been rigged to stick around to address this issue. That solution has been replaced by this one.
-  - Ice Ruins:
-    - A non-missable copy of the missable torch that opens the door on B3 has been added next to the East tongue statue.
-      - This is a QoL change made to address a randomizer-only problem where the 3rd Small Key Door is opened earlier than the vanilla game intends.
-      - This prevents players from needing to fall carefully to avoid the wind current.
-      - This has no impact on logic.
+  - Treacherous Tower:
+    - Reworked into a single check given by a single mode with a random selection of floors from all difficulties.
+    - Can choose how many floors the tower has (2-68).
 - Logic Changes:
   - Normal:
     - Knucklemaster, Zaganaga, and Yuga Ganon each now logically require the Master Sword to defeat
