@@ -54,7 +54,7 @@ impl Logic {
     }
 
     pub fn hell(&mut self, logic: fn(&Progress) -> bool) -> &mut Self {
-        self.normal = logic.into();
+        self.hell = logic.into();
         self
     }
 
