@@ -20,6 +20,7 @@ pub type Pool = Vec<Item>;
  */
 pub(crate) fn get_item_pools(rng: &mut StdRng, SeedInfo { settings, .. }: &SeedInfo) -> (Pool, Pool) {
     let mut progression_items = get_base_progression_pool();
+    let minor_progression = get_minor_progression_pool();
     let dungeon_prizes = get_dungeon_prize_pool();
     let big_keys = get_big_key_pool(settings);
     let small_keys = get_small_key_pool(settings);
@@ -42,20 +43,34 @@ pub(crate) fn get_item_pools(rng: &mut StdRng, SeedInfo { settings, .. }: &SeedI
 
     // Remove the Bee Badge from Hell Logic to keep Bee Boosting viable
     match settings.logic_mode {
-        LogicMode::Hell => junk_pool.push(Empty),
+        LogicMode::Hell => add_random_junk_item(rng, &mut junk_pool),
         _ => progression_items.push(BeeBadge),
     };
 
     // Swordless Mode
     if settings.swordless_mode {
-        junk_pool.extend_from_slice(&[Empty, Empty, Empty, Empty]);
+        add_random_junk_item(rng, &mut junk_pool);
+        add_random_junk_item(rng, &mut junk_pool);
+        add_random_junk_item(rng, &mut junk_pool);
+        add_random_junk_item(rng, &mut junk_pool);
     } else {
         progression_items.extend_from_slice(&[Sword01, Sword02, Sword03, Sword04]);
     }
 
+    let junk_pool = shuffle(rng, junk_pool);
     (
-        shuffle_order_progression_pools(rng, vec![dungeon_prizes, big_keys, small_keys, compasses, progression_items]),
-        shuffle(rng, junk_pool),
+        shuffle_order_progression_pools(
+            rng,
+            vec![
+                dungeon_prizes,
+                big_keys,
+                small_keys,
+                compasses,
+                progression_items,
+                minor_progression
+            ],
+        ),
+        junk_pool,
     )
 }
 
@@ -65,7 +80,8 @@ pub(crate) fn get_item_pools(rng: &mut StdRng, SeedInfo { settings, .. }: &SeedI
  * - Big Keys
  * - Small Keys
  * - Compasses
- * - All other progression
+ * - Progression
+ * - Minor progression
  */
 fn shuffle_order_progression_pools(rng: &mut StdRng, pools: Vec<Vec<Item>>) -> Pool {
     pools.iter().flat_map(|pool| shuffle(rng, pool.to_vec())).collect::<Pool>()
@@ -79,7 +95,7 @@ fn choose_trade_item(rng: &mut StdRng) -> Item {
 }
 
 fn get_base_progression_pool() -> Vec<Item> {
-    let mut progression_pool = vec![
+    let progression_pool = vec![
         GreatSpin, Lamp01, Bow01, Bow02, Boomerang01, Boomerang02, Hookshot01, Hookshot02, Hammer01, Hammer02, Bombs01,
         Bombs02, FireRod01, FireRod02, IceRod01, IceRod02, TornadoRod01, TornadoRod02, SandRod01, SandRod02, Net01,
         HintGlasses, Bottle01, Bottle02, Bottle03, Bottle04, RaviosBracelet01, RaviosBracelet02, Bell, StaminaScroll,
@@ -88,12 +104,19 @@ fn get_base_progression_pool() -> Vec<Item> {
         GoldBee01, Charm,
     ];
 
-    progression_pool.extend(get_health_pool());
-    progression_pool.extend(get_gold_rupee_pool());
-    progression_pool.extend(get_silver_rupee_pool());
-    progression_pool.extend(get_purple_rupee_pool());
-    progression_pool.extend(get_maiamai_pool());
     progression_pool
+}
+
+fn get_minor_progression_pool() -> Vec<Item> {
+    let mut minor_progression_pool = vec![];
+
+    minor_progression_pool.extend(get_health_pool());
+    minor_progression_pool.extend(get_gold_rupee_pool());
+    minor_progression_pool.extend(get_silver_rupee_pool());
+    minor_progression_pool.extend(get_purple_rupee_pool());
+    minor_progression_pool.extend(get_maiamai_pool());
+
+    minor_progression_pool
 }
 
 fn get_dungeon_prize_pool() -> Vec<Item> {
@@ -243,23 +266,16 @@ fn get_base_junk_pool(rng: &mut StdRng) -> Vec<Item> {
     junk.extend(repeat(MonsterHorn).take(HORNS));
     junk.extend(repeat(MonsterGuts).take(GUTS));
 
-    junk.extend(get_extra_item_pool(rng, EXTRAS));
+    add_random_junk_item(rng, &mut junk); // replaces Captain's Sword
+    add_random_junk_item(rng, &mut junk); // replaces Bouldering Guy Extra
+    add_random_junk_item(rng, &mut junk); // replaces FIXME
 
     junk
 }
 
-/// Randomly chooses Extra Items to be added to the junk pool to have enough total items to match the total number of
-/// checks in the game. Ideally we wouldn't need this at all, but technical constraints and game design decisions exist.
-fn get_extra_item_pool(rng: &mut StdRng, num_extra: usize) -> Vec<Item> {
+fn add_random_junk_item(rng: &mut StdRng, junk_pool: &mut Vec<Item>) {
     const POSSIBLE_EXTRA_ITEMS: [Item; 3] = [MonsterTail, MonsterHorn, MonsterGuts];
-
-    let mut extras = Vec::with_capacity(num_extra);
-    for _ in 0..num_extra {
-        let index = rng.gen_range(0..POSSIBLE_EXTRA_ITEMS.len());
-        extras.push(POSSIBLE_EXTRA_ITEMS[index]);
-    }
-
-    extras
+    junk_pool.push(POSSIBLE_EXTRA_ITEMS[rng.gen_range(0..POSSIBLE_EXTRA_ITEMS.len())]);
 }
 
 pub(crate) fn get_maiamai_pool() -> Vec<Item> {
