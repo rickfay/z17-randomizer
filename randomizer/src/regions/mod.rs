@@ -87,7 +87,6 @@ pub mod hyrule {
 }
 pub mod lorule {
     pub const WORLD: super::World = super::World::Lorule;
-    pub mod chamber;
     pub mod dark;
     pub mod death;
     pub mod field;
@@ -126,7 +125,6 @@ pub(crate) fn patch(patcher: &mut Patcher, seed_info: &SeedInfo) -> crate::Resul
     hyrule::southern::patch(patcher, seed_info)?;
     hyrule::zora::patch(patcher, seed_info)?;
 
-    lorule::chamber::patch(patcher, seed_info)?;
     lorule::dark::patch(patcher, seed_info)?;
     lorule::death::patch(patcher, seed_info)?;
     lorule::field::patch(patcher, seed_info)?;

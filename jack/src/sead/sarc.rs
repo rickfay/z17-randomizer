@@ -22,8 +22,7 @@ impl Sarc {
     /// Adds a new file to this [`Sarc`] Archive
     /// The `named` field determines whether the file's actual name will be stored in the archive's SFNT Filename Table.
     /// This can usually be set to false safely, but a small number of files do need this to deal with Hash collisions.
-    #[allow(unused)]
-    pub(crate) fn create(&mut self, filename: &str, data: Vec<u8>, named: bool) {
+    pub fn create(&mut self, filename: &str, data: Vec<u8>, named: bool) {
         if self.read(filename).is_some() {
             fail!("File '{}' with matching Hash already exists in SZS Archive: '{}'", filename, self.path);
         }
@@ -35,8 +34,7 @@ impl Sarc {
     }
 
     /// Gets a file with the given `filename` from within this [`Sarc`] Archive. Panics if the file does not exist.
-    #[allow(unused)]
-    pub(crate) fn read(&self, filename: &str) -> Option<Vec<u8>> {
+    pub fn read(&self, filename: &str) -> Option<Vec<u8>> {
         if let Some(files) = self.files.get(&self.calculate_hash(filename)) {
             if files.len() == 1 {
                 Some(files.get(0).unwrap().data.clone())
@@ -64,8 +62,7 @@ impl Sarc {
     }
 
     /// Updates a file within this [`Sarc`] Archive
-    #[allow(unused)]
-    pub(crate) fn update(&mut self, filename: &str, data: Vec<u8>) {
+    pub fn update(&mut self, filename: &str, data: Vec<u8>) {
         if let Some(files) = self.files.get_mut(&self.calculate_hash(filename)) {
             if files.len() == 1 {
                 files.get_mut(0).unwrap().data = data;
@@ -88,8 +85,7 @@ impl Sarc {
     }
 
     /// Deletes a file with the given `filename` from within this [`Sarc`] Archive. Panics if the file does not exist.
-    #[allow(unused)]
-    pub(crate) fn delete(&mut self, filename: &str) {
+    pub fn delete(&mut self, filename: &str) {
         let filename_hash = self.calculate_hash(filename);
         if let Some(files) = self.files.get_mut(&filename_hash) {
             if files.len() == 1 {
@@ -186,7 +182,6 @@ impl Sarc {
     }
 
     /// Hash function used to hash filenames
-    #[allow(unused)]
     fn calculate_hash(&self, filename: &str) -> u32 {
         filename.chars().fold(0, |hash, char| hash.wrapping_mul(self.multiplier.clone()) + (char as u32))
     }

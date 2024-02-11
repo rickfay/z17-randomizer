@@ -421,8 +421,10 @@ impl Obj {
     }
 
     /// Generate a new Blue Warp object
-    pub fn blue_warp(activation_flag: Flag, clp: i16, ser: u16, unq: u16, sp: SpawnPoint, translate: Vec3) -> Self {
-        Self::warp(469, 0, activation_flag, clp, Some(ser), unq, sp, translate)
+    pub fn blue_warp(
+        activation_flag: Flag, clp: i16, ser: Option<u16>, unq: u16, sp: SpawnPoint, translate: Vec3,
+    ) -> Self {
+        Self::warp(469, 0, activation_flag, clp, ser, unq, sp, translate)
     }
 
     /// Generate a new Green Warp object

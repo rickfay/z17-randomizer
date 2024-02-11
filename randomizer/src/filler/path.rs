@@ -1,6 +1,6 @@
 use crate::filler::{location::Location, logic::Logic, progress::Progress};
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub struct Path {
     destination: Location,
     logic: Logic,

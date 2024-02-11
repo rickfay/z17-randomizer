@@ -86,8 +86,8 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
                 vec![
                     fast_travel_hyrule(),
                     edge!(DesertPalaceWeatherVane),
-                    edge!(DesertPalace1F),
-                    edge!(DesertPalace2FMiniboss),
+                    edge!(DesertPalace1F, |p| p.hearts(9.0)),
+                    edge!(DesertPalace2FMiniboss, |p| p.hearts(9.0)),
                 ],
             ),
         ),
@@ -193,9 +193,9 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
                 None,
                 vec![
                     fast_travel_hyrule(),
-                    edge!(DesertPalaceExit3F),
-                    portal_left(DesertPalace, portal_map),
-                    portal_right(DesertPalace, portal_map),
+                    edge!(DesertPalaceExit3F, |p| p.hearts(9.0)),
+                    portal_left(DesertPalace, portal_map, false),
+                    portal_right(DesertPalace, portal_map, false),
                 ],
             ),
         ),
@@ -206,10 +206,10 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
                 None,
                 vec![
                     fast_travel_lorule(),
-                    portal_left(Zaganaga, portal_map),
-                    portal_right(Zaganaga, portal_map),
+                    portal_left(Zaganaga, portal_map, false),
+                    portal_right(Zaganaga, portal_map, false),
                     edge!(MiseryMireRewardBasket => {
-                        normal: |p| p.has_sand_rod() && p.has_master_sword(),
+                        normal: |p| p.has_sand_rod() && p.has_master_sword() && p.hearts(9.0),
                         hell: |p| (p.has_sand_rod() && p.can_attack()) || p.has_bow() || p.has_master_sword(),
                     }),
                 ],

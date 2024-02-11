@@ -36,20 +36,17 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                 vec![],
                 vec![
                     edge!(SwampPalaceOutside),
-                    old_path(
-                        SwampPalaceFoyer,
-                        Some(|p| p.has_bomb_flower()),
-                        None,
-                        None,
-                        Some(|p| {
+                    edge!(SwampPalaceFoyer => {
+                        normal: |p| p.has_bomb_flower() && p.hearts(6.0),
+                        adv_glitched: |p| {
                             p.not_nice_mode()
                                 && p.can_merge()
                                 && p.has_ice_rod()
                                 && p.has_flippers()
                                 && (p.has_sword() || p.has_tornado_rod() || p.has_net() || p.has_bombs())
-                        }),
-                        None,
-                    ),
+                                && p.hearts(6.0)
+                        },
+                    }),
                 ],
             ),
         ),

@@ -172,9 +172,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
             SkullWoodsOutdoor3,
             location(
                 "Skull Woods Outdoor Area 3",
-                vec![
-                    check!("Skull Woods Outdoor Chest", regions::dungeons::skull::woods::SUBREGION), // Do not use [SW] prefix
-                ],
+                vec![check!("[SW] Outdoor Chest", regions::dungeons::skull::woods::SUBREGION)],
                 vec![fast_travel_lorule(), edge!(SkullWoodsEastB1SouthFoyer), edge!(SkullWoodsEastB1SouthLedges)],
             ),
         ),

@@ -105,7 +105,7 @@ macro_rules! event_flags {
 
 impl Flag {
     event_flags! {
-        0: ZERO,
+        1: ONE,
         // ...
         251: EASTERN_COMPLETE,
         // ...
@@ -115,7 +115,9 @@ impl Flag {
         // ...
         410: HC_BARRIER,
         // ...
-        510: EARTHQUAKE,
+        420: HC_YUGA_DEFEATED,
+        // ...
+        510: QUAKE,
         // ...
         536: SAGE_GULLEY,
         // ...
@@ -155,13 +157,13 @@ impl Flag {
         817: PORTAL_DESERT_NORTH,
 
         818: PORTAL_DM_WEST_HYRULE,
-        819: PORTAL_FLOATING_ISLAND_HYRULE,
+        819: PORTAL_ROSSOS_ORE_MINE_HYRULE,
         820: PORTAL_RIVER_HYRULE,
         821: PORTAL_LAKE_HYLIA,
         822: PORTAL_HYRULE_HOTFOOT,
         823: PORTAL_SANCTUARY,
         824: PORTAL_GRAVEYARD_LEDGE_HYRULE,
-        825: PORTAL_ROSSOS_ORE_MINE_HYRULE,
+        825: PORTAL_FLOATING_ISLAND_HYRULE,
         826: PORTAL_SWAMP_PILLAR_HYRULE,
         827: PORTAL_ZORAS_DOMAIN,
         // 828: ???,
@@ -185,13 +187,13 @@ impl Flag {
         846: PORTAL_ZAGANAGA_EXIT,
         847: PORTAL_MIRE_NORTH,
         848: PORTAL_DM_WEST_LORULE,
-        849: PORTAL_FLOATING_ISLAND_LORULE,
+        849: PORTAL_ROSSOS_ORE_MINE_LORULE,
         850: PORTAL_RIVER_LORULE,
         851: PORTAL_LORULE_LAKE_WEST,
         852: PORTAL_LORULE_COLDFOOT,
         853: PORTAL_PHILOSOPHERS_CAVE,
         854: PORTAL_GRAVEYARD_LEDGE_LORULE,
-        855: PORTAL_ROSSOS_ORE_MINE_LORULE,
+        855: PORTAL_FLOATING_ISLAND_LORULE,
         856: PORTAL_SWAMP_PILLAR_LORULE,
         857: PORTAL_KUS_DOMAIN,
         // ...

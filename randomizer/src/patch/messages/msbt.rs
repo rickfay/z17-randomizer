@@ -32,10 +32,17 @@ impl MsbtFile {
     }
 
     /// Looks up the message specified by `label` and sets it to `value`
-    /// Appends a null terminator `\0` to the end of value.
+    /// Automatically appends a null terminator `\0` to the end of value.
     pub(crate) fn set(&mut self, label: &str, value: &str) {
         if let Some(item_index) = self.get_item_index(label) {
             let _ = std::mem::replace(&mut self.txt2.messages[item_index], format!("{}\0", value));
+        }
+    }
+
+    /// Clears the the message specified by `label`, setting it to an empty string.
+    pub(crate) fn clear(&mut self, label: &str) {
+        if let Some(item_index) = self.get_item_index(label) {
+            let _ = std::mem::replace(&mut self.txt2.messages[item_index], String::from("\0"));
         }
     }
 

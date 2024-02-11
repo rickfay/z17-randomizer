@@ -1,7 +1,9 @@
 use log::info;
 use modinfo::settings::keysy::Keysy;
 use modinfo::settings::portal_shuffle::PortalShuffle;
+use modinfo::settings::portals::Portals;
 use modinfo::settings::ravios_shop::RaviosShop;
+use modinfo::settings::trials_door::TrialsDoor;
 use modinfo::settings::weather_vanes::WeatherVanes;
 use modinfo::settings::{logic::LogicMode, pedestal::PedestalSetting, Settings};
 use std::{
@@ -53,16 +55,6 @@ pub fn get_seed_settings() -> Result<Settings, String> {
         "This shuffles a second progressive copy of the Lamp and Net into the general item pool.",
     );
 
-    let reverse_sage_events = prompt_bool(
-        "Reverse Sage Events",
-        "Ties Sage-related checks and events to actually rescuing that Sage.\n\
-        Makes the following changes:\n\
-        - Irene => Unlocks the Irene check (instead of Pendant of Courage)\n\
-        - Rosso => Unlocks Rosso's House and his two checks (instead of Pendant of Courage)\n\
-        - Oren  => Unlocks the Smooth Gem check and the Shady Guy Event\n\
-        - Impa  => Unlocks the front door to Hyrule Castle",
-    );
-
     let no_progression_enemies = prompt_bool(
         "No Progression Enemies",
         "Removes Enemies from dungeons that are themselves Progression (e.g.: Bawbs, the bomb enemy).\n\
@@ -96,6 +88,15 @@ pub fn get_seed_settings() -> Result<Settings, String> {
     let maiamai_madness =
         prompt_bool("Maiamai Madness", "This shuffles Maiamai into the pool, adding 100 more locations.");
 
+    let portals = Portals::try_from(prompt_u8_in_range(
+        "Portals",
+        "Choose the initial Portal state:\n\
+        [0] Closed - All Portals except the Hyrule Castle Portal (and its pair) remain closed until the Quake Item is found.\n\
+        [1] Open   - All Portals are open from the start of the game, and the Quake Item is not in the item pool.",
+        0,
+        1,
+    ))?;
+
     let portal_shuffle = PortalShuffle::try_from(prompt_u8_in_range(
         "Portal Shuffle",
         "Choose how to shuffle Portals:\n\
@@ -119,14 +120,24 @@ pub fn get_seed_settings() -> Result<Settings, String> {
         (Does not affect Lorule Castle Bomb Trial)",
     );
 
-    let skip_trials = prompt_bool("Skip Trials", "Automatically opens the Lorule Castle Trials door.");
+    let trials_door = TrialsDoor::try_from(prompt_u8_in_range(
+        "Trial's Door",
+        "Choose the behavior of the Lorule Castle Trial's Door:\n\
+        [0] OFF - Trial's Door removed. (WARNING: May require entering LC via its Portal.)\n\
+        [1] Trial  Required, randomly selected.\n\
+        [2] Trials Required, randomly selected.\n\
+        [3] Trials Required, randomly selected.\n\
+        [4] Trials Required",
+        0,
+        4,
+    ))?;
 
-    let progressive_bow_of_light = prompt_bool(
-        "Progressive Bow of Light",
-        "Replaces the Bow of Light with a third copy of the Bow. Obtaining all 3 Bows will reward the Bow of Light.\n\
-        Note 1: There will *NOT* be a Bow of Light Hint in Hilda's Study if this is enabled.\n\
-        Note 2: This option is incompatible with the option to force Bow of Light in Lorule Castle.",
-    );
+    // let progressive_bow_of_light = prompt_bool(
+    //     "Progressive Bow of Light",
+    //     "Replaces the Bow of Light with a third copy of the Bow. Obtaining all 3 Bows will reward the Bow of Light.\n\
+    //     Note 1: There will *NOT* be a Bow of Light Hint in Hilda's Study if this is enabled.\n\
+    //     Note 2: This option is incompatible with the option to force Bow of Light in Lorule Castle.",
+    // );
 
     let bow_of_light_in_castle = prompt_bool(
         "Bow of Light in Castle",
@@ -177,17 +188,6 @@ pub fn get_seed_settings() -> Result<Settings, String> {
         Note: Some large chests will have a reduced hitbox to prevent negative gameplay interference.",
     );
 
-    let hint_ghost_price = prompt_u16_in_range(
-        "Hint Ghost Price",
-        "Set the price of Hints from a Hint Ghost:\nRecommended Price: 30",
-        0,
-        9999,
-    );
-
-    if hint_ghost_price == 69 {
-        print!("\nNice.\n");
-    }
-
     let treacherous_tower_floors = prompt_u16_in_range(
         "Treacherous Tower Floors",
         "How many floors should Treacherous Tower have? (2-68)\nRecommended: 5",
@@ -211,24 +211,25 @@ pub fn get_seed_settings() -> Result<Settings, String> {
 
     Ok(Settings {
         dev_mode: false,
-        exclusions: Default::default(),
+        user_exclusions: Default::default(),
         lc_requirement,
         yuganon_requirement: lc_requirement,
         ped_requirement,
         logic_mode,
-        reverse_sage_events,
         dark_rooms_lampless,
         dungeon_prize_shuffle,
         maiamai_madness,
         nice_mode,
         super_mode,
+        portals,
         portal_shuffle,
+        trials_door,
         weather_vanes,
         ravios_shop,
         bow_of_light_in_castle,
         no_progression_enemies,
         keysy,
-        progressive_bow_of_light,
+        progressive_bow_of_light: false,
         swordless_mode,
         start_with_merge,
         start_with_pouch,
@@ -239,8 +240,6 @@ pub fn get_seed_settings() -> Result<Settings, String> {
         chest_size_matches_contents,
         minigames_excluded,
         skip_big_bomb_flower,
-        skip_trials,
-        hint_ghost_price,
         treacherous_tower_floors,
         night_mode: false,
     })

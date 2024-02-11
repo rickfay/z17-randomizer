@@ -7,7 +7,7 @@ use rand::rngs::StdRng;
 use rand::seq::SliceRandom;
 
 /// Choose which floors of Treacherous Tower to use
-pub fn choose_tower_floors(settings: &Settings, rng: &mut StdRng) -> Result<Vec<TowerStage>> {
+pub fn choose_floors(settings: &Settings, rng: &mut StdRng) -> Result<Vec<TowerStage>> {
     let mut chosen_floors = Vec::with_capacity(settings.treacherous_tower_floors);
 
     if settings.treacherous_tower_floors < 2 {

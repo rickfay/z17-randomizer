@@ -2,7 +2,7 @@ use crate::Course;
 use crate::Course::{EnemyAttackL, EnemyAttackM, EnemyAttackS};
 use serde::{Serialize, Serializer};
 
-#[derive(PartialEq, Eq, PartialOrd, Ord, Copy, Clone)]
+#[derive(PartialEq, Eq, PartialOrd, Ord, Copy, Clone, Debug)]
 pub struct TowerStage {
     pub course: Course,
     pub stage: usize,

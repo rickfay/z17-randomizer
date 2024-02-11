@@ -138,7 +138,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                 vec![
                     check!("[TR] Left Balcony", regions::dungeons::turtle::rock::SUBREGION), // Do not use [TR] prefix
                 ],
-                vec![fast_travel_lorule(), edge!(TurtleRockLeftBalconyPath)],
+                vec![fast_travel_lorule(), edge!(TurtleRockLeftBalconyPath, |p| p.hearts(9.0))],
             ),
         ),
         (
@@ -157,7 +157,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
             location(
                 "Turtle Rock Right Balcony",
                 vec![],
-                vec![fast_travel_lorule(), edge!(TurtleRockRightBalconyPath)],
+                vec![fast_travel_lorule(), edge!(TurtleRockRightBalconyPath, |p| p.hearts(9.0))],
             ),
         ),
         (

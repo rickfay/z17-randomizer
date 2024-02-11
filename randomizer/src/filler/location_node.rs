@@ -1,7 +1,7 @@
 use crate::filler::check::Check;
 use crate::filler::path::Path;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct LocationNode {
     checks: Option<Vec<Check>>,
     paths: Option<Vec<Path>>,

@@ -155,7 +155,7 @@ impl Rom {
         &mut self.get_item
     }
 
-    pub fn dump_get_items(&mut self) -> File<Vec<GetItem>> {
+    pub fn dump_get_items(&self) -> File<Vec<GetItem>> {
         self.get_item.clone()
     }
 

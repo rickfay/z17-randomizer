@@ -1,7 +1,7 @@
 use super::DungeonPrizes;
 use crate::filler::filler_item;
-use crate::filler::filler_item::FillerItem;
-use crate::filler::filler_item::FillerItem::Item;
+use crate::filler::filler_item::Randomizable;
+use crate::filler::filler_item::Randomizable::Item;
 use crate::{regions, Layout, LocationInfo};
 use macros::fail;
 use rom::flag::Flag;
@@ -77,15 +77,15 @@ pub(crate) fn remove_collision(unq: u16) -> (u16, Box<dyn Fn(&mut Obj)>) {
     (unq, Box::new(|obj: &mut Obj| obj.srt.scale = Vec3::ZERO))
 }
 
-pub fn is_sage(item: FillerItem) -> bool {
+pub fn is_sage(item: Randomizable) -> bool {
     use filler_item::Item::*;
     match item {
-        FillerItem::Item(SageGulley | SageOren | SageSeres | SageOsfala | SageImpa | SageIrene | SageRosso) => true,
+        Item(SageGulley | SageOren | SageSeres | SageOsfala | SageImpa | SageIrene | SageRosso) => true,
         _ => false,
     }
 }
 
-pub(crate) fn is_pendant(item: FillerItem) -> bool {
+pub(crate) fn is_pendant(item: Randomizable) -> bool {
     use filler_item::Item::*;
     match item {
         Item(PendantOfPower | PendantOfWisdom | PendantOfCourage) => true,
@@ -93,7 +93,7 @@ pub(crate) fn is_pendant(item: FillerItem) -> bool {
     }
 }
 
-pub(crate) fn prize_flag(prize: FillerItem) -> Flag {
+pub(crate) fn prize_flag(prize: Randomizable) -> Flag {
     use filler_item::Item::*;
     match prize {
         Item(PendantOfCourage) => Flag::EASTERN_COMPLETE,

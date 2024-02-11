@@ -1,22 +1,24 @@
+use crate::SeedInfo;
 use game::Course::*;
 use log::info;
 use modinfo::settings::portal_shuffle::PortalShuffle;
+use modinfo::settings::portals::Portals;
+use modinfo::settings::trials_door::TrialsDoor;
 use modinfo::settings::weather_vanes::WeatherVanes::*;
-use modinfo::Settings;
 use rom::flag::Flag;
 use rom::scene::SpawnPoint;
 use rom::{Demo, File};
 
 /// Cutscene file recreation.
 /// Files are not read from the ROM but instead created from scratch given their (mostly) short lengths.
-pub(crate) fn build_replacement_cutscenes(settings: &Settings) -> crate::Result<Vec<File<Demo>>> {
+pub(crate) fn build_replacement_cutscenes(seed_info: &SeedInfo) -> crate::Result<Vec<File<Demo>>> {
     info!("Building Replacement Cutscenes...");
 
     const INITIAL_SPAWN: SpawnPoint = SpawnPoint { course: IndoorLight, scene: 1, spawn: 2 };
 
     // Demo1 - Link's Nightmare cutscene (goes to Link's House 0)
     let mut demo1 = Demo::new();
-    get_initial_flags_to_set(settings).iter().for_each(|&flag| demo1.set_event_flag(0, flag));
+    get_initial_flags_to_set(seed_info).iter().for_each(|&flag| demo1.set_event_flag(0, flag));
     demo1.finish(0, INITIAL_SPAWN);
 
     // Demo2 - Sanctuary cutscene (goes to Link's House 2)
@@ -76,7 +78,7 @@ pub(crate) fn build_replacement_cutscenes(settings: &Settings) -> crate::Result<
     Ok(demo_files)
 }
 
-fn get_initial_flags_to_set(settings: &Settings) -> Vec<u16> {
+fn get_initial_flags_to_set(SeedInfo { trials_config, settings, .. }: &SeedInfo) -> Vec<u16> {
     let mut flags = vec![
         1, 7, 9, 10,  // Skip Gulley in prologue
         11,  // Fix Hyrule lighting, skip Gulley dialogue at Blacksmith
@@ -103,7 +105,8 @@ fn get_initial_flags_to_set(settings: &Settings) -> Vec<u16> {
         321, 322, // Skip first Oren cutscenes
         374, // Fix Post-Gales and Post-Hera music by marking Sahasrahla telepathy as seen
         415, // Skip Yuga capturing Zelda
-        510, // Open Portals, Activate Hyrule Castle Midway
+        410, // FIXME DONT LEAVE ON
+        420, // FIXME DONT LEAVE ON
         522, // Blacksmith Hilda Text, enable Map Swap icon, skip introductory Lorule music
         524, 560, 600, 620, 640, // Skip Hilda Text, enable Lorule overworld music
         525, // Skip Sahasrahla outside Link's House, make Hyrule Hotfoot appear
@@ -130,6 +133,11 @@ fn get_initial_flags_to_set(settings: &Settings) -> Vec<u16> {
         960, // Blacksmith's Wife
         965, // Suppress Energy Potion
     ];
+
+    // Portals Open/Closed + Quake
+    if settings.portals == Portals::Open {
+        flags.push(510);
+    }
 
     // Ravio's Shop Open/Closed
     if settings.ravios_shop == modinfo::settings::ravios_shop::RaviosShop::Open {
@@ -165,17 +173,36 @@ fn get_initial_flags_to_set(settings: &Settings) -> Vec<u16> {
         flags.push(410);
     }
 
-    // Trials Skip
-    //
-    // Set flags to auto-complete the trials, advance LC music.
-    //
-    // Flag 713 is intentionally not set so that when the door is first encountered it will fill in the bottom right
-    // square and open the door. The scene will play in either the dungeon or Hilda's Study, whichever the player
-    // encounters first. Flag 421 is repurposed to keep the two doors' states synchronized.
-    if settings.skip_trials {
-        for flag in IntoIterator::into_iter([710, 711, 712, /*713,*/ 714, 715, 716, 717]) {
-            flags.push(flag);
-        }
+    // Trial's Door
+    match settings.trials_door {
+        TrialsDoor::Off => {
+            // Set flags to auto-complete the trials, open the trials door, defeat minibosses, and advance LC music.
+            //
+            // Flag 713 is intentionally not set so that when the door is first encountered it will fill in the bottom
+            // right square and open the door. The scene will play in either the dungeon or Hilda's Study, whichever
+            // the player encounters first.
+            //
+            // Do NOT try to shortcut this and just remove the door. We *NEED* that cutscene to play in Hilda's Study
+            // situationally to draw attention to the fact that there's a path there.
+            flags.extend(vec![710, 711, 712, /*713,*/ 714, 715, 716, 717]);
+        },
+        TrialsDoor::OneTrialRequired | TrialsDoor::TwoTrialsRequired | TrialsDoor::ThreeTrialsRequired => {
+            if !trials_config.hook_trial {
+                flags.extend(vec![710, 711]);
+            }
+            if !trials_config.tile_trial {
+                flags.extend(vec![712, 713]);
+            }
+            if !trials_config.lamp_trial {
+                flags.extend(vec![714, 715]);
+            }
+            if !trials_config.bomb_trial {
+                flags.extend(vec![716, 717]);
+            }
+        },
+        TrialsDoor::AllTrialsRequired => {
+            // vanilla behavior
+        },
     }
 
     // Big Bomb Flower Skip

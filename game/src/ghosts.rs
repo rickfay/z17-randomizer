@@ -1,6 +1,7 @@
+use serde::Serialize;
 use strum::EnumIter;
 
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, EnumIter)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, EnumIter, Serialize)]
 pub enum HintGhost {
     // Hyrule Overworld Hint Ghosts (36) -----------------------------------------------------------
     LostWoodsMaze1,

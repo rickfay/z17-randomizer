@@ -1,6 +1,9 @@
 use crate::filler::check::Check;
+use crate::filler::filler_item::{Goal, Item, Randomizable, Vane};
+use crate::filler::portals::Portal;
 use crate::filler::progress::Progress;
 use crate::{filler, CheckMap, SeedInfo};
+use game::ghosts::HintGhost;
 use log::info;
 use rom::Error;
 use serde::Serialize;
@@ -17,13 +20,69 @@ pub fn calculate_metrics(seed_info: &mut SeedInfo, check_map: &mut CheckMap) -> 
     Ok(())
 }
 
+#[derive(Debug, Clone, Serialize)]
+pub struct Sphere {
+    #[serde(skip_serializing_if = "BTreeMap::is_empty")]
+    items: BTreeMap<String, Item>,
+
+    #[serde(skip_serializing_if = "BTreeMap::is_empty")]
+    ghosts: BTreeMap<String, HintGhost>,
+
+    #[serde(skip_serializing_if = "BTreeMap::is_empty")]
+    goals: BTreeMap<String, Goal>,
+
+    #[serde(skip_serializing_if = "BTreeMap::is_empty")]
+    portals: BTreeMap<String, Portal>,
+
+    #[serde(skip_serializing_if = "BTreeMap::is_empty")]
+    weather_vanes: BTreeMap<String, Vane>,
+}
+
+impl Sphere {
+    fn new() -> Self {
+        Self {
+            items: Default::default(),
+            ghosts: Default::default(),
+            goals: Default::default(),
+            portals: Default::default(),
+            weather_vanes: Default::default(),
+        }
+    }
+
+    fn add(&mut self, check_name: &str, item: Randomizable) {
+        match item {
+            Randomizable::Item(item) => {
+                self.items.insert(String::from(check_name), item);
+            },
+            Randomizable::Goal(goal) => {
+                self.goals.insert(String::from(check_name), goal);
+            },
+            Randomizable::HintGhost(ghost) => {
+                self.ghosts.insert(String::from(check_name), ghost);
+            },
+            Randomizable::Vane(vane) => {
+                self.weather_vanes.insert(String::from(check_name), vane);
+            },
+            Randomizable::Portal(portal) => {
+                self.portals.insert(String::from(check_name), portal);
+            },
+        };
+    }
+
+    fn is_empty(&self) -> bool {
+        self.items.is_empty()
+            && self.ghosts.is_empty()
+            && self.goals.is_empty()
+            && self.portals.is_empty()
+            && self.weather_vanes.is_empty()
+    }
+}
+
 /// Sphere Search
-fn sphere_search(
-    seed_info: &mut SeedInfo, check_map: &mut CheckMap,
-) -> BTreeMap<String, BTreeMap<&'static str, &'static str>> {
+fn sphere_search(seed_info: &mut SeedInfo, check_map: &mut CheckMap) -> BTreeMap<String, Sphere> {
     info!("Generating Playthrough...");
 
-    let mut progress = Progress::new(&seed_info.settings);
+    let mut progress = Progress::new(seed_info);
     let mut reachable_checks: Vec<Check>;
     let mut spheres = BTreeMap::new();
     let mut sphere_num = 0;
@@ -42,11 +101,11 @@ fn sphere_search(
             progress.add_item(*new_item);
         }
 
-        let mut sphere = BTreeMap::new();
+        let mut sphere = Sphere::new();
         for reachable_check in reachable_checks {
             let filler_item = check_map.get(reachable_check.get_name()).unwrap().unwrap();
-            if new_items.contains(&filler_item) && filler_item.include_in_sphere_search(&seed_info.settings) {
-                sphere.insert(reachable_check.get_name(), filler_item.as_str());
+            if new_items.contains(&filler_item) && filler_item.include_in_sphere_search() {
+                sphere.add(reachable_check.get_name(), filler_item);
             }
         }
         if sphere.is_empty() {
@@ -66,4 +125,4 @@ pub struct Metrics {
     playthrough: Playthrough,
 }
 
-pub type Playthrough = BTreeMap<String, BTreeMap<&'static str, &'static str>>;
+pub type Playthrough = BTreeMap<String, Sphere>;
