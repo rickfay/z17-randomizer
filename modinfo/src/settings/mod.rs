@@ -2,7 +2,9 @@ use crate::settings::keysy::Keysy;
 use crate::settings::logic::LogicMode;
 use crate::settings::pedestal::PedestalSetting;
 use crate::settings::portal_shuffle::PortalShuffle;
+use crate::settings::portals::Portals;
 use crate::settings::ravios_shop::RaviosShop;
+use crate::settings::trials_door::TrialsDoor;
 use crate::settings::weather_vanes::WeatherVanes;
 use log::info;
 use logic::LogicMode::*;
@@ -14,7 +16,9 @@ pub mod keysy;
 pub mod logic;
 pub mod pedestal;
 pub mod portal_shuffle;
+pub mod portals;
 pub mod ravios_shop;
+pub mod trials_door;
 pub mod weather_vanes;
 
 /// Logic and behavior settings.
@@ -40,10 +44,6 @@ pub struct Settings {
     #[serde(default)]
     pub logic_mode: LogicMode,
 
-    /// Makes Sage related checks and events be tied to rescuing the respective Sage
-    #[serde(default)]
-    pub reverse_sage_events: bool,
-
     /// Dark Room Lamp Requirement. If enabled, the player may have to cross dark rooms without Lamp
     #[serde(default)]
     pub dark_rooms_lampless: bool,
@@ -63,6 +63,9 @@ pub struct Settings {
     /// Shuffle Super Lamp and Super Net
     #[serde(default)]
     pub super_mode: bool,
+
+    /// Portals Open/Closed Setting
+    pub portals: Portals,
 
     /// Shuffles the Portal destinations amongst each other
     #[serde(default)]
@@ -134,13 +137,9 @@ pub struct Settings {
     #[serde(default)]
     pub skip_big_bomb_flower: bool,
 
-    /// Skip Trials Door in Lorule Castle
+    /// Trials Door setting
     #[serde(default)]
-    pub skip_trials: bool,
-
-    /// Price of Hints from Hint Ghosts
-    #[serde(default)]
-    pub hint_ghost_price: u16,
+    pub trials_door: TrialsDoor,
 
     /// Number of floors in Treacherous Tower
     #[serde(default = "five")]
@@ -149,8 +148,8 @@ pub struct Settings {
     /// Experimental: Change Hyrule to the nighttime color scheme (until visiting Lorule)
     pub night_mode: bool,
 
-    /// Set of locations to be excluded from having progression.
-    pub exclusions: BTreeSet<String>,
+    /// Set of user-provided locations to be excluded from having progression.
+    pub user_exclusions: BTreeSet<String>,
 }
 
 impl Settings {
@@ -176,7 +175,6 @@ impl Settings {
 
         info!("Nice Mode:                      {}", if self.nice_mode { "ON" } else { "OFF" });
         info!("Super Items:                    {}", if self.super_mode { "Shuffled" } else { "Not Shuffled" });
-        info!("Reverse Sage Events:            {}", if self.reverse_sage_events { "ON" } else { "OFF" });
         info!("Progression-Granting Enemies:   {}", if self.no_progression_enemies { "Removed" } else { "Vanilla" });
 
         info!("Maiamai:                        {}", if self.maiamai_madness { "Madness" } else { "Not Randomized" });
@@ -197,7 +195,7 @@ impl Settings {
             info!("Starting Shop Items:            {}", shop_items);
         }
         info!("Minigames:                      {}", if self.minigames_excluded { "Excluded" } else { "Included" });
-        info!("Trials:                         {}", if self.skip_trials { "Skipped" } else { "Normal" });
+        info!("Trials Door:                    {}", self.trials_door);
         info!("Bow of Light:                   {}", if self.bow_of_light_in_castle { "Tournament" } else { "Normal" });
         info!("Weather Vanes:                  {}", self.weather_vanes);
         info!(
@@ -211,16 +209,6 @@ impl Settings {
         info!(
             "Chest Size:                     {}",
             if self.chest_size_matches_contents { "Matches Contents" } else { "Normal" }
-        );
-        info!(
-            "Hint Ghost Price:               {}",
-            if self.hint_ghost_price == 0 {
-                "Free".to_owned()
-            } else if self.hint_ghost_price == 1 {
-                format!("{} Rupee", self.hint_ghost_price)
-            } else {
-                format!("{} Rupees", self.hint_ghost_price)
-            }
         );
         info!("Portal Shuffle:                 {}", self.portal_shuffle)
     }

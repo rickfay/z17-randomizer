@@ -1,7 +1,7 @@
 use {
     crate::{
         filler::{logic::Logic, progress::Progress},
-        FillerItem, LocationInfo,
+        LocationInfo, Randomizable,
     },
     std::hash::{Hash, Hasher},
 };
@@ -11,13 +11,13 @@ use {
 pub struct Check {
     name: &'static str,
     logic: Logic,
-    quest: Option<FillerItem>,
+    quest: Option<Randomizable>,
     location_info: Option<LocationInfo>,
 }
 
 impl Check {
     pub fn new(
-        name: &'static str, logic: Logic, quest: Option<FillerItem>, location_info: Option<LocationInfo>,
+        name: &'static str, logic: Logic, quest: Option<Randomizable>, location_info: Option<LocationInfo>,
     ) -> Self {
         Self { name, logic, quest, location_info }
     }
@@ -26,7 +26,7 @@ impl Check {
         self.name
     }
 
-    pub fn get_quest(self) -> Option<FillerItem> {
+    pub fn get_quest(self) -> Option<Randomizable> {
         self.quest
     }
 

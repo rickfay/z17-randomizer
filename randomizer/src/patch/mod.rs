@@ -1,4 +1,4 @@
-use crate::filler::filler_item::{FillerItem, Vane};
+use crate::filler::filler_item::{Randomizable, Vane};
 use crate::filler::portals::Portal;
 use crate::{patch::util::*, Error, PortalMap, Result, SeedInfo};
 use code::Code;
@@ -10,9 +10,11 @@ use game::{
 use log::{debug, error, info};
 use macros::fail;
 use modinfo::settings::portal_shuffle::PortalShuffle;
+use modinfo::settings::portals::Portals;
 use modinfo::settings::weather_vanes::WeatherVanes::*;
 use path_absolutize::*;
 use rom::byaml::scene_env::SceneEnvFile;
+use rom::flag::Flag;
 use rom::scene::{Transform, Vec3};
 use rom::{
     flow::FlowMut,
@@ -24,6 +26,7 @@ use std::{collections::HashMap, fs, path::Path};
 use tempfile::tempdir;
 use try_insert_ext::EntryInsertExt;
 
+mod actors;
 mod byaml;
 mod code;
 mod demo;
@@ -34,16 +37,16 @@ pub mod util;
 
 #[non_exhaustive]
 pub struct DungeonPrizes {
-    ep_prize: FillerItem,
-    hg_prize: FillerItem,
-    th_prize: FillerItem,
-    pd_prize: FillerItem,
-    sp_prize: FillerItem,
-    sw_prize: FillerItem,
-    tt_prize: FillerItem,
-    tr_prize: FillerItem,
-    dp_prize: FillerItem,
-    ir_prize: FillerItem,
+    ep_prize: Randomizable,
+    hg_prize: Randomizable,
+    th_prize: Randomizable,
+    pd_prize: Randomizable,
+    sp_prize: Randomizable,
+    sw_prize: Randomizable,
+    tt_prize: Randomizable,
+    tr_prize: Randomizable,
+    dp_prize: Randomizable,
+    ir_prize: Randomizable,
 }
 
 #[derive(Debug)]
@@ -257,7 +260,7 @@ impl Patcher {
     /// Perform patching operations for each patch, depending on what type it is.
     fn apply<F>(&mut self, patch: Patch, seed_info: &SeedInfo, filler_item: F) -> Result<()>
     where
-        F: Into<Option<FillerItem>> + Clone,
+        F: Into<Option<Randomizable>> + Clone,
     {
         match patch {
             Patch::Chest { course, stage, unq } => {
@@ -328,7 +331,7 @@ impl Patcher {
 
     /// Patch Chest actors and swap their size if needed for CSMC.
     fn prep_chest(
-        &mut self, item: FillerItem, course: CourseId, stage: u16, unq: u16, is_big: bool,
+        &mut self, item: Randomizable, course: CourseId, stage: u16, unq: u16, is_big: bool,
         SeedInfo { settings, .. }: &SeedInfo,
     ) -> Result<()> {
         // Set contents
@@ -365,9 +368,9 @@ impl Patcher {
     /// Portals!
     fn patch_portal(
         &mut self, portal_map: &PortalMap, course: CourseId, scene: u16, unq: u16, here_portal: Portal,
-        SeedInfo { settings, .. }: &SeedInfo,
+        seed_info: &SeedInfo,
     ) -> Result<()> {
-        if settings.portal_shuffle == PortalShuffle::Off {
+        if seed_info.settings.portal_shuffle == PortalShuffle::Off {
             return Ok(());
         }
 
@@ -375,8 +378,6 @@ impl Patcher {
         let there_flag = there_portal.get_flag();
         let there_sp = there_portal.get_spawn_point();
 
-        // let here_arg2 = here_portal.get_arg2_for(there_portal);
-        // let here_arg2 = there_portal.get_vanilla().get_vanilla_type();
         let here_arg2 = if here_portal.get_world() == there_portal.get_world() {
             here_portal.get_reverse_type()
         } else {
@@ -390,12 +391,13 @@ impl Patcher {
             [call(unq, move |obj| {
                 obj.redirect(there_sp);
                 obj.arg.2 = here_arg2;
-                obj.arg.7 = there_flag.get_value();
+                obj.set_active_flag(there_flag);
+                obj.set_inactive_flag(here_portal.get_flag());
             })],
         );
 
-        // Update Curtain flag to match destination Portal Icon Flag
         if here_portal == Portal::HyruleCastle {
+            // Hyrule Castle Portal
             self.modify_objs(
                 IndoorLight,
                 7,
@@ -405,6 +407,14 @@ impl Patcher {
                     set_disable_flag(29, there_flag), // AreaDisableWallIn
                 ],
             );
+        } else if seed_info.settings.portals == Portals::Closed {
+            // Portal paired with Hyrule Castle is always kept open
+            if here_portal == *seed_info.portal_map.get(&Portal::HyruleCastle).unwrap() {
+                self.modify_objs(course, scene, [clear_enable_flag(unq)]);
+            } else {
+                // Lock all Portals (except HC + its pair) behind Flag 510
+                self.modify_objs(course, scene, [set_enable_flag(unq, Flag::QUAKE)]);
+            }
         }
 
         // TODO angle of Portal Blockages can't seem to be changed, no point in this function until the game respects
@@ -555,7 +565,7 @@ impl Patcher {
 
     /// Weather Vanes
     fn patch_weather_vane(
-        &mut self, item: FillerItem, course: CourseId, scene: u16, unq: u16, vane: Vane,
+        &mut self, item: Randomizable, course: CourseId, scene: u16, unq: u16, vane: Vane,
         SeedInfo { settings, .. }: &SeedInfo,
     ) -> Result<()> {
         if settings.weather_vanes != Shuffled {
@@ -563,7 +573,7 @@ impl Patcher {
         }
 
         let wv_flag = match item {
-            FillerItem::Vane(vane) => vane.flag().get_value(),
+            Randomizable::Vane(vane) => vane.flag().get_value(),
             _ => unreachable!(),
         };
 
@@ -599,6 +609,17 @@ impl Patcher {
     }
 
     pub fn prepare(mut self, seed_info: &SeedInfo) -> Result<Patches> {
+        actors::patch(&mut self, seed_info)?;
+        lms::msbf::patch(&mut self, seed_info)?;
+        messages::patch_messages(&mut self, seed_info)?;
+        let prizes = get_dungeon_prizes(&seed_info.layout);
+        prizes::patch_dungeon_prizes(&mut self, &prizes);
+        // byaml::get_item::patch(&mut self)?;
+        byaml::course::patch(&mut self, &prizes, seed_info);
+        byaml::stage::patch(&mut self, seed_info)?;
+        let scene_env_file = byaml::scene_env::patch(&mut self, &seed_info.settings);
+        let cutscenes = demo::build_replacement_cutscenes(seed_info)?;
+
         let common_archive = self.game.common()?;
         let mut item_actors = HashMap::new();
 
@@ -613,46 +634,6 @@ impl Patcher {
                 item_actors.insert(item, actor);
             }
         }
-
-        // Add Warp Tiles to scenes for softlock prevention
-        let warp_tile = self.scene(DungeonHera, 0)?.actors().get_actor_bch("WarpTile")?;
-        self.scene(DungeonWind, 0)?.actors_mut().add(warp_tile.clone())?; // Gales 1F
-        self.scene(FieldDark, 19)?.actors_mut().add(warp_tile.clone())?; // Dark Maze
-        self.scene(DungeonWater, 1)?.actors_mut().add(warp_tile.clone())?; // Swamp Palace B1
-        self.scene(DungeonDokuro, 1)?.actors_mut().add(warp_tile)?; // Skull Woods B2
-
-        // Add Hint Ghost to Hilda's Study to give out Bow of Light Hint
-        if !seed_info.settings.progressive_bow_of_light {
-            let hint_ghost = self.scene(IndoorDark, 15)?.actors().get_actor_bch("HintGhost")?;
-            self.scene(IndoorDark, 4)?.actors_mut().add(hint_ghost)?;
-        }
-
-        // Add Heart Piece actor to vanilla Letter in a Bottle area
-        let heart_piece = self.scene(FieldLight, 29)?.actors().get_actor_bch("HeartPiece")?;
-        self.scene(FieldLight, 35)?.actors_mut().add(heart_piece)?;
-
-        // Debug stuff
-        // let step_switch = self.scene(DungeonDark, 0)?.actors().get_actor_bch("SwitchStep")?;
-        // self.scene(DungeonKame, 2)?.actors_mut().add(step_switch.clone())?; // Turtle Rock Boss
-        // self.scene(DungeonWind, 2)?.actors_mut().add(step_switch.clone())?; // Gales Boss
-        // self.scene(DungeonHera, 0)?.actors_mut().add(step_switch.clone())?; // Hera Boss
-        // self.scene(FieldDark, 30)?.actors_mut().add(step_switch.clone())?; // Desert Boss
-
-        // TODO Bow of Light Fix
-        //self.scene(course::Id::DungeonWater, 2)?.actors_mut().add(fresco_arrow.clone())?;
-        //self.scene(course::Id::IndoorLight, 0)?.actors_mut().add(fresco_arrow.clone())?;
-
-        // just testin'
-        // let sarc = jack::open_szs(&self.game, "Archive/ActorProfile.szs");
-
-        let prizes = get_dungeon_prizes(&seed_info.layout);
-        lms::msbf::patch(&mut self, &seed_info)?;
-        messages::patch_messages(&mut self, seed_info)?;
-        prizes::patch_dungeon_prizes(&mut self, &prizes, &seed_info.settings);
-        byaml::course::patch(&mut self, &prizes, &seed_info.settings);
-        byaml::stage::patch(&mut self, &seed_info)?;
-        let scene_env_file = byaml::scene_env::patch(&mut self, &seed_info.settings);
-        let cutscenes = demo::build_replacement_cutscenes(&seed_info.settings)?;
 
         {
             let Self { ref rentals, ref merchant, ref mut courses, .. } = self;
@@ -740,7 +721,7 @@ pub enum Patch {
 impl Patch {
     pub fn apply<F>(self, patcher: &mut Patcher, seed_info: &SeedInfo, filler_item: F) -> Result<()>
     where
-        F: Into<Option<FillerItem>>,
+        F: Into<Option<Randomizable>>,
     {
         patcher.apply(self, seed_info, filler_item.into())
     }

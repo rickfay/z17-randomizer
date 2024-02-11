@@ -8,7 +8,7 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
 
 ## Updates
 <details open="open">
-<summary>Version 0.4.0</summary>
+<summary>Version 0.4</summary>
 
 - **Portal Shuffle**
   - There are 56 Portals in the game split into 28 pairs--and now they can take you anywhere!
@@ -23,6 +23,10 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
   - Logic updated to no longer require "escape" items such as Scoot Fruit, Bell, Bombs, or Fire Rod.
   - Replaces the "Quit" button on the Pause menu
     - To return to the File Select Screen players can use the built-in soft reset feature by pressing L + R + START down at the same time.
+- Skip Trials is now the Trial's Door Setting 
+  - Select 1-4 LC Trials to randomly turn ON
+  - Or, turn OFF Trials entirely
+    - WARNING: This creates an alternative path into Lorule Castle via its Portal.
 - Keysy
   - Supports options for Small, Big, and All Keysy.
 - Ravio's Shop:

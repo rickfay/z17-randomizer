@@ -1,12 +1,11 @@
-use crate::filler::filler_item::FillerItem;
+use crate::filler::filler_item::Randomizable;
 use crate::{
     patch::{util::*, DungeonPrizes},
-    Patcher,
+    Patcher, SeedInfo,
 };
 use game::Course::{self, *};
 use log::info;
 use modinfo::settings::keysy::Keysy;
-use modinfo::Settings;
 use rom::flag::Flag;
 use rom::scene::{Icn, IcnArgs, StageMeta};
 
@@ -44,21 +43,22 @@ impl Icon {
     pub const PORTAL: i32 = 22;
 }
 
-pub fn patch(patcher: &mut Patcher, prizes: &DungeonPrizes, settings: &Settings) {
+pub fn patch(patcher: &mut Patcher, prizes: &DungeonPrizes, seed_info: &SeedInfo) {
     info!("Patching Course BYAML...");
     patch_hyrule_maps(patcher, prizes);
     patch_lorule_maps(patcher, prizes);
-    patch_eastern_maps(patcher, settings);
-    patch_gales_maps(patcher, settings);
-    patch_hera_maps(patcher, settings);
-    patch_dark_maps(patcher, settings);
-    patch_swamp_maps(patcher, settings);
-    patch_skull_maps(patcher, settings);
-    patch_thieves_maps(patcher, settings);
-    patch_turtle_maps(patcher, settings);
-    patch_desert_maps(patcher, settings);
-    patch_ice_maps(patcher, settings);
-    patch_lorule_castle_maps(patcher, settings);
+    patch_eastern_maps(patcher, seed_info);
+    patch_gales_maps(patcher, seed_info);
+    patch_hera_maps(patcher, seed_info);
+    patch_hyrule_castle_maps(patcher);
+    patch_dark_maps(patcher, seed_info);
+    patch_swamp_maps(patcher, seed_info);
+    patch_skull_maps(patcher, seed_info);
+    patch_thieves_maps(patcher, seed_info);
+    patch_turtle_maps(patcher, seed_info);
+    patch_desert_maps(patcher, seed_info);
+    patch_ice_maps(patcher, seed_info);
+    patch_lorule_castle_maps(patcher, seed_info);
 }
 
 /// Hyrule Field Maps
@@ -102,7 +102,7 @@ fn patch_lorule_maps(patcher: &mut Patcher, prizes: &DungeonPrizes) {
     }
 }
 
-fn mark_by_prize(stage_meta: &mut StageMeta, prize: FillerItem, icn_index: usize) {
+fn mark_by_prize(stage_meta: &mut StageMeta, prize: Randomizable, icn_index: usize) {
     let icn = stage_meta.icn.get_mut(icn_index).unwrap();
     if is_sage(prize) {
         icn.enable();
@@ -116,22 +116,22 @@ fn disable_icn(stage_meta: &mut StageMeta, icn_index: usize) {
     stage_meta.icn.get_mut(icn_index).unwrap().disable();
 }
 
-fn handle_small_keysy_dungeon_icons(stage_meta: &mut StageMeta, settings: &Settings) {
-    match settings.keysy {
+fn handle_small_keysy_dungeon_icons(stage_meta: &mut StageMeta, seed_info: &SeedInfo) {
+    match seed_info.settings.keysy {
         Keysy::SmallKeysy | Keysy::AllKeysy => stage_meta.icn.retain(|icn| icn.arg.0 != Icon::LOCKED),
         _ => {},
     };
 }
 
-fn handle_big_keysy_dungeon_icons(stage_meta: &mut StageMeta, settings: &Settings) {
-    match settings.keysy {
+fn handle_big_keysy_dungeon_icons(stage_meta: &mut StageMeta, seed_info: &SeedInfo) {
+    match seed_info.settings.keysy {
         Keysy::BigKeysy | Keysy::AllKeysy => stage_meta.icn.retain(|icn| icn.arg.0 != Icon::BOSS_DOOR),
         _ => {},
     };
 }
 
 /// Eastern Palace Maps
-fn patch_eastern_maps(patcher: &mut Patcher, settings: &Settings) {
+fn patch_eastern_maps(patcher: &mut Patcher, seed_info: &SeedInfo) {
     let eastern_meta = patcher.scene_meta(DungeonEast).stage_meta_mut().get_mut();
 
     // Add vanilla compass chest icon
@@ -147,12 +147,12 @@ fn patch_eastern_maps(patcher: &mut Patcher, settings: &Settings) {
     eastern_meta.icn.get_mut(6).unwrap().clear_enabled(); // 1F Merge Chest
     eastern_meta.icn.get_mut(17).unwrap().clear_enabled(); // 3F Escape Chest
 
-    handle_small_keysy_dungeon_icons(eastern_meta, settings);
-    handle_big_keysy_dungeon_icons(eastern_meta, settings);
+    handle_small_keysy_dungeon_icons(eastern_meta, seed_info);
+    handle_big_keysy_dungeon_icons(eastern_meta, seed_info);
 }
 
 /// House of Gales Maps
-fn patch_gales_maps(patcher: &mut Patcher, settings: &Settings) {
+fn patch_gales_maps(patcher: &mut Patcher, seed_info: &SeedInfo) {
     let gales_meta = patcher.scene_meta(DungeonWind).stage_meta_mut().get_mut();
 
     // Add vanilla compass chest icon
@@ -163,12 +163,12 @@ fn patch_gales_maps(patcher: &mut Patcher, settings: &Settings) {
         msg: None,
     });
 
-    handle_small_keysy_dungeon_icons(gales_meta, settings);
-    handle_big_keysy_dungeon_icons(gales_meta, settings);
+    handle_small_keysy_dungeon_icons(gales_meta, seed_info);
+    handle_big_keysy_dungeon_icons(gales_meta, seed_info);
 }
 
 /// Tower of Hera Maps
-fn patch_hera_maps(patcher: &mut Patcher, settings: &Settings) {
+fn patch_hera_maps(patcher: &mut Patcher, seed_info: &SeedInfo) {
     let hera_meta = patcher.scene_meta(DungeonHera).stage_meta_mut().get_mut();
 
     // Add vanilla compass chest icon
@@ -179,12 +179,24 @@ fn patch_hera_maps(patcher: &mut Patcher, settings: &Settings) {
         msg: None,
     });
 
-    handle_small_keysy_dungeon_icons(hera_meta, settings);
-    handle_big_keysy_dungeon_icons(hera_meta, settings);
+    handle_small_keysy_dungeon_icons(hera_meta, seed_info);
+    handle_big_keysy_dungeon_icons(hera_meta, seed_info);
+}
+
+/// Hyrule Castle Maps
+fn patch_hyrule_castle_maps(patcher: &mut Patcher) {
+    let hc_meta = patcher.scene_meta(DungeonCastle).stage_meta_mut().get_mut();
+
+    // Use the course flag to control the green Warp icons, not Flag 510.
+    let warp_2f = hc_meta.icn.get_mut(1).unwrap();
+    warp_2f.enable_on(Flag::Course(31));
+
+    let warp_7f = hc_meta.icn.get_mut(11).unwrap();
+    warp_7f.enable_on(Flag::Course(31));
 }
 
 /// Dark Palace Maps
-fn patch_dark_maps(patcher: &mut Patcher, settings: &Settings) {
+fn patch_dark_maps(patcher: &mut Patcher, seed_info: &SeedInfo) {
     let dark_meta = patcher.scene_meta(DungeonDark).stage_meta_mut().get_mut();
 
     // Add vanilla compass chest icon
@@ -195,12 +207,12 @@ fn patch_dark_maps(patcher: &mut Patcher, settings: &Settings) {
         msg: None,
     });
 
-    handle_small_keysy_dungeon_icons(dark_meta, settings);
-    handle_big_keysy_dungeon_icons(dark_meta, settings);
+    handle_small_keysy_dungeon_icons(dark_meta, seed_info);
+    handle_big_keysy_dungeon_icons(dark_meta, seed_info);
 }
 
 /// Swamp Palace Maps
-fn patch_swamp_maps(patcher: &mut Patcher, settings: &Settings) {
+fn patch_swamp_maps(patcher: &mut Patcher, seed_info: &SeedInfo) {
     let swamp_meta = patcher.scene_meta(DungeonWater).stage_meta_mut().get_mut();
 
     // Add vanilla compass chest icon
@@ -211,12 +223,12 @@ fn patch_swamp_maps(patcher: &mut Patcher, settings: &Settings) {
         msg: None,
     });
 
-    handle_small_keysy_dungeon_icons(swamp_meta, settings);
-    handle_big_keysy_dungeon_icons(swamp_meta, settings);
+    handle_small_keysy_dungeon_icons(swamp_meta, seed_info);
+    handle_big_keysy_dungeon_icons(swamp_meta, seed_info);
 }
 
 /// Skull Woods Maps
-fn patch_skull_maps(patcher: &mut Patcher, settings: &Settings) {
+fn patch_skull_maps(patcher: &mut Patcher, seed_info: &SeedInfo) {
     let skull_meta = patcher.scene_meta(DungeonDokuro).stage_meta_mut().get_mut();
 
     // Add vanilla compass chest icon
@@ -227,12 +239,12 @@ fn patch_skull_maps(patcher: &mut Patcher, settings: &Settings) {
         msg: None,
     });
 
-    handle_small_keysy_dungeon_icons(skull_meta, settings);
-    handle_big_keysy_dungeon_icons(skull_meta, settings);
+    handle_small_keysy_dungeon_icons(skull_meta, seed_info);
+    handle_big_keysy_dungeon_icons(skull_meta, seed_info);
 }
 
 /// Thieves' Hideout Maps
-fn patch_thieves_maps(patcher: &mut Patcher, settings: &Settings) {
+fn patch_thieves_maps(patcher: &mut Patcher, seed_info: &SeedInfo) {
     let thieves_meta = patcher.scene_meta(DungeonHagure).stage_meta_mut().get_mut();
 
     // Add vanilla compass chest icon
@@ -243,12 +255,12 @@ fn patch_thieves_maps(patcher: &mut Patcher, settings: &Settings) {
         msg: None,
     });
 
-    handle_small_keysy_dungeon_icons(thieves_meta, settings);
-    handle_big_keysy_dungeon_icons(thieves_meta, settings);
+    handle_small_keysy_dungeon_icons(thieves_meta, seed_info);
+    handle_big_keysy_dungeon_icons(thieves_meta, seed_info);
 }
 
 /// Turtle Rock Maps
-fn patch_turtle_maps(patcher: &mut Patcher, settings: &Settings) {
+fn patch_turtle_maps(patcher: &mut Patcher, seed_info: &SeedInfo) {
     let turtle_meta = patcher.scene_meta(DungeonKame).stage_meta_mut().get_mut();
 
     // Add vanilla compass chest icon
@@ -259,12 +271,12 @@ fn patch_turtle_maps(patcher: &mut Patcher, settings: &Settings) {
         msg: None,
     });
 
-    handle_small_keysy_dungeon_icons(turtle_meta, settings);
-    handle_big_keysy_dungeon_icons(turtle_meta, settings);
+    handle_small_keysy_dungeon_icons(turtle_meta, seed_info);
+    handle_big_keysy_dungeon_icons(turtle_meta, seed_info);
 }
 
 /// Desert Palace Maps
-fn patch_desert_maps(patcher: &mut Patcher, settings: &Settings) {
+fn patch_desert_maps(patcher: &mut Patcher, seed_info: &SeedInfo) {
     let desert_meta = patcher.scene_meta(DungeonSand).stage_meta_mut().get_mut();
 
     // Add vanilla compass chest icon
@@ -275,12 +287,12 @@ fn patch_desert_maps(patcher: &mut Patcher, settings: &Settings) {
         msg: None,
     });
 
-    handle_small_keysy_dungeon_icons(desert_meta, settings);
-    handle_big_keysy_dungeon_icons(desert_meta, settings);
+    handle_small_keysy_dungeon_icons(desert_meta, seed_info);
+    handle_big_keysy_dungeon_icons(desert_meta, seed_info);
 }
 
 /// Ice Ruins Maps
-fn patch_ice_maps(patcher: &mut Patcher, settings: &Settings) {
+fn patch_ice_maps(patcher: &mut Patcher, seed_info: &SeedInfo) {
     let ice_meta = patcher.scene_meta(DungeonIce).stage_meta_mut().get_mut();
 
     // Add vanilla compass chest icon
@@ -291,12 +303,12 @@ fn patch_ice_maps(patcher: &mut Patcher, settings: &Settings) {
         msg: None,
     });
 
-    handle_small_keysy_dungeon_icons(ice_meta, settings);
-    handle_big_keysy_dungeon_icons(ice_meta, settings);
+    handle_small_keysy_dungeon_icons(ice_meta, seed_info);
+    handle_big_keysy_dungeon_icons(ice_meta, seed_info);
 }
 
 /// Lorule Castle Maps
-fn patch_lorule_castle_maps(patcher: &mut Patcher, settings: &Settings) {
+fn patch_lorule_castle_maps(patcher: &mut Patcher, seed_info: &SeedInfo) {
     let lc_meta = patcher.scene_meta(DungeonGanon).stage_meta_mut().get_mut();
 
     // Add vanilla compass chest icon
@@ -307,5 +319,5 @@ fn patch_lorule_castle_maps(patcher: &mut Patcher, settings: &Settings) {
         msg: None,
     });
 
-    handle_small_keysy_dungeon_icons(lc_meta, settings);
+    handle_small_keysy_dungeon_icons(lc_meta, seed_info);
 }

@@ -6,6 +6,7 @@ use crate::filler::util::shuffle;
 use crate::SeedInfo;
 use modinfo::settings::keysy::Keysy;
 use modinfo::settings::logic::LogicMode;
+use modinfo::settings::portals::Portals;
 use modinfo::Settings;
 use rand::{rngs::StdRng, Rng};
 use std::iter::repeat;
@@ -57,18 +58,17 @@ pub(crate) fn get_item_pools(rng: &mut StdRng, SeedInfo { settings, .. }: &SeedI
         progression_items.extend_from_slice(&[Sword01, Sword02, Sword03, Sword04]);
     }
 
-    let junk_pool = shuffle(rng, junk_pool);
+    let mut junk_pool = shuffle(rng, junk_pool);
+
+    if settings.portals == Portals::Closed {
+        progression_items.push(Quake);
+        junk_pool.pop(); // Removes a random Junk Items
+    }
+
     (
         shuffle_order_progression_pools(
             rng,
-            vec![
-                dungeon_prizes,
-                big_keys,
-                small_keys,
-                compasses,
-                progression_items,
-                minor_progression
-            ],
+            vec![dungeon_prizes, big_keys, small_keys, compasses, progression_items, minor_progression],
         ),
         junk_pool,
     )
@@ -110,11 +110,12 @@ fn get_base_progression_pool() -> Vec<Item> {
 fn get_minor_progression_pool() -> Vec<Item> {
     let mut minor_progression_pool = vec![];
 
-    minor_progression_pool.extend(get_health_pool());
+    minor_progression_pool.extend(get_maiamai_pool());
+    minor_progression_pool.extend(get_heart_containers());
+    minor_progression_pool.extend(get_heart_pieces());
     minor_progression_pool.extend(get_gold_rupee_pool());
     minor_progression_pool.extend(get_silver_rupee_pool());
     minor_progression_pool.extend(get_purple_rupee_pool());
-    minor_progression_pool.extend(get_maiamai_pool());
 
     minor_progression_pool
 }
@@ -143,7 +144,7 @@ pub(crate) fn get_lorule_up_portals() -> Vec<Portal> {
     vec![
         ThievesTown, VacantHouse, WaterfallLorule, DarkRuinsSE, SkullWoodsPillar, DestroyedHouse, MiseryMireExit,
         MireMiddle, MireSW, MireNorth, MirePillarLeft, MirePillarRight, Zaganaga, DeathWestLorule,
-        FloatingIslandLorule, RiverLorule, LoruleLake, LoruleColdfoot, Philosopher, GraveyardLedgeLorule,
+        FloatingIslandLorule, RiverLorule, LoruleLake, LoruleHotfoot, Philosopher, GraveyardLedgeLorule,
         RossosOreMineLorule, LoruleCastle,
     ]
 }
@@ -171,29 +172,29 @@ pub(crate) fn get_weather_vanes() -> Vec<Vane> {
 }
 
 fn get_big_key_pool(settings: &Settings) -> Vec<Item> {
-    const NUM_BIG_KEYS: usize = 10;
+    let big_keys = vec![
+        EasternKeyBig, GalesKeyBig, HeraKeyBig, DarkKeyBig, SwampKeyBig, SkullKeyBig, ThievesKeyBig, IceKeyBig,
+        DesertKeyBig, TurtleKeyBig,
+    ];
     match settings.keysy {
-        Keysy::BigKeysy | Keysy::AllKeysy => repeat(RupeeBlue).take(NUM_BIG_KEYS).collect(),
-        _ => vec![
-            EasternKeyBig, GalesKeyBig, HeraKeyBig, DarkKeyBig, SwampKeyBig, SkullKeyBig, ThievesKeyBig, IceKeyBig,
-            DesertKeyBig, TurtleKeyBig,
-        ],
+        Keysy::BigKeysy | Keysy::AllKeysy => repeat(RupeeBlue).take(big_keys.len()).collect(),
+        _ => big_keys,
     }
 }
 
 fn get_small_key_pool(settings: &Settings) -> Vec<Item> {
-    const NUM_SMALL_KEYS: usize = 38;
+    let small_keys = vec![
+        HyruleSanctuaryKey, LoruleSanctuaryKey, EasternKeySmall01, EasternKeySmall02, GalesKeySmall01, GalesKeySmall02,
+        GalesKeySmall03, GalesKeySmall04, HeraKeySmall01, HeraKeySmall02, DarkKeySmall01, DarkKeySmall02,
+        DarkKeySmall03, DarkKeySmall04, SwampKeySmall01, SwampKeySmall02, SwampKeySmall03, SwampKeySmall04,
+        SkullKeySmall01, SkullKeySmall02, SkullKeySmall03, ThievesKeySmall, IceKeySmall01, IceKeySmall02,
+        IceKeySmall03, DesertKeySmall01, DesertKeySmall02, DesertKeySmall03, DesertKeySmall04, DesertKeySmall05,
+        TurtleKeySmall01, TurtleKeySmall02, TurtleKeySmall03, LoruleCastleKeySmall01, LoruleCastleKeySmall02,
+        LoruleCastleKeySmall03, LoruleCastleKeySmall04, LoruleCastleKeySmall05,
+    ];
     match settings.keysy {
-        Keysy::SmallKeysy | Keysy::AllKeysy => repeat(RupeeBlue).take(NUM_SMALL_KEYS).collect(),
-        _ => vec![
-            HyruleSanctuaryKey, LoruleSanctuaryKey, EasternKeySmall01, EasternKeySmall02, GalesKeySmall01,
-            GalesKeySmall02, GalesKeySmall03, GalesKeySmall04, HeraKeySmall01, HeraKeySmall02, DarkKeySmall01,
-            DarkKeySmall02, DarkKeySmall03, DarkKeySmall04, SwampKeySmall01, SwampKeySmall02, SwampKeySmall03,
-            SwampKeySmall04, SkullKeySmall01, SkullKeySmall02, SkullKeySmall03, ThievesKeySmall, IceKeySmall01,
-            IceKeySmall02, IceKeySmall03, DesertKeySmall01, DesertKeySmall02, DesertKeySmall03, DesertKeySmall04,
-            DesertKeySmall05, TurtleKeySmall01, TurtleKeySmall02, TurtleKeySmall03, LoruleCastleKeySmall01,
-            LoruleCastleKeySmall02, LoruleCastleKeySmall03, LoruleCastleKeySmall04, LoruleCastleKeySmall05,
-        ],
+        Keysy::SmallKeysy | Keysy::AllKeysy => repeat(RupeeBlue).take(small_keys.len()).collect(),
+        _ => small_keys,
     }
 }
 
@@ -204,14 +205,14 @@ fn get_compass_pool() -> Vec<Item> {
     ]
 }
 
-pub(crate) fn get_gold_rupee_pool() -> Vec<Item> {
+pub fn get_gold_rupee_pool() -> Vec<Item> {
     vec![
         RupeeGold01, RupeeGold02, RupeeGold03, RupeeGold04, RupeeGold05, RupeeGold06, RupeeGold07, RupeeGold08,
         RupeeGold09, RupeeGold10,
     ]
 }
 
-pub(crate) fn get_silver_rupee_pool() -> Vec<Item> {
+pub fn get_silver_rupee_pool() -> Vec<Item> {
     vec![
         RupeeSilver01, RupeeSilver02, RupeeSilver03, RupeeSilver04, RupeeSilver05, RupeeSilver06, RupeeSilver07,
         RupeeSilver08, RupeeSilver09, RupeeSilver10, RupeeSilver11, RupeeSilver12, RupeeSilver13, RupeeSilver14,
@@ -225,7 +226,7 @@ pub(crate) fn get_silver_rupee_pool() -> Vec<Item> {
     ]
 }
 
-pub(crate) fn get_purple_rupee_pool() -> Vec<Item> {
+pub fn get_purple_rupee_pool() -> Vec<Item> {
     vec![
         RupeePurple01, RupeePurple02, RupeePurple03, RupeePurple04, RupeePurple05, RupeePurple06, RupeePurple07,
         RupeePurple08, RupeePurple09, RupeePurple10, RupeePurple11, RupeePurple12, RupeePurple13, RupeePurple14,
@@ -233,17 +234,21 @@ pub(crate) fn get_purple_rupee_pool() -> Vec<Item> {
     ]
 }
 
-/// Health Pool
-/// - 28 Heart Pieces
-/// - 10 Heart Containers
-fn get_health_pool() -> Vec<Item> {
+/// 28 Heart Pieces
+pub fn get_heart_pieces() -> Vec<Item> {
     vec![
         HeartPiece01, HeartPiece02, HeartPiece03, HeartPiece04, HeartPiece05, HeartPiece06, HeartPiece07, HeartPiece08,
         HeartPiece09, HeartPiece10, HeartPiece11, HeartPiece12, HeartPiece13, HeartPiece14, HeartPiece15, HeartPiece16,
         HeartPiece17, HeartPiece18, HeartPiece19, HeartPiece20, HeartPiece21, HeartPiece22, HeartPiece23, HeartPiece24,
-        HeartPiece25, HeartPiece26, HeartPiece27, HeartPiece28, HeartContainer01, HeartContainer02, HeartContainer03,
-        HeartContainer04, HeartContainer05, HeartContainer06, HeartContainer07, HeartContainer08, HeartContainer09,
-        HeartContainer10,
+        HeartPiece25, HeartPiece26, HeartPiece27, HeartPiece28,
+    ]
+}
+
+/// 10 Heart Containers
+pub fn get_heart_containers() -> Vec<Item> {
+    vec![
+        HeartContainer01, HeartContainer02, HeartContainer03, HeartContainer04, HeartContainer05, HeartContainer06,
+        HeartContainer07, HeartContainer08, HeartContainer09, HeartContainer10,
     ]
 }
 
@@ -268,7 +273,6 @@ fn get_base_junk_pool(rng: &mut StdRng) -> Vec<Item> {
 
     add_random_junk_item(rng, &mut junk); // replaces Captain's Sword
     add_random_junk_item(rng, &mut junk); // replaces Bouldering Guy Extra
-    add_random_junk_item(rng, &mut junk); // replaces FIXME
 
     junk
 }
@@ -278,7 +282,7 @@ fn add_random_junk_item(rng: &mut StdRng, junk_pool: &mut Vec<Item>) {
     junk_pool.push(POSSIBLE_EXTRA_ITEMS[rng.gen_range(0..POSSIBLE_EXTRA_ITEMS.len())]);
 }
 
-pub(crate) fn get_maiamai_pool() -> Vec<Item> {
+pub fn get_maiamai_pool() -> Vec<Item> {
     vec![
         Maiamai001, Maiamai002, Maiamai003, Maiamai004, Maiamai005, Maiamai006, Maiamai007, Maiamai008, Maiamai009,
         Maiamai010, Maiamai011, Maiamai012, Maiamai013, Maiamai014, Maiamai015, Maiamai016, Maiamai017, Maiamai018,

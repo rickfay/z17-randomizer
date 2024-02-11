@@ -20,7 +20,7 @@ pub fn patch(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
     patch_lorule_castle_requirements(patcher, settings)?;
     patch_castle_connection(patcher, settings)?;
     patch_final_boss(patcher)?;
-    patch_hint_ghosts(patcher, settings)?;
+    patch_hint_ghosts(patcher)?;
     patch_weather_vanes(patcher)?;
     patch_rosso(patcher)?;
     patch_mother_maiamai(patcher)?;
@@ -150,6 +150,24 @@ fn patch_ravio_shop(patcher: &mut Patcher) -> Result<()> {
 
     apply!(patcher,
         IndoorLight/FieldLight_2C_Rental {
+
+            // Skip right to text
+            [123] => 818,
+            // Show mildly annoyed text if 2nd time speaking to him
+            [817 into_text] => 806,
+
+            // String together a bunch of text nodes to use to give out Sage locations
+            [811] => 2,
+            [2 into_text] => 812,
+            [809] => 314,
+            [314 into_text] => 810,
+            [815] => 823,
+            [823 into_text] => 816,
+            [813] => 361,
+            [361 into_text] => 814,
+
+            // ---------------------------------------------------------------------------------------------------------
+
             [766 into_start] => 312, // 312 starts music
             [312] => 237, // 237 gives item
             [237] => None,
@@ -398,45 +416,19 @@ fn patch_castle_connection(patcher: &mut Patcher, _settings: &Settings) -> Resul
     Ok(())
 }
 
-fn patch_hint_ghosts(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
-    let price = settings.hint_ghost_price;
+/// Hint Ghosts. Skip straight to hint, skipping as much as possible.
+fn patch_hint_ghosts(patcher: &mut Patcher) -> Result<()> {
+    apply!(patcher,
+        Boot/HintGhost {
+            // Most Hint Ghosts
+            [0 into_start] => 8,
+            [8] => None,
 
-    if price == 0 {
-        apply!(patcher,
-            Boot/HintGhost {
-                [0 into_start] => 8,
-                [8] => None,
-            },
-        );
-    } else {
-        let negative_price = -(price as i32) as u32;
-        apply!(patcher,
-            Boot/HintGhost {
-                [0 into_start] => 15, // Skip 27, 39, 40, 1, 11, 13, 10, 12, 14, 4, 17
-                [15] each [arg1(6), value(1), command(50),], // Show Rupee Counter (instead of Play Coin Counter)
-                [3 into_branch] switch [[0] => 6,], // Skip 36
-                [16] each [arg1(6), value(0), command(50),], // Hide Rupee Counter (instead of Play Coin Counter)
-
-                // Rupee count check (instead of Play Coins)
-                [6 into_branch] each [
-                    value(price as u32),
-                    command(6),
-                    switch [
-                        [0] => 9, // Skip 37
-                    ],
-                ],
-
-                // Charge Rupees instead of Play Coins
-                [9] each [
-                    value(negative_price),
-                    command(37),
-                    => 8, // Skip 5, 28, 34, 33, 21, 30, 32, 26, 18
-                ],
-                [8] => 24, // Skip 25, 19, 29, 35, 22, 23, 38, 21, 20
-                [24] each [arg1(6), value(0), command(50),], // Hide Rupee Counter (instead of Play Coin Counter)
-            },
-        );
-    }
+            // Lost Woods Hint Ghosts
+            [19 into_start] => 35,
+            [35] => None,
+        },
+    );
 
     Ok(())
 }
@@ -775,6 +767,7 @@ pub fn legacy_patches(patcher: &mut Patcher) -> Result<()> {
             // Osfala?
             [258] => 309, // skip 17
             [309] => 241, // skip 308, 225, 245
+            [242] => 243, // Skip 226 (ItemRentalSandRodFirst)
             [2]   => 76, // Skip  77, 78, 209
 
             [254] => 81, // Skip 212,  5,  82, 83, 214 - Rosso?

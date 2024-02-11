@@ -3,15 +3,13 @@ use crate::hints::{hint_color::HintColor::*, hint_ghost_name};
 use crate::patch::lms::msbf::MsbfKey;
 use crate::Result;
 use game::ghosts::HintGhost;
-use modinfo::settings::portal_shuffle::PortalShuffle;
-use modinfo::settings::weather_vanes::WeatherVanes;
 use modinfo::Settings;
 use rom::flag::Flag;
 use serde::{Serialize, Serializer};
 use std::fmt::Debug;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-pub enum FillerItem {
+pub enum Randomizable {
     Item(Item),
     Goal(Goal),
     HintGhost(HintGhost),
@@ -19,7 +17,7 @@ pub enum FillerItem {
     Portal(Portal),
 }
 
-impl FillerItem {
+impl Randomizable {
     pub fn as_item(&self) -> Option<Item> {
         match self {
             Self::Item(item) => Some(*item),
@@ -29,7 +27,7 @@ impl FillerItem {
 
     pub fn normalize(self) -> game::Item {
         use game::Item::*;
-        use FillerItem::*;
+        use Randomizable::*;
         match self {
             Item(item) => match item.to_game_item() {
                 PackageSword | ItemSwordLv1 | ItemSwordLv3 | ItemSwordLv4 => ItemSwordLv2,
@@ -61,19 +59,16 @@ impl FillerItem {
         matches!(self, Self::HintGhost(_))
     }
 
-    pub fn include_in_sphere_search(self, settings: &Settings) -> bool {
+    pub fn include_in_sphere_search(self) -> bool {
         match self {
             Self::Item(item) => item.include_in_sphere_search(),
-            Self::Vane(_) => settings.weather_vanes == WeatherVanes::Shuffled,
-            Self::Portal(_) => settings.portal_shuffle != PortalShuffle::Off,
-            Self::Goal(Goal::Triforce) => true,
-            _ => false,
+            _ => true,
         }
     }
 
     pub fn goes_in_csmc_large_chest(&self, _settings: &Settings) -> bool {
         use crate::filler::filler_item::Item::*;
-        if let FillerItem::Item(item) = self {
+        if let Randomizable::Item(item) = self {
             match item {
                 Bow01
                 | Bow02
@@ -189,6 +184,7 @@ impl FillerItem {
                 | SageRosso
                 | SageIrene
                 | SageImpa
+                | Quake
                 | ScootFruit01
                 | FoulFruit01
                 | Shield01
@@ -205,8 +201,8 @@ impl FillerItem {
     }
 
     pub fn msbf_key(self) -> Option<&'static str> {
-        use crate::filler::filler_item::FillerItem::Item;
         use crate::filler::filler_item::Item::*;
+        use crate::filler::filler_item::Randomizable::Item;
         match self {
             Item(SageGulley) => Some(MsbfKey::Dark),
             Item(SageOren) => Some(MsbfKey::Water),
@@ -238,37 +234,37 @@ impl FillerItem {
     }
 }
 
-impl From<Item> for FillerItem {
+impl From<Item> for Randomizable {
     fn from(item: Item) -> Self {
         Self::Item(item)
     }
 }
 
-impl From<Goal> for FillerItem {
+impl From<Goal> for Randomizable {
     fn from(goal: Goal) -> Self {
         Self::Goal(goal)
     }
 }
 
-impl From<HintGhost> for FillerItem {
+impl From<HintGhost> for Randomizable {
     fn from(hint_ghost: HintGhost) -> Self {
         Self::HintGhost(hint_ghost)
     }
 }
 
-impl From<Vane> for FillerItem {
+impl From<Vane> for Randomizable {
     fn from(vane: Vane) -> Self {
         Self::Vane(vane)
     }
 }
 
-impl From<Portal> for FillerItem {
+impl From<Portal> for Randomizable {
     fn from(portal: Portal) -> Self {
         Self::Portal(portal)
     }
 }
 
-impl Serialize for FillerItem {
+impl Serialize for Randomizable {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
@@ -277,7 +273,7 @@ impl Serialize for FillerItem {
     }
 }
 
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Ord, PartialOrd)]
 pub enum Item {
     Empty,
 
@@ -684,6 +680,8 @@ pub enum Item {
     SageIrene,
     SageImpa,
 
+    TriforceOfCourage,
+
     // Shop Items (treated as Quest Items) ---------------------------------------------------------
 
     // Kakariko
@@ -716,7 +714,7 @@ impl Item {
     pub fn to_game_item(&self) -> game::Item {
         use Item::*;
         match self {
-            Empty => game::Item::Empty,
+            Empty | Quake => game::Item::Empty, // Repurposed
             Bow01 | Bow02 | Bow03 => game::Item::ItemBow,
             Boomerang01 | Boomerang02 => game::Item::ItemBoomerang,
             Hookshot01 | Hookshot02 => game::Item::ItemHookShot,
@@ -876,127 +874,130 @@ impl Item {
             Bee01 | Bee02 => game::Item::Bee,
             GoldBee01 | GoldBee02 | GoldBee03 => game::Item::GoldenBeeForSale,
             Fairy01 | Fairy02 => game::Item::Fairy,
-            Quake => game::Item::ItemRentalShield, // Repurposed
+
+            TriforceOfCourage => game::Item::TriforceCourage,
         }
     }
 
     pub fn include_in_sphere_search(self) -> bool {
-        matches!(
-            self,
+        match self {
             Self::Bow01
-                | Self::Bow02
-                | Self::Bow03
-                | Self::Boomerang01
-                | Self::Boomerang02
-                | Self::Hookshot01
-                | Self::Hookshot02
-                | Self::Bombs01
-                | Self::Bombs02
-                | Self::FireRod01
-                | Self::FireRod02
-                | Self::IceRod01
-                | Self::IceRod02
-                | Self::Hammer01
-                | Self::Hammer02
-                | Self::SandRod01
-                | Self::SandRod02
-                | Self::TornadoRod01
-                | Self::TornadoRod02
-                | Self::Bell
-                | Self::StaminaScroll
-                | Self::BowOfLight
-                | Self::PegasusBoots
-                | Self::Flippers
-                | Self::RaviosBracelet01
-                | Self::RaviosBracelet02
-                | Self::HylianShield
-                | Self::SmoothGem
-                | Self::LetterInABottle
-                | Self::PremiumMilk
-                | Self::GreatSpin
-                | Self::Bottle01
-                | Self::Bottle02
-                | Self::Bottle03
-                | Self::Bottle04
-                | Self::Lamp01
-                | Self::Lamp02
-                | Self::Sword01
-                | Self::Sword02
-                | Self::Sword03
-                | Self::Sword04
-                | Self::Glove01
-                | Self::Glove02
-                | Self::Net01
-                | Self::Net02
-                | Self::Mail01
-                | Self::Mail02
-                | Self::OreYellow
-                | Self::OreGreen
-                | Self::OreBlue
-                | Self::OreRed
-                | Self::HyruleSanctuaryKey
-                | Self::LoruleSanctuaryKey
-                | Self::EasternKeyBig
-                | Self::EasternKeySmall01
-                | Self::EasternKeySmall02
-                | Self::GalesKeyBig
-                | Self::GalesKeySmall01
-                | Self::GalesKeySmall02
-                | Self::GalesKeySmall03
-                | Self::GalesKeySmall04
-                | Self::HeraKeyBig
-                | Self::HeraKeySmall01
-                | Self::HeraKeySmall02
-                | Self::DarkKeyBig
-                | Self::DarkKeySmall01
-                | Self::DarkKeySmall02
-                | Self::DarkKeySmall03
-                | Self::DarkKeySmall04
-                | Self::SwampKeyBig
-                | Self::SwampKeySmall01
-                | Self::SwampKeySmall02
-                | Self::SwampKeySmall03
-                | Self::SwampKeySmall04
-                | Self::SkullKeyBig
-                | Self::SkullKeySmall01
-                | Self::SkullKeySmall02
-                | Self::SkullKeySmall03
-                | Self::ThievesKeyBig
-                | Self::ThievesKeySmall
-                | Self::IceKeyBig
-                | Self::IceKeySmall01
-                | Self::IceKeySmall02
-                | Self::IceKeySmall03
-                | Self::DesertKeyBig
-                | Self::DesertKeySmall01
-                | Self::DesertKeySmall02
-                | Self::DesertKeySmall03
-                | Self::DesertKeySmall04
-                | Self::DesertKeySmall05
-                | Self::TurtleKeyBig
-                | Self::TurtleKeySmall01
-                | Self::TurtleKeySmall02
-                | Self::TurtleKeySmall03
-                | Self::LoruleCastleKeySmall01
-                | Self::LoruleCastleKeySmall02
-                | Self::LoruleCastleKeySmall03
-                | Self::LoruleCastleKeySmall04
-                | Self::LoruleCastleKeySmall05
-                | Self::Charm
-                | Self::PendantOfPower
-                | Self::PendantOfWisdom
-                | Self::PendantOfCourage
-                | Self::SageGulley
-                | Self::SageOren
-                | Self::SageSeres
-                | Self::SageOsfala
-                | Self::SageRosso
-                | Self::SageIrene
-                | Self::SageImpa
-                | Self::ScootFruit01
-                | Self::ScootFruit02
-                | Self::GoldBee01
-        )
+            | Self::Bow02
+            | Self::Bow03
+            | Self::Boomerang01
+            | Self::Boomerang02
+            | Self::Hookshot01
+            | Self::Hookshot02
+            | Self::Bombs01
+            | Self::Bombs02
+            | Self::FireRod01
+            | Self::FireRod02
+            | Self::IceRod01
+            | Self::IceRod02
+            | Self::Hammer01
+            | Self::Hammer02
+            | Self::SandRod01
+            | Self::SandRod02
+            | Self::TornadoRod01
+            | Self::TornadoRod02
+            | Self::Bell
+            | Self::StaminaScroll
+            | Self::BowOfLight
+            | Self::PegasusBoots
+            | Self::Flippers
+            | Self::RaviosBracelet01
+            | Self::RaviosBracelet02
+            | Self::HylianShield
+            | Self::SmoothGem
+            | Self::LetterInABottle
+            | Self::PremiumMilk
+            | Self::GreatSpin
+            | Self::Bottle01
+            | Self::Bottle02
+            | Self::Bottle03
+            | Self::Bottle04
+            | Self::Lamp01
+            | Self::Lamp02
+            | Self::Sword01
+            | Self::Sword02
+            | Self::Sword03
+            | Self::Sword04
+            | Self::Glove01
+            | Self::Glove02
+            | Self::Net01
+            | Self::Net02
+            | Self::Mail01
+            | Self::Mail02
+            | Self::OreYellow
+            | Self::OreGreen
+            | Self::OreBlue
+            | Self::OreRed
+            | Self::HyruleSanctuaryKey
+            | Self::LoruleSanctuaryKey
+            | Self::EasternKeyBig
+            | Self::EasternKeySmall01
+            | Self::EasternKeySmall02
+            | Self::GalesKeyBig
+            | Self::GalesKeySmall01
+            | Self::GalesKeySmall02
+            | Self::GalesKeySmall03
+            | Self::GalesKeySmall04
+            | Self::HeraKeyBig
+            | Self::HeraKeySmall01
+            | Self::HeraKeySmall02
+            | Self::DarkKeyBig
+            | Self::DarkKeySmall01
+            | Self::DarkKeySmall02
+            | Self::DarkKeySmall03
+            | Self::DarkKeySmall04
+            | Self::SwampKeyBig
+            | Self::SwampKeySmall01
+            | Self::SwampKeySmall02
+            | Self::SwampKeySmall03
+            | Self::SwampKeySmall04
+            | Self::SkullKeyBig
+            | Self::SkullKeySmall01
+            | Self::SkullKeySmall02
+            | Self::SkullKeySmall03
+            | Self::ThievesKeyBig
+            | Self::ThievesKeySmall
+            | Self::IceKeyBig
+            | Self::IceKeySmall01
+            | Self::IceKeySmall02
+            | Self::IceKeySmall03
+            | Self::DesertKeyBig
+            | Self::DesertKeySmall01
+            | Self::DesertKeySmall02
+            | Self::DesertKeySmall03
+            | Self::DesertKeySmall04
+            | Self::DesertKeySmall05
+            | Self::TurtleKeyBig
+            | Self::TurtleKeySmall01
+            | Self::TurtleKeySmall02
+            | Self::TurtleKeySmall03
+            | Self::LoruleCastleKeySmall01
+            | Self::LoruleCastleKeySmall02
+            | Self::LoruleCastleKeySmall03
+            | Self::LoruleCastleKeySmall04
+            | Self::LoruleCastleKeySmall05
+            | Self::Charm
+            | Self::PendantOfPower
+            | Self::PendantOfWisdom
+            | Self::PendantOfCourage
+            | Self::SageGulley
+            | Self::SageOren
+            | Self::SageSeres
+            | Self::SageOsfala
+            | Self::SageRosso
+            | Self::SageIrene
+            | Self::SageImpa
+            | Self::Quake
+            | Self::ScootFruit01
+            | Self::ScootFruit02
+            | Self::GoldBee01
+            | Self::TriforceOfCourage => true,
+            _ => false,
+        }
     }
 
     pub fn get_article(self) -> &'static str {
@@ -1127,6 +1128,9 @@ impl Item {
 
             ScootFruit01 | FoulFruit01 | Shield01 | ScootFruit02 | FoulFruit02 | Shield02 | GoldBee01 | Bee01
             | GoldBee02 | Fairy01 | Shield03 | Bee02 | GoldBee03 | Fairy02 | Shield04 => "a",
+
+            TriforceOfCourage => "the",
+
             Quake => "the",
         }
     }
@@ -1263,12 +1267,21 @@ impl Item {
             GoldBee01 | GoldBee02 | GoldBee03 => "Golden Bee",
             Fairy01 | Fairy02 => "Fairy",
             Shield01 | Shield02 | Shield03 | Shield04 => "Shield",
-            Quake => "Quake Medallion",
+            TriforceOfCourage => "Triforce of Courage",
+            Quake => "Quake",
         }
     }
 
     pub fn as_str_colorized(&self) -> String {
         Name.format(self.as_str())
+    }
+}
+
+impl Iterator for Item {
+    type Item = Self;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        Some(*self)
     }
 }
 
@@ -1385,6 +1398,15 @@ impl Goal {
     }
 }
 
+impl Serialize for Goal {
+    fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_str(self.as_str())
+    }
+}
+
 /// Weather Vane Item
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Ord, PartialOrd)]
 pub enum Vane {
@@ -1412,10 +1434,10 @@ pub enum Vane {
     YourHouseWV,
 }
 
-impl From<FillerItem> for Vane {
-    fn from(filler_item: FillerItem) -> Self {
+impl From<Randomizable> for Vane {
+    fn from(filler_item: Randomizable) -> Self {
         match filler_item {
-            FillerItem::Vane(vane) => vane,
+            Randomizable::Vane(vane) => vane,
             _ => unreachable!("Not a Vane: {:?}", filler_item),
         }
     }
@@ -1542,5 +1564,8 @@ impl Vane {
             Self::TurtleRockWV => Flag::WV_TURTLE_ROCK,
             Self::DeathMountainLoruleWV => Flag::WV_DEATH_MTN_LORULE,
         }
+    }
+    pub fn flag_value(self) -> u16 {
+        self.flag().get_value()
     }
 }

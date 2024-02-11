@@ -1,5 +1,5 @@
 use crate::filler::check::Check;
-use crate::filler::filler_item::{FillerItem, Goal, Item};
+use crate::filler::filler_item::{Goal, Item, Randomizable};
 use crate::filler::portals::Portal;
 use crate::filler::progress::Progress;
 use crate::filler::util::shuffle;
@@ -125,7 +125,7 @@ pub struct PathHint {
     pub ghosts: Vec<HintGhost>,
 
     /// The underlying Path Item (hidden in-game, visible in Spoiler Log)
-    pub path_item: FillerItem,
+    pub path_item: Randomizable,
 }
 
 impl Hint for PathHint {
@@ -221,7 +221,7 @@ pub fn generate_hints(rng: &mut StdRng, seed_info: &mut SeedInfo, check_map: &mu
     const NUM_TOTAL_HINTS: usize = 29;
 
     //
-    let mut taken_checks = seed_info.settings.exclusions.iter().map(|s| s.clone()).collect();
+    let mut taken_checks = seed_info.full_exclusions.iter().map(|s| s.clone()).collect();
     let mut taken_ghosts = Vec::new();
 
     // let mut portal_hints =
@@ -317,8 +317,8 @@ fn generate_bow_of_light_hint(
 
     for location_node in world_graph.values() {
         for &check in location_node.clone().get_checks().iter().flatten().collect::<Vec<&Check>>() {
-            if let FillerItem::Item(item) = check_map.get(check.get_name()).unwrap().unwrap() {
-                if BowOfLight.eq(&item) {
+            if let Randomizable::Item(item) = check_map.get(check.get_name()).unwrap().unwrap() {
+                if BowOfLight == item {
                     return Some(BowOfLightHint { check });
                 }
             }
@@ -337,9 +337,9 @@ fn generate_always_hints(
     taken_ghosts: &mut Vec<HintGhost>,
 ) -> Vec<LocationHint> {
     let mut always_checks = vec![
-        "Master Sword Pedestal", "Great Rupee Fairy", "Blacksmith (Lorule)", "Bouldering Guy", "Irene", "Rosso I",
-        "Rosso II", "Osfala", "Haunted Grove Stump", "Queen Oren", "Shady Guy", "Street Merchant (Right)",
-        "Octoball Derby", "Treacherous Tower",
+        "Master Sword Pedestal", "Great Rupee Fairy", "Blacksmith (Lorule)", "Bouldering Guy", "Irene", "Rosso (1)",
+        "Rosso (2)", "Haunted Grove Stump", "Queen Oren", "Shady Guy", "Street Merchant (Right)", "Octoball Derby",
+        "Treacherous Tower",
     ];
 
     always_checks.retain(|check| !taken_checks.contains(&check.to_string()));
@@ -379,7 +379,7 @@ fn generate_location_hint(check_name: &'static str, seed_info: &SeedInfo, check_
     let logical_ghosts = find_checks_before_goal(seed_info, check_map, item)
         .iter()
         .filter_map(|check| {
-            if let Some(FillerItem::HintGhost(ghost)) = check.get_quest() {
+            if let Some(Randomizable::HintGhost(ghost)) = check.get_quest() {
                 return Some(ghost);
             };
             None
@@ -550,10 +550,10 @@ fn choose_path_hint(
 
 /// Finds all checks available before a given Quest Goal using a modified Sphere Search.
 fn find_checks_before_goal(
-    seed_info: &SeedInfo, check_map: &mut CheckMap, goal: impl Into<FillerItem>,
+    seed_info: &SeedInfo, check_map: &mut CheckMap, goal: impl Into<Randomizable>,
 ) -> DashSet<Check> {
     let goal = goal.into();
-    let mut progress = Progress::new(&seed_info.settings);
+    let mut progress = Progress::new(seed_info);
     let mut reachable_checks: Vec<Check>;
     let mut potential_path_checks: DashSet<Check> = Default::default();
 
@@ -588,7 +588,7 @@ fn get_potential_path_hints(
 
     // Limit potential paths to locations with valid Path Items that haven't yet been taken
     potential_path_checks.retain(|check| {
-        if let Some(Some(FillerItem::Item(item))) = check_map.get(check.get_name()) {
+        if let Some(Some(Randomizable::Item(item))) = check_map.get(check.get_name()) {
             !taken_checks.contains(&check.get_name().to_string()) && POSSIBLE_PATH_ITEMS.contains(&item)
         } else {
             false
@@ -598,7 +598,7 @@ fn get_potential_path_hints(
     // Test candidate items to see if Boss can be defeated without them
     for check in potential_path_checks {
         // Reset Progression
-        let mut progress = Progress::new(&seed_info.settings);
+        let mut progress = Progress::new(seed_info);
 
         loop {
             reachable_checks = find_reachable_checks(seed_info, &progress);
@@ -616,7 +616,7 @@ fn get_potential_path_hints(
                     let hint_locations = reachable_items
                         .get_items()
                         .iter()
-                        .filter_map(|&item| if let FillerItem::HintGhost(ghost) = item { Some(ghost) } else { None })
+                        .filter_map(|&item| if let Randomizable::HintGhost(ghost) = item { Some(ghost) } else { None })
                         .collect::<_>();
 
                     let path_item = check_map

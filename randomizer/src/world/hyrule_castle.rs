@@ -42,8 +42,8 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
                 None,
                 vec![
                     //path!(HyruleCastleDungeonBoss), // Don't allow reverse Hyrule Castle
-                    portal_left(HyruleCastle, portal_map),
-                    portal_right(HyruleCastle, portal_map),
+                    portal_left(HyruleCastle, portal_map, true),
+                    portal_right(HyruleCastle, portal_map, true),
                 ],
             ),
         ),

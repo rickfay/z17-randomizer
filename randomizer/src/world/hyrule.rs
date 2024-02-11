@@ -33,18 +33,7 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
                     check!("Ravio's Shop (8)", regions::hyrule::ravio::shop::SUBREGION, |p| p.is_ravio_shop_open()),
                     check!("Ravio's Shop (9)", regions::hyrule::ravio::shop::SUBREGION, |p| p.is_ravio_shop_open()),
                 ],
-                vec![
-                    edge!(HyruleField),
-                    edge!(ChamberOfSages), // not technically true but gives us what we need
-                ],
-            ),
-        ),
-        (
-            ChamberOfSages,
-            location(
-                "Chamber of Sages",
-                vec![check!("Osfala", regions::lorule::chamber::sages::SUBREGION, |p| p.has_sage_osfala())],
-                vec![],
+                vec![edge!(HyruleField)],
             ),
         ),
         (
@@ -76,13 +65,7 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
                     check!("Sanctuary Weather Vane", regions::hyrule::zora::river::SUBREGION),
                     check!("Witch's House Weather Vane", regions::hyrule::zora::river::SUBREGION),
                     check!("Dampe", regions::dungeons::graveyards::hyrule::SUBREGION),
-                    check!("Irene", regions::hyrule::irene::witch::SUBREGION, |p| {
-                        if p.is_rse() {
-                            p.has_sage_irene()
-                        } else {
-                            p.has_pendant_of_courage()
-                        }
-                    }),
+                    check!("Irene", regions::hyrule::irene::witch::SUBREGION, |p| p.has_sage_irene()),
                     check!("Sanctuary Pegs", regions::dungeons::graveyards::hyrule::SUBREGION, |p| p.has_hammer()),
                     check!(
                         "Blacksmith Ledge",
@@ -235,26 +218,26 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
                 ],
                 vec![
                     fast_travel_hyrule(),
-                    portal_left(YourHouse, portal_map),
-                    portal_right(YourHouse, portal_map),
-                    portal_left(HyruleHotfoot, portal_map),
-                    portal_right(HyruleHotfoot, portal_map),
-                    portal_left(ParadoxRightHyrule, portal_map),
-                    portal_right(ParadoxRightHyrule, portal_map),
-                    portal_left(LoruleLake, portal_map),
-                    portal_right(LoruleLake, portal_map),
-                    portal_left(MiseryMireEntrance, portal_map),
-                    portal_right(MiseryMireEntrance, portal_map),
-                    portal_left(LostWoodsPillar, portal_map),
-                    portal_right(LostWoodsPillar, portal_map),
-                    portal_left(SahasrahlasHouse, portal_map),
-                    portal_right(SahasrahlasHouse, portal_map),
-                    portal_left(EasternRuinsPillar, portal_map),
-                    portal_right(EasternRuinsPillar, portal_map),
-                    portal_left(SwampPillarHyrule, portal_map),
-                    portal_right(SwampPillarHyrule, portal_map),
-                    portal_left(Portal::LakeHylia, portal_map),
-                    portal_right(Portal::LakeHylia, portal_map),
+                    portal_left(YourHouse, portal_map, false),
+                    portal_right(YourHouse, portal_map, false),
+                    portal_left(HyruleHotfoot, portal_map, false),
+                    portal_right(HyruleHotfoot, portal_map, false),
+                    portal_left(ParadoxRightHyrule, portal_map, false),
+                    portal_right(ParadoxRightHyrule, portal_map, false),
+                    portal_left(LoruleLake, portal_map, false),
+                    portal_right(LoruleLake, portal_map, false),
+                    portal_left(MiseryMireEntrance, portal_map, false),
+                    portal_right(MiseryMireEntrance, portal_map, false),
+                    portal_left(LostWoodsPillar, portal_map, false),
+                    portal_right(LostWoodsPillar, portal_map, false),
+                    portal_left(SahasrahlasHouse, portal_map, false),
+                    portal_right(SahasrahlasHouse, portal_map, false),
+                    portal_left(EasternRuinsPillar, portal_map, false),
+                    portal_right(EasternRuinsPillar, portal_map, false),
+                    portal_left(SwampPillarHyrule, portal_map, false),
+                    portal_right(SwampPillarHyrule, portal_map, false),
+                    portal_left(Portal::LakeHylia, portal_map, false),
+                    portal_right(Portal::LakeHylia, portal_map, false),
                     edge!(EasternRuinsBlockedPortal, |p| p.has_bombs()),
                     edge!(RavioShop),
                     edge!(EasternRuinsUpper => {
@@ -306,13 +289,7 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
                         normal: |p| p.has_power_glove(),
                         glitched: |_| true, // Crow boost
                     }),
-                    edge!(RossosHouse, |p| {
-                        if p.is_rse() {
-                            p.has_sage_rosso()
-                        } else {
-                            p.has_pendant_of_courage()
-                        }
-                    }),
+                    edge!(RossosHouse, |p| p.has_sage_rosso()),
                     edge!(RossoCave => {
                         normal: |p| p.has_hammer(),
                         glitched: |p| p.has_boomerang() || (p.not_nice_mode() && p.has_hookshot()),
@@ -368,7 +345,7 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
                 None,
                 vec![
                     edge!(HyruleField, |p| p.has_flippers()),
-                    portal_left(RiverHyrule, portal_map),
+                    portal_left(RiverHyrule, portal_map, false),
                     // portal_right unpossible
                 ],
             ),
@@ -388,8 +365,8 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
                 None,
                 vec![
                     edge!(HyruleField),
-                    portal_left(EasternRuinsSE, portal_map),
-                    portal_right(EasternRuinsSE, portal_map),
+                    portal_left(EasternRuinsSE, portal_map, false),
+                    portal_right(EasternRuinsSE, portal_map, false),
                 ],
             ),
         ),
@@ -457,7 +434,7 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
                 vec![
                     fast_travel_hyrule(),
                     // portal_left is unpossible
-                    portal_right(WaterfallHyrule, portal_map),
+                    portal_right(WaterfallHyrule, portal_map, false),
                     edge!(
                             HyruleField => {
                             normal: |p| p.has_flippers(),
@@ -477,8 +454,8 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
                     fast_travel_hyrule(),
                     edge!(HyruleField),
                     edge!(CuccoDungeon),
-                    portal_left(ParadoxLeftHyrule, portal_map),
-                    portal_right(ParadoxLeftHyrule, portal_map),
+                    portal_left(ParadoxLeftHyrule, portal_map, false),
+                    portal_right(ParadoxLeftHyrule, portal_map, false),
                 ],
             ),
         ),
@@ -552,9 +529,8 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
                 "Zora's Domain",
                 vec![
                     check!("Queen Oren", regions::hyrule::zora::river::SUBREGION, |p| p.has_smooth_gem()
-                        && (!p.is_rse() || p.has_sage_oren())),
-                    goal!("Give Oren Smooth Gem", Goal::RavioShopOpen, |p| p.has_smooth_gem()
-                        && (!p.is_rse() || p.has_sage_oren())),
+                        && p.has_sage_oren()),
+                    goal!("Give Oren Smooth Gem", Goal::RavioShopOpen, |p| p.has_smooth_gem() && p.has_sage_oren()),
                 ],
                 vec![edge!(ZoraDomainArea)],
             ),
@@ -564,7 +540,7 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
             location(
                 "Zora's Domain Area",
                 vec![
-                    goal!("Shady Guy Trigger", Goal::ShadyGuyTrigger),
+                    goal!("Shady Guy Trigger", Goal::ShadyGuyTrigger, |p| p.has_sage_oren()),
                     check!("Zora's Domain Ledge", regions::hyrule::zora::river::SUBREGION, |p| p.can_merge()),
                     check!("[Mai] Zora's Domain", regions::hyrule::zora::river::SUBREGION, |p| p.has_flippers()),
                     check!("[Mai] South of Zora's Domain", regions::hyrule::zora::river::SUBREGION, |p| p.can_merge()),
@@ -573,8 +549,8 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
                 ],
                 vec![
                     fast_travel_hyrule(),
-                    portal_left(ZorasDomain, portal_map),
-                    portal_right(ZorasDomain, portal_map),
+                    portal_left(ZorasDomain, portal_map, false),
+                    portal_right(ZorasDomain, portal_map, false),
                     edge!(HyruleField),
                     edge!(ZoraDomain),
                     edge!(WaterfallCaveShallowWater => {
@@ -646,21 +622,14 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
             location(
                 "Rosso's House",
                 vec![
-                    check!("Rosso I", regions::hyrule::lost::woods::SUBREGION, |p| {
-                        if p.is_rse() {
-                            p.has_sage_rosso()
-                        } else {
-                            p.has_pendant_of_courage()
-                        }
-                    }),
-                    check!("Rosso II", regions::hyrule::lost::woods::SUBREGION, |p| {
-                        p.has_power_glove() && if p.is_rse() { p.has_sage_rosso() } else { p.has_pendant_of_courage() }
-                    }),
+                    check!("Rosso (1)", regions::hyrule::lost::woods::SUBREGION, |p| p.has_sage_rosso()),
+                    check!("Rosso (2)", regions::hyrule::lost::woods::SUBREGION, |p| p.has_power_glove()
+                        && p.has_sage_rosso()),
                 ],
                 vec![
                     edge!(HyruleField),
-                    portal_left(Portal::RossosHouse, portal_map),
-                    portal_right(Portal::RossosHouse, portal_map),
+                    portal_left(Portal::RossosHouse, portal_map, false),
+                    portal_right(Portal::RossosHouse, portal_map, false),
                 ],
             ),
         ),
@@ -690,8 +659,8 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
                     fast_travel_hyrule(),
                     edge!(HyruleField),
                     edge!(GraveyardLedgeCave),
-                    portal_left(Portal::GraveyardLedgeHyrule, portal_map),
-                    portal_right(Portal::GraveyardLedgeHyrule, portal_map),
+                    portal_left(Portal::GraveyardLedgeHyrule, portal_map, false),
+                    portal_right(Portal::GraveyardLedgeHyrule, portal_map, false),
                 ],
             ),
         ),
@@ -733,7 +702,7 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
                     fast_travel_hyrule(),
                     edge!(HyruleCastleLeftRoom),
                     edge!(HyruleCastleRightRoom),
-                    edge!(HyruleCastleInterior, |p| !p.is_rse() || p.has_sage_impa()),
+                    edge!(HyruleCastleInterior),
                     edge!(HyruleField, |p| p.has_master_sword() || p.swordless_mode()),
                 ],
             ),
@@ -838,7 +807,11 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
                     //check!("Stylish Woman Portal", regions::hyrule::kakariko::village::SUBREGION, |p| p.can_merge()),
                     goal!("Open Stylish Woman's House", Goal::StylishWomansHouseOpen),
                 ],
-                vec![portal_left(StylishWoman, portal_map), portal_right(StylishWoman, portal_map), edge!(HyruleField)],
+                vec![
+                    portal_left(StylishWoman, portal_map, false),
+                    portal_right(StylishWoman, portal_map, false),
+                    edge!(HyruleField),
+                ],
             ),
         ),
         (MilkBar, location("Milk Bar", vec![goal!("Access Milk Bar", Goal::AccessMilkBar)], vec![edge!(HyruleField)])),
@@ -962,8 +935,8 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
                 "Sanctuary Church",
                 vec![],
                 vec![
-                    portal_left(Portal::Sanctuary, portal_map),
-                    portal_right(Portal::Sanctuary, portal_map),
+                    portal_left(Portal::Sanctuary, portal_map, false),
+                    portal_right(Portal::Sanctuary, portal_map, false),
                     edge!(HyruleField, |p| p.has_opened_sanctuary_doors()),
                 ],
             ),
@@ -1037,7 +1010,7 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
                     edge!(DeathFairyCave, |p| p.can_merge()),
                     edge!(DonkeyCaveLower),
                     // portal_left is unpossible
-                    portal_right(DeathWestHyrule, portal_map),
+                    portal_right(DeathWestHyrule, portal_map, false),
                 ],
             ),
         ),
@@ -1324,8 +1297,8 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
                 vec![
                     fast_travel_hyrule(),
                     edge!(FireCaveBottom),
-                    portal_left(RossosOreMineHyrule, portal_map),
-                    portal_right(RossosOreMineHyrule, portal_map),
+                    portal_left(RossosOreMineHyrule, portal_map, false),
+                    portal_right(RossosOreMineHyrule, portal_map, false),
                 ],
             ),
         ),
@@ -1336,8 +1309,8 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
                 vec![check!("Floating Island", regions::hyrule::death::mountain::SUBREGION)],
                 vec![
                     fast_travel_hyrule(),
-                    portal_left(Portal::FloatingIslandHyrule, portal_map),
-                    portal_right(Portal::FloatingIslandHyrule, portal_map),
+                    portal_left(Portal::FloatingIslandHyrule, portal_map, false),
+                    portal_right(Portal::FloatingIslandHyrule, portal_map, false),
                 ],
             ),
         ),

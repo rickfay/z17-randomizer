@@ -96,8 +96,9 @@ pub fn patch(
     info!("Patching BYAML Files...");
 
     do_dev_stuff(patcher, settings)?;
+
+    patch_flag_510_effects(patcher)?;
     patch_ravios_shop(patcher)?;
-    // patch_portals(patcher);
     patch_maiamai_cave(patcher);
     patch_treacherous_tower(patcher, tower_floors)?;
     patch_big_problem_chests(patcher, settings);
@@ -108,13 +109,13 @@ pub fn patch(
     patch_kus_domain(patcher);
     patch_letter_in_a_bottle(patcher);
     patch_master_sword(patcher);
-    patch_softlock_prevention(patcher, settings);
+    patch_gales_softlock(patcher, settings);
     patch_thief_girl_cave(patcher);
     patch_treasure_dungeons(patcher, settings);
     patch_zora(patcher);
     patch_swamp_palace(patcher);
-    patch_hint_ghosts_overworld(patcher);
-    patch_hint_ghosts_dungeons(patcher);
+    patch_hint_ghosts_overworld(patcher)?;
+    patch_hint_ghosts_dungeons(patcher)?;
 
     patch_blacksmith_lorule(patcher);
     patch_trials_door(patcher);
@@ -144,40 +145,12 @@ pub fn patch(
             [157].enable(), // Keep Bouldering Guy around
         },
 
-        // Outside Fortune-Teller
-        FieldLight 9 {
-            [86].disable(), // Buzz Blob
-            [87].disable(), // Buzz Blob
-            [88].disable(), // Buzz Blob
-            [89].disable(), // Buzz Blob
-        },
-
-        // Small Pond
-        FieldLight 10 {
-            [70].disable(), // Buzz Blob
-            [71].disable(), // Buzz Blob
-            [72].disable(), // Buzz Blob
-        },
-
         // Outside Sanctuary
         FieldLight 11 {
-            [81].disable(), // Buzz Blob
-            [82].disable(), // Buzz Blob
-            [83].disable(), // Buzz Blob
-            [84].disable(), // Buzz Blob
-            [85].enable(), // Green Spear Soldier
-            [86].enable(), // Green Spear Soldier
-            [87].enable(), // Green Spear Soldier
-
             [101].disable(), // Dampe
             [102].disable(), // Seres
             [133].active(1), // Close Church Door by default
             [133].disable(Flag::Event(523)), // Church Door rigged to open when Sanc left switch pulled
-
-            [144].disable(), // Buzz Blob
-            [145].enable(), // Buzz Blob
-            [146].enable(), // Buzz Blob
-            [147].enable(), // Buzz Blob
         },
 
         // Sanctuary Dungeon
@@ -197,118 +170,9 @@ pub fn patch(
             [20].active(523),
         },
 
-        // Graveyard
-        FieldLight 12 {
-            [89].disable(), // Crow
-            [91].disable(), // Buzz Blob
-            [92].disable(), // Buzz Blob
-            [93].enable(), // Arrow Soldier
-            [94].enable(), // Arrow Soldier
-            [162].disable(), // Crow
-        },
-
         // Outside witch's house
         FieldLight 14 {
             [123].disable(), // Disable surprised Zora
-        },
-        // Kakariko Village
-        FieldLight 16 {
-            [259].disable(), // Papa
-            [416].disable(), // Papa
-
-            [260].disable(), // Girl
-            [415].disable(), // Girl
-
-            [241].disable(), // Cucco
-            [242].disable(), // Cucco
-            [413].disable(), // Cucco
-            [414].disable(), // Cucco
-
-            [197].disable(), // Disable merchant's Smooth Gem text
-            [265].disable(), // Disable girl/dad text
-            [299].disable(), // Disable merchant's bottle text
-        },
-        // Behind Blacksmith's House
-        FieldLight 17 {
-            [47].disable(), // Buzz Blob
-            [48].disable(), // Buzz Blob
-            [49].disable(), // Buzz Blob
-            [58].disable(), // Buzz Blob
-            [59].disable(), // Buzz Blob
-            [60].disable(), // Buzz Blob
-            [61].disable(), // Buzz Blob
-        },
-        // Hyrule Castle
-        FieldLight 18 {
-
-            [263].enable(), // Red Spear Soldier
-            [536].enable(), // Red Spear Soldier
-
-            [167].disable(), // Crow
-            [168].disable(), // Crow
-            [175].disable(), // Buzz Blob
-            [177].disable(), // Buzz Blob
-            [178].disable(), // Buzz Blob
-            [179].disable(), // Buzz Blob
-            [186].clear_enable_flag(), // Blue Soldier, removed after Flag 390 ?
-            [187].clear_enable_flag(), // Dagger Soldier
-            [189].clear_enable_flag(), // Dagger Soldier, removed after Flag 390 ?
-            [190].clear_enable_flag(), // Blue Soldier
-            [194].disable(), // NPC Soldier
-            [195].disable(), // NPC Soldier
-            [198].disable(), // NPC Soldier
-            [204].clear_enable_flag(), // Arrow Soldier
-            [207].clear_enable_flag(), // Blue Soldier
-            [225].disable(), // Paint Soldier
-            [234].disable(), // Scarecrow
-            [235].disable(), // Scarecrow
-            [258].clear_enable_flag(), // Bomb Soldier
-            [260].clear_enable_flag(), // Bomb Soldier
-            [274].disable(), // NPC Soldier
-            [278].disable(), // NPC Soldier
-            [279].disable(), // NPC Soldier
-            [280].disable(), // NPC Soldier
-            [281].disable(), // Paint Soldier
-            [282].disable(), // Paint Soldier
-            [301].disable(), // Paint Soldier
-            [302].disable(), // Paint Soldier
-            [303].disable(), // Paint Soldier
-            [308].enable(), // Paint Soldier
-            [309].disable(), // Paint Soldier
-            [369].disable(), // Scarecrow
-            [370].disable(), // Scarecrow
-            [371].disable(), // NPC Soldier
-            [372].disable(), // NPC Soldier
-            [373].disable(), // NPC Soldier
-            [395].disable(), // AreaSimpleTalk - Hekiga_Green_Soldier
-            [401].disable(), // AreaSimpleTalk - Hekiga_fueta_Red
-            [402].disable(), // AreaSimpleTalk - Hekiga_fueta_Green
-            [403].disable(), // AreaSimpleTalk - Hekiga_Green_Soldier
-            [404].disable(), // AreaSimpleTalk - Hekiga_fueta_Green
-            [488].disable(), // Paint Soldier
-            [491].enable(), // Paint Soldier
-            [492].enable(), // Paint Soldier
-            [493].enable(), // Paint Soldier
-            [495].enable(), // Paint Soldier
-            [496].enable(), // Paint Soldier
-            [497].enable(), // Paint Soldier
-            [498].enable(), // Paint Soldier
-            [501].clear_enable_flag(), // TagDisableWallIn, prevent merging into barrier
-            [532].disable(), // Buzz Blob
-            [533].disable(), // AreaSimpleTalk - Hekiga_fueta_Green
-            [534].disable(), // AreaSimpleTalk - Hekiga_Blue_Soldier
-            [535].disable(), // AreaSimpleTalk - Hekiga_Blue_Soldier
-        },
-        // Wooden Bridge
-        FieldLight 19 {
-            [27].disable(), // Buzz Blob
-            [28].disable(), // Buzz Blob
-            [29].disable(), // Buzz Blob
-            [30].disable(), // Buzz Blob
-            [32].disable(), // Buzz Blob
-            [35].enable(), // Arrow Solider
-            [36].enable(), // Arrow Solider
-            [37].enable(), // Green Spear Solider
         },
 
         // Cucco Ranch
@@ -325,20 +189,6 @@ pub fn patch(
         FieldLight 26 {
             [83].disable(), // Buzz Blob
             [84].disable(), // Buzz Blob
-        },
-
-        // Outside Link's house
-        FieldLight 27 {
-            [158].disable(), // Disable Blacksmith's Wife
-        },
-        // Irene Bridge
-        FieldLight 28 {
-            [58].disable(), // Buzz Blob
-            [59].disable(), // Buzz Blob
-            [60].disable(), // Buzz Blob
-            [61].disable(), // Octorok
-            [62].disable(), // Octorok
-
         },
         // Outside woods
         FieldLight 32 {
@@ -360,11 +210,6 @@ pub fn patch(
             [344].disable(), // Buzz Blob
             [345].disable(), // Buzz Blob
             [346].disable(), // Buzz Blob
-        },
-
-        // Hyrule Hotfoot Area
-        FieldLight 36 {
-            [43].disable(), // Disable Letter in a Bottle text
         },
 
         // Sacred Realm
@@ -516,6 +361,294 @@ pub fn patch(
     Ok(())
 }
 
+/// Patch things affected by Flag 510 so that picking up Quake (or starting with it) neatly swaps the world state from
+/// post-Eastern Palace to after arriving in Lorule.
+fn patch_flag_510_effects(patcher: &mut Patcher) -> Result<()> {
+    // Outside Rosso's House
+    patcher.modify_objs(
+        FieldLight,
+        2,
+        [
+            disable(130), // NpcGameRaceGoal HyruleRace_Goal duplicate TODO GO BACK
+        ],
+    );
+
+    // Outside Fortune-Teller
+    patcher.modify_objs(
+        FieldLight,
+        9,
+        [
+            set_disable_flag(86, Flag::SAGE_IRENE), // Buzz Blob
+            set_disable_flag(87, Flag::SAGE_IRENE), // Buzz Blob
+            set_disable_flag(88, Flag::SAGE_IRENE), // Buzz Blob
+            set_disable_flag(89, Flag::SAGE_IRENE), // Buzz Blob
+        ],
+    );
+
+    // Small Pond
+    patcher.modify_objs(
+        FieldLight,
+        10,
+        [
+            // Buzz Blob - 54 appears on 246
+            // Buzz Blob - 55 appears on 246
+
+            // EnemySoldierDagger - 56 appears on 246, disappears on 510
+            // EnemySoldierDagger - 57 appears on 246, disappears on 510
+            // EnemySoldierBlue   - 58 appears on 246, disappears on 510
+            set_disable_flag(70, Flag::SAGE_IRENE), // Buzz Blob - disappears on 251
+            set_disable_flag(71, Flag::SAGE_IRENE), // Buzz Blob - disappears on 251
+            set_disable_flag(72, Flag::SAGE_IRENE), // Buzz Blob - disappears on 251
+
+                                                    // EnemySoldierBlue   - 107 appears on 510
+                                                    // EnemySoldierGreen  - 108 appears on 510
+                                                    // EnemySoldierGreen  - 109 appears on 510
+        ],
+    );
+
+    // Outside Sanctuary
+    patcher.modify_objs(
+        FieldLight,
+        11,
+        [
+            set_disable_flag(81, Flag::QUAKE),  // Buzz Blob - disappears on 251
+            set_disable_flag(82, Flag::QUAKE),  // Buzz Blob - disappears on 251
+            set_disable_flag(83, Flag::QUAKE),  // Buzz Blob - disappears on 251
+            set_disable_flag(84, Flag::QUAKE),  // Buzz Blob - disappears on 251
+            set_enable_flag(85, Flag::QUAKE),   // EnemySoldierGreenSpear - appears on 251
+            set_enable_flag(86, Flag::QUAKE),   // EnemySoldierGreenSpear - appears on 251
+            set_enable_flag(87, Flag::QUAKE),   // EnemySoldierBlue       - appears on 251
+            set_disable_flag(144, Flag::QUAKE), // Buzz Blob - disappears on 251
+            set_enable_flag(145, Flag::QUAKE),  // Buzz Blob - appears on 251
+            set_enable_flag(146, Flag::QUAKE),  // Buzz Blob - appears on 251
+            set_enable_flag(147, Flag::QUAKE),  // Buzz Blob - appears on 251
+        ],
+    );
+
+    // Hyrule Graveyard
+    patcher.modify_objs(
+        FieldLight,
+        12,
+        [
+            set_disable_flag(89, Flag::QUAKE),  // Crowly - disappears on 251
+            set_disable_flag(91, Flag::QUAKE),  // Buzz Blob - disappears on 251 (105?)
+            set_disable_flag(92, Flag::QUAKE),  // Buzz Blob - disappears on 251 (105?)
+            set_enable_flag(93, Flag::QUAKE),   // EnemyShooterArrow - appears on 251
+            set_enable_flag(94, Flag::QUAKE),   // EnemyShooterArrow - appears on 251
+            set_disable_flag(162, Flag::QUAKE), // EnemyCrowly - disappears on 251
+        ],
+    );
+
+    // Kakariko Village
+    patcher.modify_objs(
+        FieldLight,
+        16,
+        [
+            // Papa
+            clear_enable_flag(259), // Papa #2 - appears on 310, disappears on 235
+            // 287 - Papa #3 - appears on 235 (buy anything from Ravio)
+            disable(416), // Papa #1 - appears on 210, disappears on 310
+            // Girl
+            clear_enable_flag(260), // Girl #2 - appears on 310, disappears on 235
+            // 288 - Girl #3 - appears on 235
+            disable(415), // Girl #1 - appears on 210, disappears on 310
+            // Cuccos
+            // 241 - disappears on 235
+            // 242 - disappears on 235
+            // 246
+            // 289 - appears on 235
+            // 302
+            // 312 - appears on 235
+            // 313 - appears on 235
+            disable(413), // appears on 210, disappears on 310
+            disable(414), // appears on 210, disappears on 310
+            // misc.
+            clear_disable_flag(264), // MojSignboardRental
+            disable(197),            // Disable merchant's Smooth Gem text
+            disable(265),            // Disable girl/dad text
+            disable(299),            // Disable merchant's bottle text
+        ],
+    );
+
+    // Blacksmith's Backyard
+    patcher.modify_objs(
+        FieldLight,
+        17,
+        [
+            set_disable_flag(47, Flag::QUAKE), // Buzz Blob
+            set_disable_flag(48, Flag::QUAKE), // Buzz Blob
+            set_disable_flag(49, Flag::QUAKE), // Buzz Blob
+            set_enable_flag(55, Flag::QUAKE),  // EnemySoldierDagger
+            set_enable_flag(56, Flag::QUAKE),  // EnemySoldierGreenSpear
+            set_enable_flag(57, Flag::QUAKE),  // EnemySoldierDagger
+            set_disable_flag(58, Flag::QUAKE), // Buzz Blob
+            set_disable_flag(59, Flag::QUAKE), // Buzz Blob
+            set_disable_flag(60, Flag::QUAKE), // Buzz Blob
+            set_disable_flag(61, Flag::QUAKE), // Buzz Blob
+            disable(75),                       // NpcMapleFlying_1A
+            disable(76),                       // NpcMaple
+            set_enable_flag(80, Flag::QUAKE),  // Buzz Blob
+            set_enable_flag(81, Flag::QUAKE),  // Buzz Blob
+            set_enable_flag(82, Flag::QUAKE),  // Buzz Blob
+            set_enable_flag(83, Flag::QUAKE),  // Buzz Blob
+        ],
+    );
+
+    // Hyrule Castle Exterior
+    patcher.modify_objs(
+        FieldLight,
+        18,
+        [
+            disable(167), // EnemyCrowly
+            disable(168), // EnemyCrowly
+            disable(175), // Buzz Blob
+            disable(177), // Buzz Blob
+            disable(178), // Buzz Blob
+            disable(179), // Buzz Blob
+            // EnemySoldierBlue
+            call(186, |obj| {
+                obj.clear_enable_flag();
+                obj.set_disable_flag(Flag::QUAKE)
+            }),
+            // EnemySoldierDagger
+            call(189, |obj| {
+                obj.clear_enable_flag();
+                obj.set_disable_flag(Flag::QUAKE)
+            }),
+            // EnemySoldierBlue
+            call(207, |obj| {
+                obj.clear_enable_flag();
+                obj.set_disable_flag(Flag::QUAKE)
+            }),
+            set_enable_flag(263, Flag::QUAKE), // EnemyShooterSpear
+            set_enable_flag(536, Flag::QUAKE), // EnemyShooterSpear
+            // --- //
+            // FIXME go through below:
+            // --- //
+            clear_enable_flag(187), // Dagger Soldier
+            clear_enable_flag(190), // Blue Soldier
+            disable(194),           // NPC Soldier
+            disable(195),           // NPC Soldier
+            disable(198),           // NPC Soldier
+            clear_enable_flag(204), // Arrow Soldier
+            disable(225),           // Paint Soldier
+            disable(234),           // Scarecrow
+            disable(235),           // Scarecrow
+            clear_enable_flag(258), // Bomb Soldier
+            clear_enable_flag(260), // Bomb Soldier
+            disable(274),           // NPC Soldier
+            disable(278),           // NPC Soldier
+            disable(279),           // NPC Soldier
+            disable(280),           // NPC Soldier
+            disable(281),           // Paint Soldier
+            disable(282),           // Paint Soldier
+            disable(301),           // Paint Soldier
+            disable(302),           // Paint Soldier
+            disable(303),           // Paint Soldier
+            enable(308),            // Paint Soldier
+            disable(309),           // Paint Soldier
+            disable(369),           // Scarecrow
+            disable(370),           // Scarecrow
+            disable(371),           // NPC Soldier
+            disable(372),           // NPC Soldier
+            disable(373),           // NPC Soldier
+            disable(395),           // AreaSimpleTalk - Hekiga_Green_Soldier
+            disable(401),           // AreaSimpleTalk - Hekiga_fueta_Red
+            disable(402),           // AreaSimpleTalk - Hekiga_fueta_Green
+            disable(403),           // AreaSimpleTalk - Hekiga_Green_Soldier
+            disable(404),           // AreaSimpleTalk - Hekiga_fueta_Green
+            disable(488),           // Paint Soldier
+            enable(491),            // Paint Soldier
+            enable(492),            // Paint Soldier
+            enable(493),            // Paint Soldier
+            enable(495),            // Paint Soldier
+            enable(496),            // Paint Soldier
+            enable(497),            // Paint Soldier
+            enable(498),            // Paint Soldier
+            clear_enable_flag(501), // TagDisableWallIn, prevent merging into barrier
+            disable(532),           // Buzz Blob
+            disable(533),           // AreaSimpleTalk - Hekiga_fueta_Green
+            disable(534),           // AreaSimpleTalk - Hekiga_Blue_Soldier
+            disable(535),           // AreaSimpleTalk - Hekiga_Blue_Soldier
+        ],
+    );
+
+    // Wooden Bridge
+    patcher.modify_objs(
+        FieldLight,
+        19,
+        [
+            set_disable_flag(27, Flag::QUAKE), // Buzz Blob
+            set_disable_flag(28, Flag::QUAKE), // Buzz Blob
+            set_disable_flag(29, Flag::QUAKE), // Buzz Blob
+            set_disable_flag(30, Flag::QUAKE), // Buzz Blob
+            set_disable_flag(32, Flag::QUAKE), // Buzz Blob
+            clear_enable_flag(35),             // Arrow Soldier
+            clear_enable_flag(36),             // Arrow Soldier
+            clear_enable_flag(37),             // Green Spear Solider
+            clear_enable_flag(38),             // EnemySoldierDagger
+                                               // 83 - EnemySoldierGreenSpear - appears on 510
+        ],
+    );
+
+    // Eastern Ruins
+
+    // TODO 21
+    // TODO 22
+    // TODO 23
+    // TODO 24
+    // TODO 25
+    // TODO 26
+
+    // Outside Link's house
+    patcher.modify_objs(
+        FieldLight,
+        27,
+        [
+            set_enable_flag(154, Flag::QUAKE), // EnemySoldierGreen
+            set_enable_flag(155, Flag::QUAKE), // EnemySoldierBlue
+            set_enable_flag(156, Flag::QUAKE), // EnemySoldierGreen
+            disable(158),                      // Blacksmith's Wife
+        ],
+    );
+
+    // Stone Bridge
+    patcher.modify_objs(
+        FieldLight,
+        28,
+        [
+            clear_enable_flag(18), // River Zora
+            clear_enable_flag(24), // Octorok
+            clear_enable_flag(25), // Octorok
+            clear_enable_flag(29), // EnemySoldierDagger (disappears with 510)
+            clear_enable_flag(30), // EnemySoldierBlue (disappears with 510)
+            disable(58),           // Buzz Blob
+            disable(59),           // Buzz Blob
+            disable(60),           // Buzz Blob
+            disable(61),           // Octorok
+            disable(62),           // Octorok
+        ],
+    );
+
+    // TODO 29
+    // TODO 30
+    // TODO 31
+    // TODO 32
+    // TODO 33
+
+    // Hyrule Hotfoot Area
+    patcher.modify_objs(
+        FieldLight,
+        36,
+        [
+            disable(40), // Post-Irene Hyrule Hotfoot guy (duplicate)
+            disable(43), // Letter in a Bottle text
+        ],
+    );
+
+    Ok(())
+}
+
 fn patch_ravios_shop(patcher: &mut Patcher) -> Result<()> {
     patcher.modify_objs(
         IndoorLight,
@@ -577,6 +710,19 @@ fn patch_lost_woods(patcher: &mut Patcher) {
         [
             // Repurpose Flag 375 loading zone to go directly to Pedestal, skipping the Poes and the maze
             call(134, |obj| obj.redirect(SpawnPoint::new(FieldLight, 34, 0))),
+            // Move Ghosts from the Maze to the entrance area so they can still give their hints
+            call(266, |obj| {
+                obj.clp = 4;
+                obj.set_translate(7.5, 0.0, 113.5);
+            }),
+            call(267, |obj| {
+                obj.clp = 4;
+                obj.set_translate(10.0, 0.0, 108.5);
+            }),
+            call(268, |obj| {
+                obj.clp = 4;
+                obj.set_translate(-2.5, 0.0, 109.0);
+            }),
         ],
     );
 }
@@ -783,15 +929,18 @@ fn patch_swamp_palace(patcher: &mut Patcher) {
 }
 
 // Enable All Overworld Hint Ghosts
-fn patch_hint_ghosts_overworld(patcher: &mut Patcher) {
+fn patch_hint_ghosts_overworld(patcher: &mut Patcher) -> Result<()> {
     patcher.modify_objs(FieldLight, 14, [enable(126)]); // Witch's House
     patcher.modify_objs(FieldLight, 16, [enable(407)]); // Shady Guy (Kakariko)
     patcher.modify_objs(FieldLight, 17, [enable(96)]); // Behind Blacksmith
     patcher.modify_objs(FieldDark, 35, [enable(205)]); // Bullied Turtle
+    // todo add 510 ghosts (HFI, etc.)
+
+    Ok(())
 }
 
 // Hide All Dungeon Hint Ghosts
-fn patch_hint_ghosts_dungeons(patcher: &mut Patcher) {
+fn patch_hint_ghosts_dungeons(patcher: &mut Patcher) -> Result<()> {
     // Eastern
     patcher.modify_objs(
         DungeonEast,
@@ -947,6 +1096,8 @@ fn patch_hint_ghosts_dungeons(patcher: &mut Patcher) {
             disable(1607),
         ],
     );
+
+    Ok(())
 }
 
 /// Small Keysy - Remove all Small Key-locked doors
@@ -988,8 +1139,7 @@ fn patch_keysy_small(patcher: &mut Patcher, settings: &Settings) {
     patcher.modify_objs(DungeonDokuro, 1, [disable(332)]); // Skull Woods B1
     patcher.modify_objs(DungeonDokuro, 2, [disable(223)]); // Skull Woods B2
 
-    patcher.modify_objs(DungeonHagure, 1, [disable(542)]); // Thieves' Hideout B2 FIXME THIS NEEDS TESTING
-                                                           // TODO Set Thief Girl's door opened flag
+    patcher.modify_objs(DungeonHagure, 1, [disable(542)]); // Thieves' Hideout B2
 
     patcher.modify_objs(DungeonKame, 2, [disable(116)]); // Turtle Rock B1
     patcher.modify_objs(DungeonKame, 2, [disable(118)]); // Turtle Rock B1
@@ -1055,7 +1205,7 @@ fn patch_portal_shuffle(patcher: &mut Patcher, settings: &Settings) {
         30,
         [call(37, |obj| {
             obj.set_active_flag(Flag::PORTAL_DARK_MAZE_SE);
-            obj.set_enable_flag(Flag::EARTHQUAKE);
+            obj.set_enable_flag(Flag::QUAKE);
             obj.set_disable_flag(Flag::PORTAL_DARK_MAZE_SE);
         })],
     );
@@ -1066,7 +1216,7 @@ fn patch_portal_shuffle(patcher: &mut Patcher, settings: &Settings) {
         31,
         [call(65, |obj| {
             obj.set_active_flag(Flag::PORTAL_DESERT_NORTH);
-            obj.set_enable_flag(Flag::EARTHQUAKE);
+            obj.set_enable_flag(Flag::QUAKE);
             obj.set_disable_flag(Flag::PORTAL_DESERT_NORTH);
         })],
     );
@@ -1077,7 +1227,7 @@ fn patch_portal_shuffle(patcher: &mut Patcher, settings: &Settings) {
         12,
         [call(19, |obj| {
             obj.set_active_flag(Flag::PORTAL_GRAVEYARD_LEDGE_LORULE);
-            obj.set_enable_flag(Flag::EARTHQUAKE);
+            obj.set_enable_flag(Flag::QUAKE);
             obj.set_disable_flag(Flag::PORTAL_GRAVEYARD_LEDGE_LORULE);
         })],
     );
@@ -1302,6 +1452,7 @@ fn patch_castles(patcher: &mut Patcher) {
             // Barrier
             set_46_args(165, Flag::Event(1)), // Enable Barrier from game start
             disable(505),                     // Barrier "would you like to save?" text
+                                              // TODO Sahas still talking at us after Master Sword get
         ],
     );
 
@@ -1374,8 +1525,8 @@ fn patch_castles(patcher: &mut Patcher) {
             }),
             //set_disable_flag(26, hacky_flag), // Curtain
             //set_disable_flag(29, hacky_flag), // AreaDisableWallIn
-            disable(26), // Curtain fixme
-            disable(29), // AreaDisableWallIn fixme
+            // disable(26), // Curtain
+            // disable(29), // AreaDisableWallIn
             // Portal
             call(10, move |obj| {
                 obj.arg.3 = 0; // Prevent Long Portal Transition
@@ -1391,6 +1542,47 @@ fn patch_castles(patcher: &mut Patcher) {
             clear_disable_flag(42),
             clear_disable_flag(43),
         ],
+    );
+    const ZELDA_SPAWN_INDEX: i32 = 5;
+    const GATE_SPAWN_INDEX: i32 = 64;
+
+    // Hyrule Castle Gate Convenience Warp
+    patcher.add_obj(
+        FieldLight,
+        18,
+        Obj::green_warp(
+            Flag::HC_YUGA_DEFEATED,
+            0,
+            Some(164),
+            537,
+            SpawnPoint::new(IndoorLight, 7, ZELDA_SPAWN_INDEX),
+            Vec3 { x: 0.0, y: 0.0, z: 8.0 },
+        ),
+    );
+    // Zelda's Study Convenience Warp
+    patcher.add_obj(
+        IndoorLight,
+        7,
+        Obj::green_warp(
+            Flag::HC_YUGA_DEFEATED,
+            0,
+            Some(19),
+            44,
+            SpawnPoint::new(FieldLight, 18, GATE_SPAWN_INDEX),
+            Vec3 { x: 0.0, y: 0.0, z: -5.8 },
+        ),
+    );
+    // Hyrule Castle Gate spawn point
+    patcher.add_system(
+        FieldLight,
+        18,
+        Obj::spawn_point(GATE_SPAWN_INDEX, 0, 165, 538, Vec3 { x: 0.0, y: 0.0, z: 8.0 }),
+    );
+    // Zelda's Study spawn point
+    patcher.add_system(
+        IndoorLight,
+        7,
+        Obj::spawn_point(ZELDA_SPAWN_INDEX, 0, 20, 45, Vec3 { x: 0.0, y: 0.0, z: -5.8 }),
     );
 
     // Hilda's Study
@@ -1501,61 +1693,13 @@ fn patch_thief_girl_cave(patcher: &mut Patcher) {
         15,
         [
             // Thief Girl w/ Mask
-            call(8, move |obj| {
-                //obj.set_enable_flag(prize_flag);
-                obj.srt.rotate.y = 0.0;
-            }),
-            //set_enable_flag(9, prize_flag), // Chest
+            // set_enable_flag(8, prize_flag), // Thief Girl
+            // set_enable_flag(9, prize_flag), // Chest
             disable(10), // Entrance text
             disable(11), // AreaSwitchCube
             disable(13), // It's a secret to everybody
         ],
     );
-}
-
-/// Disable Portals when Flag 510 isn't set.
-#[allow(unused)] // TODO Save this for when Earthquake is implemented.
-fn patch_portals(patcher: &mut Patcher) {
-    // Stylish Woman's Portal
-    patcher.modify_objs(IndoorLight, 14, [set_enable_flag(7, Flag::EARTHQUAKE)]);
-
-    // Desert Portals
-    patcher.modify_objs(FieldLight, 31, [set_enable_flag(40, Flag::EARTHQUAKE)]);
-    patcher.modify_objs(FieldLight, 31, [set_enable_flag(41, Flag::EARTHQUAKE)]);
-    patcher.modify_objs(FieldLight, 31, [set_enable_flag(42, Flag::EARTHQUAKE)]);
-    patcher.modify_objs(FieldLight, 31, [set_enable_flag(43, Flag::EARTHQUAKE)]);
-    patcher.modify_objs(FieldLight, 31, [set_enable_flag(45, Flag::EARTHQUAKE)]);
-    patcher.modify_objs(FieldLight, 31, [set_enable_flag(16, Flag::EARTHQUAKE)]);
-
-    // Lorule Portals
-    patcher.modify_objs(FieldDark, 1, [set_enable_flag(366, Flag::EARTHQUAKE)]);
-    patcher.modify_objs(FieldDark, 2, [set_enable_flag(135, Flag::EARTHQUAKE)]);
-    patcher.modify_objs(FieldDark, 3, [set_enable_flag(45, Flag::EARTHQUAKE)]);
-    patcher.modify_objs(FieldDark, 4, [set_enable_flag(29, Flag::EARTHQUAKE)]);
-    patcher.modify_objs(FieldDark, 4, [set_enable_flag(70, Flag::EARTHQUAKE)]);
-    patcher.modify_objs(FieldDark, 12, [set_enable_flag(20, Flag::EARTHQUAKE)]);
-    patcher.modify_objs(FieldDark, 13, [set_enable_flag(60, Flag::EARTHQUAKE)]);
-    patcher.modify_objs(FieldDark, 15, [set_enable_flag(110, Flag::EARTHQUAKE)]);
-    patcher.modify_objs(FieldDark, 16, [set_enable_flag(56, Flag::EARTHQUAKE)]);
-    patcher.modify_objs(FieldDark, 16, [set_enable_flag(92, Flag::EARTHQUAKE)]);
-    patcher.modify_objs(FieldDark, 22, [set_enable_flag(26, Flag::EARTHQUAKE)]);
-    patcher.modify_objs(FieldDark, 27, [set_enable_flag(57, Flag::EARTHQUAKE)]);
-    patcher.modify_objs(FieldDark, 29, [set_enable_flag(53, Flag::EARTHQUAKE)]);
-    patcher.modify_objs(FieldDark, 30, [set_enable_flag(27, Flag::EARTHQUAKE)]);
-    patcher.modify_objs(FieldDark, 31, [set_enable_flag(13, Flag::EARTHQUAKE)]);
-    patcher.modify_objs(FieldDark, 31, [set_enable_flag(53, Flag::EARTHQUAKE)]);
-    patcher.modify_objs(FieldDark, 31, [set_enable_flag(54, Flag::EARTHQUAKE)]);
-    patcher.modify_objs(FieldDark, 31, [set_enable_flag(55, Flag::EARTHQUAKE)]);
-    patcher.modify_objs(FieldDark, 31, [set_enable_flag(56, Flag::EARTHQUAKE)]);
-    patcher.modify_objs(FieldDark, 31, [set_enable_flag(58, Flag::EARTHQUAKE)]);
-    patcher.modify_objs(FieldDark, 32, [set_enable_flag(86, Flag::EARTHQUAKE)]);
-    patcher.modify_objs(FieldDark, 32, [set_enable_flag(93, Flag::EARTHQUAKE)]);
-    patcher.modify_objs(FieldDark, 33, [set_enable_flag(216, Flag::EARTHQUAKE)]);
-    patcher.modify_objs(FieldDark, 35, [set_enable_flag(30, Flag::EARTHQUAKE)]);
-    patcher.modify_objs(FieldDark, 36, [set_enable_flag(43, Flag::EARTHQUAKE)]);
-    patcher.modify_objs(FieldDark, 37, [set_enable_flag(32, Flag::EARTHQUAKE)]);
-    //patcher.modify_objs(IndoorDark, 5, [set_enable_flag(14, Flag::EARTHQUAKE)]);
-    patcher.modify_objs(CaveDark, 5, [set_enable_flag(8, Flag::EARTHQUAKE)]);
 }
 
 /// Mother Maiamai's Cave
@@ -1618,55 +1762,13 @@ fn patch_big_problem_chests(patcher: &mut Patcher, settings: &Settings) {
     }
 }
 
-fn patch_softlock_prevention(patcher: &mut Patcher, _settings: &Settings) {
-    // Gales 1F - Add trigger to drop wall if player entered miniboss without hitting switch
+/// Gales Softlock Prevention - Add trigger to drop wall if player entered miniboss without hitting switch
+fn patch_gales_softlock(patcher: &mut Patcher, _settings: &Settings) {
     patcher.add_obj(
         DungeonWind,
         1,
         Obj::trigger_cube(Flag::Course(60), 2, 146, 454, Vec3 { x: 16.5, y: 2.5, z: -19.0 }),
     );
-
-    // Dark Maze w/o Merge
-    // match settings.logic.weather_vanes {
-    //     ActiveWeatherVanes::Lorule | ActiveWeatherVanes::All => {
-    //         // 1st Prison Cell softlock prevention
-    //         patcher.add_obj(
-    //             FieldDark,
-    //             20,
-    //             Obj::warp_tile(
-    //                 Flag::Event(1),
-    //                 0,
-    //                 66,
-    //                 245,
-    //                 0,
-    //                 1,
-    //                 19,
-    //                 Vec3 { x: 1.0 + 2.0, y: 0.5, z: 23.0 },
-    //             ),
-    //         );
-    //
-    //         // 2nd Prison Cell softlock prevention
-    //         patcher.add_obj(
-    //             FieldDark,
-    //             20,
-    //             Obj::warp_tile(
-    //                 Flag::Event(1),
-    //                 0,
-    //                 67,
-    //                 246,
-    //                 0,
-    //                 1,
-    //                 19,
-    //                 Vec3 { x: -17.0 + 2.5, y: 0.5, z: -17.0 },
-    //             ),
-    //         );
-    //     }
-    //     _ => {}
-    // };
-
-    // Swamp Palace SE Room w/o Merge
-    // Swamp Palace SW Room w/o Merge
-    // Skull Woods B2 Boss Hallway w/o Fire
 }
 
 /// Big Bomb Flower Skip
@@ -1770,9 +1872,8 @@ fn patch_no_progression_enemies(patcher: &mut Patcher, settings: &Settings) {
 /// Make changes here for dev & testing we don't want to risk making it into the actual release.
 fn do_dev_stuff(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
     if !settings.dev_mode {
-        //return Ok(()); FIXME DO NOT LEAVE ON
+        return Ok(());
     }
-
 
     // Ravio's Shop Exit Door
     patcher.modify_objs(IndoorLight, 1, [call(24, |obj| {

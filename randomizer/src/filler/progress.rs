@@ -1,36 +1,40 @@
+use crate::filler::filler_item::Item::Quake;
 use crate::filler::filler_item::Vane;
-use crate::filler::filler_item::{FillerItem, Goal, Item};
-use crate::filler::item_pools::{get_gold_rupee_pool, get_maiamai_pool, get_purple_rupee_pool, get_silver_rupee_pool};
-use crate::DashSet;
+use crate::filler::filler_item::{Goal, Item, Randomizable};
+use crate::filler::item_pools;
+use crate::{DashSet, SeedInfo};
 use modinfo::settings::keysy::Keysy;
+use modinfo::settings::portals::Portals;
+use modinfo::settings::ravios_shop::RaviosShop;
+use modinfo::settings::trials_door::TrialsDoor;
 use modinfo::settings::weather_vanes::WeatherVanes;
 use modinfo::settings::{pedestal::PedestalSetting, Settings};
 
-#[derive(Clone)]
-pub struct Progress {
-    items: DashSet<FillerItem>,
-    settings: Settings,
+#[derive(Clone, Debug)]
+pub struct Progress<'s> {
+    items: DashSet<Randomizable>,
+    seed_info: &'s SeedInfo,
 }
 
-impl Progress {
-    pub fn new(settings: &Settings) -> Self {
-        Self { items: Default::default(), settings: settings.clone() }
+impl<'s> Progress<'s> {
+    pub fn new(seed_info: &'s SeedInfo) -> Progress<'s> {
+        Self { items: Default::default(), seed_info }
     }
 
-    pub fn get_items(&self) -> &DashSet<FillerItem> {
+    pub fn get_items(&self) -> &DashSet<Randomizable> {
         &self.items
     }
 
     pub fn get_settings(&self) -> &Settings {
-        &self.settings
+        &self.seed_info.settings
     }
 
-    pub fn add_item(&mut self, item: impl Into<FillerItem>) {
+    pub fn add_item(&mut self, item: impl Into<Randomizable>) {
         self.items.insert(item.into());
     }
 
-    pub fn difference(&self, other: &Progress) -> DashSet<FillerItem> {
-        let mut new_items: DashSet<FillerItem> = Default::default();
+    pub fn difference(&self, other: &Progress) -> DashSet<Randomizable> {
+        let mut new_items: DashSet<Randomizable> = Default::default();
 
         for item in &self.items {
             if !other.items.contains(item) {
@@ -41,21 +45,21 @@ impl Progress {
         new_items
     }
 
-    pub fn has(&self, item: impl Into<FillerItem>) -> bool {
+    pub fn has(&self, item: impl Into<Randomizable>) -> bool {
         self.items.contains(&item.into())
     }
 
-    fn has_either(&self, item1: impl Into<FillerItem>, item2: impl Into<FillerItem>) -> bool {
+    fn has_either(&self, item1: impl Into<Randomizable>, item2: impl Into<Randomizable>) -> bool {
         self.items.contains(&item1.into()) || self.items.contains(&item2.into())
     }
 
-    fn has_both(&self, item1: impl Into<FillerItem>, item2: impl Into<FillerItem>) -> bool {
+    fn has_both(&self, item1: impl Into<Randomizable>, item2: impl Into<Randomizable>) -> bool {
         self.items.contains(&item1.into()) && self.items.contains(&item2.into())
     }
 
     fn has_any<T>(&self, items: impl IntoIterator<Item = T>) -> bool
     where
-        T: Into<FillerItem>,
+        T: Into<Randomizable>,
     {
         for item in items {
             if self.has(item.into()) {
@@ -67,14 +71,14 @@ impl Progress {
 
     fn has_amount<T>(&self, amount: u8, items: impl IntoIterator<Item = T>) -> bool
     where
-        T: Into<FillerItem>,
+        T: Into<Randomizable>,
     {
         self.count(items) >= amount
     }
 
     fn count<T>(&self, items: impl IntoIterator<Item = T>) -> u8
     where
-        T: Into<FillerItem>,
+        T: Into<Randomizable>,
     {
         let mut sum: u8 = 0;
         for item in items {
@@ -86,10 +90,16 @@ impl Progress {
         sum
     }
 
+    pub fn hearts(&self, amount: f32) -> bool {
+        let heart_containers = self.count(item_pools::get_heart_containers()) as f32;
+        let heart_pieces = self.count(item_pools::get_heart_pieces()) as f32;
+        3.0 + heart_containers + (0.25 * heart_pieces) >= amount
+    }
+
     pub fn has_rupees(&self, amount: u16) -> bool {
-        let purples = self.count(get_purple_rupee_pool());
-        let silvers = self.count(get_silver_rupee_pool());
-        let golds = self.count(get_gold_rupee_pool());
+        let purples = self.count(item_pools::get_purple_rupee_pool());
+        let silvers = self.count(item_pools::get_silver_rupee_pool());
+        let golds = self.count(item_pools::get_gold_rupee_pool());
 
         amount <= (purples as u16 * 50) + (silvers as u16 * 100) + (golds as u16 * 300)
     }
@@ -221,14 +231,14 @@ impl Progress {
     }
 
     pub fn are_hyrule_vanes_active(&self) -> bool {
-        match self.settings.weather_vanes {
+        match self.seed_info.settings.weather_vanes {
             WeatherVanes::Hyrule | WeatherVanes::All => true,
             _ => false,
         }
     }
 
     pub fn are_lorule_vanes_active(&self) -> bool {
-        match self.settings.weather_vanes {
+        match self.seed_info.settings.weather_vanes {
             WeatherVanes::Lorule | WeatherVanes::All => true,
             _ => false,
         }
@@ -266,8 +276,12 @@ impl Progress {
         self.has(Item::Flippers)
     }
 
+    pub fn are_portals_open(&self) -> bool {
+        self.seed_info.settings.portals == Portals::Open || self.has(Quake)
+    }
+
     pub fn can_merge(&self) -> bool {
-        self.settings.start_with_merge || self.has_both(Item::RaviosBracelet01, Item::RaviosBracelet02)
+        self.seed_info.settings.start_with_merge || self.has_both(Item::RaviosBracelet01, Item::RaviosBracelet02)
     }
 
     pub fn has_mail(&self) -> bool {
@@ -287,7 +301,7 @@ impl Progress {
     }
 
     pub fn has_maiamai(&self, amount: u8) -> bool {
-        self.has_amount(amount, get_maiamai_pool())
+        self.has_amount(amount, item_pools::get_maiamai_pool())
     }
 
     pub fn has_smooth_gem(&self) -> bool {
@@ -315,15 +329,15 @@ impl Progress {
     }
 
     pub fn swordless_mode(&self) -> bool {
-        self.settings.swordless_mode
+        self.seed_info.settings.swordless_mode
     }
 
     pub fn nice_mode(&self) -> bool {
-        self.settings.nice_mode
+        self.seed_info.settings.nice_mode
     }
 
     pub fn progression_enemies(&self) -> bool {
-        !self.settings.no_progression_enemies
+        !self.seed_info.settings.no_progression_enemies
     }
 
     pub fn break_floor_tiles(&self) -> bool {
@@ -335,7 +349,7 @@ impl Progress {
     }
 
     pub fn lampless(&self) -> bool {
-        self.settings.dark_rooms_lampless
+        self.seed_info.settings.dark_rooms_lampless
     }
 
     pub fn can_great_spin(&self) -> bool {
@@ -472,14 +486,14 @@ impl Progress {
     // KEYS ------------------------------------------------------------------------------------------------------------
 
     fn is_small_keysy(&self) -> bool {
-        match self.settings.keysy {
+        match self.seed_info.settings.keysy {
             Keysy::SmallKeysy | Keysy::AllKeysy => true,
             _ => false,
         }
     }
 
     fn is_big_keysy(&self) -> bool {
-        match self.settings.keysy {
+        match self.seed_info.settings.keysy {
             Keysy::BigKeysy | Keysy::AllKeysy => true,
             _ => false,
         }
@@ -621,15 +635,15 @@ impl Progress {
     }
 
     pub fn has_completed_trials(&self) -> bool {
-        self.settings.skip_trials
-            || (self.has(Goal::LcBombTrial)
-                && self.has(Goal::LcTileTrial)
-                && self.has(Goal::LcLampTrial)
-                && self.has(Goal::LcHookTrial))
+        self.seed_info.settings.trials_door == TrialsDoor::Off
+            || ((self.has(Goal::LcBombTrial) || !self.seed_info.trials_config.bomb_trial)
+                && (self.has(Goal::LcTileTrial) || !self.seed_info.trials_config.tile_trial)
+                && (self.has(Goal::LcLampTrial) || !self.seed_info.trials_config.lamp_trial)
+                && (self.has(Goal::LcHookTrial) || !self.seed_info.trials_config.hook_trial))
     }
 
     pub fn has_bow_of_light(&self) -> bool {
-        if self.settings.progressive_bow_of_light {
+        if self.seed_info.settings.progressive_bow_of_light {
             self.has(Item::Bow01) && self.has(Item::Bow02) && self.has(Item::Bow03)
         } else {
             self.has(Item::BowOfLight)
@@ -720,7 +734,7 @@ impl Progress {
     }
 
     pub fn is_ravio_shop_open(&self) -> bool {
-        self.has(Goal::RavioShopOpen)
+        self.has(Goal::RavioShopOpen) || self.seed_info.settings.ravios_shop == RaviosShop::Open
     }
 
     pub fn has_bomb_flower(&self) -> bool {
@@ -738,15 +752,10 @@ impl Progress {
     pub fn has_required_pendants(&self) -> bool {
         self.has(Item::PendantOfWisdom)
             && self.has(Item::PendantOfPower)
-            && match self.settings.ped_requirement {
+            && match self.seed_info.settings.ped_requirement {
                 PedestalSetting::Vanilla => true,
                 PedestalSetting::Standard => self.has_pendant_of_courage(),
             }
-    }
-
-    /// Reverse Sage Events
-    pub fn is_rse(&self) -> bool {
-        self.settings.reverse_sage_events
     }
 
     pub fn has_sage_gulley(&self) -> bool {
@@ -780,7 +789,7 @@ impl Progress {
     pub fn has_lc_requirement(&self) -> bool {
         use Item::*;
         self.has_amount(
-            self.settings.lc_requirement,
+            self.seed_info.settings.lc_requirement,
             [SageGulley, SageOren, SageSeres, SageOsfala, SageImpa, SageIrene, SageRosso],
         )
     }
@@ -788,9 +797,13 @@ impl Progress {
     pub fn has_yuganon_requirement(&self) -> bool {
         use Item::*;
         self.has_amount(
-            self.settings.yuganon_requirement,
+            self.seed_info.settings.yuganon_requirement,
             [SageGulley, SageOren, SageSeres, SageOsfala, SageImpa, SageIrene, SageRosso],
         )
+    }
+
+    pub fn has_saved_thief_girl(&self) -> bool {
+        self.has(Goal::Stalblind)
     }
 
     pub fn has_opened_stylish_womans_house(&self) -> bool {

@@ -92,12 +92,19 @@ fn determine_settings(opt_preset: Option<String>, opt_seed: Option<u32>) -> (Opt
         });
 
         if seed_info.version != VERSION {
-            fail!("There was a Version mismatch between the Randomizer and the Preset file.\nRandomizer Version: \"{}\"\nPreset Version:     \"{}\"", VERSION, seed_info.version);
+            fail!(
+                "There is a Version mismatch between the Randomizer and the Preset file.\n\
+                Randomizer Version: \"{}\"\n\
+                Preset Version:     \"{}\"",
+                VERSION,
+                seed_info.version
+            );
         }
 
         let mut seeded = false;
         if let Some(seed) = opt_seed {
             if seed_info.seed != 0 {
+                println!();
                 warn!("Two seed numbers provided! Defaulting to the command line argument.\n");
             }
 

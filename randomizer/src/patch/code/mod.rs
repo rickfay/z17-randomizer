@@ -1,6 +1,6 @@
 use super::Patcher;
-use crate::filler::filler_item::FillerItem;
 use crate::filler::filler_item::Item::*;
+use crate::filler::filler_item::Randomizable;
 use crate::{patch::util::prize_flag, regions, Layout, Result, SeedInfo};
 use arm::*;
 use game::Item::*;
@@ -172,7 +172,7 @@ pub fn create(patcher: &Patcher, SeedInfo { layout, settings, .. }: &SeedInfo) -
     configure_pedestal_requirements(&mut code, settings);
     night_mode(&mut code, settings);
     show_hint_ghosts(&mut code);
-    // earthquake(&mut code);
+    earthquake(&mut code);
     mother_maiamai(&mut code, &layout);
     pause_menu_warp(&mut code);
     // golden_bees(&mut code);
@@ -284,7 +284,7 @@ pub fn create(patcher: &Patcher, SeedInfo { layout, settings, .. }: &SeedInfo) -
     code.patch(0x1D6DBC, [ldr(R1, (R4, 0x2E)), mov(R0, R0)]);
 
     // Premium Milk
-    if layout.find_single(FillerItem::Item(LetterInABottle)).is_none() {
+    if layout.find_single(Randomizable::Item(LetterInABottle)).is_none() {
         // This code makes the Premium Milk work correctly when picked up without having first picked up the Letter.
         // This patch is only applied when the Milk is shuffled in the rando instead of the Letter.
         // If it's desired to have both shuffled at once then this code needs to be re-written.
@@ -343,7 +343,6 @@ fn file_select_screen_background(code: &mut Code) {
 }
 
 /// Create new Earthquake item that sets Flag 510
-#[allow(unused)]
 fn earthquake(code: &mut Code) {
     let earthquake = code.text().define([
         // TODO Play Earthquake Noise:
@@ -353,12 +352,12 @@ fn earthquake(code: &mut Code) {
         // Set Flag
         ldr(R0, EVENT_FLAG_PTR),
         mov(R2, 0x1),
-        ldr(R1, Flag::EARTHQUAKE.get_value()),
+        ldr(R1, Flag::QUAKE.get_value()), // Quake
         ldr(R0, (R0, 0x0)),
         bl(FN_SET_EVENT_FLAG),
         b(0x344f00),
     ]);
-    code.addr(0x3448ec, earthquake); // Rented Shield -> Earthquake
+    code.addr(0x344848, earthquake); // Empty -> Quake
 }
 
 /// Mother Maiamai Stuff
@@ -498,6 +497,7 @@ fn golden_bees(code: &mut Code) {
 
 /// Show Hint Ghosts always, without the need for the Hint Glasses
 fn show_hint_ghosts(code: &mut Code) {
+
     // Allow talking to Hint Ghosts without glasses
     code.patch(0x1cb3c8, [mov(R0, 0x1)]);
 
@@ -551,21 +551,21 @@ fn configure_pedestal_requirements(code: &mut Code, settings: &Settings) {
                 // Power
                 ldr(R0, EVENT_FLAG_PTR),
                 ldr(R0, (R0, 0x0)),
-                ldr(R1, prize_flag(FillerItem::Item(PendantOfPower)).get_value() as u32),
+                ldr(R1, prize_flag(Randomizable::Item(PendantOfPower)).get_value() as u32),
                 bl(FN_GET_EVENT_FLAG),
                 cmp(R0, 0x0),
                 b(RETURN_LABEL).eq(),
                 // Wisdom
                 ldr(R0, EVENT_FLAG_PTR),
                 ldr(R0, (R0, 0x0)),
-                ldr(R1, prize_flag(FillerItem::Item(PendantOfWisdom)).get_value() as u32),
+                ldr(R1, prize_flag(Randomizable::Item(PendantOfWisdom)).get_value() as u32),
                 bl(FN_GET_EVENT_FLAG),
                 cmp(R0, 0x0),
                 b(RETURN_LABEL).eq(),
                 // Courage
                 ldr(R0, EVENT_FLAG_PTR),
                 ldr(R0, (R0, 0x0)),
-                ldr(R1, prize_flag(FillerItem::Item(PendantOfCourage)).get_value() as u32),
+                ldr(R1, prize_flag(Randomizable::Item(PendantOfCourage)).get_value() as u32),
                 bl(FN_GET_EVENT_FLAG),
                 cmp(R0, 0x0),
                 b(RETURN_LABEL).eq(),
@@ -960,7 +960,7 @@ const ACTOR_NAMES: [(game::Item, &str); 44] = [
     (PendantWisdom, "Pendant"),
     (PendantCourage, "Pendant"),
     (ZeldaAmulet, "Pendant"),
-    (game::Item::Empty, "DeliverSwordBroken"),
+    (game::Item::Empty, "KeyBoss"),
     (EscapeFruit, "FruitEscape"),
     (StopFruit, "FruitStop"),
     (SpecialMove, "SwordD"),
@@ -1017,7 +1017,7 @@ const ITEM_NAMES: [(game::Item, &str); 63] = [
     (ItemSwordLv2, "mastersword"),
     (ItemSwordLv3, "mastersword"),
     (ItemSwordLv4, "mastersword"),
-    (game::Item::Empty, "mastersword"),
+    (game::Item::Empty, "gamecoin"),
     (MessageBottle, "messagebottle"),
     (Milk, "milk"),
     (MilkMatured, "milk_matured"),

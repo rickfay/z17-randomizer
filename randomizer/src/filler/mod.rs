@@ -1,13 +1,13 @@
 use crate::filler::check::Check;
-use crate::filler::filler_item::FillerItem::{Portal, Vane};
 use crate::filler::filler_item::Item;
+use crate::filler::filler_item::Randomizable::{Portal, Vane};
 use crate::filler::item_pools::{get_maiamai_pool, Pool};
 use crate::filler::location::Location;
 use crate::filler::progress::Progress;
 use crate::{world::WorldGraph, CheckMap, DashMap, SeedInfo};
 use log::{error, info, warn};
 use macros::fail;
-use modinfo::settings::{logic::LogicMode::*, Settings};
+use modinfo::settings::logic::LogicMode;
 use path::Path;
 use queue::Queue;
 use rand::{rngs::StdRng, Rng};
@@ -24,7 +24,8 @@ pub mod logic;
 pub mod path;
 pub mod portals;
 pub mod progress;
-pub(crate) mod tower;
+pub(crate) mod treacherous_tower;
+pub(crate) mod trials;
 pub mod util;
 pub mod vanes;
 
@@ -107,7 +108,7 @@ fn place_portals(SeedInfo { portal_map, .. }: &SeedInfo, check_map: &mut CheckMa
         ("Lorule Floating Island Portal", FloatingIslandLorule),
         ("Lorule River Portal", RiverLorule),
         ("Lorule Lake Portal", LoruleLake),
-        ("Lorule Coldfoot Portal", LoruleColdfoot),
+        ("Lorule Hotfoot Portal", LoruleHotfoot),
         ("Philosopher's Cave Portal", Philosopher),
         ("Lorule Graveyard Ledge Portal", GraveyardLedgeLorule),
         ("Lorule Rosso's Ore Mine Portal", RossosOreMineLorule),
@@ -278,7 +279,7 @@ fn preplace_items(
         }
 
         match settings.logic_mode {
-            Normal => {},
+            LogicMode::Normal => {},
             _ => {
                 weapons.extend_from_slice(&[Item::Lamp01, Item::Net01]);
             },
@@ -301,40 +302,43 @@ fn preplace_items(
 }
 
 /// Handle Exclusions
-fn handle_exclusions(
-    rng: &mut StdRng, SeedInfo { settings, .. }: &mut SeedInfo, check_map: &mut CheckMap, junk: &mut Vec<Item>,
-) {
-    settings.exclusions.insert("100 Maiamai".to_string());
+fn handle_exclusions(rng: &mut StdRng, seed_info: &mut SeedInfo, check_map: &mut CheckMap, junk: &mut Vec<Item>) {
+    seed_info.full_exclusions = seed_info.settings.user_exclusions.clone();
+
+    // todo
+    seed_info.full_exclusions.insert("100 Maiamai".to_string());
 
     // Exclude Minigames
-    if settings.minigames_excluded {
-        settings.exclusions.insert("Dodge the Cuccos".to_string());
-        settings.exclusions.insert("Hyrule Hotfoot 75s".to_string());
-        settings.exclusions.insert("Hyrule Hotfoot 65s".to_string());
-        settings.exclusions.insert("Rupee Rush (Hyrule)".to_string());
-        settings.exclusions.insert("Rupee Rush (Lorule)".to_string());
-        settings.exclusions.insert("Octoball Derby".to_string());
-        settings.exclusions.insert("Treacherous Tower".to_string());
+    if seed_info.settings.minigames_excluded {
+        seed_info.full_exclusions.insert("Dodge the Cuccos".to_string());
+        seed_info.full_exclusions.insert("Hyrule Hotfoot 75s".to_string());
+        seed_info.full_exclusions.insert("Hyrule Hotfoot 65s".to_string());
+        seed_info.full_exclusions.insert("Rupee Rush (Hyrule)".to_string());
+        seed_info.full_exclusions.insert("Rupee Rush (Lorule)".to_string());
+        seed_info.full_exclusions.insert("Octoball Derby".to_string());
+        seed_info.full_exclusions.insert("Treacherous Tower".to_string());
 
         // For Maiamai Madness, also turn the rupee rush maiamai into random junk
-        if settings.maiamai_madness {
-            settings.exclusions.insert("[Mai] Hyrule Rupee Rush Wall".to_string());
-            settings.exclusions.insert("[Mai] Lorule Rupee Rush Wall".to_string());
+        if seed_info.settings.maiamai_madness {
+            seed_info.full_exclusions.insert("[Mai] Hyrule Rupee Rush Wall".to_string());
+            seed_info.full_exclusions.insert("[Mai] Lorule Rupee Rush Wall".to_string());
         }
     }
 
-    for exclusion in &settings.exclusions {
+    for exclusion in &seed_info.full_exclusions {
         if check_map.contains_key(exclusion) {
             let check_name = exclusion.to_owned();
 
             if let Some(Some(_)) = check_map.get(&check_name) {
-                warn!("Other settings prevented excluding: \"{}\"", check_name);
+                println!();
+                warn!("Other settings prevented excluding: \"{}\"\n", check_name);
                 continue;
             }
 
             let index = rng.gen_range(0..junk.len());
             check_map.insert(check_name, Some(junk.remove(index).into()));
         } else {
+            println!();
             error!("Could not exclude \"{}\", no matching check found with that name.", exclusion);
             fail!("Consult a spoiler log for a list of valid check names.");
         }
@@ -537,7 +541,7 @@ fn filter_dungeon_checks(item: Item, eligible_checks: Vec<Check>) -> Vec<Check> 
         SkullCompass | SkullKeyBig | SkullKeySmall01 | SkullKeySmall02 | SkullKeySmall03 => vec![
             "[SW] (B1) Gibdo Room (Lower)", "[SW] (B1) South Chest", "[SW] (B1) Gibdo Room (Hole)",
             "[SW] (B1) Grate Room", "[SW] (B2) Moving Platform Room", "[SW] (B1) Big Chest (Upper)",
-            // "Skull Woods Outdoor Chest",
+            // "[SW] Outdoor Chest",
             "[SW] (B1) Big Chest (Eyes)", "[SW] Knucklemaster",
         ],
         ThievesCompass | ThievesKeyBig | ThievesKeySmall => vec![
@@ -624,8 +628,8 @@ pub fn prefill_check_map(world_graph: &mut WorldGraph) -> CheckMap {
 }
 
 /// This translation is probably adding unnecessary overhead, oh well
-fn build_progress_from_items<'s>(items: &Pool, settings: &Settings) -> Progress {
-    let mut progress = Progress::new(settings);
+fn build_progress_from_items<'s>(items: &Pool, seed_info: &'s SeedInfo) -> Progress<'s> {
+    let mut progress = Progress::new(seed_info);
     for item in items {
         progress.add_item(*item);
     }
@@ -639,14 +643,14 @@ fn build_progress_from_items<'s>(items: &Pool, settings: &Settings) -> Progress 
 fn verify_all_locations_accessible(
     seed_info: &SeedInfo, check_map: &mut CheckMap, progression_pool: &mut Pool,
 ) -> Result<(), Error> {
-    if NoLogic.eq(&seed_info.settings.logic_mode) {
+    if LogicMode::NoLogic.eq(&seed_info.settings.logic_mode) {
         return Ok(()); // Skip this check on No Logic
     }
 
     info!("Verifying all locations accessible...");
     let reachable_checks = assumed_search(seed_info, progression_pool, check_map); //find_reachable_checks(loc_map, &everything, &mut check_map); //
 
-    const STANDARD_CHECKS: usize = 265;
+    const STANDARD_CHECKS: usize = 264;
     const MAIAMAI: usize = 100;
     const DUNGEON_PRIZES: usize = 10;
     const STATIC_ITEMS: usize = 20;
@@ -723,9 +727,9 @@ pub(crate) fn find_reachable_checks(SeedInfo { world_graph, .. }: &SeedInfo, pro
 }
 
 pub(crate) fn get_items_from_reachable_checks<'s>(
-    SeedInfo { settings, vane_map, .. }: &SeedInfo, reachable_checks: &Vec<Check>, check_map: &mut CheckMap,
-) -> Progress {
-    let mut progress = Progress::new(settings);
+    seed_info: &'s SeedInfo, reachable_checks: &Vec<Check>, check_map: &mut CheckMap,
+) -> Progress<'s> {
+    let mut progress = Progress::new(seed_info);
 
     for check in reachable_checks {
         // Items already placed in the world that can be picked up
@@ -733,7 +737,7 @@ pub(crate) fn get_items_from_reachable_checks<'s>(
         match placed_item {
             None => {},
             Some(item) => match item {
-                Vane(vane) => progress.add_item(*vane_map.get(vane).unwrap()),
+                Vane(vane) => progress.add_item(*seed_info.vane_map.get(vane).unwrap()),
                 _ => progress.add_item(*item),
             },
         }
@@ -741,7 +745,7 @@ pub(crate) fn get_items_from_reachable_checks<'s>(
         // Quest items that will always be at a given check
         if let Some(quest) = check.get_quest() {
             match quest {
-                Vane(vane) => progress.add_item(*vane_map.get(&vane).unwrap()),
+                Vane(vane) => progress.add_item(*seed_info.vane_map.get(&vane).unwrap()),
                 _ => progress.add_item(quest),
             }
         }
@@ -782,6 +786,10 @@ fn assumed_fill(
         let filtered_checks = filter_checks(item, &reachable_checks, check_map);
 
         if filtered_checks.is_empty() {
+            info!("item:            {:?}", item);
+            info!("filtered_checks: {:?}", filtered_checks);
+            info!("check_map:       {:?}", check_map);
+
             return Err(crate::Error::game(format!("No reachable checks found to place: {:?}", item)));
         }
 
@@ -801,7 +809,7 @@ fn assumed_fill(
 /// all such items have been exhausted.
 ///
 fn assumed_search(seed_info: &SeedInfo, items_owned: &Pool, check_map: &mut CheckMap) -> Vec<Check> {
-    let mut considered_items = build_progress_from_items(items_owned, &seed_info.settings);
+    let mut considered_items = build_progress_from_items(items_owned, seed_info);
     let mut reachable_checks: Vec<Check>;
 
     loop {

@@ -1,4 +1,4 @@
-use crate::filler::filler_item::FillerItem;
+use crate::filler::filler_item::Randomizable;
 use crate::filler::item_pools;
 use crate::filler::location::Location;
 use crate::Result;
@@ -8,6 +8,7 @@ use log::info;
 use modinfo::settings::portal_shuffle::PortalShuffle;
 use modinfo::Settings;
 use rand::rngs::StdRng;
+use rand::Rng;
 use rom::flag::Flag;
 use rom::scene::SpawnPoint;
 use serde::{Serialize, Serializer};
@@ -70,7 +71,7 @@ pub enum Portal {
     FloatingIslandLorule,
     RiverLorule,
     LoruleLake,
-    LoruleColdfoot,
+    LoruleHotfoot,
     Philosopher,
     GraveyardLedgeLorule,
     RossosOreMineLorule,
@@ -88,7 +89,7 @@ impl Portal {
             | HyruleHotfoot | GraveyardLedgeHyrule => 1,
 
             VacantHouse | WaterfallLorule | DarkRuinsSE | MiseryMireExit | MireMiddle | MireSW | Zaganaga
-            | MireNorth | DeathWestLorule | FloatingIslandLorule | RiverLorule | LoruleLake | LoruleColdfoot
+            | MireNorth | DeathWestLorule | FloatingIslandLorule | RiverLorule | LoruleLake | LoruleHotfoot
             | GraveyardLedgeLorule => 2,
 
             ZorasDomain => 3,
@@ -115,7 +116,7 @@ impl Portal {
         use Portal::*;
         match self {
             VacantHouse | WaterfallLorule | DarkRuinsSE | MiseryMireExit | MireMiddle | MireSW | Zaganaga
-            | MireNorth | DeathWestLorule | FloatingIslandLorule | RiverLorule | LoruleLake | LoruleColdfoot
+            | MireNorth | DeathWestLorule | FloatingIslandLorule | RiverLorule | LoruleLake | LoruleHotfoot
             | GraveyardLedgeLorule => 1,
 
             YourHouse | WaterfallHyrule | EasternRuinsSE | MiseryMireEntrance | DesertMiddle | DesertSW
@@ -166,7 +167,7 @@ impl Portal {
             FloatingIslandHyrule => FloatingIslandLorule,
             RiverHyrule => RiverLorule,
             LakeHylia => LoruleLake,
-            HyruleHotfoot => LoruleColdfoot,
+            HyruleHotfoot => LoruleHotfoot,
             Sanctuary => Philosopher,
             GraveyardLedgeHyrule => GraveyardLedgeLorule,
             RossosOreMineHyrule => RossosOreMineLorule,
@@ -194,7 +195,7 @@ impl Portal {
             FloatingIslandLorule => FloatingIslandHyrule,
             RiverLorule => RiverHyrule,
             LoruleLake => LakeHylia,
-            LoruleColdfoot => HyruleHotfoot,
+            LoruleHotfoot => HyruleHotfoot,
             Philosopher => Sanctuary,
             GraveyardLedgeLorule => GraveyardLedgeHyrule,
             RossosOreMineLorule => RossosOreMineHyrule,
@@ -258,7 +259,7 @@ impl Portal {
             Portal::FloatingIslandLorule => (Location::FloatingIslandLorule, Location::FloatingIslandLorule),
             RiverLorule => (LoruleRiverPortalShallows, LoruleRiverPortalShallows),
             LoruleLake => (LoruleLakeNorthWest, LoruleLakeNorthWest),
-            LoruleColdfoot => (LoruleLakeEast, LoruleLakeEast),
+            LoruleHotfoot => (LoruleLakeEast, LoruleLakeEast),
             Philosopher => (LoruleSanctuaryCaveLower, LoruleSanctuaryCaveLower),
             Portal::GraveyardLedgeLorule => (LoruleGraveyard, LoruleGraveyard),
             Portal::RossosOreMineLorule => (Location::RossosOreMineLorule, Location::RossosOreMineLorule),
@@ -321,7 +322,7 @@ impl Portal {
             Self::FloatingIslandLorule => SpawnPoint::new(FieldDark, 4, 7),
             Self::RiverLorule => SpawnPoint::new(FieldDark, 29, 5),
             Self::LoruleLake => SpawnPoint::new(FieldDark, 35, 20),
-            Self::LoruleColdfoot => SpawnPoint::new(FieldDark, 36, 2),
+            Self::LoruleHotfoot => SpawnPoint::new(FieldDark, 36, 2),
             Self::Philosopher => SpawnPoint::new(CaveDark, 5, 3),
             Self::GraveyardLedgeLorule => SpawnPoint::new(FieldDark, 12, 20),
             Self::RossosOreMineLorule => SpawnPoint::new(FieldDark, 4, 3),
@@ -381,7 +382,7 @@ impl Portal {
             Self::FloatingIslandLorule => "Lorule Floating Island Portal",
             Self::RiverLorule => "Lorule River Portal",
             Self::LoruleLake => "Lorule Lake Portal",
-            Self::LoruleColdfoot => "Lorule Coldfoot Portal",
+            Self::LoruleHotfoot => "Lorule Hotfoot Portal",
             Self::Philosopher => "Philosopher's Cave Portal",
             Self::GraveyardLedgeLorule => "Lorule Graveyard Ledge Portal",
             Self::RossosOreMineLorule => "Lorule Rosso's Ore Mine Portal",
@@ -443,7 +444,7 @@ impl Portal {
             | Self::FloatingIslandLorule
             | Self::RiverLorule
             | Self::LoruleLake
-            | Self::LoruleColdfoot
+            | Self::LoruleHotfoot
             | Self::Philosopher
             | Self::GraveyardLedgeLorule
             | Self::RossosOreMineLorule
@@ -482,7 +483,7 @@ impl Portal {
             Self::RossosOreMineHyrule => Flag::PORTAL_ROSSOS_ORE_MINE_HYRULE,
             Self::SwampPillarHyrule => Flag::PORTAL_SWAMP_PILLAR_HYRULE,
             Self::ZorasDomain => Flag::PORTAL_ZORAS_DOMAIN,
-            Self::HyruleCastle => Flag::ZERO,
+            Self::HyruleCastle => Flag::ONE,
             Self::ThievesTown => Flag::PORTAL_THIEVES_TOWN,
             Self::VacantHouse => Flag::PORTAL_VACANT_HOUSE,
             Self::ParadoxRightLorule => Flag::PORTAL_PARADOX_UPPER_LORULE,
@@ -504,13 +505,13 @@ impl Portal {
             Self::FloatingIslandLorule => Flag::PORTAL_FLOATING_ISLAND_LORULE,
             Self::RiverLorule => Flag::PORTAL_RIVER_LORULE,
             Self::LoruleLake => Flag::PORTAL_LORULE_LAKE_WEST,
-            Self::LoruleColdfoot => Flag::PORTAL_LORULE_COLDFOOT,
+            Self::LoruleHotfoot => Flag::PORTAL_LORULE_COLDFOOT,
             Self::Philosopher => Flag::PORTAL_PHILOSOPHERS_CAVE,
             Self::GraveyardLedgeLorule => Flag::PORTAL_GRAVEYARD_LEDGE_LORULE,
             Self::RossosOreMineLorule => Flag::PORTAL_ROSSOS_ORE_MINE_LORULE,
             Self::SwampPillarLorule => Flag::PORTAL_SWAMP_PILLAR_LORULE,
             Self::KusDomain => Flag::PORTAL_KUS_DOMAIN,
-            Self::LoruleCastle => Flag::ZERO,
+            Self::LoruleCastle => Flag::ONE,
         }
     }
 }
@@ -533,10 +534,10 @@ impl PartialOrd<Portal> for Portal {
     }
 }
 
-impl From<FillerItem> for Portal {
-    fn from(filler_item: FillerItem) -> Self {
+impl From<Randomizable> for Portal {
+    fn from(filler_item: Randomizable) -> Self {
         match filler_item {
-            FillerItem::Portal(portal) => portal,
+            Randomizable::Portal(portal) => portal,
             _ => unreachable!("Not a Portal: {:?}", filler_item),
         }
     }
@@ -556,7 +557,7 @@ impl Serialize for Portal {
 ///
 /// The 6 pairs of "down-facing" Portals are only shuffled between themselves, for technical reasons
 pub fn build_portal_map(settings: &Settings, rng: &mut StdRng) -> Result<PortalMap> {
-    info!("Building Portal Map... {}", settings.portal_shuffle);
+    info!("Building Portal Map...");
     let mut portal_map: DashMap<_, _> = Default::default();
 
     let mut hyrule_up_portals = item_pools::get_hyrule_up_portals();
@@ -592,6 +593,14 @@ pub fn build_portal_map(settings: &Settings, rng: &mut StdRng) -> Result<PortalM
             create_map(&mut portal_map, &hyrule_portals, &lorule_portals);
         },
         PortalShuffle::AnyWorldPairs => {
+            // Force Hyrule Castle portal to always be paired with a Lorule (Up) portal
+            let hc_match = lorule_up_portals.remove(rng.gen_range(0..lorule_up_portals.len()));
+            hyrule_up_portals.retain(|&p| p != Portal::HyruleCastle);
+            lorule_up_portals.retain(|&p| p != hc_match);
+            portal_map.insert(Portal::HyruleCastle, hc_match);
+            portal_map.insert(hc_match, Portal::HyruleCastle);
+
+            //
             let mut up_portals = Vec::new();
             up_portals.extend(hyrule_up_portals);
             up_portals.extend(lorule_up_portals);
@@ -651,6 +660,20 @@ pub fn build_portal_map(settings: &Settings, rng: &mut StdRng) -> Result<PortalM
             }
         },
         PortalShuffle::MirroredAnyWorldPairs => {
+            // Force Hyrule Castle portal to always be paired with a Lorule (Up) portal
+            let hc_match = lorule_up_portals.remove(rng.gen_range(0..lorule_up_portals.len()));
+            hyrule_up_portals.retain(|&p| p != Portal::HyruleCastle);
+            lorule_up_portals.retain(|&p| p != hc_match);
+            portal_map.insert(Portal::HyruleCastle, hc_match);
+            portal_map.insert(hc_match, Portal::HyruleCastle);
+
+            // Mirror HC match
+            let hc_match_mirror = hc_match.get_mirror_portal();
+            lorule_up_portals.retain(|&p| p != Portal::LoruleCastle);
+            hyrule_up_portals.retain(|&p| p != hc_match_mirror);
+            portal_map.insert(Portal::LoruleCastle, hc_match_mirror);
+            portal_map.insert(hc_match_mirror, Portal::LoruleCastle);
+
             // UP
             let mut up_portals = Vec::new();
             up_portals.extend(hyrule_up_portals);

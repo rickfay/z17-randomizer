@@ -258,8 +258,6 @@ pub enum Location {
     IceRuinsBoss,
     IceRuinsPostBoss,
 
-    ChamberOfSages,
-
     LoruleCastle1F,
     LoruleCastleEastLedge1F,
     LoruleCastleCenter1F,

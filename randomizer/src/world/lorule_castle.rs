@@ -97,6 +97,7 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
                     edge!(HildasStudy => {
                         normal: |p| p.has_completed_trials(),
                         adv_glitched: |p| p.has_sword() && p.has_nice_bombs() && (p.has_bow() || p.can_merge()),
+                        hell: |p| p.has_sword() && p.has_bombs() && (p.has_bow() || p.can_merge()),
                     }),
                 ],
             ),
@@ -136,9 +137,9 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
                 "Hilda's Study",
                 None,
                 vec![
-                    edge!(LoruleCastle2F3F, |p| p.has_completed_trials()),
-                    portal_left(LoruleCastle, portal_map),
-                    portal_right(LoruleCastle, portal_map),
+                    edge!(LoruleCastle2F3F, |p| p.has_completed_trials() && p.hearts(13.0)),
+                    portal_left(LoruleCastle, portal_map, false),
+                    portal_right(LoruleCastle, portal_map, false),
                     edge!(LoruleBlacksmith),
                     edge!(ThroneRoom, |p| p.has_yuganon_requirement()),
                 ],

@@ -1,5 +1,6 @@
 use crate::filler::filler_item::Vane;
-use crate::filler::{filler_item, portals, vanes};
+use crate::filler::trials::TrialsConfig;
+use crate::filler::{portals, treacherous_tower, trials, vanes};
 use crate::world::WorldGraph;
 use crate::{
     constants::VERSION,
@@ -8,7 +9,7 @@ use crate::{
     patch::lms::msbf::MsbfKey,
     system::UserConfig,
 };
-use filler::filler_item::FillerItem;
+use filler::filler_item::Randomizable;
 use filler::portals::Portal;
 use game::tower_stage::TowerStage;
 use game::Item::{self};
@@ -21,7 +22,7 @@ use rand::{rngs::StdRng, SeedableRng};
 use regions::Subregion;
 use rom::Rom;
 use serde::{ser::SerializeMap, Deserialize, Serialize, Serializer};
-use std::collections::{BTreeMap, HashMap, HashSet};
+use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
 use std::hash::BuildHasherDefault;
 use std::{
     error::Error as StdError,
@@ -167,17 +168,17 @@ impl Layout {
         }
     }
 
-    fn get_node_mut(&mut self, node: &'static Subregion) -> &mut DashMap<&'static str, FillerItem> {
+    fn get_node_mut(&mut self, node: &'static Subregion) -> &mut DashMap<&'static str, Randomizable> {
         self.category_mut(node.world()).entry(node.name()).or_insert_with(Default::default)
     }
 
-    fn get(&self, location: &LocationInfo) -> Option<FillerItem> {
+    fn get(&self, location: &LocationInfo) -> Option<Randomizable> {
         let LocationInfo { subregion: node, name } = location;
         self.category(node.world()).get(node.name()).and_then(|region| region.get(name).copied())
     }
 
     #[allow(unused)]
-    fn get_item(&self, name: &'static str, subregion: &'static Subregion) -> FillerItem {
+    fn get_item(&self, name: &'static str, subregion: &'static Subregion) -> Randomizable {
         self.get(&LocationInfo::new(name, subregion)).unwrap()
     }
 
@@ -188,7 +189,7 @@ impl Layout {
 
     /// This just highlights why we need to redo [`Layout`]
     #[allow(unused)]
-    fn find_single(&self, find_item: FillerItem) -> Option<(&'static str, &'static str)> {
+    fn find_single(&self, find_item: Randomizable) -> Option<(&'static str, &'static str)> {
         for (region_name, region) in &self.hyrule {
             for (loc_name, item) in region {
                 if find_item.eq(item) {
@@ -216,24 +217,27 @@ impl Layout {
         None
     }
 
-    pub fn set(&mut self, location: LocationInfo, item: FillerItem) {
+    pub fn set(&mut self, location: LocationInfo, item: Randomizable) {
         let LocationInfo { subregion: node, name } = location;
         self.get_node_mut(node).insert(name, item);
         debug!("Placed {} in {}/{}", item.as_str(), location.subregion.name(), location.name);
     }
 
-    pub fn set_item(&mut self, location: &'static str, subregion: &'static Subregion, item: filler_item::Item) {
-        self.set(LocationInfo::new(location, subregion), FillerItem::Item(item));
+    pub fn set_item<T>(&mut self, location: &'static str, subregion: &'static Subregion, item: T)
+    where
+        T: Into<Randomizable>,
+    {
+        self.set(LocationInfo::new(location, subregion), item.into());
     }
 }
 
-pub type Category = DashMap<&'static str, DashMap<&'static str, FillerItem>>;
+pub type Category = DashMap<&'static str, DashMap<&'static str, Randomizable>>;
 
 fn serialize_category<S>(region: &Category, ser: S) -> Result<S::Ok, S::Error>
 where
     S: Serializer,
 {
-    struct Wrap<'a>(&'a DashMap<&'static str, FillerItem>);
+    struct Wrap<'a>(&'a DashMap<&'static str, Randomizable>);
 
     impl<'a> Serialize for Wrap<'a> {
         fn serialize<S>(&self, ser: S) -> Result<S::Ok, S::Error>
@@ -294,7 +298,7 @@ fn align_json_values(json: &mut String) {
     }
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct SeedInfo {
     #[serde(default)]
     pub seed: u32,
@@ -306,11 +310,18 @@ pub struct SeedInfo {
 
     pub settings: Settings,
 
+    /// The list of exclusions provided by the user in [`settings`], enhanced by the randomizer based on settings.
     #[serde(skip_deserializing)]
-    pub layout: Layout,
+    pub full_exclusions: BTreeSet<String>,
 
     #[serde(skip_deserializing)]
     pub treacherous_tower_floors: Vec<TowerStage>,
+
+    #[serde(skip_deserializing)]
+    pub trials_config: TrialsConfig,
+
+    #[serde(skip_deserializing)]
+    pub layout: Layout,
 
     #[serde(skip_deserializing)]
     pub portal_map: PortalMap,
@@ -331,25 +342,27 @@ pub struct SeedInfo {
 impl SeedInfo {
     fn new(
         seed: u32, hash: SeedHash, settings: Settings, portal_map: PortalMap, vane_map: VaneMap,
-        world_graph: WorldGraph, treacherous_tower_floors: Vec<TowerStage>,
+        trials_config: TrialsConfig, world_graph: WorldGraph, treacherous_tower_floors: Vec<TowerStage>,
     ) -> Self {
         Self {
             seed,
             version: VERSION.to_owned(),
             hash,
             settings,
+            full_exclusions: Default::default(),
             vane_map,
             portal_map,
             layout: Default::default(),
             metrics: Default::default(),
             hints: Default::default(),
+            trials_config,
             world_graph,
             treacherous_tower_floors,
         }
     }
 
     pub fn is_excluded(&self, check_name: &str) -> bool {
-        self.settings.exclusions.contains(check_name)
+        self.full_exclusions.contains(check_name)
     }
 }
 
@@ -360,11 +373,13 @@ impl Default for SeedInfo {
             version: "".to_owned(),
             hash: Default::default(),
             settings: Default::default(),
+            full_exclusions: Default::default(),
             portal_map: Default::default(),
             vane_map: Default::default(),
             layout: Default::default(),
             metrics: Default::default(),
             hints: Default::default(),
+            trials_config: Default::default(),
             world_graph: Default::default(),
             treacherous_tower_floors: Default::default(),
         }
@@ -395,7 +410,7 @@ pub fn generate_seed(
 ///
 /// The hash is calculated as `u64`, truncated to `u16` (5 digits), then converted to a Symbolic form that can be
 /// displayed in-game as well as in the spoiler log.
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct SeedHash {
     item_hash: String,
     text_hash: String,
@@ -417,9 +432,9 @@ impl SeedHash {
             (L_BUTTON.deref(), "(L)"),
             (R_BUTTON.deref(), "(R)"),
             (RAVIO.deref(), "(Ravio)"),
-            (BOW.deref(), "(Bow)"),
-            (BOMBS.deref(), "(Bomb)"),
-            (FIRE_ROD.deref(), "(Fire)"),
+            (SYMBOL_BOW.deref(), "(Bow)"),
+            (SYMBOL_BOMBS.deref(), "(Bomb)"),
+            (SYMBOL_FIRE_ROD.deref(), "(Fire)"),
         ];
 
         const HASH_LEN: usize = 5;
@@ -495,7 +510,7 @@ pub type DashMap<K, V> = HashMap<K, V, BuildHasherDefault<XxHash64>>;
 pub type DashSet<T> = HashSet<T, BuildHasherDefault<XxHash64>>;
 
 /// Map of all checks (as Strings) to their held item
-pub type CheckMap = DashMap<String, Option<FillerItem>>;
+pub type CheckMap = DashMap<String, Option<Randomizable>>;
 
 /// Map of all Portals to their destination Portals. Map is not bidirectional to allow for (eventual) decoupled shuffle,
 /// so each Portal and its destination must have a corresponding reversed entry.
@@ -510,10 +525,12 @@ fn calculate_seed_info(seed: u32, settings: Settings, hash: SeedHash, rng: &mut 
 
     let portal_map = portals::build_portal_map(&settings, rng)?;
     let vane_map = vanes::build_vanes_map(&settings, rng)?;
+    let trials_config = trials::configure(rng, &settings)?;
+    let treacherous_tower_floors = treacherous_tower::choose_floors(&settings, rng)?;
     let world_graph = world::build_world_graph(&portal_map);
-    let tower_floors = filler::tower::choose_tower_floors(&settings, rng)?;
 
-    let mut seed_info = SeedInfo::new(seed, hash, settings, portal_map, vane_map, world_graph, tower_floors);
+    let mut seed_info =
+        SeedInfo::new(seed, hash, settings, portal_map, vane_map, trials_config, world_graph, treacherous_tower_floors);
 
     // Check Map and Item Pools
     let check_map = &mut filler::prefill_check_map(&mut seed_info.world_graph);
@@ -538,6 +555,8 @@ pub fn patch_seed(seed_info: &SeedInfo, user_config: &UserConfig, no_patch: bool
         let mut patcher = Patcher::new(game)?;
 
         info!("ROM Loaded.\n");
+
+        // patch::lms::msbf::research(&mut patcher, None, "HintGhost", vec![], true)?;
 
         // patch::research_msbf_msbt(&mut patcher,
         //     game::Course::FieldDark, "FieldDark_05_GameTower", // MSBF

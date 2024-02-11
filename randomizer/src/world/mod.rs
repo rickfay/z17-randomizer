@@ -1,6 +1,6 @@
 use crate::regions::Subregion;
 use crate::{
-    filler::filler_item::FillerItem,
+    filler::filler_item::Randomizable,
     filler::{check::Check, location::Location, location_node::LocationNode, logic::Logic, progress::Progress},
     hints::hint_ghost_name,
     DashMap, LocationInfo, PortalMap,
@@ -26,7 +26,7 @@ mod swamp;
 mod thieves;
 mod turtle;
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct WorldGraph {
     graph: DashMap<Location, LocationNode>,
 }
@@ -237,16 +237,24 @@ fn out_of_logic(name: &'static str, subregion: &'static Subregion) -> Check {
     )
 }
 
-fn portal_left(portal: Portal, portal_map: &PortalMap) -> Path {
+fn portal_left(portal: Portal, portal_map: &PortalMap, is_hc: bool) -> Path {
     let dest_portal = portal_map.get(&portal).expect(&format!("PortalMap missing Portal: {:?}", portal));
     let (_left, right) = dest_portal.get_left_right_locations();
-    Path::new(right, *Logic::new().normal(|p| p.can_merge()))
+
+    let logic: fn(&Progress) -> bool =
+        if is_hc { |p| p.can_merge() } else { |p| p.are_portals_open() && p.can_merge() };
+
+    Path::new(right, *Logic::new().normal(logic))
 }
 
-fn portal_right(portal: Portal, portal_map: &PortalMap) -> Path {
+fn portal_right(portal: Portal, portal_map: &PortalMap, is_hc: bool) -> Path {
     let dest_portal = portal_map.get(&portal).expect("PortalMap should have all Portals mapped");
     let (left, _right) = dest_portal.get_left_right_locations();
-    Path::new(left, *Logic::new().normal(|p| p.can_merge()))
+
+    let logic: fn(&Progress) -> bool =
+        if is_hc { |p| p.can_merge() } else { |p| p.are_portals_open() && p.can_merge() };
+
+    Path::new(left, *Logic::new().normal(logic))
 }
 
 fn fast_travel_hyrule() -> Path {
@@ -259,5 +267,5 @@ fn fast_travel_lorule() -> Path {
 
 /// Hint Ghost checks
 fn ghost(ghost: HintGhost) -> Check {
-    Check::new(hint_ghost_name(&ghost), Logic::free(), Some(FillerItem::HintGhost(ghost)), None)
+    Check::new(hint_ghost_name(&ghost), Logic::free(), Some(Randomizable::HintGhost(ghost)), None)
 }

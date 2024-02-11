@@ -20,6 +20,7 @@ pub struct GetItem(
     pub f32,
     pub f32,
     pub f32,
+    /// Effects: light, twinkle, Pendant, RingRental, GtEvBottleMedicine, RupeeGold, RupeeSilver, GtEvNet, wait_get, fly, Bee
     pub String,
     pub String,
     pub String,
@@ -27,15 +28,20 @@ pub struct GetItem(
     pub i32,
     pub i32,
     pub i32,
+    /// 0 = Gold/Red
+    /// 1 = Silver/Blue
+    /// 2 = Brown
+    /// 3 = Great Spin
     pub i32,
 );
 
 impl GetItem {
     pub fn actor(&self, game: &Rom) -> Option<Actor> {
         if self.1.is_empty() {
-            None
+            let thing = game.get_item_actor("KeyBoss").ok(); // fixme dirty hack for Quake
+            thing
         } else {
-            Some(game.get_item_actor(self.actor_name().unwrap()).unwrap())
+            game.get_item_actor(self.actor_name().unwrap()).ok()
         }
     }
 
@@ -45,17 +51,41 @@ impl GetItem {
             .captures(&self.1)
             .and_then(|captures| captures.get(1))
             .map(|match_| match_.as_str())
-            .ok_or_else(|| Error::new(format!("Invalid actor name: '{}'", &self.1)))
+            .or(Some("KeyBoss")) // fixme dirty hack for Quake
+            .ok_or(Error::new(format!("Invalid actor name: '{}'", &self.1)))
+        // .ok_or_else(|| Error::new(format!("Invalid actor name: '{}'", &self.1)))
     }
 
     pub fn get_scale_factor(&self) -> f32 {
         self.2
     }
 
+    pub fn set_345(&mut self, t: Vec3) {
+        self.3 = t.x;
+        self.4 = t.y;
+        self.5 = t.z;
+    }
+
+    pub fn set_678(&mut self, s: Vec3) {
+        self.6 = s.x;
+        self.7 = s.y;
+        self.8 = s.z;
+    }
+
     pub fn get_rotate(&self) -> Vec3 {
         Vec3 { x: self.9, y: self.10, z: self.11 }
     }
+
+    pub fn set_rotate(&mut self, r: Vec3) {
+        self.9 = r.x;
+        self.10 = r.y;
+        self.11 = r.z;
+    }
 }
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct GetItems(pub Vec<GetItem>);
 
 #[cfg(test)]
 mod tests {

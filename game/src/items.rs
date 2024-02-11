@@ -11,37 +11,37 @@ Item(u16) {
      * Note: This is actually called `None` in the game files, but we've renamed it to avoid
      * confusion with Rust's [`Option::None`].
      */
-    Empty = 0x00,
+    Empty = 0x0,
     /// A generic Small Key. Adds 1 to the key count of the current scene.
-    KeySmall = 0x01,
+    KeySmall = 0x1,
     /// A generic Boss Key. Marks the Boss Key as obtained for the current scene.
-    KeyBoss = 0x02,
+    KeyBoss = 0x2,
     /// A generic Compass. Marks the Compass as obtained for the current scene.
-    Compass = 0x03,
+    Compass = 0x3,
     /// Heart Container
-    HeartContainer = 0x04,
+    HeartContainer = 0x4,
     /// Red Rupee
-    RupeeR = 0x05,
+    RupeeR = 0x5,
     /// Green Rupee
-    RupeeG = 0x06,
+    RupeeG = 0x6,
     /// Blue Rupee
-    RupeeB = 0x07,
+    RupeeB = 0x7,
     /// Heart Piece
-    HeartPiece = 0x08,
+    HeartPiece = 0x8,
     /// Ice Rod
-    ItemIceRod = 0x09,
+    ItemIceRod = 0x9,
     /// Sand Rod
-    ItemSandRod = 0x0A,
+    ItemSandRod = 0xA,
     /// Tornado Rod
-    ItemTornadeRod = 0x0B,
+    ItemTornadeRod = 0xB,
     /// Bombs
-    ItemBomb = 0x0C,
+    ItemBomb = 0xC,
     /// Fire Rod
-    ItemFireRod = 0x0D,
+    ItemFireRod = 0xD,
     /// Hookshot
-    ItemHookShot = 0x0E,
+    ItemHookShot = 0xE,
     /// Boomerang
-    ItemBoomerang = 0x0F,
+    ItemBoomerang = 0xF,
     /// Hammer
     ItemHammer = 0x10,
     /// Bow

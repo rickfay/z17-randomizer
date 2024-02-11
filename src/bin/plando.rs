@@ -1,14 +1,16 @@
-use game::Item::HeartPiece;
 use log::{error, info, LevelFilter};
 use macros::fail;
 use modinfo::settings::keysy::Keysy;
+use modinfo::settings::portals::Portals;
+use modinfo::settings::ravios_shop::RaviosShop;
+use modinfo::settings::trials_door::TrialsDoor;
 use modinfo::settings::weather_vanes::WeatherVanes;
-use modinfo::settings::Options;
-use modinfo::settings::{logic::LogicMode, pedestal::PedestalSetting, portal_shuffle::PortalShuffle, Logic, Settings};
-use randomizer::filler::filler_item;
+use modinfo::settings::{logic::LogicMode, pedestal::PedestalSetting, portal_shuffle::PortalShuffle, Settings};
 use randomizer::filler::filler_item::Item::*;
-use randomizer::filler::filler_item::{FillerItem, Item};
+use randomizer::filler::filler_item::Randomizable;
+use randomizer::filler::filler_item::Vane::*;
 use randomizer::filler::portals::Portal;
+use randomizer::filler::{filler_item, item_pools};
 use randomizer::{
     constants::VERSION,
     regions,
@@ -48,19 +50,22 @@ fn main() {
     });
 
     let seed = 0;
-    let settings = &plando_settings();
+    let settings = plando_settings();
 
     let seed_info = SeedInfo {
         seed,
-        version: VERSION,
-        hash: SeedHash::new(seed, settings),
+        version: String::from(VERSION),
+        hash: SeedHash::new(seed, &settings),
         settings,
+        full_exclusions: Default::default(),
+        treacherous_tower_floors: vec![],
         vane_map: get_plando_weather_vane_map(),
         portal_map: get_plando_portal_map(),
         layout: build_layout(),
         metrics: Default::default(),
         hints: Default::default(),
-        world_graph: (),
+        trials_config: Default::default(),
+        world_graph: Default::default(),
     };
 
     seed_info.settings.log_settings();
@@ -131,7 +136,7 @@ fn get_plando_portal_map() -> PortalMap {
         (FloatingIslandHyrule, FloatingIslandLorule),
         (RiverHyrule, RiverLorule),
         (LakeHylia, LoruleLake),
-        (HyruleHotfoot, LoruleColdfoot),
+        (HyruleHotfoot, LoruleHotfoot),
         (Sanctuary, Philosopher),
         (GraveyardLedgeHyrule, GraveyardLedgeLorule),
         (RossosOreMineHyrule, RossosOreMineLorule),
@@ -159,7 +164,7 @@ fn get_plando_portal_map() -> PortalMap {
         (FloatingIslandLorule, FloatingIslandHyrule),
         (RiverLorule, RiverHyrule),
         (LoruleLake, LakeHylia),
-        (LoruleColdfoot, HyruleHotfoot),
+        (LoruleHotfoot, HyruleHotfoot),
         (Philosopher, Sanctuary),
         (GraveyardLedgeLorule, GraveyardLedgeHyrule),
         (RossosOreMineLorule, RossosOreMineHyrule),
@@ -172,46 +177,37 @@ fn get_plando_portal_map() -> PortalMap {
 fn plando_settings() -> Settings {
     Settings {
         dev_mode: true,
-        logic: Logic {
-            logic_mode: LogicMode::Normal,
-            randomize_dungeon_prizes: true,
-            vanilla_charm: false,
-            lc_requirement: 1,
-            yuganon_requirement: 1,
-            ped_requirement: PedestalSetting::Standard,
-
-            nice_mode: false,
-            super_items: true,
-            reverse_sage_events: true,
-            no_progression_enemies: false,
-            portal_shuffle: PortalShuffle::Off,
-
-            start_with_merge: true,
-            start_with_pouch: true,
-
-            bell_in_shop: false,
-            sword_in_shop: false,
-            boots_in_shop: false,
-            assured_weapon: false,
-
-            maiamai_madness: false,
-
-            minigames_excluded: false,
-            skip_big_bomb_flower: false,
-            skip_trials: false,
-            progressive_bow_of_light: true,
-            bow_of_light_in_castle: false,
-
-            weather_vanes: WeatherVanes::Standard,
-            dark_rooms_lampless: false,
-            swordless_mode: false,
-
-            hint_ghost_price: 30,
-
-            keysy: Keysy::AllKeysy,
-        },
-        options: Options { chest_size_matches_contents: true, night_mode: false },
-        exclusions: BTreeSet::default(),
+        lc_requirement: 7,
+        yuganon_requirement: 7,
+        ped_requirement: PedestalSetting::Standard,
+        logic_mode: LogicMode::Normal,
+        dark_rooms_lampless: false,
+        dungeon_prize_shuffle: true,
+        maiamai_madness: false,
+        nice_mode: false,
+        super_mode: true,
+        portals: Portals::Open,
+        portal_shuffle: PortalShuffle::AnyWorldPairs,
+        weather_vanes: WeatherVanes::Hyrule,
+        ravios_shop: RaviosShop::Closed,
+        bow_of_light_in_castle: false,
+        no_progression_enemies: false,
+        keysy: Keysy::Off,
+        progressive_bow_of_light: false,
+        swordless_mode: false,
+        start_with_merge: true,
+        start_with_pouch: true,
+        bell_in_shop: false,
+        sword_in_shop: false,
+        boots_in_shop: false,
+        assured_weapon: false,
+        chest_size_matches_contents: true,
+        minigames_excluded: false,
+        skip_big_bomb_flower: true,
+        trials_door: TrialsDoor::RequiredTrials(1),
+        treacherous_tower_floors: 5,
+        night_mode: false,
+        user_exclusions: BTreeSet::default(),
     }
 }
 
@@ -220,6 +216,15 @@ fn build_layout() -> Layout {
 
     info!("Building Item Layout from Plan...");
     let mut layout = Layout::default();
+
+    let mut maiamai = item_pools::get_maiamai_pool().iter().map(|&item| Randomizable::from(item)).collect::<Vec<_>>();
+    let mut heart_containers = item_pools::get_heart_containers();
+    let mut heart_pieces = item_pools::get_heart_pieces();
+    let mut gold_rupees = item_pools::get_gold_rupee_pool();
+    let mut silver_rupees = item_pools::get_silver_rupee_pool();
+    let mut purple_rupees = item_pools::get_purple_rupee_pool();
+
+    // FIXME set weather vanes
 
     //////////////////////////
     // --- Ravio's Shop --- //
@@ -265,41 +270,41 @@ fn build_layout() -> Layout {
     layout.set_item("Blacksmith Cave", regions::hyrule::field::main::SUBREGION, HeartPiece14);
     layout.set_item("Blacksmith", regions::hyrule::field::main::SUBREGION, Sword03);
     layout.set_item("Blacksmith Table", regions::hyrule::field::main::SUBREGION, Empty);
-    layout.set_item("Cucco Mini-Dungeon", regions::hyrule::field::main::SUBREGION, RupeeSilver);
+    layout.set_item("Cucco Mini-Dungeon", regions::hyrule::field::main::SUBREGION, RupeeSilver01);
     layout.set_item("Hyrule Castle Rocks", regions::hyrule::field::main::SUBREGION, Empty);
     layout.set_item("Haunted Grove Stump", regions::hyrule::field::main::SUBREGION, Empty);
 
-    layout.set_item("[Mai] Blacksmith Tree", regions::hyrule::field::main::SUBREGION, Maiamai021);
-    layout.set_item("[Mai] Behind Your House", regions::hyrule::field::main::SUBREGION, Maiamai033);
-    layout.set_item("[Mai] Blacksmith Tiles", regions::hyrule::field::main::SUBREGION, Maiamai027);
-    layout.set_item("[Mai] Outside Cucco Mini-Dungeon", regions::hyrule::field::main::SUBREGION, Maiamai039);
-    layout.set_item("[Mai] Haunted Grove Tree", regions::hyrule::field::main::SUBREGION, Maiamai031);
-    layout.set_item("[Mai] Hyrule Castle Tree", regions::hyrule::field::main::SUBREGION, Maiamai022);
-    layout.set_item("[Mai] Hyrule Castle Tiles", regions::hyrule::field::main::SUBREGION, Maiamai023);
-    layout.set_item("[Mai] Your House Tree", regions::hyrule::field::main::SUBREGION, Maiamai032);
+    layout.set_item("[Mai] Blacksmith Tree", regions::hyrule::field::main::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Behind Your House", regions::hyrule::field::main::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Blacksmith Tiles", regions::hyrule::field::main::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Outside Cucco Mini-Dungeon", regions::hyrule::field::main::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Haunted Grove Tree", regions::hyrule::field::main::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Hyrule Castle Tree", regions::hyrule::field::main::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Hyrule Castle Tiles", regions::hyrule::field::main::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Your House Tree", regions::hyrule::field::main::SUBREGION, maiamai.pop().unwrap());
 
     // Irene the Witch
     layout.set_item("Irene", regions::hyrule::irene::witch::SUBREGION, Bell);
 
     // Lost Woods
     layout.set_item("Fortune-Teller", regions::hyrule::lost::woods::SUBREGION, HintGlasses);
-    layout.set_item("Hyrule Hotfoot 75s", regions::hyrule::lost::woods::SUBREGION, RupeeSilver);
+    layout.set_item("Hyrule Hotfoot 75s", regions::hyrule::lost::woods::SUBREGION, silver_rupees.pop().unwrap());
     layout.set_item("Hyrule Hotfoot 65s", regions::hyrule::lost::woods::SUBREGION, HeartPiece02);
     layout.set_item("Lost Woods Alcove", regions::hyrule::lost::woods::SUBREGION, HeartPiece09);
     layout.set_item("Lost Woods Chest", regions::hyrule::lost::woods::SUBREGION, RupeeRed);
     layout.set_item("Master Sword Pedestal", regions::hyrule::lost::woods::SUBREGION, Sword02);
-    layout.set_item("Rosso I", regions::hyrule::lost::woods::SUBREGION, Glove01);
-    layout.set_item("Rosso II", regions::hyrule::lost::woods::SUBREGION, RupeePurple);
+    layout.set_item("Rosso (1)", regions::hyrule::lost::woods::SUBREGION, Glove01);
+    layout.set_item("Rosso (2)", regions::hyrule::lost::woods::SUBREGION, purple_rupees.pop().unwrap());
     layout.set_item("Rosso Cave", regions::hyrule::lost::woods::SUBREGION, Empty);
 
-    layout.set_item("[Mai] Rosso Wall", regions::hyrule::lost::woods::SUBREGION, Maiamai003);
-    layout.set_item("[Mai] Lost Woods Path Rock", regions::hyrule::lost::woods::SUBREGION, Maiamai011);
-    layout.set_item("[Mai] Lost Woods Bush", regions::hyrule::lost::woods::SUBREGION, Maiamai002);
-    layout.set_item("[Mai] Lost Woods Rock", regions::hyrule::lost::woods::SUBREGION, Maiamai001);
-    layout.set_item("[Mai] Fortune-Teller Tent", regions::hyrule::lost::woods::SUBREGION, Maiamai012);
-    layout.set_item("[Mai] Moldorm Ledge", regions::hyrule::lost::woods::SUBREGION, Maiamai009);
-    layout.set_item("[Mai] Small Pond", regions::hyrule::lost::woods::SUBREGION, Maiamai013);
-    layout.set_item("[Mai] Lost Woods Tree", regions::hyrule::lost::woods::SUBREGION, Maiamai049);
+    layout.set_item("[Mai] Rosso Wall", regions::hyrule::lost::woods::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Lost Woods Path Rock", regions::hyrule::lost::woods::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Lost Woods Bush", regions::hyrule::lost::woods::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Lost Woods Rock", regions::hyrule::lost::woods::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Fortune-Teller Tent", regions::hyrule::lost::woods::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Moldorm Ledge", regions::hyrule::lost::woods::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Small Pond", regions::hyrule::lost::woods::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Lost Woods Tree", regions::hyrule::lost::woods::SUBREGION, maiamai.pop().unwrap());
 
     // Death Mountain
     layout.set_item("Death Mountain Open Cave", regions::hyrule::death::mountain::SUBREGION, RupeeBlue);
@@ -311,37 +316,38 @@ fn build_layout() -> Layout {
     layout.set_item("Spectacle Rock", regions::hyrule::death::mountain::SUBREGION, HeartPiece08);
     layout.set_item("Fire Cave Pillar", regions::hyrule::death::mountain::SUBREGION, HeartPiece28);
     layout.set_item("Bouldering Guy", regions::hyrule::death::mountain::SUBREGION, Bottle05);
-    layout.set_item("Hookshot Mini-Dungeon", regions::hyrule::death::mountain::SUBREGION, RupeeSilver);
+    layout.set_item("Hookshot Mini-Dungeon", regions::hyrule::death::mountain::SUBREGION, silver_rupees.pop().unwrap());
     layout.set_item("Floating Island", regions::hyrule::death::mountain::SUBREGION, HeartPiece15);
 
-    layout.set_item("[Mai] Death Mountain Base Rock", regions::hyrule::death::mountain::SUBREGION, Maiamai005);
-    layout.set_item("[Mai] Death Mountain West Ledge", regions::hyrule::death::mountain::SUBREGION, Maiamai004);
-    layout.set_item("[Mai] Fire Cave Ledge", regions::hyrule::death::mountain::SUBREGION, Maiamai006);
-    layout.set_item("[Mai] Rosso's Ore Mine", regions::hyrule::death::mountain::SUBREGION, Maiamai007);
-    layout.set_item("[Mai] Outside Hookshot Mini-Dungeon", regions::hyrule::death::mountain::SUBREGION, Maiamai008);
+    layout.set_item("[Mai] Death Mountain Base Rock", regions::hyrule::death::mountain::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Death Mountain West Ledge", regions::hyrule::death::mountain::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Fire Cave Ledge", regions::hyrule::death::mountain::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Rosso's Ore Mine", regions::hyrule::death::mountain::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Outside Hookshot Mini-Dungeon", regions::hyrule::death::mountain::SUBREGION, maiamai.pop().unwrap());
+
 
     // Kakariko
     layout.set_item("Bee Guy (1)", regions::hyrule::kakariko::village::SUBREGION, Net01);
     layout.set_item("Bee Guy (2)", regions::hyrule::kakariko::village::SUBREGION, BeeBadge);
-    layout.set_item("Dodge the Cuccos", regions::hyrule::kakariko::village::SUBREGION, HeartPiece);
+    layout.set_item("Dodge the Cuccos", regions::hyrule::kakariko::village::SUBREGION, heart_pieces.pop().unwrap());
     layout.set_item("Kakariko Item Shop (1)", regions::hyrule::kakariko::village::SUBREGION, ScootFruit01);
     layout.set_item("Kakariko Item Shop (2)", regions::hyrule::kakariko::village::SUBREGION, FoulFruit01);
     layout.set_item("Kakariko Item Shop (3)", regions::hyrule::kakariko::village::SUBREGION, Shield01);
-    layout.set_item("Kakariko Jail", regions::hyrule::kakariko::village::SUBREGION, RupeeSilver);
+    layout.set_item("Kakariko Jail", regions::hyrule::kakariko::village::SUBREGION, silver_rupees.pop().unwrap());
     layout.set_item("Kakariko Well (Bottom)", regions::hyrule::kakariko::village::SUBREGION, Empty);
-    layout.set_item("Kakariko Well (Top)", regions::hyrule::kakariko::village::SUBREGION, HeartPiece);
-    layout.set_item("Rupee Rush (Hyrule)", regions::hyrule::kakariko::village::SUBREGION, HeartPiece);
+    layout.set_item("Kakariko Well (Top)", regions::hyrule::kakariko::village::SUBREGION, heart_pieces.pop().unwrap());
+    layout.set_item("Rupee Rush (Hyrule)", regions::hyrule::kakariko::village::SUBREGION, heart_pieces.pop().unwrap());
     layout.set_item("Shady Guy", regions::hyrule::kakariko::village::SUBREGION, PegasusBoots);
     layout.set_item("Street Merchant (Left)", regions::hyrule::kakariko::village::SUBREGION, Bottle01);
     layout.set_item("Street Merchant (Right)", regions::hyrule::kakariko::village::SUBREGION, SmoothGem);
-    layout.set_item("Stylish Woman", regions::hyrule::kakariko::village::SUBREGION, HeartPiece);
+    layout.set_item("Stylish Woman", regions::hyrule::kakariko::village::SUBREGION, heart_pieces.pop().unwrap());
     layout.set_item("Woman", regions::hyrule::kakariko::village::SUBREGION, RupeeRed);
 
-    layout.set_item("[Mai] Cucco Ranch Tree", regions::hyrule::kakariko::village::SUBREGION, Maiamai030);
-    layout.set_item("[Mai] Hyrule Rupee Rush Wall", regions::hyrule::kakariko::village::SUBREGION, Maiamai029);
-    layout.set_item("[Mai] Kakariko Bush", regions::hyrule::kakariko::village::SUBREGION, Maiamai050);
-    layout.set_item("[Mai] Kakariko Sand", regions::hyrule::kakariko::village::SUBREGION, Maiamai020);
-    layout.set_item("[Mai] Woman's Roof", regions::hyrule::kakariko::village::SUBREGION, Maiamai019);
+    layout.set_item("[Mai] Cucco Ranch Tree", regions::hyrule::kakariko::village::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Hyrule Rupee Rush Wall", regions::hyrule::kakariko::village::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Kakariko Bush", regions::hyrule::kakariko::village::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Kakariko Sand", regions::hyrule::kakariko::village::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Woman's Roof", regions::hyrule::kakariko::village::SUBREGION, maiamai.pop().unwrap());
 
     // Zora's River
     layout.set_item("Queen Oren", regions::hyrule::zora::river::SUBREGION, Empty);
@@ -349,11 +355,11 @@ fn build_layout() -> Layout {
     layout.set_item("Zora's Domain Ledge", regions::hyrule::zora::river::SUBREGION, Empty);
     layout.set_item("River Mini-Dungeon", regions::hyrule::zora::river::SUBREGION, Empty);
 
-    layout.set_item("[Mai] Witch's House", regions::hyrule::zora::river::SUBREGION, Maiamai017);
-    layout.set_item("[Mai] Wooden Bridge", regions::hyrule::zora::river::SUBREGION, Maiamai024);
-    layout.set_item("[Mai] Waterfall Ledge", regions::hyrule::zora::river::SUBREGION, Maiamai016);
-    layout.set_item("[Mai] South of Zora's Domain", regions::hyrule::zora::river::SUBREGION, Maiamai018);
-    layout.set_item("[Mai] Zora's Domain", regions::hyrule::zora::river::SUBREGION, Maiamai010);
+    layout.set_item("[Mai] Witch's House", regions::hyrule::zora::river::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Wooden Bridge", regions::hyrule::zora::river::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Waterfall Ledge", regions::hyrule::zora::river::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] South of Zora's Domain", regions::hyrule::zora::river::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Zora's Domain", regions::hyrule::zora::river::SUBREGION, maiamai.pop().unwrap());
 
     // Eastern Ruins
     layout.set_item("Bird Lover", regions::hyrule::eastern::ruins::SUBREGION, Empty);
@@ -364,17 +370,17 @@ fn build_layout() -> Layout {
     layout.set_item("Eastern Ruins Cave", regions::hyrule::eastern::ruins::SUBREGION, Empty);
     layout.set_item("Eastern Ruins Peg Circle", regions::hyrule::eastern::ruins::SUBREGION, Empty);
 
-    layout.set_item("[Mai] Eastern Ruins Bonk Rocks", regions::hyrule::eastern::ruins::SUBREGION, Maiamai028);
-    layout.set_item("[Mai] Eastern Ruins Rock", regions::hyrule::eastern::ruins::SUBREGION, Maiamai036);
-    layout.set_item("[Mai] Eastern Ruins Green Tree", regions::hyrule::eastern::ruins::SUBREGION, Maiamai035);
-    layout.set_item("[Mai] Eastern Ruins Wall", regions::hyrule::eastern::ruins::SUBREGION, Maiamai025);
-    layout.set_item("[Mai] Eastern Ruins Yellow Tree", regions::hyrule::eastern::ruins::SUBREGION, Maiamai026);
-    layout.set_item("[Mai] Eastern Ruins River", regions::hyrule::eastern::ruins::SUBREGION, Maiamai034);
+    layout.set_item("[Mai] Eastern Ruins Bonk Rocks", regions::hyrule::eastern::ruins::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Eastern Ruins Rock", regions::hyrule::eastern::ruins::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Eastern Ruins Green Tree", regions::hyrule::eastern::ruins::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Eastern Ruins Wall", regions::hyrule::eastern::ruins::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Eastern Ruins Yellow Tree", regions::hyrule::eastern::ruins::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Eastern Ruins River", regions::hyrule::eastern::ruins::SUBREGION, maiamai.pop().unwrap());
 
     // Desert of Mystery
-    layout.set_item("[Mai] Buried in the Desert", regions::hyrule::desert::mystery::SUBREGION, Maiamai038);
-    layout.set_item("[Mai] Buried near Desert Palace", regions::hyrule::desert::mystery::SUBREGION, Maiamai037);
-    layout.set_item("[Mai] Southern Ruins Big Rock", regions::hyrule::desert::mystery::SUBREGION, Maiamai045);
+    layout.set_item("[Mai] Buried in the Desert", regions::hyrule::desert::mystery::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Buried near Desert Palace", regions::hyrule::desert::mystery::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Southern Ruins Big Rock", regions::hyrule::desert::mystery::SUBREGION, maiamai.pop().unwrap());
 
     // Southern Ruins
     layout.set_item("Runaway Item Seller", regions::hyrule::southern::ruins::SUBREGION, Empty);
@@ -382,9 +388,9 @@ fn build_layout() -> Layout {
     layout.set_item("Southern Ruins Pillar Cave", regions::hyrule::southern::ruins::SUBREGION, Empty);
     layout.set_item("Flippers Mini-Dungeon", regions::hyrule::southern::ruins::SUBREGION, Empty);
 
-    layout.set_item("[Mai] Outside Flippers Mini-Dungeon", regions::hyrule::southern::ruins::SUBREGION, Maiamai040);
-    layout.set_item("[Mai] Southern Ruins Bomb Cave", regions::hyrule::southern::ruins::SUBREGION, Maiamai047);
-    layout.set_item("[Mai] Southern Ruins Pillars", regions::hyrule::southern::ruins::SUBREGION, Maiamai041);
+    layout.set_item("[Mai] Outside Flippers Mini-Dungeon", regions::hyrule::southern::ruins::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Southern Ruins Bomb Cave", regions::hyrule::southern::ruins::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Southern Ruins Pillars", regions::hyrule::southern::ruins::SUBREGION, maiamai.pop().unwrap());
 
     // Lake Hylia
     layout.set_item("Maiamai Bow Upgrade", regions::hyrule::lake::hylia::SUBREGION, Bow02);
@@ -406,11 +412,11 @@ fn build_layout() -> Layout {
     layout.set_item("Lakeside Item Shop (3)", regions::hyrule::lake::hylia::SUBREGION, Empty);
     layout.set_item("Lake Hylia Eastern Shore", regions::hyrule::lake::hylia::SUBREGION, Empty);
 
-    layout.set_item("[Mai] Hyrule Hotfoot Rock", regions::hyrule::lake::hylia::SUBREGION, Maiamai044);
-    layout.set_item("[Mai] Lake Hylia Island Tile", regions::hyrule::lake::hylia::SUBREGION, Maiamai043);
-    layout.set_item("[Mai] Lake Hylia SE Wall", regions::hyrule::lake::hylia::SUBREGION, Maiamai048);
-    layout.set_item("[Mai] Lake Hylia Shallow Ring", regions::hyrule::lake::hylia::SUBREGION, Maiamai046);
-    layout.set_item("[Mai] Outside Maiamai Cave", regions::hyrule::lake::hylia::SUBREGION, Maiamai042);
+    layout.set_item("[Mai] Hyrule Hotfoot Rock", regions::hyrule::lake::hylia::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Lake Hylia Island Tile", regions::hyrule::lake::hylia::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Lake Hylia SE Wall", regions::hyrule::lake::hylia::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Lake Hylia Shallow Ring", regions::hyrule::lake::hylia::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Outside Maiamai Cave", regions::hyrule::lake::hylia::SUBREGION, maiamai.pop().unwrap());
 
     ////////////////////
     // --- Lorule --- //
@@ -422,29 +428,29 @@ fn build_layout() -> Layout {
     layout.set_item("Rupee Rush (Lorule)", regions::lorule::field::main::SUBREGION, Empty);
     layout.set_item("Great Rupee Fairy", regions::lorule::field::main::SUBREGION, Empty);
     layout.set_item("Big Bomb Flower Cave", regions::lorule::field::main::SUBREGION, Empty);
-    layout.set_item("Octoball Derby", regions::lorule::field::main::SUBREGION, HeartPiece);
+    layout.set_item("Octoball Derby", regions::lorule::field::main::SUBREGION, heart_pieces.pop().unwrap());
     layout.set_item("Blacksmith (Lorule)", regions::lorule::field::main::SUBREGION, Empty);
     layout.set_item("Swamp Cave (Left)", regions::lorule::field::main::SUBREGION, Empty);
-    layout.set_item("Swamp Cave (Middle)", regions::lorule::field::main::SUBREGION, HeartPiece);
+    layout.set_item("Swamp Cave (Middle)", regions::lorule::field::main::SUBREGION, heart_pieces.pop().unwrap());
     layout.set_item("Swamp Cave (Right)", regions::lorule::field::main::SUBREGION, Empty);
     layout.set_item("Thief Girl", regions::lorule::field::main::SUBREGION, Empty);
     layout.set_item("Lorule Field Hookshot Chest", regions::lorule::field::main::SUBREGION, Empty);
     layout.set_item("Fortune's Choice", regions::lorule::field::main::SUBREGION, Empty);
-    layout.set_item("[Mai] Thieves' Town Wall", regions::lorule::field::main::SUBREGION, Maiamai0);
-    layout.set_item("[Mai] Lorule Fortune-Teller Rock", regions::lorule::field::main::SUBREGION, Maiamai0);
-    layout.set_item("[Mai] Lorule Castle Wall", regions::lorule::field::main::SUBREGION, Maiamai0);
-    layout.set_item("[Mai] Lorule Castle Tree", regions::lorule::field::main::SUBREGION, Maiamai0);
-    layout.set_item("[Mai] Lorule Blacksmith Wall", regions::lorule::field::main::SUBREGION, Maiamai0);
-    layout.set_item("[Mai] Lorule Rupee Rush Wall", regions::lorule::field::main::SUBREGION, Maiamai0);
-    layout.set_item("[Mai] Big Bomb Flower Grass", regions::lorule::field::main::SUBREGION, Maiamai0);
-    layout.set_item("[Mai] Octoball Derby Skull", regions::lorule::field::main::SUBREGION, Maiamai0);
-    layout.set_item("[Mai] Vacant House Rock", regions::lorule::field::main::SUBREGION, Maiamai0);
-    layout.set_item("[Mai] Behind Vacant House", regions::lorule::field::main::SUBREGION, Maiamai0);
-    layout.set_item("[Mai] Lorule Haunted Grove Wall", regions::lorule::field::main::SUBREGION, Maiamai0);
-    layout.set_item("[Mai] Lorule S Ruins Pillars", regions::lorule::field::main::SUBREGION, Maiamai0);
-    layout.set_item("[Mai] Lorule S Ruins Wall", regions::lorule::field::main::SUBREGION, Maiamai0);
-    layout.set_item("[Mai] Lorule S Ruins Water", regions::lorule::field::main::SUBREGION, Maiamai0);
-    layout.set_item("[Mai] Thieves' Town Tree", regions::lorule::field::main::SUBREGION, Maiamai0);
+    layout.set_item("[Mai] Thieves' Town Wall", regions::lorule::field::main::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Lorule Fortune-Teller Rock", regions::lorule::field::main::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Lorule Castle Wall", regions::lorule::field::main::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Lorule Castle Tree", regions::lorule::field::main::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Lorule Blacksmith Wall", regions::lorule::field::main::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Lorule Rupee Rush Wall", regions::lorule::field::main::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Big Bomb Flower Grass", regions::lorule::field::main::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Octoball Derby Skull", regions::lorule::field::main::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Vacant House Rock", regions::lorule::field::main::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Behind Vacant House", regions::lorule::field::main::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Lorule Haunted Grove Wall", regions::lorule::field::main::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Lorule S Ruins Pillars", regions::lorule::field::main::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Lorule S Ruins Wall", regions::lorule::field::main::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Lorule S Ruins Water", regions::lorule::field::main::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Thieves' Town Tree", regions::lorule::field::main::SUBREGION, maiamai.pop().unwrap());
 
     // Thieves' Town Shop
     layout.set_item("Thieves' Town Item Shop (1)", regions::lorule::field::main::SUBREGION, Bee01);
@@ -458,21 +464,18 @@ fn build_layout() -> Layout {
     layout.set_item("Lorule Lakeside Item Shop (3)", regions::lorule::lake::lorule::SUBREGION, Fairy02);
     layout.set_item("Lorule Lakeside Item Shop (4)", regions::lorule::lake::lorule::SUBREGION, Shield04);
 
-    // Chamber of Sages
-    layout.set_item("Osfala", regions::lorule::chamber::sages::SUBREGION, Empty);
-
     // Skull Woods (overworld)
     layout.set_item("n-Shaped House", regions::lorule::skull::overworld::SUBREGION, Empty);
     layout.set_item("Destroyed House", regions::lorule::skull::overworld::SUBREGION, Empty);
     layout.set_item("Mysterious Man", regions::lorule::skull::overworld::SUBREGION, Empty);
-    layout.set_item("[Mai] n-Shaped House Wall", regions::lorule::skull::overworld::SUBREGION, Maiamai0);
-    layout.set_item("[Mai] Skull Woods Rock", regions::lorule::skull::overworld::SUBREGION, Maiamai0);
-    layout.set_item("[Mai] Skull Woods Bush", regions::lorule::skull::overworld::SUBREGION, Maiamai0);
-    layout.set_item("[Mai] Skull Woods Dry Pond", regions::lorule::skull::overworld::SUBREGION, Maiamai0);
-    layout.set_item("[Mai] Skull Woods Entrance Wall", regions::lorule::skull::overworld::SUBREGION, Maiamai0);
-    layout.set_item("[Mai] Skull Woods Grass", regions::lorule::skull::overworld::SUBREGION, Maiamai051);
-    layout.set_item("[Mai] Destroyed House Tree", regions::lorule::skull::overworld::SUBREGION, Maiamai053);
-    layout.set_item("[Mai] Skull Woods Skull", regions::lorule::skull::overworld::SUBREGION, Maiamai052);
+    layout.set_item("[Mai] n-Shaped House Wall", regions::lorule::skull::overworld::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Skull Woods Rock", regions::lorule::skull::overworld::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Skull Woods Bush", regions::lorule::skull::overworld::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Skull Woods Dry Pond", regions::lorule::skull::overworld::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Skull Woods Entrance Wall", regions::lorule::skull::overworld::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Skull Woods Grass", regions::lorule::skull::overworld::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Destroyed House Tree", regions::lorule::skull::overworld::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Skull Woods Skull", regions::lorule::skull::overworld::SUBREGION, maiamai.pop().unwrap());
 
     // Lorule Death Mountain
     layout.set_item("Ice Cave Ledge", regions::lorule::death::mountain::SUBREGION, Empty);
@@ -480,12 +483,12 @@ fn build_layout() -> Layout {
     layout.set_item("Lorule Mountain W Ledge", regions::lorule::death::mountain::SUBREGION, Empty);
     layout.set_item("Ice Gimos Fight", regions::lorule::death::mountain::SUBREGION, Empty);
     layout.set_item("Treacherous Tower", regions::lorule::death::mountain::SUBREGION, Empty);
-    layout.set_item("[Mai] Lorule Mountain W Skull", regions::lorule::death::mountain::SUBREGION, Maiamai0);
-    layout.set_item("[Mai] Lorule Mountain W Big Rock", regions::lorule::death::mountain::SUBREGION, Maiamai0);
-    layout.set_item("[Mai] Ice Cave Ledge", regions::lorule::death::mountain::SUBREGION, Maiamai0);
-    layout.set_item("[Mai] Lorule Mountain E Wall", regions::lorule::death::mountain::SUBREGION, Maiamai0);
-    layout.set_item("[Mai] Outside Ice Ruins", regions::lorule::death::mountain::SUBREGION, Maiamai0);
-    layout.set_item("[Mai] Lorule Mountain E Big Rock", regions::lorule::death::mountain::SUBREGION, Maiamai0);
+    layout.set_item("[Mai] Lorule Mountain W Skull", regions::lorule::death::mountain::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Lorule Mountain W Big Rock", regions::lorule::death::mountain::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Ice Cave Ledge", regions::lorule::death::mountain::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Lorule Mountain E Wall", regions::lorule::death::mountain::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Outside Ice Ruins", regions::lorule::death::mountain::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Lorule Mountain E Big Rock", regions::lorule::death::mountain::SUBREGION, maiamai.pop().unwrap());
 
     // Dark Ruins
     layout.set_item("Dark Ruins Lakeview Chest", regions::lorule::dark::ruins::SUBREGION, Empty);
@@ -498,31 +501,31 @@ fn build_layout() -> Layout {
     layout.set_item("Hinox (5)", regions::lorule::dark::ruins::SUBREGION, Empty);
     layout.set_item("Hinox (6)", regions::lorule::dark::ruins::SUBREGION, Empty);
     layout.set_item("Ku's Domain Fight", regions::lorule::dark::ruins::SUBREGION, Empty);
-    layout.set_item("[Mai] Dark Ruins Bonk Rocks", regions::lorule::dark::ruins::SUBREGION, Maiamai0);
-    layout.set_item("[Mai] Dark Maze Center Wall", regions::lorule::dark::ruins::SUBREGION, Maiamai0);
-    layout.set_item("[Mai] Dark Maze Entrance Wall", regions::lorule::dark::ruins::SUBREGION, Maiamai0);
-    layout.set_item("[Mai] Dark Ruins East Tree", regions::lorule::dark::ruins::SUBREGION, Maiamai0);
-    layout.set_item("[Mai] Dark Ruins South Wall", regions::lorule::dark::ruins::SUBREGION, Maiamai0);
-    layout.set_item("[Mai] Dark Ruins Waterfall", regions::lorule::dark::ruins::SUBREGION, Maiamai0);
-    layout.set_item("[Mai] Dark Ruins West Tree", regions::lorule::dark::ruins::SUBREGION, Maiamai0);
-    layout.set_item("[Mai] Ku's Domain Grass", regions::lorule::dark::ruins::SUBREGION, Maiamai0);
-    layout.set_item("[Mai] Ku's Domain Water", regions::lorule::dark::ruins::SUBREGION, Maiamai0);
-    layout.set_item("[Mai] Outside Hinox Cave", regions::lorule::dark::ruins::SUBREGION, Maiamai0);
+    layout.set_item("[Mai] Dark Ruins Bonk Rocks", regions::lorule::dark::ruins::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Dark Maze Center Wall", regions::lorule::dark::ruins::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Dark Maze Entrance Wall", regions::lorule::dark::ruins::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Dark Ruins East Tree", regions::lorule::dark::ruins::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Dark Ruins South Wall", regions::lorule::dark::ruins::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Dark Ruins Waterfall", regions::lorule::dark::ruins::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Dark Ruins West Tree", regions::lorule::dark::ruins::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Ku's Domain Grass", regions::lorule::dark::ruins::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Ku's Domain Water", regions::lorule::dark::ruins::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Outside Hinox Cave", regions::lorule::dark::ruins::SUBREGION, maiamai.pop().unwrap());
 
     // Misery Mire
     layout.set_item("Misery Mire Ledge", regions::lorule::misery::mire::SUBREGION, Empty);
     layout.set_item("Sand Mini-Dungeon", regions::lorule::misery::mire::SUBREGION, Empty);
-    layout.set_item("[Mai] Misery Mire Water", regions::lorule::misery::mire::SUBREGION, Maiamai0);
-    layout.set_item("[Mai] Misery Mire Wall", regions::lorule::misery::mire::SUBREGION, Maiamai0);
-    layout.set_item("[Mai] Misery Mire Rock", regions::lorule::misery::mire::SUBREGION, Maiamai0);
+    layout.set_item("[Mai] Misery Mire Water", regions::lorule::misery::mire::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Misery Mire Wall", regions::lorule::misery::mire::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Misery Mire Rock", regions::lorule::misery::mire::SUBREGION, maiamai.pop().unwrap());
 
     // Lorule Lake
     layout.set_item("Lorule Lake Chest", regions::lorule::lake::lorule::SUBREGION, Empty);
-    layout.set_item("[Mai] Lorule Lake Rock", regions::lorule::lake::lorule::SUBREGION, Maiamai0);
-    layout.set_item("[Mai] Lorule Lake SE Wall", regions::lorule::lake::lorule::SUBREGION, Maiamai0);
-    layout.set_item("[Mai] Lorule Lake Skull", regions::lorule::lake::lorule::SUBREGION, Maiamai0);
-    layout.set_item("[Mai] Lorule Lake Water", regions::lorule::lake::lorule::SUBREGION, Maiamai0);
-    layout.set_item("[Mai] Lorule Lake West Wall", regions::lorule::lake::lorule::SUBREGION, Maiamai0);
+    layout.set_item("[Mai] Lorule Lake Rock", regions::lorule::lake::lorule::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Lorule Lake SE Wall", regions::lorule::lake::lorule::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Lorule Lake Skull", regions::lorule::lake::lorule::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Lorule Lake Water", regions::lorule::lake::lorule::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Lorule Lake West Wall", regions::lorule::lake::lorule::SUBREGION, maiamai.pop().unwrap());
 
     //////////////////////////
     // --- Mini Dungeon --- //
@@ -536,8 +539,8 @@ fn build_layout() -> Layout {
     layout.set_item("[HS] Upper Chest", regions::dungeons::graveyards::hyrule::SUBREGION, Empty);
     layout.set_item("[HS] Ledge", regions::dungeons::graveyards::hyrule::SUBREGION, Empty);
     layout.set_item("Graveyard Ledge Cave", regions::dungeons::graveyards::hyrule::SUBREGION, Empty);
-    layout.set_item("[Mai] Sanctuary Wall", regions::dungeons::graveyards::hyrule::SUBREGION, Maiamai014);
-    layout.set_item("[Mai] Hyrule Graveyard Wall", regions::dungeons::graveyards::hyrule::SUBREGION, Maiamai015);
+    layout.set_item("[Mai] Sanctuary Wall", regions::dungeons::graveyards::hyrule::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Hyrule Graveyard Wall", regions::dungeons::graveyards::hyrule::SUBREGION, maiamai.pop().unwrap());
 
     // Graveyard (Lorule)
     layout.set_item("Graveyard Peninsula", regions::dungeons::graveyards::lorule::SUBREGION, Empty);
@@ -546,9 +549,11 @@ fn build_layout() -> Layout {
     layout.set_item("[LS] Ledge", regions::dungeons::graveyards::lorule::SUBREGION, Empty);
     layout.set_item("[LS] Lower Chest", regions::dungeons::graveyards::lorule::SUBREGION, Empty);
     layout.set_item("[LS] Upper Chest", regions::dungeons::graveyards::lorule::SUBREGION, Empty);
-    layout.set_item("[Mai] Lorule Graveyard Big Rock", regions::dungeons::graveyards::lorule::SUBREGION, Maiamai0);
-    layout.set_item("[Mai] Lorule Graveyard Tree", regions::dungeons::graveyards::lorule::SUBREGION, Maiamai0);
-    layout.set_item("[Mai] Lorule Graveyard Wall", regions::dungeons::graveyards::lorule::SUBREGION, Maiamai0);
+    layout.set_item("[Mai] Lorule Graveyard Big Rock", regions::dungeons::graveyards::lorule::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Lorule Graveyard Tree", regions::dungeons::graveyards::lorule::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Lorule Graveyard Wall", regions::dungeons::graveyards::lorule::SUBREGION, maiamai.pop().unwrap());
+
+    layout.set_item("Graveyard Weather Vane", regions::dungeons::graveyards::lorule::SUBREGION, GraveyardWV);
 
     //////////////////////
     // --- Dungeons --- //
@@ -565,7 +570,7 @@ fn build_layout() -> Layout {
     layout.set_item("[EP] (2F) Switch Room", regions::dungeons::eastern::palace::SUBREGION, Empty);
     layout.set_item("[EP] (2F) Big Chest", regions::dungeons::eastern::palace::SUBREGION, Empty);
     layout.set_item("[EP] Yuga (1)", regions::dungeons::eastern::palace::SUBREGION, Empty);
-    layout.set_item("[EP] Yuga (2)", regions::dungeons::eastern::palace::SUBREGION, Empty);
+    layout.set_item("[EP] Yuga (2)", regions::dungeons::eastern::palace::SUBREGION, heart_containers.pop().unwrap());
     layout.set_item("[EP] (3F) Escape Chest", regions::dungeons::eastern::palace::SUBREGION, Empty);
     layout.set_item("[EP] (1F) Escape Chest", regions::dungeons::eastern::palace::SUBREGION, Empty);
 
@@ -580,7 +585,7 @@ fn build_layout() -> Layout {
     layout.set_item("[HG] (2F) Fire Ring", regions::dungeons::house::gales::SUBREGION, Empty);
     layout.set_item("[HG] (3F) Rat Room", regions::dungeons::house::gales::SUBREGION, Empty);
     layout.set_item("[HG] (3F) Fire Bubbles", regions::dungeons::house::gales::SUBREGION, Empty);
-    layout.set_item("[HG] Margomill", regions::dungeons::house::gales::SUBREGION, Empty);
+    layout.set_item("[HG] Margomill", regions::dungeons::house::gales::SUBREGION, heart_containers.pop().unwrap());
 
     // Tower of Hera
     layout.set_item("[TH] (1F) Outside", regions::dungeons::tower::hera::SUBREGION, Empty);
@@ -592,7 +597,7 @@ fn build_layout() -> Layout {
     layout.set_item("[TH] (7F) Outside (Ledge)", regions::dungeons::tower::hera::SUBREGION, Empty);
     layout.set_item("[TH] (8F) Fairy Room", regions::dungeons::tower::hera::SUBREGION, Empty);
     layout.set_item("[TH] (11F) Big Chest", regions::dungeons::tower::hera::SUBREGION, Empty);
-    layout.set_item("[TH] Moldorm", regions::dungeons::tower::hera::SUBREGION, Empty);
+    layout.set_item("[TH] Moldorm", regions::dungeons::tower::hera::SUBREGION, heart_containers.pop().unwrap());
 
     // Hyrule Castle
     layout.set_item("[HC] Battlement", regions::dungeons::hyrule::castle::SUBREGION, Empty);
@@ -609,11 +614,11 @@ fn build_layout() -> Layout {
     layout.set_item("[PD] (B1) Helmasaur Room", regions::dungeons::dark::palace::SUBREGION, Empty);
     layout.set_item("[PD] (B1) Helmasaur Room (Fall)", regions::dungeons::dark::palace::SUBREGION, Empty);
     layout.set_item("[PD] (2F) Big Chest (Hidden)", regions::dungeons::dark::palace::SUBREGION, Empty);
-    layout.set_item("[PD] (2F) South Hidden Room", regions::dungeons::dark::palace::SUBREGION, Empty);
+    layout.set_item("[PD] (2F) South Hidden Room", regions::dungeons::dark::palace::SUBREGION, gold_rupees.pop().unwrap());
     layout.set_item("[PD] (2F) Alcove", regions::dungeons::dark::palace::SUBREGION, Empty);
     layout.set_item("[PD] (1F) Fall From 2F", regions::dungeons::dark::palace::SUBREGION, Empty);
     layout.set_item("[PD] (B1) Bomb Bowling", regions::dungeons::dark::palace::SUBREGION, Empty);
-    layout.set_item("[PD] Gemesaur King", regions::dungeons::dark::palace::SUBREGION, Empty);
+    layout.set_item("[PD] Gemesaur King", regions::dungeons::dark::palace::SUBREGION, heart_containers.pop().unwrap());
 
     // Swamp Palace
     layout.set_item("[SP] (B1) Center", regions::dungeons::swamp::palace::SUBREGION, Empty);
@@ -627,7 +632,7 @@ fn build_layout() -> Layout {
     layout.set_item("[SP] (1F) East Room", regions::dungeons::swamp::palace::SUBREGION, Empty);
     layout.set_item("[SP] (1F) West Room", regions::dungeons::swamp::palace::SUBREGION, Empty);
     layout.set_item("[SP] (1F) Big Chest (Fire)", regions::dungeons::swamp::palace::SUBREGION, Empty);
-    layout.set_item("[SP] Arrghus", regions::dungeons::swamp::palace::SUBREGION, Empty);
+    layout.set_item("[SP] Arrghus", regions::dungeons::swamp::palace::SUBREGION, heart_containers.pop().unwrap());
 
     // Skull Woods
     layout.set_item("[SW] (B1) Gibdo Room (Lower)", regions::dungeons::skull::woods::SUBREGION, Empty);
@@ -636,9 +641,9 @@ fn build_layout() -> Layout {
     layout.set_item("[SW] (B1) Grate Room", regions::dungeons::skull::woods::SUBREGION, Empty);
     layout.set_item("[SW] (B2) Moving Platform Room", regions::dungeons::skull::woods::SUBREGION, Empty);
     layout.set_item("[SW] (B1) Big Chest (Eyes)", regions::dungeons::skull::woods::SUBREGION, Empty);
-    layout.set_item("Skull Woods Outdoor Chest", regions::dungeons::skull::woods::SUBREGION, Empty);
+    layout.set_item("[SW] Outdoor Chest", regions::dungeons::skull::woods::SUBREGION, Empty);
     layout.set_item("[SW] (B1) Big Chest (Upper)", regions::dungeons::skull::woods::SUBREGION, Empty);
-    layout.set_item("[SW] Knucklemaster", regions::dungeons::skull::woods::SUBREGION, OreRed);
+    layout.set_item("[SW] Knucklemaster", regions::dungeons::skull::woods::SUBREGION, heart_containers.pop().unwrap());
 
     // Thieves' Hideout
     layout.set_item("[TT] (B1) Jail Cell", regions::dungeons::thieves::hideout::SUBREGION, Empty);
@@ -651,7 +656,7 @@ fn build_layout() -> Layout {
     layout.set_item("[TT] (B1) Big Chest (Entrance)", regions::dungeons::thieves::hideout::SUBREGION, Empty);
     layout.set_item("[TT] (B3) Underwater", regions::dungeons::thieves::hideout::SUBREGION, Empty);
     layout.set_item("[TT] (B3) Big Chest (Hidden)", regions::dungeons::thieves::hideout::SUBREGION, Empty);
-    layout.set_item("[TT] Stalblind", regions::dungeons::thieves::hideout::SUBREGION, Empty);
+    layout.set_item("[TT] Stalblind", regions::dungeons::thieves::hideout::SUBREGION, heart_containers.pop().unwrap());
 
     // Ice Ruins
     layout.set_item("[IR] (1F) Hidden Chest", regions::dungeons::ice::ruins::SUBREGION, Empty);
@@ -668,7 +673,7 @@ fn build_layout() -> Layout {
     layout.set_item("[IR] (B4) Narrow Platform", regions::dungeons::ice::ruins::SUBREGION, Empty);
     layout.set_item("[IR] (B2) Long Merge Chest", regions::dungeons::ice::ruins::SUBREGION, Empty);
     layout.set_item("[IR] (B4) Southeast Chest (Fall)", regions::dungeons::ice::ruins::SUBREGION, Empty);
-    layout.set_item("[IR] Dharkstare", regions::dungeons::ice::ruins::SUBREGION, Empty);
+    layout.set_item("[IR] Dharkstare", regions::dungeons::ice::ruins::SUBREGION, heart_containers.pop().unwrap());
 
     // Desert Palace
     layout.set_item("[DP] (1F) Entrance", regions::dungeons::desert::palace::SUBREGION, Empty);
@@ -686,7 +691,7 @@ fn build_layout() -> Layout {
     layout.set_item("[DP] (2F) Leever Room", regions::dungeons::desert::palace::SUBREGION, Empty);
     layout.set_item("[DP] (3F) Behind Falling Sand", regions::dungeons::desert::palace::SUBREGION, Empty);
     layout.set_item("[DP] (3F) Armos Room", regions::dungeons::desert::palace::SUBREGION, Empty);
-    layout.set_item("[DP] Zaganaga", regions::dungeons::desert::palace::SUBREGION, Empty);
+    layout.set_item("[DP] Zaganaga", regions::dungeons::desert::palace::SUBREGION, heart_containers.pop().unwrap());
 
     // Turtle Rock
     layout.set_item("[TR] (1F) Center", regions::dungeons::turtle::rock::SUBREGION, Empty);
@@ -701,9 +706,9 @@ fn build_layout() -> Layout {
     layout.set_item("[TR] (B1) Big Chest (Center)", regions::dungeons::turtle::rock::SUBREGION, Empty);
     layout.set_item("[TR] (B1) Platform", regions::dungeons::turtle::rock::SUBREGION, Empty);
     layout.set_item("[TR] (B1) Big Chest (Top)", regions::dungeons::turtle::rock::SUBREGION, Empty);
-    layout.set_item("[TR] (1F) Under Center", regions::dungeons::turtle::rock::SUBREGION, Empty);
-    layout.set_item("[TR] (B1) Under Center", regions::dungeons::turtle::rock::SUBREGION, Empty);
-    layout.set_item("[TR] Grinexx", regions::dungeons::turtle::rock::SUBREGION, Empty);
+    layout.set_item("[TR] (1F) Under Center", regions::dungeons::turtle::rock::SUBREGION, silver_rupees.pop().unwrap());
+    layout.set_item("[TR] (B1) Under Center", regions::dungeons::turtle::rock::SUBREGION, gold_rupees.pop().unwrap());
+    layout.set_item("[TR] Grinexx", regions::dungeons::turtle::rock::SUBREGION, heart_containers.pop().unwrap());
 
     // Lorule Castle
     layout.set_item("[LC] (1F) Ledge", regions::dungeons::lorule::castle::SUBREGION, Empty);

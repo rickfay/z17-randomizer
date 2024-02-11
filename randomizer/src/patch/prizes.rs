@@ -1,7 +1,7 @@
-use crate::filler::filler_item::FillerItem;
-use crate::filler::filler_item::FillerItem::Item;
 use crate::filler::filler_item::Item::*;
 use crate::filler::filler_item::Item::{SageOren, SageSeres};
+use crate::filler::filler_item::Randomizable;
+use crate::filler::filler_item::Randomizable::Item;
 use crate::{
     patch::{util::*, DungeonPrizes},
     MsbfKey, Patcher,
@@ -9,7 +9,6 @@ use crate::{
 use game::Course::{self, *};
 use log::info;
 use macros::fail;
-use modinfo::Settings;
 use rom::flag::Flag;
 use rom::{
     byaml,
@@ -19,12 +18,12 @@ use rom::{
 };
 use std::collections::HashMap;
 
-pub(crate) fn patch_dungeon_prizes(patcher: &mut Patcher, prizes: &DungeonPrizes, settings: &Settings) {
+pub(crate) fn patch_dungeon_prizes(patcher: &mut Patcher, prizes: &DungeonPrizes) {
     info!("Patching Dungeon Prizes...");
     patch_flowchart(patcher, prizes);
     patch_msbf_files(patcher, prizes);
     patch_dungeon_prize_actors(patcher, prizes);
-    patch_prize_byaml(patcher, settings, prizes);
+    patch_prize_byaml(patcher, prizes);
 }
 
 /// Adds entries to the FlowChart for the MSBF files related to each Portrait
@@ -71,7 +70,7 @@ fn patch_flowchart(patcher: &mut Patcher, prizes: &DungeonPrizes) {
 /// Get msbf event files and inject them into scenes
 #[rustfmt::skip]
 fn patch_msbf_files(patcher: &mut Patcher, prizes: &DungeonPrizes) {
-    let prize_msbf_map: HashMap<FillerItem, (&str, File<Box<[u8]>>)> = HashMap::from([
+    let prize_msbf_map: HashMap<Randomizable, (&str, File<Box<[u8]>>)> = HashMap::from([
         (Item(SageGulley), (MsbfKey::Dark, patcher.language(DungeonDark).unwrap().flow().extract("World/Flow/Dark.msbf").unwrap())),
         (Item(SageOren), (MsbfKey::Water, patcher.language(DungeonWater).unwrap().flow().extract("World/Flow/Water.msbf").unwrap())),
         (Item(SageSeres), (MsbfKey::Dokuro, patcher.language(FieldDark).unwrap().flow().extract("World/Flow/Dokuro.msbf").unwrap())),
@@ -98,7 +97,7 @@ fn patch_msbf_files(patcher: &mut Patcher, prizes: &DungeonPrizes) {
 fn patch_dungeon_prize_actors(patcher: &mut Patcher, prizes: &DungeonPrizes) {
     // Fetch and map Actors to their dungeon prizes
     let pendant = patcher.scene(DungeonWind, 2).unwrap().actors().get_actor_bch("Pendant").unwrap();
-    let actor_map: HashMap<FillerItem, Actor> = HashMap::from([
+    let actor_map: HashMap<Randomizable, Actor> = HashMap::from([
         (Item(PendantOfPower), pendant.clone()),
         (Item(PendantOfWisdom), pendant.clone()),
         (Item(PendantOfCourage), pendant),
@@ -132,7 +131,7 @@ fn patch_dungeon_prize_actors(patcher: &mut Patcher, prizes: &DungeonPrizes) {
 }
 
 /// Patches the BYAML files to shuffle Dungeon Prizes
-fn patch_prize_byaml(patcher: &mut Patcher, settings: &Settings, prizes: &DungeonPrizes) {
+fn patch_prize_byaml(patcher: &mut Patcher, prizes: &DungeonPrizes) {
     patch_eastern(patcher, prizes.ep_prize);
     patch_gales(patcher, prizes.hg_prize);
     patch_hera(patcher, prizes.th_prize);
@@ -144,19 +143,19 @@ fn patch_prize_byaml(patcher: &mut Patcher, settings: &Settings, prizes: &Dungeo
     patch_desert(patcher, prizes.dp_prize);
     patch_ice(patcher, prizes.ir_prize);
 
-    patch_checks_unlocked_by_prizes(patcher, settings);
+    patch_checks_unlocked_by_prizes(patcher);
 }
 
 /// Patch Checks unlocked by specific Dungeon Prizes
-fn patch_checks_unlocked_by_prizes(patcher: &mut Patcher, settings: &Settings) {
-    patch_oren(patcher, settings);
+fn patch_checks_unlocked_by_prizes(patcher: &mut Patcher) {
+    patch_oren(patcher);
     patch_impa(patcher);
-    patch_irene(patcher, settings);
-    patch_rosso(patcher, settings);
+    patch_irene(patcher);
+    patch_rosso(patcher);
 }
 
 /// Oren
-fn patch_oren(patcher: &mut Patcher, settings: &Settings) {
+fn patch_oren(patcher: &mut Patcher) {
     let credits_flag = Flag::Event(730);
 
     // Zora's Domain
@@ -171,33 +170,31 @@ fn patch_oren(patcher: &mut Patcher, settings: &Settings) {
         ],
     );
 
+    // Shady Guy Trigger
+    patcher.modify_objs(
+        FieldLight,
+        7,
+        [
+            set_enable_flag(14, Flag::SAGE_OREN), // Cutscene trigger
+            set_enable_flag(16, Flag::SAGE_OREN), // Shady Guy
+        ],
+    );
+
     // Zora's Domain
-    if settings.reverse_sage_events {
-        patcher.modify_objs(
-            CaveLight,
-            7,
-            [
-                // Hide Oren + Attendants until Oren is saved
-                set_enable_flag(116, Flag::SAGE_OREN), // Thin Oren
-                set_enable_flag(119, Flag::SAGE_OREN), // Zora Attendant
-                set_enable_flag(127, Flag::SAGE_OREN), // Zora Attendant
-                set_enable_flag(134, Flag::SAGE_OREN), // Thicc Oren
-                // Require saving Oren to turn in Smooth Gem
-                set_enable_flag(131, Flag::SAGE_OREN), // AreaSwitchCube
-                set_enable_flag(132, Flag::SAGE_OREN), // Throw Smooth Gem textbox trigger
-            ],
-        );
-    } else {
-        patcher.modify_objs(
-            CaveLight,
-            7,
-            [
-                // Always allow turning in Smooth Gem
-                clear_enable_flag(131), // AreaSwitchCube, fix for not being able to turn in Smooth Gem
-                clear_enable_flag(132), // Throw Smooth Gem textbox trigger
-            ],
-        );
-    }
+    patcher.modify_objs(
+        CaveLight,
+        7,
+        [
+            // Hide Oren + Attendants until Oren is saved
+            set_enable_flag(116, Flag::SAGE_OREN), // Thin Oren
+            set_enable_flag(119, Flag::SAGE_OREN), // Zora Attendant
+            set_enable_flag(127, Flag::SAGE_OREN), // Zora Attendant
+            set_enable_flag(134, Flag::SAGE_OREN), // Thicc Oren
+            // Require saving Oren to turn in Smooth Gem
+            set_enable_flag(131, Flag::SAGE_OREN), // AreaSwitchCube
+            set_enable_flag(132, Flag::SAGE_OREN), // Throw Smooth Gem textbox trigger
+        ],
+    );
 }
 
 /// Impa
@@ -216,11 +213,7 @@ fn patch_impa(patcher: &mut Patcher) {
 }
 
 /// Irene
-fn patch_irene(patcher: &mut Patcher, settings: &Settings) {
-    if !settings.reverse_sage_events {
-        return;
-    }
-
+fn patch_irene(patcher: &mut Patcher) {
     // Bridge
     patcher.modify_objs(
         FieldLight,
@@ -254,24 +247,22 @@ fn patch_irene(patcher: &mut Patcher, settings: &Settings) {
 }
 
 /// Rosso
-fn patch_rosso(patcher: &mut Patcher, settings: &Settings) {
-    let rosso_flag = if settings.reverse_sage_events { Flag::SAGE_ROSSO } else { Flag::EASTERN_COMPLETE };
-
+fn patch_rosso(patcher: &mut Patcher) {
     // Outside Rosso's House
     patcher.modify_objs(
         FieldLight,
         2,
         [
-            set_enable_flag(11, rosso_flag),      // Small Rock (controller, see below)
-            disable(88),                          // early game LZ to Rosso's House
-            clear_disable_flag(100),              // Keep Entry_KikoriMan3 from disappearing
-            clear_disable_flag(100),              // NpcMountaineer
-            clear_enable_flag(101),               // Rosso
-            set_disable_flag(101, Flag::CREDITS), // Rosso
-            set_disable_flag(128, rosso_flag),    // "Not in right now." signboard
-            set_46_args(132, rosso_flag),         // Door
-            disable(135),                         // Disable LZ to IndoorLight4 cutscene
-            set_enable_flag(136, rosso_flag),     // LZ to Rosso's House
+            set_enable_flag(11, Flag::SAGE_ROSSO),   // Small Rock (controller, see below)
+            disable(88),                             // early game LZ to Rosso's House
+            clear_disable_flag(100),                 // Keep Entry_KikoriMan3 from disappearing
+            clear_disable_flag(100),                 // NpcMountaineer
+            clear_enable_flag(101),                  // Rosso
+            set_disable_flag(101, Flag::CREDITS),    // Rosso
+            set_disable_flag(128, Flag::SAGE_ROSSO), // "Not in right now." signboard
+            set_46_args(132, Flag::SAGE_ROSSO),      // Door
+            disable(135),                            // Disable LZ to IndoorLight4 cutscene
+            set_enable_flag(136, Flag::SAGE_ROSSO),  // LZ to Rosso's House
         ],
     );
 
@@ -280,7 +271,7 @@ fn patch_rosso(patcher: &mut Patcher, settings: &Settings) {
         IndoorLight,
         10,
         [call(7, move |obj| {
-            obj.set_enable_flag(rosso_flag);
+            obj.set_enable_flag(Flag::SAGE_ROSSO);
             obj.clear_disable_flag();
         })],
     );
@@ -290,43 +281,43 @@ fn patch_rosso(patcher: &mut Patcher, settings: &Settings) {
         FieldLight,
         2,
         [
-            set_enable_flag(11, rosso_flag), // controller
-            set_enable_flag(12, rosso_flag),
-            set_enable_flag(14, rosso_flag),
-            set_enable_flag(15, rosso_flag),
-            set_enable_flag(16, rosso_flag),
-            set_enable_flag(18, rosso_flag),
-            set_enable_flag(19, rosso_flag),
-            set_enable_flag(20, rosso_flag),
-            set_enable_flag(21, rosso_flag),
-            set_enable_flag(93, rosso_flag),
-            set_enable_flag(94, rosso_flag),
-            set_enable_flag(102, rosso_flag),
-            set_enable_flag(103, rosso_flag),
-            set_enable_flag(104, rosso_flag),
-            set_enable_flag(105, rosso_flag),
-            set_enable_flag(106, rosso_flag),
-            set_enable_flag(107, rosso_flag),
-            set_enable_flag(108, rosso_flag),
-            set_enable_flag(109, rosso_flag),
-            set_enable_flag(110, rosso_flag),
-            set_enable_flag(111, rosso_flag),
-            set_enable_flag(112, rosso_flag),
-            set_enable_flag(118, rosso_flag),
-            set_enable_flag(119, rosso_flag),
-            set_enable_flag(120, rosso_flag),
-            set_enable_flag(121, rosso_flag),
-            set_enable_flag(122, rosso_flag),
-            set_enable_flag(123, rosso_flag),
-            set_enable_flag(124, rosso_flag),
-            set_enable_flag(125, rosso_flag),
-            set_enable_flag(126, rosso_flag),
+            set_enable_flag(11, Flag::SAGE_ROSSO), // controller
+            set_enable_flag(12, Flag::SAGE_ROSSO),
+            set_enable_flag(14, Flag::SAGE_ROSSO),
+            set_enable_flag(15, Flag::SAGE_ROSSO),
+            set_enable_flag(16, Flag::SAGE_ROSSO),
+            set_enable_flag(18, Flag::SAGE_ROSSO),
+            set_enable_flag(19, Flag::SAGE_ROSSO),
+            set_enable_flag(20, Flag::SAGE_ROSSO),
+            set_enable_flag(21, Flag::SAGE_ROSSO),
+            set_enable_flag(93, Flag::SAGE_ROSSO),
+            set_enable_flag(94, Flag::SAGE_ROSSO),
+            set_enable_flag(102, Flag::SAGE_ROSSO),
+            set_enable_flag(103, Flag::SAGE_ROSSO),
+            set_enable_flag(104, Flag::SAGE_ROSSO),
+            set_enable_flag(105, Flag::SAGE_ROSSO),
+            set_enable_flag(106, Flag::SAGE_ROSSO),
+            set_enable_flag(107, Flag::SAGE_ROSSO),
+            set_enable_flag(108, Flag::SAGE_ROSSO),
+            set_enable_flag(109, Flag::SAGE_ROSSO),
+            set_enable_flag(110, Flag::SAGE_ROSSO),
+            set_enable_flag(111, Flag::SAGE_ROSSO),
+            set_enable_flag(112, Flag::SAGE_ROSSO),
+            set_enable_flag(118, Flag::SAGE_ROSSO),
+            set_enable_flag(119, Flag::SAGE_ROSSO),
+            set_enable_flag(120, Flag::SAGE_ROSSO),
+            set_enable_flag(121, Flag::SAGE_ROSSO),
+            set_enable_flag(122, Flag::SAGE_ROSSO),
+            set_enable_flag(123, Flag::SAGE_ROSSO),
+            set_enable_flag(124, Flag::SAGE_ROSSO),
+            set_enable_flag(125, Flag::SAGE_ROSSO),
+            set_enable_flag(126, Flag::SAGE_ROSSO),
         ],
     );
 }
 
 /// Eastern Palace
-fn patch_eastern(patcher: &mut Patcher, prize: FillerItem) {
+fn patch_eastern(patcher: &mut Patcher, prize: Randomizable) {
     let data = PrizePatchData::get(prize);
     let outside_hyrule_castle = SpawnPoint::new(FieldLight, 18, 5);
 
@@ -411,7 +402,7 @@ fn patch_eastern(patcher: &mut Patcher, prize: FillerItem) {
 }
 
 /// House of Gales
-fn patch_gales(patcher: &mut Patcher, prize: FillerItem) {
+fn patch_gales(patcher: &mut Patcher, prize: Randomizable) {
     // Debug stuff
     // patcher.modify_objs(DungeonWind, 3, &[
     //     disable(436), // Margomill
@@ -486,7 +477,7 @@ fn patch_gales(patcher: &mut Patcher, prize: FillerItem) {
 }
 
 /// Tower of Hera
-fn patch_hera(patcher: &mut Patcher, prize: FillerItem) {
+fn patch_hera(patcher: &mut Patcher, prize: Randomizable) {
     // Debug stuff
     // patcher.modify_objs(DungeonHera, 1, &[
     //     disable(737), // Moldorm
@@ -551,7 +542,7 @@ fn patch_hera(patcher: &mut Patcher, prize: FillerItem) {
 }
 
 /// Dark Palace
-fn patch_dark(patcher: &mut Patcher, prize: FillerItem) {
+fn patch_dark(patcher: &mut Patcher, prize: Randomizable) {
     // Debug stuff
     // patcher.modify_objs(DungeonDark, 1, &[
     //     disable(118), // Gemesaur
@@ -636,7 +627,7 @@ fn patch_dark(patcher: &mut Patcher, prize: FillerItem) {
 }
 
 /// Swamp Palace
-fn patch_swamp(patcher: &mut Patcher, prize: FillerItem) {
+fn patch_swamp(patcher: &mut Patcher, prize: Randomizable) {
     if prize == Item(SageOren) {
         return;
     }
@@ -645,7 +636,7 @@ fn patch_swamp(patcher: &mut Patcher, prize: FillerItem) {
 }
 
 /// Skull Woods
-fn patch_skull(patcher: &mut Patcher, prize: FillerItem) {
+fn patch_skull(patcher: &mut Patcher, prize: Randomizable) {
     if prize == Item(SageSeres) {
         return;
     }
@@ -654,7 +645,7 @@ fn patch_skull(patcher: &mut Patcher, prize: FillerItem) {
 }
 
 /// Thieves' Hideout
-fn patch_thieves(patcher: &mut Patcher, prize: FillerItem) {
+fn patch_thieves(patcher: &mut Patcher, prize: Randomizable) {
     if prize == Item(SageOsfala) {
         return;
     }
@@ -663,7 +654,7 @@ fn patch_thieves(patcher: &mut Patcher, prize: FillerItem) {
 }
 
 /// Turtle Rock
-fn patch_turtle(patcher: &mut Patcher, prize: FillerItem) {
+fn patch_turtle(patcher: &mut Patcher, prize: Randomizable) {
     // Debug stuff
     // patcher.modify_objs(DungeonKame, 3, &[
     //     disable(8), // Grinexx
@@ -733,7 +724,7 @@ fn patch_turtle(patcher: &mut Patcher, prize: FillerItem) {
 }
 
 /// Desert Palace
-fn patch_desert(patcher: &mut Patcher, prize: FillerItem) {
+fn patch_desert(patcher: &mut Patcher, prize: Randomizable) {
     // Debug stuff
     // patcher.modify_objs(FieldDark, 31, &[
     //     disable(67), // Zaganaga
@@ -753,24 +744,14 @@ fn patch_desert(patcher: &mut Patcher, prize: FillerItem) {
 
     // Add blue warp to allow going from Zaga to Mire repeatedly, not just when first picking up the dungeon prize
     let (unq, ser) = patcher.find_objs_unq_ser(FieldDark, 31);
-    let mut warp_tile = Obj::warp_tile(
+    let mut warp_tile = Obj::blue_warp(
         prize_flag,
         0,
         ser,
         unq,
-        SpawnPoint::new(FieldDark, 31 - 1, 30),
+        SpawnPoint::new(FieldDark, 31, 30),
         Vec3 { x: -13.0, y: 0.0, z: -24.0 },
     );
-    // let mut warp_tile = Obj::blue_warp(
-    //     prize_flag,
-    //     0,
-    //     ser.unwrap(),
-    //     unq,
-    //     30,
-    //     FieldDark as i32,
-    //     31 - 1,
-    //     Vec3 { x: -13.0, y: 0.0, z: -24.0 },
-    // );
     warp_tile.set_enable_flag(prize_flag);
     patcher.add_obj(FieldDark, 31, warp_tile);
 
@@ -785,7 +766,7 @@ fn patch_desert(patcher: &mut Patcher, prize: FillerItem) {
 }
 
 /// Ice Ruins
-fn patch_ice(patcher: &mut Patcher, prize: FillerItem) {
+fn patch_ice(patcher: &mut Patcher, prize: Randomizable) {
     // Debug stuff
     // patcher.modify_system(DungeonIce, 1, &[
     //     call(68, |obj| {
@@ -814,7 +795,7 @@ impl PrizePatchData {
         Self { actor_id, flag, rot_x, arg1, arg9, arg12 }
     }
 
-    fn get(prize: FillerItem) -> Self {
+    fn get(prize: Randomizable) -> Self {
         match prize {
             Item(SageGulley) => Self::new(418, Flag::Event(536), 0.0, 0, 1, 60),
             Item(SageOren) => Self::new(423, Flag::Event(556), 330.0, 0, 0, 30),
@@ -831,7 +812,7 @@ impl PrizePatchData {
     }
 }
 
-fn reroute_sage_warp(patcher: &mut Patcher, prize: FillerItem, sp: SpawnPoint) {
+fn reroute_sage_warp(patcher: &mut Patcher, prize: Randomizable, sp: SpawnPoint) {
     // Get UNQ of warp object in the Chamber of Sages
     let unq_sage_warp = match prize {
         Item(SageGulley) => Some(73),
@@ -852,7 +833,8 @@ fn reroute_sage_warp(patcher: &mut Patcher, prize: FillerItem, sp: SpawnPoint) {
 }
 
 fn modify_dungeon_reward(
-    patcher: &mut Patcher, prize: FillerItem, unq: u16, scene: Course, scene_index: u16, activate: bool, sp: SpawnPoint,
+    patcher: &mut Patcher, prize: Randomizable, unq: u16, scene: Course, scene_index: u16, activate: bool,
+    sp: SpawnPoint,
 ) {
     let data = PrizePatchData::get(prize);
     patcher.modify_objs(
