@@ -34,7 +34,7 @@
     "chest_size_matches_contents": true,                      // All chests containing progression or unique items will become large, and others will be made small.
     "minigames_excluded":          true,                      // Excludes the following: Octoball Derby, Dodge the Cuccos, Hyrule Hotfoot, Treacherous Tower, and both Rupee Rushes
     "skip_big_bomb_flower":        true,                      // Skips the Big Bomb Flower by removing the 5 Big Rocks in Lorule Field.
-    "skip_trials":                 true,                      // Automatically opens the Lorule Castle Trials door.
+    "trials_door":                 "OneTrialRequired",        // "Off", "OneTrialRequired", "TwoTrialsRequired", "ThreeTrialsRequired", "AllTrialsRequired"
 
     "treacherous_tower_floors":    5,                         // The number (any integer between 2 and 66) of floors the Treacherous Tower minigame will have.
 
