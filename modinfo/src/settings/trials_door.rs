@@ -45,21 +45,6 @@ impl TryFrom<u8> for TrialsDoor {
     }
 }
 
-impl TryFrom<&str> for TrialsDoor {
-    type Error = String;
-
-    fn try_from(value: &str) -> Result<Self, Self::Error> {
-        match value.to_uppercase().as_str() {
-            "0" | "OFF" => Ok(Self::Off),
-            "1" | "1 TRIAL REQUIRED" => Ok(Self::OneTrialRequired),
-            "2" | "2 TRIALS REQUIRED" => Ok(Self::TwoTrialsRequired),
-            "3" | "3 TRIALS REQUIRED" => Ok(Self::ThreeTrialsRequired),
-            "4" | "4 TRIALS REQUIRED" => Ok(Self::AllTrialsRequired),
-            _ => Err("Invalid LcTrialsDoor setting: {}".to_string()),
-        }
-    }
-}
-
 impl Display for TrialsDoor {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(
