@@ -497,7 +497,6 @@ fn golden_bees(code: &mut Code) {
 
 /// Show Hint Ghosts always, without the need for the Hint Glasses
 fn show_hint_ghosts(code: &mut Code) {
-
     // Allow talking to Hint Ghosts without glasses
     code.patch(0x1cb3c8, [mov(R0, 0x1)]);
 

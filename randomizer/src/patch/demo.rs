@@ -105,10 +105,10 @@ fn get_initial_flags_to_set(SeedInfo { trials_config, settings, .. }: &SeedInfo)
         321, 322, // Skip first Oren cutscenes
         374, // Fix Post-Gales and Post-Hera music by marking Sahasrahla telepathy as seen
         415, // Skip Yuga capturing Zelda
-        410, // FIXME DONT LEAVE ON
-        420, // FIXME DONT LEAVE ON
+        // 410, // Hyrule Castle Barrier
+        // 420, // Yuga 2 defeated in HC
         522, // Blacksmith Hilda Text, enable Map Swap icon, skip introductory Lorule music
-        524, 560, 600, 620, 640, // Skip Hilda Text, enable Lorule overworld music
+        523, 524, 560, 600, 620, 640, // Skip Hilda Text, enable Lorule overworld music
         525, // Skip Sahasrahla outside Link's House, make Hyrule Hotfoot appear
         // 536, 537, // Gulley Flags
         // 556, 557, // Oren Flags
@@ -175,7 +175,7 @@ fn get_initial_flags_to_set(SeedInfo { trials_config, settings, .. }: &SeedInfo)
 
     // Trial's Door
     match settings.trials_door {
-        TrialsDoor::Off => {
+        TrialsDoor::Open => {
             // Set flags to auto-complete the trials, open the trials door, defeat minibosses, and advance LC music.
             //
             // Flag 713 is intentionally not set so that when the door is first encountered it will fill in the bottom

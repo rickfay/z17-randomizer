@@ -16,7 +16,7 @@ crate::region! {
             "Ice Gimos Fight": RupeeSilver @Chest(3[109]),
             "Ice Cave Ledge": RupeeGold @Chest(4[25]),
             "Lorule Mountain W Ledge": LiverBlue @Chest(3[108]),
-            "Treacherous Tower": ItemKandelaarLv2 @Event(FieldDark_05_GameTower[0x8D]),
+            "Treacherous Tower": ItemKandelaarLv2 @Event(FieldDark_05_GameTower[35]),
             "[Mai] Lorule Mountain E Big Rock": Maiamai @Maiamai(4[24]),
             "[Mai] Ice Cave Ledge": Maiamai @Maiamai(4[22]),
             "[Mai] Lorule Mountain E Wall": Maiamai @Maiamai(4[23]),

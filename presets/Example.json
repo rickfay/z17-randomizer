@@ -8,7 +8,6 @@
 
     "logic_mode":                  "Normal",                  // "Normal", "Hard", "Glitched", "AdvGlitched", "Hell", "NoLogic"
     "dark_rooms_lampless":         false,                     // If enabled the logic may expect players to cross Dark Rooms without the Lamp.
-    "reverse_sage_events":         true,                      // Ties Sage-related checks and events to actually rescuing that Sage.
 
     "dungeon_prize_shuffle":       true,                      // This shuffles all Sage Portraits, Pendants, and the Charm among themselves.
     "maiamai_madness":             false,                     // This shuffles Maiamai into the pool, adding 100 more locations.
@@ -17,7 +16,6 @@
     "nice_mode":                   false,                     // This shuffles a second progressive copy of each Ravio Item into the general item pool.
     "super_mode":                  true,                      // This shuffles a second progressive copy of the Lamp and Net into the general item pool.
     "weather_vanes":               "Hyrule",                  // Choose initially active Weather Vanes: "Standard", "Shuffled", "Convenient", "Hyrule", "Lorule", "All"
-    "ravios_shop":                 "Open",                    // "Closed", "Open"
 
     "bow_of_light_in_castle":      false,                     // Limits the Bow of Light's placement to somewhere in Lorule Castle (including possibly Zelda).
     "no_progression_enemies":      false,                     // Removes Enemies from dungeons that are themselves Progression (e.g.: Bawbs, the bomb enemy)
@@ -32,23 +30,24 @@
     "assured_weapon":              false,                     // If enabled at least one weapon is guaranteed to be placed in Ravio's Shop. (Note: incompatible with boots_in_shop and sword_in_shop).
 
     "chest_size_matches_contents": true,                      // All chests containing progression or unique items will become large, and others will be made small.
-    "minigames_excluded":          true,                      // Excludes the following: Octoball Derby, Dodge the Cuccos, Hyrule Hotfoot, Treacherous Tower, and both Rupee Rushes
+    "minigames_excluded":          false,                     // Excludes the following: Octoball Derby, Dodge the Cuccos, Hyrule Hotfoot, Treacherous Tower, and both Rupee Rushes
     "skip_big_bomb_flower":        true,                      // Skips the Big Bomb Flower by removing the 5 Big Rocks in Lorule Field.
-    "trials_door":                 "OneTrialRequired",        // "Off", "OneTrialRequired", "TwoTrialsRequired", "ThreeTrialsRequired", "AllTrialsRequired"
+    "trials_door":                 "OneTrialRequired",        // "Open", "OneTrialRequired", "TwoTrialsRequired", "ThreeTrialsRequired", "AllTrialsRequired"
 
     "treacherous_tower_floors":    5,                         // The number (any integer between 2 and 66) of floors the Treacherous Tower minigame will have.
 
     "night_mode":                  false,                     // Enables certain shaders on the overworld that make it look like nighttime in Hyrule.
 
-    "exclusions": [
-      // Exclude locations to guarantee Junk items will be placed there. Check Names are all unique, consult a spoiler log for a complete list.
+    "user_exclusions": [
+      // Exclude locations to guarantee Junk items will be placed there.
+      // Check Names are all unique, consult a spoiler log for a complete list.
+      // Place a comma "," after each line, except the last line.
       "Dodge the Cuccos",
-      "Hyrule Hotfoot 75s",
       "Hyrule Hotfoot 65s",
+      "Hyrule Hotfoot 75s",
+      "Octoball Derby",
       "Rupee Rush (Hyrule)",
-      "Rupee Rush (Lorule)",
-      "Octoball Derby"
-      // "Treacherous Tower"
+      "Rupee Rush (Lorule)"
     ]
   }
 }

@@ -711,7 +711,7 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
             HyruleCastleInterior,
             location(
                 "Hyrule Castle Interior",
-                vec![check!("[HC] Zelda", regions::dungeons::hyrule::castle::SUBREGION)],
+                vec![check!("[HC] Throne", regions::dungeons::hyrule::castle::SUBREGION, |p| p.has_sage_impa())],
                 vec![edge!(HyruleCastleCourtyard), edge!(HyruleCastleRoof)],
             ),
         ),

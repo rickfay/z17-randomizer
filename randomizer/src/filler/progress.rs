@@ -635,7 +635,7 @@ impl<'s> Progress<'s> {
     }
 
     pub fn has_completed_trials(&self) -> bool {
-        self.seed_info.settings.trials_door == TrialsDoor::Off
+        self.seed_info.settings.trials_door == TrialsDoor::Open
             || ((self.has(Goal::LcBombTrial) || !self.seed_info.trials_config.bomb_trial)
                 && (self.has(Goal::LcTileTrial) || !self.seed_info.trials_config.tile_trial)
                 && (self.has(Goal::LcLampTrial) || !self.seed_info.trials_config.lamp_trial)

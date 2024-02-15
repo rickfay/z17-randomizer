@@ -68,19 +68,19 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
                         glitched: |p| p.has_boots(),
                         adv_glitched: |p| p.has_lorule_keys(3), // drop from 4F -> 3F -> 2F
                     }),
-                    check!("[LC] Bomb Trial I", regions::dungeons::lorule::castle::SUBREGION => {
+                    check!("[LC] Bomb Trial (1)", regions::dungeons::lorule::castle::SUBREGION => {
                         normal: |p| p.has_bombs(),
                         glitched: |p| p.has_ice_rod(),
                     }),
-                    check!("[LC] Bomb Trial II", regions::dungeons::lorule::castle::SUBREGION => {
+                    check!("[LC] Bomb Trial (2)", regions::dungeons::lorule::castle::SUBREGION => {
                         normal: |p| p.has_bombs() && p.can_merge(),
                         hard: |p| p.has_bombs() && p.has_bow(),
                     }),
-                    check!("[LC] Tile Trial I", regions::dungeons::lorule::castle::SUBREGION),
+                    check!("[LC] Tile Trial (1)", regions::dungeons::lorule::castle::SUBREGION),
                     goal!("Bomb Trial", Goal::LcBombTrial, |p| p.has_lorule_keys(5)
                         && p.can_hit_switch()
                         && p.can_attack()),
-                    check!("[LC] Tile Trial II", regions::dungeons::lorule::castle::SUBREGION => {
+                    check!("[LC] Tile Trial (2)", regions::dungeons::lorule::castle::SUBREGION => {
                         normal: |p| p.can_merge(),
                         adv_glitched: |p| p.has_tornado_rod() && p.has_sword(),
                     }),
@@ -116,9 +116,9 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
                         normal: |p| p.has_lorule_keys(5) && p.has_fire_source() && p.can_attack(),
                         hard: |p| p.has_lorule_keys(5) && p.can_attack(),
                     }),
-                    check!("[LC] Hook Trial II", regions::dungeons::lorule::castle::SUBREGION, |p| p.has_hookshot()
+                    check!("[LC] Hook Trial (2)", regions::dungeons::lorule::castle::SUBREGION, |p| p.has_hookshot()
                         && (p.has_ice_rod() || p.can_merge())),
-                    check!("[LC] Hook Trial I", regions::dungeons::lorule::castle::SUBREGION, |p| p.has_hookshot()),
+                    check!("[LC] Hook Trial (1)", regions::dungeons::lorule::castle::SUBREGION, |p| p.has_hookshot()),
                     goal!("Hookshot Trial", Goal::LcHookTrial, |p| p.has_lorule_keys(5)
                         && p.has_hookshot()
                         && p.can_attack()),

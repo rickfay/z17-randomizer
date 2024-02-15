@@ -157,14 +157,14 @@ pub fn get_seed_settings() -> Result<Settings, String> {
         5,
     ))?;
 
-    let ravios_shop = RaviosShop::try_from(prompt_u8_in_range(
-        "Ravio's Shop",
-        "Choose whether Ravio's Shop is Closed or Open at the start of the game.\n\
-        [0] Closed\n\
-        [1] Open\n",
-        0,
-        1,
-    ))?;
+    // let ravios_shop = RaviosShop::try_from(prompt_u8_in_range(
+    //     "Ravio's Shop",
+    //     "Choose whether Ravio's Shop is Closed or Open at the start of the game.\n\
+    //     [0] Closed\n\
+    //     [1] Open\n",
+    //     0,
+    //     1,
+    // ))?;
 
     let dark_rooms_lampless = prompt_bool(
         "Dark Room Crossing (advanced)",
@@ -190,9 +190,9 @@ pub fn get_seed_settings() -> Result<Settings, String> {
 
     let treacherous_tower_floors = prompt_u16_in_range(
         "Treacherous Tower Floors",
-        "How many floors should Treacherous Tower have? (2-68)\nRecommended: 5",
+        "How many floors should Treacherous Tower have? (2-66)\nRecommended: 5",
         2,
-        68,
+        66,
     ) as usize;
 
     let keysy = Keysy::try_from(prompt_u8_in_range(
@@ -225,7 +225,7 @@ pub fn get_seed_settings() -> Result<Settings, String> {
         portal_shuffle,
         trials_door,
         weather_vanes,
-        ravios_shop,
+        ravios_shop: RaviosShop::Open,
         bow_of_light_in_castle,
         no_progression_enemies,
         keysy,

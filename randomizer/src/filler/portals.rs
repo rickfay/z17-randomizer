@@ -483,7 +483,7 @@ impl Portal {
             Self::RossosOreMineHyrule => Flag::PORTAL_ROSSOS_ORE_MINE_HYRULE,
             Self::SwampPillarHyrule => Flag::PORTAL_SWAMP_PILLAR_HYRULE,
             Self::ZorasDomain => Flag::PORTAL_ZORAS_DOMAIN,
-            Self::HyruleCastle => Flag::ONE,
+            Self::HyruleCastle => Flag::ZERO_ZERO,
             Self::ThievesTown => Flag::PORTAL_THIEVES_TOWN,
             Self::VacantHouse => Flag::PORTAL_VACANT_HOUSE,
             Self::ParadoxRightLorule => Flag::PORTAL_PARADOX_UPPER_LORULE,
@@ -511,7 +511,7 @@ impl Portal {
             Self::RossosOreMineLorule => Flag::PORTAL_ROSSOS_ORE_MINE_LORULE,
             Self::SwampPillarLorule => Flag::PORTAL_SWAMP_PILLAR_LORULE,
             Self::KusDomain => Flag::PORTAL_KUS_DOMAIN,
-            Self::LoruleCastle => Flag::ONE,
+            Self::LoruleCastle => Flag::ZERO_ZERO,
         }
     }
 }

@@ -572,17 +572,16 @@ fn patch_treacherous_tower(patcher: &mut Patcher, seed_info: &SeedInfo) -> Resul
             ],
 
             // --- After Game dialog --- //
-            [19] => 118,
-            [142 into_branch] switch [
-                [0] => 141, // Skip 137
+            [19] => 116, // Skip 113, 114, 115
+            [35 convert_into_action] each [
+                arg1(6), // give out item
+                = 0xB, // give out item
             ],
-            // 141 is ItemKandelaarLv2
-            [141] => 143, // Skip 146
-            [136 into_branch] switch [
-                [1] => 143, // Skip Super Net stuff
+            [34 into_branch] switch [
+                [1] => 42,
             ],
-            [140] => 143, // Skip Super Net stuff
-            [209 into_start] => 210, // Skip 208
+            [133 into_start] => 45, // Skip 51
+            [191] => 192, // Skip 39
         },
     );
 
@@ -932,13 +931,10 @@ pub fn legacy_patches(patcher: &mut Patcher) -> Result<()> {
         },
 
         // Prologue (Seres and Dampe)
+        // FieldLight_13_Sister_ACT2_heisicho
         FieldLight/FieldLight_13_Sister {
-            // FieldLight_13_Sister_ACT2_heisicho
-            [2 into_start] => 0x13, // Skip to door close
-            [0x13] => 0x1D, // Skip to item get
-            [0x1D] => 0x31, // Skip to music start
-            [0x31] => 0x1F, // Skip to flags
-            [0x20] => 0x6D,
+            [2 into_start] => 29, // Skip to item get
+            [29] => None,
         },
         // Merchant
         FieldLight/FieldLight_18_StandItem {

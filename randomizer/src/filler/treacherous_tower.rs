@@ -37,8 +37,8 @@ pub fn choose_floors(settings: &Settings, rng: &mut StdRng) -> Result<Vec<TowerS
     let first_course = [EnemyAttackS, EnemyAttackM, EnemyAttackL].choose(rng).unwrap();
     chosen_floors.insert(0, TowerStage::new(*first_course, 1));
 
-    // Shiny Moldorm is always the last floor
-    chosen_floors.push(TowerStage::new(EnemyAttackL, 50));
+    // Regular Moldorm is always the last floor
+    chosen_floors.push(TowerStage::new(EnemyAttackS, 5));
 
     Ok(chosen_floors)
 }
