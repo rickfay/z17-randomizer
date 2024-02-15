@@ -1131,7 +1131,7 @@ impl Item {
 
             TriforceOfCourage => "the",
 
-            Quake => "the",
+            Quake => "",
         }
     }
 

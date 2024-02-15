@@ -8,7 +8,7 @@ crate::region! {
 
             "[HC] Battlement": RupeePurple @Chest(FieldLight 18[224]),
             "[HC] West Wing": RupeeB @Chest(12[48]),
-            "[HC] Zelda": ZeldaAmulet @Event(FieldLight_1B_Zelda[36]),
+            "[HC] Throne": ZeldaAmulet @Chest(12[23]),
         ],
     },
 }

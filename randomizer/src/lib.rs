@@ -1,6 +1,6 @@
 use crate::filler::filler_item::Vane;
 use crate::filler::trials::TrialsConfig;
-use crate::filler::{portals, treacherous_tower, trials, vanes};
+use crate::filler::{portals, text, treacherous_tower, trials, vanes};
 use crate::world::WorldGraph;
 use crate::{
     constants::VERSION,
@@ -298,6 +298,11 @@ fn align_json_values(json: &mut String) {
     }
 }
 
+#[derive(Serialize, Default, Debug)]
+pub struct Text {
+    credits: String,
+}
+
 #[derive(Serialize, Deserialize, Debug)]
 pub struct SeedInfo {
     #[serde(default)]
@@ -330,6 +335,9 @@ pub struct SeedInfo {
     pub vane_map: VaneMap,
 
     #[serde(skip_deserializing)]
+    pub text: Text,
+
+    #[serde(skip_deserializing)]
     pub metrics: Metrics,
 
     #[serde(skip_deserializing)]
@@ -342,7 +350,7 @@ pub struct SeedInfo {
 impl SeedInfo {
     fn new(
         seed: u32, hash: SeedHash, settings: Settings, portal_map: PortalMap, vane_map: VaneMap,
-        trials_config: TrialsConfig, world_graph: WorldGraph, treacherous_tower_floors: Vec<TowerStage>,
+        trials_config: TrialsConfig, world_graph: WorldGraph, text: Text, treacherous_tower_floors: Vec<TowerStage>,
     ) -> Self {
         Self {
             seed,
@@ -357,6 +365,7 @@ impl SeedInfo {
             hints: Default::default(),
             trials_config,
             world_graph,
+            text,
             treacherous_tower_floors,
         }
     }
@@ -382,6 +391,7 @@ impl Default for SeedInfo {
             trials_config: Default::default(),
             world_graph: Default::default(),
             treacherous_tower_floors: Default::default(),
+            text: Default::default(),
         }
     }
 }
@@ -525,12 +535,14 @@ fn calculate_seed_info(seed: u32, settings: Settings, hash: SeedHash, rng: &mut 
 
     let portal_map = portals::build_portal_map(&settings, rng)?;
     let vane_map = vanes::build_vanes_map(&settings, rng)?;
+    let text = text::generate(rng)?;
     let trials_config = trials::configure(rng, &settings)?;
     let treacherous_tower_floors = treacherous_tower::choose_floors(&settings, rng)?;
     let world_graph = world::build_world_graph(&portal_map);
 
-    let mut seed_info =
-        SeedInfo::new(seed, hash, settings, portal_map, vane_map, trials_config, world_graph, treacherous_tower_floors);
+    let mut seed_info = SeedInfo::new(
+        seed, hash, settings, portal_map, vane_map, trials_config, world_graph, text, treacherous_tower_floors,
+    );
 
     // Check Map and Item Pools
     let check_map = &mut filler::prefill_check_map(&mut seed_info.world_graph);
@@ -559,8 +571,8 @@ pub fn patch_seed(seed_info: &SeedInfo, user_config: &UserConfig, no_patch: bool
         // patch::lms::msbf::research(&mut patcher, None, "HintGhost", vec![], true)?;
 
         // patch::research_msbf_msbt(&mut patcher,
-        //     game::Course::FieldDark, "FieldDark_05_GameTower", // MSBF
-        //     game::Course::FieldDark, "FieldDark_05",           // MSBT
+        //     game::Course::IndoorLight, "FieldLight_22_BlackSmith", // MSBF
+        //     game::Course::IndoorLight, "FieldLight_22",        // MSBT
         //     true);
 
         regions::patch(&mut patcher, seed_info)?;

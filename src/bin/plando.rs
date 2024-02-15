@@ -189,7 +189,7 @@ fn plando_settings() -> Settings {
         portals: Portals::Open,
         portal_shuffle: PortalShuffle::AnyWorldPairs,
         weather_vanes: WeatherVanes::Hyrule,
-        ravios_shop: RaviosShop::Closed,
+        ravios_shop: RaviosShop::Open,
         bow_of_light_in_castle: false,
         no_progression_enemies: false,
         keysy: Keysy::Off,
@@ -249,7 +249,7 @@ fn build_layout() -> Layout {
     layout.set_item("[HG] Prize", regions::dungeons::house::gales::SUBREGION, PendantOfWisdom);
     layout.set_item("[TH] Prize", regions::dungeons::tower::hera::SUBREGION, PendantOfPower);
 
-    layout.set_item("[HC] Zelda", regions::dungeons::hyrule::castle::SUBREGION, Charm);
+    layout.set_item("[HC] Throne", regions::dungeons::hyrule::castle::SUBREGION, Charm);
 
     layout.set_item("[PD] Prize", regions::dungeons::dark::palace::SUBREGION, SageGulley);
     layout.set_item("[SP] Prize", regions::dungeons::swamp::palace::SUBREGION, SageOren);
@@ -718,13 +718,13 @@ fn build_layout() -> Layout {
     layout.set_item("[LC] (2F) Ledge", regions::dungeons::lorule::castle::SUBREGION, Empty);
     layout.set_item("[LC] (4F) Center", regions::dungeons::lorule::castle::SUBREGION, Empty);
     layout.set_item("[LC] (4F) Hidden Path", regions::dungeons::lorule::castle::SUBREGION, Empty);
-    layout.set_item("[LC] Bomb Trial I", regions::dungeons::lorule::castle::SUBREGION, Empty);
-    layout.set_item("[LC] Bomb Trial II", regions::dungeons::lorule::castle::SUBREGION, Empty);
-    layout.set_item("[LC] Tile Trial I", regions::dungeons::lorule::castle::SUBREGION, Empty);
-    layout.set_item("[LC] Tile Trial II", regions::dungeons::lorule::castle::SUBREGION, Empty);
+    layout.set_item("[LC] Bomb Trial (1)", regions::dungeons::lorule::castle::SUBREGION, Empty);
+    layout.set_item("[LC] Bomb Trial (2)", regions::dungeons::lorule::castle::SUBREGION, Empty);
+    layout.set_item("[LC] Tile Trial (1)", regions::dungeons::lorule::castle::SUBREGION, Empty);
+    layout.set_item("[LC] Tile Trial (2)", regions::dungeons::lorule::castle::SUBREGION, Empty);
     layout.set_item("[LC] Lamp Trial", regions::dungeons::lorule::castle::SUBREGION, Empty);
-    layout.set_item("[LC] Hook Trial I", regions::dungeons::lorule::castle::SUBREGION, Empty);
-    layout.set_item("[LC] Hook Trial II", regions::dungeons::lorule::castle::SUBREGION, Empty);
+    layout.set_item("[LC] Hook Trial (1)", regions::dungeons::lorule::castle::SUBREGION, Empty);
+    layout.set_item("[LC] Hook Trial (2)", regions::dungeons::lorule::castle::SUBREGION, Empty);
     layout.set_item("[LC] Zelda", regions::dungeons::lorule::castle::SUBREGION, Empty);
 
     info!("Successfully Built Layout");

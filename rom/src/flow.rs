@@ -475,7 +475,7 @@ impl<'flow, 'input> StepMut<'flow, 'input> {
         }
     }
 
-    fn set_value(&mut self, value: u32) {
+    pub fn set_value(&mut self, value: u32) {
         unsafe {
             self.flow.steps.get_mut(self.index).unwrap().get_unchecked_mut(4..8).copy_from_slice(&value.to_le_bytes());
         }

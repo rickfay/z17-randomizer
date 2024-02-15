@@ -1,17 +1,17 @@
 #[derive(Debug, Copy, Clone)]
 pub enum Flag {
-    React(u16),   // 0 - Reactions with system objects, not persisted
-    Session(u16), // 1 - Flag persists until game is reset (I think?)
-    Two(u16),     // 2 - ???
-    Course(u16),  // 3 - Course-specific, shared between scenes of the same course
-    Event(u16),   // 4 - Global
+    Zero(u16),   // 0 - Reactions with system objects, not persisted
+    One(u16),    // 1 - Flag persists until game is reset (I think?)
+    Two(u16),    // 2 - ???
+    Course(u16), // 3 - Course-specific, shared between scenes of the same course
+    Event(u16),  // 4 - Global
 }
 
 impl Flag {
     pub fn get_type(self) -> u8 {
         match self {
-            Flag::React(_) => 0,
-            Flag::Session(_) => 1,
+            Flag::Zero(_) => 0,
+            Flag::One(_) => 1,
             Flag::Two(_) => 2,
             Flag::Course(_) => 3,
             Flag::Event(_) => 4,
@@ -20,8 +20,8 @@ impl Flag {
 
     pub fn get_value(self) -> u16 {
         match self {
-            Flag::React(flag) => flag,
-            Flag::Session(flag) => flag,
+            Flag::Zero(flag) => flag,
+            Flag::One(flag) => flag,
             Flag::Two(flag) => flag,
             Flag::Course(flag) => flag,
             Flag::Event(flag) => flag,
@@ -30,8 +30,8 @@ impl Flag {
 
     pub fn into_pair(self) -> (u8, u16) {
         match self {
-            Flag::React(flag) => (0, flag),
-            Flag::Session(flag) => (1, flag),
+            Flag::Zero(flag) => (0, flag),
+            Flag::One(flag) => (1, flag),
             Flag::Two(flag) => (2, flag),
             Flag::Course(flag) => (3, flag),
             Flag::Event(flag) => (4, flag),
@@ -104,8 +104,10 @@ macro_rules! event_flags {
 }
 
 impl Flag {
+    pub const ZERO_ZERO: Flag = Flag::Zero(0);
+
     event_flags! {
-        1: ONE,
+        106: REPURPOSED_106,
         // ...
         251: EASTERN_COMPLETE,
         // ...

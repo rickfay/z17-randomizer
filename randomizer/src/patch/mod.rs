@@ -10,7 +10,6 @@ use game::{
 use log::{debug, error, info};
 use macros::fail;
 use modinfo::settings::portal_shuffle::PortalShuffle;
-use modinfo::settings::portals::Portals;
 use modinfo::settings::weather_vanes::WeatherVanes::*;
 use path_absolutize::*;
 use rom::byaml::scene_env::SceneEnvFile;
@@ -298,8 +297,6 @@ impl Patcher {
                             index
                         ))
                     })?
-                    .into_action()
-                    .ok_or_else(|| Error::game("Not an action."))?
                     .set_value(filler_item.into().unwrap().as_item_index());
             },
             Patch::Shop(Shop::Ravio(index)) => {
@@ -407,14 +404,12 @@ impl Patcher {
                     set_disable_flag(29, there_flag), // AreaDisableWallIn
                 ],
             );
-        } else if seed_info.settings.portals == Portals::Closed {
+        } else if here_portal == *seed_info.portal_map.get(&Portal::HyruleCastle).unwrap() {
             // Portal paired with Hyrule Castle is always kept open
-            if here_portal == *seed_info.portal_map.get(&Portal::HyruleCastle).unwrap() {
-                self.modify_objs(course, scene, [clear_enable_flag(unq)]);
-            } else {
-                // Lock all Portals (except HC + its pair) behind Flag 510
-                self.modify_objs(course, scene, [set_enable_flag(unq, Flag::QUAKE)]);
-            }
+            self.modify_objs(course, scene, [clear_enable_flag(unq)]);
+        } else {
+            // Lock all other portals behind Flag 510
+            self.modify_objs(course, scene, [set_enable_flag(unq, Flag::QUAKE)]);
         }
 
         // TODO angle of Portal Blockages can't seem to be changed, no point in this function until the game respects

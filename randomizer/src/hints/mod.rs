@@ -337,9 +337,9 @@ fn generate_always_hints(
     taken_ghosts: &mut Vec<HintGhost>,
 ) -> Vec<LocationHint> {
     let mut always_checks = vec![
-        "Master Sword Pedestal", "Great Rupee Fairy", "Blacksmith (Lorule)", "Bouldering Guy", "Irene", "Rosso (1)",
-        "Rosso (2)", "Haunted Grove Stump", "Queen Oren", "Shady Guy", "Street Merchant (Right)", "Octoball Derby",
-        "Treacherous Tower",
+        "Blacksmith (Lorule)", "Bouldering Guy", "Great Rupee Fairy", "Haunted Grove Stump", "Irene",
+        "Master Sword Pedestal", "Octoball Derby", "Queen Oren", "Rosso (1)", "Rosso (2)", "Shady Guy",
+        "Street Merchant (Right)", "Thief Girl", "Treacherous Tower", "[HC] Throne",
     ];
 
     always_checks.retain(|check| !taken_checks.contains(&check.to_string()));
@@ -403,11 +403,10 @@ fn generate_sometimes_hints(
         "Hookshot Mini-Dungeon", "Donkey Cave", "Eastern Ruins Peg Circle", "Merge Mini-Dungeon", "Fire Cave Pillar",
         "Floating Island", "Graveyard Ledge Cave", "Ice Gimos Fight", "Ice Rod Cave", "Ku's Domain Fight",
         "Pegasus Boots Pyramid", "Misery Mire Ledge", "Sand Mini-Dungeon", "Philosopher's Cave", "Queen Oren",
-        "Spectacle Rock", "Flippers Mini-Dungeon", "Thief Girl", "Waterfall Cave", "Woman", "[LC] Zelda",
-        "River Mini-Dungeon", "[DP] (2F) Under Rock (Ball Room)", "[DP] (2F) Under Rock (Left)",
-        "[DP] (2F) Under Rock (Right)", "[EP] (1F) Escape Chest", "[HC] Battlement", "[HC] West Wing",
-        "[HG] (3F) Fire Bubbles", "[HG] (2F) Fire Ring", "[IR] (B2) Long Merge Chest",
-        "[IR] (B4) Southeast Chest (Fall)", "[LC] Tile Trial II", "[LC] Bomb Trial II", "[LC] Hook Trial II",
+        "Spectacle Rock", "Flippers Mini-Dungeon", "Waterfall Cave", "Woman", "[LC] Zelda", "River Mini-Dungeon",
+        "[DP] (2F) Under Rock (Ball Room)", "[DP] (2F) Under Rock (Left)", "[DP] (2F) Under Rock (Right)",
+        "[EP] (1F) Escape Chest", "[HG] (3F) Fire Bubbles", "[HG] (2F) Fire Ring", "[IR] (B2) Long Merge Chest",
+        "[IR] (B4) Southeast Chest (Fall)", "[LC] Tile Trial (2)", "[LC] Bomb Trial (2)", "[LC] Hook Trial (2)",
         "[LC] Lamp Trial", "[PD] (2F) Big Chest (Hidden)", "[PD] (B1) Bomb Bowling", "[SP] (B1) Big Chest (Secret)",
         "[SW] (B1) Big Chest (Eyes)", "[SW] (B1) South Chest", "[TT] (B2) Eyegores", "[TT] (B3) Big Chest (Hidden)",
         "[TH] (8F) Fairy Room", "[TR] (B1) Big Chest (Center)", "[TR] (1F) Defeat Flamolas",

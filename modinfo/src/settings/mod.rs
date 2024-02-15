@@ -76,7 +76,7 @@ pub struct Settings {
     pub weather_vanes: WeatherVanes,
 
     /// Ravio's Shop
-    #[serde(default)]
+    #[serde(default, skip_deserializing)]
     pub ravios_shop: RaviosShop,
 
     /// Guarantees Bow of Light will be placed in Lorule Castle

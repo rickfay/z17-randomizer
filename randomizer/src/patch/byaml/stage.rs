@@ -121,7 +121,7 @@ pub fn patch(
     patch_trials_door(patcher);
     patch_hildas_study(patcher, settings);
 
-    patch_portal_shuffle(patcher, settings);
+    patch_portal_shuffle(patcher);
     patch_keysy_small(patcher, settings);
     patch_keysy_big(patcher, settings);
     // patch_reverse_desert_palace(patcher, settings);
@@ -150,24 +150,24 @@ pub fn patch(
             [101].disable(), // Dampe
             [102].disable(), // Seres
             [133].active(1), // Close Church Door by default
-            [133].disable(Flag::Event(523)), // Church Door rigged to open when Sanc left switch pulled
+            [133].disable(Flag::REPURPOSED_106), // Church Door rigged to open when Sanc left switch pulled
         },
 
         // Sanctuary Dungeon
         CaveLight 18 {
-            // 523 is a repurposed flag to control this
-            [35].active(523), // Pull Switch
-            [37].inactive(523), // Door
-            [107].active(523), // TagCameraFocus
-            [107].disable(Flag::Event(523)), // TagCameraFocus
+            // 106 is a repurposed flag to control this
+            [35].active(106), // Pull Switch
+            [37].inactive(106), // Door
+            [107].active(106), // TagCameraFocus
+            [107].disable(Flag::REPURPOSED_106), // TagCameraFocus
         },
 
         // Sanctuary Church
         IndoorLight 11 {
             [14].clear_enable_flag(), // Church Door
-            [14].disable(Flag::Event(523)), // Church Door
+            [14].disable(Flag::REPURPOSED_106), // Church Door
             [16].disable(), // Early game Priest
-            [20].active(523),
+            [20].active(106),
         },
 
         // Outside witch's house
@@ -219,82 +219,6 @@ pub fn patch(
             [26].disable(), // zelda_talk - Chat after standing up
             [33].disable(), // zelda_talk_b - Wait for Zelda
             [34].disable(), // zelda_talk_c - Last chat before triangles
-        },
-
-        // Hyrule Castle
-        IndoorLight 12 {
-            [23].clear_disable_flag(), // Zelda
-            //[24].disable(), // Entry Impa
-            [26].disable(), // NPC Soldier
-            [28].disable(), // NPC Soldier
-            [29].disable(), // NPC Soldier
-            [37].disable(), // NPC Soldier
-            [38].disable(), // NPC Soldier
-            [39].disable(), // NPC Soldier
-            // [40].disable(), // Textbox trigger FieldLight_1B_Impa_ACT03_01 (left)
-            // [41].disable(), // Textbox trigger FieldLight_1B_Impa_ACT03_02 (right)
-            // [43].disable(), // Textbox trigger FieldLight_1B_Impa_ACT03_00 (main exit)
-            // [45].disable(), // Disable ZeldaFirstTimeEvent_01 (Charm)
-            [46].disable(), // NPC Soldier
-            [47].disable(), // NPC Soldier
-
-            [53].clear_enable_flag(), // Blue Soldier
-            [54].clear_enable_flag(), // Arrow Soldier
-            [56].clear_enable_flag(), // Arrow Soldier
-            [57].clear_enable_flag(), // Shooter Spear
-            [58].clear_enable_flag(), // Red Spear Soldier
-            [60].clear_enable_flag(), // Green Spear Soldier
-            [61].clear_enable_flag(), // Green Soldier
-            [63].clear_enable_flag(), // Dagger Soldier
-            [77].clear_enable_flag(), // Red Spear Soldier
-            [78].disable(), // EnemyGreenSoldier
-            [79].disable(), // EnemySoldierBlue
-            [80].disable(), // EnemySoldierDagger
-            [81].disable(), // EnemySoldierGreenSpear
-            [82].disable(), // EnemySoldierRedSpear
-
-            //[92].disable(), // NPC Soldier (lower right)
-            //[93].disable(), // NPC Soldier (lower left)
-            [94].disable(), // Scholar
-
-            //[99].disable(), // Text box trigger FieldLight_1B_Impa_ACT_03_05
-            //[100].disable(), // NpcZeldaDemo
-            //[101].disable(), // TIMER
-
-            [103].clear_enable_flag(), // Hyrule Paint Soldier
-            [104].clear_enable_flag(), // Hyrule Paint Soldier
-            [105].clear_enable_flag(), // Hyrule Paint Soldier
-            [106].clear_enable_flag(), // Hyrule Paint Soldier
-            [107].clear_enable_flag(), // Hyrule Paint Soldier
-            [108].clear_enable_flag(), // Hyrule Paint Soldier
-            [109].clear_enable_flag(), // Hyrule Paint Soldier
-            [110].clear_enable_flag(), // Hyrule Paint Soldier
-
-            [125].disable(), // NPC Solider (upper right)
-            [126].disable(), // NPC Solider (upper left)
-            [127].disable(), // FieldLight_Right_Soldier_Area
-            [128].disable(), // FieldLight_Left_Soldier_Area
-            [131].disable(), // NPC Soldier ACT 3
-            [132].disable(), // NPC Soldier ACT 3
-            [133].disable(), // NPC Soldier
-            [134].disable(), // NPC Soldier
-            [135].disable(), // NPC Soldier
-            [136].disable(), // NPC Soldier
-            [137].clear_enable_flag(), // Hyrule Paint Soldier
-            [138].clear_enable_flag(), // Hyrule Paint Soldier
-            [139].clear_enable_flag(), // Hyrule Paint Soldier
-            [140].clear_enable_flag(), // Hyrule Paint Soldier
-            [141].clear_enable_flag(), // Hyrule Paint Soldier
-            [142].clear_enable_flag(), // Hyrule Paint Soldier
-            [143].clear_enable_flag(), // Hyrule Paint Soldier
-
-            // [145].disable(), // Impa stops makes you wait and lets you go see Zelda
-            [146].clear_enable_flag(), // Blue Soldier
-
-            // Fix chest to not respawn
-            [48].call {|obj: &mut Obj| {
-                obj.arg_mut().5 = 3;
-            }},
         },
 
         // Milk Bar
@@ -494,82 +418,239 @@ fn patch_flag_510_effects(patcher: &mut Patcher) -> Result<()> {
         ],
     );
 
+    let enable_on_impa = |obj: &mut Obj| {
+        obj.set_enable_flag(Flag::SAGE_IMPA);
+        obj.set_disable_flag(Flag::CREDITS);
+    };
+    let disable_on_impa = |obj: &mut Obj| {
+        obj.clear_enable_flag();
+        obj.set_disable_flag(Flag::SAGE_IMPA);
+    };
+
     // Hyrule Castle Exterior
     patcher.modify_objs(
         FieldLight,
         18,
         [
-            disable(167), // EnemyCrowly
-            disable(168), // EnemyCrowly
-            disable(175), // Buzz Blob
-            disable(177), // Buzz Blob
-            disable(178), // Buzz Blob
-            disable(179), // Buzz Blob
+            // EnemyCrowly
+            disable(167),
+            // EnemyCrowly
+            disable(168),
+            // Buzz Blob
+            disable(175),
+            // Buzz Blob
+            disable(177),
+            // Buzz Blob
+            disable(178),
+            // Buzz Blob
+            disable(179),
             // EnemySoldierBlue
-            call(186, |obj| {
-                obj.clear_enable_flag();
-                obj.set_disable_flag(Flag::QUAKE)
-            }),
+            disable(186),
             // EnemySoldierDagger
-            call(189, |obj| {
-                obj.clear_enable_flag();
-                obj.set_disable_flag(Flag::QUAKE)
-            }),
+            call(187, disable_on_impa),
+            // EnemySoldierDagger
+            disable(189),
             // EnemySoldierBlue
-            call(207, |obj| {
-                obj.clear_enable_flag();
-                obj.set_disable_flag(Flag::QUAKE)
+            call(190, disable_on_impa),
+            // EnemyShooterArrow
+            call(204, disable_on_impa),
+            // EnemySoldierBlue
+            disable(207),
+            // NpcSoldier
+            call(194, enable_on_impa),
+            // NpcSoldier
+            call(195, enable_on_impa),
+            // NpcSoldier
+            call(198, enable_on_impa),
+            // MojSoliderPaint
+            call(225, enable_on_impa),
+            // Scarecrow
+            call(234, enable_on_impa),
+            // Scarecrow
+            call(235, enable_on_impa),
+            // EnemySoldierBomb
+            call(258, disable_on_impa),
+            // EnemySoldierBomb
+            call(259, disable_on_impa),
+            // EnemySoldierBomb
+            call(260, disable_on_impa),
+            // EnemyShooterSpear
+            call(263, disable_on_impa),
+            // NpcSoldier
+            disable(269),
+            // NpcSoldier
+            call(274, enable_on_impa),
+            // NpcSoldier
+            call(278, enable_on_impa),
+            // NpcSoldier
+            call(279, enable_on_impa),
+            // NpcSoldier
+            call(280, enable_on_impa),
+            // MojSoliderPaint
+            call(281, enable_on_impa),
+            // MojSoliderPaint
+            call(282, enable_on_impa),
+            // MojSoliderPaint
+            call(301, enable_on_impa),
+            // MojSoliderPaint
+            call(302, enable_on_impa),
+            // MojSoliderPaint
+            call(303, enable_on_impa),
+            // MojSoldierPaint
+            call(308, disable_on_impa),
+            // MojSoliderPaint
+            call(309, enable_on_impa),
+            // NpcSoldier
+            disable(341),
+            // ObjScarecrow
+            call(369, enable_on_impa),
+            // ObjScarecrow
+            call(370, enable_on_impa),
+            // NpcSoldier
+            call(371, enable_on_impa),
+            // NpcSoldier
+            call(372, enable_on_impa),
+            // NpcSoldier
+            call(373, enable_on_impa),
+            // AreaSimpleTalk - Hekiga_Green_Soldier
+            call(395, enable_on_impa),
+            // AreaSimpleTalk - Hekiga_fueta_Red
+            call(401, enable_on_impa),
+            // AreaSimpleTalk - Hekiga_fueta_Green
+            call(402, enable_on_impa),
+            // AreaSimpleTalk - Hekiga_Green_Soldier
+            call(403, enable_on_impa),
+            // AreaSimpleTalk - Hekiga_fueta_Green
+            call(404, enable_on_impa),
+            // MojSoliderPaint
+            call(488, enable_on_impa),
+            // MojSoldierPaint
+            call(491, disable_on_impa),
+            // MojSoldierPaint
+            call(492, disable_on_impa),
+            // MojSoldierPaint
+            call(493, disable_on_impa),
+            // MojSoldierPaint
+            call(495, disable_on_impa),
+            // MojSoldierPaint
+            call(496, disable_on_impa),
+            // MojSoldierPaint
+            call(497, disable_on_impa),
+            // MojSoldierPaint
+            call(498, disable_on_impa),
+            // TagDisableWallIn, prevent merging into barrier
+            clear_enable_flag(501),
+            // AreaEventTalk - lgt_NpcSahasrahla_Field1B_01
+            disable(503),
+            // AreaEventTalk - lgt_NpcSoldier_Field1B_03_broke
+            disable(504),
+            // AreaEventTalk - lgt_NpcSahasrahla_Field1B_01
+            disable(505),
+            // EnemySoldierGreen
+            set_disable_flag(514, Flag::SAGE_IMPA),
+            // EnemySoldierGreenSpear
+            set_disable_flag(515, Flag::SAGE_IMPA),
+            // EnemyShooterArrow
+            set_disable_flag(516, Flag::SAGE_IMPA),
+            // EnemySoldierGreenSpear
+            set_disable_flag(517, Flag::SAGE_IMPA),
+            // EnemySoldierGreen
+            set_disable_flag(518, Flag::SAGE_IMPA),
+            // EnemyShooterSpear
+            set_disable_flag(519, Flag::SAGE_IMPA),
+            // EnemySoldierBlue
+            set_disable_flag(520, Flag::SAGE_IMPA),
+            // EnemySoldierGreen
+            set_disable_flag(521, Flag::SAGE_IMPA),
+            // Buzz Blob
+            disable(532),
+            // AreaSimpleTalk - Hekiga_fueta_Green
+            disable(533),
+            // AreaSimpleTalk - Hekiga_Blue_Soldier
+            disable(534),
+            // AreaSimpleTalk - Hekiga_Blue_Soldier
+            disable(535),
+            // EnemyShooterSpear
+            call(536, disable_on_impa),
+        ],
+    );
+
+    // Hyrule Castle Interior
+    patcher.modify_objs(
+        IndoorLight,
+        12,
+        [
+            // Zelda - Turn into chest (patcher will auto change the ID to 34/35)
+            call(23, |obj| {
+                obj.set_inactive_flag(Flag::Event(224));
+                obj.set_enable_flag(Flag::SAGE_IMPA);
+                obj.set_disable_flag(Flag::CREDITS);
+                obj.nme = None;
+                obj.typ = 1;
             }),
-            set_enable_flag(263, Flag::QUAKE), // EnemyShooterSpear
-            set_enable_flag(536, Flag::QUAKE), // EnemyShooterSpear
-            // --- //
-            // FIXME go through below:
-            // --- //
-            clear_enable_flag(187), // Dagger Soldier
-            clear_enable_flag(190), // Blue Soldier
-            disable(194),           // NPC Soldier
-            disable(195),           // NPC Soldier
-            disable(198),           // NPC Soldier
-            clear_enable_flag(204), // Arrow Soldier
-            disable(225),           // Paint Soldier
-            disable(234),           // Scarecrow
-            disable(235),           // Scarecrow
-            clear_enable_flag(258), // Bomb Soldier
-            clear_enable_flag(260), // Bomb Soldier
-            disable(274),           // NPC Soldier
-            disable(278),           // NPC Soldier
-            disable(279),           // NPC Soldier
-            disable(280),           // NPC Soldier
-            disable(281),           // Paint Soldier
-            disable(282),           // Paint Soldier
-            disable(301),           // Paint Soldier
-            disable(302),           // Paint Soldier
-            disable(303),           // Paint Soldier
-            enable(308),            // Paint Soldier
-            disable(309),           // Paint Soldier
-            disable(369),           // Scarecrow
-            disable(370),           // Scarecrow
-            disable(371),           // NPC Soldier
-            disable(372),           // NPC Soldier
-            disable(373),           // NPC Soldier
-            disable(395),           // AreaSimpleTalk - Hekiga_Green_Soldier
-            disable(401),           // AreaSimpleTalk - Hekiga_fueta_Red
-            disable(402),           // AreaSimpleTalk - Hekiga_fueta_Green
-            disable(403),           // AreaSimpleTalk - Hekiga_Green_Soldier
-            disable(404),           // AreaSimpleTalk - Hekiga_fueta_Green
-            disable(488),           // Paint Soldier
-            enable(491),            // Paint Soldier
-            enable(492),            // Paint Soldier
-            enable(493),            // Paint Soldier
-            enable(495),            // Paint Soldier
-            enable(496),            // Paint Soldier
-            enable(497),            // Paint Soldier
-            enable(498),            // Paint Soldier
-            clear_enable_flag(501), // TagDisableWallIn, prevent merging into barrier
-            disable(532),           // Buzz Blob
-            disable(533),           // AreaSimpleTalk - Hekiga_fueta_Green
-            disable(534),           // AreaSimpleTalk - Hekiga_Blue_Soldier
-            disable(535),           // AreaSimpleTalk - Hekiga_Blue_Soldier
+            disable(24),                   // Entry Impa
+            call(26, enable_on_impa),      // NPC Soldier
+            call(28, enable_on_impa),      // NPC Soldier
+            call(29, enable_on_impa),      // NPC Soldier
+            call(36, enable_on_impa),      // NPC Soldier
+            call(37, enable_on_impa),      // NPC Soldier
+            call(38, enable_on_impa),      // NPC Soldier
+            call(39, enable_on_impa),      // NPC Soldier
+            disable(40),                   // Textbox trigger FieldLight_1B_Impa_ACT03_01 (left)
+            disable(41),                   // Textbox trigger FieldLight_1B_Impa_ACT03_02 (right)
+            disable(43),                   // Textbox trigger FieldLight_1B_Impa_ACT03_00 (main exit)
+            disable(44),                   // Textbox trigger FieldLight_1B_Impa_ACT03_03 (center?)
+            disable(45),                   // Disable ZeldaFirstTimeEvent_01 (Charm)
+            call(46, enable_on_impa),      // NPC Soldier
+            call(47, enable_on_impa),      // NPC Soldier
+            call(48, |obj| obj.arg.5 = 3), // Fix vanilla chest bug
+            call(53, disable_on_impa),     // EnemySoldierBlue
+            call(54, disable_on_impa),     // EnemyShooterArrow
+            call(56, disable_on_impa),     // EnemyShooterArrow
+            call(57, disable_on_impa),     // EnemyShooterSpear
+            call(58, disable_on_impa),     // EnemySoldierRedSpear
+            call(60, disable_on_impa),     // EnemySoldierGreenSpear
+            call(61, disable_on_impa),     // EnemySoldierGreen
+            call(63, disable_on_impa),     // EnemySoldierDagger
+            call(77, disable_on_impa),     // EnemySoldierRedSpear
+            call(78, disable_on_impa),     // EnemySoldierGreen
+            call(79, disable_on_impa),     // EnemySoldierBlue
+            call(80, disable_on_impa),     // EnemySoldierDagger
+            call(81, disable_on_impa),     // EnemySoldierGreenSpear
+            call(82, disable_on_impa),     // EnemySoldierRedSpear
+            disable(92),                   // NpcSoldier (lower right)
+            disable(93),                   // NpcSoldier (lower left)
+            call(94, enable_on_impa),      // Scholar
+            disable(99),                   // FieldLight_1B_Impa_ACT03_05
+            disable(100),                  // NpcZeldaDemo
+            disable(101),                  // TagSwitchTimer
+            call(103, disable_on_impa),    // MojHyruleSoldierPaint
+            call(104, disable_on_impa),    // MojHyruleSoldierPaint
+            call(105, disable_on_impa),    // MojHyruleSoldierPaint
+            call(106, disable_on_impa),    // MojHyruleSoldierPaint
+            call(107, disable_on_impa),    // MojHyruleSoldierPaint
+            call(108, disable_on_impa),    // MojHyruleSoldierPaint
+            call(109, disable_on_impa),    // MojHyruleSoldierPaint
+            call(110, disable_on_impa),    // MojHyruleSoldierPaint
+            disable(125),                  // NpcSoldier (upper right)
+            disable(126),                  // NpcSoldier (upper left)
+            disable(127),                  // FieldLight_Right_Soldier_Area
+            disable(128),                  // FieldLight_Left_Soldier_Area
+            call(131, enable_on_impa),     // NpcSoldier
+            call(132, enable_on_impa),     // NpcSoldier
+            call(133, enable_on_impa),     // NpcSoldier
+            call(134, enable_on_impa),     // NpcSoldier
+            call(135, enable_on_impa),     // NpcSoldier
+            call(136, enable_on_impa),     // NpcSoldier
+            call(137, disable_on_impa),    // MojHyruleSoldierPaint
+            call(138, disable_on_impa),    // MojHyruleSoldierPaint
+            call(139, disable_on_impa),    // MojHyruleSoldierPaint
+            call(140, disable_on_impa),    // MojHyruleSoldierPaint
+            call(141, disable_on_impa),    // MojHyruleSoldierPaint
+            call(142, disable_on_impa),    // MojHyruleSoldierPaint
+            call(143, disable_on_impa),    // MojHyruleSoldierPaint
+            disable(145),                  // NpcInpa
+            call(146, disable_on_impa),    // EnemySoldierBlue
         ],
     );
 
@@ -578,27 +659,65 @@ fn patch_flag_510_effects(patcher: &mut Patcher) -> Result<()> {
         FieldLight,
         19,
         [
+            // 22, Zora
             set_disable_flag(27, Flag::QUAKE), // Buzz Blob
             set_disable_flag(28, Flag::QUAKE), // Buzz Blob
             set_disable_flag(29, Flag::QUAKE), // Buzz Blob
             set_disable_flag(30, Flag::QUAKE), // Buzz Blob
             set_disable_flag(32, Flag::QUAKE), // Buzz Blob
-            clear_enable_flag(35),             // Arrow Soldier
-            clear_enable_flag(36),             // Arrow Soldier
-            clear_enable_flag(37),             // Green Spear Solider
-            clear_enable_flag(38),             // EnemySoldierDagger
+            set_enable_flag(35, Flag::QUAKE),             // Arrow Soldier
+            set_enable_flag(36, Flag::QUAKE),             // Arrow Soldier
+            set_enable_flag(37, Flag::QUAKE),             // Green Spear Solider
+            disable(38),             // EnemySoldierDagger
                                                // 83 - EnemySoldierGreenSpear - appears on 510
         ],
     );
 
-    // Eastern Ruins
+    // Cucco Ranch
+    patcher.modify_objs(
+        FieldLight,
+        24,
+        [
+            // EnemyBuzzBlob
+            call(32, |obj| {
+                obj.clear_enable_flag();
+                obj.set_disable_flag(Flag::QUAKE);
+            }),
+            // EnemyBuzzBlob
+            call(33, |obj| {
+                obj.clear_enable_flag();
+                obj.set_disable_flag(Flag::QUAKE);
+            }),
+            // EnemyBuzzBlob
+            call(34, |obj| {
+                obj.clear_enable_flag();
+                obj.set_disable_flag(Flag::QUAKE);
+            }),
+            // EnemySoldierDagger
+            set_enable_flag(38, Flag::QUAKE),
+            // EnemySoldierBlue
+            set_enable_flag(40, Flag::QUAKE),
+            // EnemyBuzzBlob
+            call(194, |obj| {
+                obj.clear_enable_flag();
+                obj.set_disable_flag(Flag::QUAKE);
+            }),
+        ],
+    );
 
-    // TODO 21
-    // TODO 22
-    // TODO 23
-    // TODO 24
-    // TODO 25
-    // TODO 26
+    // StreetPass Tree
+    patcher.modify_objs(
+        FieldLight,
+        26,
+        [
+            clear_enable_flag(86), // EnemyBuzzBlob
+            clear_enable_flag(88), // EnemyBuzzBlob
+            clear_enable_flag(90), // EnemySoldierDagger
+            // 91 // EnemySoldierBlue
+            // 92 // EnemySoldierGreen
+            clear_enable_flag(93), // EnemySoldierDagger
+        ],
+    );
 
     // Outside Link's house
     patcher.modify_objs(
@@ -630,11 +749,34 @@ fn patch_flag_510_effects(patcher: &mut Patcher) -> Result<()> {
         ],
     );
 
-    // TODO 29
-    // TODO 30
-    // TODO 31
-    // TODO 32
-    // TODO 33
+    // Paradox Portals
+    patcher.modify_objs(
+        FieldLight,
+        32,
+        [
+            set_disable_flag(47, Flag::QUAKE), // EnemyBuzzBlob
+            set_disable_flag(48, Flag::QUAKE), // EnemyBuzzBlob
+            set_disable_flag(49, Flag::QUAKE), // EnemyBuzzBlob
+            set_disable_flag(50, Flag::QUAKE), // EnemyBuzzBlob
+            set_disable_flag(51, Flag::QUAKE), // EnemyBuzzBlob
+            set_enable_flag(52, Flag::QUAKE),  // EnemySoldierGreen
+            set_enable_flag(53, Flag::QUAKE),  // EnemySoldierGreenSpear
+            set_enable_flag(54, Flag::QUAKE),  // EnemySoldierGreenSpear
+            set_enable_flag(73, Flag::QUAKE),  // EnemySoldierGreen
+        ],
+    );
+
+    // Southern Ruins
+    patcher.modify_objs(
+        FieldLight,
+        33,
+        [
+            clear_enable_flag(118), // EnemySoldierDagger
+            clear_enable_flag(159), // EnemyShooterArrow
+            clear_enable_flag(201), // EnemyShooterArrow
+            clear_enable_flag(350), // EnemySoldierDagger
+        ],
+    );
 
     // Hyrule Hotfoot Area
     patcher.modify_objs(
@@ -696,8 +838,15 @@ fn patch_treacherous_tower(patcher: &mut Patcher, tower_floors: &Vec<TowerStage>
         i += 1;
     }
 
-    // Give 1000 rupee prize instead of 5000
-    patcher.modify_objs(EnemyAttackL, 50, [call(23, |obj| obj.arg.0 = 1)]);
+    // Final Floor (Moldorm)
+    patcher.modify_objs(
+        EnemyAttackS,
+        5,
+        [
+            call(23, |obj| obj.arg.0 = 1), // Change reward to 1000 rupees
+                                           // call(23, |obj| obj.arg.0 = 2), // Change reward to 5000 rupees
+        ],
+    );
 
     Ok(())
 }
@@ -820,6 +969,8 @@ fn patch_blacksmith_hyrule(patcher: &mut Patcher) {
         IndoorLight,
         19,
         [
+            disable(5), // FieldLight_22_BlackSmith_ACT1_02
+            enable(11), // FieldLight_22_BlackSmith_ACT6_SwordLvUP
             // Make PackageSword a Chest
             call(12, |obj| {
                 obj.clear_active_args();
@@ -930,11 +1081,14 @@ fn patch_swamp_palace(patcher: &mut Patcher) {
 
 // Enable All Overworld Hint Ghosts
 fn patch_hint_ghosts_overworld(patcher: &mut Patcher) -> Result<()> {
-    patcher.modify_objs(FieldLight, 14, [enable(126)]); // Witch's House
-    patcher.modify_objs(FieldLight, 16, [enable(407)]); // Shady Guy (Kakariko)
-    patcher.modify_objs(FieldLight, 17, [enable(96)]); // Behind Blacksmith
-    patcher.modify_objs(FieldDark, 35, [enable(205)]); // Bullied Turtle
-    // todo add 510 ghosts (HFI, etc.)
+    patcher.modify_objs(FieldLight, 4, [clear_enable_flag(155)]); // Floating Island
+    patcher.modify_objs(FieldLight, 12, [clear_enable_flag(155)]); // Graveyard Ledge
+    patcher.modify_objs(FieldLight, 14, [clear_enable_flag(126)]); // Witch's House
+    patcher.modify_objs(FieldLight, 16, [clear_enable_flag(407)]); // Shady Guy
+    patcher.modify_objs(FieldLight, 16, [clear_enable_flag(410)]); // Stylish Woman
+    patcher.modify_objs(FieldLight, 17, [clear_enable_flag(96)]); // Behind Blacksmith
+    patcher.modify_objs(FieldLight, 20, [clear_enable_flag(201)]); // Eastern Ruins Cave
+    patcher.modify_objs(FieldLight, 26, [clear_enable_flag(53)]); // StreetPass Tree
 
     Ok(())
 }
@@ -1181,13 +1335,7 @@ fn patch_keysy_big(patcher: &mut Patcher, settings: &Settings) {
     patcher.modify_objs(DungeonIce, 1, [disable(291)]); // Ice Ruins B4
 }
 
-fn patch_portal_shuffle(patcher: &mut Patcher, settings: &Settings) {
-    if settings.portal_shuffle == PortalShuffle::Off {
-        return;
-    }
-
-    // Remove the Curtain
-    //patcher.modify_objs(IndoorLight, 7, [disable(26)]);
+fn patch_portal_shuffle(patcher: &mut Patcher) {
 
     // Eastern Ruins SE Portal Blockage
     patcher.modify_objs(

@@ -6,9 +6,9 @@ use std::fmt::{Display, Formatter};
 pub enum RaviosShop {
     /// Closed Shop. Game starts post-Sanctuary, with Link waking up to Ravio in his house. Players must activate one
     /// of three triggers to fully open the shop, but the Bow Slot item can be gotten early with the "Signs" event.
-    #[default]
     Closed,
     /// Open Shop. Game starts with Ravio's Shop already open for business. The Shop and Sign triggers do nothing.
+    #[default]
     Open,
 }
 

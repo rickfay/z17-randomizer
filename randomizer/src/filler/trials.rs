@@ -15,7 +15,7 @@ pub struct TrialsConfig {
 pub(crate) fn configure(rng: &mut StdRng, settings: &Settings) -> crate::Result<TrialsConfig> {
     let count;
     match settings.trials_door {
-        TrialsDoor::Off => {
+        TrialsDoor::Open => {
             return Ok(TrialsConfig { bomb_trial: false, tile_trial: false, lamp_trial: false, hook_trial: false });
         },
         TrialsDoor::OneTrialRequired => {

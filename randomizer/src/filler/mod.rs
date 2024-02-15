@@ -24,6 +24,7 @@ pub mod logic;
 pub mod path;
 pub mod portals;
 pub mod progress;
+pub(crate) mod text;
 pub(crate) mod treacherous_tower;
 pub(crate) mod trials;
 pub mod util;
@@ -582,9 +583,9 @@ fn filter_dungeon_checks(item: Item, eligible_checks: Vec<Check>) -> Vec<Check> 
         | LoruleCastleKeySmall04
         | LoruleCastleKeySmall05 => vec![
             "[LC] (1F) Ledge", "[LC] (1F) Center", "[LC] (2F) Near Torches", "[LC] (2F) Hidden Path",
-            "[LC] (2F) Ledge", "[LC] (4F) Center", "[LC] (4F) Hidden Path", "[LC] Bomb Trial I", "[LC] Bomb Trial II",
-            "[LC] Tile Trial I", "[LC] Tile Trial II", "[LC] Lamp Trial", "[LC] Hook Trial I",
-            "[LC] Hook Trial II",
+            "[LC] (2F) Ledge", "[LC] (4F) Center", "[LC] (4F) Hidden Path", "[LC] Bomb Trial (1)",
+            "[LC] Bomb Trial (2)", "[LC] Tile Trial (1)", "[LC] Tile Trial (2)", "[LC] Lamp Trial",
+            "[LC] Hook Trial (1)", "[LC] Hook Trial (2)",
             // "[LC] Zelda",
         ],
 

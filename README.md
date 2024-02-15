@@ -13,26 +13,28 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
 - **Portal Shuffle**
   - There are 56 Portals in the game split into 28 pairs--and now they can take you anywhere!
   - Read the section for more deatils: [Portal Shuffle](#portal-shuffle)
+- **Quake**
+  - Games will now start with most Portals closed, until players find the new item that opens them: the Quake Medallion.
+  - The Hyrule Castle Portal is the only Portal open without Quake, and may be required to use if Quake is placed somewhere in Lorule.
+    - Only the Portal connected to Hyrule Castle will be open in Lorule.
+    - If Portal shuffle is enabled, the HC Portal may lead to any Portal in Lorule and therefore Quake may appear nearly anywhere in Lorule.
+  - Players may optionally choose to start with Portals already open, in which case Quake will be omitted from the item pool.
 - **Weather Vanes**
   - **Pair Shuffle**: Groups Weather Vanes into random pairs that unlock each other instead of themselves.
   - **Convenient**: Activates the Vanes that don't affect logic
   - Activate All Hyrule Weather Vanes
   - Activate All Lorule Weather Vanes
-- Warp
-  - New ability to warp from anywhere to _____TODO_____
-  - Logic updated to no longer require "escape" items such as Scoot Fruit, Bell, Bombs, or Fire Rod.
-  - Replaces the "Quit" button on the Pause menu
-    - To return to the File Select Screen players can use the built-in soft reset feature by pressing L + R + START down at the same time.
-- Skip Trials is now the Trial's Door Setting 
-  - Select 1-4 LC Trials to randomly turn ON
-  - Or, turn OFF Trials entirely
-    - WARNING: This creates an alternative path into Lorule Castle via its Portal.
+- **Skip Trials &rarr; Trial's Door Setting**
+  - Select 1-4 LC Trials to randomly enable.
+  - Or set the door to always be Open.
+    - Careful: enabling this also creates an early path into Lorule Castle via its Portal.
 - Keysy
-  - Supports options for Small, Big, and All Keysy.
-- Ravio's Shop:
-  - Option to start the game with Ravio's Shop Open or Closed.
-- Faster Hints from Hint Ghosts, which no longer charge you "0 Rupees" if you set the price to free.
-- Treacherous Tower Intermediate will now be available without needing to complete the Beginner course.
+  - Small
+  - Big
+  - All
+- Hint Ghosts
+  - Faster
+  - Free
 - Eastern Palace chest icons that would normally only appear after defeating the boss will now appear beforehand (if you have the Compass).
 - Rosso has been fixed, no more Crooked Chest in his house.
 - Gameplay Changes:
@@ -48,8 +50,12 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
       - This is a QoL change made to address a randomizer-only problem where the 3rd Small Key Door is opened earlier than the vanilla game intends.
       - This prevents players from needing to fall carefully to avoid the wind current.
       - This has no impact on logic.
+  - Hyrule Castle
+    - After rescuing Impa the enemy soldiers will disappear and Impa, the Official, and Soldiers will reappear.
+    - Impa now locks the vanilla Charm check.
   - Inside Hyrule Castle
-    - No longer requires the Pendant of Courage (either) to enter, just Master Sword (and Impa if playing on RSE).
+    - No longer requires the Pendant of Courage (either) to enter, just Master Sword.
+  - Lorule Castle
     - The state of the Trials Door in Hilda's Study will now match the same in the Lorule Castle dungeon.
     - If the player has not rescued all the Sages, the loading zone to Yuganon will instead drop the player at the Blacksmith's.
       - Once all Sages are rescued the path to the Lorule Blacksmith remains open via newly placed green Warp.
@@ -59,8 +65,10 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
     - Previously Thief Girl had been rigged to stick around to address this issue. That solution has been replaced by this one.
   - Treacherous Tower:
     - Reworked into a single check given by a single mode with a random selection of floors from all difficulties.
-    - Can choose how many floors the tower has (2-68).
+    - Can choose how many floors the tower has (2-66).
 - Logic Changes:
+  - All:
+    - Dungeons now expect a certain amount of health to be available before entering logic.
   - Normal:
     - Knucklemaster, Zaganaga, and Yuga Ganon each now logically require the Master Sword to defeat
     - The Merge Chest on the right side of the Eastern Palace lobby now logically requires that dungeon's Compass.

@@ -19,6 +19,7 @@ mod msbt;
 pub fn patch_messages(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
     info!("Patching MSBT Files...");
 
+    patch_flavor_text(patcher, seed_info)?;
     patch_file_select(patcher, seed_info)?;
     // patch_pause_screen(patcher)?; TODO
     patch_item_names(patcher)?;
@@ -26,6 +27,7 @@ pub fn patch_messages(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()>
     patch_collect(patcher, seed_info)?;
     patch_actions(patcher)?;
     patch_ravio(patcher, seed_info)?;
+    patch_impa(patcher)?;
     patch_great_rupee_fairy(patcher)?;
     patch_treacherous_tower(patcher, seed_info)?;
     patch_thief_girl(patcher)?;
@@ -43,6 +45,16 @@ pub fn research(patcher: &mut Patcher, course: Course, file: &str, edotor: bool)
     load_msbt(patcher, course, file).unwrap().research(edotor)
 }
 
+/// Flavor Text
+fn patch_flavor_text(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
+    let mut msbt = load_msbt(patcher, LanguageBoot, "Ed_StaffCreditMessageT")?;
+    msbt.set("T_Text_00", &seed_info.text.credits);
+    patcher.update(msbt.dump())?;
+
+    Ok(())
+}
+
+/// File Select Screen
 fn patch_file_select(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
     let mut file_select_b = load_msbt(patcher, LanguageBoot, "Mn_FileSelectB")?;
     file_select_b.set("HeadLineText_00", &seed_info.hash.item_hash);
@@ -190,12 +202,29 @@ fn patch_ravio(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
     Ok(())
 }
 
+/// Impa in Hyrule Castle dialogue
+fn patch_impa(patcher: &mut Patcher) -> Result<()> {
+    let mut msbt = load_msbt(patcher, IndoorLight, "FieldLight_1B")?;
+    msbt.set(
+        "FieldLight_1B_Impa_ACT3_10",
+        &format!(
+            "The princess left you that {}\nbecause she sensed something in\nyou, {}.\nDon't let her down.",
+            name("chest"),
+            *PLAYER_NAME
+        ),
+    );
+    msbt.set("FieldLight_1B_Soldier_ACT2_19", "So was the chest looking as lovely\nas usual today?");
+    patcher.update(msbt.dump())?;
+
+    Ok(())
+}
+
 fn patch_great_rupee_fairy(patcher: &mut Patcher) -> Result<()> {
     let mut grf = load_msbt(patcher, CaveDark, "Cave")?;
     grf.set("CaveDark29_LuckyFairy_00", &format!("Throw Rupees into the fountain?\n{}", *CHOICE_2));
     grf.set("CaveDark29_LuckyFairy_01", "Throw 3000");
     grf.set("CaveDark29_LuckyFairy_02", "Don't throw any");
-    grf.set("CaveDark29_LuckyFairy_03", "1234567"); // shorten string so file matches OG size FIXME
+    grf.clear("CaveDark29_LuckyFairy_03");
     patcher.update(grf.dump())?;
 
     Ok(())

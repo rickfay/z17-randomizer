@@ -6,7 +6,7 @@ use std::fmt::{Display, Formatter};
 pub enum TrialsDoor {
     /// The Trials Door will open by itself automatically.
     /// WARNING: This can require entering LC early via its Portal.
-    Off,
+    Open,
 
     /// Turns on 1 random trial.
     OneTrialRequired,
@@ -35,7 +35,7 @@ impl TryFrom<u8> for TrialsDoor {
 
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         match value {
-            0 => Ok(Self::Off),
+            0 => Ok(Self::Open),
             1 => Ok(Self::OneTrialRequired),
             2 => Ok(Self::TwoTrialsRequired),
             3 => Ok(Self::ThreeTrialsRequired),
@@ -51,7 +51,7 @@ impl Display for TrialsDoor {
             f,
             "{}",
             match self {
-                TrialsDoor::Off => "Off",
+                TrialsDoor::Open => "Open",
                 TrialsDoor::OneTrialRequired => "1 Trial Required",
                 TrialsDoor::TwoTrialsRequired => "2 Trials Required",
                 TrialsDoor::ThreeTrialsRequired => "3 Trials Required",
