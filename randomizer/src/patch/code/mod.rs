@@ -153,6 +153,11 @@ impl Ips {
 pub fn create(patcher: &Patcher, SeedInfo { layout, settings, .. }: &SeedInfo) -> Code {
     let mut code = Code::new(patcher.game.exheader());
 
+    warp(&mut code);
+    //shield_without_sword(&mut code);
+    // swordless_beams(&mut code);
+    quake(&mut code);
+
     // Start with Pouch
     if settings.start_with_pouch {
         code.text().patch(0x47b28c, [mov(R0, 1)]);
@@ -172,7 +177,6 @@ pub fn create(patcher: &Patcher, SeedInfo { layout, settings, .. }: &SeedInfo) -
     configure_pedestal_requirements(&mut code, settings);
     night_mode(&mut code, settings);
     show_hint_ghosts(&mut code);
-    earthquake(&mut code);
     mother_maiamai(&mut code, &layout);
     pause_menu_warp(&mut code);
     // golden_bees(&mut code);
@@ -184,8 +188,8 @@ pub fn create(patcher: &Patcher, SeedInfo { layout, settings, .. }: &SeedInfo) -
     // Correct Master Ore display count
     code.patch(0x4637b4, [b(0x463800)]);
 
-    // fix castle barrier?
-    let master_sword_flag = code.text().define([
+    // Tear down Barrier automatically when obtaining Tempered Sword
+    let set_barrier_flag = code.text().define([
         ldr(R0, EVENT_FLAG_PTR),
         ldr(R1, Flag::HC_BARRIER.get_value()),
         mov(R2, 1),
@@ -194,7 +198,7 @@ pub fn create(patcher: &Patcher, SeedInfo { layout, settings, .. }: &SeedInfo) -
         mov(R0, 1),
         pop([R4, R5, R6, PC]),
     ]);
-    code.patch(0x344E50, [b(master_sword_flag)]);
+    code.patch(0x344E7C, [b(set_barrier_flag)]);
 
     // don't lose Bow of Light on defeat
     code.patch(0x502DD8, [mov(R0, R0)]);
@@ -342,8 +346,39 @@ fn file_select_screen_background(code: &mut Code) {
     code.text().patch(0x29d284, [b(reset_r6)]);
 }
 
+fn warp(code: &mut Code) {
+    // code.text().patch(0x441ec0, [b(0x442044)]); // Makes quit identical to cancel!
+    // code.text().patch(0x4424b0, [mov(R0, R0)]); // Remove SE from "Quit" button!
+
+    // code.text().patch(0x442498, [b(0x4424e0)]); // Quit button acts like Continue!
+
+    let kill_player = code.text().define([
+        // todo kill player here
+        // no workie yet
+        // ldr(R0, PLAYER_OBJECT_SINGLETON),
+        // ldr(R0, (R0, 0x0)),
+        // mov(R2, 0x0),
+        // strb(R2, (R0, 0x598)),
+
+        // bl(0x1973e4),
+
+        // ldr(R0, 0x197440),
+        // mov(R2, 0x1),
+        // mov(R3, 0x0),
+        //
+        // mov(R1, SP),
+        // ldr(R0, (R0, 0x0)),
+        // bl(0x004ef418), // LoadScene
+        b(0x4424e0), // Acts like player hit the "Continue" button
+    ]);
+    code.text().patch(0x442498, [b(kill_player)]);
+
+    // code.text().patch(0x12cc7c, [mov(R0, R0)]); // Don't play SE_S_SELECT sound effect when hit continue button
+    // Continue button sets: FUN_002317c0(0x3f800000,param_1 + 0x50);
+}
+
 /// Create new Earthquake item that sets Flag 510
-fn earthquake(code: &mut Code) {
+fn quake(code: &mut Code) {
     let earthquake = code.text().define([
         // TODO Play Earthquake Noise:
         // 0x6f8f24 - SE_EVENT_EARTQAUAKE
@@ -362,6 +397,10 @@ fn earthquake(code: &mut Code) {
 
 /// Mother Maiamai Stuff
 fn mother_maiamai(code: &mut Code, layout: &Layout) {
+    // code.patch(0x30fe00, [mov(R0, R0)]); // Untested -- allow getting 100 Maiamai item even if has Great Spin
+
+    /////////////////////////////////////////
+
     code.patch(0x30ffe4, [mov(R0, 1)]); // Skip FUN_00583b1c - Suck/Spit Old/New Item Animation
 
     let _fn_received_maiamai_item = code.text().define([
@@ -585,6 +624,33 @@ fn merchant(code: &mut Code) {
     let get_merchant_event_flag =
         code.text().define([ldr(R0, EVENT_FLAG_PTR), ldr(R0, (R0, 0)), ldr(R1, 0x143), b(FN_GET_EVENT_FLAG)]);
     code.patch(0x19487C, [bl(get_merchant_event_flag)]);
+}
+
+#[allow(unused)]
+fn shield_without_sword(code: &mut Code) {
+    let enable_shield_fn = code.text().define([
+        mov(R3, 0),
+        add(R0, R4, 0x400),
+        add(R0, R0, 0x294),
+        mov(R2, R3),
+        mov(R1, R3),
+        bl(0x2d455c), // Enables Shield ???
+        b(0x344f00),
+    ]);
+    code.text().patch(0x3450fc, [b(enable_shield_fn)]);
+}
+
+#[allow(unused)]
+fn swordless_beams(code: &mut Code) {
+    let _ = code.text().define([
+        mov(R3, 0),
+        add(R0, R4, 0x400),
+        add(R0, R0, 0x294),
+        mov(R2, R3),
+        mov(R1, R3),
+        bl(0x2d455c), // Enables Shield ???
+        b(0x344f00),
+    ]);
 }
 
 fn rental_items(code: &mut Code) {

@@ -319,7 +319,7 @@ fn patch_rosso(patcher: &mut Patcher) {
 /// Eastern Palace
 fn patch_eastern(patcher: &mut Patcher, prize: Randomizable) {
     let data = PrizePatchData::get(prize);
-    let outside_hyrule_castle = SpawnPoint::new(FieldLight, 18, 5);
+    let sp_outside_eastern = SpawnPoint::new(FieldLight, 20, 0);
 
     // Eastern Palace 1F - Add Dungeon Reward
     patcher.add_obj(
@@ -327,7 +327,7 @@ fn patch_eastern(patcher: &mut Patcher, prize: Randomizable) {
         1,
         Obj {
             arg: Arg(
-                outside_hyrule_castle.spawn,
+                sp_outside_eastern.spawn,
                 data.arg1,
                 0,
                 0,
@@ -337,8 +337,8 @@ fn patch_eastern(patcher: &mut Patcher, prize: Randomizable) {
                 data.flag.get_value(),
                 0,
                 data.arg9,
-                outside_hyrule_castle.course as i32,
-                outside_hyrule_castle.scene - 1,
+                sp_outside_eastern.course as i32,
+                sp_outside_eastern.scene - 1,
                 data.arg12,
                 0.0,
             ),
@@ -360,7 +360,7 @@ fn patch_eastern(patcher: &mut Patcher, prize: Randomizable) {
     );
 
     if is_sage(prize) {
-        reroute_sage_warp(patcher, prize, outside_hyrule_castle);
+        reroute_sage_warp(patcher, prize, sp_outside_eastern);
     }
 
     // Eastern Ruins - Disable Post-EP cutscene
@@ -373,26 +373,6 @@ fn patch_eastern(patcher: &mut Patcher, prize: Randomizable) {
             disable(83), // Sahasrahla
             disable(84), // Text box
             disable(85), // Loading Zone to FL18
-        ],
-    );
-
-    // Outside Hyrule Castle
-    patcher.modify_objs(
-        FieldLight,
-        18,
-        [
-            // Sahasrahla
-            call(200, |obj| {
-                obj.set_rotate(0.0, 0.0, 0.0);
-                obj.set_translate(0.0, 0.0, 13.5);
-                obj.arg.3 = 2;
-                obj.set_active_flag(Flag::Event(1));
-                obj.enable();
-            }),
-            disable(208), // Textbox trigger
-            disable(264), // lgt_NpcSoldier_Field1B_04_broke - idk what this is, but now it's nothing
-            disable(529), // AreaSwitchCube
-            disable(502), // Sahasrahla
         ],
     );
 

@@ -23,7 +23,7 @@ pub mod weather_vanes;
 
 /// Logic and behavior settings.
 #[derive(Clone, Debug, Default, Deserialize, Hash, Serialize)]
-#[serde(default)]
+#[serde(default, deny_unknown_fields)]
 pub struct Settings {
     #[serde(skip_serializing_if = "is_false")]
     pub dev_mode: bool,
@@ -76,7 +76,7 @@ pub struct Settings {
     pub weather_vanes: WeatherVanes,
 
     /// Ravio's Shop
-    #[serde(default, skip_deserializing)]
+    #[serde(default, skip_deserializing, skip_serializing_if = "ravios_shop_open")]
     pub ravios_shop: RaviosShop,
 
     /// Guarantees Bow of Light will be placed in Lorule Castle
@@ -93,7 +93,7 @@ pub struct Settings {
     pub keysy: Keysy,
 
     /// Makes the Bow of Light the third upgrade for the Bow
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "is_false")]
     pub progressive_bow_of_light: bool,
 
     /// Swordless Mode
@@ -211,6 +211,13 @@ impl Settings {
             if self.chest_size_matches_contents { "Matches Contents" } else { "Normal" }
         );
         info!("Portal Shuffle:                 {}", self.portal_shuffle)
+    }
+}
+
+fn ravios_shop_open(ravios_shop: &RaviosShop) -> bool {
+    match ravios_shop {
+        RaviosShop::Open => true,
+        _ => false,
     }
 }
 

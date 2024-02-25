@@ -11,8 +11,12 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
 <summary>Version 0.4</summary>
 
 - **Portal Shuffle**
-  - There are 56 Portals in the game split into 28 pairs--and now they can take you anywhere!
-  - Read the section for more deatils: [Portal Shuffle](#portal-shuffle)
+  - Four different shuffling modes:
+    - Cross World Pairs
+    - Any World Pairs
+    - Mirrored Cross World Pairs
+    - Mirrored Any World Pairs
+  - Read the section for more details: [Portal Shuffle](#portal-shuffle)
 - **Quake**
   - Games will now start with most Portals closed, until players find the new item that opens them: the Quake Medallion.
   - The Hyrule Castle Portal is the only Portal open without Quake, and may be required to use if Quake is placed somewhere in Lorule.
@@ -622,20 +626,33 @@ For Citra (emulator):
 - All chests containing progression or unique items will become large, and others will be made small.
 - <u>Note</u>: Some large chests will have a reduced hitbox to prevent negative gameplay interference.
 
+## Quake
+
+<img src="docs/quake.png"  alt=""/>
+
+Obtaining the Quake item activates the second quake event in the vanilla game, which opens the portals and adjusts some overworld enemy spawns. It'll also affect some NPCs' dialog.
+
+This item was created for the randomizer to give an experience closer to the vanilla game where the portals are not open early-on, meaning Lorule is unreachable even once the player has the ability to Merge.
+
+Hyrule Castle has a much more substantial role to play in the randomizer thanks to Quake, as a sometimes necessary dungeon to complete if Quake or something that leads to it happens to be somewhere in Lorule. Or simply for its portal, when playing with Portal Shuffle.
+
+The item is called "Quake" because that is how several NPCs refer to the story event in dialog. Interestingly, they always refer to it as "quake", but never "earthquake".
+
+The sprite is borrowed from the item of the same name from this game's predecessor, A Link to the Past.
+
 ## Portal Shuffle
 
-![Portal Shuffle Yay Woo](docs/portal_shuffle.jpg)
 
-There are 56 Portals (aka "fissures" or "cracks") in the game as 28 pairs that each connect an area of Hyrule with an area of Lorule.
+There are 56 Portals (aka "fissures" or "cracks") in the game formed into pairs that connect areas of Hyrule with Lorule.
 
 We shuffle them.
 
-| Setting              | Description                                                            |
-|----------------------|------------------------------------------------------------------------|
-| Cross Pairs          | All Portals will connect Hyrule + Lorule                               |
-| Full Pairs           | Any Portal can lead to any other Portal.                               |
-| Mirrored Cross Pairs | Same as Cross Pairs, but each pair's counterparts will also be paired. |
-| Mirrored Full Pairs  | Same as Full Pairs, but each pair's counterparts will also be paired.  |
+| Setting                    | Description                                                                  |
+|----------------------------|------------------------------------------------------------------------------|
+| Cross World Pairs          | All Portals will connect Hyrule + Lorule                                     |
+| Any World Pairs            | Any Portal can lead to any other Portal.                                     |
+| Mirrored Cross World Pairs | Same as Cross World Pairs, but each pair's counterparts will also be paired. |
+| Mirrored Any World Pairs   | Same as Any World Pairs, but each pair's counterparts will also be paired.   |
 
 
 
@@ -643,78 +660,73 @@ We shuffle them.
 
 The destination of a Portal determines its appearance.
 
-![Portal Appearance Matches Destination](docs/portal_appearance_matches_destination.jpg)
+![Portal Appearance Matches Destination](docs/portal_appearance_matches_destination.png)
 
-- White Portals lead to Hyrule
-- Black Portals lead to Lorule
+- White light &rarr; Hyrule
+- Black fog &rarr; Lorule
 
 ### Portal Pools
 
-![Portal Pools](docs/portal_pools.jpg)
+Most Portals in the game are "up" portals, like the one in front of Link's House.
 
-Most Portals in the game are "up" Portals, like the one in front of Link's House.
+However, there are 6 pairs of "down" portals as well, that reside on the backs pillars, buildings, etc.
+For technical reasons, these portals can only be shuffled amongst themselves.
 
-However, there are 6 pairs of "down" Portals as well, that reside on the backs pillars, buildings, etc.
-For technical reasons, these Portals can only be shuffled amongst themselves.
+![Portal Pools](docs/down_portals.png)
+<div style="text-align: center; font-style: italic; margin-bottom: 75px;">Down Portal Locations</div>
 
-| Hyrule                | Lorule            | Lorule Area |
-|-----------------------|-------------------|-------------|
-| Sahasrahla's House    | n-Shaped House    | Skull Woods |
-| Eastern Ruins Pillar  | Dark Ruins Pillar | Dark Ruins  |
-| Zora's Domain         | Ku's Domain       | Dark Ruins  |
-| Paradox Left          | Paradox Left      | Central     |
-| Paradox Right         | Paradox Right     | Central     |
-| Southern Ruins Pillar | Swamp Pillar      | Central     |
+| Hyrule                | Lorule            | Lorule Area    |
+|-----------------------|-------------------|----------------|
+| Sahasrahla's House    | n-Shaped House    | Skull Woods    |
+| Eastern Ruins Pillar  | Dark Ruins Pillar | Dark Ruins     |
+| Zora's Domain         | Ku's Domain       | Dark Ruins     |
+| Paradox Left          | Paradox Left      | Central Lorule |
+| Paradox Right         | Paradox Right     | Central Lorule |
+| Southern Ruins Pillar | Swamp Pillar      | Central Lorule |
 
 ### Blocked Portals
 
-There are 4 Portals that are blocked by breakable walls:
+There are 4 Portals that are blocked by bombable walls:
   - Eastern Ruins Southeast Portal
   - Dark Ruins Southeast Portal
   - Desert North Portal
   - Graveyard Ledge (Lorule)
 
-Any Portal that gets redirected to any of these Portals will have a breakable wall in front of it that requires Bombs to blow up.
+If you enter a portal paired with one of these portals, the blockage will automatically be cleared as though you had blown it up.
 
-TODO finish writing this...
+Because of this, the logic only requires bombs to enter the blocked side of portals.
 
 ### Portals of Interest
 
-TODO finish writing this...
-
-#### Southwest Desert Portal
-
-Logic may require players to use the **Stamina Scroll** to have enough Energy to merge from the top part of the East wall going South to reach the Portal in the Southwest corner.
-
-Other than using the Portal itself (or glitches), this is actually the _only_ way to reach the Southwest Portal.
-
-#### Desert Palace Portal
-
-Shuffled Portals make it possible to enter Desert Palace from what should be the 3F exit.
-
-< TODO: To be continued >
-
-Going through the dungeon in reverse may be logically required, but players will need the Sand Rod and the Desert Palace Big Key to do anything.
-
-Some tweaks were made to make the dungeon not glitchy when played this way:
-  - The Boss Key door and two Small Key doors are now two-sided, meaning they require their respective keys to pass even if coming from reverse.
-    - This does *gnarly* things to key logic... good luck!
-  - The 2F miniboss room:
-    - The bridge will be deployed (only) when entering the room from the north, so the player can reach the enemies
-    - North door shutters added that close for the fight
-
-#### Zaganaga's Portal
-Fighting Zaganaga simply requires finding their portal
-
 #### Hyrule Castle Portal
-- IHC may need to be completed if the Portal after Twoga is the only logical access to somewhere important.
-- The Portal paired with HC's will be covered by the same curtain, making it easy to identify.
+- This portal and its pair are the only portals open without <img src="docs/quake.png" width="24" height="24" /> **Quake**.
+- If portal shuffle is off, <img src="docs/quake.png" width="24" height="24" /> **Quake** may appear in Central Lorule and players will need to use this portal to get there.
+- When portal shuffle is on, the Hyrule Castle portal will lead to a random portal in Lorule, and thus one random region of Lorule will become accessible. In this way, <img src="docs/quake.png" width="24" height="24" /> **Quake** has the potential to appear in any region of Lorule.
 
 #### Lorule Castle Portal
 
-Words and such
+AKA the Final Boss portal, the Yuganon Portal, etc.
+- This portal is treated as access to the Central Lorule area, because if players haven't yet met the LC Requirement the loading zone to the Throne Room will instead send them to the Lorule Blacksmith.
+  - A courtesy return warp will appear in the Lorule Blacksmith if this path is used.
+  - Once the LC Requirement has been met this path will remain open with a new warp placed near the doorway.
+- This portal allows access into Lorule Castle 3F ONLY IF `trials_door` is set to the `Open` setting. Otherwise, any trials must be completed first before the door will open.
+- While not necessary to complete the game, this portal allows skipping the entirety of the Lorule Castle dungeon and is simply a faster way to the final boss once all requirements are met.
 
-TODO
+
+#### Southwest Desert Portal
+
+Logic may require players to use the <img src="docs/stamina_scroll.png" width="24" height="24" /> **Stamina Scroll** to have enough Energy to merge from the top part of the East wall going South to reach the portal in the Southwest corner.
+
+Other than using the portal itself (or glitches), this is actually the _only_ way to reach the Southwest Portal.
+
+#### Desert Palace + Zaganaga Portals
+
+These two portals are forcibly kept paired vanilla so that Desert Palace does not lose its Boss and dungeon prize. For now...
+
+#### Rosso's House Portal
+
+- This portal is locked inside Rosso's House, meaning rescuing Rosso is a requirement to access it.
+- If you enter Rosso's House using this portal before rescuing Rosso, it will be empty, and if you leave via the door it will lock behind you.
 
 ## Hint System
 
@@ -959,19 +971,16 @@ It's all in the name: no logic is used to place items at all. Dungeon items are 
   - The Kakariko Street Merchant's items may appear invisible for a small selection of items (they're actually clipping through the floor). They can still be interacted with and purchased (the left one always, the right one after bumping into the Shady Guy).
   - Not all item models have their transforms applied to them (rotation, scaling, etc.) and may look slightly odd.
   - Only the Items in Ravio's Shop and the Kakariko Street Merchant have had their models replaced -- all others will appear vanilla.
-    - Except the Letter in a Bottle's vanilla location, which will always look like a Heart Piece.
+    - The Letter in a Bottle's vanilla location will appear as a Heart Piece.
 - Portal Shuffle:
   - The player's location on the bottom screen may not be reflected accurately after exiting a same-world portal, until the player loads another area.
-  - Bonking on a breakable wall when using a Portal can sometimes result in janky behavior instead of neatly sending the player back to where they entered.
-  - In a handful of locations, the Portal Bonk can actually force a player into a region they shouldn't have access to.
 - Music:
-  - Hyrule Castle overworld music may be missing until the player has either broken the barrier or obtained the Pendant of Courage.
+  - Hyrule Castle overworld music may be incorrect.
 - Unintended Item Duplication:
   - Players can receive the final item from Zelda multiple times if they die and restart the fight.
   - Items from the Scared Hinox can be received multiple times if the player revisits the cave after a Save & Quit.
 - Miscellaneous:
-  - Some text boxes will overflow
-  - Players using the Pre-Activated Weather Vanes setting may encounter some Hilda dialog in the Lorule Graveyard if they visit it without completing the Hyrule Sanctuary Dungeon first.
+  - Some text boxes will overflow or display incorrectly.
 
 ## Special Thanks
 
