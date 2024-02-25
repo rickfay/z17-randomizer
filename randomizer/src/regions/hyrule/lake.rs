@@ -28,7 +28,7 @@ crate::region! {
             "Maiamai Tornado Rod Upgrade": ItemTornadeRodLv2 @None(),
             "[Mai] Hyrule Hotfoot Rock": Maiamai @Maiamai(36[31]),
             "[Mai] Lake Hylia Island Tile": Maiamai @Maiamai(35[130]),
-            "[Mai] Lake Hylia SE Wall": Maiamai @Maiamai(40[24]),
+            "[Mai] Lake Hylia East River": Maiamai @Maiamai(40[24]),
             "[Mai] Lake Hylia Shallow Ring": Maiamai @Maiamai(35[131]),
             "[Mai] Outside Maiamai Cave": Maiamai @Maiamai(35[129]),
         ],

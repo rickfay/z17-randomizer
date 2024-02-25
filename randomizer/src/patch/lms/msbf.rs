@@ -13,23 +13,28 @@ pub fn patch(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
 
     let settings = &seed_info.settings;
 
-    patch_ravio_shop(patcher)?;
-    patch_thieves_hideout(patcher, settings)?;
-    patch_turtles(patcher)?;
-    patch_hyrule_castle_zelda(patcher)?;
-    patch_lorule_castle_requirements(patcher, settings)?;
-    patch_castle_connection(patcher, settings)?;
-    patch_final_boss(patcher)?;
-    patch_hint_ghosts(patcher)?;
-    patch_weather_vanes(patcher)?;
-    patch_rosso(patcher)?;
-    patch_mother_maiamai(patcher)?;
-    // patch_gameover(patcher)?;
-    patch_stylish_woman(patcher)?;
-    patch_woman(patcher)?;
-    patch_treacherous_tower(patcher, seed_info)?;
     patch_bee_guy(patcher)?;
+    patch_big_fairies(patcher)?;
+    patch_castle_connection(patcher, settings)?;
+    patch_cross_old_man(patcher)?;
+    patch_final_boss(patcher)?;
+    // patch_gameover(patcher)?;
+    patch_hint_ghosts(patcher)?;
+    patch_hyrule_castle_zelda(patcher)?;
     patch_impa(patcher)?;
+    patch_lorule_castle_requirements(patcher, settings)?;
+    patch_mother_maiamai(patcher)?;
+    patch_papa_girl(patcher)?;
+    patch_ravio_shop(patcher)?;
+    patch_rosso(patcher)?;
+    patch_sahasrahlas_house(patcher)?;
+    patch_stylish_woman(patcher)?;
+    patch_thieves_hideout(patcher, settings)?;
+    patch_treacherous_tower(patcher, seed_info)?;
+    patch_turtles(patcher)?;
+    patch_weather_vanes(patcher)?;
+    patch_woman(patcher)?;
+    patch_young_woman(patcher)?;
 
     legacy_patches(patcher)
 }
@@ -514,6 +519,70 @@ fn patch_rosso(patcher: &mut Patcher) -> Result<()> {
     Ok(())
 }
 
+/// Big Fairies
+fn patch_big_fairies(patcher: &mut Patcher) -> Result<()> {
+    apply!(patcher,
+        CaveLight/Cave {
+            [0 into_start] => 4, // Skip "I will soothe your wounds and provide comfort. Close your eyes and relax..."
+        },
+    );
+
+    Ok(())
+}
+
+/// Papa and Girl
+fn patch_papa_girl(patcher: &mut Patcher) -> Result<()> {
+    apply!(patcher,
+        FieldLight/FieldLight_18_MiddleMan {
+            [26 into_branch] each [
+                value(385), // Quake "true flag"
+                switch [
+                    [0] => 21,
+                    [1] => 3,
+                ],
+            ],
+        },
+
+        FieldLight/FieldLight_18_KakarikoGirl {
+            [28 into_branch] each [
+                switch [
+                    [0] => 46,
+                    [1] => 2,
+                ],
+            ],
+        },
+    );
+
+    Ok(())
+}
+
+/// Young Woman (that's literally her name okay)
+fn patch_young_woman(patcher: &mut Patcher) -> Result<()> {
+    apply!(patcher,
+        IndoorLight/FieldLight_18_KakarikoGirl {
+            [41 into_branch] switch [
+                [0] => 43,
+                [1] => 42,
+            ],
+        },
+    );
+
+    Ok(())
+}
+
+/// Sahasrahla tells the pendant locations
+fn patch_sahasrahlas_house(patcher: &mut Patcher) -> Result<()> {
+    apply!(patcher,
+        IndoorLight/FieldLight_18_SahasPupil {
+            [51 into_start] => 38, // Skip to 3 large text boxes that we're going to repurpose (38, 45, 36)
+            [38 into_text] => 45, // Skip 46
+            [36 into_text] => None,
+        },
+    );
+
+    Ok(())
+}
+
 /// Stylish Woman
 fn patch_stylish_woman(patcher: &mut Patcher) -> Result<()> {
     apply!(patcher,
@@ -634,6 +703,38 @@ fn patch_impa(patcher: &mut Patcher) -> Result<()> {
     Ok(())
 }
 
+/// Enable fighting Gramps without having done anything with StreetPass
+fn patch_cross_old_man(patcher: &mut Patcher) -> Result<()> {
+    apply!(patcher,
+        // Regular dialog
+        FieldLight/CrossOldMan {
+            [0 into_start] => 15, // Skip everything related to StreetPass and challenges and go straight to Gramps battle
+            [15 into_branch] switch [
+                [0] => 13, // Skip 8, 14, 19/20
+            ],
+            [10 into_branch] switch [
+                [0] => 24,
+                [1] => None,
+            ],
+        },
+
+        // After battle dialog
+        FieldLight/CrossForceTalk {
+            [6 into_branch] switch [
+                [0] => 5, // Skip 8
+                [1] => None, // Skip 7
+            ],
+        },
+
+        // Don't show achievements post battle
+        CrossBattle/CrossBattle {
+            [4] => 2, // Skip 3
+        },
+    );
+
+    Ok(())
+}
+
 /// Quit / Game Over dialog
 #[allow(unused)]
 fn patch_gameover(patcher: &mut Patcher) -> Result<()> {
@@ -685,12 +786,6 @@ pub fn legacy_patches(patcher: &mut Patcher) -> Result<()> {
         // Irene Bell Text
         FieldLight/FieldLight_WarpEvent { [0 into_start] => None, },
         FieldDark/FieldLight_WarpEvent  { [0 into_start] => None, },
-
-        // Sahasrahla
-        FieldLight/FieldLight_1B_Sahasrahla {
-            [14 into_start] => 22,
-            [22 into_text] => None,
-        },
 
         // Runaway Item Seller
         Boot/FieldLight_33_Douguya {
@@ -864,49 +959,6 @@ pub fn legacy_patches(patcher: &mut Patcher) -> Result<()> {
             [71] => 47, // skip 50
             [59] => 49, // skip 35
         },
-
-
-
-        // Eastern Ruins
-        // FieldLight/FieldLight_1E_Sahasrahla {
-        //     // lgt_NpcSahasrahla_Field1E_03
-        //     //[0 into_start] => 0x6A,
-        //
-        //     // 0,127,128,105,126,21,2,114,70,75,112,113
-        //     [107] => 23, // skip 1
-        //     // 23,24,29,26,68
-        //     [68] => 129, // skip 25,124
-        //     // 130,131,132
-        //     [103] => 104, // skip 102
-        //     // 14,27,65,66,3,16,17,15,67,18
-        //     [28] => 8, // skip 4
-        //     // 22,69,5,9,13,6
-        //     //[13] => 106, // skip 6 - Leaving in so Link doesn't bumrush Sahas
-        //     // 12,19,11,33,32,10,20,7 - END
-        // },
-
-        // Hyrule Castle
-        // FieldLight/FieldLight_1B_Sahasrahla {
-        //     // lgt_NpcSahasrahla_Field1B_00
-        //     // 0,24,26,
-        //     [35] =>  5, // skip 1
-        //     [43] => 57, // skip 7
-        //     [49] => 65, // skip 44
-        //     [64] => 66, // skip 63
-        //     [66] => 51, // skip 9
-        //     [68] => 85, // skip 50
-        //     // 81,82,83,86,84,20,54,53
-        //
-        //     [67] => 55, // skip 10, 52
-        //     //[55] => 23, // skip 22
-        //
-        //     // 23 gives out item
-        //     // fix - Gift given too early b/c Sahasrahla moves during 10,52,22
-        //     // 12,13,69,62,111
-        //     [113] => 56, // skip 103, 91(goto), 105
-        //     [56] => 73, // skip 11
-        //     // 77,76,114,72 - FIN
-        // },
     );
 
     // untouched

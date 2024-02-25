@@ -183,7 +183,8 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
                     check!("[Mai] Outside Flippers Mini-Dungeon", regions::hyrule::southern::ruins::SUBREGION, |p| p
                         .has_flippers()),
                     check!("[Mai] Outside Maiamai Cave", regions::hyrule::lake::hylia::SUBREGION, |p| p.can_merge()),
-                    check!("[Mai] Lake Hylia SE Wall", regions::hyrule::lake::hylia::SUBREGION, |p| p.can_merge()),
+                    check!("[Mai] Lake Hylia East River", regions::hyrule::lake::hylia::SUBREGION, |p| p
+                        .has_flippers()),
                     check!("[Mai] Hyrule Hotfoot Rock", regions::hyrule::lake::hylia::SUBREGION, |p| p.can_merge()
                         && p.has_titans_mitt()),
                     check!("[Mai] Southern Ruins Big Rock", regions::hyrule::desert::mystery::SUBREGION, |p| p
@@ -224,8 +225,6 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
                     portal_right(HyruleHotfoot, portal_map, false),
                     portal_left(ParadoxRightHyrule, portal_map, false),
                     portal_right(ParadoxRightHyrule, portal_map, false),
-                    portal_left(LoruleLake, portal_map, false),
-                    portal_right(LoruleLake, portal_map, false),
                     portal_left(MiseryMireEntrance, portal_map, false),
                     portal_right(MiseryMireEntrance, portal_map, false),
                     portal_left(LostWoodsPillar, portal_map, false),

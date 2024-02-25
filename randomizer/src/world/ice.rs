@@ -27,7 +27,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                 "Ice Ruins",
                 vec![
                     check!("[IR] (1F) Hidden Chest", regions::dungeons::ice::ruins::SUBREGION, |p| p.has_ice_compass()),
-                    check!("[IR] (B4) Ice Pillar", regions::dungeons::ice::ruins::SUBREGION),
+                    check!("[IR] (B2) Ice Pillar", regions::dungeons::ice::ruins::SUBREGION),
                     check!("[IR] (B3) Grate Chest (Left)", regions::dungeons::ice::ruins::SUBREGION),
                     check!("[IR] (B3) Grate Chest (Right)", regions::dungeons::ice::ruins::SUBREGION),
                     check!("[IR] (B5) Big Chest", regions::dungeons::ice::ruins::SUBREGION),

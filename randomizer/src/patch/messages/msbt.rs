@@ -198,7 +198,7 @@ struct MsbtFileHeader {
 /// Header for blocks found in MSBT / MSBP files
 ///
 /// Reference: https://github.com/Kinnay/Nintendo-File-Formats/wiki/LMS-File-Format#block-header
-#[derive(Default)]
+#[derive(Default, Debug)]
 struct BlockHeader {
     /// Magic number for the block
     block_type: u32,
@@ -254,7 +254,7 @@ struct Label {
 
 /// Attributes Block
 /// Reference: https://github.com/Kinnay/Nintendo-File-Formats/wiki/MSBT-File-Format#atr1-block
-#[derive(Default)]
+#[derive(Default, Debug)]
 struct Atr1Block {
     /// Uses the magic number `ATR1`
     header: BlockHeader,
@@ -270,7 +270,7 @@ struct Atr1Block {
 /// Stores the actual text messages as UTF-16 strings.
 ///
 /// Reference: https://github.com/Kinnay/Nintendo-File-Formats/wiki/MSBT-File-Format#txt2-block
-#[derive(Default)]
+#[derive(Default, Debug)]
 struct Txt2Block {
     /// Uses the magic number `TXT2`
     header: BlockHeader,
@@ -335,6 +335,7 @@ pub(crate) fn load_msbt(patcher: &mut Patcher, course: Course, file: &str) -> Re
     // ATR1 BLOCK
 
     let atr1_idx = (((lbl1.header.block_size + 0x30) & 0xFFFFFFF0) + 0x10) as usize;
+    // let atr1_idx = ((lbl1.header.block_size + 0x30) & 0xFFFFFFF0) as usize; // CrossBattle.msbt required this...?
 
     let mut atr1 = Atr1Block::default();
     atr1.header.block_type = LittleEndian::read_u32(&raw[atr1_idx..]); // ATR1

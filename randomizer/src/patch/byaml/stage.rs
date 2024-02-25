@@ -1,6 +1,5 @@
 use crate::patch::Patcher;
-use crate::{patch::util::*, Result, SeedInfo};
-use game::tower_stage::TowerStage;
+use crate::{patch::util::*, regions, Result, SeedInfo};
 use game::Course::{self, *};
 use log::info;
 use macros::fail;
@@ -90,28 +89,27 @@ macro_rules! action {
 }
 
 /// Patch Stage BYAML Files
-pub fn patch(
-    patcher: &mut Patcher, SeedInfo { settings, treacherous_tower_floors: tower_floors, .. }: &SeedInfo,
-) -> Result<()> {
+pub fn patch(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
     info!("Patching BYAML Files...");
 
-    do_dev_stuff(patcher, settings)?;
+    do_dev_stuff(patcher, &seed_info.settings)?;
 
     patch_flag_510_effects(patcher)?;
     patch_ravios_shop(patcher)?;
+    patch_sahasrahlas_house(patcher)?;
     patch_maiamai_cave(patcher);
-    patch_treacherous_tower(patcher, tower_floors)?;
-    patch_big_problem_chests(patcher, settings);
+    patch_treacherous_tower(patcher, seed_info)?;
+    patch_big_problem_chests(patcher, seed_info);
     patch_blacksmith_hyrule(patcher);
     patch_castles(patcher);
     patch_chamber_of_sages(patcher);
-    patch_dark_maze(patcher);
+    patch_dark_maze(patcher, seed_info);
     patch_kus_domain(patcher);
     patch_letter_in_a_bottle(patcher);
     patch_master_sword(patcher);
-    patch_gales_softlock(patcher, settings);
-    patch_thief_girl_cave(patcher);
-    patch_treasure_dungeons(patcher, settings);
+    patch_gales_softlock(patcher);
+    patch_thief_girl_cave(patcher, seed_info);
+    patch_treasure_dungeons(patcher, seed_info);
     patch_zora(patcher);
     patch_swamp_palace(patcher);
     patch_hint_ghosts_overworld(patcher)?;
@@ -119,15 +117,15 @@ pub fn patch(
 
     patch_blacksmith_lorule(patcher);
     patch_trials_door(patcher);
-    patch_hildas_study(patcher, settings);
+    patch_hildas_study(patcher, &seed_info.settings);
 
     patch_portal_shuffle(patcher);
-    patch_keysy_small(patcher, settings);
-    patch_keysy_big(patcher, settings);
+    patch_keysy_small(patcher, &seed_info.settings);
+    patch_keysy_big(patcher, &seed_info.settings);
     // patch_reverse_desert_palace(patcher, settings);
 
-    patch_big_bomb_flower_skip(patcher, settings);
-    patch_no_progression_enemies(patcher, settings);
+    patch_big_bomb_flower_skip(patcher, &seed_info.settings);
+    patch_no_progression_enemies(patcher, &seed_info.settings);
     patch_lost_woods(patcher);
     // patch_open_lost_woods(patcher);
     patch_magic_shop(patcher);
@@ -369,13 +367,13 @@ fn patch_flag_510_effects(patcher: &mut Patcher) -> Result<()> {
         16,
         [
             // Papa
-            clear_enable_flag(259), // Papa #2 - appears on 310, disappears on 235
-            // 287 - Papa #3 - appears on 235 (buy anything from Ravio)
-            disable(416), // Papa #1 - appears on 210, disappears on 310
+            set_flags(259, Flag::QUAKE, Flag::ZERO_ZERO), // Papa #2 (post-Quake)
+            disable(287),                                 // Papa #3
+            set_flags(416, Flag::ZERO_ZERO, Flag::QUAKE), // Papa #1
             // Girl
-            clear_enable_flag(260), // Girl #2 - appears on 310, disappears on 235
-            // 288 - Girl #3 - appears on 235
-            disable(415), // Girl #1 - appears on 210, disappears on 310
+            set_flags(260, Flag::QUAKE, Flag::ZERO_ZERO), // Girl #2 (post-Quake)
+            disable(288),                                 // 288 - Girl #3
+            set_flags(415, Flag::ZERO_ZERO, Flag::QUAKE), // Girl #1
             // Cuccos
             // 241 - disappears on 235
             // 242 - disappears on 235
@@ -462,6 +460,10 @@ fn patch_flag_510_effects(patcher: &mut Patcher) -> Result<()> {
             call(195, enable_on_impa),
             // NpcSoldier
             call(198, enable_on_impa),
+            // Sahasrahla
+            disable(200),
+            // lgt_NpcSahasrahla_Field1B_00
+            disable(208),
             // MojSoliderPaint
             call(225, enable_on_impa),
             // Scarecrow
@@ -476,6 +478,8 @@ fn patch_flag_510_effects(patcher: &mut Patcher) -> Result<()> {
             call(260, disable_on_impa),
             // EnemyShooterSpear
             call(263, disable_on_impa),
+            // lgt_NpcSoldier_Field1B_04_broke
+            disable(264),
             // NpcSoldier
             disable(269),
             // NpcSoldier
@@ -540,6 +544,8 @@ fn patch_flag_510_effects(patcher: &mut Patcher) -> Result<()> {
             call(498, disable_on_impa),
             // TagDisableWallIn, prevent merging into barrier
             clear_enable_flag(501),
+            // Sahasrahla
+            disable(502),
             // AreaEventTalk - lgt_NpcSahasrahla_Field1B_01
             disable(503),
             // AreaEventTalk - lgt_NpcSoldier_Field1B_03_broke
@@ -562,6 +568,8 @@ fn patch_flag_510_effects(patcher: &mut Patcher) -> Result<()> {
             set_disable_flag(520, Flag::SAGE_IMPA),
             // EnemySoldierGreen
             set_disable_flag(521, Flag::SAGE_IMPA),
+            // AreaSwitchCube
+            disable(529),
             // Buzz Blob
             disable(532),
             // AreaSimpleTalk - Hekiga_fueta_Green
@@ -665,10 +673,10 @@ fn patch_flag_510_effects(patcher: &mut Patcher) -> Result<()> {
             set_disable_flag(29, Flag::QUAKE), // Buzz Blob
             set_disable_flag(30, Flag::QUAKE), // Buzz Blob
             set_disable_flag(32, Flag::QUAKE), // Buzz Blob
-            set_enable_flag(35, Flag::QUAKE),             // Arrow Soldier
-            set_enable_flag(36, Flag::QUAKE),             // Arrow Soldier
-            set_enable_flag(37, Flag::QUAKE),             // Green Spear Solider
-            disable(38),             // EnemySoldierDagger
+            set_enable_flag(35, Flag::QUAKE),  // Arrow Soldier
+            set_enable_flag(36, Flag::QUAKE),  // Arrow Soldier
+            set_enable_flag(37, Flag::QUAKE),  // Green Spear Solider
+            disable(38),                       // EnemySoldierDagger
                                                // 83 - EnemySoldierGreenSpear - appears on 510
         ],
     );
@@ -822,7 +830,9 @@ fn patch_ravios_shop(patcher: &mut Patcher) -> Result<()> {
     Ok(())
 }
 
-fn patch_treacherous_tower(patcher: &mut Patcher, tower_floors: &Vec<TowerStage>) -> Result<()> {
+fn patch_treacherous_tower(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
+    let tower_floors = &seed_info.treacherous_tower_floors;
+
     let mut i = 1;
     while i < tower_floors.len() {
         // i - 1 = previous floor, i = current floor
@@ -1045,9 +1055,9 @@ fn patch_kus_domain(patcher: &mut Patcher) {
 }
 
 // Mini-Dungeons
-fn patch_treasure_dungeons(patcher: &mut Patcher, settings: &Settings) {
+fn patch_treasure_dungeons(patcher: &mut Patcher, seed_info: &SeedInfo) {
     // Remove Mini-Dungeon entry cutscenes only when CSMC is off (since they show the chests)
-    if !settings.chest_size_matches_contents {
+    if !seed_info.settings.chest_size_matches_contents {
         patcher.modify_objs(AttractionLight, 1, [disable(15)]);
         patcher.modify_objs(AttractionLight, 2, [disable(54)]);
         patcher.modify_objs(AttractionLight, 3, [disable(47)]);
@@ -1336,7 +1346,6 @@ fn patch_keysy_big(patcher: &mut Patcher, settings: &Settings) {
 }
 
 fn patch_portal_shuffle(patcher: &mut Patcher) {
-
     // Eastern Ruins SE Portal Blockage
     patcher.modify_objs(
         FieldLight,
@@ -1815,7 +1824,10 @@ fn patch_master_sword(patcher: &mut Patcher) {
     );
 }
 
-fn patch_dark_maze(patcher: &mut Patcher) {
+fn patch_dark_maze(patcher: &mut Patcher, seed_info: &SeedInfo) {
+    let pd_prize = seed_info.layout.get_item("[PD] Prize", regions::dungeons::dark::palace::SUBREGION);
+    let prize_flag = prize_flag(pd_prize);
+
     // Remove dialog
     patcher.modify_objs(
         FieldDark,
@@ -1831,23 +1843,67 @@ fn patch_dark_maze(patcher: &mut Patcher) {
             disable(196), // NpcGuardMan
             disable(231), // AreaEventTalk
             disable(235), // Hilda Text
+            // Remove Maze Guards after Dark Palace
+            set_disable_flag(73, prize_flag),
+            set_disable_flag(82, prize_flag),
+            set_disable_flag(83, prize_flag),
+            set_disable_flag(84, prize_flag),
+            set_disable_flag(113, prize_flag),
+            set_disable_flag(123, prize_flag),
+            set_disable_flag(135, prize_flag),
+            set_disable_flag(136, prize_flag),
+            set_disable_flag(143, prize_flag),
+            set_disable_flag(171, prize_flag),
+            set_disable_flag(176, prize_flag),
+            set_disable_flag(177, prize_flag),
+            set_disable_flag(178, prize_flag),
+            set_disable_flag(179, prize_flag),
+            set_disable_flag(197, prize_flag),
         ],
     );
 }
 
-fn patch_thief_girl_cave(patcher: &mut Patcher) {
+fn patch_thief_girl_cave(patcher: &mut Patcher, seed_info: &SeedInfo) {
+    let tt_prize = seed_info.layout.get_item("[TT] Prize", regions::dungeons::thieves::hideout::SUBREGION);
+    let prize_flag = prize_flag(tt_prize);
+
     patcher.modify_objs(
         CaveDark,
         15,
         [
             // Thief Girl w/ Mask
-            // set_enable_flag(8, prize_flag), // Thief Girl
-            // set_enable_flag(9, prize_flag), // Chest
-            disable(10), // Entrance text
-            disable(11), // AreaSwitchCube
-            disable(13), // It's a secret to everybody
+            set_enable_flag(8, prize_flag), // Thief Girl
+            set_enable_flag(9, prize_flag), // Chest
+            disable(10),                    // Entrance text
+            disable(11),                    // AreaSwitchCube
+            disable(13),                    // It's a secret to everybody
         ],
     );
+}
+
+/// Sahasrahla's House
+fn patch_sahasrahlas_house(patcher: &mut Patcher) -> Result<()> {
+    patcher.modify_objs(
+        IndoorLight,
+        16,
+        [
+            disable(6),            // Sahasrahla_First_00
+            disable(28),           // Sahasrahla_House_01
+            clear_enable_flag(29), // Sahasrahla (all others disabled, or are for credits)
+        ],
+    );
+
+    // Open doors
+    patcher.modify_objs(
+        FieldLight,
+        16,
+        [
+            set_46_args(251, Flag::Event(1)), // Right door
+            set_46_args(261, Flag::Event(1)), // Left door
+        ],
+    );
+
+    Ok(())
 }
 
 /// Mother Maiamai's Cave
@@ -1864,8 +1920,8 @@ fn patch_maiamai_cave(patcher: &mut Patcher) {
 }
 
 /// Modify the hitboxes of select big chests that could negatively affect gameplay
-fn patch_big_problem_chests(patcher: &mut Patcher, settings: &Settings) {
-    if !settings.chest_size_matches_contents {
+fn patch_big_problem_chests(patcher: &mut Patcher, seed_info: &SeedInfo) {
+    if !seed_info.settings.chest_size_matches_contents {
         return;
     }
 
@@ -1911,7 +1967,7 @@ fn patch_big_problem_chests(patcher: &mut Patcher, settings: &Settings) {
 }
 
 /// Gales Softlock Prevention - Add trigger to drop wall if player entered miniboss without hitting switch
-fn patch_gales_softlock(patcher: &mut Patcher, _settings: &Settings) {
+fn patch_gales_softlock(patcher: &mut Patcher) {
     patcher.add_obj(
         DungeonWind,
         1,
@@ -2024,9 +2080,9 @@ fn do_dev_stuff(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
     }
 
     // Ravio's Shop Exit Door
-    patcher.modify_objs(IndoorLight, 1, [call(24, |obj| {
-        obj.redirect(SpawnPoint::new(
-            FieldLight, 27, 5,  // No Redirect
+    patcher.modify_objs(IndoorLight, 1, [
+        redirect(24, SpawnPoint::new(FieldLight, 27,
+            5, // No Redirect
             // Demo, 4, 0,
             // IndoorDark, 4, 0,  // Lorule Blacksmith
             // DungeonSand, 1, 16,  // Desert Palace 1F Exit
@@ -2060,8 +2116,8 @@ fn do_dev_stuff(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
             // IndoorDark, 5, 0, // Hilda's Study
             // IndoorLight, 7, 0, // Zelda's Study (lighting gets weird)
             // DungeonCastle, 6, 0, // Yuga 2 Boss
-        ));
-    })]);
+        ))
+    ]);
 
     // Ravio's Shop Front Door
     // patcher.modify_objs(FieldLight, 27, [

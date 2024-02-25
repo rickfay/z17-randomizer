@@ -46,6 +46,16 @@ pub(crate) fn set_disable_flag(unq: u16, flag: Flag) -> (u16, Box<dyn Fn(&mut Ob
     (unq, Box::new(move |obj: &mut Obj| obj.set_disable_flag(flag)))
 }
 
+pub(crate) fn set_flags(unq: u16, enable_flag: Flag, disable_flag: Flag) -> (u16, Box<dyn Fn(&mut Obj)>) {
+    (
+        unq,
+        Box::new(move |obj: &mut Obj| {
+            obj.set_enable_flag(enable_flag);
+            obj.set_disable_flag(disable_flag);
+        }),
+    )
+}
+
 pub(crate) fn clear_enable_flag(unq: u16) -> (u16, Box<dyn Fn(&mut Obj)>) {
     (unq, Box::new(move |obj: &mut Obj| obj.clear_enable_flag()))
 }

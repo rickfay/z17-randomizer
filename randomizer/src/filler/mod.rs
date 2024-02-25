@@ -217,23 +217,26 @@ fn preplace_items(
         place_static(check_map, progression, Item::SandRod02, "Maiamai Sand Rod Upgrade");
     }
 
-    let mut shop_positions: Vec<String> = Vec::new();
-    let mut bow_light_positions: Vec<String> = Vec::from(["[LC] Zelda".to_owned()]);
+    let mut shop_positions = vec![
+        "Ravio's Shop (1)", "Ravio's Shop (2)", "Ravio's Shop (3)", "Ravio's Shop (4)", "Ravio's Shop (5)",
+        "Ravio's Shop (7)", "Ravio's Shop (8)", "Ravio's Shop (9)",
+    ];
+    let mut bow_light_positions = vec![
+        "[LC] (1F) Ledge", "[LC] (1F) Center", "[LC] (2F) Near Torches", "[LC] (2F) Hidden Path", "[LC] (2F) Ledge",
+        "[LC] (4F) Center", "[LC] (4F) Hidden Path", "[LC] Bomb Trial (1)", "[LC] Bomb Trial (2)",
+        "[LC] Tile Trial (1)", "[LC] Tile Trial (2)", "[LC] Lamp Trial", "[LC] Hook Trial (1)", "[LC] Hook Trial (2)",
+        "[LC] Zelda",
+    ];
     let mut maiamai_positions: Vec<String> = Vec::new();
-
-    for (check_name, item) in check_map.clone() {
-        if check_name.starts_with("[LC]") && item.is_none() {
-            let _ = &bow_light_positions.push(check_name.clone());
-        } else if check_name.starts_with("Ravio's Shop") && !check_name.contains('6') {
-            let _ = &shop_positions.push(check_name.clone());
-        } else if check_name.starts_with("[Mai]") {
+    for (check_name, _) in check_map.iter() {
+        if check_name.starts_with("[Mai]") {
             let _ = &maiamai_positions.push(check_name.clone());
         }
     }
 
     if !settings.progressive_bow_of_light && settings.bow_of_light_in_castle {
         check_map.insert(
-            bow_light_positions.remove(rng.gen_range(0..bow_light_positions.len())),
+            String::from(bow_light_positions.remove(rng.gen_range(0..bow_light_positions.len()))),
             Some(Item::BowOfLight.into()),
         );
         progression.retain(|x| *x != Item::BowOfLight);
@@ -241,7 +244,10 @@ fn preplace_items(
 
     // Bell in Shop
     if settings.bell_in_shop {
-        check_map.insert(shop_positions.remove(rng.gen_range(0..shop_positions.len())), Some(Item::Bell.into()));
+        check_map.insert(
+            String::from(shop_positions.remove(rng.gen_range(0..shop_positions.len()))),
+            Some(Item::Bell.into()),
+        );
         progression.retain(|x| *x != Item::Bell);
     }
 
@@ -253,14 +259,19 @@ fn preplace_items(
 
     // Sword in Shop
     if settings.sword_in_shop {
-        check_map.insert(shop_positions.remove(rng.gen_range(0..shop_positions.len())), Some(Item::Sword01.into()));
+        check_map.insert(
+            String::from(shop_positions.remove(rng.gen_range(0..shop_positions.len()))),
+            Some(Item::Sword01.into()),
+        );
         progression.retain(|x| *x != Item::Sword01);
     }
 
     // Boots in Shop
     if settings.boots_in_shop {
-        check_map
-            .insert(shop_positions.remove(rng.gen_range(0..shop_positions.len())), Some(Item::PegasusBoots.into()));
+        check_map.insert(
+            String::from(shop_positions.remove(rng.gen_range(0..shop_positions.len()))),
+            Some(Item::PegasusBoots.into()),
+        );
         progression.retain(|x| *x != Item::PegasusBoots);
     }
 
@@ -288,7 +299,8 @@ fn preplace_items(
 
         let weapon = *weapons.get(rng.gen_range(0..weapons.len())).unwrap();
 
-        check_map.insert(shop_positions.remove(rng.gen_range(0..shop_positions.len())), Some(weapon.into()));
+        check_map
+            .insert(String::from(shop_positions.remove(rng.gen_range(0..shop_positions.len()))), Some(weapon.into()));
         progression.retain(|x| *x != weapon);
     }
 
@@ -554,7 +566,7 @@ fn filter_dungeon_checks(item: Item, eligible_checks: Vec<Check>) -> Vec<Check> 
         ],
         IceCompass | IceKeyBig | IceKeySmall01 | IceKeySmall02 | IceKeySmall03 => vec![
             "[IR] (1F) Hidden Chest", "[IR] (B3) Grate Chest (Left)", "[IR] (B3) Grate Chest (Right)",
-            "[IR] (B4) Ice Pillar", "[IR] (B5) Big Chest", "[IR] (B1) East Chest", "[IR] (B1) Narrow Ledge",
+            "[IR] (B2) Ice Pillar", "[IR] (B5) Big Chest", "[IR] (B1) East Chest", "[IR] (B1) Narrow Ledge",
             "[IR] (B1) Upper Chest", "[IR] (B3) Big Chest (Puzzle)", "[IR] (B4) Switches",
             "[IR] (B4) Southwest Chest (Fall)", "[IR] (B4) Narrow Platform", "[IR] (B2) Long Merge Chest",
             "[IR] (B4) Southeast Chest (Fall)", "[IR] Dharkstare",
@@ -787,9 +799,9 @@ fn assumed_fill(
         let filtered_checks = filter_checks(item, &reachable_checks, check_map);
 
         if filtered_checks.is_empty() {
-            info!("item:            {:?}", item);
-            info!("filtered_checks: {:?}", filtered_checks);
-            info!("check_map:       {:?}", check_map);
+            // info!("item:            {:?}", item);
+            // info!("filtered_checks: {:?}", filtered_checks);
+            // info!("check_map:       {:?}", check_map);
 
             return Err(crate::Error::game(format!("No reachable checks found to place: {:?}", item)));
         }

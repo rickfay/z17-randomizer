@@ -31,6 +31,7 @@ pub fn patch_messages(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()>
     patch_great_rupee_fairy(patcher)?;
     patch_treacherous_tower(patcher, seed_info)?;
     patch_thief_girl(patcher)?;
+    patch_cross_old_man(patcher)?;
 
     patch_street_merchant(patcher, seed_info)?;
     patch_sahasrahla(patcher, seed_info)?;
@@ -117,7 +118,7 @@ fn patch_item_names(patcher: &mut Patcher) -> Result<()> {
 fn patch_event_item_get(patcher: &mut Patcher) -> Result<()> {
     let mut msbt = load_msbt(patcher, LanguageBoot, "EventItemGet")?;
 
-    msbt.set("none", "A quake shakes the kingdom,\nopening the fissures!"); // ehh
+    msbt.set("none", &format!("A quake shakes the kingdom!")); // ehh
 
     msbt.set("item_bow", "You got the bow!");
     msbt.set("item_boomerang", "You got the boomerang!");
@@ -213,7 +214,7 @@ fn patch_impa(patcher: &mut Patcher) -> Result<()> {
             *PLAYER_NAME
         ),
     );
-    msbt.set("FieldLight_1B_Soldier_ACT2_19", "So was the chest looking as lovely\nas usual today?");
+    msbt.set("FieldLight_1B_Soldier_ACT2_19", "So was Lady Impa looking as\nlovely as usual today?");
     patcher.update(msbt.dump())?;
 
     Ok(())
@@ -269,6 +270,21 @@ fn patch_thief_girl(patcher: &mut Patcher) -> Result<()> {
     Ok(())
 }
 
+/// Gramps
+fn patch_cross_old_man(patcher: &mut Patcher) -> Result<()> {
+    let mut msbt = load_msbt(patcher, FieldLight, "CrossOldMan")?;
+
+    msbt.set(
+        "cross_old_man_05_select",
+        &format!("Well then. Want to try your hand\nat battling {}?{}", name("me"), *CHOICE_2),
+    );
+    msbt.set("cross_old_man_10_select", &format!("Do you want to try battling me again?{}", *CHOICE_2));
+
+    patcher.update(msbt.dump())?;
+
+    Ok(())
+}
+
 /// Street Merchant - Shorten text & show the item names
 fn patch_street_merchant(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
     let item_left = seed_info
@@ -311,48 +327,23 @@ fn patch_street_merchant(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<
 }
 
 /// Sahasrahla gives out the locations of the Red & Blue Pendants
-#[allow(unused)]
 fn patch_sahasrahla(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
-    let (courage, _) = seed_info.layout.find_single(Item(PendantOfCourage)).unwrap();
-    let (wisdom, _) = seed_info.layout.find_single(Item(PendantOfWisdom)).unwrap();
     let (power, _) = seed_info.layout.find_single(Item(PendantOfPower)).unwrap();
+    let (wisdom, _) = seed_info.layout.find_single(Item(PendantOfWisdom)).unwrap();
+    let (courage, _) = seed_info.layout.find_single(Item(PendantOfCourage)).unwrap();
 
-    let mut sahasrahla = load_msbt(patcher, FieldLight, "FieldLight_1B")?;
+    let mut sahasrahla = load_msbt(patcher, IndoorLight, "FieldLight_18")?;
+
     sahasrahla.set(
-        "lgt_NpcSahasrahla_Field1B_08",
-        &format!(
-            "The {} has been\n\
-            enshrined in the {}.\n\
-            \n\
-            The {} has been\n\
-            enshrined in the {}.\n\
-            \n\
-            And the {}, in the\n\
-            {}.",
-            green("Pendant of Courage"),
-            green(courage),
-            name("Pendant of Wisdom"),
-            name(wisdom),
-            attention("Pendant of Power"),
-            attention(power)
-        ),
+        "lgt_Sahasrahla_first_03",
+        &format!("The {} is in the\n{}.", attention("Pendant of Power"), attention(power)),
     );
-    sahasrahla.clear("lgt_NpcSahasrahla_Field1B_00");
-    sahasrahla.clear("lgt_NpcSahasrahla_Field1B_01");
-    sahasrahla.clear("lgt_NpcSahasrahla_Field1B_02");
-    sahasrahla.clear("lgt_NpcSahasrahla_Field1B_03");
-    sahasrahla.clear("lgt_NpcSahasrahla_Field1B_04");
-    sahasrahla.clear("lgt_NpcSahasrahla_Field1B_05");
-    sahasrahla.clear("lgt_NpcSahasrahla_Field1B_06");
-    sahasrahla.clear("lgt_NpcSahasrahla_Field1B_07");
-    sahasrahla.clear("lgt_NpcSahasrahla_Field1B_09");
-    sahasrahla.clear("lgt_NpcSahasrahla_Field1B_10");
-    sahasrahla.clear("lgt_NpcSahasrahla_Field1B_11");
-    sahasrahla.clear("lgt_NpcSahasrahla_Field1B_12");
-    sahasrahla.clear("lgt_NpcSahasrahla_Field1B_13");
-    sahasrahla.clear("lgt_NpcSahasrahla_Field1B_14");
-    sahasrahla.clear("lgt_NpcSahasrahla_Field1B_15");
-    sahasrahla.clear("lgt_NpcSahasrahla_Field1B_16");
+    sahasrahla
+        .set("lgt_Sahasrahla_first_12", &format!("The {} is in the\n{}.", name("Pendant of Wisdom"), name(wisdom)));
+    sahasrahla.set(
+        "lgt_Sahasrahla_first_10",
+        &format!("And the {} is in the\n{}.", green("Pendant of Courage"), green(courage)),
+    );
 
     patcher.update(sahasrahla.dump())?;
 

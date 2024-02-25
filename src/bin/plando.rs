@@ -414,7 +414,7 @@ fn build_layout() -> Layout {
 
     layout.set_item("[Mai] Hyrule Hotfoot Rock", regions::hyrule::lake::hylia::SUBREGION, maiamai.pop().unwrap());
     layout.set_item("[Mai] Lake Hylia Island Tile", regions::hyrule::lake::hylia::SUBREGION, maiamai.pop().unwrap());
-    layout.set_item("[Mai] Lake Hylia SE Wall", regions::hyrule::lake::hylia::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Lake Hylia East River", regions::hyrule::lake::hylia::SUBREGION, maiamai.pop().unwrap());
     layout.set_item("[Mai] Lake Hylia Shallow Ring", regions::hyrule::lake::hylia::SUBREGION, maiamai.pop().unwrap());
     layout.set_item("[Mai] Outside Maiamai Cave", regions::hyrule::lake::hylia::SUBREGION, maiamai.pop().unwrap());
 
@@ -662,7 +662,7 @@ fn build_layout() -> Layout {
     layout.set_item("[IR] (1F) Hidden Chest", regions::dungeons::ice::ruins::SUBREGION, Empty);
     layout.set_item("[IR] (B3) Grate Chest (Left)", regions::dungeons::ice::ruins::SUBREGION, Empty);
     layout.set_item("[IR] (B3) Grate Chest (Right)", regions::dungeons::ice::ruins::SUBREGION, Empty);
-    layout.set_item("[IR] (B4) Ice Pillar", regions::dungeons::ice::ruins::SUBREGION, Empty);
+    layout.set_item("[IR] (B2) Ice Pillar", regions::dungeons::ice::ruins::SUBREGION, Empty);
     layout.set_item("[IR] (B5) Big Chest", regions::dungeons::ice::ruins::SUBREGION, Empty);
     layout.set_item("[IR] (B1) East Chest", regions::dungeons::ice::ruins::SUBREGION, Empty);
     layout.set_item("[IR] (B1) Narrow Ledge", regions::dungeons::ice::ruins::SUBREGION, Empty);
