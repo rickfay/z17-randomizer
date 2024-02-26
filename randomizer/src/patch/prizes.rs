@@ -170,16 +170,6 @@ fn patch_oren(patcher: &mut Patcher) {
         ],
     );
 
-    // Shady Guy Trigger
-    patcher.modify_objs(
-        FieldLight,
-        7,
-        [
-            set_enable_flag(14, Flag::SAGE_OREN), // Cutscene trigger
-            set_enable_flag(16, Flag::SAGE_OREN), // Shady Guy
-        ],
-    );
-
     // Zora's Domain
     patcher.modify_objs(
         CaveLight,

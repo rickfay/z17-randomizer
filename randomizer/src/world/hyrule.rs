@@ -539,7 +539,7 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
             location(
                 "Zora's Domain Area",
                 vec![
-                    goal!("Shady Guy Trigger", Goal::ShadyGuyTrigger, |p| p.has_sage_oren()),
+                    goal!("Shady Guy Trigger", Goal::ShadyGuyTrigger),
                     check!("Zora's Domain Ledge", regions::hyrule::zora::river::SUBREGION, |p| p.can_merge()),
                     check!("[Mai] Zora's Domain", regions::hyrule::zora::river::SUBREGION, |p| p.has_flippers()),
                     check!("[Mai] South of Zora's Domain", regions::hyrule::zora::river::SUBREGION, |p| p.can_merge()),
