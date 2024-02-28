@@ -86,18 +86,18 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
             location(
                 "Skull Woods Boss Room",
                 vec![check!("[SW] Knucklemaster", regions::dungeons::skull::woods::SUBREGION => {
-                    normal: |p| p.has_master_sword(),
-                    hell: |p| p.can_technically_defeat_knucklemaster(),
+                    normal: |p| p.has_master_sword() || p.can_defeat_knucklemaster_swordless(),
+                    hard: |p| p.can_technically_defeat_knucklemaster(),
                 })],
                 vec![
                     edge!(SkullWoodsBossHallway => {
-                        normal: |p| p.has_master_sword(),
-                        hell: |p| p.can_technically_defeat_knucklemaster(),
+                        normal: |p| p.has_master_sword() || p.can_defeat_knucklemaster_swordless(),
+                        hard: |p| p.can_technically_defeat_knucklemaster(),
                     }),
                     edge!(SkullWoodsSeresGrove => {
-                        normal: |p| p.has_master_sword(),
+                        normal: |p| p.has_master_sword() || p.can_defeat_knucklemaster_swordless(),
+                        hard: |p| p.can_technically_defeat_knucklemaster(),
                         glitched: |p| p.has_tornado_rod(),
-                        hell: |p| p.can_technically_defeat_knucklemaster(),
                     }),
                 ],
             ),

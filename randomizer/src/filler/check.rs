@@ -1,3 +1,4 @@
+use serde::Serialize;
 use {
     crate::{
         filler::{logic::Logic, progress::Progress},
@@ -7,7 +8,7 @@ use {
 };
 
 /// A specific location containing a randomized item
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, Serialize)]
 pub struct Check {
     name: &'static str,
     logic: Logic,
@@ -22,19 +23,19 @@ impl Check {
         Self { name, logic, quest, location_info }
     }
 
-    pub fn get_name(self) -> &'static str {
+    pub fn get_name(&self) -> &'static str {
         self.name
     }
 
-    pub fn get_quest(self) -> Option<Randomizable> {
+    pub fn get_quest(&self) -> Option<Randomizable> {
         self.quest
     }
 
-    pub fn get_location_info(self) -> Option<LocationInfo> {
+    pub fn get_location_info(&self) -> Option<LocationInfo> {
         self.location_info
     }
 
-    pub fn can_access(self, progress: &Progress) -> bool {
+    pub fn can_access(&self, progress: &Progress) -> bool {
         self.logic.can_access(progress)
     }
 }

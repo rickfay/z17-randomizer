@@ -464,6 +464,13 @@ impl<'s> Progress<'s> {
         self.has_hookshot() && self.can_attack()
     }
 
+    pub fn can_defeat_knucklemaster_swordless(&self) -> bool {
+        // Bow does not work
+        self.swordless_mode()
+            && self.can_merge()
+            && (self.has_bombs() || self.has_fire_rod() || self.has_hammer() || self.has_ice_rod())
+    }
+
     pub fn can_technically_defeat_knucklemaster(&self) -> bool {
         self.can_merge()
             && (self.has_sword()

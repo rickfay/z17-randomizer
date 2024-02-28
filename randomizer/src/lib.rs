@@ -112,7 +112,7 @@ pub enum ErrorKind {
     Io,
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq, Hash)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Hash, Serialize)]
 pub struct LocationInfo {
     subregion: &'static Subregion,
     name: &'static str,
@@ -335,10 +335,10 @@ pub struct SeedInfo {
     pub vane_map: VaneMap,
 
     #[serde(skip_deserializing)]
-    pub text: Text,
+    pub metrics: Metrics,
 
     #[serde(skip_deserializing)]
-    pub metrics: Metrics,
+    pub text: Text,
 
     #[serde(skip_deserializing)]
     pub hints: Hints,
@@ -590,5 +590,10 @@ pub fn patch_seed(seed_info: &SeedInfo, user_config: &UserConfig, no_patch: bool
 
         write!(File::create(path)?, "{}", serialized).expect("Could not write the spoiler log.");
     }
+
+    // let path = user_config.output().join(format!("{:0>10}_world_graph.json", seed_info.seed));
+    // let world_graph = serde_json::to_string_pretty(&seed_info.world_graph).unwrap();
+    // write!(File::create(path)?, "{}", world_graph).expect("Could not write World Graph");
+
     Ok(())
 }

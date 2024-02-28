@@ -1,7 +1,8 @@
 use crate::filler::check::Check;
 use crate::filler::path::Path;
+use serde::Serialize;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize)]
 pub struct LocationNode {
     checks: Option<Vec<Check>>,
     paths: Option<Vec<Path>>,

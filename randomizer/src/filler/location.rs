@@ -1,4 +1,6 @@
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+use serde::Serialize;
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize)]
 pub enum Location {
     // Hyrule -------------------
     HyruleBellTravel,

@@ -733,7 +733,7 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
                     edge!(HyruleField),
                     edge!(HyruleCastleCourtyard),
                     edge!(HyruleCastleInterior),
-                    edge!(HyruleCastleDungeon),
+                    edge!(HyruleCastleDungeon, |p| p.hearts(6.0)),
                 ],
             ),
         ),
