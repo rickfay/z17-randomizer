@@ -11,7 +11,6 @@ crate::region! {
 
             "Dark Palace Weather Vane": None @WeatherVane(20[210] DarkPalaceWV),
 
-            "Dark Ruins Lakeview Chest": RupeeSilver @Chest(35[228]),
             "Dark Maze Chest": RupeeR @Chest(20[79]),
             "Dark Maze Ledge": HeartPiece @Heart(20[172]),
             "Hinox (1)": RupeeB @Event(CaveDark/FieldDark_17_NpcHinox [0x02]),

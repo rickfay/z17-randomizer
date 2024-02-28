@@ -7,8 +7,7 @@ use crate::{
 };
 use game::ghosts::HintGhost;
 use log::info;
-use serde::ser::SerializeStruct;
-use serde::{Serialize, Serializer};
+use serde::Serialize;
 use std::ops::{Deref, DerefMut};
 
 mod dark;
@@ -26,7 +25,7 @@ mod swamp;
 mod thieves;
 mod turtle;
 
-#[derive(Default, Debug)]
+#[derive(Default, Debug, Serialize)]
 pub struct WorldGraph {
     graph: DashMap<Location, LocationNode>,
 }
@@ -34,16 +33,6 @@ pub struct WorldGraph {
 impl WorldGraph {
     fn new() -> Self {
         Self { graph: Default::default() }
-    }
-}
-
-impl Serialize for WorldGraph {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        let ser = serializer.serialize_struct("WorldGraph", 2)?;
-        ser.end()
     }
 }
 

@@ -491,7 +491,7 @@ fn build_layout() -> Layout {
     layout.set_item("[Mai] Lorule Mountain E Big Rock", regions::lorule::death::mountain::SUBREGION, maiamai.pop().unwrap());
 
     // Dark Ruins
-    layout.set_item("Dark Ruins Lakeview Chest", regions::lorule::dark::ruins::SUBREGION, Empty);
+    layout.set_item("Dark/Turtle Chest", regions::lorule::lake::lorule::SUBREGION, Empty);
     layout.set_item("Dark Maze Chest", regions::lorule::dark::ruins::SUBREGION, Empty);
     layout.set_item("Dark Maze Ledge", regions::lorule::dark::ruins::SUBREGION, Empty);
     layout.set_item("Hinox (1)", regions::lorule::dark::ruins::SUBREGION, Empty);

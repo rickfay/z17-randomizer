@@ -4,12 +4,12 @@
   "version": "v0.4.0 - SNAPSHOT",
   "settings": {
     "lc_requirement":              7,                         // Sage Portraits needed to enter Lorule Castle's front door.
-    "ped_requirement":             "Standard",                // MS Pedestal Pendant requirement: (2) "Vanilla", (3) "Charmed", or (4) "Standard"
+    "ped_requirement":             "Standard",                // MS Pedestal Pendant requirement: (2) "Vanilla", (3) "Standard"
 
     "logic_mode":                  "Normal",                  // "Normal", "Hard", "Glitched", "AdvGlitched", "Hell", "NoLogic"
     "dark_rooms_lampless":         false,                     // If enabled the logic may expect players to cross Dark Rooms without the Lamp.
 
-    "dungeon_prize_shuffle":       true,                      // This shuffles all Sage Portraits, Pendants, and the Charm among themselves.
+    "dungeon_prize_shuffle":       true,                      // This shuffles all Sage Portraits and Pendants among themselves.
     "maiamai_madness":             false,                     // This shuffles Maiamai into the pool, adding 100 more locations.
     "portals":                     "Closed",                  // "Closed", "Open"
     "portal_shuffle":              "Off",                     // "Off", "CrossWorldPairs", "AnyWorldPairs", "MirroredCrossWorldPairs", "MirroredAnyWorldPairs"

@@ -1,10 +1,12 @@
 use crate::{hints::hint_color::HintColor, patch::Patcher, SeedInfo};
 use log::info;
+use serde::Serialize;
 use std::{
     fmt::{self, Debug, Formatter},
     hash::{Hash, Hasher},
 };
 
+#[derive(Serialize)]
 pub struct Subregion {
     name: &'static str,
     color: HintColor,
@@ -48,7 +50,7 @@ impl Hash for Subregion {
     }
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq, Hash)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Hash, Serialize)]
 pub enum World {
     Hyrule,
     Lorule,

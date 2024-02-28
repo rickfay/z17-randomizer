@@ -10,6 +10,7 @@ crate::region! {
 
             "Turtle Rock Weather Vane": None @WeatherVane(35[67] TurtleRockWV),
 
+            "Dark/Turtle Chest": RupeeSilver @Chest(35[228]),
             "Lorule Lake Chest": RupeeSilver @Chest(28[53]),
             "Lorule Lakeside Item Shop (1)": Bee @None(),
             "Lorule Lakeside Item Shop (2)": GoldenBeeForSale @None(),

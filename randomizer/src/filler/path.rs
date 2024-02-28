@@ -1,6 +1,7 @@
 use crate::filler::{location::Location, logic::Logic, progress::Progress};
+use serde::Serialize;
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, Serialize)]
 pub struct Path {
     destination: Location,
     logic: Logic,

@@ -287,13 +287,14 @@ fn preplace_items(
         ]);
 
         if !&settings.swordless_mode {
-            weapons.extend_from_slice(&[Item::Sword01]);
+            weapons.push(Item::Sword01);
         }
 
         match settings.logic_mode {
             LogicMode::Normal => {},
             _ => {
-                weapons.extend_from_slice(&[Item::Lamp01, Item::Net01]);
+                weapons.push(Item::Lamp01);
+                weapons.push(Item::Net01);
             },
         }
 

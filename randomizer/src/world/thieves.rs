@@ -56,7 +56,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                                 && p.can_merge()
                                 && (p.progression_enemies() || p.has_bombs())
                                 && p.can_hit_shielded_switch()
-                                && (p.has_sword() || p.has_bow()) // Fight is too hard for "any attacking item" to be in Normal Logic. Limit to Sword or Bow (which deals triple damage)
+                                && (p.has_sword() || (p.swordless_mode() && p.has_bow())) // Fight is too hard for "any attacking item" to be in Normal Logic. Limit to Sword (or Bow in Swordless)
                         },
                         hard: |p| {
                             p.thieves_b1b2_doors_open()

@@ -22,7 +22,6 @@ pub fn calculate_metrics(seed_info: &mut SeedInfo, check_map: &mut CheckMap) -> 
 
 #[derive(Debug, Clone, Serialize)]
 pub struct Sphere {
-    #[serde(skip_serializing_if = "BTreeMap::is_empty")]
     items: BTreeMap<String, Item>,
 
     #[serde(skip_serializing_if = "BTreeMap::is_empty")]

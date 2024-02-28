@@ -209,8 +209,9 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
                     portal_left(Zaganaga, portal_map, false),
                     portal_right(Zaganaga, portal_map, false),
                     edge!(MiseryMireRewardBasket => {
-                        normal: |p| p.has_sand_rod() && p.has_master_sword() && p.hearts(9.0),
-                        hell: |p| (p.has_sand_rod() && p.can_attack()) || p.has_bow() || p.has_master_sword(),
+                        normal: |p| p.has_sand_rod() && p.hearts(9.0) && (p.has_master_sword() || (p.swordless_mode() && p.can_attack())),
+                        hard: |p| p.has_sand_rod() && p.can_attack(),
+                        hell: |p| p.has_bow() || p.has_master_sword(),
                     }),
                 ],
             ),
