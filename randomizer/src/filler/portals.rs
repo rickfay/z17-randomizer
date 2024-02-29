@@ -85,20 +85,20 @@ impl Portal {
         use Portal::*;
         match self {
             YourHouse | WaterfallHyrule | EasternRuinsSE | MiseryMireEntrance | DesertMiddle | DesertSW
-            | DesertPalace | DesertNorth | DeathWestHyrule | FloatingIslandHyrule | RiverHyrule | LakeHylia
+            | DesertPalace | DesertNorth | DeathWestHyrule | RossosOreMineHyrule | RiverHyrule | LakeHylia
             | HyruleHotfoot | GraveyardLedgeHyrule => 1,
 
             VacantHouse | WaterfallLorule | DarkRuinsSE | MiseryMireExit | MireMiddle | MireSW | Zaganaga
-            | MireNorth | DeathWestLorule | FloatingIslandLorule | RiverLorule | LoruleLake | LoruleHotfoot
+            | MireNorth | DeathWestLorule | RossosOreMineLorule | RiverLorule | LoruleLake | LoruleHotfoot
             | GraveyardLedgeLorule => 2,
 
             ZorasDomain => 3,
 
             KusDomain => 4,
 
-            StylishWoman | LostWoodsPillar | RossosHouse | RossosOreMineHyrule => 5,
+            StylishWoman | LostWoodsPillar | RossosHouse | FloatingIslandHyrule => 5,
 
-            ThievesTown | SkullWoodsPillar | DestroyedHouse | RossosOreMineLorule => 6,
+            ThievesTown | SkullWoodsPillar | DestroyedHouse | FloatingIslandLorule => 6,
 
             EasternRuinsPillar | SahasrahlasHouse | SwampPillarHyrule => 7,
 
@@ -116,20 +116,20 @@ impl Portal {
         use Portal::*;
         match self {
             VacantHouse | WaterfallLorule | DarkRuinsSE | MiseryMireExit | MireMiddle | MireSW | Zaganaga
-            | MireNorth | DeathWestLorule | FloatingIslandLorule | RiverLorule | LoruleLake | LoruleHotfoot
-            | GraveyardLedgeLorule => 1,
+            | MireNorth | DeathWestLorule | RossosOreMineLorule | RiverLorule | LoruleLake | LoruleHotfoot
+            | GraveyardLedgeLorule => 9,
 
             YourHouse | WaterfallHyrule | EasternRuinsSE | MiseryMireEntrance | DesertMiddle | DesertSW
-            | DesertPalace | DesertNorth | DeathWestHyrule | FloatingIslandHyrule | RiverHyrule | LakeHylia
+            | DesertPalace | DesertNorth | DeathWestHyrule | RossosOreMineHyrule | RiverHyrule | LakeHylia
             | HyruleHotfoot | GraveyardLedgeHyrule => 2,
 
             KusDomain => 3,
 
             ZorasDomain => 4,
 
-            ThievesTown | SkullWoodsPillar | DestroyedHouse | RossosOreMineLorule => 5,
+            ThievesTown | SkullWoodsPillar | DestroyedHouse | FloatingIslandLorule => 5,
 
-            StylishWoman | LostWoodsPillar | RossosHouse | RossosOreMineHyrule => 6,
+            StylishWoman | LostWoodsPillar | RossosHouse | FloatingIslandHyrule => 6,
 
             DarkRuinsPillar | NShapedHouse | SwampPillarLorule => 7,
 
