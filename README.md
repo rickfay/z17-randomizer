@@ -330,7 +330,7 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
 
 ## Setup
 
-- Download: [https://github.com/rickfay/z17-randomizer/releases/tag/v0.3.0-release](https://github.com/rickfay/z17-randomizer/releases/tag/v0.3.0-release)
+- Download: [https://github.com/rickfay/z17-randomizer/releases/tag/v0.3.1-release](https://github.com/rickfay/z17-randomizer/releases/tag/v0.3.1-release)
 
 1. Unzip the download to your directory of choice.
 2. Move your A Link Between Worlds ROM into the same folder. Name it: `ALBW.3ds`
