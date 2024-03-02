@@ -4,13 +4,13 @@ crate::region! {
     color: Name,
     mystery {
         locations: [
-            "Misery Mire Entrance Portal": None @Portal(37[29] MiseryMireEntrance),
-            "Desert Right Pillar Portal": None @Portal(31[42] DesertPillarRight),
-            "Desert Left Pillar Portal": None @Portal(31[41] DesertPillarLeft),
-            "Desert Middle Portal": None @Portal(31[43] DesertMiddle),
-            "Desert SW Portal": None @Portal(31[45] DesertSW),
-            "Desert Palace Portal": None @Portal(31[16] DesertPalace),
-            "Desert North Portal": None @Portal(31[40] DesertNorth),
+            "Misery Mire Entrance Crack": None @Crack(37[29] MiseryMireEntrance),
+            "Desert Right Pillar Crack": None @Crack(31[42] DesertPillarRight),
+            "Desert Left Pillar Crack": None @Crack(31[41] DesertPillarLeft),
+            "Desert Middle Crack": None @Crack(31[43] DesertMiddle),
+            "Desert SW Crack": None @Crack(31[45] DesertSW),
+            "Desert Palace Crack": None @Crack(31[16] DesertPalace),
+            "Desert North Crack": None @Crack(31[40] DesertNorth),
 
             "Desert Palace Weather Vane": None @WeatherVane(31[72] DesertPalaceWV),
 

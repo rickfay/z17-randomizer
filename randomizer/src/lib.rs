@@ -1,6 +1,6 @@
 use crate::filler::filler_item::Vane;
 use crate::filler::trials::TrialsConfig;
-use crate::filler::{portals, text, treacherous_tower, trials, vanes};
+use crate::filler::{cracks, text, treacherous_tower, trials, vanes};
 use crate::world::WorldGraph;
 use crate::{
     constants::VERSION,
@@ -9,8 +9,8 @@ use crate::{
     patch::lms::msbf::MsbfKey,
     system::UserConfig,
 };
+use filler::cracks::Crack;
 use filler::filler_item::Randomizable;
-use filler::portals::Portal;
 use game::tower_stage::TowerStage;
 use game::Item::{self};
 use log::{debug, error, info};
@@ -329,7 +329,7 @@ pub struct SeedInfo {
     pub layout: Layout,
 
     #[serde(skip_deserializing)]
-    pub portal_map: PortalMap,
+    pub crack_map: CrackMap,
 
     #[serde(skip_deserializing, rename = "weather_vane_map")]
     pub vane_map: VaneMap,
@@ -349,7 +349,7 @@ pub struct SeedInfo {
 
 impl SeedInfo {
     fn new(
-        seed: u32, hash: SeedHash, settings: Settings, portal_map: PortalMap, vane_map: VaneMap,
+        seed: u32, hash: SeedHash, settings: Settings, crack_map: CrackMap, vane_map: VaneMap,
         trials_config: TrialsConfig, world_graph: WorldGraph, text: Text, treacherous_tower_floors: Vec<TowerStage>,
     ) -> Self {
         Self {
@@ -359,7 +359,7 @@ impl SeedInfo {
             settings,
             full_exclusions: Default::default(),
             vane_map,
-            portal_map,
+            crack_map,
             layout: Default::default(),
             metrics: Default::default(),
             hints: Default::default(),
@@ -383,7 +383,7 @@ impl Default for SeedInfo {
             hash: Default::default(),
             settings: Default::default(),
             full_exclusions: Default::default(),
-            portal_map: Default::default(),
+            crack_map: Default::default(),
             vane_map: Default::default(),
             layout: Default::default(),
             metrics: Default::default(),
@@ -522,9 +522,9 @@ pub type DashSet<T> = HashSet<T, BuildHasherDefault<XxHash64>>;
 /// Map of all checks (as Strings) to their held item
 pub type CheckMap = DashMap<String, Option<Randomizable>>;
 
-/// Map of all Portals to their destination Portals. Map is not bidirectional to allow for (eventual) decoupled shuffle,
-/// so each Portal and its destination must have a corresponding reversed entry.
-pub type PortalMap = BTreeMap<Portal, Portal>;
+/// Map of all cracks to their destination cracks. Map is not bidirectional to allow for (eventual) decoupled shuffle,
+/// so each Crack and its destination must have a corresponding reversed entry.
+pub type CrackMap = BTreeMap<Crack, Crack>;
 
 /// Map of all Weather Vanes to the destination Vanes they unlock.
 pub type VaneMap = BTreeMap<Vane, Vane>;
@@ -533,15 +533,15 @@ fn calculate_seed_info(seed: u32, settings: Settings, hash: SeedHash, rng: &mut 
     println!();
     info!("Calculating Seed Info...");
 
-    let portal_map = portals::build_portal_map(&settings, rng)?;
+    let crack_map = cracks::build_crack_map(&settings, rng)?;
     let vane_map = vanes::build_vanes_map(&settings, rng)?;
     let text = text::generate(rng)?;
     let trials_config = trials::configure(rng, &settings)?;
     let treacherous_tower_floors = treacherous_tower::choose_floors(&settings, rng)?;
-    let world_graph = world::build_world_graph(&portal_map);
+    let world_graph = world::build_world_graph(&crack_map);
 
     let mut seed_info = SeedInfo::new(
-        seed, hash, settings, portal_map, vane_map, trials_config, world_graph, text, treacherous_tower_floors,
+        seed, hash, settings, crack_map, vane_map, trials_config, world_graph, text, treacherous_tower_floors,
     );
 
     // Check Map and Item Pools
@@ -563,7 +563,13 @@ pub fn patch_seed(seed_info: &SeedInfo, user_config: &UserConfig, no_patch: bool
     if !no_patch {
         info!("Starting Patch Process...");
 
-        let game = Rom::load(user_config.rom())?;
+        let game = match Rom::load(user_config.rom()) {
+            Ok(rom) => rom,
+            Err(_) => {
+                // Retry once, people keep naming their ROMs "ALBW.3ds.3ds" :P
+                Rom::load(&format!("{}.3ds", user_config.rom().to_str().unwrap()))?
+            },
+        };
         let mut patcher = Patcher::new(game)?;
 
         info!("ROM Loaded.\n");

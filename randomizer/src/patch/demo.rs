@@ -1,8 +1,8 @@
 use crate::SeedInfo;
 use game::Course::*;
 use log::info;
-use modinfo::settings::portal_shuffle::PortalShuffle;
-use modinfo::settings::portals::Portals;
+use modinfo::settings::cracks::Cracks;
+use modinfo::settings::cracksanity::Cracksanity;
 use modinfo::settings::trials_door::TrialsDoor;
 use modinfo::settings::weather_vanes::WeatherVanes::*;
 use rom::flag::Flag;
@@ -134,8 +134,8 @@ fn get_initial_flags_to_set(SeedInfo { trials_config, settings, .. }: &SeedInfo)
         965, // Suppress Energy Potion
     ];
 
-    // Portals Open/Closed + Quake
-    if settings.portals == Portals::Open {
+    // Cracks Open/Closed + Quake
+    if settings.cracks == Cracks::Open {
         flags.push(510);
     }
 
@@ -161,7 +161,7 @@ fn get_initial_flags_to_set(SeedInfo { trials_config, settings, .. }: &SeedInfo)
     // Weather Vanes
     let wv_flags = match settings.weather_vanes {
         Standard | Shuffled => None,
-        Convenient => Flag::get_convenient_weather_vane_flags(settings.portal_shuffle != PortalShuffle::Off),
+        Convenient => Flag::get_convenient_weather_vane_flags(settings.cracksanity != Cracksanity::Off),
         Hyrule => Flag::get_hyrule_weather_vane_flags(),
         Lorule => Flag::get_lorule_weather_vane_flags(),
         All => Flag::get_all_weather_vane_flags(),

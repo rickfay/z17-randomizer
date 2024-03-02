@@ -2,10 +2,10 @@ use crate::filler::filler_item::Randomizable;
 use crate::filler::item_pools;
 use crate::filler::location::Location;
 use crate::Result;
-use crate::{filler, DashMap, PortalMap};
+use crate::{filler, CrackMap, DashMap};
 use game::Course::{CaveDark, FieldDark, FieldLight, IndoorDark, IndoorLight};
 use log::info;
-use modinfo::settings::portal_shuffle::PortalShuffle;
+use modinfo::settings::cracksanity::Cracksanity;
 use modinfo::Settings;
 use rand::rngs::StdRng;
 use rand::Rng;
@@ -16,9 +16,9 @@ use std::cmp::Ordering;
 use std::fmt::{Display, Formatter};
 use std::hash::Hash;
 
-/// Weather Vane Item
+/// Crack item
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
-pub enum Portal {
+pub enum Crack {
     // --- Hyrule --- //
     StylishWoman,
     YourHouse,
@@ -80,9 +80,9 @@ pub enum Portal {
     LoruleCastle,
 }
 
-impl Portal {
+impl Crack {
     pub(crate) fn get_type(&self) -> i32 {
-        use Portal::*;
+        use Crack::*;
         match self {
             YourHouse | WaterfallHyrule | EasternRuinsSE | MiseryMireEntrance | DesertMiddle | DesertSW
             | DesertPalace | DesertNorth | DeathWestHyrule | RossosOreMineHyrule | RiverHyrule | LakeHylia
@@ -113,7 +113,7 @@ impl Portal {
     }
 
     pub(crate) fn get_reverse_type(&self) -> i32 {
-        use Portal::*;
+        use Crack::*;
         match self {
             VacantHouse | WaterfallLorule | DarkRuinsSE | MiseryMireExit | MireMiddle | MireSW | Zaganaga
             | MireNorth | DeathWestLorule | RossosOreMineLorule | RiverLorule | LoruleLake | LoruleHotfoot
@@ -143,8 +143,8 @@ impl Portal {
         }
     }
 
-    pub(crate) fn get_mirror_portal(&self) -> Portal {
-        use Portal::*;
+    pub(crate) fn get_mirror_crack(&self) -> Crack {
+        use Crack::*;
         match self {
             StylishWoman => ThievesTown,
             YourHouse => VacantHouse,
@@ -207,7 +207,7 @@ impl Portal {
 
     pub(crate) fn get_left_right_locations(&self) -> (Location, Location) {
         use crate::filler::location::Location::*;
-        use Portal::*;
+        use Crack::*;
         match self {
             StylishWoman => (StylishWomanHouse, StylishWomanHouse),
             YourHouse => (HyruleField, HyruleField),
@@ -215,10 +215,10 @@ impl Portal {
             ParadoxLeftHyrule => (CuccoDungeonLedge, CuccoDungeonLedge),
             WaterfallHyrule => (ZoraRiver, WaterfallLedge),
             EasternRuinsPillar => (HyruleField, HyruleField),
-            EasternRuinsSE => (EasternRuinsBlockedPortal, EasternRuinsBlockedPortal),
+            EasternRuinsSE => (EasternRuinsBlockedCrack, EasternRuinsBlockedCrack),
             LostWoodsPillar => (HyruleField, HyruleField),
             SahasrahlasHouse => (HyruleField, HyruleField),
-            Portal::RossosHouse => (Location::RossosHouse, Location::RossosHouse),
+            Crack::RossosHouse => (Location::RossosHouse, Location::RossosHouse),
             MiseryMireEntrance => (HyruleField, HyruleField),
             DesertPillarRight => (Desert, Desert),
             DesertPillarLeft => (Desert, Desert),
@@ -227,12 +227,12 @@ impl Portal {
             DesertPalace => (DesertZaganagaLedge, DesertZaganagaLedge),
             DesertNorth => (Desert, Desert),
             DeathWestHyrule => (DeathMountainBase, DeathMountainBase),
-            Portal::FloatingIslandHyrule => (Location::FloatingIslandHyrule, Location::FloatingIslandHyrule),
+            Crack::FloatingIslandHyrule => (Location::FloatingIslandHyrule, Location::FloatingIslandHyrule),
             RiverHyrule => (BridgeShallowWater, Location::LakeHylia),
-            Portal::LakeHylia => (HyruleField, HyruleField),
+            Crack::LakeHylia => (HyruleField, HyruleField),
             HyruleHotfoot => (HyruleField, HyruleField),
-            Portal::Sanctuary => (SanctuaryChurch, SanctuaryChurch),
-            Portal::GraveyardLedgeHyrule => (Location::GraveyardLedgeHyrule, Location::GraveyardLedgeHyrule),
+            Crack::Sanctuary => (SanctuaryChurch, SanctuaryChurch),
+            Crack::GraveyardLedgeHyrule => (Location::GraveyardLedgeHyrule, Location::GraveyardLedgeHyrule),
             RossosOreMineHyrule => (RossosOreMine, RossosOreMine),
             SwampPillarHyrule => (HyruleField, HyruleField),
             ZorasDomain => (ZoraDomainArea, ZoraDomainArea),
@@ -244,7 +244,7 @@ impl Portal {
             ParadoxLeftLorule => (LoruleCastleArea, LoruleCastleArea),
             WaterfallLorule => (DarkRuinsRiver, DarkRuinsShallowWater),
             DarkRuinsPillar => (DarkRuins, DarkRuins),
-            DarkRuinsSE => (DarkRuinsBlockedPortal, DarkRuinsBlockedPortal),
+            DarkRuinsSE => (DarkRuinsBlockedCrack, DarkRuinsBlockedCrack),
             SkullWoodsPillar => (SkullWoodsOverworld, SkullWoodsOverworld),
             NShapedHouse => (SkullWoodsOverworld, SkullWoodsOverworld),
             DestroyedHouse => (SkullWoodsOverworld, SkullWoodsOverworld),
@@ -256,20 +256,20 @@ impl Portal {
             Zaganaga => (ZaganagasArena, ZaganagasArena),
             MireNorth => (MiseryMireLedge, MiseryMireLedge),
             DeathWestLorule => (LoruleDeathWest, LoruleDeathWest),
-            Portal::FloatingIslandLorule => (Location::FloatingIslandLorule, Location::FloatingIslandLorule),
-            RiverLorule => (LoruleRiverPortalShallows, LoruleRiverPortalShallows),
+            Crack::FloatingIslandLorule => (Location::FloatingIslandLorule, Location::FloatingIslandLorule),
+            RiverLorule => (LoruleRiverCrackShallows, LoruleRiverCrackShallows),
             LoruleLake => (LoruleLakeNorthWest, LoruleLakeNorthWest),
             LoruleHotfoot => (LoruleLakeEast, LoruleLakeEast),
             Philosopher => (LoruleSanctuaryCaveLower, LoruleSanctuaryCaveLower),
-            Portal::GraveyardLedgeLorule => (LoruleGraveyard, LoruleGraveyard),
-            Portal::RossosOreMineLorule => (Location::RossosOreMineLorule, Location::RossosOreMineLorule),
+            Crack::GraveyardLedgeLorule => (LoruleGraveyard, LoruleGraveyard),
+            Crack::RossosOreMineLorule => (Location::RossosOreMineLorule, Location::RossosOreMineLorule),
             SwampPillarLorule => (LoruleCastleArea, LoruleCastleArea),
-            Portal::KusDomain => (KusDomainSouth, KusDomainSouth),
+            Crack::KusDomain => (KusDomainSouth, KusDomainSouth),
             LoruleCastle => (HildasStudy, HildasStudy),
         }
     }
 
-    /// Get destination spawn point coordinates for this Portal
+    /// Get destination spawn point coordinates for this crack
     pub fn get_spawn_point(self) -> SpawnPoint {
         match self {
             Self::HyruleCastle => SpawnPoint::new(IndoorLight, 7, 3),
@@ -333,62 +333,63 @@ impl Portal {
 
     pub fn as_str(self) -> &'static str {
         match self {
-            Self::YourHouse => "Your House Portal",
-            Self::StylishWoman => "Stylish Woman Portal",
-            Self::ParadoxRightHyrule => "Hyrule Right Paradox Portal",
-            Self::ParadoxLeftHyrule => "Hyrule Left Paradox Portal",
-            Self::WaterfallHyrule => "Hyrule Waterfall Portal",
-            Self::EasternRuinsPillar => "Eastern Ruins Pillar Portal",
-            Self::EasternRuinsSE => "Eastern Ruins SE Portal",
-            Self::LostWoodsPillar => "Lost Woods Pillar Portal",
-            Self::SahasrahlasHouse => "Sahasrahla's House Portal",
-            Self::RossosHouse => "Rosso's House Portal",
-            Self::MiseryMireEntrance => "Misery Mire Entrance Portal",
-            Self::DesertMiddle => "Desert Middle Portal",
-            Self::DesertSW => "Desert SW Portal",
-            Self::DesertNorth => "Desert North Portal",
-            Self::DesertPillarLeft => "Desert Left Pillar Portal",
-            Self::DesertPillarRight => "Desert Right Pillar Portal",
-            Self::DesertPalace => "Desert Palace Portal",
-            Self::DeathWestHyrule => "Hyrule Death West Portal",
-            Self::FloatingIslandHyrule => "Hyrule Floating Island Portal",
-            Self::RiverHyrule => "Hyrule River Portal",
-            Self::LakeHylia => "Lake Hylia Portal",
-            Self::HyruleHotfoot => "Hyrule Hotfoot Portal",
-            Self::Sanctuary => "Sanctuary Portal",
-            Self::GraveyardLedgeHyrule => "Hyrule Graveyard Ledge Portal",
-            Self::RossosOreMineHyrule => "Hyrule Rosso's Ore Mine Portal",
-            Self::SwampPillarHyrule => "Hyrule Swamp Pillar Portal",
-            Self::ZorasDomain => "Zora's Domain Portal",
-            Self::HyruleCastle => "[HC] Portal",
-            Self::ThievesTown => "Thieves' Town Portal",
-            Self::VacantHouse => "Vacant House Portal",
-            Self::ParadoxRightLorule => "Lorule Right Paradox Portal",
-            Self::ParadoxLeftLorule => "Lorule Left Paradox Portal",
-            Self::WaterfallLorule => "Lorule Waterfall Portal",
-            Self::DarkRuinsPillar => "Dark Ruins Pillar Portal",
-            Self::DarkRuinsSE => "Dark Ruins SE Portal",
-            Self::SkullWoodsPillar => "Skull Woods Pillar Portal",
-            Self::NShapedHouse => "n-Shaped House Portal",
-            Self::DestroyedHouse => "Destroyed House Portal",
-            Self::MiseryMireExit => "Misery Mire Exit Portal",
-            Self::MirePillarRight => "Mire Right Pillar Portal",
-            Self::MirePillarLeft => "Mire Left Pillar Portal",
-            Self::MireMiddle => "Mire Middle Portal",
-            Self::MireSW => "Mire SW Portal",
-            Self::Zaganaga => "Zaganaga Portal",
-            Self::MireNorth => "Mire North Portal",
-            Self::DeathWestLorule => "Lorule Death West Portal",
-            Self::FloatingIslandLorule => "Lorule Floating Island Portal",
-            Self::RiverLorule => "Lorule River Portal",
-            Self::LoruleLake => "Lorule Lake Portal",
-            Self::LoruleHotfoot => "Lorule Hotfoot Portal",
-            Self::Philosopher => "Philosopher's Cave Portal",
-            Self::GraveyardLedgeLorule => "Lorule Graveyard Ledge Portal",
-            Self::RossosOreMineLorule => "Lorule Rosso's Ore Mine Portal",
-            Self::SwampPillarLorule => "Lorule Swamp Pillar Portal",
-            Self::KusDomain => "Ku's Domain Portal",
-            Self::LoruleCastle => "[LC] Portal",
+            Self::YourHouse => "Your House Crack",
+            Self::StylishWoman => "Stylish Woman's House Crack",
+            Self::ParadoxRightHyrule => "Hyrule Right Paradox Crack",
+            Self::ParadoxLeftHyrule => "Hyrule Left Paradox Crack",
+            Self::WaterfallHyrule => "Hyrule Waterfall Crack",
+            Self::EasternRuinsPillar => "Eastern Ruins Pillar Crack",
+            Self::EasternRuinsSE => "Eastern Ruins SE Crack",
+            Self::LostWoodsPillar => "Lost Woods Pillar Crack",
+            Self::SahasrahlasHouse => "Sahasrahla's House Crack",
+            Self::RossosHouse => "Rosso's House Crack",
+            Self::MiseryMireEntrance => "Misery Mire Entrance Crack",
+            Self::DesertMiddle => "Desert Middle Crack",
+            Self::DesertSW => "Desert SW Crack",
+            Self::DesertNorth => "Desert North Crack",
+            Self::DesertPillarLeft => "Desert Left Pillar Crack",
+            Self::DesertPillarRight => "Desert Right Pillar Crack",
+            Self::DesertPalace => "Desert Palace Crack",
+            Self::DeathWestHyrule => "Hyrule Death West Crack",
+            Self::FloatingIslandHyrule => "Hyrule Floating Island Crack",
+            Self::RiverHyrule => "Hyrule River Crack",
+            Self::LakeHylia => "Lake Hylia Crack",
+            Self::HyruleHotfoot => "Hyrule Hotfoot Crack",
+            Self::Sanctuary => "Sanctuary Crack",
+            Self::GraveyardLedgeHyrule => "Hyrule Graveyard Ledge Crack",
+            Self::RossosOreMineHyrule => "Hyrule Rosso's Ore Mine Crack",
+            Self::SwampPillarHyrule => "Hyrule Swamp Pillar Crack",
+            Self::ZorasDomain => "Zora's Domain Crack",
+            Self::HyruleCastle => "[HC] Crack",
+            // --- //
+            Self::ThievesTown => "Thieves' Town Crack",
+            Self::VacantHouse => "Vacant House Crack",
+            Self::ParadoxRightLorule => "Lorule Right Paradox Crack",
+            Self::ParadoxLeftLorule => "Lorule Left Paradox Crack",
+            Self::WaterfallLorule => "Lorule Waterfall Crack",
+            Self::DarkRuinsPillar => "Dark Ruins Pillar Crack",
+            Self::DarkRuinsSE => "Dark Ruins SE Crack",
+            Self::SkullWoodsPillar => "Skull Woods Pillar Crack",
+            Self::NShapedHouse => "n-Shaped House Crack",
+            Self::DestroyedHouse => "Destroyed House Crack",
+            Self::MiseryMireExit => "Misery Mire Exit Crack",
+            Self::MirePillarRight => "Mire Right Pillar Crack",
+            Self::MirePillarLeft => "Mire Left Pillar Crack",
+            Self::MireMiddle => "Mire Middle Crack",
+            Self::MireSW => "Mire SW Crack",
+            Self::Zaganaga => "Zaganaga Crack",
+            Self::MireNorth => "Mire North Crack",
+            Self::DeathWestLorule => "Lorule Death West Crack",
+            Self::FloatingIslandLorule => "Lorule Floating Island Crack",
+            Self::RiverLorule => "Lorule River Crack",
+            Self::LoruleLake => "Lorule Lake Crack",
+            Self::LoruleHotfoot => "Lorule Hotfoot Crack",
+            Self::Philosopher => "Philosopher's Cave Crack",
+            Self::GraveyardLedgeLorule => "Lorule Graveyard Ledge Crack",
+            Self::RossosOreMineLorule => "Lorule Rosso's Ore Mine Crack",
+            Self::SwampPillarLorule => "Lorule Swamp Pillar Crack",
+            Self::KusDomain => "Ku's Domain Crack",
+            Self::LoruleCastle => "[LC] Crack",
         }
     }
 
@@ -456,94 +457,94 @@ impl Portal {
 
     pub fn get_flag(self) -> Flag {
         match self {
-            Self::StylishWoman => Flag::PORTAL_STYLISH_WOMAN,
-            Self::YourHouse => Flag::PORTAL_YOUR_HOUSE,
-            Self::ParadoxRightHyrule => Flag::PORTAL_PARADOX_LOWER_HYRULE,
-            Self::ParadoxLeftHyrule => Flag::PORTAL_PARADOX_UPPER_HYRULE,
-            Self::WaterfallHyrule => Flag::PORTAL_WATERFALL_HYRULE,
-            Self::EasternRuinsPillar => Flag::PORTAL_EASTERN_RUINS_PILLAR,
-            Self::EasternRuinsSE => Flag::PORTAL_EASTERN_RUINS_SE,
-            Self::LostWoodsPillar => Flag::PORTAL_LOST_WOODS,
-            Self::SahasrahlasHouse => Flag::PORTAL_SAHASRAHLAS_HOUSE,
-            Self::RossosHouse => Flag::PORTAL_ROSSOS_HOUSE,
-            Self::MiseryMireEntrance => Flag::PORTAL_MISERY_MIRE_EXIT,
-            Self::DesertPillarRight => Flag::PORTAL_DESERT_RILLAR_RIGHT,
-            Self::DesertPillarLeft => Flag::PORTAL_DESERT_PILLAR_LEFT,
-            Self::DesertMiddle => Flag::PORTAL_DESERT_MIDDLE,
-            Self::DesertSW => Flag::PORTAL_DESERT_SW,
-            Self::DesertPalace => Flag::PORTAL_TO_ZAGANAGA,
-            Self::DesertNorth => Flag::PORTAL_DESERT_NORTH,
-            Self::DeathWestHyrule => Flag::PORTAL_DM_WEST_HYRULE,
-            Self::FloatingIslandHyrule => Flag::PORTAL_FLOATING_ISLAND_HYRULE,
-            Self::RiverHyrule => Flag::PORTAL_RIVER_HYRULE,
-            Self::LakeHylia => Flag::PORTAL_LAKE_HYLIA,
-            Self::HyruleHotfoot => Flag::PORTAL_HYRULE_HOTFOOT,
-            Self::Sanctuary => Flag::PORTAL_SANCTUARY,
-            Self::GraveyardLedgeHyrule => Flag::PORTAL_GRAVEYARD_LEDGE_HYRULE,
-            Self::RossosOreMineHyrule => Flag::PORTAL_ROSSOS_ORE_MINE_HYRULE,
-            Self::SwampPillarHyrule => Flag::PORTAL_SWAMP_PILLAR_HYRULE,
-            Self::ZorasDomain => Flag::PORTAL_ZORAS_DOMAIN,
+            Self::StylishWoman => Flag::CRACK_STYLISH_WOMAN,
+            Self::YourHouse => Flag::CRACK_YOUR_HOUSE,
+            Self::ParadoxRightHyrule => Flag::CRACK_PARADOX_LOWER_HYRULE,
+            Self::ParadoxLeftHyrule => Flag::CRACK_PARADOX_UPPER_HYRULE,
+            Self::WaterfallHyrule => Flag::CRACK_WATERFALL_HYRULE,
+            Self::EasternRuinsPillar => Flag::CRACK_EASTERN_RUINS_PILLAR,
+            Self::EasternRuinsSE => Flag::CRACK_EASTERN_RUINS_SE,
+            Self::LostWoodsPillar => Flag::CRACK_LOST_WOODS,
+            Self::SahasrahlasHouse => Flag::CRACK_SAHASRAHLAS_HOUSE,
+            Self::RossosHouse => Flag::CRACK_ROSSOS_HOUSE,
+            Self::MiseryMireEntrance => Flag::CRACK_MISERY_MIRE_EXIT,
+            Self::DesertPillarRight => Flag::CRACK_DESERT_RILLAR_RIGHT,
+            Self::DesertPillarLeft => Flag::CRACK_DESERT_PILLAR_LEFT,
+            Self::DesertMiddle => Flag::CRACK_DESERT_MIDDLE,
+            Self::DesertSW => Flag::CRACK_DESERT_SW,
+            Self::DesertPalace => Flag::CRACK_TO_ZAGANAGA,
+            Self::DesertNorth => Flag::CRACK_DESERT_NORTH,
+            Self::DeathWestHyrule => Flag::CRACK_DM_WEST_HYRULE,
+            Self::FloatingIslandHyrule => Flag::CRACK_FLOATING_ISLAND_HYRULE,
+            Self::RiverHyrule => Flag::CRACK_RIVER_HYRULE,
+            Self::LakeHylia => Flag::CRACK_LAKE_HYLIA,
+            Self::HyruleHotfoot => Flag::CRACK_HYRULE_HOTFOOT,
+            Self::Sanctuary => Flag::CRACK_SANCTUARY,
+            Self::GraveyardLedgeHyrule => Flag::CRACK_GRAVEYARD_LEDGE_HYRULE,
+            Self::RossosOreMineHyrule => Flag::CRACK_ROSSOS_ORE_MINE_HYRULE,
+            Self::SwampPillarHyrule => Flag::CRACK_SWAMP_PILLAR_HYRULE,
+            Self::ZorasDomain => Flag::CRACK_ZORAS_DOMAIN,
             Self::HyruleCastle => Flag::ZERO_ZERO,
-            Self::ThievesTown => Flag::PORTAL_THIEVES_TOWN,
-            Self::VacantHouse => Flag::PORTAL_VACANT_HOUSE,
-            Self::ParadoxRightLorule => Flag::PORTAL_PARADOX_UPPER_LORULE,
-            Self::ParadoxLeftLorule => Flag::PORTAL_PARADOX_LOWER_LORULE,
-            Self::WaterfallLorule => Flag::PORTAL_WATERFALL_LORULE,
-            Self::DarkRuinsPillar => Flag::PORTAL_DARK_RUINS_PILLAR,
-            Self::DarkRuinsSE => Flag::PORTAL_DARK_MAZE_SE,
-            Self::SkullWoodsPillar => Flag::PORTAL_SKULL_WOODS_PILLAR,
-            Self::NShapedHouse => Flag::PORTAL_N_SHAPED_HOUSE,
-            Self::DestroyedHouse => Flag::PORTAL_DESTROYED_HOUSE,
-            Self::MiseryMireExit => Flag::PORTAL_MISERY_MIRE_EXIT,
-            Self::MirePillarRight => Flag::PORTAL_MIRE_PILLAR_RIGHT,
-            Self::MirePillarLeft => Flag::PORTAL_MIRE_PILLAR_LEFT,
-            Self::MireMiddle => Flag::PORTAL_MIRE_MIDDLE,
-            Self::MireSW => Flag::PORTAL_MIRE_SW,
-            Self::Zaganaga => Flag::PORTAL_ZAGANAGA_EXIT,
-            Self::MireNorth => Flag::PORTAL_MIRE_NORTH,
-            Self::DeathWestLorule => Flag::PORTAL_DM_WEST_LORULE,
-            Self::FloatingIslandLorule => Flag::PORTAL_FLOATING_ISLAND_LORULE,
-            Self::RiverLorule => Flag::PORTAL_RIVER_LORULE,
-            Self::LoruleLake => Flag::PORTAL_LORULE_LAKE_WEST,
-            Self::LoruleHotfoot => Flag::PORTAL_LORULE_COLDFOOT,
-            Self::Philosopher => Flag::PORTAL_PHILOSOPHERS_CAVE,
-            Self::GraveyardLedgeLorule => Flag::PORTAL_GRAVEYARD_LEDGE_LORULE,
-            Self::RossosOreMineLorule => Flag::PORTAL_ROSSOS_ORE_MINE_LORULE,
-            Self::SwampPillarLorule => Flag::PORTAL_SWAMP_PILLAR_LORULE,
-            Self::KusDomain => Flag::PORTAL_KUS_DOMAIN,
+            Self::ThievesTown => Flag::CRACK_THIEVES_TOWN,
+            Self::VacantHouse => Flag::CRACK_VACANT_HOUSE,
+            Self::ParadoxRightLorule => Flag::CRACK_PARADOX_UPPER_LORULE,
+            Self::ParadoxLeftLorule => Flag::CRACK_PARADOX_LOWER_LORULE,
+            Self::WaterfallLorule => Flag::CRACK_WATERFALL_LORULE,
+            Self::DarkRuinsPillar => Flag::CRACK_DARK_RUINS_PILLAR,
+            Self::DarkRuinsSE => Flag::CRACK_DARK_MAZE_SE,
+            Self::SkullWoodsPillar => Flag::CRACK_SKULL_WOODS_PILLAR,
+            Self::NShapedHouse => Flag::CRACK_N_SHAPED_HOUSE,
+            Self::DestroyedHouse => Flag::CRACK_DESTROYED_HOUSE,
+            Self::MiseryMireExit => Flag::CRACK_MISERY_MIRE_EXIT,
+            Self::MirePillarRight => Flag::CRACK_MIRE_PILLAR_RIGHT,
+            Self::MirePillarLeft => Flag::CRACK_MIRE_PILLAR_LEFT,
+            Self::MireMiddle => Flag::CRACK_MIRE_MIDDLE,
+            Self::MireSW => Flag::CRACK_MIRE_SW,
+            Self::Zaganaga => Flag::CRACK_ZAGANAGA_EXIT,
+            Self::MireNorth => Flag::CRACK_MIRE_NORTH,
+            Self::DeathWestLorule => Flag::CRACK_DM_WEST_LORULE,
+            Self::FloatingIslandLorule => Flag::CRACK_FLOATING_ISLAND_LORULE,
+            Self::RiverLorule => Flag::CRACK_RIVER_LORULE,
+            Self::LoruleLake => Flag::CRACK_LORULE_LAKE_WEST,
+            Self::LoruleHotfoot => Flag::CRACK_LORULE_COLDFOOT,
+            Self::Philosopher => Flag::CRACK_PHILOSOPHERS_CAVE,
+            Self::GraveyardLedgeLorule => Flag::CRACK_GRAVEYARD_LEDGE_LORULE,
+            Self::RossosOreMineLorule => Flag::CRACK_ROSSOS_ORE_MINE_LORULE,
+            Self::SwampPillarLorule => Flag::CRACK_SWAMP_PILLAR_LORULE,
+            Self::KusDomain => Flag::CRACK_KUS_DOMAIN,
             Self::LoruleCastle => Flag::ZERO_ZERO,
         }
     }
 }
 
-impl Display for Portal {
+impl Display for Crack {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.as_str())
     }
 }
 
-impl Ord for Portal {
+impl Ord for Crack {
     fn cmp(&self, other: &Self) -> Ordering {
         self.as_str().cmp(other.as_str())
     }
 }
 
-impl PartialOrd<Portal> for Portal {
+impl PartialOrd<Crack> for Crack {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
     }
 }
 
-impl From<Randomizable> for Portal {
+impl From<Randomizable> for Crack {
     fn from(filler_item: Randomizable) -> Self {
         match filler_item {
-            Randomizable::Portal(portal) => portal,
-            _ => unreachable!("Not a Portal: {:?}", filler_item),
+            Randomizable::Crack(crack) => crack,
+            _ => unreachable!("Not a Crack: {:?}", filler_item),
         }
     }
 }
 
-impl Serialize for Portal {
+impl Serialize for Crack {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
@@ -552,189 +553,189 @@ impl Serialize for Portal {
     }
 }
 
-/// Builds out the Portal map for use traversing the WorldGraph.
-/// Shuffles the Portal destinations if PortalShuffle is enabled.
+/// Builds out the CrackMap for use traversing the WorldGraph.
+/// Shuffles the crack destinations if CrackShuffle is enabled.
 ///
-/// The 6 pairs of "down-facing" Portals are only shuffled between themselves, for technical reasons
-pub fn build_portal_map(settings: &Settings, rng: &mut StdRng) -> Result<PortalMap> {
-    info!("Building Portal Map...");
-    let mut portal_map: DashMap<_, _> = Default::default();
+/// The 6 pairs of "down-facing" Cracks are only shuffled between themselves, for technical reasons
+pub fn build_crack_map(settings: &Settings, rng: &mut StdRng) -> Result<CrackMap> {
+    info!("Building Crack Map...");
+    let mut crack_map: DashMap<_, _> = Default::default();
 
-    let mut hyrule_up_portals = item_pools::get_hyrule_up_portals();
-    let mut hyrule_down_portals = item_pools::get_hyrule_down_portals();
-    let mut lorule_up_portals = item_pools::get_lorule_up_portals();
-    let lorule_down_portals = item_pools::get_lorule_down_portals();
+    let mut hyrule_up_cracks = item_pools::get_hyrule_up_cracks();
+    let mut hyrule_down_cracks = item_pools::get_hyrule_down_cracks();
+    let mut lorule_up_cracks = item_pools::get_lorule_up_cracks();
+    let lorule_down_cracks = item_pools::get_lorule_down_cracks();
 
-    // Keep Desert Palace + Zaganaga Portals vanilla (TODO new feature)
-    portal_map.insert(Portal::DesertPalace, Portal::Zaganaga);
-    portal_map.insert(Portal::Zaganaga, Portal::DesertPalace);
-    hyrule_up_portals.retain(|&p| p != Portal::DesertPalace);
-    lorule_up_portals.retain(|&p| p != Portal::Zaganaga);
+    // Keep Desert Palace + Zaganaga Cracks vanilla (TODO new feature)
+    crack_map.insert(Crack::DesertPalace, Crack::Zaganaga);
+    crack_map.insert(Crack::Zaganaga, Crack::DesertPalace);
+    hyrule_up_cracks.retain(|&p| p != Crack::DesertPalace);
+    lorule_up_cracks.retain(|&p| p != Crack::Zaganaga);
 
-    match settings.portal_shuffle {
-        PortalShuffle::Off => {
-            let mut hyrule_portals = hyrule_up_portals;
-            hyrule_portals.extend(hyrule_down_portals);
+    match settings.cracksanity {
+        Cracksanity::Off => {
+            let mut hyrule_cracks = hyrule_up_cracks;
+            hyrule_cracks.extend(hyrule_down_cracks);
 
-            for hyrule_portal in hyrule_portals {
-                let lorule_portal = hyrule_portal.get_mirror_portal();
+            for hyrule_crack in hyrule_cracks {
+                let lorule_crack = hyrule_crack.get_mirror_crack();
 
-                portal_map.insert(hyrule_portal, lorule_portal);
-                portal_map.insert(lorule_portal, hyrule_portal);
+                crack_map.insert(hyrule_crack, lorule_crack);
+                crack_map.insert(lorule_crack, hyrule_crack);
             }
         },
-        PortalShuffle::CrossWorldPairs => {
-            let mut hyrule_portals = hyrule_up_portals;
-            hyrule_portals.extend(hyrule_down_portals);
+        Cracksanity::CrossWorldPairs => {
+            let mut hyrule_cracks = hyrule_up_cracks;
+            hyrule_cracks.extend(hyrule_down_cracks);
 
-            let mut lorule_portals = filler::util::shuffle(rng, lorule_up_portals);
-            lorule_portals.extend(filler::util::shuffle(rng, lorule_down_portals));
+            let mut lorule_cracks = filler::util::shuffle(rng, lorule_up_cracks);
+            lorule_cracks.extend(filler::util::shuffle(rng, lorule_down_cracks));
 
-            create_map(&mut portal_map, &hyrule_portals, &lorule_portals);
+            create_map(&mut crack_map, &hyrule_cracks, &lorule_cracks);
         },
-        PortalShuffle::AnyWorldPairs => {
-            // Force Hyrule Castle portal to always be paired with a Lorule (Up) portal
-            let hc_match = lorule_up_portals.remove(rng.gen_range(0..lorule_up_portals.len()));
-            hyrule_up_portals.retain(|&p| p != Portal::HyruleCastle);
-            lorule_up_portals.retain(|&p| p != hc_match);
-            portal_map.insert(Portal::HyruleCastle, hc_match);
-            portal_map.insert(hc_match, Portal::HyruleCastle);
+        Cracksanity::AnyWorldPairs => {
+            // Force Hyrule Castle crack to always be paired with a Lorule (Up) crack
+            let hc_match = lorule_up_cracks.remove(rng.gen_range(0..lorule_up_cracks.len()));
+            hyrule_up_cracks.retain(|&p| p != Crack::HyruleCastle);
+            lorule_up_cracks.retain(|&p| p != hc_match);
+            crack_map.insert(Crack::HyruleCastle, hc_match);
+            crack_map.insert(hc_match, Crack::HyruleCastle);
 
             //
-            let mut up_portals = Vec::new();
-            up_portals.extend(hyrule_up_portals);
-            up_portals.extend(lorule_up_portals);
+            let mut up_cracks = Vec::new();
+            up_cracks.extend(hyrule_up_cracks);
+            up_cracks.extend(lorule_up_cracks);
 
-            let mut down_portals = Vec::new();
-            down_portals.extend(hyrule_down_portals);
-            down_portals.extend(lorule_down_portals);
+            let mut down_cracks = Vec::new();
+            down_cracks.extend(hyrule_down_cracks);
+            down_cracks.extend(lorule_down_cracks);
 
-            portal_map.extend(filler::util::pair_randomly(rng, up_portals)?);
-            portal_map.extend(filler::util::pair_randomly(rng, down_portals)?);
+            crack_map.extend(filler::util::pair_randomly(rng, up_cracks)?);
+            crack_map.extend(filler::util::pair_randomly(rng, down_cracks)?);
         },
-        PortalShuffle::MirroredCrossWorldPairs => {
+        Cracksanity::MirroredCrossWorldPairs => {
             // UP
-            let mut lorule_up_portals = filler::util::shuffle(rng, lorule_up_portals);
+            let mut lorule_up_cracks = filler::util::shuffle(rng, lorule_up_cracks);
 
-            while !hyrule_up_portals.is_empty() {
-                let hyrule_up_portal = hyrule_up_portals.pop().unwrap();
-                let lorule_up_portal = lorule_up_portals.pop().unwrap();
+            while !hyrule_up_cracks.is_empty() {
+                let hyrule_up_crack = hyrule_up_cracks.pop().unwrap();
+                let lorule_up_crack = lorule_up_cracks.pop().unwrap();
 
-                portal_map.insert(hyrule_up_portal, lorule_up_portal);
-                portal_map.insert(lorule_up_portal, hyrule_up_portal);
+                crack_map.insert(hyrule_up_crack, lorule_up_crack);
+                crack_map.insert(lorule_up_crack, hyrule_up_crack);
 
-                // Add mirror portal pairing, if portal pair isn't vanilla
-                if hyrule_up_portal.get_mirror_portal() != lorule_up_portal {
-                    let hyrule_mirror = hyrule_up_portal.get_mirror_portal();
-                    let lorule_mirror = lorule_up_portal.get_mirror_portal();
+                // Add mirror crack pairing, if crack pair isn't vanilla
+                if hyrule_up_crack.get_mirror_crack() != lorule_up_crack {
+                    let hyrule_mirror = hyrule_up_crack.get_mirror_crack();
+                    let lorule_mirror = lorule_up_crack.get_mirror_crack();
 
-                    hyrule_up_portals.retain(|&p| p != lorule_mirror);
-                    lorule_up_portals.retain(|&p| p != hyrule_mirror);
+                    hyrule_up_cracks.retain(|&p| p != lorule_mirror);
+                    lorule_up_cracks.retain(|&p| p != hyrule_mirror);
 
-                    portal_map.insert(hyrule_mirror, lorule_mirror);
-                    portal_map.insert(lorule_mirror, hyrule_mirror);
+                    crack_map.insert(hyrule_mirror, lorule_mirror);
+                    crack_map.insert(lorule_mirror, hyrule_mirror);
                 }
             }
 
             // DOWN
-            let mut lorule_down_portals = filler::util::shuffle(rng, lorule_down_portals);
+            let mut lorule_down_cracks = filler::util::shuffle(rng, lorule_down_cracks);
 
-            while !hyrule_down_portals.is_empty() {
-                let hyrule_down_portal = hyrule_down_portals.pop().unwrap();
-                let lorule_down_portal = lorule_down_portals.pop().unwrap();
+            while !hyrule_down_cracks.is_empty() {
+                let hyrule_down_crack = hyrule_down_cracks.pop().unwrap();
+                let lorule_down_crack = lorule_down_cracks.pop().unwrap();
 
-                portal_map.insert(hyrule_down_portal, lorule_down_portal);
-                portal_map.insert(lorule_down_portal, hyrule_down_portal);
+                crack_map.insert(hyrule_down_crack, lorule_down_crack);
+                crack_map.insert(lorule_down_crack, hyrule_down_crack);
 
-                // Add mirror portal pairing, if portal pair isn't vanilla
-                if hyrule_down_portal.get_mirror_portal() != lorule_down_portal {
-                    let hyrule_mirror = hyrule_down_portal.get_mirror_portal();
-                    let lorule_mirror = lorule_down_portal.get_mirror_portal();
+                // Add mirror crack pairing, if crack pair isn't vanilla
+                if hyrule_down_crack.get_mirror_crack() != lorule_down_crack {
+                    let hyrule_mirror = hyrule_down_crack.get_mirror_crack();
+                    let lorule_mirror = lorule_down_crack.get_mirror_crack();
 
-                    hyrule_down_portals.retain(|&p| p != lorule_mirror);
-                    lorule_down_portals.retain(|&p| p != hyrule_mirror);
+                    hyrule_down_cracks.retain(|&p| p != lorule_mirror);
+                    lorule_down_cracks.retain(|&p| p != hyrule_mirror);
 
-                    portal_map.insert(hyrule_mirror, lorule_mirror);
-                    portal_map.insert(lorule_mirror, hyrule_mirror);
+                    crack_map.insert(hyrule_mirror, lorule_mirror);
+                    crack_map.insert(lorule_mirror, hyrule_mirror);
                 }
             }
         },
-        PortalShuffle::MirroredAnyWorldPairs => {
-            // Force Hyrule Castle portal to always be paired with a Lorule (Up) portal
-            let hc_match = lorule_up_portals.remove(rng.gen_range(0..lorule_up_portals.len()));
-            hyrule_up_portals.retain(|&p| p != Portal::HyruleCastle);
-            lorule_up_portals.retain(|&p| p != hc_match);
-            portal_map.insert(Portal::HyruleCastle, hc_match);
-            portal_map.insert(hc_match, Portal::HyruleCastle);
+        Cracksanity::MirroredAnyWorldPairs => {
+            // Force Hyrule Castle crack to always be paired with a Lorule (Up) crack
+            let hc_match = lorule_up_cracks.remove(rng.gen_range(0..lorule_up_cracks.len()));
+            hyrule_up_cracks.retain(|&p| p != Crack::HyruleCastle);
+            lorule_up_cracks.retain(|&p| p != hc_match);
+            crack_map.insert(Crack::HyruleCastle, hc_match);
+            crack_map.insert(hc_match, Crack::HyruleCastle);
 
             // Mirror HC match
-            let hc_match_mirror = hc_match.get_mirror_portal();
-            lorule_up_portals.retain(|&p| p != Portal::LoruleCastle);
-            hyrule_up_portals.retain(|&p| p != hc_match_mirror);
-            portal_map.insert(Portal::LoruleCastle, hc_match_mirror);
-            portal_map.insert(hc_match_mirror, Portal::LoruleCastle);
+            let hc_match_mirror = hc_match.get_mirror_crack();
+            lorule_up_cracks.retain(|&p| p != Crack::LoruleCastle);
+            hyrule_up_cracks.retain(|&p| p != hc_match_mirror);
+            crack_map.insert(Crack::LoruleCastle, hc_match_mirror);
+            crack_map.insert(hc_match_mirror, Crack::LoruleCastle);
 
             // UP
-            let mut up_portals = Vec::new();
-            up_portals.extend(hyrule_up_portals);
-            up_portals.extend(lorule_up_portals);
+            let mut up_cracks = Vec::new();
+            up_cracks.extend(hyrule_up_cracks);
+            up_cracks.extend(lorule_up_cracks);
 
-            let mut up_portals = filler::util::shuffle(rng, up_portals);
+            let mut up_cracks = filler::util::shuffle(rng, up_cracks);
 
-            while !up_portals.is_empty() {
-                let first = up_portals.pop().unwrap();
-                let second = up_portals.pop().unwrap();
+            while !up_cracks.is_empty() {
+                let first = up_cracks.pop().unwrap();
+                let second = up_cracks.pop().unwrap();
 
-                portal_map.insert(first, second);
-                portal_map.insert(second, first);
+                crack_map.insert(first, second);
+                crack_map.insert(second, first);
 
-                // Add mirror portal pairing, if portal pair isn't vanilla
-                if first.get_mirror_portal() != second {
-                    let first_mirror = first.get_mirror_portal();
-                    let second_mirror = second.get_mirror_portal();
+                // Add mirror crack pairing, if crack pair isn't vanilla
+                if first.get_mirror_crack() != second {
+                    let first_mirror = first.get_mirror_crack();
+                    let second_mirror = second.get_mirror_crack();
 
-                    up_portals.retain(|&p| p != first_mirror);
-                    up_portals.retain(|&p| p != second_mirror);
+                    up_cracks.retain(|&p| p != first_mirror);
+                    up_cracks.retain(|&p| p != second_mirror);
 
-                    portal_map.insert(first_mirror, second_mirror);
-                    portal_map.insert(second_mirror, first_mirror);
+                    crack_map.insert(first_mirror, second_mirror);
+                    crack_map.insert(second_mirror, first_mirror);
                 }
             }
 
             // DOWN
-            let mut down_portals = Vec::new();
-            down_portals.extend(hyrule_down_portals);
-            down_portals.extend(lorule_down_portals);
+            let mut down_cracks = Vec::new();
+            down_cracks.extend(hyrule_down_cracks);
+            down_cracks.extend(lorule_down_cracks);
 
-            let mut down_portals = filler::util::shuffle(rng, down_portals);
+            let mut down_cracks = filler::util::shuffle(rng, down_cracks);
 
-            while !down_portals.is_empty() {
-                let first = down_portals.pop().unwrap();
-                let second = down_portals.pop().unwrap();
+            while !down_cracks.is_empty() {
+                let first = down_cracks.pop().unwrap();
+                let second = down_cracks.pop().unwrap();
 
-                portal_map.insert(first, second);
-                portal_map.insert(second, first);
+                crack_map.insert(first, second);
+                crack_map.insert(second, first);
 
-                // Add mirror portal pairing, if portal pair isn't vanilla
-                if first.get_mirror_portal() != second {
-                    let first_mirror = first.get_mirror_portal();
-                    let second_mirror = second.get_mirror_portal();
+                // Add mirror crack pairing, if crack pair isn't vanilla
+                if first.get_mirror_crack() != second {
+                    let first_mirror = first.get_mirror_crack();
+                    let second_mirror = second.get_mirror_crack();
 
-                    down_portals.retain(|&p| p != first_mirror);
-                    down_portals.retain(|&p| p != second_mirror);
+                    down_cracks.retain(|&p| p != first_mirror);
+                    down_cracks.retain(|&p| p != second_mirror);
 
-                    portal_map.insert(first_mirror, second_mirror);
-                    portal_map.insert(second_mirror, first_mirror);
+                    crack_map.insert(first_mirror, second_mirror);
+                    crack_map.insert(second_mirror, first_mirror);
                 }
             }
         },
     }
 
-    // info!("{:?}", portal_map);
+    // info!("{:?}", crack_map);
     //
     // let mut keys = crate::DashSet::default();
     // let mut values = crate::DashSet::default();
-    // for (k, v) in &portal_map {
+    // for (k, v) in &crack_map {
     //     keys.insert(k);
     //     values.insert(v);
     // }
@@ -744,15 +745,15 @@ pub fn build_portal_map(settings: &Settings, rng: &mut StdRng) -> Result<PortalM
     //
     // info!("PASS");
 
-    Ok(portal_map.iter().map(|(&a, &b)| (a, b)).collect())
+    Ok(crack_map.iter().map(|(&a, &b)| (a, b)).collect())
 }
 
-fn create_map<T>(portal_map: &mut DashMap<T, T>, vec1: &Vec<T>, vec2: &Vec<T>)
+fn create_map<T>(crack_map: &mut DashMap<T, T>, vec1: &Vec<T>, vec2: &Vec<T>)
 where
     T: Copy + Eq + Hash + PartialEq,
 {
     for i in 0..vec1.len() {
-        portal_map.insert(vec1[i], vec2[i]);
-        portal_map.insert(vec2[i], vec1[i]);
+        crack_map.insert(vec1[i], vec2[i]);
+        crack_map.insert(vec2[i], vec1[i]);
     }
 }

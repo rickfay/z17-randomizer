@@ -5,7 +5,7 @@ use std::fmt::{Display, Formatter};
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Deserialize, Serialize)]
 pub enum TrialsDoor {
     /// The Trials Door will open by itself automatically.
-    /// WARNING: This can require entering LC early via its Portal.
+    /// WARNING: This can require entering LC early via the crack.
     Open,
 
     /// Turns on 1 random trial.
@@ -20,7 +20,7 @@ pub enum TrialsDoor {
     /// Turns on all trials.
     AllTrialsRequired,
     // /// The Trials door is sealed shut and cannot be opened from either direction.
-    // /// The Lorule Castle Portal must be used to reach Yuga Ganon.
+    // /// The Lorule Castle Crack must be used to reach Yuga Ganon.
     // Sealed, todo
 }
 

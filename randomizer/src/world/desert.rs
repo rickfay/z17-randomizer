@@ -4,15 +4,15 @@ use crate::filler::location::Location::{self, *};
 use crate::filler::location_node::LocationNode;
 use crate::filler::logic::Logic;
 use crate::filler::path::Path;
-use crate::world::{check, edge, fast_travel_hyrule, fast_travel_lorule, goal, location, portal_left, portal_right};
+use crate::world::{check, crack_left, crack_right, edge, fast_travel_hyrule, fast_travel_lorule, goal, location};
 use crate::LocationInfo;
-use crate::{regions, PortalMap};
+use crate::{regions, CrackMap};
 
-use crate::filler::portals::Portal::{DesertPalace, Zaganaga};
+use crate::filler::cracks::Crack::{DesertPalace, Zaganaga};
 use std::collections::HashMap;
 
 /// Desert Palace World Graph
-pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
+pub(crate) fn graph(crack_map: &CrackMap) -> HashMap<Location, LocationNode> {
     HashMap::from([
         (
             DesertPalaceFoyer,
@@ -194,8 +194,8 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
                 vec![
                     fast_travel_hyrule(),
                     edge!(DesertPalaceExit3F, |p| p.hearts(9.0)),
-                    portal_left(DesertPalace, portal_map, false),
-                    portal_right(DesertPalace, portal_map, false),
+                    crack_left(DesertPalace, crack_map, false),
+                    crack_right(DesertPalace, crack_map, false),
                 ],
             ),
         ),
@@ -206,8 +206,8 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
                 None,
                 vec![
                     fast_travel_lorule(),
-                    portal_left(Zaganaga, portal_map, false),
-                    portal_right(Zaganaga, portal_map, false),
+                    crack_left(Zaganaga, crack_map, false),
+                    crack_right(Zaganaga, crack_map, false),
                     edge!(MiseryMireRewardBasket => {
                         normal: |p| p.has_sand_rod() && p.hearts(9.0) && (p.has_master_sword() || (p.swordless_mode() && p.can_attack())),
                         hard: |p| p.has_sand_rod() && p.can_attack(),

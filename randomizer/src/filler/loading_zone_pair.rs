@@ -8,7 +8,7 @@ use LoadingZoneId::*;
 Desired Groups:
 - Dungeon Entrances
 - Cave Entrances
-- Portals
+- Cracks
 
  */
 #[allow(unused)]
@@ -69,7 +69,7 @@ macro_rules! loading_zones {
         }
     };
 }
-/*macro_rules! portals {
+/*macro_rules! cracks {
     (
         $(#[$attr:meta])*
         $type:ident {
@@ -174,7 +174,7 @@ loading_zones! {
         SAHASRAHLAS_HOUSE_RIGHT : entry( dest, FieldLight, 16, 258, 7 )  exit( dest, IndoorLight, 16, 4, 0 ),
         SANCTUARY : entry( dest, FieldLight, 11, 103, 0 )  exit( dest, IndoorLight, 11, 7, 1 ),
         SANCTUARY_GRAVESTONE : entry( dest, FieldLight, 12, 75, 3 )  exit( dest, CaveLight, 18, 106, 0 ),
-        SANCTUARY_PORTAL_CAVE : entry( dest, FieldLight, 12, 125, 4 )  exit( dest, CaveLight, 5, 4, 0 ),
+        SANCTUARY_CRACK_CAVE : entry( dest, FieldLight, 12, 125, 4 )  exit( dest, CaveLight, 5, 4, 0 ),
         SOUTHERN_RUINS_BIG_FAIRY_CAVE : entry( dest, FieldLight, 37, 44, 4 )  exit( dest, CaveLight, 20, 5, 0 ),
         SOUTHERN_RUINS_BOMB_CAVE : entry( dest, FieldLight, 33, 319, 8 )  exit( dest, CaveLight, 28, 10, 0 ),
         SOUTHERN_RUINS_FAIRY_CAVE : entry( dest, FieldLight, 33, 303, 6 )  exit( dest, CaveLight, 26, 5, 0 ),
@@ -195,16 +195,16 @@ loading_zones! {
         BIG_BOMB_FLOWER_SHOP: entry(BigBombFlowerField, FieldDark, 24, 45, 0) exit(BigBombFlowerShop, IndoorDark, 3, 32, 1),
     }
 
-    portals {
-        PORTAL_DM_WEST: entry(DeathMountainBase, FieldLight, 3, 361, 20) exit(LoruleDeathWest, FieldDark, 3, 45, 3),
+    cracks {
+        CRACK_DM_WEST: entry(DeathMountainBase, FieldLight, 3, 361, 20) exit(LoruleDeathWest, FieldDark, 3, 45, 3),
     }
 
 
 }
 
-// portals! {
+// cracks! {
 //     #[allow(unused)]
-//     Portal {
+//     Crack {
 //         DEATH_MOUNTAIN_WEST: hyrule(DeathMountainBase, FieldLight, 3, 361, 20, 818) lorule(LoruleDeathWest, FieldDark, 3, 45, 3, 848),
 //     }
 // }

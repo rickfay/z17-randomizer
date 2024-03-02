@@ -279,11 +279,11 @@ macro_rules! patch {
     (GoldRupee($scene:literal[$unq:literal])) => {
         Patch::GoldRupee { course: COURSE, scene: $scene - 1, unq: $unq }
     };
-    (Portal($course:ident $scene:literal[$unq:literal] $portal:ident)) => {
-        Patch::Portal { course: ::game::Course::$course, scene: $scene - 1, unq: $unq, portal: crate::Portal::$portal }
+    (Crack($course:ident $scene:literal[$unq:literal] $crack:ident)) => {
+        Patch::Crack { course: ::game::Course::$course, scene: $scene - 1, unq: $unq, crack: crate::Crack::$crack }
     };
-    (Portal($scene:literal[$unq:literal] $portal:ident)) => {
-        Patch::Portal { course: COURSE, scene: $scene - 1, unq: $unq, portal: crate::Portal::$portal }
+    (Crack($scene:literal[$unq:literal] $crack:ident)) => {
+        Patch::Crack { course: COURSE, scene: $scene - 1, unq: $unq, crack: crate::Crack::$crack }
     };
     (WeatherVane($course:ident $scene:literal[$unq:literal] $vane:ident)) => {
         Patch::WeatherVane { course: ::game::Course::$course, scene: $scene - 1, unq: $unq, vane: crate::filler::filler_item::Vane::$vane }

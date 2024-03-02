@@ -4,9 +4,9 @@ crate::region! {
     color: Name,
     lorule {
         locations: [
-            "Lorule River Portal": None @Portal(29[53] RiverLorule),
-            "Lorule Lake Portal": None @Portal(35[30] LoruleLake),
-            "Lorule Hotfoot Portal": None @Portal(36[43] LoruleHotfoot),
+            "Lorule River Crack": None @Crack(29[53] RiverLorule),
+            "Lorule Lake Crack": None @Crack(35[30] LoruleLake),
+            "Lorule Hotfoot Crack": None @Crack(36[43] LoruleHotfoot),
 
             "Turtle Rock Weather Vane": None @WeatherVane(35[67] TurtleRockWV),
 

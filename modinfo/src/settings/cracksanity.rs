@@ -1,15 +1,15 @@
 use serde::{Deserialize, Serialize};
 use std::fmt::{Display, Formatter};
 
-/// Portal Shuffle Setting
+/// Crackanity
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq, Deserialize, Serialize)]
-pub enum PortalShuffle {
-    /// Portals are not shuffled
+pub enum Cracksanity {
+    /// Cracks are not shuffled
     #[default]
     Off,
-    /// Portals are shuffled, but remain in HyLo pairs
+    /// Cracks are shuffled, but remain in HyLo pairs
     CrossWorldPairs,
-    /// Portals are shuffled freely, and can lead to the same or opposite world
+    /// Cracks are shuffled freely, and can lead to the same or opposite world
     AnyWorldPairs,
     /// Same as CrossWorldPairs, but each pair's vanilla counterparts will be in a matching pair
     MirroredCrossWorldPairs,
@@ -17,7 +17,7 @@ pub enum PortalShuffle {
     MirroredAnyWorldPairs,
 }
 
-impl TryFrom<u8> for PortalShuffle {
+impl TryFrom<u8> for Cracksanity {
     type Error = String;
 
     fn try_from(value: u8) -> Result<Self, Self::Error> {
@@ -27,12 +27,12 @@ impl TryFrom<u8> for PortalShuffle {
             2 => Ok(Self::AnyWorldPairs),
             3 => Ok(Self::MirroredCrossWorldPairs),
             4 => Ok(Self::MirroredAnyWorldPairs),
-            _ => Err("Invalid PortalShuffle index: {}".to_owned()),
+            _ => Err("Invalid CrackShuffle index: {}".to_owned()),
         }
     }
 }
 
-impl Display for PortalShuffle {
+impl Display for Cracksanity {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(
             f,

@@ -4,11 +4,11 @@ crate::region! {
     color: Name,
     main {
         locations: [
-            "Thieves' Town Portal": None @Portal(16[56] ThievesTown),
-            "Vacant House Portal": None @Portal(27[57] VacantHouse),
-            "Lorule Right Paradox Portal": None @Portal(32[93] ParadoxRightLorule),
-            "Lorule Left Paradox Portal": None @Portal(32[86] ParadoxLeftLorule),
-            "Lorule Swamp Pillar Portal": None @Portal(33[216] SwampPillarLorule),
+            "Thieves' Town Crack": None @Crack(16[56] ThievesTown),
+            "Vacant House Crack": None @Crack(27[57] VacantHouse),
+            "Lorule Right Paradox Crack": None @Crack(32[93] ParadoxRightLorule),
+            "Lorule Left Paradox Crack": None @Crack(32[86] ParadoxLeftLorule),
+            "Lorule Swamp Pillar Crack": None @Crack(33[216] SwampPillarLorule),
 
             "Lorule Castle Weather Vane": None @WeatherVane(18[124] LoruleCastleWV),
             "Thieves' Town Weather Vane": None @WeatherVane(16[148] ThievesTownWV),

@@ -3,7 +3,7 @@ use crate::{
     filler::filler_item::Randomizable,
     filler::{check::Check, location::Location, location_node::LocationNode, logic::Logic, progress::Progress},
     hints::hint_ghost_name,
-    DashMap, LocationInfo, PortalMap,
+    CrackMap, DashMap, LocationInfo,
 };
 use game::ghosts::HintGhost;
 use log::info;
@@ -51,29 +51,29 @@ impl DerefMut for WorldGraph {
 }
 
 /// Build the World Graph
-/// FIXME shouldn't take portal_map as argument, map should be independent of that randomization
-pub fn build_world_graph(portal_map: &PortalMap) -> WorldGraph {
+/// FIXME shouldn't take crack_map as argument, map should be independent of that randomization
+pub fn build_world_graph(crack_map: &CrackMap) -> WorldGraph {
     info!("Building World Graph...");
     let mut world = WorldGraph::new();
 
-    world.extend(hyrule::graph(portal_map));
-    world.extend(lorule::graph(portal_map));
+    world.extend(hyrule::graph(crack_map));
+    world.extend(lorule::graph(crack_map));
 
     world.extend(eastern::graph());
     world.extend(gales::graph());
     world.extend(hera::graph());
 
-    world.extend(hyrule_castle::graph(portal_map));
+    world.extend(hyrule_castle::graph(crack_map));
 
     world.extend(dark::graph());
     world.extend(swamp::graph());
     world.extend(skull::graph());
     world.extend(thieves::graph());
     world.extend(ice::graph());
-    world.extend(desert::graph(portal_map));
+    world.extend(desert::graph(crack_map));
     world.extend(turtle::graph());
 
-    world.extend(lorule_castle::graph(portal_map));
+    world.extend(lorule_castle::graph(crack_map));
 
     world
 }
@@ -181,8 +181,8 @@ macro_rules! edge {
     );
 }
 
+use crate::filler::cracks::Crack;
 use crate::filler::path::Path;
-use crate::filler::portals::Portal;
 pub(crate) use check;
 pub(crate) use edge;
 pub(crate) use goal;
@@ -226,22 +226,20 @@ fn out_of_logic(name: &'static str, subregion: &'static Subregion) -> Check {
     )
 }
 
-fn portal_left(portal: Portal, portal_map: &PortalMap, is_hc: bool) -> Path {
-    let dest_portal = portal_map.get(&portal).expect(&format!("PortalMap missing Portal: {:?}", portal));
-    let (_left, right) = dest_portal.get_left_right_locations();
+fn crack_left(crack: Crack, crack_map: &CrackMap, is_hc: bool) -> Path {
+    let dest_crack = crack_map.get(&crack).expect(&format!("CrackMap missing Crack: {:?}", crack));
+    let (_left, right) = dest_crack.get_left_right_locations();
 
-    let logic: fn(&Progress) -> bool =
-        if is_hc { |p| p.can_merge() } else { |p| p.are_portals_open() && p.can_merge() };
+    let logic: fn(&Progress) -> bool = if is_hc { |p| p.can_merge() } else { |p| p.are_cracks_open() && p.can_merge() };
 
     Path::new(right, *Logic::new().normal(logic))
 }
 
-fn portal_right(portal: Portal, portal_map: &PortalMap, is_hc: bool) -> Path {
-    let dest_portal = portal_map.get(&portal).expect("PortalMap should have all Portals mapped");
-    let (left, _right) = dest_portal.get_left_right_locations();
+fn crack_right(crack: Crack, crack_map: &CrackMap, is_hc: bool) -> Path {
+    let dest_crack = crack_map.get(&crack).expect("CrackMap should have all Cracks mapped");
+    let (left, _right) = dest_crack.get_left_right_locations();
 
-    let logic: fn(&Progress) -> bool =
-        if is_hc { |p| p.can_merge() } else { |p| p.are_portals_open() && p.can_merge() };
+    let logic: fn(&Progress) -> bool = if is_hc { |p| p.can_merge() } else { |p| p.are_cracks_open() && p.can_merge() };
 
     Path::new(left, *Logic::new().normal(logic))
 }

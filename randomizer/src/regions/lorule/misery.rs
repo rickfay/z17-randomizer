@@ -4,13 +4,13 @@ crate::region! {
     color: Name,
     mire {
         locations: [
-            "Misery Mire Exit Portal": None @Portal(37[32] MiseryMireExit),
-            "Mire Right Pillar Portal": None @Portal(31[55] MirePillarRight),
-            "Mire Left Pillar Portal": None @Portal(31[54] MirePillarLeft),
-            "Mire Middle Portal": None @Portal(31[56] MireMiddle),
-            "Mire SW Portal": None @Portal(31[58] MireSW),
-            "Zaganaga Portal": None @Portal(31[13] Zaganaga),
-            "Mire North Portal": None @Portal(31[53] MireNorth),
+            "Misery Mire Exit Crack": None @Crack(37[32] MiseryMireExit),
+            "Mire Right Pillar Crack": None @Crack(31[55] MirePillarRight),
+            "Mire Left Pillar Crack": None @Crack(31[54] MirePillarLeft),
+            "Mire Middle Crack": None @Crack(31[56] MireMiddle),
+            "Mire SW Crack": None @Crack(31[58] MireSW),
+            "Zaganaga Crack": None @Crack(31[13] Zaganaga),
+            "Mire North Crack": None @Crack(31[53] MireNorth),
 
             "Misery Mire Weather Vane": None @WeatherVane(31[92] MiseryMireWV),
 

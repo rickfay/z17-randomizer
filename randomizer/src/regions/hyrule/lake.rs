@@ -4,8 +4,8 @@ crate::region! {
     color: Name,
     hylia {
         locations: [
-            "Lake Hylia Portal": None @Portal(35[76] LakeHylia),
-            "Hyrule Hotfoot Portal": None @Portal(36[30] HyruleHotfoot),
+            "Lake Hylia Crack": None @Crack(35[76] LakeHylia),
+            "Hyrule Hotfoot Crack": None @Crack(36[30] HyruleHotfoot),
 
             "House of Gales Weather Vane": None @WeatherVane(35[45] HouseOfGalesWV),
 

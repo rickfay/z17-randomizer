@@ -4,10 +4,10 @@ crate::region! {
     color: Name,
     area {
         locations: [
-            "Sanctuary Portal": None @Portal(IndoorLight 11[21] Sanctuary),
-            "Hyrule Graveyard Ledge Portal": None @Portal(12[107] GraveyardLedgeHyrule),
-            "Hyrule Waterfall Portal": None @Portal(13[30] WaterfallHyrule),
-            "Zora's Domain Portal": None @Portal(15[41] ZorasDomain),
+            "Sanctuary Crack": None @Crack(IndoorLight 11[21] Sanctuary),
+            "Hyrule Graveyard Ledge Crack": None @Crack(12[107] GraveyardLedgeHyrule),
+            "Hyrule Waterfall Crack": None @Crack(13[30] WaterfallHyrule),
+            "Zora's Domain Crack": None @Crack(15[41] ZorasDomain),
 
             "Sanctuary Weather Vane": None @WeatherVane(11[129] SanctuaryWV),
             "Witch's House Weather Vane": None @WeatherVane(14[61] WitchsHouseWV),

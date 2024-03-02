@@ -10,19 +10,19 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
 <details open="open">
 <summary>Version 0.4</summary>
 
-- **Portal Shuffle**
+- **Cracksanity**
   - Four different shuffling modes:
     - Cross World Pairs
     - Any World Pairs
     - Mirrored Cross World Pairs
     - Mirrored Any World Pairs
-  - Read the section for more details: [Portal Shuffle](#portal-shuffle)
+  - Read the section for more details: [Cracksanity](#cracksanity)
 - **Quake**
-  - Games will now start with most Portals closed, until players find the new item that opens them: the Quake Medallion.
-  - The Hyrule Castle Portal is the only Portal open without Quake, and may be required to use if Quake is placed somewhere in Lorule.
-    - Only the Portal connected to Hyrule Castle will be open in Lorule.
-    - If Portal shuffle is enabled, the HC Portal may lead to any Portal in Lorule and therefore Quake may appear nearly anywhere in Lorule.
-  - Players may optionally choose to start with Portals already open, in which case Quake will be omitted from the item pool.
+  - Games will now start with most cracks closed, until players find the new item that opens them: the Quake Medallion.
+  - The Hyrule Castle crack is the only crack open without Quake, and may be required to use if Quake is placed somewhere in Lorule.
+    - Only the crack connected to Hyrule Castle will be open in Lorule.
+    - If Cracksanity is enabled, the HC crack may lead to any crack in Lorule and therefore Quake may appear nearly anywhere in Lorule.
+  - Players may optionally choose to start with Cracks already open, in which case Quake will be omitted from the item pool.
 - **Weather Vanes**
   - **Pair Shuffle**: Groups Weather Vanes into random pairs that unlock each other instead of themselves.
   - **Convenient**: Activates the Vanes that don't affect logic
@@ -31,7 +31,7 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
 - **Skip Trials &rarr; Trial's Door Setting**
   - Select 1-4 LC Trials to randomly enable.
   - Or set the door to always be Open.
-    - Careful: enabling this also creates an early path into Lorule Castle via its Portal.
+    - Careful: enabling this also creates an early path into Lorule Castle via the crack.
 - Keysy
   - Small
   - Big
@@ -144,7 +144,7 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
     - No longer a merge-free path to Lorule
   - Completing HC rewards players with early access to:
       - Lorule Castle via the Trials Door
-        - Taking the Portal to Hilda's Study will automatically mark the LC Trials as complete.
+        - Taking the crack to Hilda's Study will automatically mark the LC Trials as complete.
       - Throne Room (Final Boss Room)
         - Yuga Ganon will not spawn unless Portrait requirements are met
   - Option to disable the Hyrule Castle Dungeon entirely
@@ -187,7 +187,7 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
   - Rosso's House starts locked again
     - Needs Pendant of Courage to unlock (or Rosso if playing with the new RSE Setting)
 - <u>Night Mode Improved</u>:
-  - The effect no longer disappears when entering a Portal and will last indefinitely.
+  - The effect no longer disappears when entering a Crack and will last indefinitely.
 - <u>Spoiler Log</u>:
   - New Playthrough section
       - Shows Sphere-by-Sphere logical path through seed.
@@ -343,7 +343,7 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
 
 
 - **FIXED:** Duplicate/Wrong Enemies in Hyrule Field
-  - The enemies present in Hyrule Field should now be those typically present in the vanilla game after beating Eastern Palace and opening the Portals to Lorule. The seemingly random duplicates in certain areas have been removed.
+  - The enemies present in Hyrule Field should now be those typically present in the vanilla game after beating Eastern Palace and opening the cracks to Lorule. The seemingly random duplicates in certain areas have been removed.
 
 
 - **FIXED:** Kakariko now has the correct number of NPCs and Cuccos.
@@ -360,7 +360,7 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
   - `skip_trials` option added. Removes the Trials Door in Lorule Castle if enabled.
   - `boots_in_shop` promoted to a UI option instead of requiring a preset to use.
   - Glitched logic now considers using the Ice Rod to reach the Eastern Palace Boss door.
-  - Long Portal animation from Zelda's Study has been shortened.
+  - Long Crack animation from Zelda's Study has been shortened.
   - The following cutscenes have been removed:
     - Zelda in the Sacred Realm
     - Thief Girl Cave
@@ -403,7 +403,7 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
 <summary>Version 0.0.1</summary>
 
 - Highlights:
-  - Portals to Lorule are open from game start
+  - Cracks to Lorule are open from game start
   - Start with Ravio's Bracelet option
   - Glitched Logic option
   - Ravio's Shop is fully open from game start
@@ -630,50 +630,50 @@ For Citra (emulator):
 
 <img src="docs/quake.png"  alt=""/>
 
-Obtaining the Quake item activates the second quake event in the vanilla game, which opens the portals and adjusts some overworld enemy spawns. It'll also affect some NPCs' dialog.
+Obtaining the Quake item activates the second quake event in the vanilla game, which opens the cracks and adjusts some overworld enemy spawns. It'll also affect some NPCs' dialog.
 
-This item was created for the randomizer to give an experience closer to the vanilla game where the portals are not open early-on, meaning Lorule is unreachable even once the player has the ability to Merge.
+This item was created for the randomizer to give an experience closer to the vanilla game where the cracks are not open early-on, meaning Lorule is unreachable even once the player has the ability to Merge.
 
-Hyrule Castle has a much more substantial role to play in the randomizer thanks to Quake, as a sometimes necessary dungeon to complete if Quake or something that leads to it happens to be somewhere in Lorule. Or simply for its portal, when playing with Portal Shuffle.
+Hyrule Castle has a much more substantial role to play in the randomizer thanks to Quake, as a sometimes necessary dungeon to complete if Quake or something that leads to it happens to be somewhere in Lorule. Or simply for its crack, when playing with Cracksanity.
 
 The item is called "Quake" because that is how several NPCs refer to the story event in dialog. Interestingly, they always refer to it as "quake", but never "earthquake".
 
 The sprite is borrowed from the item of the same name from this game's predecessor, A Link to the Past.
 
-## Portal Shuffle
+## Cracksanity
 
 
-There are 56 Portals (aka "fissures" or "cracks") in the game formed into pairs that connect areas of Hyrule with Lorule.
+There are 56 Cracks (aka "fissures") in the game formed into pairs that connect areas of Hyrule with Lorule.
 
 We shuffle them.
 
 | Setting                    | Description                                                                  |
 |----------------------------|------------------------------------------------------------------------------|
-| Cross World Pairs          | All Portals will connect Hyrule + Lorule                                     |
-| Any World Pairs            | Any Portal can lead to any other Portal.                                     |
+| Cross World Pairs          | All Cracks will connect Hyrule + Lorule                                     |
+| Any World Pairs            | Any Crack can lead to any other Crack.                                     |
 | Mirrored Cross World Pairs | Same as Cross World Pairs, but each pair's counterparts will also be paired. |
 | Mirrored Any World Pairs   | Same as Any World Pairs, but each pair's counterparts will also be paired.   |
 
 
 
-### Portal Appearance
+### Crack Appearance
 
-The destination of a Portal determines its appearance.
+The destination of a Crack determines its appearance.
 
-![Portal Appearance Matches Destination](docs/portal_appearance_matches_destination.png)
+![Crack Appearance Matches Destination](docs/crack_appearance_matches_destination.png)
 
 - White light &rarr; Hyrule
 - Black fog &rarr; Lorule
 
-### Portal Pools
+### Crack Pools
 
-Most Portals in the game are "up" portals, like the one in front of Link's House.
+Most Cracks in the game are "up" cracks, like the one in front of Link's House.
 
-However, there are 6 pairs of "down" portals as well, that reside on the backs pillars, buildings, etc.
-For technical reasons, these portals can only be shuffled amongst themselves.
+However, there are 6 pairs of "down" cracks as well, that reside on the backs pillars, buildings, etc.
+For technical reasons, these cracks can only be shuffled amongst themselves.
 
-![Portal Pools](docs/down_portals.png)
-<div style="text-align: center; font-style: italic; margin-bottom: 75px;">Down Portal Locations</div>
+![Crack Pools](docs/down_cracks.png)
+<div style="text-align: center; font-style: italic; margin-bottom: 75px;">Down Crack Locations</div>
 
 | Hyrule                | Lorule            | Lorule Area    |
 |-----------------------|-------------------|----------------|
@@ -684,49 +684,49 @@ For technical reasons, these portals can only be shuffled amongst themselves.
 | Paradox Right         | Paradox Right     | Central Lorule |
 | Southern Ruins Pillar | Swamp Pillar      | Central Lorule |
 
-### Blocked Portals
+### Blocked Cracks
 
-There are 4 Portals that are blocked by bombable walls:
-  - Eastern Ruins Southeast Portal
-  - Dark Ruins Southeast Portal
-  - Desert North Portal
+There are 4 Cracks that are blocked by bombable walls:
+  - Eastern Ruins Southeast Crack
+  - Dark Ruins Southeast Crack
+  - Desert North Crack
   - Graveyard Ledge (Lorule)
 
-If you enter a portal paired with one of these portals, the blockage will automatically be cleared as though you had blown it up.
+If you enter a crack paired with one of these cracks, the blockage will automatically be cleared as though you had blown it up.
 
-Because of this, the logic only requires bombs to enter the blocked side of portals.
+Because of this, the logic only requires bombs to enter the blocked side of cracks.
 
-### Portals of Interest
+### Cracks of Interest
 
-#### Hyrule Castle Portal
-- This portal and its pair are the only portals open without <img src="docs/quake.png" width="24" height="24" /> **Quake**.
-- If portal shuffle is off, <img src="docs/quake.png" width="24" height="24" /> **Quake** may appear in Central Lorule and players will need to use this portal to get there.
-- When portal shuffle is on, the Hyrule Castle portal will lead to a random portal in Lorule, and thus one random region of Lorule will become accessible. In this way, <img src="docs/quake.png" width="24" height="24" /> **Quake** has the potential to appear in any region of Lorule.
+#### Hyrule Castle Crack
+- This crack and its pair are the only cracks open without <img src="docs/quake.png" width="24" height="24" /> **Quake**.
+- If crack shuffle is off, <img src="docs/quake.png" width="24" height="24" /> **Quake** may appear in Central Lorule and players will need to use this crack to get there.
+- When crack shuffle is on, the Hyrule Castle crack will lead to a random crack in Lorule, and thus one random region of Lorule will become accessible. In this way, <img src="docs/quake.png" width="24" height="24" /> **Quake** has the potential to appear in any region of Lorule.
 
-#### Lorule Castle Portal
+#### Lorule Castle Crack
 
-AKA the Final Boss portal, the Yuganon Portal, etc.
-- This portal is treated as access to the Central Lorule area, because if players haven't yet met the LC Requirement the loading zone to the Throne Room will instead send them to the Lorule Blacksmith.
+AKA the Final Boss crack, the Yuganon Crack, etc.
+- This crack is treated as access to the Central Lorule area, because if players haven't yet met the LC Requirement the loading zone to the Throne Room will instead send them to the Lorule Blacksmith.
   - A courtesy return warp will appear in the Lorule Blacksmith if this path is used.
   - Once the LC Requirement has been met this path will remain open with a new warp placed near the doorway.
-- This portal allows access into Lorule Castle 3F ONLY IF `trials_door` is set to the `Open` setting. Otherwise, any trials must be completed first before the door will open.
-- While not necessary to complete the game, this portal allows skipping the entirety of the Lorule Castle dungeon and is simply a faster way to the final boss once all requirements are met.
+- This crack allows access into Lorule Castle 3F ONLY IF `trials_door` is set to the `Open` setting. Otherwise, any trials must be completed first before the door will open.
+- While not necessary to complete the game, this crack allows skipping the entirety of the Lorule Castle dungeon and is simply a faster way to the final boss once all requirements are met.
 
 
-#### Southwest Desert Portal
+#### Southwest Desert Crack
 
-Logic may require players to use the <img src="docs/stamina_scroll.png" width="24" height="24" /> **Stamina Scroll** to have enough Energy to merge from the top part of the East wall going South to reach the portal in the Southwest corner.
+Logic may require players to use the <img src="docs/stamina_scroll.png" width="24" height="24" /> **Stamina Scroll** to have enough Energy to merge from the top part of the East wall going South to reach the crack in the Southwest corner.
 
-Other than using the portal itself (or glitches), this is actually the _only_ way to reach the Southwest Portal.
+Other than using the crack itself (or glitches), this is actually the _only_ way to reach the Southwest Crack.
 
-#### Desert Palace + Zaganaga Portals
+#### Desert Palace + Zaganaga Cracks
 
-These two portals are forcibly kept paired vanilla so that Desert Palace does not lose its Boss and dungeon prize. For now...
+These two cracks are forcibly kept paired vanilla so that Desert Palace does not lose its Boss and dungeon prize. For now...
 
-#### Rosso's House Portal
+#### Rosso's House Crack
 
-- This portal is locked inside Rosso's House, meaning rescuing Rosso is a requirement to access it.
-- If you enter Rosso's House using this portal before rescuing Rosso, it will be empty, and if you leave via the door it will lock behind you.
+- This crack is locked inside Rosso's House, meaning rescuing Rosso is a requirement to access it.
+- If you enter Rosso's House using this crack before rescuing Rosso, it will be empty, and if you leave via the door it will lock behind you.
 
 ## Hint System
 
@@ -957,7 +957,7 @@ This mode logically includes every known RTA-viable glitch, including those that
   - Enemy Clips with the Sand Rod
   - Thieves' Hideout B1 with just Bombs
   - Desert Palace
-    - Skip via Portal Clipping with Hookshot/Boomerang + Tornado Rod
+    - Skip via Crack Clipping with Hookshot/Boomerang + Tornado Rod
     - Defeat Zaganaga with just Bow or just Sword Beams
 
 ### No Logic
@@ -972,8 +972,8 @@ It's all in the name: no logic is used to place items at all. Dungeon items are 
   - Not all item models have their transforms applied to them (rotation, scaling, etc.) and may look slightly odd.
   - Only the Items in Ravio's Shop and the Kakariko Street Merchant have had their models replaced -- all others will appear vanilla.
     - The Letter in a Bottle's vanilla location will appear as a Heart Piece.
-- Portal Shuffle:
-  - The player's location on the bottom screen may not be reflected accurately after exiting a same-world portal, until the player loads another area.
+- Cracksanity:
+  - The player's location on the bottom screen may not be reflected accurately after exiting a same-world crack, until the player loads another area.
 - Music:
   - Hyrule Castle overworld music may be incorrect.
 - Unintended Item Duplication:

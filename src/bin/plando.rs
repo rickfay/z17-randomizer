@@ -1,21 +1,21 @@
 use log::{error, info, LevelFilter};
 use macros::fail;
+use modinfo::settings::cracks::Cracks;
 use modinfo::settings::keysy::Keysy;
-use modinfo::settings::portals::Portals;
 use modinfo::settings::ravios_shop::RaviosShop;
 use modinfo::settings::trials_door::TrialsDoor;
 use modinfo::settings::weather_vanes::WeatherVanes;
-use modinfo::settings::{logic::LogicMode, pedestal::PedestalSetting, portal_shuffle::PortalShuffle, Settings};
+use modinfo::settings::{cracksanity::Cracksanity, logic::LogicMode, pedestal::PedestalSetting, Settings};
+use randomizer::filler::cracks::Crack;
 use randomizer::filler::filler_item::Item::*;
 use randomizer::filler::filler_item::Randomizable;
 use randomizer::filler::filler_item::Vane::*;
-use randomizer::filler::portals::Portal;
 use randomizer::filler::{filler_item, item_pools};
 use randomizer::{
     constants::VERSION,
     regions,
     system::{System, UserConfig},
-    Layout, PortalMap, SeedHash, SeedInfo, VaneMap,
+    CrackMap, Layout, SeedHash, SeedInfo, VaneMap,
 };
 use simplelog::SimpleLogger;
 use std::collections::BTreeSet;
@@ -60,7 +60,7 @@ fn main() {
         full_exclusions: Default::default(),
         treacherous_tower_floors: vec![],
         vane_map: get_plando_weather_vane_map(),
-        portal_map: get_plando_portal_map(),
+        crack_map: get_plando_crack_map(),
         layout: build_layout(),
         metrics: Default::default(),
         hints: Default::default(),
@@ -112,9 +112,9 @@ fn get_plando_weather_vane_map() -> VaneMap {
     ])
 }
 
-fn get_plando_portal_map() -> PortalMap {
-    use Portal::*;
-    PortalMap::from_iter([
+fn get_plando_crack_map() -> CrackMap {
+    use Crack::*;
+    CrackMap::from_iter([
         (StylishWoman, ThievesTown),
         (YourHouse, VacantHouse),
         (ParadoxRightHyrule, ParadoxRightLorule),
@@ -186,8 +186,8 @@ fn plando_settings() -> Settings {
         maiamai_madness: false,
         nice_mode: false,
         super_mode: true,
-        portals: Portals::Open,
-        portal_shuffle: PortalShuffle::AnyWorldPairs,
+        cracks: Cracks::Open,
+        cracksanity: Cracksanity::AnyWorldPairs,
         weather_vanes: WeatherVanes::Hyrule,
         ravios_shop: RaviosShop::Open,
         bow_of_light_in_castle: false,
@@ -696,7 +696,7 @@ fn build_layout() -> Layout {
     // Turtle Rock
     layout.set_item("[TR] (1F) Center", regions::dungeons::turtle::rock::SUBREGION, Empty);
     layout.set_item("[TR] (1F) Grate Chest", regions::dungeons::turtle::rock::SUBREGION, Empty);
-    layout.set_item("[TR] (1F) Portal Room NW", regions::dungeons::turtle::rock::SUBREGION, Empty);
+    layout.set_item("[TR] (1F) Northwest Room", regions::dungeons::turtle::rock::SUBREGION, Empty);
     layout.set_item("[TR] (1F) Northeast Ledge", regions::dungeons::turtle::rock::SUBREGION, Empty);
     layout.set_item("[TR] (1F) Southeast Chest", regions::dungeons::turtle::rock::SUBREGION, Empty);
     layout.set_item("[TR] (1F) Defeat Flamolas", regions::dungeons::turtle::rock::SUBREGION, Empty);

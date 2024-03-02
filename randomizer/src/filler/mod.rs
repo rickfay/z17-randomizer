@@ -1,6 +1,6 @@
 use crate::filler::check::Check;
 use crate::filler::filler_item::Item;
-use crate::filler::filler_item::Randomizable::{Portal, Vane};
+use crate::filler::filler_item::Randomizable::{Crack, Vane};
 use crate::filler::item_pools::{get_maiamai_pool, Pool};
 use crate::filler::location::Location;
 use crate::filler::progress::Progress;
@@ -15,6 +15,7 @@ use rom::Error;
 use std::collections::HashSet;
 
 pub mod check;
+pub mod cracks;
 pub mod filler_item;
 pub mod item_pools;
 mod loading_zone_pair;
@@ -22,7 +23,6 @@ pub mod location;
 pub mod location_node;
 pub mod logic;
 pub mod path;
-pub mod portals;
 pub mod progress;
 pub(crate) mod text;
 pub(crate) mod treacherous_tower;
@@ -38,7 +38,7 @@ pub fn fill_all_locations_reachable(
 ) -> crate::Result<()> {
     let (mut progression_pool, mut junk_pool) = item_pools::get_item_pools(rng, seed_info);
 
-    place_portals(seed_info, check_map);
+    place_cracks(seed_info, check_map);
     place_weather_vanes(seed_info, check_map);
 
     verify_all_locations_accessible(seed_info, check_map, &mut progression_pool)?;
@@ -54,71 +54,71 @@ pub fn fill_all_locations_reachable(
     Ok(())
 }
 
-/// Portal randomization
-fn place_portals(SeedInfo { portal_map, .. }: &SeedInfo, check_map: &mut CheckMap) {
-    use crate::filler::portals::Portal::*;
-    let portal_lut = vec![
-        ("[HC] Portal", HyruleCastle),
-        ("Stylish Woman Portal", StylishWoman),
-        ("Your House Portal", YourHouse),
-        ("Hyrule Right Paradox Portal", ParadoxRightHyrule),
-        ("Hyrule Left Paradox Portal", ParadoxLeftHyrule),
-        ("Hyrule Waterfall Portal", WaterfallHyrule),
-        ("Eastern Ruins Pillar Portal", EasternRuinsPillar),
-        ("Eastern Ruins SE Portal", EasternRuinsSE),
-        ("Lost Woods Pillar Portal", LostWoodsPillar),
-        ("Sahasrahla's House Portal", SahasrahlasHouse),
-        ("Rosso's House Portal", RossosHouse),
-        ("Misery Mire Entrance Portal", MiseryMireEntrance),
-        ("Desert Right Pillar Portal", DesertPillarRight),
-        ("Desert Left Pillar Portal", DesertPillarLeft),
-        ("Desert Middle Portal", DesertMiddle),
-        ("Desert SW Portal", DesertSW),
-        ("Desert Palace Portal", DesertPalace),
-        ("Desert North Portal", DesertNorth),
-        ("Hyrule Death West Portal", DeathWestHyrule),
-        ("Hyrule Floating Island Portal", FloatingIslandHyrule),
-        ("Hyrule River Portal", RiverHyrule),
-        ("Lake Hylia Portal", LakeHylia),
-        ("Hyrule Hotfoot Portal", HyruleHotfoot),
-        ("Sanctuary Portal", Sanctuary),
-        ("Hyrule Graveyard Ledge Portal", GraveyardLedgeHyrule),
-        ("Hyrule Rosso's Ore Mine Portal", RossosOreMineHyrule),
-        ("Hyrule Swamp Pillar Portal", SwampPillarHyrule),
-        ("Zora's Domain Portal", ZorasDomain),
+/// Crack randomization
+fn place_cracks(SeedInfo { crack_map, .. }: &SeedInfo, check_map: &mut CheckMap) {
+    use crate::filler::cracks::Crack::*;
+    let crack_lut = vec![
+        ("[HC] Crack", HyruleCastle),
+        ("Stylish Woman's House Crack", StylishWoman),
+        ("Your House Crack", YourHouse),
+        ("Hyrule Right Paradox Crack", ParadoxRightHyrule),
+        ("Hyrule Left Paradox Crack", ParadoxLeftHyrule),
+        ("Hyrule Waterfall Crack", WaterfallHyrule),
+        ("Eastern Ruins Pillar Crack", EasternRuinsPillar),
+        ("Eastern Ruins SE Crack", EasternRuinsSE),
+        ("Lost Woods Pillar Crack", LostWoodsPillar),
+        ("Sahasrahla's House Crack", SahasrahlasHouse),
+        ("Rosso's House Crack", RossosHouse),
+        ("Misery Mire Entrance Crack", MiseryMireEntrance),
+        ("Desert Right Pillar Crack", DesertPillarRight),
+        ("Desert Left Pillar Crack", DesertPillarLeft),
+        ("Desert Middle Crack", DesertMiddle),
+        ("Desert SW Crack", DesertSW),
+        ("Desert Palace Crack", DesertPalace),
+        ("Desert North Crack", DesertNorth),
+        ("Hyrule Death West Crack", DeathWestHyrule),
+        ("Hyrule Floating Island Crack", FloatingIslandHyrule),
+        ("Hyrule River Crack", RiverHyrule),
+        ("Lake Hylia Crack", LakeHylia),
+        ("Hyrule Hotfoot Crack", HyruleHotfoot),
+        ("Sanctuary Crack", Sanctuary),
+        ("Hyrule Graveyard Ledge Crack", GraveyardLedgeHyrule),
+        ("Hyrule Rosso's Ore Mine Crack", RossosOreMineHyrule),
+        ("Hyrule Swamp Pillar Crack", SwampPillarHyrule),
+        ("Zora's Domain Crack", ZorasDomain),
         // --- //
-        ("[LC] Portal", LoruleCastle),
-        ("Thieves' Town Portal", ThievesTown),
-        ("Vacant House Portal", VacantHouse),
-        ("Lorule Right Paradox Portal", ParadoxRightLorule),
-        ("Lorule Left Paradox Portal", ParadoxLeftLorule),
-        ("Lorule Waterfall Portal", WaterfallLorule),
-        ("Dark Ruins Pillar Portal", DarkRuinsPillar),
-        ("Dark Ruins SE Portal", DarkRuinsSE),
-        ("Skull Woods Pillar Portal", SkullWoodsPillar),
-        ("n-Shaped House Portal", NShapedHouse),
-        ("Destroyed House Portal", DestroyedHouse),
-        ("Misery Mire Exit Portal", MiseryMireExit),
-        ("Mire Right Pillar Portal", MirePillarRight),
-        ("Mire Left Pillar Portal", MirePillarLeft),
-        ("Mire Middle Portal", MireMiddle),
-        ("Mire SW Portal", MireSW),
-        ("Zaganaga Portal", Zaganaga),
-        ("Mire North Portal", MireNorth),
-        ("Lorule Death West Portal", DeathWestLorule),
-        ("Lorule Floating Island Portal", FloatingIslandLorule),
-        ("Lorule River Portal", RiverLorule),
-        ("Lorule Lake Portal", LoruleLake),
-        ("Lorule Hotfoot Portal", LoruleHotfoot),
-        ("Philosopher's Cave Portal", Philosopher),
-        ("Lorule Graveyard Ledge Portal", GraveyardLedgeLorule),
-        ("Lorule Rosso's Ore Mine Portal", RossosOreMineLorule),
-        ("Lorule Swamp Pillar Portal", SwampPillarLorule),
-        ("Ku's Domain Portal", KusDomain),
+        ("[LC] Crack", LoruleCastle),
+        ("Thieves' Town Crack", ThievesTown),
+        ("Vacant House Crack", VacantHouse),
+        ("Lorule Right Paradox Crack", ParadoxRightLorule),
+        ("Lorule Left Paradox Crack", ParadoxLeftLorule),
+        ("Lorule Waterfall Crack", WaterfallLorule),
+        ("Dark Ruins Pillar Crack", DarkRuinsPillar),
+        ("Dark Ruins SE Crack", DarkRuinsSE),
+        ("Skull Woods Pillar Crack", SkullWoodsPillar),
+        ("n-Shaped House Crack", NShapedHouse),
+        ("Destroyed House Crack", DestroyedHouse),
+        ("Misery Mire Exit Crack", MiseryMireExit),
+        ("Mire Right Pillar Crack", MirePillarRight),
+        ("Mire Left Pillar Crack", MirePillarLeft),
+        ("Mire Middle Crack", MireMiddle),
+        ("Mire SW Crack", MireSW),
+        ("Zaganaga Crack", Zaganaga),
+        ("Mire North Crack", MireNorth),
+        ("Lorule Death West Crack", DeathWestLorule),
+        ("Lorule Floating Island Crack", FloatingIslandLorule),
+        ("Lorule River Crack", RiverLorule),
+        ("Lorule Lake Crack", LoruleLake),
+        ("Lorule Hotfoot Crack", LoruleHotfoot),
+        ("Philosopher's Cave Crack", Philosopher),
+        ("Lorule Graveyard Ledge Crack", GraveyardLedgeLorule),
+        ("Lorule Rosso's Ore Mine Crack", RossosOreMineLorule),
+        ("Lorule Swamp Pillar Crack", SwampPillarLorule),
+        ("Ku's Domain Crack", KusDomain),
     ];
 
-    for (check_name, portal) in portal_lut {
-        check_map.insert(check_name.to_owned(), Some(Portal(*portal_map.get(&portal).unwrap())));
+    for (check_name, crack) in crack_lut {
+        check_map.insert(check_name.to_owned(), Some(Crack(*crack_map.get(&crack).unwrap())));
     }
 }
 
@@ -582,7 +582,7 @@ fn filter_dungeon_checks(item: Item, eligible_checks: Vec<Check>) -> Vec<Check> 
             // "[DP] Zaganaga",
         ],
         TurtleCompass | TurtleKeyBig | TurtleKeySmall01 | TurtleKeySmall02 | TurtleKeySmall03 => vec![
-            "[TR] (1F) Center", "[TR] (1F) Grate Chest", "[TR] (1F) Portal Room NW", "[TR] (1F) Northeast Ledge",
+            "[TR] (1F) Center", "[TR] (1F) Grate Chest", "[TR] (1F) Northwest Room", "[TR] (1F) Northeast Ledge",
             "[TR] (1F) Southeast Chest", "[TR] (1F) Defeat Flamolas",
             // "[TR] Left Balcony",
             "[TR] (1F) Under Center", "[TR] (B1) Under Center", "[TR] (B1) Northeast Room", "[TR] (B1) Platform",
@@ -652,7 +652,7 @@ fn build_progress_from_items<'s>(items: &Pool, seed_info: &'s SeedInfo) -> Progr
 }
 
 /// Verifies that, assuming we have all possible pieces of player progression, all locations in the world graph can be
-/// reached. This is the baseline check for an uncompletable seed, usually because of something like Entrance or Portal
+/// reached. This is the baseline check for an uncompletable seed, usually because of something like Entrance or Crack
 /// randomization resulting in a layout that renders certain locations inaccessible.
 fn verify_all_locations_accessible(
     seed_info: &SeedInfo, check_map: &mut CheckMap, progression_pool: &mut Pool,
@@ -684,7 +684,7 @@ fn verify_all_locations_accessible(
         //     if reachable_check_names.contains(&check.as_str()) {
         //         // info!("Reachable Check: {}", check);
         //     } else {
-        //         if !check.contains("Portal") {
+        //         if !check.contains("Crack") {
         //             info!("Unreachable Check: {}", check);
         //         }
         //     }

@@ -1,4 +1,4 @@
-use crate::filler::portals::Portal;
+use crate::filler::cracks::Crack;
 use crate::hints::{hint_color::HintColor::*, hint_ghost_name};
 use crate::patch::lms::msbf::MsbfKey;
 use crate::Result;
@@ -14,7 +14,7 @@ pub enum Randomizable {
     Goal(Goal),
     HintGhost(HintGhost),
     Vane(Vane),
-    Portal(Portal),
+    Crack(Crack),
 }
 
 impl Randomizable {
@@ -188,7 +188,7 @@ impl Randomizable {
                 | Goal::Triforce,
             )
             | Self::Vane(_)
-            | Self::Portal(_) => true,
+            | Self::Crack(_) => true,
             _ => false,
         }
     }
@@ -349,7 +349,7 @@ impl Randomizable {
             Self::Goal(goal) => goal.as_str(),
             Self::HintGhost(ghost) => hint_ghost_name(&ghost),
             Self::Vane(vane) => vane.as_str(),
-            Self::Portal(portal) => portal.as_str(),
+            Self::Crack(crack) => crack.as_str(),
         }
     }
 
@@ -385,9 +385,9 @@ impl From<Vane> for Randomizable {
     }
 }
 
-impl From<Portal> for Randomizable {
-    fn from(portal: Portal) -> Self {
-        Self::Portal(portal)
+impl From<Crack> for Randomizable {
+    fn from(crack: Crack) -> Self {
+        Self::Crack(crack)
     }
 }
 

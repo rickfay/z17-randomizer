@@ -4,9 +4,9 @@ crate::region! {
     color: Name,
     main {
         locations: [
-            "Your House Portal": None @Portal(27[68] YourHouse),
-            "Hyrule Right Paradox Portal": None @Portal(32[60] ParadoxRightHyrule),
-            "Hyrule Left Paradox Portal": None @Portal(32[56] ParadoxLeftHyrule),
+            "Your House Crack": None @Crack(27[68] YourHouse),
+            "Hyrule Right Paradox Crack": None @Crack(32[60] ParadoxRightHyrule),
+            "Hyrule Left Paradox Crack": None @Crack(32[56] ParadoxLeftHyrule),
 
             "Your House Weather Vane": None @WeatherVane(27[48] YourHouseWV),
 

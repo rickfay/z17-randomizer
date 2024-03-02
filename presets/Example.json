@@ -11,8 +11,8 @@
 
     "dungeon_prize_shuffle":       true,                      // This shuffles all Sage Portraits and Pendants among themselves.
     "maiamai_madness":             false,                     // This shuffles Maiamai into the pool, adding 100 more locations.
-    "portals":                     "Closed",                  // "Closed", "Open"
-    "portal_shuffle":              "Off",                     // "Off", "CrossWorldPairs", "AnyWorldPairs", "MirroredCrossWorldPairs", "MirroredAnyWorldPairs"
+    "cracks":                      "Closed",                  // "Closed", "Open"
+    "cracksanity":                 "Off",                     // "Off", "CrossWorldPairs", "AnyWorldPairs", "MirroredCrossWorldPairs", "MirroredAnyWorldPairs"
     "nice_mode":                   false,                     // This shuffles a second progressive copy of each Ravio Item into the general item pool.
     "super_mode":                  true,                      // This shuffles a second progressive copy of the Lamp and Net into the general item pool.
     "weather_vanes":               "Hyrule",                  // Choose initially active Weather Vanes: "Standard", "Shuffled", "Convenient", "Hyrule", "Lorule", "All"

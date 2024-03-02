@@ -4,10 +4,10 @@ crate::region! {
     color: Name,
     ruins {
         locations: [
-            "Lorule Waterfall Portal": None @Portal(13[60] WaterfallLorule),
-            "Dark Ruins Pillar Portal": None @Portal(22[26] DarkRuinsPillar),
-            "Dark Ruins SE Portal": None @Portal(30[27] DarkRuinsSE),
-            "Ku's Domain Portal": None @Portal(15[110] KusDomain),
+            "Lorule Waterfall Crack": None @Crack(13[60] WaterfallLorule),
+            "Dark Ruins Pillar Crack": None @Crack(22[26] DarkRuinsPillar),
+            "Dark Ruins SE Crack": None @Crack(30[27] DarkRuinsSE),
+            "Ku's Domain Crack": None @Crack(15[110] KusDomain),
 
             "Dark Palace Weather Vane": None @WeatherVane(20[210] DarkPalaceWV),
 

@@ -4,8 +4,8 @@ crate::region! {
     color: Name,
     village {
         locations: [
-            "Stylish Woman Portal": None @Portal(IndoorLight 14[7] StylishWoman),
-            "Sahasrahla's House Portal": None @Portal(16[275] SahasrahlasHouse),
+            "Stylish Woman's House Crack": None @Crack(IndoorLight 14[7] StylishWoman),
+            "Sahasrahla's House Crack": None @Crack(16[275] SahasrahlasHouse),
 
             "Kakariko Village Weather Vane": None @WeatherVane(16[203] KakarikoVillageWV),
 

@@ -4,8 +4,8 @@ crate::region! {
     color: Name,
     woods {
         locations: [
-            "Lost Woods Pillar Portal": None @Portal(1[227] LostWoodsPillar),
-            "Rosso's House Portal": None @Portal(IndoorLight 10[19] RossosHouse),
+            "Lost Woods Pillar Crack": None @Crack(1[227] LostWoodsPillar),
+            "Rosso's House Crack": None @Crack(IndoorLight 10[19] RossosHouse),
 
             "Fortune-Teller": HintGlasses @Event(IndoorLight/FieldLight_11_FortuneGirl[4]),
             "Hyrule Hotfoot 75s": RupeeSilver @Event(FieldLight_HyruleRace[0x21]),

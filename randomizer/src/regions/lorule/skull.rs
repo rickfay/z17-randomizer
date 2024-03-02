@@ -4,9 +4,9 @@ crate::region! {
     color: Name,
     overworld {
         locations: [
-            "Skull Woods Pillar Portal": None @Portal(1[366] SkullWoodsPillar),
-            "n-Shaped House Portal": None @Portal(16[92] NShapedHouse),
-            "Destroyed House Portal": None @Portal(2[135] DestroyedHouse),
+            "Skull Woods Pillar Crack": None @Crack(1[366] SkullWoodsPillar),
+            "n-Shaped House Crack": None @Crack(16[92] NShapedHouse),
+            "Destroyed House Crack": None @Crack(2[135] DestroyedHouse),
 
             "Skull Woods Weather Vane": None @WeatherVane(1[270] SkullWoodsWV),
 

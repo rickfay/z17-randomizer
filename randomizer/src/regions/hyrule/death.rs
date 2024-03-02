@@ -4,9 +4,9 @@ crate::region! {
     color: Name,
     mountain {
         locations: [
-            "Hyrule Death West Portal": None @Portal(3[361] DeathWestHyrule),
-            "Hyrule Floating Island Portal": None @Portal(4[111] FloatingIslandHyrule),
-            "Hyrule Rosso's Ore Mine Portal": None @Portal(4[65] RossosOreMineHyrule),
+            "Hyrule Death West Crack": None @Crack(3[361] DeathWestHyrule),
+            "Hyrule Floating Island Crack": None @Crack(4[111] FloatingIslandHyrule),
+            "Hyrule Rosso's Ore Mine Crack": None @Crack(4[65] RossosOreMineHyrule),
 
             "Death Mountain (Hyrule) Weather Vane": None @WeatherVane(3[349] DeathMountainHyruleWV),
             "Tower of Hera Weather Vane": None @WeatherVane(3[335] TowerOfHeraWV),

@@ -1,12 +1,12 @@
+use crate::filler::cracks::Crack;
 use crate::filler::filler_item::Item;
 use crate::filler::filler_item::Item::*;
 use crate::filler::filler_item::Vane;
-use crate::filler::portals::Portal;
 use crate::filler::util::shuffle;
 use crate::SeedInfo;
+use modinfo::settings::cracks::Cracks;
 use modinfo::settings::keysy::Keysy;
 use modinfo::settings::logic::LogicMode;
-use modinfo::settings::portals::Portals;
 use modinfo::Settings;
 use rand::{rngs::StdRng, Rng};
 use std::iter::repeat;
@@ -34,8 +34,8 @@ pub(crate) fn get_item_pools(rng: &mut StdRng, SeedInfo { settings, .. }: &SeedI
     // Choose either Letter in a Bottle or Premium Milk to include in the seed
     progression_items.push(choose_trade_item(rng));
 
-    // Portals
-    if settings.portals == Portals::Closed {
+    // Cracks
+    if settings.cracks == Cracks::Closed {
         delta_junk_items -= 1;
         progression_items.push(Quake);
     }
@@ -153,9 +153,9 @@ fn get_dungeon_prize_pool() -> Vec<Item> {
     ]
 }
 
-/// List of "normal" up-facing Hyrule Portals
-pub(crate) fn get_hyrule_up_portals() -> Vec<Portal> {
-    use crate::filler::portals::Portal::*;
+/// List of "normal" up-facing Hyrule cracks
+pub(crate) fn get_hyrule_up_cracks() -> Vec<Crack> {
+    use crate::filler::cracks::Crack::*;
     vec![
         StylishWoman, YourHouse, WaterfallHyrule, EasternRuinsSE, LostWoodsPillar, RossosHouse, MiseryMireEntrance,
         DesertMiddle, DesertSW, DesertNorth, DesertPillarLeft, DesertPillarRight, DesertPalace, DeathWestHyrule,
@@ -164,9 +164,9 @@ pub(crate) fn get_hyrule_up_portals() -> Vec<Portal> {
     ]
 }
 
-/// List of "normal" up-facing Lorule Portals
-pub(crate) fn get_lorule_up_portals() -> Vec<Portal> {
-    use crate::filler::portals::Portal::*;
+/// List of "normal" up-facing Lorule cracks
+pub(crate) fn get_lorule_up_cracks() -> Vec<Crack> {
+    use crate::filler::cracks::Crack::*;
     vec![
         ThievesTown, VacantHouse, WaterfallLorule, DarkRuinsSE, SkullWoodsPillar, DestroyedHouse, MiseryMireExit,
         MireMiddle, MireSW, MireNorth, MirePillarLeft, MirePillarRight, Zaganaga, DeathWestLorule,
@@ -175,15 +175,15 @@ pub(crate) fn get_lorule_up_portals() -> Vec<Portal> {
     ]
 }
 
-/// List of down-facing Hyrule Portals
-pub(crate) fn get_hyrule_down_portals() -> Vec<Portal> {
-    use crate::filler::portals::Portal::*;
+/// List of down-facing Hyrule cracks
+pub(crate) fn get_hyrule_down_cracks() -> Vec<Crack> {
+    use crate::filler::cracks::Crack::*;
     vec![ParadoxRightHyrule, ParadoxLeftHyrule, EasternRuinsPillar, SahasrahlasHouse, SwampPillarHyrule, ZorasDomain]
 }
 
-/// List of down-facing Lorule Portals
-pub(crate) fn get_lorule_down_portals() -> Vec<Portal> {
-    use crate::filler::portals::Portal::*;
+/// List of down-facing Lorule cracks
+pub(crate) fn get_lorule_down_cracks() -> Vec<Crack> {
+    use crate::filler::cracks::Crack::*;
     vec![ParadoxRightLorule, ParadoxLeftLorule, DarkRuinsPillar, NShapedHouse, SwampPillarLorule, KusDomain]
 }
 

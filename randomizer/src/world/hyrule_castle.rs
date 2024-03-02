@@ -1,13 +1,13 @@
+use crate::filler::cracks::Crack::HyruleCastle;
 use crate::filler::location::Location::{self, *};
 use crate::filler::location_node::LocationNode;
 use crate::filler::logic::Logic;
 use crate::filler::path::Path;
-use crate::filler::portals::Portal::HyruleCastle;
-use crate::world::{edge, location, portal_left, portal_right};
-use crate::PortalMap;
+use crate::world::{crack_left, crack_right, edge, location};
+use crate::CrackMap;
 use std::collections::HashMap;
 
-pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
+pub(crate) fn graph(crack_map: &CrackMap) -> HashMap<Location, LocationNode> {
     HashMap::from([
         (
             HyruleCastleDungeon,
@@ -38,12 +38,12 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
             ZeldasStudy,
             location(
                 "Zelda's Study",
-                //vec![check!("[HC] Portal", regions::dungeons::hyrule::castle::SUBREGION, |p| p.can_merge())],
+                //vec![check!("[HC] Crack", regions::dungeons::hyrule::castle::SUBREGION, |p| p.can_merge())],
                 None,
                 vec![
                     //path!(HyruleCastleDungeonBoss), // Don't allow reverse Hyrule Castle
-                    portal_left(HyruleCastle, portal_map, true),
-                    portal_right(HyruleCastle, portal_map, true),
+                    crack_left(HyruleCastle, crack_map, true),
+                    crack_right(HyruleCastle, crack_map, true),
                 ],
             ),
         ),
