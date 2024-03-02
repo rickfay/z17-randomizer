@@ -62,7 +62,6 @@ pub mod dungeons {
     pub mod dark;
     pub mod desert;
     pub mod eastern;
-    pub mod graveyards;
     pub mod house;
     pub mod hyrule;
     pub mod ice;
@@ -84,14 +83,15 @@ pub mod hyrule {
     pub mod lake;
     pub mod lost;
     pub mod ravio;
+    pub mod river;
     pub mod southern;
-    pub mod zora;
 }
 pub mod lorule {
     pub const WORLD: super::World = super::World::Lorule;
     pub mod dark;
     pub mod death;
     pub mod field;
+    pub mod graveyard;
     pub mod lake;
     pub mod misery;
     pub mod skull;
@@ -104,7 +104,6 @@ pub(crate) fn patch(patcher: &mut Patcher, seed_info: &SeedInfo) -> crate::Resul
     dungeons::dark::patch(patcher, seed_info)?;
     dungeons::desert::patch(patcher, seed_info)?;
     dungeons::eastern::patch(patcher, seed_info)?;
-    dungeons::graveyards::patch(patcher, seed_info)?;
     dungeons::house::patch(patcher, seed_info)?;
     dungeons::hyrule::patch(patcher, seed_info)?;
     dungeons::ice::patch(patcher, seed_info)?;
@@ -124,12 +123,13 @@ pub(crate) fn patch(patcher: &mut Patcher, seed_info: &SeedInfo) -> crate::Resul
     hyrule::lake::patch(patcher, seed_info)?;
     hyrule::lost::patch(patcher, seed_info)?;
     hyrule::ravio::patch(patcher, seed_info)?;
+    hyrule::river::patch(patcher, seed_info)?;
     hyrule::southern::patch(patcher, seed_info)?;
-    hyrule::zora::patch(patcher, seed_info)?;
 
     lorule::dark::patch(patcher, seed_info)?;
     lorule::death::patch(patcher, seed_info)?;
     lorule::field::patch(patcher, seed_info)?;
+    lorule::graveyard::patch(patcher, seed_info)?;
     lorule::lake::patch(patcher, seed_info)?;
     lorule::misery::patch(patcher, seed_info)?;
     lorule::skull::patch(patcher, seed_info)?;

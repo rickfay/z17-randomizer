@@ -181,13 +181,13 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
             location(
                 "Lorule Graveyard",
                 vec![
-                    check!("Graveyard Weather Vane", regions::dungeons::graveyards::lorule::SUBREGION),
-                    check!("Graveyard Peninsula", regions::dungeons::graveyards::lorule::SUBREGION),
-                    check!("[Mai] Lorule Graveyard Big Rock", regions::dungeons::graveyards::lorule::SUBREGION, |p| p
+                    check!("Graveyard Weather Vane", regions::lorule::graveyard::lorule::SUBREGION),
+                    check!("Graveyard Peninsula", regions::lorule::graveyard::lorule::SUBREGION),
+                    check!("[Mai] Lorule Graveyard Big Rock", regions::lorule::graveyard::lorule::SUBREGION, |p| p
                         .has_titans_mitt()),
-                    check!("[Mai] Lorule Graveyard Wall", regions::dungeons::graveyards::lorule::SUBREGION, |p| p
+                    check!("[Mai] Lorule Graveyard Wall", regions::lorule::graveyard::lorule::SUBREGION, |p| p
                         .can_merge()),
-                    check!("[Mai] Lorule Graveyard Tree", regions::dungeons::graveyards::lorule::SUBREGION, |p| p
+                    check!("[Mai] Lorule Graveyard Tree", regions::lorule::graveyard::lorule::SUBREGION, |p| p
                         .has_boots()),
                     ghost(HintGhost::LoruleGraveyard),
                 ],
@@ -225,13 +225,13 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
             location(
                 "Lorule Sanctuary",
                 vec![
-                    check!("[LS] Entrance Chest", regions::dungeons::graveyards::lorule::SUBREGION, |p| p.has_lamp()
+                    check!("[LS] Entrance Chest", regions::lorule::graveyard::lorule::SUBREGION, |p| p.has_lamp()
                         || p.lampless()),
-                    check!("[LS] Lower Chest", regions::dungeons::graveyards::lorule::SUBREGION, |p| p.has_lamp()
+                    check!("[LS] Lower Chest", regions::lorule::graveyard::lorule::SUBREGION, |p| p.has_lamp()
                         || (p.has_fire_rod() && p.lampless())),
-                    check!("[LS] Upper Chest", regions::dungeons::graveyards::lorule::SUBREGION, |p| p.has_lamp()
+                    check!("[LS] Upper Chest", regions::lorule::graveyard::lorule::SUBREGION, |p| p.has_lamp()
                         || (p.has_fire_rod() && p.lampless())),
-                    check!("[LS] Ledge", regions::dungeons::graveyards::lorule::SUBREGION, |p| p.can_merge()
+                    check!("[LS] Ledge", regions::lorule::graveyard::lorule::SUBREGION, |p| p.can_merge()
                         && (p.has_lamp() || (p.has_fire_rod() && p.lampless()))),
                 ],
                 vec![
@@ -267,7 +267,7 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
             LoruleSanctuaryCaveUpper,
             location(
                 "Philosopher's Cave Upper",
-                vec![check!("Philosopher's Cave", regions::dungeons::graveyards::lorule::SUBREGION, |p| p.can_merge())],
+                vec![check!("Philosopher's Cave", regions::lorule::graveyard::lorule::SUBREGION, |p| p.can_merge())],
                 vec![edge!(LoruleSanctuary), edge!(LoruleSanctuaryCaveLower)],
             ),
         ),

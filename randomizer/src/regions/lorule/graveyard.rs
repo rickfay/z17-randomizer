@@ -2,22 +2,6 @@ crate::region! {
     course: FieldLight,
     name: "Graveyard",
     color: Purple,
-    hyrule {
-        locations: [
-            "Sanctuary Portal": None @Portal(IndoorLight 11[21] Sanctuary),
-            "Hyrule Graveyard Ledge Portal": None @Portal(12[107] GraveyardLedgeHyrule),
-
-            "Dampe": ItemSwordLv1 @Event(FieldLight_13_Sister[0x1D]),
-            "Graveyard Ledge Cave": HeartPiece @Heart(CaveLight 5[2]),
-            "Sanctuary Pegs": RupeeSilver @Chest(11[89]),
-            "[HS] Entrance": ItemKandelaar @Chest(CaveLight 18[19]),
-            "[HS] Ledge": HeartPiece @Heart(CaveLight 18[31]),
-            "[HS] Lower Chest": RupeeR @Chest(CaveLight 18[45]),
-            "[HS] Upper Chest": KeySmall @Chest(CaveLight 18[32]),
-            "[Mai] Hyrule Graveyard Wall": Maiamai @Maiamai(12[120]),
-            "[Mai] Sanctuary Wall": Maiamai @Maiamai(11[137]),
-        ],
-    },
     lorule {
         locations: [
             "Philosopher's Cave Portal": None @Portal(CaveDark 5[8] Philosopher),

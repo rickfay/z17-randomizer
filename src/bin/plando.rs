@@ -350,16 +350,16 @@ fn build_layout() -> Layout {
     layout.set_item("[Mai] Woman's Roof", regions::hyrule::kakariko::village::SUBREGION, maiamai.pop().unwrap());
 
     // Zora's River
-    layout.set_item("Queen Oren", regions::hyrule::zora::river::SUBREGION, Empty);
-    layout.set_item("Waterfall Cave", regions::hyrule::zora::river::SUBREGION, Empty);
-    layout.set_item("Zora's Domain Ledge", regions::hyrule::zora::river::SUBREGION, Empty);
-    layout.set_item("River Mini-Dungeon", regions::hyrule::zora::river::SUBREGION, Empty);
+    layout.set_item("Queen Oren", regions::hyrule::river::area::SUBREGION, Empty);
+    layout.set_item("Waterfall Cave", regions::hyrule::river::area::SUBREGION, Empty);
+    layout.set_item("Zora's Domain Ledge", regions::hyrule::river::area::SUBREGION, Empty);
+    layout.set_item("River Mini-Dungeon", regions::hyrule::river::area::SUBREGION, Empty);
 
-    layout.set_item("[Mai] Witch's House", regions::hyrule::zora::river::SUBREGION, maiamai.pop().unwrap());
-    layout.set_item("[Mai] Wooden Bridge", regions::hyrule::zora::river::SUBREGION, maiamai.pop().unwrap());
-    layout.set_item("[Mai] Waterfall Ledge", regions::hyrule::zora::river::SUBREGION, maiamai.pop().unwrap());
-    layout.set_item("[Mai] South of Zora's Domain", regions::hyrule::zora::river::SUBREGION, maiamai.pop().unwrap());
-    layout.set_item("[Mai] Zora's Domain", regions::hyrule::zora::river::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Witch's House", regions::hyrule::river::area::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Wooden Bridge", regions::hyrule::river::area::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Waterfall Ledge", regions::hyrule::river::area::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] South of Zora's Domain", regions::hyrule::river::area::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Zora's Domain", regions::hyrule::river::area::SUBREGION, maiamai.pop().unwrap());
 
     // Eastern Ruins
     layout.set_item("Bird Lover", regions::hyrule::eastern::ruins::SUBREGION, Empty);
@@ -532,28 +532,28 @@ fn build_layout() -> Layout {
     //////////////////////////
 
     // Graveyard (Hyrule)
-    layout.set_item("Dampe", regions::dungeons::graveyards::hyrule::SUBREGION, Empty);
-    layout.set_item("Sanctuary Pegs", regions::dungeons::graveyards::hyrule::SUBREGION, Empty);
-    layout.set_item("[HS] Entrance", regions::dungeons::graveyards::hyrule::SUBREGION, Empty);
-    layout.set_item("[HS] Lower Chest", regions::dungeons::graveyards::hyrule::SUBREGION, Empty);
-    layout.set_item("[HS] Upper Chest", regions::dungeons::graveyards::hyrule::SUBREGION, Empty);
-    layout.set_item("[HS] Ledge", regions::dungeons::graveyards::hyrule::SUBREGION, Empty);
-    layout.set_item("Graveyard Ledge Cave", regions::dungeons::graveyards::hyrule::SUBREGION, Empty);
-    layout.set_item("[Mai] Sanctuary Wall", regions::dungeons::graveyards::hyrule::SUBREGION, maiamai.pop().unwrap());
-    layout.set_item("[Mai] Hyrule Graveyard Wall", regions::dungeons::graveyards::hyrule::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("Dampe", regions::hyrule::river::area::SUBREGION, Empty);
+    layout.set_item("Sanctuary Pegs", regions::hyrule::river::area::SUBREGION, Empty);
+    layout.set_item("[HS] Entrance", regions::hyrule::river::area::SUBREGION, Empty);
+    layout.set_item("[HS] Lower Chest", regions::hyrule::river::area::SUBREGION, Empty);
+    layout.set_item("[HS] Upper Chest", regions::hyrule::river::area::SUBREGION, Empty);
+    layout.set_item("[HS] Ledge", regions::hyrule::river::area::SUBREGION, Empty);
+    layout.set_item("Graveyard Ledge Cave", regions::hyrule::river::area::SUBREGION, Empty);
+    layout.set_item("[Mai] Sanctuary Wall", regions::hyrule::river::area::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Hyrule Graveyard Wall", regions::hyrule::river::area::SUBREGION, maiamai.pop().unwrap());
 
     // Graveyard (Lorule)
-    layout.set_item("Graveyard Peninsula", regions::dungeons::graveyards::lorule::SUBREGION, Empty);
-    layout.set_item("Philosopher's Cave", regions::dungeons::graveyards::lorule::SUBREGION, Empty);
-    layout.set_item("[LS] Entrance Chest", regions::dungeons::graveyards::lorule::SUBREGION, Empty);
-    layout.set_item("[LS] Ledge", regions::dungeons::graveyards::lorule::SUBREGION, Empty);
-    layout.set_item("[LS] Lower Chest", regions::dungeons::graveyards::lorule::SUBREGION, Empty);
-    layout.set_item("[LS] Upper Chest", regions::dungeons::graveyards::lorule::SUBREGION, Empty);
-    layout.set_item("[Mai] Lorule Graveyard Big Rock", regions::dungeons::graveyards::lorule::SUBREGION, maiamai.pop().unwrap());
-    layout.set_item("[Mai] Lorule Graveyard Tree", regions::dungeons::graveyards::lorule::SUBREGION, maiamai.pop().unwrap());
-    layout.set_item("[Mai] Lorule Graveyard Wall", regions::dungeons::graveyards::lorule::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("Graveyard Peninsula", regions::lorule::graveyard::lorule::SUBREGION, Empty);
+    layout.set_item("Philosopher's Cave", regions::dungeons::graveyard::lorule::SUBREGION, Empty);
+    layout.set_item("[LS] Entrance Chest", regions::dungeons::graveyard::lorule::SUBREGION, Empty);
+    layout.set_item("[LS] Ledge", regions::dungeons::graveyard::lorule::SUBREGION, Empty);
+    layout.set_item("[LS] Lower Chest", regions::lorule::graveyard::lorule::SUBREGION, Empty);
+    layout.set_item("[LS] Upper Chest", regions::lorule::graveyard::lorule::SUBREGION, Empty);
+    layout.set_item("[Mai] Lorule Graveyard Big Rock", regions::lorule::graveyard::lorule::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Lorule Graveyard Tree", regions::lorule::graveyard::lorule::SUBREGION, maiamai.pop().unwrap());
+    layout.set_item("[Mai] Lorule Graveyard Wall", regions::lorule::graveyard::lorule::SUBREGION, maiamai.pop().unwrap());
 
-    layout.set_item("Graveyard Weather Vane", regions::dungeons::graveyards::lorule::SUBREGION, GraveyardWV);
+    layout.set_item("Graveyard Weather Vane", regions::lorule::graveyard::lorule::SUBREGION, GraveyardWV);
 
     //////////////////////
     // --- Dungeons --- //

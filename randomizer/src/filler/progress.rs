@@ -4,6 +4,7 @@ use crate::filler::filler_item::{Goal, Item, Randomizable};
 use crate::filler::item_pools;
 use crate::{DashSet, SeedInfo};
 use modinfo::settings::keysy::Keysy;
+use modinfo::settings::portal_shuffle::PortalShuffle;
 use modinfo::settings::portals::Portals;
 use modinfo::settings::ravios_shop::RaviosShop;
 use modinfo::settings::trials_door::TrialsDoor;
@@ -19,6 +20,17 @@ pub struct Progress<'s> {
 impl<'s> Progress<'s> {
     pub fn new(seed_info: &'s SeedInfo) -> Progress<'s> {
         Self { items: Default::default(), seed_info }
+    }
+
+    /// Constructs a new [`Progress`] instance that already has all minor progression items.
+    pub fn nothing_but_hearts_and_rupees(seed_info: &'s SeedInfo) -> Progress<'s> {
+        let mut items = DashSet::default();
+        items.extend(item_pools::get_heart_pieces().iter().map(|&i| i.into()).collect::<DashSet<Randomizable>>());
+        items.extend(item_pools::get_heart_containers().iter().map(|&i| i.into()).collect::<DashSet<Randomizable>>());
+        items.extend(item_pools::get_gold_rupee_pool().iter().map(|&i| i.into()).collect::<DashSet<Randomizable>>());
+        items.extend(item_pools::get_silver_rupee_pool().iter().map(|&i| i.into()).collect::<DashSet<Randomizable>>());
+        items.extend(item_pools::get_purple_rupee_pool().iter().map(|&i| i.into()).collect::<DashSet<Randomizable>>());
+        Self { items, seed_info }
     }
 
     pub fn get_items(&self) -> &DashSet<Randomizable> {
@@ -242,6 +254,10 @@ impl<'s> Progress<'s> {
             WeatherVanes::Lorule | WeatherVanes::All => true,
             _ => false,
         }
+    }
+
+    pub fn portal_shuffle(&self) -> bool {
+        self.seed_info.settings.portal_shuffle != PortalShuffle::Off
     }
 
     pub fn can_escape(&self) -> bool {
