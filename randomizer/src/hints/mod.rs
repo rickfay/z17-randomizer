@@ -594,10 +594,15 @@ fn get_potential_path_hints(
         }
     });
 
+    // Always start with all hearts and rupees to prevent "weird" hints where items can be considered path for them in
+    // in a way that confuses players and is rarely helpful.
+    let nothing_but_hearts_and_rupees = Progress::nothing_but_hearts_and_rupees(seed_info);
+
     // Test candidate items to see if Boss can be defeated without them
     for check in potential_path_checks {
-        // Reset Progression
-        let mut progress = Progress::new(seed_info);
+        // Reset Progression.
+        // Cloning is more efficient than constructing here because that constructor is fat. (and ugly)
+        let mut progress = nothing_but_hearts_and_rupees.clone();
 
         loop {
             reachable_checks = find_reachable_checks(seed_info, &progress);
@@ -722,10 +727,10 @@ pub(crate) fn hint_ghost_name(ghost: &HintGhost) -> &'static str {
     }
 }
 
-const POSSIBLE_PATH_ITEMS: [Item; 49] = [
+const POSSIBLE_PATH_ITEMS: [Item; 45] = [
     Bow01, Bow02, Bow03, Boomerang01, Boomerang02, Hookshot01, Hookshot02, Bombs01, Bombs02, FireRod01, FireRod02,
     IceRod01, IceRod02, Hammer01, Hammer02, SandRod01, SandRod02, TornadoRod01, TornadoRod02, Bell, StaminaScroll,
     PegasusBoots, Flippers, HylianShield, SmoothGem, LetterInABottle, PremiumMilk, HintGlasses, GreatSpin, Bottle01,
-    Bottle02, Bottle03, Bottle04, Lamp01, Lamp02, Sword01, Sword02, Sword03, Sword04, Glove01, Glove02, Net01, Net02,
-    Mail01, Mail02, OreYellow, OreGreen, OreBlue, OreRed,
+    Bottle02, Bottle03, Bottle04, Lamp01, Lamp02, Glove01, Glove02, Net01, Net02, Mail01, Mail02, OreYellow, OreGreen,
+    OreBlue, OreRed,
 ];

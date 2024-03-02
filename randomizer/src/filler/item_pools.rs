@@ -128,7 +128,7 @@ fn get_base_progression_pool() -> Vec<Item> {
     progression_pool
 }
 
-fn get_minor_progression_pool() -> Vec<Item> {
+pub(crate) fn get_minor_progression_pool() -> Vec<Item> {
     let mut minor_progression_pool = vec![];
 
     minor_progression_pool.extend(get_maiamai_pool());
@@ -137,9 +137,13 @@ fn get_minor_progression_pool() -> Vec<Item> {
     minor_progression_pool.extend(get_gold_rupee_pool());
     minor_progression_pool.extend(get_silver_rupee_pool());
     minor_progression_pool.extend(get_purple_rupee_pool());
-    minor_progression_pool.extend(vec![RupeeGreen, RupeeGreen]);
+    minor_progression_pool.extend(get_greg_pool());
 
     minor_progression_pool
+}
+
+fn get_greg_pool() -> Vec<Item> {
+    vec![RupeeGreen, RupeeGreen]
 }
 
 fn get_dungeon_prize_pool() -> Vec<Item> {

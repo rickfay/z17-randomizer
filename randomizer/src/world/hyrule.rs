@@ -62,11 +62,11 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
                     //check!("Your House Portal", regions::hyrule::field::main::SUBREGION, |p| p.can_merge()),
                     check!("Your House Weather Vane", regions::hyrule::field::main::SUBREGION),
                     check!("Kakariko Village Weather Vane", regions::hyrule::kakariko::village::SUBREGION),
-                    check!("Sanctuary Weather Vane", regions::hyrule::zora::river::SUBREGION),
-                    check!("Witch's House Weather Vane", regions::hyrule::zora::river::SUBREGION),
-                    check!("Dampe", regions::dungeons::graveyards::hyrule::SUBREGION),
+                    check!("Sanctuary Weather Vane", regions::hyrule::river::area::SUBREGION),
+                    check!("Witch's House Weather Vane", regions::hyrule::river::area::SUBREGION),
+                    check!("Dampe", regions::hyrule::river::area::SUBREGION),
                     check!("Irene", regions::hyrule::irene::witch::SUBREGION, |p| p.has_sage_irene()),
-                    check!("Sanctuary Pegs", regions::dungeons::graveyards::hyrule::SUBREGION, |p| p.has_hammer()),
+                    check!("Sanctuary Pegs", regions::hyrule::river::area::SUBREGION, |p| p.has_hammer()),
                     check!(
                         "Blacksmith Ledge",
                         regions::hyrule::field::main::SUBREGION => {
@@ -100,7 +100,7 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
                         "Hyrule Hotfoot 65s",
                         regions::hyrule::lost::woods::SUBREGION => {
                             normal: | p | p.has_boots(),
-                            hard: |p| p.can_merge() && p.has_bell(),
+                            hard: |p| p.can_merge() && p.has_bell() && !p.portal_shuffle(),
                             hell: |_| true, // Can just walk it
                         }
                     ),
@@ -140,7 +140,7 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
                     // Maiamai
                     check!("[Mai] Rosso Wall", regions::hyrule::lost::woods::SUBREGION, |p| p.can_merge()),
                     check!("[Mai] Small Pond", regions::hyrule::lost::woods::SUBREGION, |p| p.has_flippers()),
-                    check!("[Mai] Sanctuary Wall", regions::dungeons::graveyards::hyrule::SUBREGION, |p| p.can_merge()),
+                    check!("[Mai] Sanctuary Wall", regions::hyrule::river::area::SUBREGION, |p| p.can_merge()),
                     check!("[Mai] Blacksmith Tree", regions::hyrule::field::main::SUBREGION, |p| p.has_boots()),
                     check!("[Mai] Lost Woods Tree", regions::hyrule::lost::woods::SUBREGION, |p| p.has_boots()),
                     check!("[Mai] Hyrule Castle Tree", regions::hyrule::field::main::SUBREGION, |p| p.has_boots()),
@@ -148,7 +148,7 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
                         .has_tornado_rod()),
                     check!(
                         "[Mai] Wooden Bridge",
-                        regions::hyrule::zora::river::SUBREGION=> {
+                        regions::hyrule::river::area::SUBREGION=> {
                             normal: |p| p.has_flippers(),
                             adv_glitched: |p| p.has_boots() && (p.has_fire_rod() || p.has_nice_bombs()),
                             hell: |p| p.has_boots(), // bee boost fake flippers
@@ -429,7 +429,7 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
             WaterfallLedge,
             location(
                 "Waterfall Ledge",
-                vec![check!("[Mai] Waterfall Ledge", regions::hyrule::zora::river::SUBREGION, |p| p.can_merge())],
+                vec![check!("[Mai] Waterfall Ledge", regions::hyrule::river::area::SUBREGION, |p| p.can_merge())],
                 vec![
                     fast_travel_hyrule(),
                     // portal_left is unpossible
@@ -472,7 +472,7 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
                 "Witch's House",
                 vec![
                     goal!("Access Potion Shop", Goal::AccessPotionShop),
-                    check!("[Mai] Witch's House", regions::hyrule::zora::river::SUBREGION, |p| p.can_merge()),
+                    check!("[Mai] Witch's House", regions::hyrule::river::area::SUBREGION, |p| p.can_merge()),
                 ],
                 vec![edge!(HyruleField)],
             ),
@@ -527,7 +527,7 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
             location(
                 "Zora's Domain",
                 vec![
-                    check!("Queen Oren", regions::hyrule::zora::river::SUBREGION, |p| p.has_smooth_gem()
+                    check!("Queen Oren", regions::hyrule::river::area::SUBREGION, |p| p.has_smooth_gem()
                         && p.has_sage_oren()),
                     goal!("Give Oren Smooth Gem", Goal::RavioShopOpen, |p| p.has_smooth_gem() && p.has_sage_oren()),
                 ],
@@ -540,9 +540,9 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
                 "Zora's Domain Area",
                 vec![
                     goal!("Shady Guy Trigger", Goal::ShadyGuyTrigger),
-                    check!("Zora's Domain Ledge", regions::hyrule::zora::river::SUBREGION, |p| p.can_merge()),
-                    check!("[Mai] Zora's Domain", regions::hyrule::zora::river::SUBREGION, |p| p.has_flippers()),
-                    check!("[Mai] South of Zora's Domain", regions::hyrule::zora::river::SUBREGION, |p| p.can_merge()),
+                    check!("Zora's Domain Ledge", regions::hyrule::river::area::SUBREGION, |p| p.can_merge()),
+                    check!("[Mai] Zora's Domain", regions::hyrule::river::area::SUBREGION, |p| p.has_flippers()),
+                    check!("[Mai] South of Zora's Domain", regions::hyrule::river::area::SUBREGION, |p| p.can_merge()),
                     ghost(HintGhost::ZorasDomain),
                     ghost(HintGhost::WaterfallCave),
                 ],
@@ -571,7 +571,7 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
             WaterfallCave,
             location(
                 "Waterfall Cave",
-                vec![check!("Waterfall Cave", regions::hyrule::zora::river::SUBREGION)],
+                vec![check!("Waterfall Cave", regions::hyrule::river::area::SUBREGION)],
                 vec![edge!(WaterfallCaveShallowWater)],
             ),
         ),
@@ -644,7 +644,7 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
             TornadoRodDungeon,
             location(
                 "River Mini-Dungeon",
-                vec![check!("River Mini-Dungeon", regions::hyrule::zora::river::SUBREGION, |p| p.can_merge())],
+                vec![check!("River Mini-Dungeon", regions::hyrule::river::area::SUBREGION, |p| p.can_merge())],
                 vec![edge!(HyruleField)],
             ),
         ),
@@ -652,8 +652,7 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
             Location::GraveyardLedgeHyrule,
             location(
                 "Graveyard Ledge",
-                vec![check!("[Mai] Hyrule Graveyard Wall", regions::dungeons::graveyards::hyrule::SUBREGION, |p| p
-                    .can_merge())],
+                vec![check!("[Mai] Hyrule Graveyard Wall", regions::hyrule::river::area::SUBREGION, |p| p.can_merge())],
                 vec![
                     fast_travel_hyrule(),
                     edge!(HyruleField),
@@ -667,7 +666,7 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
             GraveyardLedgeCave,
             location(
                 "Graveyard Ledge Cave",
-                vec![check!("Graveyard Ledge Cave", regions::dungeons::graveyards::hyrule::SUBREGION)],
+                vec![check!("Graveyard Ledge Cave", regions::hyrule::river::area::SUBREGION)],
                 vec![edge!(GraveyardLedgeHyrule)],
             ),
         ),
@@ -945,12 +944,12 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
             location(
                 "Sanctuary",
                 vec![
-                    check!("[HS] Entrance", regions::dungeons::graveyards::hyrule::SUBREGION),
-                    check!("[HS] Lower Chest", regions::dungeons::graveyards::hyrule::SUBREGION, |p| p.has_lamp()
+                    check!("[HS] Entrance", regions::hyrule::river::area::SUBREGION),
+                    check!("[HS] Lower Chest", regions::hyrule::river::area::SUBREGION, |p| p.has_lamp()
                         || (p.has_fire_rod() && p.lampless())),
-                    check!("[HS] Upper Chest", regions::dungeons::graveyards::hyrule::SUBREGION, |p| p.has_lamp()
+                    check!("[HS] Upper Chest", regions::hyrule::river::area::SUBREGION, |p| p.has_lamp()
                         || (p.has_fire_rod() && p.lampless())),
-                    check!("[HS] Ledge", regions::dungeons::graveyards::hyrule::SUBREGION, |p| {
+                    check!("[HS] Ledge", regions::hyrule::river::area::SUBREGION, |p| {
                         p.can_merge() && (p.has_lamp() || (p.has_fire_rod() && p.lampless()))
                     }),
                     goal!("Open Sanctuary Doors", Goal::OpenSanctuaryDoors => {
