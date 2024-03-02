@@ -4,7 +4,7 @@ crate::region! {
     color: Name,
     castle {
         locations: [
-            "[HC] Portal": None @Portal(7[10] HyruleCastle),
+            "[HC] Crack": None @Crack(7[10] HyruleCastle),
 
             "[HC] Battlement": RupeePurple @Chest(FieldLight 18[224]),
             "[HC] West Wing": RupeeB @Chest(12[48]),

@@ -4,8 +4,8 @@ crate::region! {
     color: Purple,
     lorule {
         locations: [
-            "Philosopher's Cave Portal": None @Portal(CaveDark 5[8] Philosopher),
-            "Lorule Graveyard Ledge Portal": None @Portal(FieldDark 12[20] GraveyardLedgeLorule),
+            "Philosopher's Cave Crack": None @Crack(CaveDark 5[8] Philosopher),
+            "Lorule Graveyard Ledge Crack": None @Crack(FieldDark 12[20] GraveyardLedgeLorule),
 
             "Graveyard Weather Vane": None @WeatherVane(FieldDark 12[97] GraveyardWV),
 

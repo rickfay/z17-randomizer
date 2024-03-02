@@ -4,9 +4,9 @@ crate::region! {
     color: Name,
     mountain {
         locations: [
-            "Lorule Death West Portal": None @Portal(3[45] DeathWestLorule),
-            "Lorule Floating Island Portal": None @Portal(4[70] FloatingIslandLorule),
-            "Lorule Rosso's Ore Mine Portal": None @Portal(4[29] RossosOreMineLorule),
+            "Lorule Death West Crack": None @Crack(3[45] DeathWestLorule),
+            "Lorule Floating Island Crack": None @Crack(4[70] FloatingIslandLorule),
+            "Lorule Rosso's Ore Mine Crack": None @Crack(4[29] RossosOreMineLorule),
 
             "Treacherous Tower Weather Vane": None @WeatherVane(3[52] TreacherousTowerWV),
             "Death Mountain (Lorule) Weather Vane": None @WeatherVane(4[68] DeathMountainLoruleWV),

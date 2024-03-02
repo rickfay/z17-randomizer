@@ -4,15 +4,15 @@ use crate::filler::location::Location::{self, *};
 use crate::filler::location_node::LocationNode;
 use crate::filler::logic::Logic;
 use crate::filler::path::Path;
-use crate::world::{check, edge, goal, location, portal_left, portal_right};
+use crate::world::{check, crack_left, crack_right, edge, goal, location};
 use crate::LocationInfo;
-use crate::{regions, PortalMap};
+use crate::{regions, CrackMap};
 
-use crate::filler::portals::Portal::LoruleCastle;
+use crate::filler::cracks::Crack::LoruleCastle;
 use std::collections::HashMap;
 
 /// Lorule Castle World Graph
-pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
+pub(crate) fn graph(crack_map: &CrackMap) -> HashMap<Location, LocationNode> {
     HashMap::from([
         (
             LoruleCastle1F,
@@ -138,8 +138,8 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
                 None,
                 vec![
                     edge!(LoruleCastle2F3F, |p| p.has_completed_trials() && p.hearts(13.0)),
-                    portal_left(LoruleCastle, portal_map, false),
-                    portal_right(LoruleCastle, portal_map, false),
+                    crack_left(LoruleCastle, crack_map, false),
+                    crack_right(LoruleCastle, crack_map, false),
                     edge!(LoruleBlacksmith),
                     edge!(ThroneRoom, |p| p.has_yuganon_requirement()),
                 ],

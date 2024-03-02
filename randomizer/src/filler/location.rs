@@ -8,7 +8,7 @@ pub enum Location {
     MaiamaiCave,
     EasternRuinsUpper,
     EasternRuinsEastLedge,
-    EasternRuinsBlockedPortal,
+    EasternRuinsBlockedCrack,
     EasternFairyCave,
     EasternBigFairyCave,
     WitchCave,
@@ -65,7 +65,7 @@ pub enum Location {
     BridgeShallowWater,
     DarkRuinsRiver,
     MiseryMireLeftPillarMerged,
-    LoruleRiverPortalShallows,
+    LoruleRiverCrackShallows,
 
     WaterfallLedge,
     CuccoHouse,
@@ -130,8 +130,8 @@ pub enum Location {
 
     Desert,
     DesertNorthLedge,
-    DesertUseBlockedPortalRight,
-    DesertUseBlockedPortalLeft,
+    DesertUseBlockedCrackRight,
+    DesertUseBlockedCrackLeft,
     DesertFairyLedge,
     DesertFairyCave,
     DesertCenterLedge,
@@ -153,7 +153,7 @@ pub enum Location {
     LoruleLakesideItemShop,
 
     DarkRuins,
-    DarkRuinsBlockedPortal,
+    DarkRuinsBlockedCrack,
     DarkMazeEntrance,
     DarkMazeHalfway,
     DarkPalaceWeatherVane,

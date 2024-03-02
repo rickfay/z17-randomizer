@@ -3,8 +3,8 @@ use crate::{patch::util::*, regions, Result, SeedInfo};
 use game::Course::{self, *};
 use log::info;
 use macros::fail;
+use modinfo::settings::cracksanity::Cracksanity;
 use modinfo::settings::keysy::Keysy;
-use modinfo::settings::portal_shuffle::PortalShuffle;
 use modinfo::settings::Settings;
 use rom::flag::Flag;
 use rom::scene::{Arg, Obj, SpawnPoint, Transform, Vec3};
@@ -119,7 +119,7 @@ pub fn patch(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
     patch_trials_door(patcher);
     patch_hildas_study(patcher, &seed_info.settings);
 
-    patch_portal_shuffle(patcher);
+    patch_cracksanity(patcher);
     patch_keysy_small(patcher, &seed_info.settings);
     patch_keysy_big(patcher, &seed_info.settings);
     // patch_reverse_desert_palace(patcher, settings);
@@ -757,7 +757,7 @@ fn patch_flag_510_effects(patcher: &mut Patcher) -> Result<()> {
         ],
     );
 
-    // Paradox Portals
+    // Paradox Cracks
     patcher.modify_objs(
         FieldLight,
         32,
@@ -1345,47 +1345,47 @@ fn patch_keysy_big(patcher: &mut Patcher, settings: &Settings) {
     patcher.modify_objs(DungeonIce, 1, [disable(291)]); // Ice Ruins B4
 }
 
-fn patch_portal_shuffle(patcher: &mut Patcher) {
-    // Eastern Ruins SE Portal Blockage
+fn patch_cracksanity(patcher: &mut Patcher) {
+    // Eastern Ruins SE Crack Blockage
     patcher.modify_objs(
         FieldLight,
         30,
         [call(57, |obj| {
-            obj.set_active_flag(Flag::PORTAL_EASTERN_RUINS_SE);
-            obj.set_disable_flag(Flag::PORTAL_EASTERN_RUINS_SE);
+            obj.set_active_flag(Flag::CRACK_EASTERN_RUINS_SE);
+            obj.set_disable_flag(Flag::CRACK_EASTERN_RUINS_SE);
         })],
     );
 
-    // Dark Ruins SE Portal
+    // Dark Ruins SE Crack
     patcher.modify_objs(
         FieldDark,
         30,
         [call(37, |obj| {
-            obj.set_active_flag(Flag::PORTAL_DARK_MAZE_SE);
+            obj.set_active_flag(Flag::CRACK_DARK_MAZE_SE);
             obj.set_enable_flag(Flag::QUAKE);
-            obj.set_disable_flag(Flag::PORTAL_DARK_MAZE_SE);
+            obj.set_disable_flag(Flag::CRACK_DARK_MAZE_SE);
         })],
     );
 
-    // Desert North Portal
+    // Desert North Crack
     patcher.modify_objs(
         FieldLight,
         31,
         [call(65, |obj| {
-            obj.set_active_flag(Flag::PORTAL_DESERT_NORTH);
+            obj.set_active_flag(Flag::CRACK_DESERT_NORTH);
             obj.set_enable_flag(Flag::QUAKE);
-            obj.set_disable_flag(Flag::PORTAL_DESERT_NORTH);
+            obj.set_disable_flag(Flag::CRACK_DESERT_NORTH);
         })],
     );
 
-    // Lorule Graveyard Ledge Portal
+    // Lorule Graveyard Ledge Crack
     patcher.modify_objs(
         FieldDark,
         12,
         [call(19, |obj| {
-            obj.set_active_flag(Flag::PORTAL_GRAVEYARD_LEDGE_LORULE);
+            obj.set_active_flag(Flag::CRACK_GRAVEYARD_LEDGE_LORULE);
             obj.set_enable_flag(Flag::QUAKE);
-            obj.set_disable_flag(Flag::PORTAL_GRAVEYARD_LEDGE_LORULE);
+            obj.set_disable_flag(Flag::CRACK_GRAVEYARD_LEDGE_LORULE);
         })],
     );
 }
@@ -1459,10 +1459,10 @@ fn patch_hildas_study(patcher: &mut Patcher, settings: &Settings) {
 /// This mostly involves making Key doors (small + boss) two-sided so that keys are required to pass through them no
 /// matter which way the player approach them.
 ///
-/// Currently not being used as I'm keeping the DP/Z Portals vanilla for the first release.
+/// Currently not being used as I'm keeping the DP/Z Cracks vanilla for the first release.
 #[allow(unused)]
 fn patch_reverse_desert_palace(patcher: &mut Patcher, settings: &Settings) {
-    if settings.portal_shuffle == PortalShuffle::Off {
+    if settings.cracksanity == Cracksanity::Off {
         return;
     }
 
@@ -1684,9 +1684,9 @@ fn patch_castles(patcher: &mut Patcher) {
             //set_disable_flag(29, hacky_flag), // AreaDisableWallIn
             // disable(26), // Curtain
             // disable(29), // AreaDisableWallIn
-            // Portal
+            // Crack
             call(10, move |obj| {
-                obj.arg.3 = 0; // Prevent Long Portal Transition
+                obj.arg.3 = 0; // Prevent Long Crack Transition
             }),
             // Fairies
             clear_enable_flag(18),
@@ -2089,7 +2089,7 @@ fn do_dev_stuff(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
             // FieldLight, 4, 8,  // Floating Island
             // IndoorLight, 14, 0,  // Stylish Woman's House
             // IndoorLight, 12, 4,  // Hyrule Castle
-            // FieldDark, 29, 5,  // Lorule River Portal
+            // FieldDark, 29, 5,  // Lorule River Crack
             // FieldLight, 16, 5,  // Kakariko Village
             // CaveLight, 15, 0, // Maiamai Cave
             // IndoorLight, 17, 0, // Bee Guy's House
@@ -2124,7 +2124,7 @@ fn do_dev_stuff(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
     //     call(51, |obj| {
     //         obj.redirect(Dest::new(
     //         // IndoorLight, 1, 1,  // No Redirect
-    //         FieldDark, 29, 5,  // Lorule River Portal
+    //         FieldDark, 29, 5,  // Lorule River Crack
     //     ));
     // })]);
 

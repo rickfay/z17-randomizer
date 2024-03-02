@@ -54,7 +54,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                         None,
                     ),
                     old_check(
-                        LocationInfo::new("[TR] (1F) Portal Room NW", regions::dungeons::turtle::rock::SUBREGION),
+                        LocationInfo::new("[TR] (1F) Northwest Room", regions::dungeons::turtle::rock::SUBREGION),
                         Some(|p| p.can_merge()),
                         None,
                         None,

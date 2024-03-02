@@ -3,14 +3,13 @@ use {
     crate::{Error, Result},
     bytey::*,
     data_encoding::HEXUPPER,
-    log::{error, info},
+    log::info,
     ring::digest::{Context, SHA256},
     serde::Serialize,
     std::{
         fs,
-        io::{prelude::*, stdin, BufReader},
+        io::{prelude::*, BufReader},
         path::Path,
-        process::exit,
     },
 };
 pub mod byaml;
@@ -44,38 +43,24 @@ where
     }
 }
 
-// FIXME unnecssary duplicate
-fn pause() {
-    print!("\nPress Enter to continue...");
-    stdin().read_exact(&mut [0]).unwrap();
-}
-
 impl Cxi<fs::File> {
     pub fn open<P>(path: P) -> Result<Self>
     where
         P: AsRef<Path>,
     {
         let path = path.as_ref();
-        let mut file = match fs::File::open(path) {
-            Ok(file) => file,
-            Err(_) => {
-                error!("Couldn't load ROM from: \"{}\"", path.display());
-                error!("Please check that config.json points to a valid ROM.");
-                pause();
-                exit(1);
-            },
-        };
+        let mut file = fs::File::open(path)?;
 
         //validate_rom(&file);
 
-        bytey::typedef! { struct NCSD: TryFromBytes<'_> [HEADER_LEN] {
+        typedef! { struct NCSD: TryFromBytes<'_> [HEADER_LEN] {
             #b"NCSD",
             [8] id: u64,
             [0x20] offset: u32,
         }}
         let header = NCSD::try_read_from_offset(&mut file, SIGNATURE_LEN)?;
         let offset = from_media_units(header.offset);
-        bytey::typedef! { struct NCCH: TryFromBytes<'_> [HEADER_LEN] {
+        typedef! { struct NCCH: TryFromBytes<'_> [HEADER_LEN] {
             #b"NCCH",
             [8] id: u64,
             [0x18] program_id: u64,

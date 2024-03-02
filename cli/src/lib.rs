@@ -1,7 +1,7 @@
 use log::info;
+use modinfo::settings::cracks::Cracks;
+use modinfo::settings::cracksanity::Cracksanity;
 use modinfo::settings::keysy::Keysy;
-use modinfo::settings::portal_shuffle::PortalShuffle;
-use modinfo::settings::portals::Portals;
 use modinfo::settings::ravios_shop::RaviosShop;
 use modinfo::settings::trials_door::TrialsDoor;
 use modinfo::settings::weather_vanes::WeatherVanes;
@@ -88,21 +88,21 @@ pub fn get_seed_settings() -> Result<Settings, String> {
     let maiamai_madness =
         prompt_bool("Maiamai Madness", "This shuffles Maiamai into the pool, adding 100 more locations.");
 
-    let portals = Portals::try_from(prompt_u8_in_range(
-        "Portals",
-        "Choose the initial Portal state:\n\
-        [0] Closed - All Portals except the Hyrule Castle Portal (and its pair) remain closed until the Quake Item is found.\n\
-        [1] Open   - All Portals are open from the start of the game, and the Quake Item is not in the item pool.",
+    let cracks = Cracks::try_from(prompt_u8_in_range(
+        "Cracks",
+        "Choose the initial state of the cracks between worlds:\n\
+        [0] Closed - All cracks except the Hyrule Castle crack (and its pair) remain closed until Quake is found.\n\
+        [1] Open   - All cracks are open from the start of the game, and Quake is not in the item pool.",
         0,
         1,
     ))?;
 
-    let portal_shuffle = PortalShuffle::try_from(prompt_u8_in_range(
-        "Portal Shuffle",
-        "Choose how to shuffle Portals:\n\
-        [0] Off                        - Portals are not shuffled.\n\
-        [1] Cross World Pairs          - Portals are shuffled, but remain in Hyrule/Lorule pairs.\n\
-        [2] Any World Pairs            - Portals are shuffled freely, and can lead to the same or opposite world.\n\
+    let cracksanity = Cracksanity::try_from(prompt_u8_in_range(
+        "Cracksanity",
+        "Choose how to shuffle cracks:\n\
+        [0] Off                        - Cracks are not shuffled.\n\
+        [1] Cross World Pairs          - Cracks are shuffled, but remain in Hyrule/Lorule pairs.\n\
+        [2] Any World Pairs            - Cracks are shuffled freely, and can lead to the same or opposite world.\n\
         [3] Mirrored Cross World Pairs - Same as Cross World Pairs, but each pair's vanilla counterparts will be in a matching pair.\n\
         [4] Mirrored Any World Pairs   - Same as Any World Pairs, but each pair's vanilla counterparts will be in a matching pair.",
         0,
@@ -123,7 +123,7 @@ pub fn get_seed_settings() -> Result<Settings, String> {
     let trials_door = TrialsDoor::try_from(prompt_u8_in_range(
         "Trial's Door",
         "Choose the behavior of the Lorule Castle Trial's Door:\n\
-        [0] OFF - Trial's Door removed. (WARNING: May require entering LC via its Portal.)\n\
+        [0] OFF - Trial's Door removed. (WARNING: May require entering LC via the crack.)\n\
         [1] Trial  Required, randomly selected.\n\
         [2] Trials Required, randomly selected.\n\
         [3] Trials Required, randomly selected.\n\
@@ -221,8 +221,8 @@ pub fn get_seed_settings() -> Result<Settings, String> {
         maiamai_madness,
         nice_mode,
         super_mode,
-        portals,
-        portal_shuffle,
+        cracks,
+        cracksanity,
         trials_door,
         weather_vanes,
         ravios_shop: RaviosShop::Open,

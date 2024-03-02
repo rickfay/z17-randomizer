@@ -1,6 +1,6 @@
 use crate::filler::check::Check;
+use crate::filler::cracks::Crack;
 use crate::filler::filler_item::{Goal, Item, Randomizable, Vane};
-use crate::filler::portals::Portal;
 use crate::filler::progress::Progress;
 use crate::{filler, CheckMap, SeedInfo};
 use game::ghosts::HintGhost;
@@ -31,7 +31,7 @@ pub struct Sphere {
     goals: BTreeMap<String, Goal>,
 
     #[serde(skip_serializing_if = "BTreeMap::is_empty")]
-    portals: BTreeMap<String, Portal>,
+    cracks: BTreeMap<String, Crack>,
 
     #[serde(skip_serializing_if = "BTreeMap::is_empty")]
     weather_vanes: BTreeMap<String, Vane>,
@@ -43,7 +43,7 @@ impl Sphere {
             items: Default::default(),
             ghosts: Default::default(),
             goals: Default::default(),
-            portals: Default::default(),
+            cracks: Default::default(),
             weather_vanes: Default::default(),
         }
     }
@@ -62,8 +62,8 @@ impl Sphere {
             Randomizable::Vane(vane) => {
                 self.weather_vanes.insert(String::from(check_name), vane);
             },
-            Randomizable::Portal(portal) => {
-                self.portals.insert(String::from(check_name), portal);
+            Randomizable::Crack(crack) => {
+                self.cracks.insert(String::from(check_name), crack);
             },
         };
     }
@@ -72,7 +72,7 @@ impl Sphere {
         self.items.is_empty()
             && self.ghosts.is_empty()
             && self.goals.is_empty()
-            && self.portals.is_empty()
+            && self.cracks.is_empty()
             && self.weather_vanes.is_empty()
     }
 }

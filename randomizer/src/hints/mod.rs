@@ -1,6 +1,6 @@
 use crate::filler::check::Check;
+use crate::filler::cracks::Crack;
 use crate::filler::filler_item::{Goal, Item, Randomizable};
-use crate::filler::portals::Portal;
 use crate::filler::progress::Progress;
 use crate::filler::util::shuffle;
 use crate::filler::{find_reachable_checks, get_items_from_reachable_checks};
@@ -10,7 +10,7 @@ use crate::{CheckMap, DashSet, SeedInfo};
 use game::ghosts::HintGhost;
 use log::{debug, info};
 use macros::fail;
-use modinfo::settings::portal_shuffle::PortalShuffle;
+use modinfo::settings::cracksanity::Cracksanity;
 use rand::seq::IteratorRandom;
 use rand::{rngs::StdRng, Rng};
 use rom::Error;
@@ -156,14 +156,14 @@ impl Serialize for PathHint {
     }
 }
 
-/// A [`Hint`] that reveals where a certain Portal leads
+/// A [`Hint`] that reveals where a certain Crack leads
 #[derive(Debug, Clone, Serialize)]
-pub struct PortalHint {
-    /// The Portal whose destination will be hinted
-    pub portal: Portal,
+pub struct CrackHint {
+    /// The Crack whose destination will be hinted
+    pub crack: Crack,
 
     /// The
-    pub destination: Portal,
+    pub destination: Crack,
 
     /// List of Hint Ghosts that are guaranteed to be logically reachable before the hinted item.
     #[serde(skip_serializing)]
@@ -175,13 +175,13 @@ pub struct PortalHint {
     pub ghosts: Vec<HintGhost>,
 }
 
-impl Hint for PortalHint {
+impl Hint for CrackHint {
     fn get_hint(&self) -> String {
-        format!("The {} leads to\n{}.", name(self.portal.as_str()), name(self.destination.as_str()))
+        format!("The {} leads to\n{}.", name(self.crack.as_str()), name(self.destination.as_str()))
     }
 
     fn get_hint_spoiler(&self) -> String {
-        format!("The {} leads to\n{}.", self.portal, self.destination)
+        format!("The {} leads to\n{}.", self.crack, self.destination)
     }
 }
 
@@ -224,8 +224,8 @@ pub fn generate_hints(rng: &mut StdRng, seed_info: &mut SeedInfo, check_map: &mu
     let mut taken_checks = seed_info.full_exclusions.iter().map(|s| s.clone()).collect();
     let mut taken_ghosts = Vec::new();
 
-    // let mut portal_hints =
-    //     generate_portal_hints(settings, portal_map, world_graph, check_map, &mut taken_checks, &mut taken_ghosts, rng);
+    // let mut crack_hints =
+    //     generate_crack_hints(settings, crack_map, world_graph, check_map, &mut taken_checks, &mut taken_ghosts, rng);
 
     let mut always_hints = generate_always_hints(rng, seed_info, check_map, &mut taken_checks, &mut taken_ghosts);
     let mut path_hints = generate_path_hints(rng, seed_info, check_map, &mut taken_checks, &mut taken_ghosts);
@@ -243,23 +243,23 @@ pub fn generate_hints(rng: &mut StdRng, seed_info: &mut SeedInfo, check_map: &mu
     Ok(())
 }
 
-/// Portal Hints
+/// Crack Hints
 #[allow(unused)]
-fn generate_portal_hints(
+fn generate_crack_hints(
     rng: &mut StdRng, seed_info: &mut SeedInfo, check_map: &mut CheckMap, taken_checks: &mut Vec<&str>,
     taken_ghosts: &mut Vec<HintGhost>,
-) -> Vec<PortalHint> {
-    if seed_info.settings.portal_shuffle == PortalShuffle::Off {
+) -> Vec<CrackHint> {
+    if seed_info.settings.cracksanity == Cracksanity::Off {
         return Vec::with_capacity(0);
     }
 
-    let portals_to_hint: Vec<Portal> =
-        vec![Portal::HyruleCastle, Portal::LoruleCastle, Portal::DesertPalace, Portal::Zaganaga, Portal::RossosHouse];
+    let cracks_to_hint: Vec<Crack> =
+        vec![Crack::HyruleCastle, Crack::LoruleCastle, Crack::DesertPalace, Crack::Zaganaga, Crack::RossosHouse];
 
-    for portal in portals_to_hint {
-        let portal_hint = PortalHint {
-            portal,
-            destination: *seed_info.portal_map.get(&portal).expect(&format!("portal_map entry for {}", portal)),
+    for crack in cracks_to_hint {
+        let crack_hint = CrackHint {
+            crack,
+            destination: *seed_info.crack_map.get(&crack).expect(&format!("crack_map entry for {}", crack)),
             logical_ghosts: vec![],
             ghosts: vec![],
         };

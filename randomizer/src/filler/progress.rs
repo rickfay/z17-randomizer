@@ -3,9 +3,9 @@ use crate::filler::filler_item::Vane;
 use crate::filler::filler_item::{Goal, Item, Randomizable};
 use crate::filler::item_pools;
 use crate::{DashSet, SeedInfo};
+use modinfo::settings::cracks::Cracks;
+use modinfo::settings::cracksanity::Cracksanity;
 use modinfo::settings::keysy::Keysy;
-use modinfo::settings::portal_shuffle::PortalShuffle;
-use modinfo::settings::portals::Portals;
 use modinfo::settings::ravios_shop::RaviosShop;
 use modinfo::settings::trials_door::TrialsDoor;
 use modinfo::settings::weather_vanes::WeatherVanes;
@@ -256,8 +256,8 @@ impl<'s> Progress<'s> {
         }
     }
 
-    pub fn portal_shuffle(&self) -> bool {
-        self.seed_info.settings.portal_shuffle != PortalShuffle::Off
+    pub fn cracksanity(&self) -> bool {
+        self.seed_info.settings.cracksanity != Cracksanity::Off
     }
 
     pub fn can_escape(&self) -> bool {
@@ -292,8 +292,8 @@ impl<'s> Progress<'s> {
         self.has(Item::Flippers)
     }
 
-    pub fn are_portals_open(&self) -> bool {
-        self.seed_info.settings.portals == Portals::Open || self.has(Quake)
+    pub fn are_cracks_open(&self) -> bool {
+        self.seed_info.settings.cracks == Cracks::Open || self.has(Quake)
     }
 
     pub fn can_merge(&self) -> bool {

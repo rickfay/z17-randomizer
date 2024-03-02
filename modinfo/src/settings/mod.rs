@@ -1,8 +1,8 @@
+use crate::settings::cracks::Cracks;
+use crate::settings::cracksanity::Cracksanity;
 use crate::settings::keysy::Keysy;
 use crate::settings::logic::LogicMode;
 use crate::settings::pedestal::PedestalSetting;
-use crate::settings::portal_shuffle::PortalShuffle;
-use crate::settings::portals::Portals;
 use crate::settings::ravios_shop::RaviosShop;
 use crate::settings::trials_door::TrialsDoor;
 use crate::settings::weather_vanes::WeatherVanes;
@@ -12,11 +12,11 @@ use serde::{Deserialize, Serialize};
 use std::collections::btree_set::BTreeSet;
 use std::hash::Hash;
 
+pub mod cracks;
+pub mod cracksanity;
 pub mod keysy;
 pub mod logic;
 pub mod pedestal;
-pub mod portal_shuffle;
-pub mod portals;
 pub mod ravios_shop;
 pub mod trials_door;
 pub mod weather_vanes;
@@ -64,12 +64,12 @@ pub struct Settings {
     #[serde(default)]
     pub super_mode: bool,
 
-    /// Portals Open/Closed Setting
-    pub portals: Portals,
+    /// Cracks Open/Closed Setting
+    pub cracks: Cracks,
 
-    /// Shuffles the Portal destinations amongst each other
+    /// Shuffles the crack destinations amongst each other
     #[serde(default)]
-    pub portal_shuffle: PortalShuffle,
+    pub cracksanity: Cracksanity,
 
     /// Weather Vanes behavior and activation setting.
     #[serde(default)]
@@ -210,7 +210,7 @@ impl Settings {
             "Chest Size:                     {}",
             if self.chest_size_matches_contents { "Matches Contents" } else { "Normal" }
         );
-        info!("Portal Shuffle:                 {}", self.portal_shuffle)
+        info!("Cracksanity:                   {}", self.cracksanity)
     }
 }
 

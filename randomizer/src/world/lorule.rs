@@ -1,23 +1,23 @@
 use crate::filler::check::Check;
+use crate::filler::cracks::Crack;
+use crate::filler::cracks::Crack::*;
 use crate::filler::filler_item::Goal;
 use crate::filler::filler_item::Vane::*;
 use crate::filler::location::Location::{self, *};
 use crate::filler::location_node::LocationNode;
 use crate::filler::logic::Logic;
 use crate::filler::path::Path;
-use crate::filler::portals::Portal;
-use crate::filler::portals::Portal::*;
 use crate::world::{
-    check, edge, fast_travel_hyrule, fast_travel_lorule, ghost, goal, location, old_path, out_of_logic, portal_left,
-    portal_right,
+    check, crack_left, crack_right, edge, fast_travel_hyrule, fast_travel_lorule, ghost, goal, location, old_path,
+    out_of_logic,
 };
 use crate::LocationInfo;
-use crate::{regions, PortalMap};
+use crate::{regions, CrackMap};
 use game::ghosts::HintGhost;
 use std::collections::HashMap;
 
 /// Lorule
-pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
+pub(crate) fn graph(crack_map: &CrackMap) -> HashMap<Location, LocationNode> {
     HashMap::from([
         (
             LoruleBellTravel,
@@ -47,7 +47,7 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
             location(
                 "Lorule Castle Area",
                 vec![
-                    // check!("Vacant House Portal", regions::lorule::field::main::SUBREGION, |p| p.can_merge()),
+                    // check!("Vacant House Crack", regions::lorule::field::main::SUBREGION, |p| p.can_merge()),
                     check!("Vacant House Weather Vane", regions::lorule::field::main::SUBREGION),
                     check!("Blacksmith Weather Vane", regions::lorule::field::main::SUBREGION),
                     check!("Lorule Castle Weather Vane", regions::lorule::field::main::SUBREGION),
@@ -82,14 +82,14 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
                     ghost(HintGhost::SwampPalaceOutsideRight),
                 ],
                 vec![
-                    portal_left(VacantHouse, portal_map, false),
-                    portal_right(VacantHouse, portal_map, false),
-                    portal_left(ThievesTown, portal_map, false),
-                    portal_right(ThievesTown, portal_map, false),
-                    portal_left(ParadoxLeftLorule, portal_map, false),
-                    portal_right(ParadoxLeftLorule, portal_map, false),
-                    portal_left(SwampPillarLorule, portal_map, false),
-                    portal_right(SwampPillarLorule, portal_map, false),
+                    crack_left(VacantHouse, crack_map, false),
+                    crack_right(VacantHouse, crack_map, false),
+                    crack_left(ThievesTown, crack_map, false),
+                    crack_right(ThievesTown, crack_map, false),
+                    crack_left(ParadoxLeftLorule, crack_map, false),
+                    crack_right(ParadoxLeftLorule, crack_map, false),
+                    crack_left(SwampPillarLorule, crack_map, false),
+                    crack_right(SwampPillarLorule, crack_map, false),
                     fast_travel_lorule(),
                     edge!(GreatRupeeFairyCave, |p| p.has_bomb_flower()),
                     edge!(LoruleBlacksmith),
@@ -214,8 +214,8 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
                 vec![],
                 vec![
                     fast_travel_lorule(),
-                    portal_left(Portal::GraveyardLedgeLorule, portal_map, false),
-                    portal_right(Portal::GraveyardLedgeLorule, portal_map, false),
+                    crack_left(Crack::GraveyardLedgeLorule, crack_map, false),
+                    crack_right(Crack::GraveyardLedgeLorule, crack_map, false),
                     edge!(LoruleGraveyard),
                 ],
             ),
@@ -257,8 +257,8 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
                 "Philosopher's Cave Lower",
                 vec![],
                 vec![
-                    portal_left(Philosopher, portal_map, false),
-                    portal_right(Philosopher, portal_map, false),
+                    crack_left(Philosopher, crack_map, false),
+                    crack_right(Philosopher, crack_map, false),
                     edge!(LoruleGraveyard),
                 ],
             ),
@@ -357,8 +357,8 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
                 vec![
                     fast_travel_lorule(),
                     edge!(LoruleCastleArea),
-                    portal_left(ParadoxRightLorule, portal_map, false),
-                    portal_right(ParadoxRightLorule, portal_map, false),
+                    crack_left(ParadoxRightLorule, crack_map, false),
+                    crack_right(ParadoxRightLorule, crack_map, false),
                 ],
             ),
         ),
@@ -374,10 +374,10 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
                 ],
                 vec![
                     fast_travel_hyrule(),
-                    portal_left(DesertPillarRight, portal_map, false),
-                    portal_right(DesertPillarRight, portal_map, false),
-                    portal_left(DesertPillarLeft, portal_map, false),
-                    portal_right(DesertPillarLeft, portal_map, false),
+                    crack_left(DesertPillarRight, crack_map, false),
+                    crack_right(DesertPillarRight, crack_map, false),
+                    crack_left(DesertPillarLeft, crack_map, false),
+                    crack_right(DesertPillarLeft, crack_map, false),
                     edge!(DesertNorthLedge => {
                         normal: |p| p.can_merge() && (p.has_sand_rod() || p.has_stamina_scroll()),
                         glitched: |p| p.has_nice_bombs() || p.has_fire_rod(),
@@ -402,30 +402,30 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
                 None,
                 vec![
                     edge!(Desert),
-                    edge!(DesertUseBlockedPortalRight, |p| p.has_bombs()),
-                    edge!(DesertUseBlockedPortalLeft, |p| p.has_bombs() && p.has_sand_rod()),
+                    edge!(DesertUseBlockedCrackRight, |p| p.has_bombs()),
+                    edge!(DesertUseBlockedCrackLeft, |p| p.has_bombs() && p.has_sand_rod()),
                 ],
             ),
         ),
         (
-            DesertUseBlockedPortalRight,
+            DesertUseBlockedCrackRight,
             location(
-                "Desert Use Blocked Portal Right",
+                "Desert Use Blocked Crack Right",
                 None,
                 vec![
-                    // portal is blocked, no return paths
-                    portal_right(DesertNorth, portal_map, false),
+                    // crack is blocked, no return paths
+                    crack_right(DesertNorth, crack_map, false),
                 ],
             ),
         ),
         (
-            DesertUseBlockedPortalLeft,
+            DesertUseBlockedCrackLeft,
             location(
-                "Desert Use Blocked Portal Left",
+                "Desert Use Blocked Crack Left",
                 None,
                 vec![
-                    // portal is blocked, no return paths
-                    portal_left(DesertNorth, portal_map, false),
+                    // crack is blocked, no return paths
+                    crack_left(DesertNorth, crack_map, false),
                 ],
             ),
         ),
@@ -436,8 +436,8 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
                 vec![ghost(HintGhost::DesertCenter)],
                 vec![
                     edge!(Desert),
-                    // portal_left unpossible
-                    portal_right(DesertMiddle, portal_map, false),
+                    // crack_left unpossible
+                    crack_right(DesertMiddle, crack_map, false),
                 ],
             ),
         ),
@@ -448,8 +448,8 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
                 vec![ghost(HintGhost::DesertSouthWest)],
                 vec![
                     fast_travel_hyrule(),
-                    portal_left(DesertSW, portal_map, false),
-                    portal_right(DesertSW, portal_map, false),
+                    crack_left(DesertSW, crack_map, false),
+                    crack_right(DesertSW, crack_map, false),
                     edge!(Desert),
                     edge!(DesertPalaceWeatherVane, |p| p.has_sand_rod()),
                 ],
@@ -486,12 +486,12 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
                 vec![
                     fast_travel_lorule(),
                     edge!(SandRodDungeon),
-                    // no way to enter left pillar portal
-                    // no way to enter mire north portal
-                    portal_left(MiseryMireExit, portal_map, false),
-                    portal_right(MiseryMireExit, portal_map, false),
-                    portal_left(MirePillarRight, portal_map, false),
-                    portal_right(MirePillarRight, portal_map, false),
+                    // no way to enter left pillar crack
+                    // no way to enter mire north crack
+                    crack_left(MiseryMireExit, crack_map, false),
+                    crack_right(MiseryMireExit, crack_map, false),
+                    crack_left(MirePillarRight, crack_map, false),
+                    crack_right(MirePillarRight, crack_map, false),
                     old_path(
                         MiseryMireOoB,
                         None,
@@ -520,16 +520,16 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
             ),
         ),
         (
-            // This is the useless portal surrounded by water
-            // Psst... it can be used to reverse the side of the portal you entered
+            // This is the useless crack surrounded by water
+            // Psst... it can be used to reverse the side of the crack you entered
             MiseryMireLeftPillarMerged,
             location(
                 "Misery Mire Left Pillar Merged",
                 None,
                 vec![
                     edge!(MiseryMire, |p| p.has_flippers()),
-                    portal_left(MirePillarLeft, portal_map, false),
-                    portal_right(MirePillarLeft, portal_map, false),
+                    crack_left(MirePillarLeft, crack_map, false),
+                    crack_right(MirePillarLeft, crack_map, false),
                 ],
             ),
         ),
@@ -541,17 +541,17 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
                 vec![
                     fast_travel_lorule(),
                     edge!(MiseryMire),
-                    portal_left(MireMiddle, portal_map, false),
-                    portal_right(MireMiddle, portal_map, false),
-                    portal_left(MireSW, portal_map, false),
-                    portal_right(MireSW, portal_map, false),
+                    crack_left(MireMiddle, crack_map, false),
+                    crack_right(MireMiddle, crack_map, false),
+                    crack_left(MireSW, crack_map, false),
+                    crack_right(MireSW, crack_map, false),
                     old_path(
                         MiseryMireOoB,
                         None,
                         None,
                         None,
                         Some(|p| p.has_fire_rod() || p.has_nice_bombs()),
-                        Some(|p| (p.has_hookshot() || p.has_boomerang()) && p.has_tornado_rod()), // portal clip
+                        Some(|p| (p.has_hookshot() || p.has_boomerang()) && p.has_tornado_rod()), // crack clip
                     ),
                 ],
             ),
@@ -565,8 +565,8 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
                     fast_travel_lorule(),
                     edge!(MiseryMire),
                     edge!(MiseryMireBridge),
-                    portal_left(Zaganaga, portal_map, false),
-                    portal_right(Zaganaga, portal_map, false),
+                    crack_left(Zaganaga, crack_map, false),
+                    crack_right(Zaganaga, crack_map, false),
                     edge!(ZaganagasArena),
                     old_path(MiseryMireRewardBasket, None, None, None, Some(|p| p.has_boots()), None),
                 ],
@@ -605,8 +605,8 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
                 ],
                 vec![
                     fast_travel_lorule(),
-                    portal_left(LoruleHotfoot, portal_map, false),
-                    portal_right(LoruleHotfoot, portal_map, false),
+                    crack_left(LoruleHotfoot, crack_map, false),
+                    crack_right(LoruleHotfoot, crack_map, false),
                     old_path(
                         LoruleLakeWater,
                         Some(|p| p.has_flippers()),
@@ -638,8 +638,8 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
                 ],
                 vec![
                     fast_travel_lorule(),
-                    portal_left(LoruleLake, portal_map, false),
-                    portal_right(LoruleLake, portal_map, false),
+                    crack_left(LoruleLake, crack_map, false),
+                    crack_right(LoruleLake, crack_map, false),
                     edge!(LoruleLakesideItemShop),
                     old_path(LoruleLakeSouthWest, Some(|p| p.can_merge()), None, None, None, None),
                     old_path(LoruleLakeWater, Some(|p| p.has_flippers()), None, None, None, None),
@@ -674,14 +674,14 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
             ),
         ),
         (
-            LoruleRiverPortalShallows,
+            LoruleRiverCrackShallows,
             location(
-                "Lorule River Portal Shallows",
+                "Lorule River Crack Shallows",
                 None,
                 vec![
                     fast_travel_lorule(),
-                    portal_left(RiverLorule, portal_map, false),
-                    portal_right(RiverLorule, portal_map, false),
+                    crack_left(RiverLorule, crack_map, false),
+                    crack_right(RiverLorule, crack_map, false),
                     edge!(LoruleLakeWater, |p| p.has_flippers()),
                 ],
             ),
@@ -704,7 +704,7 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
                     edge!(LoruleLakeNorthWest),
                     edge!(LoruleLakeSouthWest),
                     edge!(LoruleLakeEast),
-                    edge!(LoruleRiverPortalShallows),
+                    edge!(LoruleRiverCrackShallows),
                     edge!(TurtleRockWeatherVane => {
                         normal: |p| p.can_rescue_turtles(),
                         glitched: |p| p.has_tornado_rod(),
@@ -764,13 +764,13 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
                 ],
                 vec![
                     fast_travel_lorule(),
-                    portal_left(DarkRuinsPillar, portal_map, false),
-                    portal_right(DarkRuinsPillar, portal_map, false),
-                    edge!(DarkRuinsBlockedPortal, |p| p.has_bombs()),
+                    crack_left(DarkRuinsPillar, crack_map, false),
+                    crack_right(DarkRuinsPillar, crack_map, false),
+                    edge!(DarkRuinsBlockedCrack, |p| p.has_bombs()),
                     edge!(DarkMazeEntrance),
                     edge!(KusDomainSouth, |p| p.can_merge()),
                     edge!(DarkRuinsShallowWater),
-                    edge!(LoruleRiverPortalShallows => {
+                    edge!(LoruleRiverCrackShallows => {
                         glitched: |p| p.has_fire_rod() || p.has_nice_bombs(),
                         hell: |_| true, // Bee Boost
                     }),
@@ -787,14 +787,14 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
             ),
         ),
         (
-            DarkRuinsBlockedPortal,
+            DarkRuinsBlockedCrack,
             location(
-                "Dark Ruins Blocked Portal",
+                "Dark Ruins Blocked Crack",
                 None,
                 vec![
                     edge!(DarkRuins),
-                    portal_left(DarkRuinsSE, portal_map, false),
-                    portal_right(DarkRuinsSE, portal_map, false),
+                    crack_left(DarkRuinsSE, crack_map, false),
+                    crack_right(DarkRuinsSE, crack_map, false),
                 ],
             ),
         ),
@@ -884,8 +884,8 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
                 None,
                 vec![
                     fast_travel_lorule(),
-                    // portal_left unpossible
-                    portal_right(WaterfallLorule, portal_map, false),
+                    // crack_left unpossible
+                    crack_right(WaterfallLorule, crack_map, false),
                     edge!(HinoxCaveWater, |p| p.can_merge() && p.has_flippers()),
                     edge!(HinoxCaveShallowWater, |p| p.can_merge()),
                     edge!(DarkRuins, |p| p.has_flippers()),
@@ -900,8 +900,8 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
                     && p.can_cut_grass())],
                 vec![
                     fast_travel_lorule(),
-                    portal_left(Portal::KusDomain, portal_map, false),
-                    portal_right(Portal::KusDomain, portal_map, false),
+                    crack_left(Crack::KusDomain, crack_map, false),
+                    crack_right(Crack::KusDomain, crack_map, false),
                     old_path(
                         HinoxCaveWater,
                         Some(|p| p.has_flippers()),
@@ -991,7 +991,7 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
                     check!("Skull Woods Weather Vane", regions::lorule::skull::overworld::SUBREGION),
                     check!("n-Shaped House", regions::lorule::skull::overworld::SUBREGION => {
                         normal: |p| p.can_merge(),
-                        adv_glitched: |p| p.has_boomerang() || (p.not_nice_mode() && p.has_hookshot()), // portal clip through house
+                        adv_glitched: |p| p.has_boomerang() || (p.not_nice_mode() && p.has_hookshot()), // crack clip through house
                     }),
                     check!("Destroyed House", regions::lorule::skull::overworld::SUBREGION),
                     check!("[Mai] Skull Woods Grass", regions::lorule::skull::overworld::SUBREGION, |p| p
@@ -1014,12 +1014,12 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
                 ],
                 vec![
                     fast_travel_lorule(),
-                    portal_left(DestroyedHouse, portal_map, false),
-                    portal_right(DestroyedHouse, portal_map, false),
-                    portal_left(NShapedHouse, portal_map, false),
-                    portal_right(NShapedHouse, portal_map, false),
-                    portal_left(SkullWoodsPillar, portal_map, false),
-                    portal_right(SkullWoodsPillar, portal_map, false),
+                    crack_left(DestroyedHouse, crack_map, false),
+                    crack_right(DestroyedHouse, crack_map, false),
+                    crack_left(NShapedHouse, crack_map, false),
+                    crack_right(NShapedHouse, crack_map, false),
+                    crack_left(SkullWoodsPillar, crack_map, false),
+                    crack_right(SkullWoodsPillar, crack_map, false),
                     edge!(MysteriousManCave),
                     edge!(SkullWoodsFoyer, |p| p.hearts(6.0)),
                 ],
@@ -1066,8 +1066,8 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
                 ],
                 vec![
                     fast_travel_lorule(),
-                    portal_left(DeathWestLorule, portal_map, false),
-                    portal_right(DeathWestLorule, portal_map, false),
+                    crack_left(DeathWestLorule, crack_map, false),
+                    crack_right(DeathWestLorule, crack_map, false),
                     old_path(
                         Location::RossosOreMineLorule,
                         None,
@@ -1090,8 +1090,8 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
                 ],
                 vec![
                     fast_travel_lorule(),
-                    portal_left(Portal::RossosOreMineLorule, portal_map, false),
-                    portal_right(Portal::RossosOreMineLorule, portal_map, false),
+                    crack_left(Crack::RossosOreMineLorule, crack_map, false),
+                    crack_right(Crack::RossosOreMineLorule, crack_map, false),
                     old_path(LoruleDeathWest, Some(|p| p.has_hookshot()), None, None, None, None),
                     edge!(IceCaveEast),
                 ],
@@ -1170,8 +1170,8 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
                 vec![
                     fast_travel_lorule(),
                     edge!(IceCaveNorthWest),
-                    portal_left(Portal::FloatingIslandLorule, portal_map, false),
-                    portal_right(Portal::FloatingIslandLorule, portal_map, false),
+                    crack_left(Crack::FloatingIslandLorule, crack_map, false),
+                    crack_right(Crack::FloatingIslandLorule, crack_map, false),
                 ],
             ),
         ),

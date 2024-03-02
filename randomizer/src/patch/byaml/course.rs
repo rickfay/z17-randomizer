@@ -40,7 +40,7 @@ impl Icon {
 
     pub const DESTINATION: i32 = 20; // Red X
     pub const SAVE_POINT: i32 = 21; // Weather Vane
-    pub const PORTAL: i32 = 22;
+    pub const CRACK: i32 = 22;
 }
 
 pub fn patch(patcher: &mut Patcher, prizes: &DungeonPrizes, seed_info: &SeedInfo) {

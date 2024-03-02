@@ -1,19 +1,19 @@
 use crate::filler::check::Check;
+use crate::filler::cracks::Crack;
+use crate::filler::cracks::Crack::*;
 use crate::filler::filler_item::{self, Goal, Vane::*};
 use crate::filler::location::Location::{self, *};
 use crate::filler::location_node::LocationNode;
 use crate::filler::logic::Logic;
 use crate::filler::path::Path;
-use crate::filler::portals::Portal;
-use crate::filler::portals::Portal::*;
-use crate::world::{check, edge, fast_travel_hyrule, ghost, goal, location, portal_left, portal_right};
+use crate::world::{check, crack_left, crack_right, edge, fast_travel_hyrule, ghost, goal, location};
 use crate::LocationInfo;
-use crate::{regions, PortalMap};
+use crate::{regions, CrackMap};
 use game::ghosts::HintGhost;
 use std::collections::HashMap;
 
 /// Hyrule
-pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
+pub(crate) fn graph(crack_map: &CrackMap) -> HashMap<Location, LocationNode> {
     HashMap::from([
         // Starting Node
         (
@@ -59,7 +59,7 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
             location(
                 "Hyrule Field",
                 vec![
-                    //check!("Your House Portal", regions::hyrule::field::main::SUBREGION, |p| p.can_merge()),
+                    //check!("Your House Crack", regions::hyrule::field::main::SUBREGION, |p| p.can_merge()),
                     check!("Your House Weather Vane", regions::hyrule::field::main::SUBREGION),
                     check!("Kakariko Village Weather Vane", regions::hyrule::kakariko::village::SUBREGION),
                     check!("Sanctuary Weather Vane", regions::hyrule::river::area::SUBREGION),
@@ -100,7 +100,7 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
                         "Hyrule Hotfoot 65s",
                         regions::hyrule::lost::woods::SUBREGION => {
                             normal: | p | p.has_boots(),
-                            hard: |p| p.can_merge() && p.has_bell() && !p.portal_shuffle(),
+                            hard: |p| p.can_merge() && p.has_bell() && !p.cracksanity(),
                             hell: |_| true, // Can just walk it
                         }
                     ),
@@ -219,25 +219,25 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
                 ],
                 vec![
                     fast_travel_hyrule(),
-                    portal_left(YourHouse, portal_map, false),
-                    portal_right(YourHouse, portal_map, false),
-                    portal_left(HyruleHotfoot, portal_map, false),
-                    portal_right(HyruleHotfoot, portal_map, false),
-                    portal_left(ParadoxRightHyrule, portal_map, false),
-                    portal_right(ParadoxRightHyrule, portal_map, false),
-                    portal_left(MiseryMireEntrance, portal_map, false),
-                    portal_right(MiseryMireEntrance, portal_map, false),
-                    portal_left(LostWoodsPillar, portal_map, false),
-                    portal_right(LostWoodsPillar, portal_map, false),
-                    portal_left(SahasrahlasHouse, portal_map, false),
-                    portal_right(SahasrahlasHouse, portal_map, false),
-                    portal_left(EasternRuinsPillar, portal_map, false),
-                    portal_right(EasternRuinsPillar, portal_map, false),
-                    portal_left(SwampPillarHyrule, portal_map, false),
-                    portal_right(SwampPillarHyrule, portal_map, false),
-                    portal_left(Portal::LakeHylia, portal_map, false),
-                    portal_right(Portal::LakeHylia, portal_map, false),
-                    edge!(EasternRuinsBlockedPortal, |p| p.has_bombs()),
+                    crack_left(YourHouse, crack_map, false),
+                    crack_right(YourHouse, crack_map, false),
+                    crack_left(HyruleHotfoot, crack_map, false),
+                    crack_right(HyruleHotfoot, crack_map, false),
+                    crack_left(ParadoxRightHyrule, crack_map, false),
+                    crack_right(ParadoxRightHyrule, crack_map, false),
+                    crack_left(MiseryMireEntrance, crack_map, false),
+                    crack_right(MiseryMireEntrance, crack_map, false),
+                    crack_left(LostWoodsPillar, crack_map, false),
+                    crack_right(LostWoodsPillar, crack_map, false),
+                    crack_left(SahasrahlasHouse, crack_map, false),
+                    crack_right(SahasrahlasHouse, crack_map, false),
+                    crack_left(EasternRuinsPillar, crack_map, false),
+                    crack_right(EasternRuinsPillar, crack_map, false),
+                    crack_left(SwampPillarHyrule, crack_map, false),
+                    crack_right(SwampPillarHyrule, crack_map, false),
+                    crack_left(Crack::LakeHylia, crack_map, false),
+                    crack_right(Crack::LakeHylia, crack_map, false),
+                    edge!(EasternRuinsBlockedCrack, |p| p.has_bombs()),
                     edge!(RavioShop),
                     edge!(EasternRuinsUpper => {
                         normal: |p| p.can_hit_far_switch() || p.has_ice_rod() || p.can_merge(),
@@ -344,8 +344,8 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
                 None,
                 vec![
                     edge!(HyruleField, |p| p.has_flippers()),
-                    portal_left(RiverHyrule, portal_map, false),
-                    // portal_right unpossible
+                    crack_left(RiverHyrule, crack_map, false),
+                    // crack_right unpossible
                 ],
             ),
         ),
@@ -358,14 +358,14 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
             ),
         ),
         (
-            EasternRuinsBlockedPortal,
+            EasternRuinsBlockedCrack,
             location(
                 "Eastern Ruins Blocked Cave",
                 None,
                 vec![
                     edge!(HyruleField),
-                    portal_left(EasternRuinsSE, portal_map, false),
-                    portal_right(EasternRuinsSE, portal_map, false),
+                    crack_left(EasternRuinsSE, crack_map, false),
+                    crack_right(EasternRuinsSE, crack_map, false),
                 ],
             ),
         ),
@@ -432,8 +432,8 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
                 vec![check!("[Mai] Waterfall Ledge", regions::hyrule::river::area::SUBREGION, |p| p.can_merge())],
                 vec![
                     fast_travel_hyrule(),
-                    // portal_left is unpossible
-                    portal_right(WaterfallHyrule, portal_map, false),
+                    // crack_left is unpossible
+                    crack_right(WaterfallHyrule, crack_map, false),
                     edge!(
                             HyruleField => {
                             normal: |p| p.has_flippers(),
@@ -453,8 +453,8 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
                     fast_travel_hyrule(),
                     edge!(HyruleField),
                     edge!(CuccoDungeon),
-                    portal_left(ParadoxLeftHyrule, portal_map, false),
-                    portal_right(ParadoxLeftHyrule, portal_map, false),
+                    crack_left(ParadoxLeftHyrule, crack_map, false),
+                    crack_right(ParadoxLeftHyrule, crack_map, false),
                 ],
             ),
         ),
@@ -548,8 +548,8 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
                 ],
                 vec![
                     fast_travel_hyrule(),
-                    portal_left(ZorasDomain, portal_map, false),
-                    portal_right(ZorasDomain, portal_map, false),
+                    crack_left(ZorasDomain, crack_map, false),
+                    crack_right(ZorasDomain, crack_map, false),
                     edge!(HyruleField),
                     edge!(ZoraDomain),
                     edge!(WaterfallCaveShallowWater => {
@@ -627,8 +627,8 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
                 ],
                 vec![
                     edge!(HyruleField),
-                    portal_left(Portal::RossosHouse, portal_map, false),
-                    portal_right(Portal::RossosHouse, portal_map, false),
+                    crack_left(Crack::RossosHouse, crack_map, false),
+                    crack_right(Crack::RossosHouse, crack_map, false),
                 ],
             ),
         ),
@@ -657,8 +657,8 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
                     fast_travel_hyrule(),
                     edge!(HyruleField),
                     edge!(GraveyardLedgeCave),
-                    portal_left(Portal::GraveyardLedgeHyrule, portal_map, false),
-                    portal_right(Portal::GraveyardLedgeHyrule, portal_map, false),
+                    crack_left(Crack::GraveyardLedgeHyrule, crack_map, false),
+                    crack_right(Crack::GraveyardLedgeHyrule, crack_map, false),
                 ],
             ),
         ),
@@ -802,12 +802,12 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
                 "Stylish Woman's House",
                 vec![
                     check!("Stylish Woman", regions::hyrule::kakariko::village::SUBREGION),
-                    //check!("Stylish Woman Portal", regions::hyrule::kakariko::village::SUBREGION, |p| p.can_merge()),
+                    //check!("Stylish Woman's House Crack", regions::hyrule::kakariko::village::SUBREGION, |p| p.can_merge()),
                     goal!("Open Stylish Woman's House", Goal::StylishWomansHouseOpen),
                 ],
                 vec![
-                    portal_left(StylishWoman, portal_map, false),
-                    portal_right(StylishWoman, portal_map, false),
+                    crack_left(StylishWoman, crack_map, false),
+                    crack_right(StylishWoman, crack_map, false),
                     edge!(HyruleField),
                 ],
             ),
@@ -933,8 +933,8 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
                 "Sanctuary Church",
                 vec![],
                 vec![
-                    portal_left(Portal::Sanctuary, portal_map, false),
-                    portal_right(Portal::Sanctuary, portal_map, false),
+                    crack_left(Crack::Sanctuary, crack_map, false),
+                    crack_right(Crack::Sanctuary, crack_map, false),
                     edge!(HyruleField, |p| p.has_opened_sanctuary_doors()),
                 ],
             ),
@@ -1007,8 +1007,8 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
                     edge!(DeathWeatherVaneCaveLeft),
                     edge!(DeathFairyCave, |p| p.can_merge()),
                     edge!(DonkeyCaveLower),
-                    // portal_left is unpossible
-                    portal_right(DeathWestHyrule, portal_map, false),
+                    // crack_left is unpossible
+                    crack_right(DeathWestHyrule, crack_map, false),
                 ],
             ),
         ),
@@ -1295,8 +1295,8 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
                 vec![
                     fast_travel_hyrule(),
                     edge!(FireCaveBottom),
-                    portal_left(RossosOreMineHyrule, portal_map, false),
-                    portal_right(RossosOreMineHyrule, portal_map, false),
+                    crack_left(RossosOreMineHyrule, crack_map, false),
+                    crack_right(RossosOreMineHyrule, crack_map, false),
                 ],
             ),
         ),
@@ -1307,8 +1307,8 @@ pub(crate) fn graph(portal_map: &PortalMap) -> HashMap<Location, LocationNode> {
                 vec![check!("Floating Island", regions::hyrule::death::mountain::SUBREGION)],
                 vec![
                     fast_travel_hyrule(),
-                    portal_left(Portal::FloatingIslandHyrule, portal_map, false),
-                    portal_right(Portal::FloatingIslandHyrule, portal_map, false),
+                    crack_left(Crack::FloatingIslandHyrule, crack_map, false),
+                    crack_right(Crack::FloatingIslandHyrule, crack_map, false),
                 ],
             ),
         ),

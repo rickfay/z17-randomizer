@@ -4,7 +4,7 @@ crate::region! {
     color: Purple,
     castle {
         locations: [
-            "[LC] Portal": None @Portal(IndoorDark 5[14] LoruleCastle),
+            "[LC] Crack": None @Crack(IndoorDark 5[14] LoruleCastle),
 
             "[LC] (1F) Ledge": RupeeR @Chest(1[714]),
             "[LC] (1F) Center": KeySmall @Chest[1[723],1[1586],], // Two actors representing one chest, idfk

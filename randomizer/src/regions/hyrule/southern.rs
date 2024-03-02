@@ -4,7 +4,7 @@ crate::region! {
     color: Name,
     ruins {
         locations: [
-            "Hyrule Swamp Pillar Portal": None @Portal(33[298] SwampPillarHyrule),
+            "Hyrule Swamp Pillar Crack": None @Crack(33[298] SwampPillarHyrule),
 
             "Runaway Item Seller": RupeeSilver @Event(Boot/FieldLight_33_Douguya[0x49]),
             "Southern Ruins Ledge": RupeeSilver @Chest(33[320]),

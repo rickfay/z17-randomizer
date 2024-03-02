@@ -1,6 +1,6 @@
+use crate::filler::cracks::Crack;
 use crate::filler::filler_item::{Randomizable, Vane};
-use crate::filler::portals::Portal;
-use crate::{patch::util::*, Error, PortalMap, Result, SeedInfo};
+use crate::{patch::util::*, CrackMap, Error, Result, SeedInfo};
 use code::Code;
 use fs_extra::dir::CopyOptions;
 use game::{
@@ -9,7 +9,7 @@ use game::{
 };
 use log::{debug, error, info};
 use macros::fail;
-use modinfo::settings::portal_shuffle::PortalShuffle;
+use modinfo::settings::cracksanity::Cracksanity;
 use modinfo::settings::weather_vanes::WeatherVanes::*;
 use path_absolutize::*;
 use rom::byaml::scene_env::SceneEnvFile;
@@ -130,7 +130,7 @@ impl Patcher {
     fn read_obj(&mut self, id: CourseId, stage_index: u16, unq: u16) -> &Obj {
         let stage = self.scene(id, stage_index - 1).unwrap().stage_mut().get_mut();
         stage.get_obj(unq).expect(&format!(
-            "Failed to read Portal Objs entry with UNQ: {} from World/Byaml/{:?}{}_stage.byaml",
+            "Failed to read Crack Objs entry with UNQ: {} from World/Byaml/{:?}{}_stage.byaml",
             unq, id, stage_index
         ))
     }
@@ -274,8 +274,8 @@ impl Patcher {
             | Patch::GoldRupee { course, scene, unq } => {
                 self.parse_args(course, scene, unq).1 = filler_item.into().unwrap().as_item_index() as i32;
             },
-            Patch::Portal { course, scene, unq, portal } => {
-                self.patch_portal(&seed_info.portal_map, course, scene + 1, unq, portal, seed_info)?;
+            Patch::Crack { course, scene, unq, crack } => {
+                self.patch_crack(&seed_info.crack_map, course, scene + 1, unq, crack, seed_info)?;
             },
             Patch::WeatherVane { course, scene, unq, vane } => {
                 self.patch_weather_vane(filler_item.into().unwrap(), course, scene, unq, vane, seed_info)?;
@@ -362,26 +362,26 @@ impl Patcher {
         Ok(())
     }
 
-    /// Portals!
-    fn patch_portal(
-        &mut self, portal_map: &PortalMap, course: CourseId, scene: u16, unq: u16, here_portal: Portal,
+    /// Cracks!
+    fn patch_crack(
+        &mut self, crack_map: &CrackMap, course: CourseId, scene: u16, unq: u16, here_crack: Crack,
         seed_info: &SeedInfo,
     ) -> Result<()> {
-        if seed_info.settings.portal_shuffle == PortalShuffle::Off {
+        if seed_info.settings.cracksanity == Cracksanity::Off {
             return Ok(());
         }
 
-        let there_portal = portal_map.get(&here_portal).expect(&format!("No portal_map entry for: {:?}", here_portal));
-        let there_flag = there_portal.get_flag();
-        let there_sp = there_portal.get_spawn_point();
+        let there_crack = crack_map.get(&here_crack).expect(&format!("No crack_map entry for: {:?}", here_crack));
+        let there_flag = there_crack.get_flag();
+        let there_sp = there_crack.get_spawn_point();
 
-        let here_arg2 = if here_portal.get_world() == there_portal.get_world() {
-            here_portal.get_reverse_type()
+        let here_arg2 = if here_crack.get_world() == there_crack.get_world() {
+            here_crack.get_reverse_type()
         } else {
-            here_portal.get_type()
+            here_crack.get_type()
         };
 
-        // Redirect Portal to new destination, and set correct flag to update destination icon on lower screen
+        // Redirect Crack to new destination, and set correct flag to update destination icon on lower screen
         self.modify_objs(
             course,
             scene,
@@ -389,12 +389,12 @@ impl Patcher {
                 obj.redirect(there_sp);
                 obj.arg.2 = here_arg2;
                 obj.set_active_flag(there_flag);
-                obj.set_inactive_flag(here_portal.get_flag());
+                obj.set_inactive_flag(here_crack.get_flag());
             })],
         );
 
-        if here_portal == Portal::HyruleCastle {
-            // Hyrule Castle Portal
+        if here_crack == Crack::HyruleCastle {
+            // Hyrule Castle Crack
             self.modify_objs(
                 IndoorLight,
                 7,
@@ -404,65 +404,65 @@ impl Patcher {
                     set_disable_flag(29, there_flag), // AreaDisableWallIn
                 ],
             );
-        } else if here_portal == *seed_info.portal_map.get(&Portal::HyruleCastle).unwrap() {
-            // Portal paired with Hyrule Castle is always kept open
+        } else if here_crack == *seed_info.crack_map.get(&Crack::HyruleCastle).unwrap() {
+            // Crack paired with Hyrule Castle is always kept open
             self.modify_objs(course, scene, [clear_enable_flag(unq)]);
         } else {
-            // Lock all other portals behind Flag 510
+            // Lock all other cracks behind Flag 510
             self.modify_objs(course, scene, [set_enable_flag(unq, Flag::QUAKE)]);
         }
 
-        // TODO angle of Portal Blockages can't seem to be changed, no point in this function until the game respects
+        // TODO angle of Crack Blockages can't seem to be changed, no point in this function until the game respects
         // the x-component of the MojWallBreakFieldLight/MojWallBreakFieldDark's rotation.
-        //self.block_portals(course, scene, unq, here_portal, *there_portal)?;
+        //self.block_cracks(course, scene, unq, here_crack, *there_crack)?;
 
         Ok(())
     }
 
-    /// For portals that now lead to blocked portals, add matching blockages on that side of the portal
+    /// For cracks that now lead to blocked cracks, add matching blockages on that side of the crack
     #[allow(unused)]
-    fn block_portals(
-        &mut self, course: CourseId, scene: u16, unq: u16, here_portal: Portal, there_portal: Portal,
+    fn block_cracks(
+        &mut self, course: CourseId, scene: u16, unq: u16, here_crack: Crack, there_crack: Crack,
     ) -> Result<()> {
-        // Already blocked Portals can be left alone
-        match here_portal {
-            Portal::DesertNorth
-            | Portal::EasternRuinsSE
-            | Portal::DarkRuinsSE
-            | Portal::GraveyardLedgeLorule
-            | Portal::HyruleCastle => {
+        // Already blocked Cracks can be left alone
+        match here_crack {
+            Crack::DesertNorth
+            | Crack::EasternRuinsSE
+            | Crack::DarkRuinsSE
+            | Crack::GraveyardLedgeLorule
+            | Crack::HyruleCastle => {
                 return Ok(());
             },
             _ => {},
         }
 
-        match there_portal {
-            // Blocked portals
-            Portal::DesertNorth | Portal::EasternRuinsSE | Portal::GraveyardLedgeLorule | Portal::DarkRuinsSE => {
-                // Read vanilla Portal data, use it to add blockages relative to Portals
-                let obj_portal = self.read_obj(course, scene, unq);
-                let clp = obj_portal.clp;
-                let translate = obj_portal.srt.translate;
+        match there_crack {
+            // Blocked cracks
+            Crack::DesertNorth | Crack::EasternRuinsSE | Crack::GraveyardLedgeLorule | Crack::DarkRuinsSE => {
+                // Read vanilla Crack data, use it to add blockages relative to Cracks
+                let obj_crack = self.read_obj(course, scene, unq);
+                let clp = obj_crack.clp;
+                let translate = obj_crack.srt.translate;
                 let (wall_unq, wall_ser) = self.find_objs_unq_ser(course, scene);
 
-                // Attach blockage to Portal (keeps light/dark fog from appearing until breakage is gone)
+                // Attach blockage to Crack (keeps light/dark fog from appearing until breakage is gone)
                 self.modify_objs(course, scene, [call(unq, move |obj| obj.lnk = vec![(wall_unq, 0, 0)])]);
 
                 // Different actors for WallBreakFieldLight and WallBreakFieldDark
-                match there_portal {
-                    Portal::DesertNorth | Portal::EasternRuinsSE => {
+                match there_crack {
+                    Crack::DesertNorth | Crack::EasternRuinsSE => {
                         self.add_obj(
                             course,
                             scene,
-                            Obj::wall_break_field_light(here_portal.get_flag(), clp, wall_ser, wall_unq, translate),
+                            Obj::wall_break_field_light(here_crack.get_flag(), clp, wall_ser, wall_unq, translate),
                         );
                         self.copy_bch("WallBreakFieldLight", (FieldLight, 30), (course, scene))?;
                     },
-                    Portal::GraveyardLedgeLorule | Portal::DarkRuinsSE => {
+                    Crack::GraveyardLedgeLorule | Crack::DarkRuinsSE => {
                         self.add_obj(
                             course,
                             scene,
-                            Obj::wall_break_field_dark(here_portal.get_flag(), clp, wall_ser, wall_unq, translate),
+                            Obj::wall_break_field_dark(here_crack.get_flag(), clp, wall_ser, wall_unq, translate),
                         );
                         self.copy_bch("WallBreakFieldDark", (FieldDark, 30), (course, scene))?;
                     },
@@ -470,18 +470,18 @@ impl Patcher {
                 }
             },
             // Hyrule Castle Curtain
-            Portal::HyruleCastle => {
-                // Read vanilla Portal data, use it to add the Curtain and WallDisableIn actors
-                let obj_portal = self.read_obj(course, scene, unq);
-                let clp = obj_portal.clp;
-                let t_curtain = obj_portal.srt.translate.add(Vec3 { x: 0.0, y: 0.0, z: 1.0 });
-                let t_wall = obj_portal.srt.translate.add(Vec3 { x: -0.02731, y: -0.00001, z: 0.96672 });
+            Crack::HyruleCastle => {
+                // Read vanilla Crack data, use it to add the Curtain and WallDisableIn actors
+                let obj_crack = self.read_obj(course, scene, unq);
+                let clp = obj_crack.clp;
+                let t_curtain = obj_crack.srt.translate.add(Vec3 { x: 0.0, y: 0.0, z: 1.0 });
+                let t_wall = obj_crack.srt.translate.add(Vec3 { x: -0.02731, y: -0.00001, z: 0.96672 });
                 let (curtain_unq, curtain_ser) = self.find_objs_unq_ser(course, scene);
 
-                // Attach Curtain to Portal (keeps light from appearing until Curtain is gone)
+                // Attach Curtain to Crack (keeps light from appearing until Curtain is gone)
                 self.modify_objs(course, scene, [call(unq, move |obj| obj.lnk = vec![(curtain_unq, 0, 0)])]);
 
-                let flag = here_portal.get_flag();
+                let flag = here_crack.get_flag();
 
                 // Curtain
                 self.add_obj(
@@ -706,7 +706,7 @@ pub enum Patch {
     Maiamai { course: CourseId, scene: u16, unq: u16 },
     SilverRupee { course: CourseId, scene: u16, unq: u16 },
     GoldRupee { course: CourseId, scene: u16, unq: u16 },
-    Portal { course: CourseId, scene: u16, unq: u16, portal: Portal },
+    Crack { course: CourseId, scene: u16, unq: u16, crack: Crack },
     WeatherVane { course: CourseId, scene: u16, unq: u16, vane: Vane },
     Shop(Shop),
     Multi(Vec<Patch>),
