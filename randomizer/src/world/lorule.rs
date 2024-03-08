@@ -385,7 +385,7 @@ pub(crate) fn graph(crack_map: &CrackMap) -> HashMap<Location, LocationNode> {
                     }),
                     edge!(DesertCenterLedge, |p| p.has_sand_rod()),
                     edge!(DesertSouthWestLedge => {
-                        hard: |p| p.has_stamina_scroll(),
+                        normal: |p| p.can_merge() && (p.has_stamina_scroll() || p.has_nice_sand_rod()), // YUP
                         glitched: |p| p.has_fire_rod() || p.has_nice_bombs(),
                         adv_glitched: |_| true, // vulture boost
                     }),

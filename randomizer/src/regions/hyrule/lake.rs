@@ -16,7 +16,7 @@ crate::region! {
             "Lakeside Item Shop (1)": EscapeFruit @None(),
             "Lakeside Item Shop (2)": StopFruit @None(),
             "Lakeside Item Shop (3)": ItemShield @None(),
-            "100 Maiamai": SpecialMove @None(),
+            "100 Maiamai": SpecialMove @Event(CaveLight/FieldLight_35_Kinsta[23]),
             "Maiamai Bombs Upgrade": ItemBombLv2 @None(),
             "Maiamai Boomerang Upgrade": ItemBoomerangLv2 @None(),
             "Maiamai Bow Upgrade": ItemBowLv2 @None(),

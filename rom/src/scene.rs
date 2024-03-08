@@ -456,13 +456,11 @@ impl Obj {
 
     /// Generate a new Obj to act as a Dungeon Reward trigger <br />
     /// Remember to import the actor: `TreasureBoxS`
-    pub fn pendant_chest(
-        prize: Item, active_flag: Flag, pendant_flag: Flag, clp: i16, ser: u16, unq: u16, translate: Vec3,
-    ) -> Self {
-        let (arg4, arg6) = Flag::into_pair(active_flag);
-        let (arg5, arg7) = Flag::into_pair(pendant_flag);
+    pub fn chest(item: Item, active: Flag, inactive: Flag, clp: i16, ser: u16, unq: u16, translate: Vec3) -> Self {
+        let (arg4, arg6) = Flag::into_pair(active);
+        let (arg5, arg7) = Flag::into_pair(inactive);
         Self {
-            arg: Arg(prize as i32, 0, 0, 0, arg4, arg5, arg6, arg7, 0, 0, 0, 0, 0, 0.0),
+            arg: Arg(item as i32, 0, 1, 0, arg4, arg5, arg6, arg7, 0, 0, 0, 0, 0, 2.0),
             clp,
             flg: (0, 0, 0, 0),
             id: 35,
@@ -470,11 +468,7 @@ impl Obj {
             nme: None,
             ril: vec![],
             ser: Some(ser),
-            srt: Transform {
-                scale: Vec3 { x: 1.0, y: 1.0, z: 1.0 },
-                rotate: Vec3 { x: 0.0, y: 0.0, z: 0.0 },
-                translate,
-            },
+            srt: Transform { scale: Vec3::UNIT, rotate: Vec3::ZERO, translate },
             typ: 1,
             unq,
         }

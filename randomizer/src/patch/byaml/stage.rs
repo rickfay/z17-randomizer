@@ -47,10 +47,10 @@ macro_rules! action {
     ($unq:tt.active(0)) => {
         $unq.set_active_flag(None);
     };
-    ($unq:tt.active($flag:literal)) => {
+    ($unq:tt.active($flag:expr)) => {
         $unq.set_active_flag(Flag::Event($flag));
     };
-    ($unq:tt.inactive($flag:literal)) => {
+    ($unq:tt.inactive($flag:expr)) => {
         $unq.set_inactive_flag(Flag::Event($flag));
     };
     ($unq:tt.enable($flag:expr)) => {
@@ -1914,7 +1914,10 @@ fn patch_maiamai_cave(patcher: &mut Patcher) {
         35,
         [
             disable(233), // Open Maiamai Cave
-            disable(235), // Remove the Sign
+            call(235, |obj| {
+                obj.clear_disable_flag(); // keep the sign around, we're going to repurpose it
+                obj.set_translate(-4.25, 0.0, -26.0); // shift sign to the right slightly to not block entrance
+            }),
         ],
     );
 }
@@ -2071,7 +2074,6 @@ fn patch_no_progression_enemies(patcher: &mut Patcher, settings: &Settings) {
 
 //noinspection ALL
 #[rustfmt::skip]
-#[allow(unused)]
 /// Development Sandbox
 /// Make changes here for dev & testing we don't want to risk making it into the actual release.
 fn do_dev_stuff(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
@@ -2079,10 +2081,29 @@ fn do_dev_stuff(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
         return Ok(());
     }
 
+    // Maiamai Cave
+    // patcher.add_obj(CaveLight, 15, Obj::chest(game::Item::Empty, Flag::ZERO_ZERO, Flag::Course(300), 0, 10, 10, Vec3 { x: -7.0, y: 0.0, z: -13.0 }));
+    // patcher.add_obj(CaveLight, 15, Obj::chest(game::Item::Empty, Flag::ZERO_ZERO, Flag::Course(301), 0, 11, 11, Vec3 { x: -6.0, y: 0.0, z: -13.0 }));
+    // patcher.add_obj(CaveLight, 15, Obj::chest(game::Item::Empty, Flag::ZERO_ZERO, Flag::Course(302), 0, 12, 12, Vec3 { x: -5.0, y: 0.0, z: -13.0 }));
+    // patcher.add_obj(CaveLight, 15, Obj::chest(game::Item::Empty, Flag::ZERO_ZERO, Flag::Course(303), 0, 13, 13, Vec3 { x: -4.0, y: 0.0, z: -13.0 }));
+    // patcher.add_obj(CaveLight, 15, Obj::chest(game::Item::Empty, Flag::ZERO_ZERO, Flag::Course(304), 0, 14, 14, Vec3 { x: -3.0, y: 0.0, z: -13.0 }));
+    // patcher.add_obj(CaveLight, 15, Obj::chest(game::Item::Empty, Flag::ZERO_ZERO, Flag::Course(305), 0, 15, 15, Vec3 { x: -2.0, y: 0.0, z: -13.0 })); // shouldn't be used but anywho
+    // patcher.add_obj(CaveLight, 15, Obj::chest(game::Item::Empty, Flag::ZERO_ZERO, Flag::Course(306), 0, 16, 16, Vec3 { x: -1.0, y: 0.0, z: -13.0 }));
+    //
+    // patcher.add_obj(CaveLight, 15, Obj::chest(game::Item::Empty, Flag::ZERO_ZERO, Flag::Course(307), 0, 17, 17, Vec3 { x: 1.0, y: 0.0, z: -13.0 }));
+    // patcher.add_obj(CaveLight, 15, Obj::chest(game::Item::Empty, Flag::ZERO_ZERO, Flag::Course(308), 0, 18, 18, Vec3 { x: 2.0, y: 0.0, z: -13.0 }));
+    // patcher.add_obj(CaveLight, 15, Obj::chest(game::Item::Empty, Flag::ZERO_ZERO, Flag::Course(309), 0, 19, 19, Vec3 { x: 3.0, y: 0.0, z: -13.0 }));
+    // patcher.add_obj(CaveLight, 15, Obj::chest(game::Item::Empty, Flag::ZERO_ZERO, Flag::Course(310), 0, 20, 20, Vec3 { x: 4.0, y: 0.0, z: -13.0 }));
+    // patcher.add_obj(CaveLight, 15, Obj::chest(game::Item::Empty, Flag::ZERO_ZERO, Flag::Course(311), 0, 21, 21, Vec3 { x: 5.0, y: 0.0, z: -13.0 }));
+    // patcher.add_obj(CaveLight, 15, Obj::chest(game::Item::Empty, Flag::ZERO_ZERO, Flag::Course(312), 0, 22, 22, Vec3 { x: 6.0, y: 0.0, z: -13.0 }));
+    // patcher.add_obj(CaveLight, 15, Obj::chest(game::Item::Empty, Flag::ZERO_ZERO, Flag::Course(313), 0, 23, 23, Vec3 { x: 7.0, y: 0.0, z: -13.0 }));
+
+
     // Ravio's Shop Exit Door
     patcher.modify_objs(IndoorLight, 1, [
-        redirect(24, SpawnPoint::new(FieldLight, 27,
-            5, // No Redirect
+        redirect(24, SpawnPoint::new(
+            FieldLight, 27, 5, // No Redirect
+            // CaveLight, 15, 0, // Maiamai Cave
             // Demo, 4, 0,
             // IndoorDark, 4, 0,  // Lorule Blacksmith
             // DungeonSand, 1, 16,  // Desert Palace 1F Exit

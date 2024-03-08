@@ -196,7 +196,6 @@ impl<'s> Progress<'s> {
         self.has_either(Item::SandRod01, Item::SandRod02)
     }
 
-    #[allow(unused)]
     pub fn has_nice_sand_rod(&self) -> bool {
         self.has_both(Item::SandRod01, Item::SandRod02)
     }

@@ -13,7 +13,7 @@ use std::{
 
 /// Pauses program execution
 pub fn pause() {
-    println!("\nPress Enter to continue...");
+    println!("Press Enter to continue...");
     stdin().read_exact(&mut [0]).unwrap();
 }
 

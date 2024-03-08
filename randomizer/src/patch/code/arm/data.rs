@@ -69,6 +69,11 @@ where
 }
 
 #[allow(unused)]
+pub fn nop() -> Instruction {
+    mov(R0, R0) // fixme not actually the NOP command
+}
+
+#[allow(unused)]
 pub fn raw(addr: u32) -> Instruction {
     Instruction::Raw(addr)
 }

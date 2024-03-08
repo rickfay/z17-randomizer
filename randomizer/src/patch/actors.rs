@@ -6,21 +6,23 @@ use modinfo::Settings;
 
 /// Add Actors to scenes that don't originally have them
 pub fn patch(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
+    patch_dev_stuff(patcher, seed_info)?;
+
     patch_letter_in_a_bottle(patcher)?;
     patch_bow_of_light_hint(patcher, &seed_info.settings)?;
-
-    // patch_dev_stuff(patcher, seed_info)?;
 
     Ok(())
 }
 
-#[allow(unused)]
+#[allow(unused_variables)]
 fn patch_dev_stuff(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
     if !seed_info.settings.dev_mode {
         return Ok(());
     }
 
-    //let triforce_brave = patcher.scene(CaveDark, 9)?.actors().get_actor_bch("TriForceBrave")?;
+    // Add chest actor to Maiamai cave
+    // let chest = patcher.scene(game::Course::DungeonHera, 0)?.actors().get_actor_bch("TreasureBoxS")?;
+    // patcher.scene(game::Course::CaveLight, 14)?.actors_mut().add(chest)?;
 
     Ok(())
 }

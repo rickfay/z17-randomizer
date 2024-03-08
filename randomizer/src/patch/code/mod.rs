@@ -1,8 +1,12 @@
 use super::Patcher;
 use crate::filler::filler_item::Item::*;
 use crate::filler::filler_item::Randomizable;
+use crate::patch::code::arm::data::{add, cmp, mov};
+use crate::patch::code::arm::ls::{ldr, ldrb, str_, strb};
+use crate::patch::code::arm::lsm::{pop, push};
+use crate::patch::code::arm::Register::*;
+use crate::patch::code::arm::{b, bl, Instruction, LR, PC, SP};
 use crate::{patch::util::prize_flag, regions, Layout, Result, SeedInfo};
-use arm::*;
 use game::Item::*;
 use modinfo::settings::{pedestal::PedestalSetting::*, Settings};
 use rom::flag::Flag;
@@ -42,7 +46,7 @@ impl Code {
     }
 
     pub fn patch<const N: usize>(&mut self, addr: u32, instructions: [Instruction; N]) -> u32 {
-        let code = assemble(addr, instructions);
+        let code = arm::assemble(addr, instructions);
         let len = code.len() as u32;
         self.overwrite(addr, code);
         len
@@ -103,7 +107,7 @@ impl<'a> Segment<'a> {
     }
 
     pub fn patch<const N: usize>(&mut self, addr: u32, instructions: [Instruction; N]) -> u32 {
-        let code = assemble(addr, instructions);
+        let code = arm::assemble(addr, instructions);
         let len = code.len() as u32;
         self.write(addr, code);
         len
@@ -377,7 +381,7 @@ fn warp(code: &mut Code) {
     // Continue button sets: FUN_002317c0(0x3f800000,param_1 + 0x50);
 }
 
-/// Create new Earthquake item that sets Flag 510
+/// Create new item that sets Flag 510
 fn quake(code: &mut Code) {
     let earthquake = code.text().define([
         // TODO Play Earthquake Noise:
@@ -397,37 +401,84 @@ fn quake(code: &mut Code) {
 
 /// Mother Maiamai Stuff
 fn mother_maiamai(code: &mut Code, layout: &Layout) {
-    // code.patch(0x30fe00, [mov(R0, R0)]); // Untested -- allow getting 100 Maiamai item even if has Great Spin
+    // Make each Maiamai worth more (for testing only)
+    // let amount = 90;
+    // code.patch(0x2559bc, [add(R1, R1, amount)]);
+    // code.patch(0x2559c0, [add(R2, R2, amount)]);
 
-    /////////////////////////////////////////
+    // Use flags 302-311 (not 305) to record whether we've picked up that item's upgrade.
+    const NEW_LOCAL_FLAGS_START_IDX: u32 = 300;
 
-    code.patch(0x30ffe4, [mov(R0, 1)]); // Skip FUN_00583b1c - Suck/Spit Old/New Item Animation
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    let _fn_received_maiamai_item = code.text().define([
-        mov(R8, R1),     // save R1
-        add(R1, R1, 50), // arbitrary - just need 9 unused flags, using 302-311 (not 305)
-        //ldr(R0, 0x1e70e8),
-        //ldr(R0, (R0, 0x0)),
-        ldr(R0, 0x70c8e0),
+    // Accept Nice Items in addition to their regular counterparts for the check to see if we own anything upgradable.
+    code.patch(0x30fdcc, [b(0x30fef0).ge()]);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // Rewrite ::::caseD_6 to check local flags for (I think?) 100 Maiamai item giveout
+    let thing = code.text().define([
+        add(R1, R4, NEW_LOCAL_FLAGS_START_IDX),
+        ldr(R0, MAP_MANAGER_INSTANCE),
         ldr(R0, (R0, 0x0)),
         ldr(R0, (R0, 0x40)),
-        // ldr(R2, 0x3),
-
-        // bl(0x5822a0),
         bl(FN_GET_LOCAL_FLAG_3),
-        mov(R1, R8), // restore R1
+        b(0x30fee4),
+    ]);
+    code.patch(0x30fed8, [b(thing)]);
+    code.patch(0x30fee4, [cmp(R0, 0x1)]);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /*
+     * Determines if the player has enough Maiamai compared with how many have been spent to show the upgrade dialog,
+     * using the following formula:
+     *
+     * 0 < floor((total_maiamai_obtained - total_maiamai_on_hand) / (10 - num_nice_items_obtained))
+     *
+     * For randomizer, we need to replace `num_nice_items_obtained` with a count of our current flags that have been set.
+     */
+    code.patch(0x30fdf8, [b(0x30fe0c)]); // Skip Great Spin item check
+    let fn_get_maiamai_flag3 = code.text().define([
+        add(R1, R4, NEW_LOCAL_FLAGS_START_IDX),
+        ldr(R0, MAP_MANAGER_INSTANCE),
+        ldr(R0, (R0, 0x0)),
+        ldr(R0, (R0, 0x40)),
+        bl(FN_GET_LOCAL_FLAG_3),
+        b(0x30fe48),
+    ]);
+    code.patch(0x30fe3c, [b(fn_get_maiamai_flag3)]);
+    code.patch(0x30fe48, [cmp(R0, 0x0)]);
+    code.patch(0x30fe4c, [add(R5, R5, 0x1).eq()]);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // Skip FUN_00583b1c - Suck/Spit Old/New Item Animation
+    code.patch(0x30ffe4, [mov(R0, 1)]);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // Check our newly created local flags to determine if items can appear on MM's list of items to upgrade
+    let fn_get_maiamai_flag3 = code.text().define([
+        add(R1, R1, NEW_LOCAL_FLAGS_START_IDX),
+        ldr(R0, MAP_MANAGER_INSTANCE),
+        ldr(R0, (R0, 0x0)),
+        ldr(R0, (R0, 0x40)),
+        bl(FN_GET_LOCAL_FLAG_3),
         cmp(R0, 0x0),
         b(0x46d848).eq(),
         b(0x46d888),
     ]);
-    code.patch(0x46d844, [b(0x46d888).lt()]);
-    //code.patch(0x46d844, [b(fn_received_maiamai_item)]);
+    code.patch(0x46d840, [b(fn_get_maiamai_flag3).ge()]);
+    code.patch(0x46d844, [b(0x46d888)]);
 
-    code.patch(0x30feb4, [mov(R0, 0).eq()]); // Allow Nice Items to give rewards
-                                             // code.patch(0x30fe9c, [mov(R0, 0).eq()]); // Allow Rented Items to give rewards
-    code.patch(0x3105c8, [mov(R0, 0x0)]); // Skip Sound: SE_ShopManKinSta_VACUUM
+    // Allow getting upgrades if you already have the Nice Item for this slot
+    code.patch(0x30feb4, [mov(R0, 0).eq()]);
 
-    // vvv--- Stuff that didn't work below ---vvv
+    // Skip Sound: SE_ShopManKinSta_VACUUM
+    code.patch(0x3105c8, [mov(R0, 0x0)]);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // Ingoing Item Model
     // code.patch(0x30FF8C, [mov(R1, 0x11)]);
@@ -440,52 +491,59 @@ fn mother_maiamai(code: &mut Code, layout: &Layout) {
     // code.patch(0x30FFC4, [mov(R1, 0x11)]);
     // code.patch(0x30FFCC, [mov(R1, 0x11)]);
 
-    // Show even if we have Nice item of that slot
-    // code.patch(0x300feb0, [mov(R0, R0)]);
-    // code.patch(0x300feb4, [mov(R0, 0)]);
-    // code.patch(0x300feb8, [b(0x30fec0)]);
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    // Don't hide slots for Items where we have the Nice version
-    //code.patch(0x30feb4, [mov(R0, 0).eq()]); // TODO TEST ??? (Result = failed)
-    // code.patch(0x194b74, [b(0x194b78).ne()]); // TODO TEST ??? (failed...)
-    // code.patch(0x194b78, [mov(R5, 0x0)]); (todo nada...)
-
-    //  (todo apparently just made Cancel not work)
-    // code.patch(0x30fdf8, [b(0x30fef0),]);
-    // code.patch(0x30fe6c, [b(0x30fef0), ]);
-
-    // Makes Cancel option act like an Item was selected (Bombs in testing)
-    // code.patch(0x30fe6c, [b(0x30febc)]);
-    // code.patch(0x30febc, [mov(R0, 0x0)]);
-
-    // Skip FUN_00625250
-    // code.patch(0x310148, [mov(R0, R0)]);
-
-    // Skip FUN_003931ec (bad idea)
-    // code.patch(0x6252c4, [mov(R0, R0)]);
-
-    let ice = layout.get_item("Maiamai Ice Rod Upgrade", regions::hyrule::lake::hylia::SUBREGION);
-    let sand = layout.get_item("Maiamai Sand Rod Upgrade", regions::hyrule::lake::hylia::SUBREGION);
-    let torn = layout.get_item("Maiamai Tornado Rod Upgrade", regions::hyrule::lake::hylia::SUBREGION);
-    let bomb = layout.get_item("Maiamai Bombs Upgrade", regions::hyrule::lake::hylia::SUBREGION);
-    let fire = layout.get_item("Maiamai Fire Rod Upgrade", regions::hyrule::lake::hylia::SUBREGION);
-    let hook = layout.get_item("Maiamai Hookshot Upgrade", regions::hyrule::lake::hylia::SUBREGION);
-    let rang = layout.get_item("Maiamai Boomerang Upgrade", regions::hyrule::lake::hylia::SUBREGION);
-    let hamm = layout.get_item("Maiamai Hammer Upgrade", regions::hyrule::lake::hylia::SUBREGION);
+    // Record upgrades received with a new course flag for each one.
     let bow = layout.get_item("Maiamai Bow Upgrade", regions::hyrule::lake::hylia::SUBREGION);
+    let boomerang = layout.get_item("Maiamai Boomerang Upgrade", regions::hyrule::lake::hylia::SUBREGION);
+    let hookshot = layout.get_item("Maiamai Hookshot Upgrade", regions::hyrule::lake::hylia::SUBREGION);
+    let hammer = layout.get_item("Maiamai Hammer Upgrade", regions::hyrule::lake::hylia::SUBREGION);
+    let bombs = layout.get_item("Maiamai Bombs Upgrade", regions::hyrule::lake::hylia::SUBREGION);
+    let fire_rod = layout.get_item("Maiamai Fire Rod Upgrade", regions::hyrule::lake::hylia::SUBREGION);
+    let ice_rod = layout.get_item("Maiamai Ice Rod Upgrade", regions::hyrule::lake::hylia::SUBREGION);
+    let tornado_rod = layout.get_item("Maiamai Tornado Rod Upgrade", regions::hyrule::lake::hylia::SUBREGION);
+    let sand_rod = layout.get_item("Maiamai Sand Rod Upgrade", regions::hyrule::lake::hylia::SUBREGION);
 
-    ice.as_item().unwrap().to_game_item();
+    for (offset, addr, item) in vec![
+        (304, 0x3100f8, bow),
+        (303, 0x3100f0, boomerang),
+        (311, 0x310128, hookshot),
+        (306, 0x310100, hammer),
+        (302, 0x310130, bombs),
+        (308, 0x310110, fire_rod),
+        (309, 0x310118, ice_rod),
+        (310, 0x310120, tornado_rod),
+        (307, 0x310108, sand_rod),
+    ] {
+        let fn_set_local3_flag_for_this_upgrade = code.text().define([
+            ldr(R0, MAP_MANAGER_INSTANCE),
+            ldr(R0, (R0, 0x0)),
+            ldr(R0, (R0, 0x40)),
+            ldr(R1, offset),
+            mov(R2, 0x1),
+            bl(FN_SET_LOCAL_FLAG_3),
+            mov(R0, item.as_item_index()),
+            b(0x310134),
+        ]);
+        code.patch(addr, [b(fn_set_local3_flag_for_this_upgrade)]);
+    }
 
-    // Item
-    code.patch(0x310118, [mov(R0, ice.as_item_index())]); // 0x4D - Nice Ice Rod
-    code.patch(0x310108, [mov(R0, sand.as_item_index())]); // 0x4E - Nice Sand Rod
-    code.patch(0x310120, [mov(R0, torn.as_item_index())]); // 0x4F - Nice Torando Rod
-    code.patch(0x310130, [mov(R0, bomb.as_item_index())]); // 0x50 - Nice Bombs
-    code.patch(0x310110, [mov(R0, fire.as_item_index())]); // 0x51 - Nice Fire Rod
-    code.patch(0x310128, [mov(R0, hook.as_item_index())]); // 0x52 - Nice Hookshot
-    code.patch(0x3100F0, [mov(R0, rang.as_item_index())]); // 0x53 - Nice Boomerang
-    code.patch(0x310100, [mov(R0, hamm.as_item_index())]); // 0x54 - Nice Hammer
-    code.patch(0x3100F8, [mov(R0, bow.as_item_index())]); // 0x55 - Nice Bow
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // Item Names
+    code.patch(0x426e28, [mov(R0, get_item_name_offset_for(bow))]);
+    code.patch(0x426e18, [mov(R0, get_item_name_offset_for(boomerang))]);
+    code.patch(0x426e10, [mov(R0, get_item_name_offset_for(hookshot))]);
+    code.patch(0x426e20, [mov(R0, get_item_name_offset_for(hammer))]);
+    code.patch(0x426e00, [mov(R0, get_item_name_offset_for(bombs))]);
+    code.patch(0x426e08, [mov(R0, get_item_name_offset_for(fire_rod))]);
+    code.patch(0x426de8, [mov(R0, get_item_name_offset_for(ice_rod))]);
+    code.patch(0x426df8, [mov(R0, get_item_name_offset_for(tornado_rod))]);
+    code.patch(0x426df0, [mov(R0, get_item_name_offset_for(sand_rod))]);
+}
+
+fn get_item_name_offset_for(_item: Randomizable) -> u32 {
+    0x0 // todo
 }
 
 fn pause_menu_warp(code: &mut Code) {
@@ -1129,9 +1187,9 @@ const FN_GET_LOCAL_FLAG_3: u32 = 0x52a05c;
 /// r0: PlayerObjectSingleton <br />
 /// r1: flag index <br />
 /// r2: new flag value (0 or 1)
-// const FN_SET_LOCAL_FLAG_3: u32 = 0x1bb724;
+const FN_SET_LOCAL_FLAG_3: u32 = 0x1bb724;
 
-// const MAP_MANAGER_INSTANCE: u32 = 0x70c8e0;
+const MAP_MANAGER_INSTANCE: u32 = 0x70c8e0;
 // const PTR_MAP_MANAGER_INSTANCE: u32 = 0x27320c;
 const PLAYER_OBJECT_SINGLETON: u32 = 0x70FB60;
 const VTABLE_STRING: u32 = 0x6F5988;
