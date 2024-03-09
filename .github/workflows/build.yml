@@ -31,6 +31,7 @@ jobs:
           strip: true
       - name: Prepare zip file
         run: |
+          mv target/${{ matrix.platform.target }}/release/${{ matrix.platform.file }} .
           mkdir generated
           touch generated/.keep
       - name: Upload build artifact
@@ -38,7 +39,7 @@ jobs:
         with:
           name: ${{ matrix.platform.target }}
           path: |
-            target/${{ matrix.platform.target }}/release/${{ matrix.platform.file }}
+            ${{ matrix.platform.file }}
             config.json
             generated
             presets
