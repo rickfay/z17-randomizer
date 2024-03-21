@@ -2,11 +2,10 @@ use crate::filler::filler_item::Item::{
     PendantOfCourage, PendantOfPower, PendantOfWisdom, SageGulley, SageImpa, SageIrene, SageOren, SageOsfala,
     SageRosso, SageSeres,
 };
-use crate::filler::filler_item::Randomizable::Item;
 use crate::{
     hints::{formatting::*, Hint},
     patch::messages::{hint_ghosts::HintGhost, msbt::load_msbt},
-    LocationInfo, Patcher, Result, SeedInfo,
+    regions, Patcher, Result, SeedInfo,
 };
 use game::Course::{self, *};
 use log::info;
@@ -36,6 +35,7 @@ pub fn patch_messages(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()>
     patch_street_merchant(patcher, seed_info)?;
     patch_sahasrahla(patcher, seed_info)?;
     patch_hint_ghosts(patcher, seed_info)?;
+    // patch_mother_maiamai_sign(patcher, seed_info)?;
     patch_bow_of_light(patcher, seed_info)?;
 
     Ok(())
@@ -118,7 +118,7 @@ fn patch_item_names(patcher: &mut Patcher) -> Result<()> {
 fn patch_event_item_get(patcher: &mut Patcher) -> Result<()> {
     let mut msbt = load_msbt(patcher, LanguageBoot, "EventItemGet")?;
 
-    msbt.set("none", &format!("A quake shakes the kingdom!")); // ehh
+    msbt.set("none", "A quake shakes the kingdom!"); // ehh
 
     msbt.set("item_bow", "You got the bow!");
     msbt.set("item_boomerang", "You got the boomerang!");
@@ -140,9 +140,9 @@ fn patch_event_item_get(patcher: &mut Patcher) -> Result<()> {
 
 /// Gear Descriptions
 fn patch_collect(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
-    let power = seed_info.layout.find_single(Item(PendantOfPower)).unwrap().0;
-    let wisdom = seed_info.layout.find_single(Item(PendantOfWisdom)).unwrap().0;
-    let courage = seed_info.layout.find_single(Item(PendantOfCourage)).unwrap().0;
+    let power = seed_info.layout.find_single(PendantOfPower).unwrap().0;
+    let wisdom = seed_info.layout.find_single(PendantOfWisdom).unwrap().0;
+    let courage = seed_info.layout.find_single(PendantOfCourage).unwrap().0;
 
     let mut msbt = load_msbt(patcher, LanguageBoot, "Collect")?;
 
@@ -166,13 +166,13 @@ fn patch_actions(patcher: &mut Patcher) -> Result<()> {
 
 /// Ravio
 fn patch_ravio(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
-    let (gulley, _) = seed_info.layout.find_single(Item(SageGulley)).unwrap();
-    let (oren, _) = seed_info.layout.find_single(Item(SageOren)).unwrap();
-    let (seres, _) = seed_info.layout.find_single(Item(SageSeres)).unwrap();
-    let (osfala, _) = seed_info.layout.find_single(Item(SageOsfala)).unwrap();
-    let (impa, _) = seed_info.layout.find_single(Item(SageImpa)).unwrap();
-    let (irene, _) = seed_info.layout.find_single(Item(SageIrene)).unwrap();
-    let (rosso, _) = seed_info.layout.find_single(Item(SageRosso)).unwrap();
+    let (gulley, _) = seed_info.layout.find_single(SageGulley).unwrap();
+    let (oren, _) = seed_info.layout.find_single(SageOren).unwrap();
+    let (seres, _) = seed_info.layout.find_single(SageSeres).unwrap();
+    let (osfala, _) = seed_info.layout.find_single(SageOsfala).unwrap();
+    let (impa, _) = seed_info.layout.find_single(SageImpa).unwrap();
+    let (irene, _) = seed_info.layout.find_single(SageIrene).unwrap();
+    let (rosso, _) = seed_info.layout.find_single(SageRosso).unwrap();
 
     let first_intro = &format!("What's that? You're looking for the\n{}?", name("Seven Sages"));
     let second_intro = &format!("Yeah...if you're looking for those\n{}?", name("Seven Sages"));
@@ -287,16 +287,10 @@ fn patch_cross_old_man(patcher: &mut Patcher) -> Result<()> {
 
 /// Street Merchant - Shorten text & show the item names
 fn patch_street_merchant(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
-    let item_left = seed_info
-        .layout
-        .get(&LocationInfo::new("Street Merchant (Left)", crate::regions::hyrule::kakariko::village::SUBREGION))
-        .unwrap()
-        .as_str();
-    let item_right = seed_info
-        .layout
-        .get(&LocationInfo::new("Street Merchant (Right)", crate::regions::hyrule::kakariko::village::SUBREGION))
-        .unwrap()
-        .as_str();
+    let item_left =
+        seed_info.layout.get_unsafe("Street Merchant (Left)", regions::hyrule::kakariko::village::SUBREGION).as_str();
+    let item_right =
+        seed_info.layout.get_unsafe("Street Merchant (Right)", regions::hyrule::kakariko::village::SUBREGION).as_str();
 
     let mut street_merchant = load_msbt(patcher, FieldLight, "FieldLight_18")?;
     street_merchant.set(
@@ -328,9 +322,9 @@ fn patch_street_merchant(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<
 
 /// Sahasrahla gives out the locations of the Red & Blue Pendants
 fn patch_sahasrahla(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
-    let (power, _) = seed_info.layout.find_single(Item(PendantOfPower)).unwrap();
-    let (wisdom, _) = seed_info.layout.find_single(Item(PendantOfWisdom)).unwrap();
-    let (courage, _) = seed_info.layout.find_single(Item(PendantOfCourage)).unwrap();
+    let (power, _) = seed_info.layout.find_single(PendantOfPower).unwrap();
+    let (wisdom, _) = seed_info.layout.find_single(PendantOfWisdom).unwrap();
+    let (courage, _) = seed_info.layout.find_single(PendantOfCourage).unwrap();
 
     let mut sahasrahla = load_msbt(patcher, IndoorLight, "FieldLight_18")?;
 
@@ -425,6 +419,38 @@ fn patch_hint_ghosts(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> 
 
         patcher.update(msbt_file.dump())?;
     }
+
+    Ok(())
+}
+
+/// Mother Maiamai Sign
+#[allow(unused)]
+fn patch_mother_maiamai_sign(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
+    let major_item_count = [
+        "Maiamai Bow Upgrade", "Maiamai Boomerang Upgrade", "Maiamai Hookshot Upgrade", "Maiamai Hammer Upgrade",
+        "Maiamai Bombs Upgrade", "Maiamai Fire Rod Upgrade", "Maiamai Ice Rod Upgrade", "Maiamai Tornado Rod Upgrade",
+        "Maiamai Sand Rod Upgrade", "100 Maiamai",
+    ]
+    .iter()
+    .flat_map(|&loc| {
+        if let Some(item) = seed_info.layout.get(loc, regions::hyrule::lake::cave::SUBREGION) {
+            if item.is_major_item() {
+                return Some(());
+            }
+        }
+        None
+    })
+    .count();
+
+    let mut msbt = load_msbt(patcher, FieldLight, "FieldLight_35")?;
+    msbt.set(
+        "SNBD_lgt_FieldLight35_Kinsta_SignBoard_00",
+        &format!(
+            "Do Not Enter! Very Strange Creature\nwith {} Inside!",
+            attention(&format!("{} Major Item{}", major_item_count, if major_item_count == 1 { "" } else { "s" }))
+        ),
+    );
+    patcher.update(msbt.dump())?;
 
     Ok(())
 }

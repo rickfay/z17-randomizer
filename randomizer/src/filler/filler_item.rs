@@ -3,7 +3,6 @@ use crate::hints::{hint_color::HintColor::*, hint_ghost_name};
 use crate::patch::lms::msbf::MsbfKey;
 use crate::Result;
 use game::ghosts::HintGhost;
-use modinfo::Settings;
 use rom::flag::Flag;
 use serde::{Serialize, Serializer};
 use std::fmt::Debug;
@@ -60,140 +59,138 @@ impl Randomizable {
     }
 
     pub fn include_in_sphere_search(self) -> bool {
-        match self {
+        matches!(
+            self,
             Self::Item(
                 Item::Bow01
-                | Item::Bow02
-                | Item::Bow03
-                | Item::Boomerang01
-                | Item::Boomerang02
-                | Item::Hookshot01
-                | Item::Hookshot02
-                | Item::Bombs01
-                | Item::Bombs02
-                | Item::FireRod01
-                | Item::FireRod02
-                | Item::IceRod01
-                | Item::IceRod02
-                | Item::Hammer01
-                | Item::Hammer02
-                | Item::SandRod01
-                | Item::SandRod02
-                | Item::TornadoRod01
-                | Item::TornadoRod02
-                | Item::Bell
-                | Item::StaminaScroll
-                | Item::BowOfLight
-                | Item::PegasusBoots
-                | Item::Flippers
-                | Item::RaviosBracelet01
-                | Item::RaviosBracelet02
-                | Item::HylianShield
-                | Item::SmoothGem
-                | Item::LetterInABottle
-                | Item::PremiumMilk
-                | Item::GreatSpin
-                | Item::Bottle01
-                | Item::Bottle02
-                | Item::Bottle03
-                | Item::Bottle04
-                | Item::Lamp01
-                | Item::Lamp02
-                | Item::Sword01
-                | Item::Sword02
-                | Item::Sword03
-                | Item::Sword04
-                | Item::Glove01
-                | Item::Glove02
-                | Item::Net01
-                | Item::Net02
-                | Item::Mail01
-                | Item::Mail02
-                | Item::OreYellow
-                | Item::OreGreen
-                | Item::OreBlue
-                | Item::OreRed
-                | Item::HyruleSanctuaryKey
-                | Item::LoruleSanctuaryKey
-                | Item::EasternKeyBig
-                | Item::EasternKeySmall01
-                | Item::EasternKeySmall02
-                | Item::GalesKeyBig
-                | Item::GalesKeySmall01
-                | Item::GalesKeySmall02
-                | Item::GalesKeySmall03
-                | Item::GalesKeySmall04
-                | Item::HeraKeyBig
-                | Item::HeraKeySmall01
-                | Item::HeraKeySmall02
-                | Item::DarkKeyBig
-                | Item::DarkKeySmall01
-                | Item::DarkKeySmall02
-                | Item::DarkKeySmall03
-                | Item::DarkKeySmall04
-                | Item::SwampKeyBig
-                | Item::SwampKeySmall01
-                | Item::SwampKeySmall02
-                | Item::SwampKeySmall03
-                | Item::SwampKeySmall04
-                | Item::SkullKeyBig
-                | Item::SkullKeySmall01
-                | Item::SkullKeySmall02
-                | Item::SkullKeySmall03
-                | Item::ThievesKeyBig
-                | Item::ThievesKeySmall
-                | Item::IceKeyBig
-                | Item::IceKeySmall01
-                | Item::IceKeySmall02
-                | Item::IceKeySmall03
-                | Item::DesertKeyBig
-                | Item::DesertKeySmall01
-                | Item::DesertKeySmall02
-                | Item::DesertKeySmall03
-                | Item::DesertKeySmall04
-                | Item::DesertKeySmall05
-                | Item::TurtleKeyBig
-                | Item::TurtleKeySmall01
-                | Item::TurtleKeySmall02
-                | Item::TurtleKeySmall03
-                | Item::LoruleCastleKeySmall01
-                | Item::LoruleCastleKeySmall02
-                | Item::LoruleCastleKeySmall03
-                | Item::LoruleCastleKeySmall04
-                | Item::LoruleCastleKeySmall05
-                | Item::Charm
-                | Item::PendantOfPower
-                | Item::PendantOfWisdom
-                | Item::PendantOfCourage
-                | Item::SageGulley
-                | Item::SageOren
-                | Item::SageSeres
-                | Item::SageOsfala
-                | Item::SageRosso
-                | Item::SageIrene
-                | Item::SageImpa
-                | Item::Quake
-                | Item::ScootFruit01
-                | Item::ScootFruit02
-                | Item::GoldBee01
-                | Item::TriforceOfCourage,
-            )
-            | Self::Goal(
+                    | Item::Bow02
+                    | Item::Bow03
+                    | Item::Boomerang01
+                    | Item::Boomerang02
+                    | Item::Hookshot01
+                    | Item::Hookshot02
+                    | Item::Bombs01
+                    | Item::Bombs02
+                    | Item::FireRod01
+                    | Item::FireRod02
+                    | Item::IceRod01
+                    | Item::IceRod02
+                    | Item::Hammer01
+                    | Item::Hammer02
+                    | Item::SandRod01
+                    | Item::SandRod02
+                    | Item::TornadoRod01
+                    | Item::TornadoRod02
+                    | Item::Bell
+                    | Item::StaminaScroll
+                    | Item::BowOfLight
+                    | Item::PegasusBoots
+                    | Item::Flippers
+                    | Item::RaviosBracelet01
+                    | Item::RaviosBracelet02
+                    | Item::HylianShield
+                    | Item::SmoothGem
+                    | Item::LetterInABottle
+                    | Item::PremiumMilk
+                    | Item::GreatSpin
+                    | Item::Bottle01
+                    | Item::Bottle02
+                    | Item::Bottle03
+                    | Item::Bottle04
+                    | Item::Lamp01
+                    | Item::Lamp02
+                    | Item::Sword01
+                    | Item::Sword02
+                    | Item::Sword03
+                    | Item::Sword04
+                    | Item::Glove01
+                    | Item::Glove02
+                    | Item::Net01
+                    | Item::Net02
+                    | Item::Mail01
+                    | Item::Mail02
+                    | Item::OreYellow
+                    | Item::OreGreen
+                    | Item::OreBlue
+                    | Item::OreRed
+                    | Item::HyruleSanctuaryKey
+                    | Item::LoruleSanctuaryKey
+                    | Item::EasternKeyBig
+                    | Item::EasternKeySmall01
+                    | Item::EasternKeySmall02
+                    | Item::GalesKeyBig
+                    | Item::GalesKeySmall01
+                    | Item::GalesKeySmall02
+                    | Item::GalesKeySmall03
+                    | Item::GalesKeySmall04
+                    | Item::HeraKeyBig
+                    | Item::HeraKeySmall01
+                    | Item::HeraKeySmall02
+                    | Item::DarkKeyBig
+                    | Item::DarkKeySmall01
+                    | Item::DarkKeySmall02
+                    | Item::DarkKeySmall03
+                    | Item::DarkKeySmall04
+                    | Item::SwampKeyBig
+                    | Item::SwampKeySmall01
+                    | Item::SwampKeySmall02
+                    | Item::SwampKeySmall03
+                    | Item::SwampKeySmall04
+                    | Item::SkullKeyBig
+                    | Item::SkullKeySmall01
+                    | Item::SkullKeySmall02
+                    | Item::SkullKeySmall03
+                    | Item::ThievesKeyBig
+                    | Item::ThievesKeySmall
+                    | Item::IceKeyBig
+                    | Item::IceKeySmall01
+                    | Item::IceKeySmall02
+                    | Item::IceKeySmall03
+                    | Item::DesertKeyBig
+                    | Item::DesertKeySmall01
+                    | Item::DesertKeySmall02
+                    | Item::DesertKeySmall03
+                    | Item::DesertKeySmall04
+                    | Item::DesertKeySmall05
+                    | Item::TurtleKeyBig
+                    | Item::TurtleKeySmall01
+                    | Item::TurtleKeySmall02
+                    | Item::TurtleKeySmall03
+                    | Item::LoruleCastleKeySmall01
+                    | Item::LoruleCastleKeySmall02
+                    | Item::LoruleCastleKeySmall03
+                    | Item::LoruleCastleKeySmall04
+                    | Item::LoruleCastleKeySmall05
+                    | Item::Charm
+                    | Item::PendantOfPower
+                    | Item::PendantOfWisdom
+                    | Item::PendantOfCourage
+                    | Item::SageGulley
+                    | Item::SageOren
+                    | Item::SageSeres
+                    | Item::SageOsfala
+                    | Item::SageRosso
+                    | Item::SageIrene
+                    | Item::SageImpa
+                    | Item::Quake
+                    | Item::ScootFruit01
+                    | Item::ScootFruit02
+                    | Item::GoldBee01
+                    | Item::TriforceOfCourage,
+            ) | Self::Goal(
                 Goal::RavioShopOpen
-                | Goal::ShadyGuyTrigger
-                | Goal::LcTileTrial
-                | Goal::LcLampTrial
-                | Goal::LcBombTrial
-                | Goal::LcHookTrial
-                | Goal::Triforce,
-            )
-            | Self::Vane(_)
-            | Self::Crack(_) => true,
-            _ => false,
-        }
+                    | Goal::ShadyGuyTrigger
+                    | Goal::LcTileTrial
+                    | Goal::LcLampTrial
+                    | Goal::LcBombTrial
+                    | Goal::LcHookTrial
+                    | Goal::Triforce,
+            ) | Self::Vane(_)
+                | Self::Crack(_)
+        )
     }
 
-    pub fn goes_in_csmc_large_chest(&self, _settings: &Settings) -> bool {
+    pub fn is_major_item(&self) -> bool {
         use crate::filler::filler_item::Item::*;
         if let Randomizable::Item(item) = self {
             match item {

@@ -38,7 +38,7 @@ where
         map.insert(x.clone(), y.clone());
         map.insert(y, x);
 
-        i = i + 2;
+        i += 2;
     }
 
     Ok(map)

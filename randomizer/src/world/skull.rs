@@ -47,14 +47,8 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                 "Skull Woods B2",
                 None,
                 vec![
-                    edge!(SkullWoodsMain => {
-                        normal: |p| p.can_merge() && p.can_attack(),
-                        hard: |p| p.can_merge() && p.has_lamp_or_net(),
-                    }),
-                    edge!(SkullWoodsElevatorHallway => {
-                        normal: |p| p.can_merge() && p.can_attack(),
-                        hard: |p| p.can_merge() && p.has_lamp_or_net(),
-                    }),
+                    edge!(SkullWoodsMain, |p| p.can_merge() && p.can_attack()),
+                    edge!(SkullWoodsElevatorHallway, |p| p.can_merge() && p.can_attack()),
                 ],
             ),
         ),
@@ -85,18 +79,12 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
             SkullWoodsBossRoom,
             location(
                 "Skull Woods Boss Room",
-                vec![check!("[SW] Knucklemaster", regions::dungeons::skull::woods::SUBREGION => {
-                    normal: |p| p.has_master_sword() || p.can_defeat_knucklemaster_swordless(),
-                    hard: |p| p.can_technically_defeat_knucklemaster(),
-                })],
+                vec![check!("[SW] Knucklemaster", regions::dungeons::skull::woods::SUBREGION, |p| p
+                    .can_defeat_knucklemaster())],
                 vec![
-                    edge!(SkullWoodsBossHallway => {
-                        normal: |p| p.has_master_sword() || p.can_defeat_knucklemaster_swordless(),
-                        hard: |p| p.can_technically_defeat_knucklemaster(),
-                    }),
+                    edge!(SkullWoodsBossHallway, |p| p.can_defeat_knucklemaster()),
                     edge!(SkullWoodsSeresGrove => {
-                        normal: |p| p.has_master_sword() || p.can_defeat_knucklemaster_swordless(),
-                        hard: |p| p.can_technically_defeat_knucklemaster(),
+                        normal: |p| p.has_master_sword() || p.can_defeat_knucklemaster(),
                         glitched: |p| p.has_tornado_rod(),
                     }),
                 ],

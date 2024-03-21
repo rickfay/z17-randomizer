@@ -154,8 +154,10 @@ impl Ips {
     }
 }
 
-pub fn create(patcher: &Patcher, SeedInfo { layout, settings, .. }: &SeedInfo) -> Code {
+pub fn create(patcher: &Patcher, seed_info: &SeedInfo) -> Code {
     let mut code = Code::new(patcher.game.exheader());
+
+    do_dev_stuff(&mut code, seed_info);
 
     warp(&mut code);
     //shield_without_sword(&mut code);
@@ -163,7 +165,7 @@ pub fn create(patcher: &Patcher, SeedInfo { layout, settings, .. }: &SeedInfo) -
     quake(&mut code);
 
     // Start with Pouch
-    if settings.start_with_pouch {
+    if seed_info.settings.start_with_pouch {
         code.text().patch(0x47b28c, [mov(R0, 1)]);
     }
 
@@ -175,14 +177,15 @@ pub fn create(patcher: &Patcher, SeedInfo { layout, settings, .. }: &SeedInfo) -
 
     rental_items(&mut code);
     progressive_items(&mut code);
-    bracelet(&mut code, settings);
+    bracelet(&mut code, &seed_info.settings);
     ore_progress(&mut code);
     merchant(&mut code);
-    configure_pedestal_requirements(&mut code, settings);
-    night_mode(&mut code, settings);
+    configure_pedestal_requirements(&mut code, &seed_info.settings);
+    night_mode(&mut code, &seed_info.settings);
     show_hint_ghosts(&mut code);
-    mother_maiamai(&mut code, &layout);
+    mother_maiamai(&mut code, &seed_info.layout);
     pause_menu_warp(&mut code);
+    purple_potion_bottles(&mut code, &seed_info.settings);
     // golden_bees(&mut code);
     // file_select_screen_background(&mut code);
 
@@ -292,7 +295,7 @@ pub fn create(patcher: &Patcher, SeedInfo { layout, settings, .. }: &SeedInfo) -
     code.patch(0x1D6DBC, [ldr(R1, (R4, 0x2E)), mov(R0, R0)]);
 
     // Premium Milk
-    if layout.find_single(Randomizable::Item(LetterInABottle)).is_none() {
+    if seed_info.layout.find_single(LetterInABottle).is_none() {
         // This code makes the Premium Milk work correctly when picked up without having first picked up the Letter.
         // This patch is only applied when the Milk is shuffled in the rando instead of the Letter.
         // If it's desired to have both shuffled at once then this code needs to be re-written.
@@ -333,6 +336,18 @@ pub fn create(patcher: &Patcher, SeedInfo { layout, settings, .. }: &SeedInfo) -
     code.patch(0x344dec, [b(great_spin_fix)]);
 
     code
+}
+
+#[allow(unused_variables)]
+fn do_dev_stuff(code: &mut Code, seed_info: &SeedInfo) {
+    if !seed_info.settings.dev_mode {
+        return;
+    }
+
+    // Make each Maiamai worth more (for testing only)
+    let amount = 25;
+    code.patch(0x2559bc, [add(R1, R1, amount)]);
+    code.patch(0x2559c0, [add(R2, R2, amount)]);
 }
 
 /// File Select Screen Background
@@ -401,18 +416,24 @@ fn quake(code: &mut Code) {
 
 /// Mother Maiamai Stuff
 fn mother_maiamai(code: &mut Code, layout: &Layout) {
-    // Make each Maiamai worth more (for testing only)
-    // let amount = 90;
-    // code.patch(0x2559bc, [add(R1, R1, amount)]);
-    // code.patch(0x2559c0, [add(R2, R2, amount)]);
-
     // Use flags 302-311 (not 305) to record whether we've picked up that item's upgrade.
     const NEW_LOCAL_FLAGS_START_IDX: u32 = 300;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    // Great Spin final Nice Item check (?)
     // Accept Nice Items in addition to their regular counterparts for the check to see if we own anything upgradable.
-    code.patch(0x30fdcc, [b(0x30fef0).ge()]);
+    // code.patch(0x30fdcc, [b(0x30fef0).ge()]);
+    let fn_get_maiamai_flag3 = code.text().define([
+        add(R1, R4, NEW_LOCAL_FLAGS_START_IDX),
+        ldr(R0, MAP_MANAGER_INSTANCE),
+        ldr(R0, (R0, 0x0)),
+        ldr(R0, (R0, 0x40)),
+        bl(FN_GET_LOCAL_FLAG_3),
+        b(0x30fdc4),
+    ]);
+    code.patch(0x30fdb8, [b(fn_get_maiamai_flag3)]);
+    code.patch(0x30fdc4, [cmp(R0, 0x0)]);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -448,7 +469,7 @@ fn mother_maiamai(code: &mut Code, layout: &Layout) {
         b(0x30fe48),
     ]);
     code.patch(0x30fe3c, [b(fn_get_maiamai_flag3)]);
-    code.patch(0x30fe48, [cmp(R0, 0x0)]);
+    code.patch(0x30fe48, [cmp(R0, 0x1)]);
     code.patch(0x30fe4c, [add(R5, R5, 0x1).eq()]);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -494,17 +515,17 @@ fn mother_maiamai(code: &mut Code, layout: &Layout) {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // Record upgrades received with a new course flag for each one.
-    let bow = layout.get_item("Maiamai Bow Upgrade", regions::hyrule::lake::hylia::SUBREGION);
-    let boomerang = layout.get_item("Maiamai Boomerang Upgrade", regions::hyrule::lake::hylia::SUBREGION);
-    let hookshot = layout.get_item("Maiamai Hookshot Upgrade", regions::hyrule::lake::hylia::SUBREGION);
-    let hammer = layout.get_item("Maiamai Hammer Upgrade", regions::hyrule::lake::hylia::SUBREGION);
-    let bombs = layout.get_item("Maiamai Bombs Upgrade", regions::hyrule::lake::hylia::SUBREGION);
-    let fire_rod = layout.get_item("Maiamai Fire Rod Upgrade", regions::hyrule::lake::hylia::SUBREGION);
-    let ice_rod = layout.get_item("Maiamai Ice Rod Upgrade", regions::hyrule::lake::hylia::SUBREGION);
-    let tornado_rod = layout.get_item("Maiamai Tornado Rod Upgrade", regions::hyrule::lake::hylia::SUBREGION);
-    let sand_rod = layout.get_item("Maiamai Sand Rod Upgrade", regions::hyrule::lake::hylia::SUBREGION);
+    let bow = layout.get_unsafe("Maiamai Bow Upgrade", regions::hyrule::lake::cave::SUBREGION);
+    let boomerang = layout.get_unsafe("Maiamai Boomerang Upgrade", regions::hyrule::lake::cave::SUBREGION);
+    let hookshot = layout.get_unsafe("Maiamai Hookshot Upgrade", regions::hyrule::lake::cave::SUBREGION);
+    let hammer = layout.get_unsafe("Maiamai Hammer Upgrade", regions::hyrule::lake::cave::SUBREGION);
+    let bombs = layout.get_unsafe("Maiamai Bombs Upgrade", regions::hyrule::lake::cave::SUBREGION);
+    let fire_rod = layout.get_unsafe("Maiamai Fire Rod Upgrade", regions::hyrule::lake::cave::SUBREGION);
+    let ice_rod = layout.get_unsafe("Maiamai Ice Rod Upgrade", regions::hyrule::lake::cave::SUBREGION);
+    let tornado_rod = layout.get_unsafe("Maiamai Tornado Rod Upgrade", regions::hyrule::lake::cave::SUBREGION);
+    let sand_rod = layout.get_unsafe("Maiamai Sand Rod Upgrade", regions::hyrule::lake::cave::SUBREGION);
 
-    for (offset, addr, item) in vec![
+    for (offset, addr, item) in [
         (304, 0x3100f8, bow),
         (303, 0x3100f0, boomerang),
         (311, 0x310128, hookshot),
@@ -582,6 +603,12 @@ fn pause_menu_warp(code: &mut Code) {
     // code.patch(0x441edc, [b(fn_death_warp)]);
     //
     // code.patch(0x0, 0x0);
+}
+
+fn purple_potion_bottles(code: &mut Code, settings: &Settings) {
+    if settings.purple_potion_bottles {
+        code.patch(0x255210, [mov(R1, 0x3)]);
+    }
 }
 
 /// Golden Bee stuff

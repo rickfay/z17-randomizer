@@ -1,11 +1,12 @@
-use crate::settings::cracks::Cracks;
-use crate::settings::cracksanity::Cracksanity;
-use crate::settings::keysy::Keysy;
-use crate::settings::logic::LogicMode;
-use crate::settings::pedestal::PedestalSetting;
-use crate::settings::ravios_shop::RaviosShop;
-use crate::settings::trials_door::TrialsDoor;
-use crate::settings::weather_vanes::WeatherVanes;
+pub use crate::settings::cracks::Cracks;
+pub use crate::settings::cracksanity::Cracksanity;
+pub use crate::settings::keysy::Keysy;
+pub use crate::settings::logic::LogicMode;
+pub use crate::settings::nice_items::NiceItems;
+pub use crate::settings::pedestal::PedestalSetting;
+pub use crate::settings::ravios_shop::RaviosShop;
+pub use crate::settings::trials_door::TrialsDoor;
+pub use crate::settings::weather_vanes::WeatherVanes;
 use log::info;
 use logic::LogicMode::*;
 use serde::{Deserialize, Serialize};
@@ -16,6 +17,7 @@ pub mod cracks;
 pub mod cracksanity;
 pub mod keysy;
 pub mod logic;
+pub mod nice_items;
 pub mod pedestal;
 pub mod ravios_shop;
 pub mod trials_door;
@@ -52,17 +54,25 @@ pub struct Settings {
     #[serde(default = "r#true")]
     pub dungeon_prize_shuffle: bool,
 
+    /// Maiamai Limit
+    #[serde(default = "fifty")]
+    pub maiamai_limit: usize,
+
     /// Maiamai Madness
     #[serde(default)]
     pub maiamai_madness: bool,
 
-    /// Shuffles Nice Items into the general item pool as progressive upgrades (temporary: removes Maiamai cave)
+    /// Nice Items
     #[serde(default)]
-    pub nice_mode: bool,
+    pub nice_items: NiceItems,
 
     /// Shuffle Super Lamp and Super Net
     #[serde(default)]
-    pub super_mode: bool,
+    pub super_items: bool,
+
+    /// Lamp & Net as Weapons
+    #[serde(default)]
+    pub lamp_and_net_as_weapons: bool,
 
     /// Cracks Open/Closed Setting
     pub cracks: Cracks,
@@ -145,6 +155,9 @@ pub struct Settings {
     #[serde(default = "five")]
     pub treacherous_tower_floors: usize,
 
+    /// Purple Potion Bottles
+    pub purple_potion_bottles: bool,
+
     /// Experimental: Change Hyrule to the nighttime color scheme (until visiting Lorule)
     pub night_mode: bool,
 
@@ -173,15 +186,14 @@ impl Settings {
         info!("Yuga Ganon Requirement:         {} Portraits", self.yuganon_requirement);
         info!("Pedestal Requirement:           {}", self.ped_requirement);
 
-        info!("Nice Mode:                      {}", if self.nice_mode { "ON" } else { "OFF" });
-        info!("Super Items:                    {}", if self.super_mode { "Shuffled" } else { "Not Shuffled" });
+        info!("Super Items:                    {}", if self.super_items { "Shuffled" } else { "Not Shuffled" });
         info!("Progression-Granting Enemies:   {}", if self.no_progression_enemies { "Removed" } else { "Vanilla" });
 
         info!("Maiamai:                        {}", if self.maiamai_madness { "Madness" } else { "Not Randomized" });
 
         info!("Start with Merge:               {}", if self.start_with_merge { "Yes" } else { "No" });
         info!("Start with Pouch:               {}", if self.start_with_pouch { "Yes" } else { "No" });
-        let shop_items = vec![
+        let shop_items = [
             (&self.bell_in_shop, "Bell"),
             (&self.sword_in_shop, "Sword"),
             (&self.boots_in_shop, "Pegasus Boots"),
@@ -215,10 +227,7 @@ impl Settings {
 }
 
 fn ravios_shop_open(ravios_shop: &RaviosShop) -> bool {
-    match ravios_shop {
-        RaviosShop::Open => true,
-        _ => false,
-    }
+    matches!(ravios_shop, RaviosShop::Open)
 }
 
 const fn is_false(b: &bool) -> bool {
@@ -231,6 +240,10 @@ const fn five() -> usize {
 
 const fn seven() -> u8 {
     7
+}
+
+const fn fifty() -> usize {
+    50
 }
 
 const fn r#true() -> bool {

@@ -227,7 +227,7 @@ fn out_of_logic(name: &'static str, subregion: &'static Subregion) -> Check {
 }
 
 fn crack_left(crack: Crack, crack_map: &CrackMap, is_hc: bool) -> Path {
-    let dest_crack = crack_map.get(&crack).expect(&format!("CrackMap missing Crack: {:?}", crack));
+    let dest_crack = crack_map.get(&crack).unwrap_or_else(|| panic!("CrackMap missing Crack: {:?}", crack));
     let (_left, right) = dest_crack.get_left_right_locations();
 
     let logic: fn(&Progress) -> bool = if is_hc { |p| p.can_merge() } else { |p| p.are_cracks_open() && p.can_merge() };

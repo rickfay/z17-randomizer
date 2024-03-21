@@ -1,6 +1,7 @@
 use crate::{actors::Actors, files::sarc::Sarc, flag::Flag, File, Item, Result};
 use game::Course;
 use serde::{de, ser::SerializeTuple, Deserialize, Deserializer, Serialize, Serializer};
+use std::ops::Add;
 use std::{fmt, path::Path};
 
 #[derive(Debug)]
@@ -434,6 +435,7 @@ impl Obj {
         Self::warp(19, 0, activation_flag, clp, ser, unq, sp, translate)
     }
 
+    #[allow(clippy::too_many_arguments)]
     fn warp(
         id: i16, arg1: i32, activation_flag: Flag, clp: i16, ser: Option<u16>, unq: u16, sp: SpawnPoint,
         translate: Vec3,
@@ -751,12 +753,15 @@ pub struct Vec3 {
 impl Vec3 {
     pub const UNIT: Self = Self { x: 1.0, y: 1.0, z: 1.0 };
     pub const ZERO: Self = Self { x: 0.0, y: 0.0, z: 0.0 };
+}
 
-    /// Adds the values of `other` to this Vec3, consuming the original and returning the sum
-    pub fn add(mut self, other: Vec3) -> Self {
-        self.x += other.x;
-        self.y += other.y;
-        self.z += other.z;
+impl Add for Vec3 {
+    type Output = Self;
+
+    fn add(mut self, rhs: Self) -> Self::Output {
+        self.x += rhs.x;
+        self.y += rhs.y;
+        self.z += rhs.z;
         self
     }
 }

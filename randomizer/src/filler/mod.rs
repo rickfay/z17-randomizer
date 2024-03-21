@@ -1,6 +1,6 @@
 use crate::filler::check::Check;
-use crate::filler::filler_item::Item;
 use crate::filler::filler_item::Randomizable::{Crack, Vane};
+use crate::filler::filler_item::{Item, Randomizable};
 use crate::filler::item_pools::{get_maiamai_pool, Pool};
 use crate::filler::location::Location;
 use crate::filler::progress::Progress;
@@ -8,6 +8,7 @@ use crate::{world::WorldGraph, CheckMap, DashMap, SeedInfo};
 use log::{error, info, warn};
 use macros::fail;
 use modinfo::settings::logic::LogicMode;
+use modinfo::settings::nice_items::NiceItems;
 use path::Path;
 use queue::Queue;
 use rand::{rngs::StdRng, Rng};
@@ -46,7 +47,7 @@ pub fn fill_all_locations_reachable(
     preplace_items(rng, seed_info, check_map, &mut progression_pool);
     handle_exclusions(rng, seed_info, check_map, &mut junk_pool);
 
-    assumed_fill(rng, seed_info, check_map, &mut progression_pool)?;
+    assumed_fill(rng, seed_info, check_map, &mut progression_pool, &mut junk_pool)?;
     fill_junk(rng, check_map, &mut junk_pool);
 
     build_layout(seed_info, check_map)?;
@@ -204,8 +205,8 @@ fn preplace_items(
     place_static(check_map, progression, Item::Fairy02, "Lorule Lakeside Item Shop (3)");
     place_static(check_map, progression, Item::Shield04, "Lorule Lakeside Item Shop (4)");
 
-    // Nice Mode
-    if !&settings.nice_mode {
+    // Vanilla Nice Items
+    if settings.nice_items == NiceItems::Vanilla {
         place_static(check_map, progression, Item::Bow02, "Maiamai Bow Upgrade");
         place_static(check_map, progression, Item::Boomerang02, "Maiamai Boomerang Upgrade");
         place_static(check_map, progression, Item::Hookshot02, "Maiamai Hookshot Upgrade");
@@ -227,12 +228,6 @@ fn preplace_items(
         "[LC] Tile Trial (1)", "[LC] Tile Trial (2)", "[LC] Lamp Trial", "[LC] Hook Trial (1)", "[LC] Hook Trial (2)",
         "[LC] Zelda",
     ];
-    let mut maiamai_positions: Vec<String> = Vec::new();
-    for (check_name, _) in check_map.iter() {
-        if check_name.starts_with("[Mai]") {
-            let _ = &maiamai_positions.push(check_name.clone());
-        }
-    }
 
     if !settings.progressive_bow_of_light && settings.bow_of_light_in_castle {
         check_map.insert(
@@ -308,6 +303,13 @@ fn preplace_items(
     // For non-Maiamai Madness seeds, default them to Maiamai
     // FIXME Inefficient to add Maiamai to progression pool, shuffle, then remove them
     if !&settings.maiamai_madness {
+        let mut maiamai_positions: Vec<String> = Vec::new();
+        for (check_name, _) in check_map.iter() {
+            if check_name.starts_with("[Mai]") {
+                maiamai_positions.push(check_name.clone());
+            }
+        }
+
         let mut maiamai_items = get_maiamai_pool();
         for check_name in maiamai_positions {
             place_static(check_map, progression, maiamai_items.remove(0), &check_name);
@@ -319,8 +321,9 @@ fn preplace_items(
 fn handle_exclusions(rng: &mut StdRng, seed_info: &mut SeedInfo, check_map: &mut CheckMap, junk: &mut Vec<Item>) {
     seed_info.full_exclusions = seed_info.settings.user_exclusions.clone();
 
-    // todo
-    seed_info.full_exclusions.insert("100 Maiamai".to_string());
+    if seed_info.settings.maiamai_limit < 100 {
+        seed_info.full_exclusions.insert("100 Maiamai".to_string());
+    }
 
     // Exclude Minigames
     if seed_info.settings.minigames_excluded {
@@ -380,19 +383,19 @@ fn build_layout(SeedInfo { layout, world_graph, .. }: &mut SeedInfo, check_map: 
 }
 
 fn is_dungeon_prize(item: Item) -> bool {
-    match item {
+    matches!(
+        item,
         Item::PendantOfPower
-        | Item::PendantOfWisdom
-        | Item::PendantOfCourage
-        | Item::SageGulley
-        | Item::SageOren
-        | Item::SageSeres
-        | Item::SageOsfala
-        | Item::SageImpa
-        | Item::SageIrene
-        | Item::SageRosso => true,
-        _ => false,
-    }
+            | Item::PendantOfWisdom
+            | Item::PendantOfCourage
+            | Item::SageGulley
+            | Item::SageOren
+            | Item::SageSeres
+            | Item::SageOsfala
+            | Item::SageImpa
+            | Item::SageIrene
+            | Item::SageRosso
+    )
 }
 
 fn is_dungeon_item(item: Item) -> bool {
@@ -483,10 +486,6 @@ fn fill_junk(rng: &mut StdRng, check_map: &mut CheckMap, junk_items: &mut Pool) 
     }
 }
 
-fn place_item_randomly(item: Item, checks: &Vec<Check>, check_map: &mut CheckMap, rng: &mut StdRng) {
-    check_map.insert(checks.get(rng.gen_range(0..checks.len())).unwrap().get_name().to_owned(), Some(item.into()));
-}
-
 fn filter_checks(item: Item, checks: &[Check], check_map: &mut CheckMap) -> Vec<Check> {
     // Filter out non-empty checks
     let mut filtered_checks =
@@ -505,8 +504,8 @@ fn filter_checks(item: Item, checks: &[Check], check_map: &mut CheckMap) -> Vec<
     filtered_checks
 }
 
-fn filter_dungeon_prize_checks(eligible_checks: &Vec<Check>) -> Vec<Check> {
-    let dungeon_prize_checks = vec![
+fn filter_dungeon_prize_checks(eligible_checks: &[Check]) -> Vec<Check> {
+    let dungeon_prize_checks = [
         "[EP] Prize", "[HG] Prize", "[TH] Prize", "[PD] Prize", "[SP] Prize", "[SW] Prize", "[TT] Prize", "[TR] Prize",
         "[DP] Prize", "[IR] Prize",
     ];
@@ -785,16 +784,16 @@ pub(crate) fn get_items_from_reachable_checks<'s>(
 /// * `check_map` - A map representing all checks and items assigned to them
 /// * `settings` - Game settings
 fn assumed_fill(
-    rng: &mut StdRng, seed_info: &SeedInfo, check_map: &mut CheckMap, items_owned: &mut Pool,
+    rng: &mut StdRng, seed_info: &SeedInfo, check_map: &mut CheckMap, items_owned: &mut Pool, junk: &mut Pool,
 ) -> crate::Result<()> {
     info!("Placing Progression Items...");
 
     let mut reachable_checks = assumed_search(seed_info, items_owned, check_map);
+    let mut major_maiamai_items = 0;
 
     while exist_empty_reachable_check(&reachable_checks, check_map) && !items_owned.is_empty() {
         let item = items_owned.remove(0);
 
-        //
         reachable_checks = assumed_search(seed_info, items_owned, check_map);
 
         let filtered_checks = filter_checks(item, &reachable_checks, check_map);
@@ -807,10 +806,48 @@ fn assumed_fill(
             return Err(crate::Error::game(format!("No reachable checks found to place: {:?}", item)));
         }
 
-        place_item_randomly(item, &filtered_checks, check_map, rng);
+        let chosen_check_name = place_item_randomly(item, &filtered_checks, check_map, rng);
+        handle_maiamai_limit(item.into(), chosen_check_name, &mut major_maiamai_items, seed_info, check_map, junk);
     }
 
     Ok(())
+}
+
+/// Places the given `item` on a random check in the `check_map`, then returns that check's name.
+fn place_item_randomly(item: Item, checks: &Vec<Check>, check_map: &mut CheckMap, rng: &mut StdRng) -> &'static str {
+    let check_name = checks.get(rng.gen_range(0..checks.len())).unwrap().get_name();
+    check_map.insert(check_name.to_owned(), Some(item.into()));
+    check_name
+}
+
+/// Handles the Maiamai Limit. Keeps track of the number of major items placed behind Maiamai Upgrades, and if it
+/// exceeds the `maiamai_limit` setting it will junk all the remaining Maiamai Upgrade checks.
+fn handle_maiamai_limit(
+    item: Randomizable, chosen_check_name: &str, major_maiamai_items: &mut usize, seed_info: &SeedInfo,
+    check_map: &mut CheckMap, junk: &mut Pool,
+) {
+    // Early exit if we've already dealt with the limit
+    if *major_maiamai_items >= seed_info.settings.maiamai_limit / 10 {
+        return;
+    }
+
+    const MAIAMAI_CHECK_NAMES: [&str; 9] = [
+        "Maiamai Bow Upgrade", "Maiamai Boomerang Upgrade", "Maiamai Hookshot Upgrade", "Maiamai Hammer Upgrade",
+        "Maiamai Bombs Upgrade", "Maiamai Fire Rod Upgrade", "Maiamai Ice Rod Upgrade", "Maiamai Tornado Rod Upgrade",
+        "Maiamai Sand Rod Upgrade",
+    ];
+
+    if MAIAMAI_CHECK_NAMES.contains(&chosen_check_name) && item.is_major_item() {
+        *major_maiamai_items += 1;
+        if *major_maiamai_items >= seed_info.settings.maiamai_limit / 10 {
+            // info!("HANDLE MAIAMAI LIMIT: {}, MAJOR ITEMS: {}", seed_info.settings.maiamai_limit / 10, major_maiamai_items);
+            for check_name in MAIAMAI_CHECK_NAMES {
+                if Some(&None) == check_map.get(check_name) {
+                    check_map.insert(String::from(check_name), Some(junk.pop().expect("valid junk item").into()));
+                }
+            }
+        }
+    }
 }
 
 /// The Assumed Search algorithm.

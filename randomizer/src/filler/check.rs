@@ -27,6 +27,10 @@ impl Check {
         self.name
     }
 
+    pub fn get_logic(&self) -> Logic {
+        self.logic
+    }
+
     pub fn get_quest(&self) -> Option<Randomizable> {
         self.quest
     }

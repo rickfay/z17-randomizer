@@ -271,11 +271,11 @@ impl<'input> FlowMut<'input> {
                         let mut bytes: Vec<u8> = msg.as_bytes().into();
                         bytes = bytes
                             .iter()
-                            .map(|&b| if b != 0xA && (b < 0x20 || b > 0x7E) { 0xEF } else { b })
+                            .map(|&b| if b != 0xA && !(0x20..=0x7E).contains(&b) { 0xEF } else { b })
                             .collect::<Vec<_>>();
 
-                        let msg = String::from_utf8_lossy(&*bytes);
-                        Some((label, str::replace(&*msg, "\n", "\\n")))
+                        let msg = String::from_utf8_lossy(&bytes);
+                        Some((label, str::replace(&msg, "\n", "\\n")))
                     } else {
                         None
                     };

@@ -69,6 +69,7 @@ fn patch_flowchart(patcher: &mut Patcher, prizes: &DungeonPrizes) {
 
 /// Get msbf event files and inject them into scenes
 #[rustfmt::skip]
+#[allow(clippy::type_complexity)]
 fn patch_msbf_files(patcher: &mut Patcher, prizes: &DungeonPrizes) {
     let prize_msbf_map: HashMap<Randomizable, (&str, File<Box<[u8]>>)> = HashMap::from([
         (Item(SageGulley), (MsbfKey::Dark, patcher.language(DungeonDark).unwrap().flow().extract("World/Flow/Dark.msbf").unwrap())),

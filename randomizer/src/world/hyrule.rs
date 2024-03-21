@@ -374,27 +374,26 @@ pub(crate) fn graph(crack_map: &CrackMap) -> HashMap<Location, LocationNode> {
             location(
                 "Mother Maiamai Cave",
                 vec![
-                    check!("Maiamai Bow Upgrade", regions::hyrule::lake::hylia::SUBREGION, |p| p.has_90_maiamai()
+                    check!("Maiamai Bow Upgrade", regions::hyrule::lake::cave::SUBREGION, |p| p.has_90_maiamai()
                         && p.has_bow()),
-                    check!("Maiamai Boomerang Upgrade", regions::hyrule::lake::hylia::SUBREGION, |p| p
-                        .has_90_maiamai()
+                    check!("Maiamai Boomerang Upgrade", regions::hyrule::lake::cave::SUBREGION, |p| p.has_90_maiamai()
                         && p.has_boomerang()),
-                    check!("Maiamai Hookshot Upgrade", regions::hyrule::lake::hylia::SUBREGION, |p| p.has_90_maiamai()
+                    check!("Maiamai Hookshot Upgrade", regions::hyrule::lake::cave::SUBREGION, |p| p.has_90_maiamai()
                         && p.has_hookshot()),
-                    check!("Maiamai Hammer Upgrade", regions::hyrule::lake::hylia::SUBREGION, |p| p.has_90_maiamai()
+                    check!("Maiamai Hammer Upgrade", regions::hyrule::lake::cave::SUBREGION, |p| p.has_90_maiamai()
                         && p.has_hammer()),
-                    check!("Maiamai Bombs Upgrade", regions::hyrule::lake::hylia::SUBREGION, |p| p.has_90_maiamai()
+                    check!("Maiamai Bombs Upgrade", regions::hyrule::lake::cave::SUBREGION, |p| p.has_90_maiamai()
                         && p.has_bombs()),
-                    check!("Maiamai Fire Rod Upgrade", regions::hyrule::lake::hylia::SUBREGION, |p| p.has_90_maiamai()
+                    check!("Maiamai Fire Rod Upgrade", regions::hyrule::lake::cave::SUBREGION, |p| p.has_90_maiamai()
                         && p.has_fire_rod()),
-                    check!("Maiamai Ice Rod Upgrade", regions::hyrule::lake::hylia::SUBREGION, |p| p.has_90_maiamai()
+                    check!("Maiamai Ice Rod Upgrade", regions::hyrule::lake::cave::SUBREGION, |p| p.has_90_maiamai()
                         && p.has_ice_rod()),
-                    check!("Maiamai Tornado Rod Upgrade", regions::hyrule::lake::hylia::SUBREGION, |p| p
+                    check!("Maiamai Tornado Rod Upgrade", regions::hyrule::lake::cave::SUBREGION, |p| p
                         .has_90_maiamai()
                         && p.has_tornado_rod()),
-                    check!("Maiamai Sand Rod Upgrade", regions::hyrule::lake::hylia::SUBREGION, |p| p.has_90_maiamai()
+                    check!("Maiamai Sand Rod Upgrade", regions::hyrule::lake::cave::SUBREGION, |p| p.has_90_maiamai()
                         && p.has_sand_rod()),
-                    check!("100 Maiamai", regions::hyrule::lake::hylia::SUBREGION, |p| p.has_bombs()
+                    check!("100 Maiamai", regions::hyrule::lake::cave::SUBREGION, |p| p.has_bombs()
                         && p.has_boomerang()
                         && p.has_bow()
                         && p.has_fire_rod()

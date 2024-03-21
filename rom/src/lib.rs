@@ -139,7 +139,7 @@ impl Rom {
 
     /// Gets the 64-bit title ID.
     pub fn id(&self) -> u64 {
-        self.id.into()
+        self.id
     }
 
     /// Gets the ROM's extended header.

@@ -6,6 +6,7 @@ use crate::{DashSet, SeedInfo};
 use modinfo::settings::cracks::Cracks;
 use modinfo::settings::cracksanity::Cracksanity;
 use modinfo::settings::keysy::Keysy;
+use modinfo::settings::nice_items::NiceItems;
 use modinfo::settings::ravios_shop::RaviosShop;
 use modinfo::settings::trials_door::TrialsDoor;
 use modinfo::settings::weather_vanes::WeatherVanes;
@@ -120,9 +121,16 @@ impl<'s> Progress<'s> {
         self.has_either(Item::Lamp01, Item::Lamp02)
     }
 
-    #[allow(unused)]
     pub fn has_super_lamp(&self) -> bool {
         self.has_both(Item::Lamp01, Item::Lamp02)
+    }
+
+    pub fn has_net(&self) -> bool {
+        self.has_either(Item::Net01, Item::Net02)
+    }
+
+    pub fn has_super_net(&self) -> bool {
+        self.has_both(Item::Net01, Item::Net02)
     }
 
     pub fn has_bow(&self) -> bool {
@@ -200,10 +208,6 @@ impl<'s> Progress<'s> {
         self.has_both(Item::SandRod01, Item::SandRod02)
     }
 
-    pub fn has_net(&self) -> bool {
-        self.has_either(Item::Net01, Item::Net02)
-    }
-
     pub fn can_use_shield(&self) -> bool {
         self.has_sword()
             && self.has_any([Item::Shield01, Item::Shield02, Item::Shield03, Item::Shield04, Item::HylianShield])
@@ -242,17 +246,11 @@ impl<'s> Progress<'s> {
     }
 
     pub fn are_hyrule_vanes_active(&self) -> bool {
-        match self.seed_info.settings.weather_vanes {
-            WeatherVanes::Hyrule | WeatherVanes::All => true,
-            _ => false,
-        }
+        matches!(self.seed_info.settings.weather_vanes, WeatherVanes::Hyrule | WeatherVanes::All)
     }
 
     pub fn are_lorule_vanes_active(&self) -> bool {
-        match self.seed_info.settings.weather_vanes {
-            WeatherVanes::Lorule | WeatherVanes::All => true,
-            _ => false,
-        }
+        matches!(self.seed_info.settings.weather_vanes, WeatherVanes::Lorule | WeatherVanes::All)
     }
 
     pub fn cracksanity(&self) -> bool {
@@ -347,10 +345,6 @@ impl<'s> Progress<'s> {
         self.seed_info.settings.swordless_mode
     }
 
-    pub fn nice_mode(&self) -> bool {
-        self.seed_info.settings.nice_mode
-    }
-
     pub fn progression_enemies(&self) -> bool {
         !self.seed_info.settings.no_progression_enemies
     }
@@ -360,7 +354,7 @@ impl<'s> Progress<'s> {
     }
 
     pub fn not_nice_mode(&self) -> bool {
-        !self.nice_mode()
+        self.seed_info.settings.nice_items == NiceItems::Off
     }
 
     pub fn lampless(&self) -> bool {
@@ -398,6 +392,23 @@ impl<'s> Progress<'s> {
             || self.has_boots()
             || self.has_nice_tornado_rod()
             || self.has_nice_hookshot()
+            || self.has_super_lamp()
+            || self.has_super_net()
+            || self.has_lamp_or_net_as_weapon()
+    }
+
+    pub fn can_attack_bowproof(&self) -> bool {
+        self.has_sword()
+            || self.has_bombs()
+            || self.has_fire_rod()
+            || self.has_ice_rod()
+            || self.has_hammer()
+            || self.has_boots()
+            || self.has_nice_tornado_rod()
+            || self.has_nice_hookshot()
+            || self.has_super_lamp()
+            || self.has_super_net()
+            || self.has_lamp_or_net_as_weapon()
     }
 
     pub fn can_attack_fireproof(&self) -> bool {
@@ -409,10 +420,34 @@ impl<'s> Progress<'s> {
             || self.has_boots()
             || self.has_nice_tornado_rod()
             || self.has_nice_hookshot()
+            || self.has_super_net()
+            || self.has_net_as_weapon()
     }
 
-    pub fn has_lamp_or_net(&self) -> bool {
-        self.has_any([Item::Lamp01, Item::Lamp02, Item::Net01, Item::Net02])
+    pub fn can_attack_iceproof(&self) -> bool {
+        self.has_sword()
+            || self.has_bow()
+            || self.has_bombs()
+            || self.has_fire_rod()
+            || self.has_hammer()
+            || self.has_boots()
+            || self.has_nice_tornado_rod()
+            || self.has_nice_hookshot()
+            || self.has_super_lamp()
+            || self.has_super_net()
+            || self.has_lamp_or_net_as_weapon()
+    }
+
+    pub fn has_lamp_or_net_as_weapon(&self) -> bool {
+        self.seed_info.settings.lamp_and_net_as_weapons && (self.has_lamp() || self.has_net())
+    }
+
+    pub fn has_lamp_as_weapon(&self) -> bool {
+        self.seed_info.settings.lamp_and_net_as_weapons && self.has_lamp()
+    }
+
+    pub fn has_net_as_weapon(&self) -> bool {
+        self.seed_info.settings.lamp_and_net_as_weapons && self.has_net()
     }
 
     pub fn can_hit_switch(&self) -> bool {
@@ -458,67 +493,54 @@ impl<'s> Progress<'s> {
 
     // BOSSES ----------------------------------------------------------------------------------------------------------
 
+    /// Margomill
     pub fn can_defeat_margomill(&self) -> bool {
-        self.has_tornado_rod()
-            && (self.has_sword() || self.has_bow() || self.has_bombs() || self.has_fire_rod() || self.has_hammer())
+        self.has_bombs() || (self.has_tornado_rod() && self.can_attack_iceproof())
     }
 
+    /// Moldorm
     pub fn can_defeat_moldorm(&self) -> bool {
         self.has_hammer()
     }
 
+    /// Yuga 2 / Twoga
     pub fn can_defeat_yuga2(&self) -> bool {
-        self.has_sword() || self.has_bombs() || self.has_fire_rod() || self.has_ice_rod() || self.has_hammer()
+        self.can_attack_bowproof()
     }
 
+    /// Gemesaur King
     pub fn can_defeat_gemesaur(&self) -> bool {
         self.has_bombs() && (self.has_lamp() || (self.has_fire_rod() && self.lampless()))
     }
 
-    pub fn can_defeat_arrgus(&self) -> bool {
+    /// Arrghus
+    pub fn can_defeat_arrghus(&self) -> bool {
         self.has_hookshot() && self.can_attack()
     }
 
-    pub fn can_defeat_knucklemaster_swordless(&self) -> bool {
-        // Bow does not work
-        self.swordless_mode()
-            && self.can_merge()
-            && (self.has_bombs() || self.has_fire_rod() || self.has_hammer() || self.has_ice_rod())
+    /// Knucklemaster
+    pub fn can_defeat_knucklemaster(&self) -> bool {
+        self.can_merge() && (self.has_master_sword() || (self.swordless_mode() && self.can_attack_bowproof()))
     }
 
-    pub fn can_technically_defeat_knucklemaster(&self) -> bool {
-        self.can_merge()
-            && (self.has_sword()
-            // Bow does not work
-            || self.has_bombs()
-            || self.has_fire_rod()
-            || self.has_ice_rod()
-            || self.has_hammer()
-            || self.has_lamp_or_net())
-    }
-
-    pub fn can_defeat_dharkstare(&self) -> bool {
-        self.has_fire_rod()
-    }
-
+    /// Grinexx
     pub fn can_defeat_grinexx(&self) -> bool {
         self.has_ice_rod()
+    }
+
+    /// Dharkstare
+    pub fn can_defeat_dharkstare(&self) -> bool {
+        self.has_fire_rod()
     }
 
     // KEYS ------------------------------------------------------------------------------------------------------------
 
     fn is_small_keysy(&self) -> bool {
-        match self.seed_info.settings.keysy {
-            Keysy::SmallKeysy | Keysy::AllKeysy => true,
-            _ => false,
-        }
+        matches!(self.seed_info.settings.keysy, Keysy::SmallKeysy | Keysy::AllKeysy)
     }
 
     fn is_big_keysy(&self) -> bool {
-        match self.seed_info.settings.keysy {
-            Keysy::BigKeysy | Keysy::AllKeysy => true,
-            _ => false,
-        }
+        matches!(self.seed_info.settings.keysy, Keysy::BigKeysy | Keysy::AllKeysy)
     }
 
     pub fn has_sanctuary_key(&self) -> bool {

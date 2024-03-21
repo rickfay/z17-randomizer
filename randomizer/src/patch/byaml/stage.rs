@@ -1825,7 +1825,7 @@ fn patch_master_sword(patcher: &mut Patcher) {
 }
 
 fn patch_dark_maze(patcher: &mut Patcher, seed_info: &SeedInfo) {
-    let pd_prize = seed_info.layout.get_item("[PD] Prize", regions::dungeons::dark::palace::SUBREGION);
+    let pd_prize = seed_info.layout.get_unsafe("[PD] Prize", regions::dungeons::dark::palace::SUBREGION);
     let prize_flag = prize_flag(pd_prize);
 
     // Remove dialog
@@ -1864,7 +1864,7 @@ fn patch_dark_maze(patcher: &mut Patcher, seed_info: &SeedInfo) {
 }
 
 fn patch_thief_girl_cave(patcher: &mut Patcher, seed_info: &SeedInfo) {
-    let tt_prize = seed_info.layout.get_item("[TT] Prize", regions::dungeons::thieves::hideout::SUBREGION);
+    let tt_prize = seed_info.layout.get_unsafe("[TT] Prize", regions::dungeons::thieves::hideout::SUBREGION);
     let prize_flag = prize_flag(tt_prize);
 
     patcher.modify_objs(
@@ -1914,10 +1914,11 @@ fn patch_maiamai_cave(patcher: &mut Patcher) {
         35,
         [
             disable(233), // Open Maiamai Cave
-            call(235, |obj| {
-                obj.clear_disable_flag(); // keep the sign around, we're going to repurpose it
-                obj.set_translate(-4.25, 0.0, -26.0); // shift sign to the right slightly to not block entrance
-            }),
+            disable(235), // Remove the sign
+                          // call(235, |obj| {
+                          //     obj.clear_disable_flag(); // keep the sign around, we're going to repurpose it
+                          //     obj.set_translate(-4.25, 0.0, -26.0); // shift sign to the right slightly to not block entrance
+                          // }),
         ],
     );
 }

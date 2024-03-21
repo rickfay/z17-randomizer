@@ -692,10 +692,7 @@ pub(crate) fn graph(crack_map: &CrackMap) -> HashMap<Location, LocationNode> {
             location(
                 "Lorule Lake Water",
                 vec![
-                    goal!("Turtle (under attack)",Goal::TurtleAttacked => {
-                        normal: |p| p.can_attack(),
-                        hard: |p| p.has_lamp_or_net(),
-                    }),
+                    goal!("Turtle (bullied)", Goal::TurtleAttacked, |p| p.can_attack()),
                     check!("[Mai] Lorule Lake Water", regions::lorule::lake::lorule::SUBREGION),
                     ghost(HintGhost::TurtleBullied),
                 ],
@@ -1049,7 +1046,7 @@ pub(crate) fn graph(crack_map: &CrackMap) -> HashMap<Location, LocationNode> {
                     }),
                     check!("Treacherous Tower",regions::lorule::death::mountain::SUBREGION => {
                         normal: |p| (p.has_sword() || (p.swordless_mode() && p.can_attack())) && (p.has_bombs() || p.has_hammer() || p.has_tornado_rod()),
-                        hard: |p| p.has_bombs() || p.has_hammer() || (p.has_tornado_rod() && p.has_lamp_or_net()),
+                        hard: |p| p.has_bombs() || p.has_hammer() || (p.has_tornado_rod() && p.can_attack()),
                     }),
                     check!("[Mai] Lorule Mountain W Skull", regions::lorule::death::mountain::SUBREGION => {
                         normal: |p| p.can_destroy_skull(),

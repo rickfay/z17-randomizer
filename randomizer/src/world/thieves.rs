@@ -63,7 +63,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                                 && p.can_merge()
                                 && (p.progression_enemies() || p.has_bombs())
                                 && p.can_hit_shielded_switch()
-                                && (p.can_attack() || p.has_lamp_or_net())
+                                && p.can_attack()
                         },
                         adv_glitched: |p| p.adv_thieves_statue_clip() && (p.has_boots() || p.has_tornado_rod()),
                     }),
@@ -76,70 +76,41 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                                 && p.has_flippers()
                                 && p.can_attack()
                         },
-                        hard: |p| {
-                            p.thieves_b1b2_doors_open()
-                                && p.has_thieves_key()
-                                && p.can_merge()
-                                && p.has_flippers()
-                                && p.has_lamp_or_net()
-                        },
                         adv_glitched: |p| p.adv_thieves_statue_clip() && p.has_tornado_rod(),
                         hell: |p| p.hell_thieves_statue_clip() && p.has_tornado_rod(),
                     }),
                     check!("[TT] (B3) Underwater", regions::dungeons::thieves::hideout::SUBREGION => {
                         normal: |p| p.thieves_escape_equipment() && p.can_attack(),
-                        hard: |p| p.thieves_escape_equipment() && p.has_lamp_or_net(),
                         adv_glitched: |p| p.adv_thieves_statue_clip() && p.has_tornado_rod(),
                         hell: |p| p.hell_thieves_statue_clip() && p.has_tornado_rod(),
                     }),
                     check!("[TT] (B3) Big Chest (Hidden)", regions::dungeons::thieves::hideout::SUBREGION => {
                         normal: |p| p.thieves_escape_equipment() && p.can_attack(),
-                        hard: |p| p.thieves_escape_equipment() && p.has_lamp_or_net(),
                         adv_glitched: |p| p.adv_thieves_statue_clip() && p.has_tornado_rod(),
                         hell: |p| p.hell_thieves_statue_clip() && p.has_tornado_rod(),
                     }),
                     check!("[TT] (B1) Behind Wall", regions::dungeons::thieves::hideout::SUBREGION => {
                         normal: |p| p.thieves_escape_equipment() && p.can_attack(),
-                        hard: |p| p.thieves_escape_equipment() && p.has_lamp_or_net(),
                         hell: |p| p.hell_thieves_statue_clip() && p.has_tornado_rod() && p.can_escape_dungeon(),
                     }),
                     check!("[TT] (B1) Big Chest (Entrance)", regions::dungeons::thieves::hideout::SUBREGION => {
                         normal: |p| p.thieves_escape_equipment() && p.can_attack(),
-                        hard: |p| p.thieves_escape_equipment() && p.has_lamp_or_net(),
                         hell: |p| p.hell_thieves_statue_clip() && p.has_tornado_rod(),
                     }),
                 ],
                 vec![
                     edge!(LoruleCastleArea),
-                    edge!(ThievesBoss => {
-                        normal: |p| {
-                            p.has_thieves_big_key()
-                                && p.has_thieves_key()
-                                && p.thieves_escape_equipment()
-                                && p.can_merge()
-                                && p.can_attack()
-                        },
-                        hard: |p| {
-                            p.has_thieves_big_key()
-                                && p.has_thieves_key()
-                                && p.thieves_escape_equipment()
-                                && p.can_merge()
-                                && p.has_lamp_or_net()
-                        },
-                    }),
+                    edge!(ThievesBoss, |p| p.has_thieves_big_key()
+                        && p.has_thieves_key()
+                        && p.thieves_escape_equipment()
+                        && p.can_merge()
+                        && p.can_attack()),
                 ],
             ),
         ),
         (
             ThievesBoss,
-            location(
-                "Thieves' Hideout Boss",
-                None,
-                vec![edge!(ThievesPostBoss => {
-                    normal: |p| p.can_merge() && p.can_attack(),
-                    hard: |p| p.can_merge() && p.has_lamp_or_net(),
-                })],
-            ),
+            location("Thieves' Hideout Boss", None, vec![edge!(ThievesPostBoss, |p| p.can_merge() && p.can_attack())]),
         ),
         (
             ThievesPostBoss,

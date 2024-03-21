@@ -26,7 +26,6 @@ pub(crate) fn graph(crack_map: &CrackMap) -> HashMap<Location, LocationNode> {
                     edge!(DesertPalaceWeatherVane),
                     edge!(DesertPalace1F => {
                         normal: |p| p.has_sand_rod() && p.can_merge() && p.can_attack(),
-                        hard: |p| p.has_sand_rod() && p.can_merge() && p.has_lamp_or_net(),
                         hell: |p| p.has_sand_rod() && p.has_tornado_rod() && p.can_attack(),
                     }),
                 ],
@@ -70,10 +69,7 @@ pub(crate) fn graph(crack_map: &CrackMap) -> HashMap<Location, LocationNode> {
                     }),
                 ],
                 vec![
-                    edge!(DesertPalaceFoyer => {
-                        normal: |p| p.has_sand_rod() && p.can_attack(),
-                        hard: |p| p.has_sand_rod() && p.has_lamp_or_net(),
-                    }),
+                    edge!(DesertPalaceFoyer, |p| p.has_sand_rod() && p.can_attack()),
                     edge!(DesertPalaceMidwayLedge, |p| p.has_desert_keys(2) && p.has_titans_mitt()),
                 ],
             ),
@@ -102,14 +98,10 @@ pub(crate) fn graph(crack_map: &CrackMap) -> HashMap<Location, LocationNode> {
                             glitched: |_| true,
                         }
                     ),
-                    edge!(DesertPalace1F => {
-                        normal: |p| p.can_attack(), // midway
-                        hard: |p| p.has_lamp_or_net(), // midway
-                    }),
+                    edge!(DesertPalace1F, |p| p.can_attack()),
                     edge!(DesertPalace2F => {
                         normal: |p| p.can_attack() && p.has_sand_rod() && p.can_merge(),
-                        hard: |p| p.has_lamp_or_net() && p.has_sand_rod() && p.can_merge(),
-                        glitched: |p| (p.can_attack() || p.has_lamp_or_net()) && p.has_sand_rod() && p.has_boots(),
+                        glitched: |p| p.can_attack() && p.has_sand_rod() && p.has_boots(),
                     }),
                 ],
             ),

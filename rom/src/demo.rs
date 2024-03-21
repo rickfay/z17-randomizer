@@ -5,7 +5,7 @@ use serde::{ser::SerializeSeq, Serialize, Serializer};
 use std::vec;
 
 /// A cutscene file (CSV)
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct Demo {
     commands: Vec<TimedCommand>,
 }
@@ -22,7 +22,7 @@ impl Demo {
 
     /// Adds an event flag to be set during the cutscene.
     pub fn set_event_flag(&mut self, timestamp: usize, flag: u16) {
-        self.commands.push(TimedCommand::new(timestamp, Command::SetEventFlag(flag.into())));
+        self.commands.push(TimedCommand::new(timestamp, Command::SetEventFlag(flag)));
     }
 
     pub fn finish(&mut self, timestamp: usize, sp: SpawnPoint) {

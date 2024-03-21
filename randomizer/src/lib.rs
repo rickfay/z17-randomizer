@@ -172,14 +172,12 @@ impl Layout {
         self.category_mut(node.world()).entry(node.name()).or_insert_with(Default::default)
     }
 
-    fn get(&self, location: &LocationInfo) -> Option<Randomizable> {
-        let LocationInfo { subregion: node, name } = location;
-        self.category(node.world()).get(node.name()).and_then(|region| region.get(name).copied())
+    fn get(&self, name: &'static str, subregion: &'static Subregion) -> Option<Randomizable> {
+        self.category(subregion.world()).get(subregion.name()).and_then(|region| region.get(name).copied())
     }
 
-    #[allow(unused)]
-    fn get_item(&self, name: &'static str, subregion: &'static Subregion) -> Randomizable {
-        self.get(&LocationInfo::new(name, subregion)).unwrap()
+    fn get_unsafe(&self, name: &'static str, subregion: &'static Subregion) -> Randomizable {
+        self.get(name, subregion).unwrap_or_else(|| panic!("Location unexpectedly empty: {}", name))
     }
 
     #[allow(unused)]
@@ -188,8 +186,12 @@ impl Layout {
     }
 
     /// This just highlights why we need to redo [`Layout`]
-    #[allow(unused)]
-    fn find_single(&self, find_item: Randomizable) -> Option<(&'static str, &'static str)> {
+    fn find_single<R>(&self, find_item: R) -> Option<(&'static str, &'static str)>
+    where
+        R: Into<Randomizable>,
+    {
+        let find_item = find_item.into();
+
         for (region_name, region) in &self.hyrule {
             for (loc_name, item) in region {
                 if find_item.eq(item) {
@@ -280,7 +282,7 @@ fn align_json_values(json: &mut String) {
         let index_prev_new_line = json[..index_colon].rfind('\n').unwrap_or_else(|| {
             fail!("Couldn't fine new line character before index: {}", index_colon);
         });
-        let line_length_up_to_value = &index_colon - index_prev_new_line;
+        let line_length_up_to_value = index_colon - index_prev_new_line;
 
         if KEY_ALIGNMENT < line_length_up_to_value {
             error!("Failed to write Spoiler Log");
@@ -348,28 +350,6 @@ pub struct SeedInfo {
 }
 
 impl SeedInfo {
-    fn new(
-        seed: u32, hash: SeedHash, settings: Settings, crack_map: CrackMap, vane_map: VaneMap,
-        trials_config: TrialsConfig, world_graph: WorldGraph, text: Text, treacherous_tower_floors: Vec<TowerStage>,
-    ) -> Self {
-        Self {
-            seed,
-            version: VERSION.to_owned(),
-            hash,
-            settings,
-            full_exclusions: Default::default(),
-            vane_map,
-            crack_map,
-            layout: Default::default(),
-            metrics: Default::default(),
-            hints: Default::default(),
-            trials_config,
-            world_graph,
-            text,
-            treacherous_tower_floors,
-        }
-    }
-
     pub fn is_excluded(&self, check_name: &str) -> bool {
         self.full_exclusions.contains(check_name)
     }
@@ -402,9 +382,9 @@ pub fn generate_seed(
 ) -> Result<()> {
     validate_settings(&settings)?;
 
-    let rng = &mut StdRng::seed_from_u64(seed.clone() as u64);
+    let rng = &mut StdRng::seed_from_u64(seed as u64);
 
-    let hash = SeedHash::new(seed.clone(), &settings);
+    let hash = SeedHash::new(seed, &settings);
 
     info!("Hash:                           {}", hash.text_hash);
 
@@ -540,9 +520,22 @@ fn calculate_seed_info(seed: u32, settings: Settings, hash: SeedHash, rng: &mut 
     let treacherous_tower_floors = treacherous_tower::choose_floors(&settings, rng)?;
     let world_graph = world::build_world_graph(&crack_map);
 
-    let mut seed_info = SeedInfo::new(
-        seed, hash, settings, crack_map, vane_map, trials_config, world_graph, text, treacherous_tower_floors,
-    );
+    let mut seed_info = SeedInfo {
+        seed,
+        version: VERSION.to_owned(),
+        hash,
+        settings,
+        full_exclusions: Default::default(),
+        vane_map,
+        crack_map,
+        layout: Default::default(),
+        metrics: Default::default(),
+        hints: Default::default(),
+        trials_config,
+        world_graph,
+        text,
+        treacherous_tower_floors,
+    };
 
     // Check Map and Item Pools
     let check_map = &mut filler::prefill_check_map(&mut seed_info.world_graph);
@@ -567,7 +560,7 @@ pub fn patch_seed(seed_info: &SeedInfo, user_config: &UserConfig, no_patch: bool
             Ok(rom) => rom,
             Err(_) => {
                 // Retry once, people keep naming their ROMs "ALBW.3ds.3ds" :P
-                Rom::load(&format!("{}.3ds", user_config.rom().to_str().unwrap()))?
+                Rom::load(format!("{}.3ds", user_config.rom().to_str().unwrap()))?
             },
         };
         let mut patcher = Patcher::new(game)?;
