@@ -2,15 +2,8 @@ use {
     self::{exheader::ExHeader, romfs::RomFs},
     crate::{Error, Result},
     bytey::*,
-    data_encoding::HEXUPPER,
-    log::info,
-    ring::digest::{Context, SHA256},
     serde::Serialize,
-    std::{
-        fs,
-        io::{prelude::*, BufReader},
-        path::Path,
-    },
+    std::{fs, io::prelude::*, path::Path},
 };
 pub mod byaml;
 pub mod exheader;
@@ -70,43 +63,6 @@ impl Cxi<fs::File> {
         cmp_id(ncch.program_id, header.id)?;
         Ok(Self { file, id: header.id, offset })
     }
-}
-
-#[allow(unused)]
-fn validate_rom(file: &fs::File) {
-    //info!("Calculating Checksum...");
-
-    let mut reader = BufReader::new(file);
-    let mut context = Context::new(&SHA256);
-    let mut buffer = [0; 1024];
-
-    loop {
-        let count = reader.read(&mut buffer).unwrap();
-        if count == 0 {
-            break;
-        }
-        context.update(&buffer[..count]);
-    }
-
-    let checksum = &HEXUPPER.encode(context.finish().as_ref());
-    info!("SHA256 Checksum:                {}", checksum);
-
-    // let valid_checksum = String::from("4071DC95F6948669C7A13D378509D5A224E167B77CF8FD2E163484BA9AF8B64D");
-    // let encrypted_checksum = String::from("tbd"); // TODO determine this value
-    //
-    // if valid_checksum.eq(checksum) {
-    //     info!("ROM is valid.");
-    // } else {
-    //     if encrypted_checksum.eq(checksum) {
-    //         error!("ROM is encrypted. Please decrypt this ROM before using the randomizer.");
-    //     } else {
-    //         error!("Invalid checksum: {}", checksum);
-    //         error!("ROM is invalid. Please provide a decrypted, North American ROM of The Legend of Zelda: A Link Between Worlds.");
-    //     }
-    //
-    //     pause();
-    //     std::process::exit(1);
-    // }
 }
 
 #[derive(Clone, Debug)]
