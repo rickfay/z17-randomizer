@@ -26,6 +26,7 @@ pub mod logic;
 pub mod path;
 pub mod progress;
 pub(crate) mod text;
+pub mod tower_stage;
 pub(crate) mod treacherous_tower;
 pub(crate) mod trials;
 pub mod util;

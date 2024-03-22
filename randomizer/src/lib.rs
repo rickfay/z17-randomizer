@@ -1,4 +1,5 @@
 use crate::filler::filler_item::Vane;
+use crate::filler::tower_stage::TowerStage;
 use crate::filler::trials::TrialsConfig;
 use crate::filler::{cracks, text, treacherous_tower, trials, vanes};
 use crate::world::WorldGraph;
@@ -11,7 +12,6 @@ use crate::{
 };
 use filler::cracks::Crack;
 use filler::filler_item::Randomizable;
-use game::tower_stage::TowerStage;
 use game::Item::{self};
 use log::{debug, error, info};
 use macros::fail;

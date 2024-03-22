@@ -1,12 +1,20 @@
 name: build
+
 on:
   workflow_dispatch:
   push:
+    branches:
+      - master
+      - dev
+  pull_request:
+    branches:
+      - master
+      - dev
+
 jobs:
   build:
     name: Build
     strategy:
-      fail-fast: false
       matrix:
         platform:
           - { os: macos-latest , target: x86_64-apple-darwin, file: albw-randomizer }
@@ -19,21 +27,24 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+
       - name: Install musl dependencies
         if: ${{ matrix.platform.os == 'ubuntu-latest' }}
         run: sudo apt install -y musl-tools
+
       - name: Cargo build program
         uses: houseabsolute/actions-rust-cross@v0
         with:
           command: build
           target: ${{ matrix.platform.target }}
           args: "--release --bin albw-randomizer"
-          strip: true
+
       - name: Prepare zip file
         run: |
           mv target/${{ matrix.platform.target }}/release/${{ matrix.platform.file }} .
           mkdir generated
           touch generated/.keep
+
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:

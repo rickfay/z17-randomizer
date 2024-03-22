@@ -1,8 +1,6 @@
-use std::io;
-
 use rom::Rom;
-
 use sead::sarc::Sarc;
+use std::io;
 
 pub mod byaml;
 pub mod sead;

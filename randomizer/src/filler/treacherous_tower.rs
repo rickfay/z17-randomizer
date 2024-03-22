@@ -1,5 +1,5 @@
+use crate::filler::tower_stage::TowerStage;
 use crate::Result;
-use game::tower_stage::TowerStage;
 use game::Course::{EnemyAttackL, EnemyAttackM, EnemyAttackS};
 use macros::fail;
 use modinfo::Settings;

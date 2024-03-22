@@ -577,7 +577,7 @@ fn mother_maiamai(code: &mut Code, layout: &Layout, item_names: &HashMap<Item, u
 
     let fn_get_maiamai_item_name = code.text().define([
         push([R1, LR]),
-        // Discount multiply R0 by 4 (aka, left shift 2)
+        // R0 *= 4
         add(R0, R0, R0),
         add(R0, R0, R0),
         // R0 = maiamai_item_name_table[R0 * 4]
