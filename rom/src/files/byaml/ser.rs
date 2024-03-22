@@ -1,3 +1,5 @@
+#![allow(unused_qualifications)]
+
 use {
     super::Kind,
     crate::files::align,
@@ -47,12 +49,12 @@ impl Display for Error {
     }
 }
 
-impl ::std::error::Error for Error {}
+impl std::error::Error for Error {}
 
 impl ser::Error for Error {
     fn custom<T>(msg: T) -> Self
     where
-        T: fmt::Display,
+        T: Display,
     {
         Self(msg.to_string())
     }

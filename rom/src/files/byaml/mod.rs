@@ -8,7 +8,7 @@ pub use {
     ser::{to_writer, Serializer},
 };
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq, ::serde_repr::Deserialize_repr, ::serde_repr::Serialize_repr)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, serde_repr::Deserialize_repr, serde_repr::Serialize_repr)]
 #[repr(u8)]
 enum Kind {
     String = 0xA0,
@@ -43,8 +43,8 @@ impl<'by> bytey::TryFromBytes<'by> for Kind {
     const SIZE: usize = <u8 as bytey::FromBytes>::SIZE;
     type Bytes = <u8 as bytey::FromBytes<'by>>::Bytes;
 
-    fn try_from_bytes(bytes: &'_ Self::Bytes) -> ::bytey::Result<Self> {
-        match <u8 as ::bytey::FromBytes>::from_bytes(bytes) {
+    fn try_from_bytes(bytes: &'_ Self::Bytes) -> bytey::Result<Self> {
+        match <u8 as bytey::FromBytes>::from_bytes(bytes) {
             0xA0 => Ok(Self::String),
             0xC0 => Ok(Self::Array),
             0xC1 => Ok(Self::Map),

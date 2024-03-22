@@ -1,6 +1,7 @@
 use crate::{actors::Actors, files::sarc::Sarc, flag::Flag, File, Item, Result};
 use game::Course;
 use serde::{de, ser::SerializeTuple, Deserialize, Deserializer, Serialize, Serializer};
+use std::ops::Add;
 use std::{fmt, path::Path};
 
 #[derive(Debug)]
@@ -434,6 +435,7 @@ impl Obj {
         Self::warp(19, 0, activation_flag, clp, ser, unq, sp, translate)
     }
 
+    #[allow(clippy::too_many_arguments)]
     fn warp(
         id: i16, arg1: i32, activation_flag: Flag, clp: i16, ser: Option<u16>, unq: u16, sp: SpawnPoint,
         translate: Vec3,
@@ -456,13 +458,11 @@ impl Obj {
 
     /// Generate a new Obj to act as a Dungeon Reward trigger <br />
     /// Remember to import the actor: `TreasureBoxS`
-    pub fn pendant_chest(
-        prize: Item, active_flag: Flag, pendant_flag: Flag, clp: i16, ser: u16, unq: u16, translate: Vec3,
-    ) -> Self {
-        let (arg4, arg6) = Flag::into_pair(active_flag);
-        let (arg5, arg7) = Flag::into_pair(pendant_flag);
+    pub fn chest(item: Item, active: Flag, inactive: Flag, clp: i16, ser: u16, unq: u16, translate: Vec3) -> Self {
+        let (arg4, arg6) = Flag::into_pair(active);
+        let (arg5, arg7) = Flag::into_pair(inactive);
         Self {
-            arg: Arg(prize as i32, 0, 0, 0, arg4, arg5, arg6, arg7, 0, 0, 0, 0, 0, 0.0),
+            arg: Arg(item as i32, 0, 1, 0, arg4, arg5, arg6, arg7, 0, 0, 0, 0, 0, 2.0),
             clp,
             flg: (0, 0, 0, 0),
             id: 35,
@@ -470,11 +470,7 @@ impl Obj {
             nme: None,
             ril: vec![],
             ser: Some(ser),
-            srt: Transform {
-                scale: Vec3 { x: 1.0, y: 1.0, z: 1.0 },
-                rotate: Vec3 { x: 0.0, y: 0.0, z: 0.0 },
-                translate,
-            },
+            srt: Transform { scale: Vec3::UNIT, rotate: Vec3::ZERO, translate },
             typ: 1,
             unq,
         }
@@ -757,12 +753,15 @@ pub struct Vec3 {
 impl Vec3 {
     pub const UNIT: Self = Self { x: 1.0, y: 1.0, z: 1.0 };
     pub const ZERO: Self = Self { x: 0.0, y: 0.0, z: 0.0 };
+}
 
-    /// Adds the values of `other` to this Vec3, consuming the original and returning the sum
-    pub fn add(mut self, other: Vec3) -> Self {
-        self.x += other.x;
-        self.y += other.y;
-        self.z += other.z;
+impl Add for Vec3 {
+    type Output = Self;
+
+    fn add(mut self, rhs: Self) -> Self::Output {
+        self.x += rhs.x;
+        self.y += rhs.y;
+        self.z += rhs.z;
         self
     }
 }

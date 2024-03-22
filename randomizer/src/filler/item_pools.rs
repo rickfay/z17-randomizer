@@ -7,8 +7,10 @@ use crate::SeedInfo;
 use modinfo::settings::cracks::Cracks;
 use modinfo::settings::keysy::Keysy;
 use modinfo::settings::logic::LogicMode;
+use modinfo::settings::nice_items::NiceItems;
 use modinfo::Settings;
 use rand::{rngs::StdRng, Rng};
+use std::cmp::Ordering;
 use std::iter::repeat;
 
 pub type Pool = Vec<Item>;
@@ -40,8 +42,16 @@ pub(crate) fn get_item_pools(rng: &mut StdRng, SeedInfo { settings, .. }: &SeedI
         progression_items.push(Quake);
     }
 
-    // Super Mode replaces two pieces of junk with an extra Lamp and Net
-    if settings.super_mode {
+    // Nice Items
+    match settings.nice_items {
+        NiceItems::Vanilla | NiceItems::Shuffled => progression_items.extend_from_slice(&[
+            Bow02, Boomerang02, Hookshot02, Hammer02, Bombs02, FireRod02, IceRod02, TornadoRod02, SandRod02,
+        ]),
+        NiceItems::Off => delta_junk_items += 9,
+    }
+
+    // Replaces two pieces of junk with an extra Lamp and Net
+    if settings.super_items {
         delta_junk_items -= 2;
         progression_items.push(Lamp02);
         progression_items.push(Net02);
@@ -79,12 +89,13 @@ pub(crate) fn get_item_pools(rng: &mut StdRng, SeedInfo { settings, .. }: &SeedI
     // Junk Pool. Add or remove elements from the junk pool based on chosen settings.
     let junk_pool = get_base_junk_pool(rng);
     let mut junk_pool = shuffle(rng, junk_pool);
-    if delta_junk_items > 0 {
-        (0..delta_junk_items).for_each(|_| add_random_junk_item(rng, &mut junk_pool));
-    } else if delta_junk_items < 0 {
-        (0..-delta_junk_items).for_each(|_| {
+
+    match delta_junk_items.cmp(&0) {
+        Ordering::Greater => (0..delta_junk_items).for_each(|_| add_random_junk_item(rng, &mut junk_pool)),
+        Ordering::Less => (0..-delta_junk_items).for_each(|_| {
             junk_pool.pop();
-        });
+        }),
+        Ordering::Equal => {},
     }
 
     (
@@ -118,11 +129,10 @@ fn choose_trade_item(rng: &mut StdRng) -> Item {
 
 fn get_base_progression_pool() -> Vec<Item> {
     let progression_pool = vec![
-        GreatSpin, Lamp01, Bow01, Bow02, Boomerang01, Boomerang02, Hookshot01, Hookshot02, Hammer01, Hammer02, Bombs01,
-        Bombs02, FireRod01, FireRod02, IceRod01, IceRod02, TornadoRod01, TornadoRod02, SandRod01, SandRod02, Net01,
-        HintGlasses, Bottle01, Bottle02, Bottle03, Bottle04, Bell, StaminaScroll, PegasusBoots, Flippers, HylianShield,
-        SmoothGem, Glove01, Glove02, Mail01, Mail02, OreYellow, OreGreen, OreBlue, OreRed, ScootFruit01, ScootFruit02,
-        FoulFruit01, FoulFruit02, Shield01, Shield02, Shield03, Shield04, GoldBee01, Charm,
+        GreatSpin, Lamp01, Bow01, Boomerang01, Hookshot01, Hammer01, Bombs01, FireRod01, IceRod01, TornadoRod01,
+        SandRod01, Net01, HintGlasses, Bottle01, Bottle02, Bottle03, Bottle04, Bell, StaminaScroll, PegasusBoots,
+        Flippers, HylianShield, SmoothGem, Glove01, Glove02, Mail01, Mail02, OreYellow, OreGreen, OreBlue, OreRed,
+        ScootFruit01, ScootFruit02, FoulFruit01, FoulFruit02, Shield01, Shield02, Shield03, Shield04, GoldBee01, Charm,
     ];
 
     progression_pool

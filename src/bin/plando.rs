@@ -1,11 +1,11 @@
 use log::{error, info, LevelFilter};
 use macros::fail;
-use modinfo::settings::cracks::Cracks;
-use modinfo::settings::keysy::Keysy;
-use modinfo::settings::ravios_shop::RaviosShop;
-use modinfo::settings::trials_door::TrialsDoor;
-use modinfo::settings::weather_vanes::WeatherVanes;
-use modinfo::settings::{cracksanity::Cracksanity, logic::LogicMode, pedestal::PedestalSetting, Settings};
+use modinfo::settings::Keysy;
+use modinfo::settings::RaviosShop;
+use modinfo::settings::TrialsDoor;
+use modinfo::settings::WeatherVanes;
+use modinfo::settings::{Cracks, NiceItems};
+use modinfo::settings::{Cracksanity, LogicMode, PedestalSetting, Settings};
 use randomizer::filler::cracks::Crack;
 use randomizer::filler::filler_item::Item::*;
 use randomizer::filler::filler_item::Randomizable;
@@ -63,6 +63,7 @@ fn main() {
         crack_map: get_plando_crack_map(),
         layout: build_layout(),
         metrics: Default::default(),
+        text: Default::default(),
         hints: Default::default(),
         trials_config: Default::default(),
         world_graph: Default::default(),
@@ -183,9 +184,11 @@ fn plando_settings() -> Settings {
         logic_mode: LogicMode::Normal,
         dark_rooms_lampless: false,
         dungeon_prize_shuffle: true,
+        maiamai_limit: 50,
         maiamai_madness: false,
-        nice_mode: false,
-        super_mode: true,
+        nice_items: NiceItems::Off,
+        super_items: false,
+        lamp_and_net_as_weapons: false,
         cracks: Cracks::Open,
         cracksanity: Cracksanity::AnyWorldPairs,
         weather_vanes: WeatherVanes::Hyrule,
@@ -204,8 +207,9 @@ fn plando_settings() -> Settings {
         chest_size_matches_contents: true,
         minigames_excluded: false,
         skip_big_bomb_flower: true,
-        trials_door: TrialsDoor::RequiredTrials(1),
+        trials_door: TrialsDoor::OneTrialRequired,
         treacherous_tower_floors: 5,
+        purple_potion_bottles: true,
         night_mode: false,
         user_exclusions: BTreeSet::default(),
     }
@@ -393,16 +397,16 @@ fn build_layout() -> Layout {
     layout.set_item("[Mai] Southern Ruins Pillars", regions::hyrule::southern::ruins::SUBREGION, maiamai.pop().unwrap());
 
     // Lake Hylia
-    layout.set_item("Maiamai Bow Upgrade", regions::hyrule::lake::hylia::SUBREGION, Bow02);
-    layout.set_item("Maiamai Boomerang Upgrade", regions::hyrule::lake::hylia::SUBREGION, Boomerang02);
-    layout.set_item("Maiamai Hookshot Upgrade", regions::hyrule::lake::hylia::SUBREGION, Hookshot02);
-    layout.set_item("Maiamai Hammer Upgrade", regions::hyrule::lake::hylia::SUBREGION, Hammer02);
-    layout.set_item("Maiamai Bombs Upgrade", regions::hyrule::lake::hylia::SUBREGION, Bombs02);
-    layout.set_item("Maiamai Fire Rod Upgrade", regions::hyrule::lake::hylia::SUBREGION, FireRod02);
-    layout.set_item("Maiamai Ice Rod Upgrade", regions::hyrule::lake::hylia::SUBREGION, IceRod02);
-    layout.set_item("Maiamai Tornado Rod Upgrade", regions::hyrule::lake::hylia::SUBREGION, TornadoRod02);
-    layout.set_item("Maiamai Sand Rod Upgrade", regions::hyrule::lake::hylia::SUBREGION, SandRod02);
-    layout.set_item("100 Maiamai", regions::hyrule::lake::hylia::SUBREGION, GreatSpin);
+    layout.set_item("Maiamai Bow Upgrade", regions::hyrule::lake::cave::SUBREGION, Bow02);
+    layout.set_item("Maiamai Boomerang Upgrade", regions::hyrule::lake::cave::SUBREGION, Boomerang02);
+    layout.set_item("Maiamai Hookshot Upgrade", regions::hyrule::lake::cave::SUBREGION, Hookshot02);
+    layout.set_item("Maiamai Hammer Upgrade", regions::hyrule::lake::cave::SUBREGION, Hammer02);
+    layout.set_item("Maiamai Bombs Upgrade", regions::hyrule::lake::cave::SUBREGION, Bombs02);
+    layout.set_item("Maiamai Fire Rod Upgrade", regions::hyrule::lake::cave::SUBREGION, FireRod02);
+    layout.set_item("Maiamai Ice Rod Upgrade", regions::hyrule::lake::cave::SUBREGION, IceRod02);
+    layout.set_item("Maiamai Tornado Rod Upgrade", regions::hyrule::lake::cave::SUBREGION, TornadoRod02);
+    layout.set_item("Maiamai Sand Rod Upgrade", regions::hyrule::lake::cave::SUBREGION, SandRod02);
+    layout.set_item("100 Maiamai", regions::hyrule::lake::cave::SUBREGION, GreatSpin);
 
     layout.set_item("Ice Rod Cave", regions::hyrule::lake::hylia::SUBREGION, Empty);
     layout.set_item("Lake Hylia Dark Cave", regions::hyrule::lake::hylia::SUBREGION, Empty);
@@ -544,9 +548,9 @@ fn build_layout() -> Layout {
 
     // Graveyard (Lorule)
     layout.set_item("Graveyard Peninsula", regions::lorule::graveyard::lorule::SUBREGION, Empty);
-    layout.set_item("Philosopher's Cave", regions::dungeons::graveyard::lorule::SUBREGION, Empty);
-    layout.set_item("[LS] Entrance Chest", regions::dungeons::graveyard::lorule::SUBREGION, Empty);
-    layout.set_item("[LS] Ledge", regions::dungeons::graveyard::lorule::SUBREGION, Empty);
+    layout.set_item("Philosopher's Cave", regions::lorule::graveyard::lorule::SUBREGION, Empty);
+    layout.set_item("[LS] Entrance Chest", regions::lorule::graveyard::lorule::SUBREGION, Empty);
+    layout.set_item("[LS] Ledge", regions::lorule::graveyard::lorule::SUBREGION, Empty);
     layout.set_item("[LS] Lower Chest", regions::lorule::graveyard::lorule::SUBREGION, Empty);
     layout.set_item("[LS] Upper Chest", regions::lorule::graveyard::lorule::SUBREGION, Empty);
     layout.set_item("[Mai] Lorule Graveyard Big Rock", regions::lorule::graveyard::lorule::SUBREGION, maiamai.pop().unwrap());

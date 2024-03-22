@@ -146,7 +146,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                             && (p.progression_enemies() || p.has_bombs() || p.has_hammer())
                             && p.has_swamp_keys(4)
                             && p.has_swamp_big_key()
-                            && p.can_defeat_arrgus()
+                            && p.can_defeat_arrghus()
                     }),
                     None,
                     None,

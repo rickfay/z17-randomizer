@@ -288,7 +288,7 @@ pub(crate) fn load_msbt(patcher: &mut Patcher, course: Course, file: &str) -> Re
         .unwrap()
         .flow()
         .extract(filename.as_str())
-        .expect(&format!("loading MSBT file: {}", filename));
+        .unwrap_or_else(|| panic!("loading MSBT file: {}", filename));
 
     let raw = file.get_mut();
 

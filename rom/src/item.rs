@@ -38,8 +38,7 @@ pub struct GetItem(
 impl GetItem {
     pub fn actor(&self, game: &Rom) -> Option<Actor> {
         if self.1.is_empty() {
-            let thing = game.get_item_actor("KeyBoss").ok(); // fixme dirty hack for Quake
-            thing
+            game.get_item_actor("KeyBoss").ok()
         } else {
             game.get_item_actor(self.actor_name().unwrap()).ok()
         }

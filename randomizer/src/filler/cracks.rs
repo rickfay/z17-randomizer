@@ -557,6 +557,7 @@ impl Serialize for Crack {
 /// Shuffles the crack destinations if CrackShuffle is enabled.
 ///
 /// The 6 pairs of "down-facing" Cracks are only shuffled between themselves, for technical reasons
+#[allow(clippy::manual_while_let_some)]
 pub fn build_crack_map(settings: &Settings, rng: &mut StdRng) -> Result<CrackMap> {
     info!("Building Crack Map...");
     let mut crack_map: DashMap<_, _> = Default::default();
@@ -748,7 +749,7 @@ pub fn build_crack_map(settings: &Settings, rng: &mut StdRng) -> Result<CrackMap
     Ok(crack_map.iter().map(|(&a, &b)| (a, b)).collect())
 }
 
-fn create_map<T>(crack_map: &mut DashMap<T, T>, vec1: &Vec<T>, vec2: &Vec<T>)
+fn create_map<T>(crack_map: &mut DashMap<T, T>, vec1: &[T], vec2: &[T])
 where
     T: Copy + Eq + Hash + PartialEq,
 {

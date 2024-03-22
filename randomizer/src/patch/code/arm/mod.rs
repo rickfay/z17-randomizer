@@ -1,12 +1,8 @@
-mod data;
-mod ls;
-mod lsm;
-pub use {
-    self::data::{add, cmp, mov},
-    ls::{ldr, ldrb, str_, strb},
-    lsm::{ldm, pop, push, stm, AddressingMode::*},
-    Register::*,
-};
+use crate::patch::code::arm::Register::*;
+
+pub(crate) mod data;
+pub(crate) mod ls;
+pub(crate) mod lsm;
 
 #[allow(unused)]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -344,6 +340,6 @@ where
     assembler.bytes.into_boxed_slice()
 }
 
-pub const SP: Register = Register::R13;
-pub const LR: Register = Register::R14;
-pub const PC: Register = Register::R15;
+pub const SP: Register = R13;
+pub const LR: Register = R14;
+pub const PC: Register = R15;

@@ -157,11 +157,6 @@ macro_rules! region {
         $crate::subregion!($start $start_props);
         $($crate::subregion!($id $props);)*
 
-        #[allow(unused)]
-        pub(crate) fn start() -> &'static $crate::regions::Subregion {
-            $start::SUBREGION
-        }
-
         pub const NAME: &str = $name;
         pub const COLOR: $crate::hints::hint_color::HintColor = $crate::hints::hint_color::HintColor::$color;
         #[allow(unused)]
@@ -203,7 +198,7 @@ macro_rules! subregion {
                     patcher,
                     seed_info,
                     seed_info.layout
-                        .get(&$crate::LocationInfo::new($key, SUBREGION))
+                        .get($key, SUBREGION)
                 )?;)*)?
                 Ok(())
             }
@@ -280,16 +275,16 @@ macro_rules! patch {
         Patch::GoldRupee { course: COURSE, scene: $scene - 1, unq: $unq }
     };
     (Crack($course:ident $scene:literal[$unq:literal] $crack:ident)) => {
-        Patch::Crack { course: ::game::Course::$course, scene: $scene - 1, unq: $unq, crack: crate::Crack::$crack }
+        Patch::Crack { course: ::game::Course::$course, scene: $scene - 1, unq: $unq, crack: $crate::Crack::$crack }
     };
     (Crack($scene:literal[$unq:literal] $crack:ident)) => {
-        Patch::Crack { course: COURSE, scene: $scene - 1, unq: $unq, crack: crate::Crack::$crack }
+        Patch::Crack { course: COURSE, scene: $scene - 1, unq: $unq, crack: $crate::Crack::$crack }
     };
     (WeatherVane($course:ident $scene:literal[$unq:literal] $vane:ident)) => {
-        Patch::WeatherVane { course: ::game::Course::$course, scene: $scene - 1, unq: $unq, vane: crate::filler::filler_item::Vane::$vane }
+        Patch::WeatherVane { course: ::game::Course::$course, scene: $scene - 1, unq: $unq, vane: $crate::filler::filler_item::Vane::$vane }
     };
     (WeatherVane($scene:literal[$unq:literal] $vane:ident)) => {
-        Patch::WeatherVane { course: COURSE, scene: $scene - 1, unq: $unq, vane: crate::filler::filler_item::Vane::$vane }
+        Patch::WeatherVane { course: COURSE, scene: $scene - 1, unq: $unq, vane: $crate::filler::filler_item::Vane::$vane }
     };
     (Shop($variant:ident$($args:tt)?)) => {
         Patch::Shop($crate::patch::Shop::$variant $($args)?)

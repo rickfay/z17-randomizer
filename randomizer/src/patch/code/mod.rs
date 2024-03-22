@@ -1,8 +1,13 @@
 use super::Patcher;
 use crate::filler::filler_item::Item::*;
 use crate::filler::filler_item::Randomizable;
+use crate::patch::code::arm::data::{add, cmp, mov};
+use crate::patch::code::arm::ls::{ldr, ldrb, str_, strb};
+use crate::patch::code::arm::lsm::{pop, push};
+use crate::patch::code::arm::Register::*;
+use crate::patch::code::arm::{b, bl, Instruction, LR, PC, SP};
 use crate::{patch::util::prize_flag, regions, Layout, Result, SeedInfo};
-use arm::*;
+use game::Item;
 use game::Item::*;
 use modinfo::settings::{pedestal::PedestalSetting::*, Settings};
 use rom::flag::Flag;
@@ -42,7 +47,7 @@ impl Code {
     }
 
     pub fn patch<const N: usize>(&mut self, addr: u32, instructions: [Instruction; N]) -> u32 {
-        let code = assemble(addr, instructions);
+        let code = arm::assemble(addr, instructions);
         let len = code.len() as u32;
         self.overwrite(addr, code);
         len
@@ -103,7 +108,7 @@ impl<'a> Segment<'a> {
     }
 
     pub fn patch<const N: usize>(&mut self, addr: u32, instructions: [Instruction; N]) -> u32 {
-        let code = assemble(addr, instructions);
+        let code = arm::assemble(addr, instructions);
         let len = code.len() as u32;
         self.write(addr, code);
         len
@@ -150,8 +155,12 @@ impl Ips {
     }
 }
 
-pub fn create(patcher: &Patcher, SeedInfo { layout, settings, .. }: &SeedInfo) -> Code {
+pub fn create(patcher: &Patcher, seed_info: &SeedInfo) -> Code {
     let mut code = Code::new(patcher.game.exheader());
+    let actor_names = actor_names(&mut code);
+    let item_names = item_names(&mut code);
+
+    do_dev_stuff(&mut code, seed_info);
 
     warp(&mut code);
     //shield_without_sword(&mut code);
@@ -159,7 +168,7 @@ pub fn create(patcher: &Patcher, SeedInfo { layout, settings, .. }: &SeedInfo) -
     quake(&mut code);
 
     // Start with Pouch
-    if settings.start_with_pouch {
+    if seed_info.settings.start_with_pouch {
         code.text().patch(0x47b28c, [mov(R0, 1)]);
     }
 
@@ -171,14 +180,15 @@ pub fn create(patcher: &Patcher, SeedInfo { layout, settings, .. }: &SeedInfo) -
 
     rental_items(&mut code);
     progressive_items(&mut code);
-    bracelet(&mut code, settings);
+    bracelet(&mut code, &seed_info.settings);
     ore_progress(&mut code);
     merchant(&mut code);
-    configure_pedestal_requirements(&mut code, settings);
-    night_mode(&mut code, settings);
+    configure_pedestal_requirements(&mut code, &seed_info.settings);
+    night_mode(&mut code, &seed_info.settings);
     show_hint_ghosts(&mut code);
-    mother_maiamai(&mut code, &layout);
+    mother_maiamai(&mut code, &seed_info.layout, &item_names);
     pause_menu_warp(&mut code);
+    purple_potion_bottles(&mut code, &seed_info.settings);
     // golden_bees(&mut code);
     // file_select_screen_background(&mut code);
 
@@ -233,9 +243,6 @@ pub fn create(patcher: &Patcher, SeedInfo { layout, settings, .. }: &SeedInfo) -
     code.patch(0x243DE8, [bl(get_sword_flag1)]);
     code.patch(0x30E160, [bl(get_sword_flag2)]);
 
-    //
-    let actor_names = actor_names(&mut code);
-    let item_names = item_names(&mut code);
     let overwrite_rentals = code.text;
     let mut actor_offset = 0;
     let mut name_offset = 0x714608;
@@ -288,7 +295,7 @@ pub fn create(patcher: &Patcher, SeedInfo { layout, settings, .. }: &SeedInfo) -
     code.patch(0x1D6DBC, [ldr(R1, (R4, 0x2E)), mov(R0, R0)]);
 
     // Premium Milk
-    if layout.find_single(Randomizable::Item(LetterInABottle)).is_none() {
+    if seed_info.layout.find_single(LetterInABottle).is_none() {
         // This code makes the Premium Milk work correctly when picked up without having first picked up the Letter.
         // This patch is only applied when the Milk is shuffled in the rando instead of the Letter.
         // If it's desired to have both shuffled at once then this code needs to be re-written.
@@ -329,6 +336,18 @@ pub fn create(patcher: &Patcher, SeedInfo { layout, settings, .. }: &SeedInfo) -
     code.patch(0x344dec, [b(great_spin_fix)]);
 
     code
+}
+
+#[allow(unused_variables)]
+fn do_dev_stuff(code: &mut Code, seed_info: &SeedInfo) {
+    if !seed_info.settings.dev_mode {
+        return;
+    }
+
+    // Make each Maiamai worth more (for testing only)
+    let amount = 25;
+    code.patch(0x2559bc, [add(R1, R1, amount)]);
+    code.patch(0x2559c0, [add(R2, R2, amount)]);
 }
 
 /// File Select Screen Background
@@ -377,7 +396,7 @@ fn warp(code: &mut Code) {
     // Continue button sets: FUN_002317c0(0x3f800000,param_1 + 0x50);
 }
 
-/// Create new Earthquake item that sets Flag 510
+/// Create new item that sets Flag 510
 fn quake(code: &mut Code) {
     let earthquake = code.text().define([
         // TODO Play Earthquake Noise:
@@ -396,38 +415,101 @@ fn quake(code: &mut Code) {
 }
 
 /// Mother Maiamai Stuff
-fn mother_maiamai(code: &mut Code, layout: &Layout) {
-    // code.patch(0x30fe00, [mov(R0, R0)]); // Untested -- allow getting 100 Maiamai item even if has Great Spin
+fn mother_maiamai(code: &mut Code, layout: &Layout, item_names: &HashMap<Item, u32>) {
+    /// Use flags 302-311 (not 305) to record whether we've picked up that item's upgrade.
+    /// The "inventory index" (see table: 0x6a6170) of each item gets added to this:
+    /// * 0x4 = Bow
+    /// * 0x3 = Boomerang
+    /// * 0xB = Hookshot
+    /// * 0x6 = Hammer
+    /// * 0x2 = Bombs
+    /// * 0x8 = Fire Rod
+    /// * 0x9 = Ice Rod
+    /// * 0xA = Tornado Rod
+    /// * 0x7 = Sand Rod
+    const NEW_LOCAL_FLAGS_START_IDX: u32 = 300;
 
-    /////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    code.patch(0x30ffe4, [mov(R0, 1)]); // Skip FUN_00583b1c - Suck/Spit Old/New Item Animation
-
-    let _fn_received_maiamai_item = code.text().define([
-        mov(R8, R1),     // save R1
-        add(R1, R1, 50), // arbitrary - just need 9 unused flags, using 302-311 (not 305)
-        //ldr(R0, 0x1e70e8),
-        //ldr(R0, (R0, 0x0)),
-        ldr(R0, 0x70c8e0),
+    // Great Spin final Nice Item check (?)
+    // Accept Nice Items in addition to their regular counterparts for the check to see if we own anything upgradable.
+    // code.patch(0x30fdcc, [b(0x30fef0).ge()]);
+    let fn_get_maiamai_flag3 = code.text().define([
+        add(R1, R4, NEW_LOCAL_FLAGS_START_IDX),
+        ldr(R0, MAP_MANAGER_INSTANCE),
         ldr(R0, (R0, 0x0)),
         ldr(R0, (R0, 0x40)),
-        // ldr(R2, 0x3),
-
-        // bl(0x5822a0),
         bl(FN_GET_LOCAL_FLAG_3),
-        mov(R1, R8), // restore R1
+        b(0x30fdc4),
+    ]);
+    code.patch(0x30fdb8, [b(fn_get_maiamai_flag3)]);
+    code.patch(0x30fdc4, [cmp(R0, 0x0)]);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // Rewrite ::::caseD_6 to check local flags for (I think?) 100 Maiamai item giveout
+    let thing = code.text().define([
+        add(R1, R4, NEW_LOCAL_FLAGS_START_IDX),
+        ldr(R0, MAP_MANAGER_INSTANCE),
+        ldr(R0, (R0, 0x0)),
+        ldr(R0, (R0, 0x40)),
+        bl(FN_GET_LOCAL_FLAG_3),
+        b(0x30fee4),
+    ]);
+    code.patch(0x30fed8, [b(thing)]);
+    code.patch(0x30fee4, [cmp(R0, 0x1)]);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /*
+     * Determines if the player has enough Maiamai compared with how many have been spent to show the upgrade dialog,
+     * using the following formula:
+     *
+     * 0 < floor((total_maiamai_obtained - total_maiamai_on_hand) / (10 - num_nice_items_obtained))
+     *
+     * For randomizer, we need to replace `num_nice_items_obtained` with a count of our current flags that have been set.
+     */
+    code.patch(0x30fdf8, [b(0x30fe0c)]); // Skip Great Spin item check
+    let fn_get_maiamai_flag3 = code.text().define([
+        add(R1, R4, NEW_LOCAL_FLAGS_START_IDX),
+        ldr(R0, MAP_MANAGER_INSTANCE),
+        ldr(R0, (R0, 0x0)),
+        ldr(R0, (R0, 0x40)),
+        bl(FN_GET_LOCAL_FLAG_3),
+        b(0x30fe48),
+    ]);
+    code.patch(0x30fe3c, [b(fn_get_maiamai_flag3)]);
+    code.patch(0x30fe48, [cmp(R0, 0x1)]);
+    code.patch(0x30fe4c, [add(R5, R5, 0x1).eq()]);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // Skip FUN_00583b1c - Suck/Spit Old/New Item Animation
+    code.patch(0x30ffe4, [mov(R0, 1)]);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // Check our newly created local flags to determine if items can appear on MM's list of items to upgrade
+    let fn_get_maiamai_flag3 = code.text().define([
+        add(R1, R1, NEW_LOCAL_FLAGS_START_IDX),
+        ldr(R0, MAP_MANAGER_INSTANCE),
+        ldr(R0, (R0, 0x0)),
+        ldr(R0, (R0, 0x40)),
+        bl(FN_GET_LOCAL_FLAG_3),
         cmp(R0, 0x0),
         b(0x46d848).eq(),
         b(0x46d888),
     ]);
-    code.patch(0x46d844, [b(0x46d888).lt()]);
-    //code.patch(0x46d844, [b(fn_received_maiamai_item)]);
+    code.patch(0x46d840, [b(fn_get_maiamai_flag3).ge()]);
+    code.patch(0x46d844, [b(0x46d888)]);
 
-    code.patch(0x30feb4, [mov(R0, 0).eq()]); // Allow Nice Items to give rewards
-                                             // code.patch(0x30fe9c, [mov(R0, 0).eq()]); // Allow Rented Items to give rewards
-    code.patch(0x3105c8, [mov(R0, 0x0)]); // Skip Sound: SE_ShopManKinSta_VACUUM
+    // Allow getting upgrades if you already have the Nice Item for this slot
+    code.patch(0x30feb4, [mov(R0, 0).eq()]);
 
-    // vvv--- Stuff that didn't work below ---vvv
+    // Skip Sound: SE_ShopManKinSta_VACUUM
+    code.patch(0x3105c8, [mov(R0, 0x0)]);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // Ingoing Item Model
     // code.patch(0x30FF8C, [mov(R1, 0x11)]);
@@ -440,52 +522,73 @@ fn mother_maiamai(code: &mut Code, layout: &Layout) {
     // code.patch(0x30FFC4, [mov(R1, 0x11)]);
     // code.patch(0x30FFCC, [mov(R1, 0x11)]);
 
-    // Show even if we have Nice item of that slot
-    // code.patch(0x300feb0, [mov(R0, R0)]);
-    // code.patch(0x300feb4, [mov(R0, 0)]);
-    // code.patch(0x300feb8, [b(0x30fec0)]);
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    // Don't hide slots for Items where we have the Nice version
-    //code.patch(0x30feb4, [mov(R0, 0).eq()]); // TODO TEST ??? (Result = failed)
-    // code.patch(0x194b74, [b(0x194b78).ne()]); // TODO TEST ??? (failed...)
-    // code.patch(0x194b78, [mov(R5, 0x0)]); (todo nada...)
+    // Record upgrades received with a new course flag for each one.
+    let bow = layout.get_unsafe("Maiamai Bow Upgrade", regions::hyrule::lake::cave::SUBREGION);
+    let boomerang = layout.get_unsafe("Maiamai Boomerang Upgrade", regions::hyrule::lake::cave::SUBREGION);
+    let hookshot = layout.get_unsafe("Maiamai Hookshot Upgrade", regions::hyrule::lake::cave::SUBREGION);
+    let hammer = layout.get_unsafe("Maiamai Hammer Upgrade", regions::hyrule::lake::cave::SUBREGION);
+    let bombs = layout.get_unsafe("Maiamai Bombs Upgrade", regions::hyrule::lake::cave::SUBREGION);
+    let fire_rod = layout.get_unsafe("Maiamai Fire Rod Upgrade", regions::hyrule::lake::cave::SUBREGION);
+    let ice_rod = layout.get_unsafe("Maiamai Ice Rod Upgrade", regions::hyrule::lake::cave::SUBREGION);
+    let tornado_rod = layout.get_unsafe("Maiamai Tornado Rod Upgrade", regions::hyrule::lake::cave::SUBREGION);
+    let sand_rod = layout.get_unsafe("Maiamai Sand Rod Upgrade", regions::hyrule::lake::cave::SUBREGION);
 
-    //  (todo apparently just made Cancel not work)
-    // code.patch(0x30fdf8, [b(0x30fef0),]);
-    // code.patch(0x30fe6c, [b(0x30fef0), ]);
+    for (offset, addr, item) in [
+        (304, 0x3100f8, bow),
+        (303, 0x3100f0, boomerang),
+        (311, 0x310128, hookshot),
+        (306, 0x310100, hammer),
+        (302, 0x310130, bombs),
+        (308, 0x310110, fire_rod),
+        (309, 0x310118, ice_rod),
+        (310, 0x310120, tornado_rod),
+        (307, 0x310108, sand_rod),
+    ] {
+        let fn_set_local3_flag_for_this_upgrade = code.text().define([
+            ldr(R0, MAP_MANAGER_INSTANCE),
+            ldr(R0, (R0, 0x0)),
+            ldr(R0, (R0, 0x40)),
+            ldr(R1, offset),
+            mov(R2, 0x1),
+            bl(FN_SET_LOCAL_FLAG_3),
+            mov(R0, item.as_item_index()),
+            b(0x310134),
+        ]);
+        code.patch(addr, [b(fn_set_local3_flag_for_this_upgrade)]);
+    }
 
-    // Makes Cancel option act like an Item was selected (Bombs in testing)
-    // code.patch(0x30fe6c, [b(0x30febc)]);
-    // code.patch(0x30febc, [mov(R0, 0x0)]);
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    // Skip FUN_00625250
-    // code.patch(0x310148, [mov(R0, R0)]);
+    // Item Names
+    let maiamai_item_name_table = code.rodata().declare(
+        [ice_rod, sand_rod, tornado_rod, bombs, fire_rod, hookshot, boomerang, hammer, bow]
+            .iter()
+            .flat_map(|item| {
+                u32::to_le_bytes(
+                    *item_names
+                        .get(&Randomizable::normalize(*item))
+                        .unwrap_or_else(|| panic!("No item_name for: {item:?}")),
+                )
+            })
+            .collect::<Vec<_>>(),
+    );
 
-    // Skip FUN_003931ec (bad idea)
-    // code.patch(0x6252c4, [mov(R0, R0)]);
+    let fn_get_maiamai_item_name = code.text().define([
+        push([R1, LR]),
+        // Discount multiply R0 by 4 (aka, left shift 2)
+        add(R0, R0, R0),
+        add(R0, R0, R0),
+        // R0 = maiamai_item_name_table[R0 * 4]
+        ldr(R1, maiamai_item_name_table),
+        ldr(R0, (R1, R0)),
+        pop([R1, PC]),
+    ]);
 
-    let ice = layout.get_item("Maiamai Ice Rod Upgrade", regions::hyrule::lake::hylia::SUBREGION);
-    let sand = layout.get_item("Maiamai Sand Rod Upgrade", regions::hyrule::lake::hylia::SUBREGION);
-    let torn = layout.get_item("Maiamai Tornado Rod Upgrade", regions::hyrule::lake::hylia::SUBREGION);
-    let bomb = layout.get_item("Maiamai Bombs Upgrade", regions::hyrule::lake::hylia::SUBREGION);
-    let fire = layout.get_item("Maiamai Fire Rod Upgrade", regions::hyrule::lake::hylia::SUBREGION);
-    let hook = layout.get_item("Maiamai Hookshot Upgrade", regions::hyrule::lake::hylia::SUBREGION);
-    let rang = layout.get_item("Maiamai Boomerang Upgrade", regions::hyrule::lake::hylia::SUBREGION);
-    let hamm = layout.get_item("Maiamai Hammer Upgrade", regions::hyrule::lake::hylia::SUBREGION);
-    let bow = layout.get_item("Maiamai Bow Upgrade", regions::hyrule::lake::hylia::SUBREGION);
+    code.patch(0x46d858, [bl(fn_get_maiamai_item_name)]);
 
-    ice.as_item().unwrap().to_game_item();
-
-    // Item
-    code.patch(0x310118, [mov(R0, ice.as_item_index())]); // 0x4D - Nice Ice Rod
-    code.patch(0x310108, [mov(R0, sand.as_item_index())]); // 0x4E - Nice Sand Rod
-    code.patch(0x310120, [mov(R0, torn.as_item_index())]); // 0x4F - Nice Torando Rod
-    code.patch(0x310130, [mov(R0, bomb.as_item_index())]); // 0x50 - Nice Bombs
-    code.patch(0x310110, [mov(R0, fire.as_item_index())]); // 0x51 - Nice Fire Rod
-    code.patch(0x310128, [mov(R0, hook.as_item_index())]); // 0x52 - Nice Hookshot
-    code.patch(0x3100F0, [mov(R0, rang.as_item_index())]); // 0x53 - Nice Boomerang
-    code.patch(0x310100, [mov(R0, hamm.as_item_index())]); // 0x54 - Nice Hammer
-    code.patch(0x3100F8, [mov(R0, bow.as_item_index())]); // 0x55 - Nice Bow
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 }
 
 fn pause_menu_warp(code: &mut Code) {
@@ -524,6 +627,12 @@ fn pause_menu_warp(code: &mut Code) {
     // code.patch(0x441edc, [b(fn_death_warp)]);
     //
     // code.patch(0x0, 0x0);
+}
+
+fn purple_potion_bottles(code: &mut Code, settings: &Settings) {
+    if settings.purple_potion_bottles {
+        code.patch(0x255210, [mov(R1, 0x3)]);
+    }
 }
 
 /// Golden Bee stuff
@@ -933,7 +1042,7 @@ fn ore_progress(code: &mut Code) {
     code.patch(0x4637B8, [bl(get_sword_fake)]);
 }
 
-fn actor_names(code: &mut Code) -> HashMap<game::Item, u32> {
+fn actor_names(code: &mut Code) -> HashMap<Item, u32> {
     let mut map = IntoIterator::into_iter(ACTOR_NAME_OFFSETS).collect::<HashMap<_, _>>();
     map.extend(IntoIterator::into_iter(ACTOR_NAMES).map(|(item, name)| {
         let name = format!("{}\0", name);
@@ -942,16 +1051,17 @@ fn actor_names(code: &mut Code) -> HashMap<game::Item, u32> {
     map
 }
 
-fn item_names(code: &mut Code) -> HashMap<game::Item, u32> {
+fn item_names(code: &mut Code) -> HashMap<Item, u32> {
     let mut map = IntoIterator::into_iter(ITEM_NAME_OFFSETS).collect::<HashMap<_, _>>();
     map.extend(IntoIterator::into_iter(ITEM_NAMES).map(|(item, name)| {
         let name = format!("item_name_{}\0", name);
         (item, code.rodata().declare(name.as_bytes()))
     }));
+    // log::info!("{map:?}");
     map
 }
 
-const ACTOR_NAME_OFFSETS: [(game::Item, u32); 33] = [
+const ACTOR_NAME_OFFSETS: [(Item, u32); 33] = [
     (ItemStoneBeauty, 0x5D2060),
     (RupeeR, 0x5D639C),
     (RupeeG, 0x5D639C),
@@ -970,7 +1080,7 @@ const ACTOR_NAME_OFFSETS: [(game::Item, u32); 33] = [
     (ItemBow, 0x5D6B6C),
     (ItemShield, 0x5D6B78),
     (ItemBottle, 0x5D7048),
-    (game::Item::HintGlasses, 0x5D70AC),
+    (Item::HintGlasses, 0x5D70AC),
     (RupeeGold, 0x5D7144),
     (ItemSwordLv1, 0x5D7178),
     (ItemSwordLv2, 0x5D7178),
@@ -981,13 +1091,13 @@ const ACTOR_NAME_OFFSETS: [(game::Item, u32); 33] = [
     (LiverBlue, 0x5D7654),
     (MessageBottle, 0x5D76A0),
     (MilkMatured, 0x5D76A0),
-    (game::Item::Pouch, 0x5D7734),
+    (Item::Pouch, 0x5D7734),
     (ItemBowLight, 0x5D776C),
     (HeartContainer, 0x5D7B7C),
     (HeartPiece, 0x5D7B94),
 ];
 
-const ACTOR_NAMES: [(game::Item, &str); 44] = [
+const ACTOR_NAMES: [(Item, &str); 44] = [
     (KeyBoss, "KeyBoss"),
     (TriforceCourage, "BadgeBee"),
     (Compass, "Compass"),
@@ -1004,12 +1114,12 @@ const ACTOR_NAMES: [(game::Item, &str); 44] = [
     (ClothesBlue, "GtEvCloth"),
     (Heart, "Heart"),
     (HyruleShield, "GtEvShieldB"),
-    (game::Item::OreYellow, "OreSword"),
-    (game::Item::OreGreen, "OreSword"),
-    (game::Item::OreBlue, "OreSword"),
+    (Item::OreYellow, "OreSword"),
+    (Item::OreGreen, "OreSword"),
+    (Item::OreBlue, "OreSword"),
     (GanbariPowerUp, "PowerUp"),
     (DashBoots, "GtEvBoots"),
-    (game::Item::OreRed, "OreSword"),
+    (Item::OreRed, "OreSword"),
     (ItemIceRodLv2, "GtEvRodIceB"),
     (ItemSandRodLv2, "GtEvRodSandB"),
     (ItemTornadeRodLv2, "GtEvTornadoB"),
@@ -1025,7 +1135,7 @@ const ACTOR_NAMES: [(game::Item, &str); 44] = [
     (PendantWisdom, "Pendant"),
     (PendantCourage, "Pendant"),
     (ZeldaAmulet, "Pendant"),
-    (game::Item::Empty, "KeyBoss"),
+    (Item::Empty, "KeyBoss"),
     (EscapeFruit, "FruitEscape"),
     (StopFruit, "FruitStop"),
     (SpecialMove, "SwordD"),
@@ -1034,7 +1144,9 @@ const ACTOR_NAMES: [(game::Item, &str); 44] = [
     (GoldenBee, "GtEvBottleBee"),
 ];
 
-const ITEM_NAME_OFFSETS: [(game::Item, u32); 14] = [
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+const ITEM_NAME_OFFSETS: [(Item, u32); 20] = [
     (ItemBomb, 0x6F9A9A),
     (ItemSandRod, 0x6F9AD0),
     (ItemIceRod, 0x6F9AE2),
@@ -1046,12 +1158,18 @@ const ITEM_NAME_OFFSETS: [(game::Item, u32); 14] = [
     (ItemBoomerang, 0x6F9BA9),
     (ItemHammer, 0x6F9CCC),
     (ItemHookShot, 0x6F9CDD),
-    (ItemBow, 0x6F9D08),
-    (LiverYellow, 0x6F9D2F),
-    (ItemStoneBeauty, 0x6F9D56),
+    (ItemBow, 0x6F9D08),         // item_name_bow
+    (LiverYellow, 0x6F9D2F),     // item_name_liver_yellow
+    (ItemStoneBeauty, 0x6F9D56), // item_name_stonebeauty
+    (RupeeR, 0x6f9c2f),          // item_name_bfirerod_rental
+    (RupeeG, 0x6f9c13),          // item_name_tornaderod_rental
+    (RupeeB, 0x6f9bfb),          // item_name_icerod_rental
+    (RupeePurple, 0x6f9c49),     // item_name_boomerang_rental
+    (RupeeSilver, 0x6f9c7c),     // item_name_hookshot_rental
+    (RupeeGold, 0x6f9be2),       // item_name_sandrod_rental
 ];
 
-const ITEM_NAMES: [(game::Item, &str); 63] = [
+const ITEM_NAMES: [(Item, &str); 57] = [
     (BadgeBee, "beebadge"),
     (Compass, "compass"),
     (ItemBell, "bell"),
@@ -1061,16 +1179,10 @@ const ITEM_NAMES: [(game::Item, &str); 63] = [
     (ClothesBlue, "clothes_blue"),
     (EscapeFruit, "doron"),
     (StopFruit, "durian"),
-    (RupeeR, "bfirerod_rental"),       // renamed
-    (RupeeG, "tornaderod_rental"),     // renamed
-    (RupeeB, "icerod_rental"),         // renamed
-    (RupeePurple, "boomerang_rental"), // renamed
-    (RupeeSilver, "hookshot_rental"),  // renamed
-    (RupeeGold, "sandrod_rental"),     // renamed
     (GanbariPowerUp, "ganbari_power_up"),
     (HeartContainer, "heartcontioner"),
     (HeartPiece, "heartpiece"),
-    (game::Item::HintGlasses, "hintglass"),
+    (Item::HintGlasses, "hintglass"),
     (HyruleShield, "hyrule_shield"),
     (KeyBoss, "keyboss"),
     (TriforceCourage, "triforce_courage"),
@@ -1082,22 +1194,22 @@ const ITEM_NAMES: [(game::Item, &str); 63] = [
     (ItemSwordLv2, "mastersword"),
     (ItemSwordLv3, "mastersword"),
     (ItemSwordLv4, "mastersword"),
-    (game::Item::Empty, "gamecoin"),
+    (Item::Empty, "gamecoin"),
     (MessageBottle, "messagebottle"),
     (Milk, "milk"),
     (MilkMatured, "milk_matured"),
     (ItemInsectNet, "net"),
     (ItemInsectNetLv2, "net_lv2"),
-    (game::Item::OreYellow, "ore"),
-    (game::Item::OreGreen, "ore"),
-    (game::Item::OreBlue, "ore"),
-    (game::Item::OreRed, "ore"),
+    (Item::OreYellow, "ore"),
+    (Item::OreGreen, "ore"),
+    (Item::OreBlue, "ore"),
+    (Item::OreRed, "ore"),
     (DashBoots, "pegasus"),
     (Heart, "potshop_heart"),
     (PendantCourage, "courage"),
     (PendantPower, "power"),
     (PendantWisdom, "wisdom"),
-    (game::Item::Pouch, "pouch"),
+    (Item::Pouch, "pouch"),
     (PowerGlove, "powergloves"),
     (ItemShield, "shield"),
     (SpecialMove, "special_move"),
@@ -1129,9 +1241,9 @@ const FN_GET_LOCAL_FLAG_3: u32 = 0x52a05c;
 /// r0: PlayerObjectSingleton <br />
 /// r1: flag index <br />
 /// r2: new flag value (0 or 1)
-// const FN_SET_LOCAL_FLAG_3: u32 = 0x1bb724;
+const FN_SET_LOCAL_FLAG_3: u32 = 0x1bb724;
 
-// const MAP_MANAGER_INSTANCE: u32 = 0x70c8e0;
+const MAP_MANAGER_INSTANCE: u32 = 0x70c8e0;
 // const PTR_MAP_MANAGER_INSTANCE: u32 = 0x27320c;
 const PLAYER_OBJECT_SINGLETON: u32 = 0x70FB60;
 const VTABLE_STRING: u32 = 0x6F5988;

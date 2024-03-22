@@ -7,7 +7,7 @@ use crate::filler::progress::Progress;
 
 // TODO I'd eventually like to externalize the logic, both for organization purposes and to allow users to write custom logic. But this is fine for now.
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Default)]
 pub struct Logic {
     pub normal: Option<fn(&Progress) -> bool>,
     pub hard: Option<fn(&Progress) -> bool>,

@@ -12,10 +12,6 @@ pub fn build_vanes_map(settings: &Settings, rng: &mut StdRng) -> crate::Result<V
     let weather_vanes_keys = item_pools::get_weather_vanes();
     match settings.weather_vanes {
         WeatherVanes::Shuffled => pair_randomly(rng, item_pools::get_weather_vanes()),
-        _ => Ok(weather_vanes_keys
-            .iter()
-            .map(|&vane| vane)
-            .zip(item_pools::get_weather_vanes().iter().map(|&vane| vane))
-            .collect::<_>()),
+        _ => Ok(weather_vanes_keys.iter().copied().zip(item_pools::get_weather_vanes().iter().copied()).collect::<_>()),
     }
 }

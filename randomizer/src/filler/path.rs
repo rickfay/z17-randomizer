@@ -16,6 +16,10 @@ impl Path {
         self.destination
     }
 
+    pub fn get_logic(&self) -> Logic {
+        self.logic
+    }
+
     pub fn can_access(self, progress: &Progress) -> bool {
         self.logic.can_access(progress)
     }

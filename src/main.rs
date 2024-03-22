@@ -60,7 +60,11 @@ fn main() {
         match randomizer::generate_seed(seed, settings.clone(), &user_config, opt.no_patch, opt.no_spoiler) {
             Ok(_) => {
                 println!();
-                info!("Successfully Generated ALBWR Seed {} in {} seconds.", seed, stopwatch.elapsed().as_secs());
+                info!("Successfully Generated ALBWR Seed {} in {} seconds! :D", seed, stopwatch.elapsed().as_secs());
+                println!();
+                info!("For help installing this seed: https://github.com/rickfay/z17-randomizer#setup");
+                info!("List of known issues: https://github.com/rickfay/z17-randomizer#known-issues");
+                info!("Visit us on Discord: https://discord.gg/dmAJh2uY7M");
                 break;
             },
             Err(err) => {

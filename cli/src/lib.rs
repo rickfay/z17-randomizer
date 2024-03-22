@@ -2,6 +2,7 @@ use log::info;
 use modinfo::settings::cracks::Cracks;
 use modinfo::settings::cracksanity::Cracksanity;
 use modinfo::settings::keysy::Keysy;
+use modinfo::settings::nice_items::NiceItems;
 use modinfo::settings::ravios_shop::RaviosShop;
 use modinfo::settings::trials_door::TrialsDoor;
 use modinfo::settings::weather_vanes::WeatherVanes;
@@ -13,7 +14,7 @@ use std::{
 
 /// Pauses program execution
 pub fn pause() {
-    println!("\nPress Enter to continue...");
+    println!("Press Enter to continue...");
     stdin().read_exact(&mut [0]).unwrap();
 }
 
@@ -28,6 +29,10 @@ pub fn get_seed_settings() -> Result<Settings, String> {
         "Randomize Dungeon Prizes",
         "This shuffles all Sage Portraits, Pendants, and the Charm among themselves.",
     );
+
+    let maiamai_limit =
+        prompt_u8_in_range("Maiamai Limit", "Choose the maximum number of Maiamai you're willing to collect:", 0, 100)
+            as usize;
 
     let lc_requirement = prompt_u8_in_range(
         "Lorule Castle Requirement",
@@ -46,13 +51,27 @@ pub fn get_seed_settings() -> Result<Settings, String> {
         3,
     ))?;
 
-    let nice_mode = prompt_bool(
-        "Shuffle Nice Items",
-        "This shuffles a second progressive copy of each Ravio Item into the general item pool.",
-    );
-    let super_mode = prompt_bool(
+    let nice_items = NiceItems::try_from(prompt_u8_in_range(
+        "Nice Items",
+        "Choose how to handle Nice Items and Mother Maiamai's upgrades:\n\
+        [0] Vanilla  - Nice Items are obtained as upgrades from Mother Maiamai.\n\
+        [1] Shuffled - Freely shuffles two progressive copies of each Ravio Item, and randomizes Mother Maiamai's rewards.\n\
+        [2] Off      - Removes Nice Items from the game, and randomizes Mother Maiamai's rewards.",
+        0,
+        2,
+    ))?;
+
+    let super_items = prompt_bool(
         "Shuffle Super Items",
         "This shuffles a second progressive copy of the Lamp and Net into the general item pool.",
+    );
+
+    let lamp_and_net_as_weapons = prompt_bool(
+        "Lamp & Net as Weapons (advanced)",
+        "Treat the base Lamp and Net as damage-dealing weapons?\n\
+        Details:\n\
+        - The red base Lamp and Net each deal 1/2 the damage of the Forgotten Sword (i.e. they're VERY BAD weapons).\n\
+        - The blue Super Lamp and Super Net each deal 4 damage (same as MS Lv3) and are always considered weapons, regardless of this setting.",
     );
 
     let no_progression_enemies = prompt_bool(
@@ -195,6 +214,9 @@ pub fn get_seed_settings() -> Result<Settings, String> {
         66,
     ) as usize;
 
+    let purple_potion_bottles =
+        prompt_bool("Purple Potion Bottles", "Fills all Empty Bottles with a free Purple Potion.");
+
     let keysy = Keysy::try_from(prompt_u8_in_range(
         "Keysy",
         "This setting removes locked keys and doors from dungeons if enabled.\n\
@@ -218,9 +240,11 @@ pub fn get_seed_settings() -> Result<Settings, String> {
         logic_mode,
         dark_rooms_lampless,
         dungeon_prize_shuffle,
+        maiamai_limit,
         maiamai_madness,
-        nice_mode,
-        super_mode,
+        nice_items,
+        super_items,
+        lamp_and_net_as_weapons,
         cracks,
         cracksanity,
         trials_door,
@@ -241,6 +265,7 @@ pub fn get_seed_settings() -> Result<Settings, String> {
         minigames_excluded,
         skip_big_bomb_flower,
         treacherous_tower_floors,
+        purple_potion_bottles,
         night_mode: false,
     })
 }

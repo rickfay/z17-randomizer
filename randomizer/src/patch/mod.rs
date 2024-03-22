@@ -21,6 +21,7 @@ use rom::{
     File, IntoBytes, Language, Rom, Scene,
 };
 use serde::Serialize;
+use std::ops::Add;
 use std::{collections::HashMap, fs, path::Path};
 use tempfile::tempdir;
 use try_insert_ext::EntryInsertExt;
@@ -129,10 +130,12 @@ impl Patcher {
 
     fn read_obj(&mut self, id: CourseId, stage_index: u16, unq: u16) -> &Obj {
         let stage = self.scene(id, stage_index - 1).unwrap().stage_mut().get_mut();
-        stage.get_obj(unq).expect(&format!(
-            "Failed to read Crack Objs entry with UNQ: {} from World/Byaml/{:?}{}_stage.byaml",
-            unq, id, stage_index
-        ))
+        stage.get_obj(unq).unwrap_or_else(|| {
+            panic!(
+                "Failed to read Crack Objs entry with UNQ: {} from World/Byaml/{:?}{}_stage.byaml",
+                unq, id, stage_index
+            )
+        })
     }
 
     fn modify_objs<A>(&mut self, course_id: CourseId, stage_index: u16, actions: A)
@@ -338,7 +341,7 @@ impl Patcher {
         let large_chest = (34, "TreasureBoxL");
 
         let chest_data = if settings.chest_size_matches_contents {
-            if item.goes_in_csmc_large_chest(settings) {
+            if item.is_major_item() {
                 large_chest
             } else {
                 small_chest
@@ -371,7 +374,8 @@ impl Patcher {
             return Ok(());
         }
 
-        let there_crack = crack_map.get(&here_crack).expect(&format!("No crack_map entry for: {:?}", here_crack));
+        let there_crack =
+            crack_map.get(&here_crack).unwrap_or_else(|| panic!("No crack_map entry for: {:?}", here_crack));
         let there_flag = there_crack.get_flag();
         let there_sp = there_crack.get_spawn_point();
 
@@ -498,7 +502,7 @@ impl Patcher {
                         ser: curtain_ser,
                         srt: Transform {
                             scale: Vec3 { x: 1.0, y: 16.0, z: 1.0 },
-                            rotate: Vec3 { x: 339.37350, y: 0.0, z: 0.0 },
+                            rotate: Vec3 { x: 339.3735, y: 0.0, z: 0.0 },
                             translate: t_curtain,
                         },
                         typ: 1,
@@ -633,7 +637,7 @@ impl Patcher {
         {
             let Self { ref rentals, ref merchant, ref mut courses, .. } = self;
             let your_house_actors = courses.get_mut(&IndoorLight).unwrap().scenes.get_mut(&0).unwrap().actors_mut();
-            for actor in rentals.iter().filter_map(|item| item_actors.get(&item)) {
+            for actor in rentals.iter().filter_map(|item| item_actors.get(item)) {
                 your_house_actors.add(actor.clone())?;
             }
             let kakariko_actors = courses.get_mut(&FieldLight).unwrap().scenes.get_mut(&15).unwrap().actors_mut();

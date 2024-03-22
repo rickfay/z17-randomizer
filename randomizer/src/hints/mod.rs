@@ -12,6 +12,7 @@ use log::{debug, info};
 use macros::fail;
 use modinfo::settings::cracksanity::Cracksanity;
 use rand::seq::IteratorRandom;
+use rand::seq::SliceRandom;
 use rand::{rngs::StdRng, Rng};
 use rom::Error;
 use serde::{
@@ -23,12 +24,12 @@ use Item::*;
 
 pub mod formatting;
 pub mod hint_color;
-mod hints;
 
 #[derive(Default, Debug, Clone, Serialize)]
 pub struct Hints {
     pub path_hints: Vec<PathHint>,
     pub always_hints: Vec<LocationHint>,
+    pub maiamai_hints: Vec<LocationHint>,
     pub sometimes_hints: Vec<LocationHint>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub bow_of_light_hint: Option<BowOfLightHint>,
@@ -221,24 +222,28 @@ pub fn generate_hints(rng: &mut StdRng, seed_info: &mut SeedInfo, check_map: &mu
     const NUM_TOTAL_HINTS: usize = 29;
 
     //
-    let mut taken_checks = seed_info.full_exclusions.iter().map(|s| s.clone()).collect();
+    let mut taken_checks = seed_info.full_exclusions.iter().cloned().collect();
     let mut taken_ghosts = Vec::new();
 
     // let mut crack_hints =
     //     generate_crack_hints(settings, crack_map, world_graph, check_map, &mut taken_checks, &mut taken_ghosts, rng);
 
     let mut always_hints = generate_always_hints(rng, seed_info, check_map, &mut taken_checks, &mut taken_ghosts);
+    let mut maiamai_hints = generate_maiamai_hints(rng, seed_info, check_map, &mut taken_checks, &mut taken_ghosts);
     let mut path_hints = generate_path_hints(rng, seed_info, check_map, &mut taken_checks, &mut taken_ghosts);
 
-    let num_sometimes_hints = NUM_TOTAL_HINTS - always_hints.len() - path_hints.len();
+    let num_sometimes_hints = NUM_TOTAL_HINTS - always_hints.len() - maiamai_hints.len() - path_hints.len();
     let mut sometimes_hints =
         generate_sometimes_hints(rng, seed_info, check_map, num_sometimes_hints, &taken_checks, &mut taken_ghosts);
 
-    duplicate_hints(&mut taken_ghosts, &mut always_hints, &mut path_hints, &mut sometimes_hints, NUM_TOTAL_HINTS, rng);
+    duplicate_hints(
+        &mut taken_ghosts, &mut always_hints, &mut maiamai_hints, &mut path_hints, &mut sometimes_hints,
+        NUM_TOTAL_HINTS, rng,
+    );
 
     let bow_of_light_hint = generate_bow_of_light_hint(seed_info, check_map);
 
-    seed_info.hints = Hints { path_hints, always_hints, sometimes_hints, bow_of_light_hint };
+    seed_info.hints = Hints { path_hints, always_hints, maiamai_hints, sometimes_hints, bow_of_light_hint };
 
     Ok(())
 }
@@ -246,8 +251,8 @@ pub fn generate_hints(rng: &mut StdRng, seed_info: &mut SeedInfo, check_map: &mu
 /// Crack Hints
 #[allow(unused)]
 fn generate_crack_hints(
-    rng: &mut StdRng, seed_info: &mut SeedInfo, check_map: &mut CheckMap, taken_checks: &mut Vec<&str>,
-    taken_ghosts: &mut Vec<HintGhost>,
+    rng: &mut StdRng, seed_info: &mut SeedInfo, check_map: &mut CheckMap, taken_checks: &mut [&str],
+    taken_ghosts: &mut [HintGhost],
 ) -> Vec<CrackHint> {
     if seed_info.settings.cracksanity == Cracksanity::Off {
         return Vec::with_capacity(0);
@@ -259,7 +264,7 @@ fn generate_crack_hints(
     for crack in cracks_to_hint {
         let crack_hint = CrackHint {
             crack,
-            destination: *seed_info.crack_map.get(&crack).expect(&format!("crack_map entry for {}", crack)),
+            destination: *seed_info.crack_map.get(&crack).unwrap_or_else(|| panic!("crack_map entry for {}", crack)),
             logical_ghosts: vec![],
             ghosts: vec![],
         };
@@ -269,8 +274,8 @@ fn generate_crack_hints(
 }
 
 fn duplicate_hints(
-    taken_ghosts: &mut Vec<HintGhost>, always_hints: &mut Vec<LocationHint>, path_hints: &mut Vec<PathHint>,
-    sometimes_hints: &mut Vec<LocationHint>, num_total_hints: usize, rng: &mut StdRng,
+    taken_ghosts: &mut Vec<HintGhost>, always_hints: &mut Vec<LocationHint>, maiamai_hints: &mut Vec<LocationHint>,
+    path_hints: &mut Vec<PathHint>, sometimes_hints: &mut Vec<LocationHint>, num_total_hints: usize, rng: &mut StdRng,
 ) {
     assert_eq!(
         taken_ghosts.len(),
@@ -279,7 +284,7 @@ fn duplicate_hints(
         taken_ghosts.len(),
         num_total_hints
     );
-    let hint_count = always_hints.len() + path_hints.len() + sometimes_hints.len();
+    let hint_count = always_hints.len() + maiamai_hints.len() + path_hints.len() + sometimes_hints.len();
     assert_eq!(
         hint_count, num_total_hints,
         "Only {} of the expected {} hints were actually created",
@@ -292,6 +297,10 @@ fn duplicate_hints(
     ghosts.retain(|ghost| !taken_ghosts.contains(ghost));
 
     for hint in always_hints {
+        hint.ghosts.push(ghosts.remove(rng.gen_range(0..ghosts.len())));
+    }
+
+    for hint in maiamai_hints {
         hint.ghosts.push(ghosts.remove(rng.gen_range(0..ghosts.len())));
     }
 
@@ -357,6 +366,56 @@ fn generate_always_hints(
     always_hints
 }
 
+/**
+ * Generates hints for Mother Maiamai's Upgrades.
+ */
+fn generate_maiamai_hints(
+    rng: &mut StdRng, seed_info: &SeedInfo, check_map: &mut CheckMap, taken_checks: &mut Vec<String>,
+    taken_ghosts: &mut Vec<HintGhost>,
+) -> Vec<LocationHint> {
+    const NUM_MAI_HINTS: usize = 5;
+    let mut available_maiamai_checks = vec![
+        "Maiamai Bow Upgrade", "Maiamai Boomerang Upgrade", "Maiamai Hookshot Upgrade", "Maiamai Hammer Upgrade",
+        "Maiamai Bombs Upgrade", "Maiamai Fire Rod Upgrade", "Maiamai Ice Rod Upgrade", "Maiamai Tornado Rod Upgrade",
+        "Maiamai Sand Rod Upgrade", "100 Maiamai",
+    ];
+
+    // Handle exclusions
+    available_maiamai_checks.retain(|check| !taken_checks.contains(&check.to_string()));
+
+    // First find any and all checks with major items to make hints
+    let mut chosen_maiamai_checks = vec![];
+    let mut i = 0;
+    while i < available_maiamai_checks.len() && chosen_maiamai_checks.len() < NUM_MAI_HINTS {
+        if let Some(Some(item)) = check_map.get(available_maiamai_checks[i]) {
+            if item.is_major_item() {
+                chosen_maiamai_checks.push(available_maiamai_checks.remove(i));
+                continue;
+            }
+        }
+        i += 1;
+    }
+
+    // Add junk hints to reach the desired hint amount
+    if chosen_maiamai_checks.len() < NUM_MAI_HINTS {
+        chosen_maiamai_checks
+            .extend(available_maiamai_checks.choose_multiple(rng, NUM_MAI_HINTS - chosen_maiamai_checks.len()));
+    }
+
+    // Generate the actual Location Hints
+    let mut maiamai_hints = Vec::with_capacity(NUM_MAI_HINTS);
+    for check_name in chosen_maiamai_checks {
+        let mut location_hint = generate_location_hint(check_name, seed_info, check_map);
+        if location_hint.choose_ghost(rng, taken_ghosts).is_err() {
+            continue;
+        }
+        maiamai_hints.push(location_hint);
+        taken_checks.push(check_name.to_string());
+    }
+
+    maiamai_hints
+}
+
 fn generate_location_hint(check_name: &'static str, seed_info: &SeedInfo, check_map: &mut CheckMap) -> LocationHint {
     // fixme this sucks
     let mut check = None;
@@ -386,7 +445,7 @@ fn generate_location_hint(check_name: &'static str, seed_info: &SeedInfo, check_
         })
         .collect::<Vec<_>>();
 
-    LocationHint { item: item.as_item().unwrap(), check: check.clone(), logical_ghosts, ghosts: vec![] }
+    LocationHint { item: item.as_item().unwrap(), check, logical_ghosts, ghosts: vec![] }
 }
 
 /**
@@ -578,7 +637,7 @@ fn find_checks_before_goal(
 
 /// Determines the possible Path Hints for a given goal, if any exist. Paths are returned in a random order.
 fn get_potential_path_hints(
-    rng: &mut StdRng, seed_info: &SeedInfo, check_map: &mut CheckMap, taken_checks: &mut Vec<String>, goal: Goal,
+    rng: &mut StdRng, seed_info: &SeedInfo, check_map: &mut CheckMap, taken_checks: &mut [String], goal: Goal,
 ) -> Vec<PathHint> {
     let mut reachable_checks: Vec<Check>;
     let mut potential_paths: Vec<PathHint> = Vec::new();
@@ -588,7 +647,7 @@ fn get_potential_path_hints(
     // Limit potential paths to locations with valid Path Items that haven't yet been taken
     potential_path_checks.retain(|check| {
         if let Some(Some(Randomizable::Item(item))) = check_map.get(check.get_name()) {
-            !taken_checks.contains(&check.get_name().to_string()) && POSSIBLE_PATH_ITEMS.contains(&item)
+            !taken_checks.contains(&check.get_name().to_string()) && POSSIBLE_PATH_ITEMS.contains(item)
         } else {
             false
         }

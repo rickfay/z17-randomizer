@@ -1,8 +1,11 @@
+#![allow(unused_qualifications)]
+
+use serde::de;
 use {
     super::Kind,
     crate::{files::align, Error, Result},
     bytey::*,
-    serde::de::{self, value::BorrowedBytesDeserializer, DeserializeSeed, MapAccess, SeqAccess, Unexpected, Visitor},
+    serde::de::{value::BorrowedBytesDeserializer, DeserializeSeed, MapAccess, SeqAccess, Unexpected, Visitor},
     std::{
         convert::{TryFrom, TryInto},
         fmt::{self, Display, Formatter},
@@ -39,6 +42,7 @@ impl<'de> Deserializer<'de> {
         Self { source }
     }
 
+    #[allow(unused_qualifications)]
     fn invalid_root<V>(kind: &'static str) -> Result<V::Value>
     where
         V: Visitor<'de>,
@@ -62,6 +66,7 @@ impl<'de> Deserializer<'de> {
 impl<'de> de::Deserializer<'de> for Deserializer<'de> {
     type Error = Error;
 
+    #[allow(unused_qualifications)]
     fn deserialize_any<V>(self, visitor: V) -> Result<V::Value, Self::Error>
     where
         V: Visitor<'de>,
@@ -72,7 +77,7 @@ impl<'de> de::Deserializer<'de> for Deserializer<'de> {
             match kind {
                 Kind::Array => visitor.visit_seq(self.array(&document)?),
                 Kind::Map => visitor.visit_map(self.map(&document)?),
-                kind => Err(de::Error::invalid_value(
+                kind => Err(serde::de::Error::invalid_value(
                     Unexpected::Other(kind.to_string().as_str()),
                     &"0xC0 [array] or 0xC1 [map]",
                 )),
@@ -299,7 +304,7 @@ struct Document<'de> {
 
 impl<'de> Document<'de> {
     fn new(source: &'de [u8]) -> Result<Self> {
-        bytey::typedef! { struct Header: TryFromBytes<'_> [0x10] {
+        typedef! { struct Header: TryFromBytes<'_> [0x10] {
             #super::MAGIC,
             [2] version: u16 where version == super::VERSION,
             [4] keys: u32,
@@ -338,6 +343,7 @@ impl<'de> Document<'de> {
         })
     }
 
+    #[allow(clippy::needless_lifetimes)]
     fn root<'doc, T>(&'doc self, f: fn(&'doc Self, u32) -> Result<T>) -> Result<T> {
         f(self, self.root)
     }

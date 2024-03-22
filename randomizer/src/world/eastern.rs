@@ -37,14 +37,8 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                         normal: |p| p.can_hit_far_switch() || p.has_nice_ice_rod(),
                         hard: |_| true, // throw pot
                     }),
-                    check!("[EP] (1F) Popo Room", regions::dungeons::eastern::palace::SUBREGION => {
-                        normal: |p| p.can_attack(),
-                        hard: |p| p.has_lamp_or_net(),
-                    }),
-                    check!("[EP] (1F) Secret Room", regions::dungeons::eastern::palace::SUBREGION => {
-                        normal: |p| p.can_attack(),
-                        hard: |p| p.has_lamp_or_net(),
-                    }),
+                    check!("[EP] (1F) Popo Room", regions::dungeons::eastern::palace::SUBREGION, |p| p.can_attack()),
+                    check!("[EP] (1F) Secret Room", regions::dungeons::eastern::palace::SUBREGION, |p| p.can_attack()),
                     check!("[EP] (1F) Switch Room", regions::dungeons::eastern::palace::SUBREGION => {
                         normal: |p| p.can_hit_far_switch(),
                         hard: |p| p.has_ice_rod() || p.has_master_sword(), // Ice Rod + Pot
@@ -61,16 +55,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
             location(
                 "Eastern Palace Miniboss",
                 None,
-                vec![
-                    edge!(EasternPalace1F => {
-                        normal: |p| p.can_attack(),
-                        hard: |p| p.has_lamp_or_net(),
-                    }),
-                    edge!(EasternPalace2F => {
-                        normal: |p| p.can_attack(),
-                        hard: |p| p.has_lamp_or_net(),
-                    }),
-                ],
+                vec![edge!(EasternPalace1F, |p| p.can_attack()), edge!(EasternPalace2F, |p| p.can_attack())],
             ),
         ),
         (
@@ -78,10 +63,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
             location(
                 "Eastern Palace 2F",
                 vec![
-                    check!("[EP] (2F) Defeat Popos", regions::dungeons::eastern::palace::SUBREGION => {
-                        normal: |p| p.can_attack(),
-                        hard: |p| p.has_lamp_or_net(),
-                    }),
+                    check!("[EP] (2F) Defeat Popos", regions::dungeons::eastern::palace::SUBREGION, |p| p.can_attack()),
                     check!("[EP] (2F) Ball Room", regions::dungeons::eastern::palace::SUBREGION),
                     check!("[EP] (2F) Switch Room", regions::dungeons::eastern::palace::SUBREGION => {
                         normal: |p| p.can_hit_far_switch() || p.has_ice_rod(),
@@ -96,14 +78,8 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                     edge!(EasternPalaceMiniboss),
                     edge!(
                         EasternPalaceBoss => {
-                        normal: |p| p.has_eastern_big_key()
-                            && (
-                                (p.has_eastern_keys(2) && p.can_hit_far_switch())
-                                || p.has_ice_rod()
-                                || p.has_bombs()
-                            )
-                            && p.can_attack(),
-                        hard: |p| p.has_eastern_big_key() && p.has_eastern_keys(2) && p.has_lamp_or_net(),
+                        normal: |p| p.has_eastern_big_key() && ((p.has_eastern_keys(2) && p.can_hit_far_switch()) || p.has_ice_rod() || p.has_bombs()),
+                        hard: |p| p.has_eastern_big_key() && (p.has_eastern_keys(2) || p.has_ice_rod() || p.has_bombs()),
                         glitched: |p| p.has_master_sword() || p.can_great_spin(),
                         adv_glitched: |p| p.has_tornado_rod(),
                     }),
@@ -120,8 +96,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                     hard: |p| {
                         p.has_bombs()
                             || p.has_master_sword()
-                            || ((p.has_boomerang() || p.has_hookshot())
-                                && (p.can_attack() || p.has_lamp_or_net()))
+                            || ((p.has_boomerang() || p.has_hookshot()) && p.can_attack())
                             || p.has_nice_ice_rod()
                     },
                     hell: |p| p.has_ice_rod(), // gross

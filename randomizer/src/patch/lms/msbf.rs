@@ -282,7 +282,16 @@ fn patch_mother_maiamai(patcher: &mut Patcher) -> Result<()> {
             // 30 START
             // --------------------------------------------------------------------
 
-            [31 into_branch] switch [[0] => 24,],
+            // FIXME this is skipping a function we should just correct with an ASM patch, and as such the cutscene plays strangely
+            // check event Flag 998 to see if we've gotten the 100 maiamai reward yet
+            [31 into_branch] each [
+                arg1(0x6),
+                value(998),
+                command(0xA),
+                switch [[0] => 24,], // Skip "You found all of my babies!" text
+            ],
+
+            // Skip text after receiving Great Spin
             [35 into_branch] switch [[1] => 94,],
             [25] => 94,
 
@@ -296,18 +305,22 @@ fn patch_mother_maiamai(patcher: &mut Patcher) -> Result<()> {
             [72] => 45,
             [73 into_branch] switch [[1] => 45,],
 
-            // Item Selection Cancel Text
-            [43 into_branch] switch [
-                [1] => 46,
-                [2] => 46,
-                [3] => 46,
-            ],
+            // Item Selection Cancel Text (keep this for now)
+            // [43 into_branch] switch [
+            //     [1] => 46,
+            //     [2] => 46,
+            //     [3] => 46,
+            // ],
+
+            // [131] => 139, // Skip 132, 133 (skips confirmation dialog)
 
             // Cancel quicker, Skips going back down 77 START
             [42] => 69,
             [76 into_branch] switch [[1] => 69,],
 
-            [133 into_branch] switch [[0] => 47,], // Skip 139,50,48
+            [131] => 47, // Skip confirmation dialog (132, 133, 139, 50, 48)
+            //[133 into_branch] switch [[0] => 47,], // Skip 139,50,48 (use this if confirmation dialog is desired)
+
             [47] => 83, // Skip 51,49
             //[47] => 81, // Skip 51,49,83,84 (10x Maiamai jump to water)
 
@@ -315,11 +328,11 @@ fn patch_mother_maiamai(patcher: &mut Patcher) -> Result<()> {
             // 77 START
             // --------------------------------------------------------------------
 
-            // Skip advice on finding Maiamai
-            [140 into_branch] switch [[1] => 80,],
-            [141] => 80,
-            [111 into_branch] switch [[0] => 80,],
-            [110 into_branch] switch [[1] => 80,],
+            // Skip closing dialogs
+            // [111 into_branch] switch [[0] => 80,], // Skip 88
+            // [110 into_branch] switch [[1] => 80,],
+            // [141] => 80, // Skip 143
+            // [144 into_branch] switch [[0] => 80, [1] => 80,], // Skip 142, 143
         },
     );
 
