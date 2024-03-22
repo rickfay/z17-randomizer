@@ -1201,7 +1201,7 @@ impl Item {
             | HeartPiece08 | HeartPiece09 | HeartPiece10 | HeartPiece11 | HeartPiece12 | HeartPiece13
             | HeartPiece14 | HeartPiece15 | HeartPiece16 | HeartPiece17 | HeartPiece18 | HeartPiece19
             | HeartPiece20 | HeartPiece21 | HeartPiece22 | HeartPiece23 | HeartPiece24 | HeartPiece25
-            | HeartPiece26 | HeartPiece27 | HeartPiece28 => "Heart Piece",
+            | HeartPiece26 | HeartPiece27 | HeartPiece28 => "Piece of Heart",
             HeartContainer01 | HeartContainer02 | HeartContainer03 | HeartContainer04 | HeartContainer05
             | HeartContainer06 | HeartContainer07 | HeartContainer08 | HeartContainer09 | HeartContainer10 => {
                 "Heart Container"

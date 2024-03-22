@@ -7,6 +7,7 @@ use crate::patch::code::arm::lsm::{pop, push};
 use crate::patch::code::arm::Register::*;
 use crate::patch::code::arm::{b, bl, Instruction, LR, PC, SP};
 use crate::{patch::util::prize_flag, regions, Layout, Result, SeedInfo};
+use game::Item;
 use game::Item::*;
 use modinfo::settings::{pedestal::PedestalSetting::*, Settings};
 use rom::flag::Flag;
@@ -156,6 +157,8 @@ impl Ips {
 
 pub fn create(patcher: &Patcher, seed_info: &SeedInfo) -> Code {
     let mut code = Code::new(patcher.game.exheader());
+    let actor_names = actor_names(&mut code);
+    let item_names = item_names(&mut code);
 
     do_dev_stuff(&mut code, seed_info);
 
@@ -183,7 +186,7 @@ pub fn create(patcher: &Patcher, seed_info: &SeedInfo) -> Code {
     configure_pedestal_requirements(&mut code, &seed_info.settings);
     night_mode(&mut code, &seed_info.settings);
     show_hint_ghosts(&mut code);
-    mother_maiamai(&mut code, &seed_info.layout);
+    mother_maiamai(&mut code, &seed_info.layout, &item_names);
     pause_menu_warp(&mut code);
     purple_potion_bottles(&mut code, &seed_info.settings);
     // golden_bees(&mut code);
@@ -240,9 +243,6 @@ pub fn create(patcher: &Patcher, seed_info: &SeedInfo) -> Code {
     code.patch(0x243DE8, [bl(get_sword_flag1)]);
     code.patch(0x30E160, [bl(get_sword_flag2)]);
 
-    //
-    let actor_names = actor_names(&mut code);
-    let item_names = item_names(&mut code);
     let overwrite_rentals = code.text;
     let mut actor_offset = 0;
     let mut name_offset = 0x714608;
@@ -415,8 +415,18 @@ fn quake(code: &mut Code) {
 }
 
 /// Mother Maiamai Stuff
-fn mother_maiamai(code: &mut Code, layout: &Layout) {
-    // Use flags 302-311 (not 305) to record whether we've picked up that item's upgrade.
+fn mother_maiamai(code: &mut Code, layout: &Layout, item_names: &HashMap<Item, u32>) {
+    /// Use flags 302-311 (not 305) to record whether we've picked up that item's upgrade.
+    /// The "inventory index" (see table: 0x6a6170) of each item gets added to this:
+    /// * 0x4 = Bow
+    /// * 0x3 = Boomerang
+    /// * 0xB = Hookshot
+    /// * 0x6 = Hammer
+    /// * 0x2 = Bombs
+    /// * 0x8 = Fire Rod
+    /// * 0x9 = Ice Rod
+    /// * 0xA = Tornado Rod
+    /// * 0x7 = Sand Rod
     const NEW_LOCAL_FLAGS_START_IDX: u32 = 300;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -552,19 +562,33 @@ fn mother_maiamai(code: &mut Code, layout: &Layout) {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // Item Names
-    code.patch(0x426e28, [mov(R0, get_item_name_offset_for(bow))]);
-    code.patch(0x426e18, [mov(R0, get_item_name_offset_for(boomerang))]);
-    code.patch(0x426e10, [mov(R0, get_item_name_offset_for(hookshot))]);
-    code.patch(0x426e20, [mov(R0, get_item_name_offset_for(hammer))]);
-    code.patch(0x426e00, [mov(R0, get_item_name_offset_for(bombs))]);
-    code.patch(0x426e08, [mov(R0, get_item_name_offset_for(fire_rod))]);
-    code.patch(0x426de8, [mov(R0, get_item_name_offset_for(ice_rod))]);
-    code.patch(0x426df8, [mov(R0, get_item_name_offset_for(tornado_rod))]);
-    code.patch(0x426df0, [mov(R0, get_item_name_offset_for(sand_rod))]);
-}
+    let maiamai_item_name_table = code.rodata().declare(
+        [ice_rod, sand_rod, tornado_rod, bombs, fire_rod, hookshot, boomerang, hammer, bow]
+            .iter()
+            .flat_map(|item| {
+                u32::to_le_bytes(
+                    *item_names
+                        .get(&Randomizable::normalize(*item))
+                        .unwrap_or_else(|| panic!("No item_name for: {item:?}")),
+                )
+            })
+            .collect::<Vec<_>>(),
+    );
 
-fn get_item_name_offset_for(_item: Randomizable) -> u32 {
-    0x0 // todo
+    let fn_get_maiamai_item_name = code.text().define([
+        push([R1, LR]),
+        // Discount multiply R0 by 4 (aka, left shift 2)
+        add(R0, R0, R0),
+        add(R0, R0, R0),
+        // R0 = maiamai_item_name_table[R0 * 4]
+        ldr(R1, maiamai_item_name_table),
+        ldr(R0, (R1, R0)),
+        pop([R1, PC]),
+    ]);
+
+    code.patch(0x46d858, [bl(fn_get_maiamai_item_name)]);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 }
 
 fn pause_menu_warp(code: &mut Code) {
@@ -1018,7 +1042,7 @@ fn ore_progress(code: &mut Code) {
     code.patch(0x4637B8, [bl(get_sword_fake)]);
 }
 
-fn actor_names(code: &mut Code) -> HashMap<game::Item, u32> {
+fn actor_names(code: &mut Code) -> HashMap<Item, u32> {
     let mut map = IntoIterator::into_iter(ACTOR_NAME_OFFSETS).collect::<HashMap<_, _>>();
     map.extend(IntoIterator::into_iter(ACTOR_NAMES).map(|(item, name)| {
         let name = format!("{}\0", name);
@@ -1027,16 +1051,17 @@ fn actor_names(code: &mut Code) -> HashMap<game::Item, u32> {
     map
 }
 
-fn item_names(code: &mut Code) -> HashMap<game::Item, u32> {
+fn item_names(code: &mut Code) -> HashMap<Item, u32> {
     let mut map = IntoIterator::into_iter(ITEM_NAME_OFFSETS).collect::<HashMap<_, _>>();
     map.extend(IntoIterator::into_iter(ITEM_NAMES).map(|(item, name)| {
         let name = format!("item_name_{}\0", name);
         (item, code.rodata().declare(name.as_bytes()))
     }));
+    // log::info!("{map:?}");
     map
 }
 
-const ACTOR_NAME_OFFSETS: [(game::Item, u32); 33] = [
+const ACTOR_NAME_OFFSETS: [(Item, u32); 33] = [
     (ItemStoneBeauty, 0x5D2060),
     (RupeeR, 0x5D639C),
     (RupeeG, 0x5D639C),
@@ -1055,7 +1080,7 @@ const ACTOR_NAME_OFFSETS: [(game::Item, u32); 33] = [
     (ItemBow, 0x5D6B6C),
     (ItemShield, 0x5D6B78),
     (ItemBottle, 0x5D7048),
-    (game::Item::HintGlasses, 0x5D70AC),
+    (Item::HintGlasses, 0x5D70AC),
     (RupeeGold, 0x5D7144),
     (ItemSwordLv1, 0x5D7178),
     (ItemSwordLv2, 0x5D7178),
@@ -1066,13 +1091,13 @@ const ACTOR_NAME_OFFSETS: [(game::Item, u32); 33] = [
     (LiverBlue, 0x5D7654),
     (MessageBottle, 0x5D76A0),
     (MilkMatured, 0x5D76A0),
-    (game::Item::Pouch, 0x5D7734),
+    (Item::Pouch, 0x5D7734),
     (ItemBowLight, 0x5D776C),
     (HeartContainer, 0x5D7B7C),
     (HeartPiece, 0x5D7B94),
 ];
 
-const ACTOR_NAMES: [(game::Item, &str); 44] = [
+const ACTOR_NAMES: [(Item, &str); 44] = [
     (KeyBoss, "KeyBoss"),
     (TriforceCourage, "BadgeBee"),
     (Compass, "Compass"),
@@ -1089,12 +1114,12 @@ const ACTOR_NAMES: [(game::Item, &str); 44] = [
     (ClothesBlue, "GtEvCloth"),
     (Heart, "Heart"),
     (HyruleShield, "GtEvShieldB"),
-    (game::Item::OreYellow, "OreSword"),
-    (game::Item::OreGreen, "OreSword"),
-    (game::Item::OreBlue, "OreSword"),
+    (Item::OreYellow, "OreSword"),
+    (Item::OreGreen, "OreSword"),
+    (Item::OreBlue, "OreSword"),
     (GanbariPowerUp, "PowerUp"),
     (DashBoots, "GtEvBoots"),
-    (game::Item::OreRed, "OreSword"),
+    (Item::OreRed, "OreSword"),
     (ItemIceRodLv2, "GtEvRodIceB"),
     (ItemSandRodLv2, "GtEvRodSandB"),
     (ItemTornadeRodLv2, "GtEvTornadoB"),
@@ -1110,7 +1135,7 @@ const ACTOR_NAMES: [(game::Item, &str); 44] = [
     (PendantWisdom, "Pendant"),
     (PendantCourage, "Pendant"),
     (ZeldaAmulet, "Pendant"),
-    (game::Item::Empty, "KeyBoss"),
+    (Item::Empty, "KeyBoss"),
     (EscapeFruit, "FruitEscape"),
     (StopFruit, "FruitStop"),
     (SpecialMove, "SwordD"),
@@ -1119,7 +1144,9 @@ const ACTOR_NAMES: [(game::Item, &str); 44] = [
     (GoldenBee, "GtEvBottleBee"),
 ];
 
-const ITEM_NAME_OFFSETS: [(game::Item, u32); 14] = [
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+const ITEM_NAME_OFFSETS: [(Item, u32); 20] = [
     (ItemBomb, 0x6F9A9A),
     (ItemSandRod, 0x6F9AD0),
     (ItemIceRod, 0x6F9AE2),
@@ -1131,12 +1158,18 @@ const ITEM_NAME_OFFSETS: [(game::Item, u32); 14] = [
     (ItemBoomerang, 0x6F9BA9),
     (ItemHammer, 0x6F9CCC),
     (ItemHookShot, 0x6F9CDD),
-    (ItemBow, 0x6F9D08),
-    (LiverYellow, 0x6F9D2F),
-    (ItemStoneBeauty, 0x6F9D56),
+    (ItemBow, 0x6F9D08),         // item_name_bow
+    (LiverYellow, 0x6F9D2F),     // item_name_liver_yellow
+    (ItemStoneBeauty, 0x6F9D56), // item_name_stonebeauty
+    (RupeeR, 0x6f9c2f),          // item_name_bfirerod_rental
+    (RupeeG, 0x6f9c13),          // item_name_tornaderod_rental
+    (RupeeB, 0x6f9bfb),          // item_name_icerod_rental
+    (RupeePurple, 0x6f9c49),     // item_name_boomerang_rental
+    (RupeeSilver, 0x6f9c7c),     // item_name_hookshot_rental
+    (RupeeGold, 0x6f9be2),       // item_name_sandrod_rental
 ];
 
-const ITEM_NAMES: [(game::Item, &str); 63] = [
+const ITEM_NAMES: [(Item, &str); 57] = [
     (BadgeBee, "beebadge"),
     (Compass, "compass"),
     (ItemBell, "bell"),
@@ -1146,16 +1179,10 @@ const ITEM_NAMES: [(game::Item, &str); 63] = [
     (ClothesBlue, "clothes_blue"),
     (EscapeFruit, "doron"),
     (StopFruit, "durian"),
-    (RupeeR, "bfirerod_rental"),       // renamed
-    (RupeeG, "tornaderod_rental"),     // renamed
-    (RupeeB, "icerod_rental"),         // renamed
-    (RupeePurple, "boomerang_rental"), // renamed
-    (RupeeSilver, "hookshot_rental"),  // renamed
-    (RupeeGold, "sandrod_rental"),     // renamed
     (GanbariPowerUp, "ganbari_power_up"),
     (HeartContainer, "heartcontioner"),
     (HeartPiece, "heartpiece"),
-    (game::Item::HintGlasses, "hintglass"),
+    (Item::HintGlasses, "hintglass"),
     (HyruleShield, "hyrule_shield"),
     (KeyBoss, "keyboss"),
     (TriforceCourage, "triforce_courage"),
@@ -1167,22 +1194,22 @@ const ITEM_NAMES: [(game::Item, &str); 63] = [
     (ItemSwordLv2, "mastersword"),
     (ItemSwordLv3, "mastersword"),
     (ItemSwordLv4, "mastersword"),
-    (game::Item::Empty, "gamecoin"),
+    (Item::Empty, "gamecoin"),
     (MessageBottle, "messagebottle"),
     (Milk, "milk"),
     (MilkMatured, "milk_matured"),
     (ItemInsectNet, "net"),
     (ItemInsectNetLv2, "net_lv2"),
-    (game::Item::OreYellow, "ore"),
-    (game::Item::OreGreen, "ore"),
-    (game::Item::OreBlue, "ore"),
-    (game::Item::OreRed, "ore"),
+    (Item::OreYellow, "ore"),
+    (Item::OreGreen, "ore"),
+    (Item::OreBlue, "ore"),
+    (Item::OreRed, "ore"),
     (DashBoots, "pegasus"),
     (Heart, "potshop_heart"),
     (PendantCourage, "courage"),
     (PendantPower, "power"),
     (PendantWisdom, "wisdom"),
-    (game::Item::Pouch, "pouch"),
+    (Item::Pouch, "pouch"),
     (PowerGlove, "powergloves"),
     (ItemShield, "shield"),
     (SpecialMove, "special_move"),

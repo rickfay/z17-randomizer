@@ -318,7 +318,9 @@ fn patch_mother_maiamai(patcher: &mut Patcher) -> Result<()> {
             [42] => 69,
             [76 into_branch] switch [[1] => 69,],
 
-            [133 into_branch] switch [[0] => 47,], // Skip 139,50,48
+            [131] => 47, // Skip confirmation dialog (132, 133, 139, 50, 48)
+            //[133 into_branch] switch [[0] => 47,], // Skip 139,50,48 (use this if confirmation dialog is desired)
+
             [47] => 83, // Skip 51,49
             //[47] => 81, // Skip 51,49,83,84 (10x Maiamai jump to water)
 
