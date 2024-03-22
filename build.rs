@@ -1,9 +1,17 @@
-extern crate winres;
+use std::env;
+use std::io;
+use winres::WindowsResource;
 
-fn main() {
-    if cfg!(target_os = "windows") || cfg!(target_os = "windows-latest") {
-        let mut res = winres::WindowsResource::new();
+fn main() -> io::Result<()> {
+    // Windows
+    if env::var_os("CARGO_CFG_WINDOWS").is_some() {
+        let mut res = WindowsResource::new();
         res.set_icon("icon.ico");
-        res.compile().unwrap();
+        res.compile()?;
     }
+
+    // macOS - todo
+    // unix  - todo
+
+    Ok(())
 }
