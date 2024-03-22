@@ -48,7 +48,7 @@ jobs:
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.platform.target }}
+          name: albwr-${{ matrix.platform.target }}
           path: |
             ${{ matrix.platform.file }}
             config.json
