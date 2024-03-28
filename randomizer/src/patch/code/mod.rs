@@ -1,23 +1,30 @@
-use super::Patcher;
-use crate::filler::filler_item::Item::*;
-use crate::filler::filler_item::Randomizable;
-use crate::patch::code::arm::data::{add, cmp, mov};
-use crate::patch::code::arm::ls::{ldr, ldrb, str_, strb};
-use crate::patch::code::arm::lsm::{pop, push};
-use crate::patch::code::arm::Register::*;
-use crate::patch::code::arm::{b, bl, Instruction, LR, PC, SP};
-use crate::{patch::util::prize_flag, regions, Layout, Result, SeedInfo};
-use game::Item;
-use game::Item::*;
-use modinfo::settings::{pedestal::PedestalSetting::*, Settings};
-use rom::flag::Flag;
-use rom::scene::SpawnPoint;
-use rom::ExHeader;
 use std::{
     collections::HashMap,
     fs::{self, File},
     io::Write,
     path::Path,
+};
+
+use game::{Item, Item::*};
+use modinfo::settings::{pedestal::PedestalSetting::*, Settings};
+use rom::{flag::Flag, scene::SpawnPoint, ExHeader, RomRegion};
+
+use super::Patcher;
+use crate::{
+    filler::filler_item::{Item::*, Randomizable},
+    patch::{
+        code::arm::{
+            b, bl,
+            data::{add, cmp, mov},
+            ls::{ldr, ldrb, str_, strb},
+            lsm::{pop, push},
+            Instruction,
+            Register::*,
+            LR, PC, SP,
+        },
+        util::prize_flag,
+    },
+    regions, Layout, Result, SeedInfo,
 };
 
 mod arm;
@@ -157,46 +164,58 @@ impl Ips {
 
 pub fn create(patcher: &Patcher, seed_info: &SeedInfo) -> Code {
     let mut code = Code::new(patcher.game.exheader());
-    let actor_names = actor_names(&mut code);
+    let actor_names = actor_names(&mut code, patcher.game.region());
     let item_names = item_names(&mut code);
 
-    do_dev_stuff(&mut code, seed_info);
+    do_dev_stuff(&mut code, seed_info, patcher.game.region());
 
-    warp(&mut code);
+    warp(&mut code, patcher.game.region());
     //shield_without_sword(&mut code);
     // swordless_beams(&mut code);
-    quake(&mut code);
+    quake(&mut code, patcher.game.region());
 
     // Start with Pouch
     if seed_info.settings.start_with_pouch {
-        code.text().patch(0x47b28c, [mov(R0, 1)]);
+        match patcher.game.region() {
+            RomRegion::US => code.text().patch(0x47b28c, [mov(R0, 1)]),
+            RomRegion::EU => code.text().patch(0x47b264, [mov(R0, 1)]),
+        };
     }
 
     // Enable Y Button
-    code.text().patch(0x47B2C8, [mov(R0, 1)]);
+    match patcher.game.region() {
+        RomRegion::US => code.text().patch(0x47B2C8, [mov(R0, 1)]),
+        RomRegion::EU => code.text().patch(0x47B2A0, [mov(R0, 1)]),
+    };
 
     // instant text
     code.overwrite(0x17A430, [0xFF]);
 
-    rental_items(&mut code);
-    progressive_items(&mut code);
-    bracelet(&mut code, &seed_info.settings);
-    ore_progress(&mut code);
-    merchant(&mut code);
-    configure_pedestal_requirements(&mut code, &seed_info.settings);
-    night_mode(&mut code, &seed_info.settings);
+    rental_items(&mut code, patcher.game.region());
+    progressive_items(&mut code, patcher.game.region());
+    bracelet(&mut code, &seed_info.settings, patcher.game.region());
+    ore_progress(&mut code, patcher.game.region());
+    merchant(&mut code, patcher.game.region());
+    configure_pedestal_requirements(&mut code, &seed_info.settings, patcher.game.region());
+    night_mode(&mut code, &seed_info.settings, patcher.game.region());
     show_hint_ghosts(&mut code);
-    mother_maiamai(&mut code, &seed_info.layout, &item_names);
-    pause_menu_warp(&mut code);
-    purple_potion_bottles(&mut code, &seed_info.settings);
+    mother_maiamai(&mut code, &seed_info.layout, &item_names, patcher.game.region());
+    pause_menu_warp(&mut code, patcher.game.region());
+    purple_potion_bottles(&mut code, &seed_info.settings, patcher.game.region());
     // golden_bees(&mut code);
     // file_select_screen_background(&mut code);
 
     // Show Maiamai on Gear Screen even when you have zero
-    code.patch(0x426490, [b(0x4264a0)]);
+    match patcher.game.region() {
+        RomRegion::US => code.patch(0x426490, [b(0x4264a0)]),
+        RomRegion::EU => code.patch(0x426470, [b(0x426480)]),
+    };
 
     // Correct Master Ore display count
-    code.patch(0x4637b4, [b(0x463800)]);
+    match patcher.game.region() {
+        RomRegion::US => code.patch(0x4637b4, [b(0x463800)]),
+        RomRegion::EU => code.patch(0x46378c, [b(0x4637d8)]),
+    };
 
     // Tear down Barrier automatically when obtaining Tempered Sword
     let set_barrier_flag = code.text().define([
@@ -204,21 +223,41 @@ pub fn create(patcher: &Patcher, seed_info: &SeedInfo) -> Code {
         ldr(R1, Flag::HC_BARRIER.get_value()),
         mov(R2, 1),
         ldr(R0, (R0, 0)),
-        bl(0x4CDF40),
+        match patcher.game.region() {
+            RomRegion::US => bl(0x4CDF40),
+            RomRegion::EU => bl(0x4CDF18),
+        },
         mov(R0, 1),
         pop([R4, R5, R6, PC]),
     ]);
-    code.patch(0x344E7C, [b(set_barrier_flag)]);
+    match patcher.game.region() {
+        RomRegion::US => code.patch(0x344E7C, [b(set_barrier_flag)]),
+        RomRegion::EU => code.patch(0x344E58, [b(set_barrier_flag)]),
+    };
 
     // don't lose Bow of Light on defeat
-    code.patch(0x502DD8, [mov(R0, R0)]);
+    match patcher.game.region() {
+        RomRegion::US => code.patch(0x502DD8, [mov(R0, R0)]),
+        RomRegion::EU => code.patch(0x502DB0, [mov(R0, R0)]),
+    };
 
     // Infinite Scoot Fruit
-    code.patch(0x38D59C, [mov(R2, 0x2)]);
+    match patcher.game.region() {
+        RomRegion::US => code.patch(0x38D59C, [mov(R2, 0x2)]),
+        RomRegion::EU => code.patch(0x38D578, [mov(R2, 0x2)]),
+    };
 
     // Infinite Foul Fruit
-    code.patch(0x38D728, [mov(R0, R0)]); // Don't clear equipped slot
-    code.patch(0x38D734, [mov(R2, 0x2)]); // Keep fruit
+    match patcher.game.region() {
+        RomRegion::US => {
+            code.patch(0x38D728, [mov(R0, R0)]); // Don't clear equipped slot
+            code.patch(0x38D734, [mov(R2, 0x2)]); // Keep fruit
+        },
+        RomRegion::EU => {
+            code.patch(0x38D704, [mov(R0, R0)]); // Don't clear equipped slot
+            code.patch(0x38D710, [mov(R2, 0x2)]); // Keep fruit
+        },
+    };
 
     // blacksmith
     let get_sword_flag1 = code.text().define([
@@ -226,7 +265,10 @@ pub fn create(patcher: &Patcher, seed_info: &SeedInfo) -> Code {
         ldr(R0, EVENT_FLAG_PTR),
         ldr(R0, (R0, 0)),
         ldr(R1, 0x375),
-        bl(0x584A80),
+        match patcher.game.region() {
+            RomRegion::US => bl(0x584A80),
+            RomRegion::EU => bl(0x584A58),
+        },
         add(R0, R0, 3),
         pop([PC]),
     ]);
@@ -236,12 +278,18 @@ pub fn create(patcher: &Patcher, seed_info: &SeedInfo) -> Code {
         ldr(R0, (R0, 0)),
         mov(R1, 0xCE),
         mov(R2, 3),
-        bl(0x5822A0),
+        match patcher.game.region() {
+            RomRegion::US => bl(0x5822A0),
+            RomRegion::EU => bl(0x582278),
+        },
         add(R0, R0, 4),
         pop([PC]),
     ]);
     code.patch(0x243DE8, [bl(get_sword_flag1)]);
-    code.patch(0x30E160, [bl(get_sword_flag2)]);
+    match patcher.game.region() {
+        RomRegion::US => code.patch(0x30E160, [bl(get_sword_flag2)]),
+        RomRegion::EU => code.patch(0x30E13C, [bl(get_sword_flag2)]),
+    };
 
     let overwrite_rentals = code.text;
     let mut actor_offset = 0;
@@ -262,11 +310,20 @@ pub fn create(patcher: &Patcher, seed_info: &SeedInfo) -> Code {
         code.overwrite(name_offset, name.to_le_bytes());
         name_offset += 4;
     }
-    code.text().define([b(0x5D68F4)]);
-    code.patch(0x5D688C, [b(overwrite_rentals)]);
+    match patcher.game.region() {
+        RomRegion::US => code.text().define([b(0x5D68F4)]),
+        RomRegion::EU => code.text().define([b(0x5D68CC)]),
+    };
+    match patcher.game.region() {
+        RomRegion::US => code.patch(0x5D688C, [b(overwrite_rentals)]),
+        RomRegion::EU => code.patch(0x5D6864, [b(overwrite_rentals)]),
+    };
     let rentals = patcher.rentals.iter().map(|item| *item as u8).collect::<Vec<_>>();
     code.overwrite(0x6A0348, rentals);
-    let sold_out = 0x5D6B84u32;
+    let sold_out: u32 = match patcher.game.region() {
+        RomRegion::US => 0x5D6B84,
+        RomRegion::EU => 0x5D6B5C,
+    };
     let merchant_left = patcher.merchant[0];
     let merchant_left_actor = code.rodata().declare(VTABLE_STRING.to_le_bytes());
     code.rodata().declare(actor_names.get(&merchant_left).unwrap().to_le_bytes());
@@ -283,13 +340,19 @@ pub fn create(patcher: &Patcher, seed_info: &SeedInfo) -> Code {
     code.overwrite(0x6A03E8, [merchant_right as u8]);
 
     // Hearts
-    code.patch(0x33497C, [ldr(R1, (R4, 0x2E)), mov(R0, R0)]);
+    match patcher.game.region() {
+        RomRegion::US => code.patch(0x33497C, [ldr(R1, (R4, 0x2E)), mov(R0, R0)]),
+        RomRegion::EU => code.patch(0x334958, [ldr(R1, (R4, 0x2E)), mov(R0, R0)]),
+    };
 
     // Keys
     code.patch(0x192E58, [ldr(R1, (R4, 0x2E))]);
 
     // Maiamai
-    code.patch(0x514254, [ldr(R1, (R4, 0x30))]);
+    match patcher.game.region() {
+        RomRegion::US => code.patch(0x514254, [ldr(R1, (R4, 0x30))]),
+        RomRegion::EU => code.patch(0x51422C, [ldr(R1, (R4, 0x30))]),
+    };
 
     // Silver and Gold Rupees
     code.patch(0x1D6DBC, [ldr(R1, (R4, 0x2E)), mov(R0, R0)]);
@@ -300,10 +363,23 @@ pub fn create(patcher: &Patcher, seed_info: &SeedInfo) -> Code {
         // This patch is only applied when the Milk is shuffled in the rando instead of the Letter.
         // If it's desired to have both shuffled at once then this code needs to be re-written.
 
-        code.patch(0x3455B8, [b(0x345578)]); // Repurpose Letter In a Bottle code
-        code.patch(0x255930, [mov(R0, 0xD)]); // Give Milk instead of Letter
+        match patcher.game.region() {
+            RomRegion::US => {
+                code.patch(0x3455B8, [b(0x345578)]); // Repurpose Letter In a Bottle code
+                code.patch(0x255930, [mov(R0, 0xD)]); // Give Milk instead of Letter
+            },
+            RomRegion::EU => {
+                code.patch(0x345594, [b(0x345554)]); // Repurpose Letter In a Bottle code
+                code.patch(0x255958, [mov(R0, 0xD)]); // Give Milk instead of Letter
+            },
+        }
     }
-    code.patch(0x345588, [b(0x34559C)]); // Skip setting Flag 916
+
+    // Skip setting Flag 916
+    match patcher.game.region() {
+        RomRegion::US => code.patch(0x345588, [b(0x34559C)]),
+        RomRegion::EU => code.patch(0x345564, [b(0x345578)]),
+    };
 
     // Pendant Redirection - Get destination coordinates from Byaml
     let redirect_pendants = code.text().define([
@@ -325,29 +401,57 @@ pub fn create(patcher: &Patcher, seed_info: &SeedInfo) -> Code {
         mov(R2, 1),
         ldr(R1, Flag::EASTERN_COMPLETE.get_value()),
         ldr(R0, (R0, 0)),
-        bl(FN_SET_EVENT_FLAG),
-        b(0x344F00),
+        match patcher.game.region() {
+            RomRegion::US => bl(FN_SET_EVENT_FLAG_US),
+            RomRegion::EU => bl(FN_SET_EVENT_FLAG_EU),
+        },
+        match patcher.game.region() {
+            RomRegion::US => b(0x344F00),
+            RomRegion::EU => b(0x344EDC),
+        },
     ]);
-    code.patch(0x344d9c, [b(set_courage_flag)]);
+    match patcher.game.region() {
+        RomRegion::US => code.patch(0x344d9c, [b(set_courage_flag)]),
+        RomRegion::EU => code.patch(0x344d78, [b(set_courage_flag)]),
+    };
 
     // Great Spin Fix to work with and not disappear when obtaining Forgotten Sword
-    let great_spin_fix =
-        code.text().define([ldr(R0, (R4, 0x4E4)), cmp(R0, 0x3), mov(R2, 0x2).ne(), mov(R2, 0x3).eq(), b(0x344df0)]);
-    code.patch(0x344dec, [b(great_spin_fix)]);
+    let great_spin_fix = code.text().define([
+        ldr(R0, (R4, 0x4E4)),
+        cmp(R0, 0x3),
+        mov(R2, 0x2).ne(),
+        mov(R2, 0x3).eq(),
+        match patcher.game.region() {
+            RomRegion::US => b(0x344df0),
+            RomRegion::EU => b(0x344dcc),
+        },
+    ]);
+    match patcher.game.region() {
+        RomRegion::US => code.patch(0x344dec, [b(great_spin_fix)]),
+        RomRegion::EU => code.patch(0x344dc8, [b(great_spin_fix)]),
+    };
 
     code
 }
 
 #[allow(unused_variables)]
-fn do_dev_stuff(code: &mut Code, seed_info: &SeedInfo) {
+fn do_dev_stuff(code: &mut Code, seed_info: &SeedInfo, region: RomRegion) {
     if !seed_info.settings.dev_mode {
         return;
     }
 
     // Make each Maiamai worth more (for testing only)
     let amount = 25;
-    code.patch(0x2559bc, [add(R1, R1, amount)]);
-    code.patch(0x2559c0, [add(R2, R2, amount)]);
+    match region {
+        RomRegion::US => {
+            code.patch(0x2559bc, [add(R1, R1, amount)]);
+            code.patch(0x2559c0, [add(R2, R2, amount)]);
+        },
+        RomRegion::EU => {
+            code.patch(0x2559e4, [add(R1, R1, amount)]);
+            code.patch(0x2559e8, [add(R2, R2, amount)]);
+        },
+    }
 }
 
 /// File Select Screen Background
@@ -365,7 +469,7 @@ fn file_select_screen_background(code: &mut Code) {
     code.text().patch(0x29d284, [b(reset_r6)]);
 }
 
-fn warp(code: &mut Code) {
+fn warp(code: &mut Code, region: RomRegion) {
     // code.text().patch(0x441ec0, [b(0x442044)]); // Makes quit identical to cancel!
     // code.text().patch(0x4424b0, [mov(R0, R0)]); // Remove SE from "Quit" button!
 
@@ -388,16 +492,23 @@ fn warp(code: &mut Code) {
         // mov(R1, SP),
         // ldr(R0, (R0, 0x0)),
         // bl(0x004ef418), // LoadScene
-        b(0x4424e0), // Acts like player hit the "Continue" button
+        // Acts like player hit the "Continue" button
+        match region {
+            RomRegion::US => b(0x4424e0),
+            RomRegion::EU => b(0x4424c0),
+        },
     ]);
-    code.text().patch(0x442498, [b(kill_player)]);
+    match region {
+        RomRegion::US => code.text().patch(0x442498, [b(kill_player)]),
+        RomRegion::EU => code.text().patch(0x442478, [b(kill_player)]),
+    };
 
     // code.text().patch(0x12cc7c, [mov(R0, R0)]); // Don't play SE_S_SELECT sound effect when hit continue button
     // Continue button sets: FUN_002317c0(0x3f800000,param_1 + 0x50);
 }
 
 /// Create new item that sets Flag 510
-fn quake(code: &mut Code) {
+fn quake(code: &mut Code, region: RomRegion) {
     let earthquake = code.text().define([
         // TODO Play Earthquake Noise:
         // 0x6f8f24 - SE_EVENT_EARTQAUAKE
@@ -408,14 +519,24 @@ fn quake(code: &mut Code) {
         mov(R2, 0x1),
         ldr(R1, Flag::QUAKE.get_value()), // Quake
         ldr(R0, (R0, 0x0)),
-        bl(FN_SET_EVENT_FLAG),
-        b(0x344f00),
+        match region {
+            RomRegion::US => bl(FN_SET_EVENT_FLAG_US),
+            RomRegion::EU => bl(FN_SET_EVENT_FLAG_EU),
+        },
+        match region {
+            RomRegion::US => b(0x344f00),
+            RomRegion::EU => b(0x344edc),
+        },
     ]);
-    code.addr(0x344848, earthquake); // Empty -> Quake
+    // Empty -> Quake
+    match region {
+        RomRegion::US => code.addr(0x344848, earthquake),
+        RomRegion::EU => code.addr(0x344824, earthquake),
+    };
 }
 
 /// Mother Maiamai Stuff
-fn mother_maiamai(code: &mut Code, layout: &Layout, item_names: &HashMap<Item, u32>) {
+fn mother_maiamai(code: &mut Code, layout: &Layout, item_names: &HashMap<Item, u32>, region: RomRegion) {
     /// Use flags 302-311 (not 305) to record whether we've picked up that item's upgrade.
     /// The "inventory index" (see table: 0x6a6170) of each item gets added to this:
     /// * 0x4 = Bow
@@ -439,11 +560,25 @@ fn mother_maiamai(code: &mut Code, layout: &Layout, item_names: &HashMap<Item, u
         ldr(R0, MAP_MANAGER_INSTANCE),
         ldr(R0, (R0, 0x0)),
         ldr(R0, (R0, 0x40)),
-        bl(FN_GET_LOCAL_FLAG_3),
-        b(0x30fdc4),
+        match region {
+            RomRegion::US => bl(FN_GET_LOCAL_FLAG_3_US),
+            RomRegion::EU => bl(FN_GET_LOCAL_FLAG_3_EU),
+        },
+        match region {
+            RomRegion::US => b(0x30fdc4),
+            RomRegion::EU => b(0x30fda0),
+        },
     ]);
-    code.patch(0x30fdb8, [b(fn_get_maiamai_flag3)]);
-    code.patch(0x30fdc4, [cmp(R0, 0x0)]);
+    match region {
+        RomRegion::US => {
+            code.patch(0x30fdb8, [b(fn_get_maiamai_flag3)]);
+            code.patch(0x30fdc4, [cmp(R0, 0x0)]);
+        },
+        RomRegion::EU => {
+            code.patch(0x30fd94, [b(fn_get_maiamai_flag3)]);
+            code.patch(0x30fda0, [cmp(R0, 0x0)]);
+        },
+    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -453,11 +588,25 @@ fn mother_maiamai(code: &mut Code, layout: &Layout, item_names: &HashMap<Item, u
         ldr(R0, MAP_MANAGER_INSTANCE),
         ldr(R0, (R0, 0x0)),
         ldr(R0, (R0, 0x40)),
-        bl(FN_GET_LOCAL_FLAG_3),
-        b(0x30fee4),
+        match region {
+            RomRegion::US => bl(FN_GET_LOCAL_FLAG_3_US),
+            RomRegion::EU => bl(FN_GET_LOCAL_FLAG_3_EU),
+        },
+        match region {
+            RomRegion::US => b(0x30fee4),
+            RomRegion::EU => b(0x30fec0),
+        },
     ]);
-    code.patch(0x30fed8, [b(thing)]);
-    code.patch(0x30fee4, [cmp(R0, 0x1)]);
+    match region {
+        RomRegion::US => {
+            code.patch(0x30fed8, [b(thing)]);
+            code.patch(0x30fee4, [cmp(R0, 0x1)]);
+        },
+        RomRegion::EU => {
+            code.patch(0x30feb4, [b(thing)]);
+            code.patch(0x30fec0, [cmp(R0, 0x1)]);
+        },
+    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -469,23 +618,45 @@ fn mother_maiamai(code: &mut Code, layout: &Layout, item_names: &HashMap<Item, u
      *
      * For randomizer, we need to replace `num_nice_items_obtained` with a count of our current flags that have been set.
      */
-    code.patch(0x30fdf8, [b(0x30fe0c)]); // Skip Great Spin item check
+    // Skip Great Spin item check
+    match region {
+        RomRegion::US => code.patch(0x30fdf8, [b(0x30fe0c)]),
+        RomRegion::EU => code.patch(0x30fdd4, [b(0x30fde8)]),
+    };
     let fn_get_maiamai_flag3 = code.text().define([
         add(R1, R4, NEW_LOCAL_FLAGS_START_IDX),
         ldr(R0, MAP_MANAGER_INSTANCE),
         ldr(R0, (R0, 0x0)),
         ldr(R0, (R0, 0x40)),
-        bl(FN_GET_LOCAL_FLAG_3),
-        b(0x30fe48),
+        match region {
+            RomRegion::US => bl(FN_GET_LOCAL_FLAG_3_US),
+            RomRegion::EU => bl(FN_GET_LOCAL_FLAG_3_EU),
+        },
+        match region {
+            RomRegion::US => b(0x30fe48),
+            RomRegion::EU => b(0x30fe24),
+        },
     ]);
-    code.patch(0x30fe3c, [b(fn_get_maiamai_flag3)]);
-    code.patch(0x30fe48, [cmp(R0, 0x1)]);
-    code.patch(0x30fe4c, [add(R5, R5, 0x1).eq()]);
+    match region {
+        RomRegion::US => {
+            code.patch(0x30fe3c, [b(fn_get_maiamai_flag3)]);
+            code.patch(0x30fe48, [cmp(R0, 0x1)]);
+            code.patch(0x30fe4c, [add(R5, R5, 0x1).eq()]);
+        },
+        RomRegion::EU => {
+            code.patch(0x30fe18, [b(fn_get_maiamai_flag3)]);
+            code.patch(0x30fe24, [cmp(R0, 0x1)]);
+            code.patch(0x30fe28, [add(R5, R5, 0x1).eq()]);
+        },
+    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // Skip FUN_00583b1c - Suck/Spit Old/New Item Animation
-    code.patch(0x30ffe4, [mov(R0, 1)]);
+    match region {
+        RomRegion::US => code.patch(0x30ffe4, [mov(R0, 1)]),
+        RomRegion::EU => code.patch(0x30ffc0, [mov(R0, 1)]),
+    };
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -495,19 +666,42 @@ fn mother_maiamai(code: &mut Code, layout: &Layout, item_names: &HashMap<Item, u
         ldr(R0, MAP_MANAGER_INSTANCE),
         ldr(R0, (R0, 0x0)),
         ldr(R0, (R0, 0x40)),
-        bl(FN_GET_LOCAL_FLAG_3),
+        match region {
+            RomRegion::US => bl(FN_GET_LOCAL_FLAG_3_US),
+            RomRegion::EU => bl(FN_GET_LOCAL_FLAG_3_EU),
+        },
         cmp(R0, 0x0),
-        b(0x46d848).eq(),
-        b(0x46d888),
+        match region {
+            RomRegion::US => b(0x46d848).eq(),
+            RomRegion::EU => b(0x46d820).eq(),
+        },
+        match region {
+            RomRegion::US => b(0x46d888),
+            RomRegion::EU => b(0x46d860),
+        },
     ]);
-    code.patch(0x46d840, [b(fn_get_maiamai_flag3).ge()]);
-    code.patch(0x46d844, [b(0x46d888)]);
+    match region {
+        RomRegion::US => {
+            code.patch(0x46d840, [b(fn_get_maiamai_flag3).ge()]);
+            code.patch(0x46d844, [b(0x46d888)]);
+        },
+        RomRegion::EU => {
+            code.patch(0x46d818, [b(fn_get_maiamai_flag3).ge()]);
+            code.patch(0x46d81c, [b(0x46d860)]);
+        },
+    }
 
     // Allow getting upgrades if you already have the Nice Item for this slot
-    code.patch(0x30feb4, [mov(R0, 0).eq()]);
+    match region {
+        RomRegion::US => code.patch(0x30feb4, [mov(R0, 0).eq()]),
+        RomRegion::EU => code.patch(0x30fe90, [mov(R0, 0).eq()]),
+    };
 
     // Skip Sound: SE_ShopManKinSta_VACUUM
-    code.patch(0x3105c8, [mov(R0, 0x0)]);
+    match region {
+        RomRegion::US => code.patch(0x3105c8, [mov(R0, 0x0)]),
+        RomRegion::EU => code.patch(0x3105a4, [mov(R0, 0x0)]),
+    };
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -535,17 +729,30 @@ fn mother_maiamai(code: &mut Code, layout: &Layout, item_names: &HashMap<Item, u
     let tornado_rod = layout.get_unsafe("Maiamai Tornado Rod Upgrade", regions::hyrule::lake::cave::SUBREGION);
     let sand_rod = layout.get_unsafe("Maiamai Sand Rod Upgrade", regions::hyrule::lake::cave::SUBREGION);
 
-    for (offset, addr, item) in [
-        (304, 0x3100f8, bow),
-        (303, 0x3100f0, boomerang),
-        (311, 0x310128, hookshot),
-        (306, 0x310100, hammer),
-        (302, 0x310130, bombs),
-        (308, 0x310110, fire_rod),
-        (309, 0x310118, ice_rod),
-        (310, 0x310120, tornado_rod),
-        (307, 0x310108, sand_rod),
-    ] {
+    for (offset, addr, item) in match region {
+        RomRegion::US => [
+            (304, 0x3100f8, bow),
+            (303, 0x3100f0, boomerang),
+            (311, 0x310128, hookshot),
+            (306, 0x310100, hammer),
+            (302, 0x310130, bombs),
+            (308, 0x310110, fire_rod),
+            (309, 0x310118, ice_rod),
+            (310, 0x310120, tornado_rod),
+            (307, 0x310108, sand_rod),
+        ],
+        RomRegion::EU => [
+            (304, 0x3100d4, bow),
+            (303, 0x3100cc, boomerang),
+            (311, 0x310104, hookshot),
+            (306, 0x3100dc, hammer),
+            (302, 0x31010c, bombs),
+            (308, 0x3101ec, fire_rod),
+            (309, 0x3100f4, ice_rod),
+            (310, 0x3100fc, tornado_rod),
+            (307, 0x3100e4, sand_rod),
+        ],
+    } {
         let fn_set_local3_flag_for_this_upgrade = code.text().define([
             ldr(R0, MAP_MANAGER_INSTANCE),
             ldr(R0, (R0, 0x0)),
@@ -554,7 +761,10 @@ fn mother_maiamai(code: &mut Code, layout: &Layout, item_names: &HashMap<Item, u
             mov(R2, 0x1),
             bl(FN_SET_LOCAL_FLAG_3),
             mov(R0, item.as_item_index()),
-            b(0x310134),
+            match region {
+                RomRegion::US => b(0x310134),
+                RomRegion::EU => b(0x310110),
+            },
         ]);
         code.patch(addr, [b(fn_set_local3_flag_for_this_upgrade)]);
     }
@@ -586,19 +796,25 @@ fn mother_maiamai(code: &mut Code, layout: &Layout, item_names: &HashMap<Item, u
         pop([R1, PC]),
     ]);
 
-    code.patch(0x46d858, [bl(fn_get_maiamai_item_name)]);
+    match region {
+        RomRegion::US => code.patch(0x46d858, [bl(fn_get_maiamai_item_name)]),
+        RomRegion::EU => code.patch(0x46d830, [bl(fn_get_maiamai_item_name)]),
+    };
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 }
 
-fn pause_menu_warp(code: &mut Code) {
+fn pause_menu_warp(code: &mut Code, region: RomRegion) {
     // Pause Menu...?
     // code.patch(0x441ee8, [mov(R0, R0)]); // Don't call function to return to FSS?
     // code.patch(0x441eec, [mov(R0, R0)]); // Don't call function to return to FSS?
 
     let _fn_load_scene_links_house = code.text().define([
         mov(R0, 0x0),
-        bl(0x4eefa0),
+        match region {
+            RomRegion::US => bl(0x4eefa0),
+            RomRegion::EU => bl(0x4eef78),
+        },
         mov(R0, 0x1), // ???
         strb(R0, (SP, 0xA)),
         mov(R0, 0x2), // scene = IndoorLight
@@ -612,8 +828,15 @@ fn pause_menu_warp(code: &mut Code) {
         mov(R1, SP),
         ldr(R0, 0x709df8),
         // ldr(R0, (R0, 0x0)),
-        bl(0x4ef418), // Load Scene Function
-        b(0x441eec),
+        // Load Scene Function
+        match region {
+            RomRegion::US => bl(0x4ef418),
+            RomRegion::EU => bl(0x4ef3f0),
+        },
+        match region {
+            RomRegion::US => b(0x441eec),
+            RomRegion::EU => b(0x441ecc),
+        },
     ]);
 
     // code.patch(0x441ee8, [b(fn_load_scene_links_house)]);
@@ -629,9 +852,12 @@ fn pause_menu_warp(code: &mut Code) {
     // code.patch(0x0, 0x0);
 }
 
-fn purple_potion_bottles(code: &mut Code, settings: &Settings) {
+fn purple_potion_bottles(code: &mut Code, settings: &Settings, region: RomRegion) {
     if settings.purple_potion_bottles {
-        code.patch(0x255210, [mov(R1, 0x3)]);
+        match region {
+            RomRegion::US => code.patch(0x255210, [mov(R1, 0x3)]),
+            RomRegion::EU => code.patch(0x255238, [mov(R1, 0x3)]),
+        };
     }
 }
 
@@ -656,16 +882,28 @@ fn show_hint_ghosts(code: &mut Code) {
     code.patch(0x1cbf9c, [mov(R2, 0x0), b(0x1cbfac)]);
 }
 
-fn night_mode(code: &mut Code, settings: &Settings) {
+fn night_mode(code: &mut Code, settings: &Settings, region: RomRegion) {
     if settings.night_mode {
         // Keeps Flag 964 from being unset
-        code.patch(0x3a8624, [mov(R2, 0x1)]);
+        match region {
+            RomRegion::US => code.patch(0x3a8624, [mov(R2, 0x1)]),
+            RomRegion::EU => code.patch(0x3a8600, [mov(R2, 0x1)]),
+        };
     }
 }
 
-fn configure_pedestal_requirements(code: &mut Code, settings: &Settings) {
+fn configure_pedestal_requirements(code: &mut Code, settings: &Settings, region: RomRegion) {
     const FLAG_PEDESTAL: u32 = 375;
     const RETURN_LABEL: u32 = 0x1439c8;
+
+    let fn_get_event_flag = match region {
+        RomRegion::US => FN_GET_EVENT_FLAG_US,
+        RomRegion::EU => FN_GET_EVENT_FLAG_EU,
+    };
+    let fn_set_event_flag = match region {
+        RomRegion::US => FN_SET_EVENT_FLAG_US,
+        RomRegion::EU => FN_SET_EVENT_FLAG_EU,
+    };
 
     let ped_instructions = match settings.ped_requirement {
         Vanilla => {
@@ -674,14 +912,14 @@ fn configure_pedestal_requirements(code: &mut Code, settings: &Settings) {
                 ldr(R0, EVENT_FLAG_PTR),
                 ldr(R0, (R0, 0x0)),
                 ldr(R1, prize_flag(PendantOfPower.into()).get_value() as u32),
-                bl(FN_GET_EVENT_FLAG),
+                bl(fn_get_event_flag),
                 cmp(R0, 0x0),
                 b(RETURN_LABEL).eq(),
                 // Wisdom
                 ldr(R0, EVENT_FLAG_PTR),
                 ldr(R0, (R0, 0x0)),
                 ldr(R1, prize_flag(PendantOfWisdom.into()).get_value() as u32),
-                bl(FN_GET_EVENT_FLAG),
+                bl(fn_get_event_flag),
                 cmp(R0, 0x0),
                 b(RETURN_LABEL).eq(),
                 // Set Flag
@@ -689,7 +927,7 @@ fn configure_pedestal_requirements(code: &mut Code, settings: &Settings) {
                 mov(R2, 0x1),
                 ldr(R1, FLAG_PEDESTAL),
                 ldr(R0, (R0, 0x0)),
-                bl(FN_SET_EVENT_FLAG),
+                bl(fn_set_event_flag),
                 b(RETURN_LABEL),
             ])
         },
@@ -699,21 +937,21 @@ fn configure_pedestal_requirements(code: &mut Code, settings: &Settings) {
                 ldr(R0, EVENT_FLAG_PTR),
                 ldr(R0, (R0, 0x0)),
                 ldr(R1, prize_flag(Randomizable::Item(PendantOfPower)).get_value() as u32),
-                bl(FN_GET_EVENT_FLAG),
+                bl(fn_get_event_flag),
                 cmp(R0, 0x0),
                 b(RETURN_LABEL).eq(),
                 // Wisdom
                 ldr(R0, EVENT_FLAG_PTR),
                 ldr(R0, (R0, 0x0)),
                 ldr(R1, prize_flag(Randomizable::Item(PendantOfWisdom)).get_value() as u32),
-                bl(FN_GET_EVENT_FLAG),
+                bl(fn_get_event_flag),
                 cmp(R0, 0x0),
                 b(RETURN_LABEL).eq(),
                 // Courage
                 ldr(R0, EVENT_FLAG_PTR),
                 ldr(R0, (R0, 0x0)),
                 ldr(R1, prize_flag(Randomizable::Item(PendantOfCourage)).get_value() as u32),
-                bl(FN_GET_EVENT_FLAG),
+                bl(fn_get_event_flag),
                 cmp(R0, 0x0),
                 b(RETURN_LABEL).eq(),
                 // Set Flag
@@ -721,7 +959,7 @@ fn configure_pedestal_requirements(code: &mut Code, settings: &Settings) {
                 mov(R2, 0x1),
                 ldr(R1, FLAG_PEDESTAL),
                 ldr(R0, (R0, 0x0)),
-                bl(FN_SET_EVENT_FLAG),
+                bl(fn_set_event_flag),
                 b(RETURN_LABEL),
             ])
         },
@@ -729,9 +967,12 @@ fn configure_pedestal_requirements(code: &mut Code, settings: &Settings) {
     code.patch(0x143968, [b(ped_instructions)]);
 }
 
-fn merchant(code: &mut Code) {
+fn merchant(code: &mut Code, region: RomRegion) {
     let get_merchant_event_flag =
-        code.text().define([ldr(R0, EVENT_FLAG_PTR), ldr(R0, (R0, 0)), ldr(R1, 0x143), b(FN_GET_EVENT_FLAG)]);
+        code.text().define([ldr(R0, EVENT_FLAG_PTR), ldr(R0, (R0, 0)), ldr(R1, 0x143), match region {
+            RomRegion::US => b(FN_GET_EVENT_FLAG_US),
+            RomRegion::EU => b(FN_GET_EVENT_FLAG_EU),
+        }]);
     code.patch(0x19487C, [bl(get_merchant_event_flag)]);
 }
 
@@ -762,7 +1003,7 @@ fn swordless_beams(code: &mut Code) {
     ]);
 }
 
-fn rental_items(code: &mut Code) {
+fn rental_items(code: &mut Code, region: RomRegion) {
     let map_rental_item = 0x194BFC;
     let flag_offset = 0xF0;
     let getter = code.text().define([
@@ -771,16 +1012,29 @@ fn rental_items(code: &mut Code) {
         ldr(R0, (R0, 0)),
         add(R1, R1, flag_offset),
         mov(R2, 3),
-        bl(0x5822A0),
+        match region {
+            RomRegion::US => bl(0x5822A0),
+            RomRegion::EU => bl(0x582278),
+        },
         cmp(R0, 1),
         mov(R0, 2).eq(),
         pop([PC]),
     ]);
     code.patch(0x194728, [bl(getter)]);
-    code.patch(0x311CE4, [bl(getter)]);
-    code.patch(0x311EAC, [bl(getter)]);
-    code.patch(0x31261C, [bl(getter)]);
-    code.patch(0x312660, [bl(getter)]);
+    match region {
+        RomRegion::US => {
+            code.patch(0x311CE4, [bl(getter)]);
+            code.patch(0x311EAC, [bl(getter)]);
+            code.patch(0x31261C, [bl(getter)]);
+            code.patch(0x312660, [bl(getter)]);
+        },
+        RomRegion::EU => {
+            code.patch(0x311CC0, [bl(getter)]);
+            code.patch(0x311E88, [bl(getter)]);
+            code.patch(0x3125F8, [bl(getter)]);
+            code.patch(0x31263C, [bl(getter)]);
+        },
+    };
     let setter = code.text().define([
         ldrb(R0, (R4, 0x9D0)),
         bl(map_rental_item),
@@ -791,14 +1045,26 @@ fn rental_items(code: &mut Code) {
         ldr(R0, (R0, 0)),
         mov(R2, 3),
         mov(R3, 1),
-        bl(0x4AD9E8),
-        b(0x652E70),
+        match region {
+            RomRegion::US => bl(0x4AD9E8),
+            RomRegion::EU => bl(0x4AD9C0),
+        },
+        match region {
+            RomRegion::US => b(0x652E70),
+            RomRegion::EU => b(0x652E48),
+        },
     ]);
-    code.patch(0x652E34, [b(setter).eq()]);
+    match region {
+        RomRegion::US => code.patch(0x652E34, [b(setter).eq()]),
+        RomRegion::EU => code.patch(0x652E0C, [b(setter).eq()]),
+    };
 }
 
-fn progressive_items(code: &mut Code) {
-    let return_label = 0x2922C4;
+fn progressive_items(code: &mut Code, region: RomRegion) {
+    let return_label = match region {
+        RomRegion::US => 0x2922C4,
+        RomRegion::EU => 0x2922EC,
+    };
     /*let first_sword = code.text().define([
         ldr(R0, (R0, 0x4C4)),
         cmp(R0, 0),
@@ -969,14 +1235,25 @@ fn progressive_items(code: &mut Code) {
         b(return_label),
     ]);
 
-    code.patch(0x2922A0, [b(progressive_charm)]);
+    match region {
+        RomRegion::US => code.patch(0x2922A0, [b(progressive_charm)]),
+        RomRegion::EU => code.patch(0x2922C8, [b(progressive_charm)]),
+    };
 }
 
-fn bracelet(code: &mut Code, settings: &Settings) {
+fn bracelet(code: &mut Code, settings: &Settings, region: RomRegion) {
     if settings.start_with_merge {
         // Check Flag 1 (always set) instead of Flag 250 to see if we can merge.
-        code.patch(0x4266c8, [mov(R1, 0x1)]);
-        code.patch(0x537c40, [mov(R1, 0x1)]);
+        match region {
+            RomRegion::US => {
+                code.patch(0x4266C8, [mov(R1, 0x1)]);
+                code.patch(0x537c40, [mov(R1, 0x1)]);
+            },
+            RomRegion::EU => {
+                code.patch(0x4266A8, [mov(R1, 0x1)]);
+                code.patch(0x537c18, [mov(R1, 0x1)]);
+            },
+        };
         return;
     }
 
@@ -994,14 +1271,20 @@ fn bracelet(code: &mut Code, settings: &Settings) {
      * player inventory for the Bracelet can never be set to 3. Low priority, but change this.
      */
 
-    let item_set_value = 0x255494;
+    let item_set_value = match region {
+        RomRegion::US => 0x255494,
+        RomRegion::EU => 0x2554BC,
+    };
     let add_ring_hekiga = code.text().define([
         add(R0, R4, 0x400),
         mov(R2, 3),
         mov(R1, 0x17),
         add(R0, R0, 0xC),
         bl(item_set_value),
-        b(0x344F00),
+        match region {
+            RomRegion::US => b(0x344F00),
+            RomRegion::EU => b(0x344EDC),
+        },
     ]);
     code.overwrite(0x3448F4, add_ring_hekiga.to_le_bytes());
     let can_merge = code.text().define([
@@ -1009,18 +1292,29 @@ fn bracelet(code: &mut Code, settings: &Settings) {
         ldr(R0, PLAYER_OBJECT_SINGLETON),
         ldr(R0, (R0, 0)),
         mov(R1, 0x17),
-        bl(FN_GET_ITEM_LEVEL),
+        match region {
+            RomRegion::US => bl(FN_GET_ITEM_LEVEL_US),
+            RomRegion::EU => bl(FN_GET_ITEM_LEVEL_EU),
+        },
         cmp(R0, 3),
         mov(R0, 1).eq(),
         mov(R0, 0).ne(),
         pop([PC]),
     ]);
     code.patch(0x1DCA8C, [bl(can_merge)]);
-    code.patch(0x4266D0, [bl(can_merge)]);
-    code.patch(0x52E654, [bl(can_merge)]);
+    match region {
+        RomRegion::US => {
+            code.patch(0x4266D0, [bl(can_merge)]);
+            code.patch(0x52E654, [bl(can_merge)]);
+        },
+        RomRegion::EU => {
+            code.patch(0x4266B0, [bl(can_merge)]);
+            code.patch(0x52E62C, [bl(can_merge)]);
+        },
+    };
 }
 
-fn ore_progress(code: &mut Code) {
+fn ore_progress(code: &mut Code, region: RomRegion) {
     let get_sword_fake = code.text().define([
         push([R4, LR]),
         mov(R4, 1),
@@ -1029,21 +1323,33 @@ fn ore_progress(code: &mut Code) {
         add(R0, R0, 0x400),
         add(R0, R0, 0x88),
         mov(R1, 0xCE),
-        bl(0x52A05C),
+        match region {
+            RomRegion::US => bl(0x52A05C),
+            RomRegion::EU => bl(0x52A034),
+        },
         add(R4, R4, R0),
         ldr(R0, EVENT_FLAG_PTR),
         ldr(R0, (R0, 0)),
         ldr(R1, 0x375),
-        bl(0x584A80),
+        match region {
+            RomRegion::US => bl(0x584A80),
+            RomRegion::EU => bl(0x584A58),
+        },
         add(R4, R4, R0),
         mov(R0, R4),
         pop([R4, PC]),
     ]);
-    code.patch(0x4637B8, [bl(get_sword_fake)]);
+    match region {
+        RomRegion::US => code.patch(0x4637B8, [bl(get_sword_fake)]),
+        RomRegion::EU => code.patch(0x463790, [bl(get_sword_fake)]),
+    };
 }
 
-fn actor_names(code: &mut Code) -> HashMap<Item, u32> {
-    let mut map = IntoIterator::into_iter(ACTOR_NAME_OFFSETS).collect::<HashMap<_, _>>();
+fn actor_names(code: &mut Code, region: RomRegion) -> HashMap<Item, u32> {
+    let mut map = match region {
+        RomRegion::US => IntoIterator::into_iter(ACTOR_NAME_OFFSETS_US).collect::<HashMap<_, _>>(),
+        RomRegion::EU => IntoIterator::into_iter(ACTOR_NAME_OFFSETS_EU).collect::<HashMap<_, _>>(),
+    };
     map.extend(IntoIterator::into_iter(ACTOR_NAMES).map(|(item, name)| {
         let name = format!("{}\0", name);
         (item, code.rodata().declare(name.as_bytes()))
@@ -1061,7 +1367,7 @@ fn item_names(code: &mut Code) -> HashMap<Item, u32> {
     map
 }
 
-const ACTOR_NAME_OFFSETS: [(Item, u32); 33] = [
+const ACTOR_NAME_OFFSETS_US: [(Item, u32); 33] = [
     (ItemStoneBeauty, 0x5D2060),
     (RupeeR, 0x5D639C),
     (RupeeG, 0x5D639C),
@@ -1095,6 +1401,42 @@ const ACTOR_NAME_OFFSETS: [(Item, u32); 33] = [
     (ItemBowLight, 0x5D776C),
     (HeartContainer, 0x5D7B7C),
     (HeartPiece, 0x5D7B94),
+];
+
+const ACTOR_NAME_OFFSETS_EU: [(Item, u32); 33] = [
+    (ItemStoneBeauty, 0x5D2030),
+    (RupeeR, 0x5D6374),
+    (RupeeG, 0x5D6374),
+    (RupeeB, 0x5D6374),
+    (RupeePurple, 0x5D6374),
+    (RupeeSilver, 0x5D637C),
+    (KeySmall, 0x5D6558),
+    (ItemIceRod, 0x5D6AD4),
+    (ItemSandRod, 0x5D6AE0),
+    (ItemTornadeRod, 0x5D6AF0),
+    (ItemBomb, 0x5D6B00),
+    (ItemFireRod, 0x5D6B08),
+    (ItemHookShot, 0x5D6B18),
+    (ItemBoomerang, 0x5D6B28),
+    (ItemHammer, 0x5D6B38),
+    (ItemBow, 0x5D6B44),
+    (ItemShield, 0x5D6B50),
+    (ItemBottle, 0x5D7020),
+    (Item::HintGlasses, 0x5D7084),
+    (RupeeGold, 0x5D711C),
+    (ItemSwordLv1, 0x5D7150),
+    (ItemSwordLv2, 0x5D7150),
+    (ItemSwordLv3, 0x5D7150),
+    (ItemSwordLv4, 0x5D7150),
+    (LiverPurple, 0x5D7604),
+    (LiverYellow, 0x5D7618),
+    (LiverBlue, 0x5D762C),
+    (MessageBottle, 0x5D7678),
+    (MilkMatured, 0x5D7678),
+    (Item::Pouch, 0x5D770C),
+    (ItemBowLight, 0x5D7744),
+    (HeartContainer, 0x5D7B54),
+    (HeartPiece, 0x5D7B6C),
 ];
 
 const ACTOR_NAMES: [(Item, &str); 44] = [
@@ -1230,13 +1572,20 @@ const ITEM_NAMES: [(Item, &str); 57] = [
 ];
 
 const EVENT_FLAG_PTR: u32 = 0x70B728;
-const FN_GET_ITEM_LEVEL: u32 = 0x55696C;
-const FN_GET_EVENT_FLAG: u32 = 0x584B94;
-const FN_SET_EVENT_FLAG: u32 = 0x4CDF40;
+
+const FN_GET_ITEM_LEVEL_US: u32 = 0x55696C;
+const FN_GET_ITEM_LEVEL_EU: u32 = 0x556944;
+
+const FN_GET_EVENT_FLAG_US: u32 = 0x584B94;
+const FN_GET_EVENT_FLAG_EU: u32 = 0x584B6C;
+
+const FN_SET_EVENT_FLAG_US: u32 = 0x4CDF40;
+const FN_SET_EVENT_FLAG_EU: u32 = 0x4CDF18;
 
 /// r0: PlayerObjectSingleton <br />
 /// r1: flag index
-const FN_GET_LOCAL_FLAG_3: u32 = 0x52a05c;
+const FN_GET_LOCAL_FLAG_3_US: u32 = 0x52a05c;
+const FN_GET_LOCAL_FLAG_3_EU: u32 = 0x52a034;
 
 /// r0: PlayerObjectSingleton <br />
 /// r1: flag index <br />

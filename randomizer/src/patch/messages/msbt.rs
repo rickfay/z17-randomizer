@@ -2,7 +2,7 @@ use std::str::from_utf8;
 
 use byteorder::{ByteOrder, LittleEndian};
 use game::Course;
-use rom::File;
+use rom::{File, RomRegion};
 
 use crate::{Patcher, Result};
 
@@ -282,7 +282,10 @@ struct Txt2Block {
 
 /// Load MSBT File
 pub(crate) fn load_msbt(patcher: &mut Patcher, course: Course, file: &str) -> Result<MsbtFile> {
-    let filename = format!("US_English/{}.msbt", file);
+    let filename = match patcher.game.region() {
+        RomRegion::US => format!("US_English/{}.msbt", file),
+        RomRegion::EU => format!("EU_English/{}.msbt", file),
+    };
     let mut file = patcher
         .language(course)
         .unwrap()
