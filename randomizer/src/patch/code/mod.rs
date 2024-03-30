@@ -1286,7 +1286,10 @@ fn bracelet(code: &mut Code, settings: &Settings, region: RomRegion) {
             RomRegion::EU => b(0x344EDC),
         },
     ]);
-    code.overwrite(0x3448F4, add_ring_hekiga.to_le_bytes());
+    match region {
+        RomRegion::US => code.overwrite(0x3448F4, add_ring_hekiga.to_le_bytes()),
+        RomRegion::EU => code.overwrite(0x3448D0, add_ring_hekiga.to_le_bytes()),
+    }
     let can_merge = code.text().define([
         push([LR]),
         ldr(R0, PLAYER_OBJECT_SINGLETON),
