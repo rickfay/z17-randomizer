@@ -24,7 +24,7 @@ pub fn patch_messages(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()>
     patch_item_names(patcher)?;
     patch_event_item_get(patcher)?;
     patch_collect(patcher, seed_info)?;
-    patch_actions(patcher)?;
+    // patch_actions(patcher)?; This is causing issues for some reason
     patch_ravio(patcher, seed_info)?;
     patch_impa(patcher)?;
     patch_great_rupee_fairy(patcher)?;
