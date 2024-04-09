@@ -37,6 +37,7 @@ pub struct Hints {
 
 /// Basic functionality for all in-game hints.
 pub(crate) trait Hint: Serialize {
+    fn get_ghosts(&self) -> &Vec<HintGhost>;
     fn get_hint(&self) -> String;
     fn get_hint_spoiler(&self) -> String;
 }
@@ -74,6 +75,10 @@ impl LocationHint {
 }
 
 impl Hint for LocationHint {
+    fn get_ghosts(&self) -> &Vec<HintGhost> {
+        &self.ghosts
+    }
+
     fn get_hint(&self) -> String {
         let article = self.item.get_article();
         format!(
@@ -130,6 +135,10 @@ pub struct PathHint {
 }
 
 impl Hint for PathHint {
+    fn get_ghosts(&self) -> &Vec<HintGhost> {
+        &self.ghosts
+    }
+
     fn get_hint(&self) -> String {
         format!(
             "{}\nis on the path to\n{}",
@@ -158,7 +167,7 @@ impl Serialize for PathHint {
 }
 
 /// A [`Hint`] that reveals where a certain Crack leads
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone)]
 pub struct CrackHint {
     /// The Crack whose destination will be hinted
     pub crack: Crack,
@@ -167,22 +176,38 @@ pub struct CrackHint {
     pub destination: Crack,
 
     /// List of Hint Ghosts that are guaranteed to be logically reachable before the hinted item.
-    #[serde(skip_serializing)]
     pub logical_ghosts: Vec<HintGhost>,
 
     /// Hint Ghosts that will give out this hint. <br />
     /// Only one of these is guaranteed to be from `logical_ghosts`, the other(s) are placed completely at random.
-    #[serde(skip_serializing)]
     pub ghosts: Vec<HintGhost>,
 }
 
 impl Hint for CrackHint {
+    fn get_ghosts(&self) -> &Vec<HintGhost> {
+        &self.ghosts
+    }
+
     fn get_hint(&self) -> String {
         format!("The {} leads to\n{}.", name(self.crack.as_str()), name(self.destination.as_str()))
     }
 
     fn get_hint_spoiler(&self) -> String {
         format!("The {} leads to\n{}.", self.crack, self.destination)
+    }
+}
+
+impl Serialize for CrackHint {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut ser = serializer.serialize_struct("CrackHint", 3)?;
+        ser.serialize_field("hint", &self.get_hint_spoiler())?;
+        ser.serialize_field("crack", &self.crack.as_str())?;
+        ser.serialize_field("ghosts", &SerializeGhosts(&self.ghosts))?;
+
+        ser.end()
     }
 }
 
@@ -194,6 +219,10 @@ pub struct BowOfLightHint {
 }
 
 impl Hint for BowOfLightHint {
+    fn get_ghosts(&self) -> &Vec<HintGhost> {
+        unimplemented!()
+    }
+
     fn get_hint(&self) -> String {
         format!(
             "Did you find the {}\nin {}?",

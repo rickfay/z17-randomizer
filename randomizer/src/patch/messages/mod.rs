@@ -5,7 +5,7 @@ use crate::filler::filler_item::Item::{
 use crate::{
     hints::{formatting::*, Hint},
     patch::messages::{hint_ghosts::HintGhost, msbt::load_msbt},
-    regions, Patcher, Result, SeedInfo,
+    regions, DashMap, Patcher, Result, SeedInfo,
 };
 use game::Course::{self, *};
 use log::info;
@@ -353,43 +353,11 @@ fn patch_hint_ghosts(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> 
     }
 
     // Organize Hints by the MSBT File they need to update
-    let mut msbt_hint_map = BTreeMap::new();
-
-    // Path Hints
-    for path_hint in &seed_info.hints.path_hints {
-        // Make mutable copy of hint for processing
-        let path_hint = &mut path_hint.clone();
-
-        for ghost in &path_hint.ghosts {
-            let hint_ghost = HintGhost::from(*ghost);
-            let entry = msbt_hint_map.entry((hint_ghost.course, hint_ghost.msbt_file)).or_insert_with(BTreeMap::new);
-            entry.insert(hint_ghost.msg_label, path_hint.get_hint());
-        }
-    }
-
-    // Always Hints
-    for always_hint in &seed_info.hints.always_hints {
-        // Make mutable copy of hint for processing
-        let always_hint = &mut always_hint.clone();
-
-        for ghost in &always_hint.ghosts {
-            let hint_ghost = HintGhost::from(*ghost);
-            let entry = msbt_hint_map.entry((hint_ghost.course, hint_ghost.msbt_file)).or_insert_with(BTreeMap::new);
-            entry.insert(hint_ghost.msg_label, always_hint.get_hint());
-        }
-    }
-
-    // Sometimes Hints
-    for sometimes_hint in &seed_info.hints.sometimes_hints {
-        // Make mutable copy of hint for processing
-        let sometimes_hint = &mut sometimes_hint.clone();
-
-        for ghost in &sometimes_hint.ghosts {
-            let hint_ghost = HintGhost::from(*ghost);
-            let entry = msbt_hint_map.entry((hint_ghost.course, hint_ghost.msbt_file)).or_insert_with(BTreeMap::new);
-            entry.insert(hint_ghost.msg_label, sometimes_hint.get_hint());
-        }
-    }
+    let mut msbt_hint_map = DashMap::default();
+    add_to_msbt_hint_map(&mut msbt_hint_map, &seed_info.hints.path_hints)?;
+    add_to_msbt_hint_map(&mut msbt_hint_map, &seed_info.hints.maiamai_hints)?;
+    add_to_msbt_hint_map(&mut msbt_hint_map, &seed_info.hints.always_hints)?;
+    add_to_msbt_hint_map(&mut msbt_hint_map, &seed_info.hints.sometimes_hints)?;
 
     // FIXME extremely dumb. Clear out some unused messages in Lost Woods to keep file size down.
     msbt_hint_map.get_mut(&(FieldLight, "FieldLight_00")).unwrap().extend(BTreeMap::from([
@@ -418,6 +386,23 @@ fn patch_hint_ghosts(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> 
         }
 
         patcher.update(msbt_file.dump())?;
+    }
+
+    Ok(())
+}
+
+fn add_to_msbt_hint_map<H>(
+    msbt_hint_map: &mut DashMap<(Course, &str), DashMap<&str, String>>, hints: &Vec<H>,
+) -> Result<()>
+    where
+        H: Hint,
+{
+    for hint in hints {
+        for ghost in hint.get_ghosts() {
+            let hint_ghost = HintGhost::from(*ghost);
+            let entry = msbt_hint_map.entry((hint_ghost.course, hint_ghost.msbt_file)).or_insert_with(DashMap::default);
+            entry.insert(hint_ghost.msg_label, hint.get_hint());
+        }
     }
 
     Ok(())
