@@ -11,6 +11,7 @@ use game::ghosts::HintGhost;
 use log::{debug, info};
 use macros::fail;
 use modinfo::settings::cracksanity::Cracksanity;
+use modinfo::settings::NiceItems;
 use rand::seq::IteratorRandom;
 use rand::seq::SliceRandom;
 use rand::{rngs::StdRng, Rng};
@@ -376,8 +377,8 @@ fn generate_always_hints(
 ) -> Vec<LocationHint> {
     let mut always_checks = vec![
         "Blacksmith (Lorule)", "Bouldering Guy", "Great Rupee Fairy", "Haunted Grove Stump", "Irene",
-        "Master Sword Pedestal", "Octoball Derby", "Queen Oren", "Rosso (1)", "Rosso (2)", "Shady Guy",
-        "Street Merchant (Right)", "Thief Girl", "Treacherous Tower", "[HC] Throne",
+        "Master Sword Pedestal", "Octoball Derby", "Queen Oren", "Rosso (1)", "Rosso (2)", "Thief Girl",
+        "Treacherous Tower", "[HC] Throne",
     ];
 
     always_checks.retain(|check| !taken_checks.contains(&check.to_string()));
@@ -395,13 +396,16 @@ fn generate_always_hints(
     always_hints
 }
 
-/**
- * Generates hints for Mother Maiamai's Upgrades.
- */
+/// Generates hints for Mother Maiamai's Upgrades.
 fn generate_maiamai_hints(
     rng: &mut StdRng, seed_info: &SeedInfo, check_map: &mut CheckMap, taken_checks: &mut Vec<String>,
     taken_ghosts: &mut Vec<HintGhost>,
 ) -> Vec<LocationHint> {
+    // Don't generate Maiamai Hints when Nice Items are vanilla
+    if seed_info.settings.nice_items == NiceItems::Vanilla {
+        return vec![];
+    }
+
     const NUM_MAI_HINTS: usize = 5;
     let mut available_maiamai_checks = vec![
         "Maiamai Bow Upgrade", "Maiamai Boomerang Upgrade", "Maiamai Hookshot Upgrade", "Maiamai Hammer Upgrade",
@@ -490,8 +494,8 @@ fn generate_sometimes_hints(
         "Bee Guy (2)", "Behind Ice Gimos", "Bird Lover", "Blacksmith", "Blacksmith Cave", "Cucco Mini-Dungeon",
         "Hookshot Mini-Dungeon", "Donkey Cave", "Eastern Ruins Peg Circle", "Merge Mini-Dungeon", "Fire Cave Pillar",
         "Floating Island", "Graveyard Ledge Cave", "Ice Gimos Fight", "Ice Rod Cave", "Ku's Domain Fight",
-        "Pegasus Boots Pyramid", "Misery Mire Ledge", "Sand Mini-Dungeon", "Philosopher's Cave", "Queen Oren",
-        "Spectacle Rock", "Flippers Mini-Dungeon", "Waterfall Cave", "Woman", "[LC] Zelda", "River Mini-Dungeon",
+        "Pegasus Boots Pyramid", "Misery Mire Ledge", "Sand Mini-Dungeon", "Philosopher's Cave", "Spectacle Rock",
+        "Flippers Mini-Dungeon", "Waterfall Cave", "Woman", "[LC] Zelda", "River Mini-Dungeon",
         "[DP] (2F) Under Rock (Ball Room)", "[DP] (2F) Under Rock (Left)", "[DP] (2F) Under Rock (Right)",
         "[EP] (1F) Escape Chest", "[HG] (3F) Fire Bubbles", "[HG] (2F) Fire Ring", "[IR] (B2) Long Merge Chest",
         "[IR] (B4) Southeast Chest (Fall)", "[LC] Tile Trial (2)", "[LC] Bomb Trial (2)", "[LC] Hook Trial (2)",
