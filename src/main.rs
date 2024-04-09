@@ -71,7 +71,7 @@ fn main() {
                 error!("{:?}", err);
                 if x < MAX_RETRIES {
                     if !seeded {
-                        info!("Seed was not completable. Retrying...\n");
+                        info!("A retryable error was encountered.\n");
                         seed = rand::random();
                     } else {
                         fail!("Couldn't generate Seed: \"{}\" with the given settings.", seed);

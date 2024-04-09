@@ -49,7 +49,7 @@ pub fn fill_all_locations_reachable(
     handle_exclusions(rng, seed_info, check_map, &mut junk_pool);
 
     assumed_fill(rng, seed_info, check_map, &mut progression_pool, &mut junk_pool)?;
-    fill_junk(rng, check_map, &mut junk_pool);
+    fill_junk(rng, check_map, &mut junk_pool)?;
 
     build_layout(seed_info, check_map)?;
 
@@ -464,7 +464,7 @@ fn is_dungeon_item(item: Item) -> bool {
     )
 }
 
-fn fill_junk(rng: &mut StdRng, check_map: &mut CheckMap, junk_items: &mut Pool) {
+fn fill_junk(rng: &mut StdRng, check_map: &mut CheckMap, junk_items: &mut Pool) -> Result<(), Error> {
     info!("Placing Junk Items...");
 
     let mut empty_check_keys = Vec::new();
@@ -475,16 +475,18 @@ fn fill_junk(rng: &mut StdRng, check_map: &mut CheckMap, junk_items: &mut Pool) 
     }
 
     if empty_check_keys.len() != junk_items.len() {
-        fail!(
+        return Err(Error::new(format!(
             "Number of empty checks: {} does not match available junk items: {}",
             empty_check_keys.len(),
             junk_items.len()
-        );
+        )));
     }
 
     for junk in junk_items {
         check_map.insert(empty_check_keys.remove(rng.gen_range(0..empty_check_keys.len())), Some((*junk).into()));
     }
+
+    Ok(())
 }
 
 fn filter_checks(item: Item, checks: &[Check], check_map: &mut CheckMap) -> Vec<Check> {
