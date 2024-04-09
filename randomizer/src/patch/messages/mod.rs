@@ -394,8 +394,8 @@ fn patch_hint_ghosts(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> 
 fn add_to_msbt_hint_map<H>(
     msbt_hint_map: &mut DashMap<(Course, &str), DashMap<&str, String>>, hints: &Vec<H>,
 ) -> Result<()>
-    where
-        H: Hint,
+where
+    H: Hint,
 {
     for hint in hints {
         for ghost in hint.get_ghosts() {

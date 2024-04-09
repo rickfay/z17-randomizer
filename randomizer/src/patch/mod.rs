@@ -1,6 +1,6 @@
 use crate::filler::cracks::Crack;
 use crate::filler::filler_item::{Randomizable, Vane};
-use crate::{patch::util::*, CrackMap, Error, Result, SeedInfo};
+use crate::{patch::util::*, Error, Result, SeedInfo};
 use code::Code;
 use fs_extra::dir::CopyOptions;
 use game::{
@@ -278,7 +278,7 @@ impl Patcher {
                 self.parse_args(course, scene, unq).1 = filler_item.into().unwrap().as_item_index() as i32;
             },
             Patch::Crack { course, scene, unq, crack } => {
-                self.patch_crack(&seed_info.crack_map, course, scene + 1, unq, crack, seed_info)?;
+                self.patch_crack(course, scene + 1, unq, crack, seed_info)?;
             },
             Patch::WeatherVane { course, scene, unq, vane } => {
                 self.patch_weather_vane(filler_item.into().unwrap(), course, scene, unq, vane, seed_info)?;
@@ -367,18 +367,18 @@ impl Patcher {
 
     /// Cracks!
     fn patch_crack(
-        &mut self, crack_map: &CrackMap, course: CourseId, scene: u16, unq: u16, here_crack: Crack,
-        seed_info: &SeedInfo,
+        &mut self, course: CourseId, scene: u16, unq: u16, here_crack: Crack, seed_info: &SeedInfo,
     ) -> Result<()> {
         if seed_info.settings.cracksanity == Cracksanity::Off {
             return Ok(());
         }
 
         let there_crack =
-            crack_map.get(&here_crack).unwrap_or_else(|| panic!("No crack_map entry for: {:?}", here_crack));
+            seed_info.crack_map.get(&here_crack).unwrap_or_else(|| panic!("No crack_map entry for: {:?}", here_crack));
         let there_flag = there_crack.get_flag();
         let there_sp = there_crack.get_spawn_point();
 
+        // Crack type
         let here_arg2 = if here_crack.get_world() == there_crack.get_world() {
             here_crack.get_reverse_type()
         } else {
@@ -398,16 +398,28 @@ impl Patcher {
         );
 
         if here_crack == Crack::HyruleCastle {
-            // Hyrule Castle Crack
-            self.modify_objs(
-                IndoorLight,
-                7,
-                [
-                    set_46_args(26, there_flag),      // Curtain
-                    set_46_args(29, there_flag),      // AreaDisableWallIn
-                    set_disable_flag(29, there_flag), // AreaDisableWallIn
-                ],
-            );
+            if *there_crack == Crack::LoruleCastle {
+                // Vanilla HC/LC pair - Delete the curtain and no merge zone
+                self.modify_objs(
+                    IndoorLight,
+                    7,
+                    [
+                        disable(26), // Curtain
+                        disable(29), // AreaDisableWallIn
+                    ],
+                );
+            } else {
+                // Wire the curtain + no merge zone to the other crack's flag
+                self.modify_objs(
+                    IndoorLight,
+                    7,
+                    [
+                        set_46_args(26, there_flag),      // Curtain
+                        set_46_args(29, there_flag),      // AreaDisableWallIn
+                        set_disable_flag(29, there_flag), // AreaDisableWallIn
+                    ],
+                );
+            }
         } else if here_crack == *seed_info.crack_map.get(&Crack::HyruleCastle).unwrap() {
             // Crack paired with Hyrule Castle is always kept open
             self.modify_objs(course, scene, [clear_enable_flag(unq)]);
