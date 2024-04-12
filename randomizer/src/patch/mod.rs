@@ -757,7 +757,7 @@ impl Patches {
         P: AsRef<Path>,
     {
         let temp = tempdir()?;
-        let moddir = temp.path().join(&format!("{:016X}", self.game.id()));
+        let moddir = temp.path().join(format!("{:016X}", self.game.id()));
         let romfs = moddir.join("romfs");
         fs::create_dir_all(&romfs)?;
         self.code.dump(&moddir, self.game.exheader())?;

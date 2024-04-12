@@ -37,7 +37,7 @@ impl Sarc {
     pub fn read(&self, filename: &str) -> Option<Vec<u8>> {
         if let Some(files) = self.files.get(&self.calculate_hash(filename)) {
             if files.len() == 1 {
-                Some(files.get(0).unwrap().data.clone())
+                Some(files.first().unwrap().data.clone())
             } else {
                 Some(
                     files

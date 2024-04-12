@@ -40,7 +40,7 @@ impl Load {
     }
 
     pub fn add_entry(&mut self, id: &str, entry: &str) {
-        let load_entry = self.0.entry(String::from(id)).or_insert_with(Vec::new);
+        let load_entry = self.0.entry(String::from(id)).or_default();
 
         // Manually check for dupe - Choosing not to switch to a HashSet to minimize file changes
         if !load_entry.contains(&String::from(entry)) {
