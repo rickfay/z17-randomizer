@@ -400,7 +400,7 @@ where
     for hint in hints {
         for ghost in hint.get_ghosts() {
             let hint_ghost = HintGhost::from(*ghost);
-            let entry = msbt_hint_map.entry((hint_ghost.course, hint_ghost.msbt_file)).or_insert_with(DashMap::default);
+            let entry = msbt_hint_map.entry((hint_ghost.course, hint_ghost.msbt_file)).or_default();
             entry.insert(hint_ghost.msg_label, hint.get_hint());
         }
     }

@@ -169,7 +169,7 @@ impl Layout {
     }
 
     fn get_node_mut(&mut self, node: &'static Subregion) -> &mut DashMap<&'static str, Randomizable> {
-        self.category_mut(node.world()).entry(node.name()).or_insert_with(Default::default)
+        self.category_mut(node.world()).entry(node.name()).or_default()
     }
 
     fn get(&self, name: &'static str, subregion: &'static Subregion) -> Option<Randomizable> {

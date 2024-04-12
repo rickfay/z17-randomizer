@@ -304,7 +304,7 @@ fn generate_crack_hints(
 }
 
 fn duplicate_hints(
-    taken_ghosts: &mut Vec<HintGhost>, always_hints: &mut Vec<LocationHint>, maiamai_hints: &mut Vec<LocationHint>,
+    taken_ghosts: &mut [HintGhost], always_hints: &mut Vec<LocationHint>, maiamai_hints: &mut Vec<LocationHint>,
     path_hints: &mut Vec<PathHint>, sometimes_hints: &mut Vec<LocationHint>, num_total_hints: usize, rng: &mut StdRng,
 ) {
     assert_eq!(

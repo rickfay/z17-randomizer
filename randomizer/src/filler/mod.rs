@@ -45,7 +45,7 @@ pub fn fill_all_locations_reachable(
 
     verify_all_locations_accessible(seed_info, check_map, &mut progression_pool)?;
 
-    preplace_items(rng, seed_info, check_map, &mut progression_pool);
+    preplace_items(rng, seed_info, check_map, &mut progression_pool)?;
     handle_exclusions(rng, seed_info, check_map, &mut junk_pool);
 
     assumed_fill(rng, seed_info, check_map, &mut progression_pool, &mut junk_pool)?;
@@ -160,7 +160,7 @@ fn place_weather_vanes(SeedInfo { vane_map, .. }: &SeedInfo, check_map: &mut Che
 /// Place static items ahead of the randomly filled ones
 fn preplace_items(
     rng: &mut StdRng, SeedInfo { settings, .. }: &SeedInfo, check_map: &mut CheckMap, progression: &mut Vec<Item>,
-) {
+) -> crate::Result<()> {
     // Vanilla Dungeon Prizes
     if !&settings.dungeon_prize_shuffle {
         place_static(check_map, progression, Item::PendantOfCourage, "[EP] Prize");
@@ -219,9 +219,9 @@ fn preplace_items(
         place_static(check_map, progression, Item::SandRod02, "Maiamai Sand Rod Upgrade");
     }
 
-    let mut shop_positions = vec![
-        "Ravio's Shop (1)", "Ravio's Shop (2)", "Ravio's Shop (3)", "Ravio's Shop (4)", "Ravio's Shop (5)",
-        "Ravio's Shop (7)", "Ravio's Shop (8)", "Ravio's Shop (9)",
+    let shop_positions = vec![
+        "Ravio's Gift", "Ravio's Shop (1)", "Ravio's Shop (2)", "Ravio's Shop (3)", "Ravio's Shop (4)",
+        "Ravio's Shop (5)", "Ravio's Shop (7)", "Ravio's Shop (8)", "Ravio's Shop (9)",
     ];
     let mut bow_light_positions = vec![
         "[LC] (1F) Ledge", "[LC] (1F) Center", "[LC] (2F) Near Torches", "[LC] (2F) Hidden Path", "[LC] (2F) Ledge",
@@ -238,41 +238,26 @@ fn preplace_items(
         progression.retain(|x| *x != Item::BowOfLight);
     }
 
-    // Bell in Shop
+    let mut shop_items = vec![];
+
+    // Bell
     if settings.bell_in_shop {
-        check_map.insert(
-            String::from(shop_positions.remove(rng.gen_range(0..shop_positions.len()))),
-            Some(Item::Bell.into()),
-        );
-        progression.retain(|x| *x != Item::Bell);
+        shop_items.push(Item::Bell);
     }
 
-    // Pouch in Shop
-    // if settings.logic.pouch_in_shop {
-    //     check_map.insert(shop_positions.remove(rng.gen_range(0..shop_positions.len())), Some(Item::Pouch.into()));
-    //     progression.retain(|x| *x != Item::Pouch);
-    // }
-
-    // Sword in Shop
+    // Sword
     if settings.sword_in_shop {
-        check_map.insert(
-            String::from(shop_positions.remove(rng.gen_range(0..shop_positions.len()))),
-            Some(Item::Sword01.into()),
-        );
-        progression.retain(|x| *x != Item::Sword01);
+        shop_items.push(Item::Sword01);
     }
 
-    // Boots in Shop
+    // Boots
     if settings.boots_in_shop {
-        check_map.insert(
-            String::from(shop_positions.remove(rng.gen_range(0..shop_positions.len()))),
-            Some(Item::PegasusBoots.into()),
-        );
-        progression.retain(|x| *x != Item::PegasusBoots);
+        shop_items.push(Item::PegasusBoots);
     }
 
     // Assures a weapon will be available in Ravio's Shop
     if (!&settings.sword_in_shop && !&settings.boots_in_shop) && settings.assured_weapon {
+        // Default potential weapons
         let mut weapons = Vec::from([
             Item::Bow01,
             Item::Bombs01,
@@ -282,24 +267,22 @@ fn preplace_items(
             Item::PegasusBoots,
         ]);
 
+        // Include Sword only if we're not playing on Swordless Mode
         if !&settings.swordless_mode {
             weapons.push(Item::Sword01);
         }
 
-        match settings.logic_mode {
-            LogicMode::Normal => {},
-            _ => {
-                weapons.push(Item::Lamp01);
-                weapons.push(Item::Net01);
-            },
-        }
+        // Include Lamp and Net if they're considered weapons
+        if settings.lamp_and_net_as_weapons {
+            weapons.push(Item::Lamp01);
+            weapons.push(Item::Net01);
+        };
 
         let weapon = *weapons.get(rng.gen_range(0..weapons.len())).unwrap();
-
-        check_map
-            .insert(String::from(shop_positions.remove(rng.gen_range(0..shop_positions.len()))), Some(weapon.into()));
-        progression.retain(|x| *x != weapon);
+        shop_items.push(weapon);
     }
+
+    insert_items_into_random_locations(shop_items, shop_positions, rng, check_map, progression)?;
 
     // For non-Maiamai Madness seeds, default them to Maiamai
     // FIXME Inefficient to add Maiamai to progression pool, shuffle, then remove them
@@ -316,6 +299,21 @@ fn preplace_items(
             place_static(check_map, progression, maiamai_items.remove(0), &check_name);
         }
     }
+
+    Ok(())
+}
+
+/// Inserts the given `items` randomly into the list of `locations`, and updates the `check_map` and `progression` pool
+/// accordingly. Both lists are consumed.
+fn insert_items_into_random_locations(
+    items: Vec<Item>, mut locations: Vec<&str>, rng: &mut StdRng, check_map: &mut CheckMap, progression: &mut Vec<Item>,
+) -> crate::Result<()> {
+    for item in items {
+        check_map.insert(String::from(locations.remove(rng.gen_range(0..locations.len()))), Some(item.into()));
+        progression.retain(|x| *x != item);
+    }
+
+    Ok(())
 }
 
 /// Handle Exclusions
@@ -817,7 +815,7 @@ fn assumed_fill(
 }
 
 /// Places the given `item` on a random check in the `check_map`, then returns that check's name.
-fn place_item_randomly(item: Item, checks: &Vec<Check>, check_map: &mut CheckMap, rng: &mut StdRng) -> &'static str {
+fn place_item_randomly(item: Item, checks: &[Check], check_map: &mut CheckMap, rng: &mut StdRng) -> &'static str {
     let check_name = checks.get(rng.gen_range(0..checks.len())).unwrap().get_name();
     check_map.insert(check_name.to_owned(), Some(item.into()));
     check_name

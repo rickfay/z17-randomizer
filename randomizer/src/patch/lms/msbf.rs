@@ -623,7 +623,7 @@ fn patch_woman(patcher: &mut Patcher) -> Result<()> {
 
 /// Treacherous Tower
 fn patch_treacherous_tower(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
-    let first_course = seed_info.treacherous_tower_floors.get(0).unwrap().course as u32;
+    let first_course = seed_info.treacherous_tower_floors.first().unwrap().course as u32;
 
     apply!(patcher,
         FieldDark / FieldDark_05_GameTower {
