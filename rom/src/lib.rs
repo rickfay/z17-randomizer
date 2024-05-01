@@ -101,11 +101,28 @@ pub enum ErrorKind {
 #[allow(dead_code)]
 pub struct Rom {
     id: u64,
+    region: RomRegion,
     exheader: ExHeader,
     romfs: RefCell<RomFs<fs::File>>,
     flow_chart: File<FlowChart>,
     get_item: File<Vec<GetItem>>,
     message: File<Load>,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum RomRegion {
+    US,
+    EU,
+}
+
+impl RomRegion {
+    fn detect(id: u64) -> Result<Self> {
+        match id {
+            US_ID => Ok(Self::US),
+            EU_ID => Ok(Self::EU),
+            _ => Err(Error::new("Invalid ROM ID or unsupported Region.")),
+        }
+    }
 }
 
 impl Rom {
@@ -120,26 +137,31 @@ impl Rom {
         let path = path.as_ref().to_path_buf();
         info!("Loading ROM from:               {}", &path.absolutize()?.display());
         let mut cxi = Cxi::open(&path)?;
-        if cxi.id() == US_ID {
-            let id = cxi.id();
-            let exheader = cxi.exheader()?;
-            let mut romfs = cxi.try_into_romfs()?;
-            let region_boot = romfs.read("US/RegionBoot.szs")?.map(Sarc::from);
-            let flow_chart =
+        let id = cxi.id();
+        let region = RomRegion::detect(id)?;
+        let exheader = cxi.exheader()?;
+        let mut romfs = cxi.try_into_romfs()?;
+        let region_boot = match region { 
+            RomRegion::US => romfs.read("US/RegionBoot.szs")?.map(Sarc::from),
+            RomRegion::EU => romfs.read("EU/RegionBoot.szs")?.map(Sarc::from),
+        };
+        let flow_chart =
                 region_boot.get().read("World/Byaml/FlowChart.byaml")?.try_map(|data| byaml::from_bytes(&data))?;
-            let get_item =
+        let get_item =
                 region_boot.get().read("World/Byaml/GetItem.byaml")?.try_map(|data| byaml::from_bytes(&data))?;
-            let message =
+        let message =
                 region_boot.get().read("World/Byaml/Message.byaml")?.try_map(|data| byaml::from_bytes(&data))?;
-            Ok(Self { id, exheader, romfs: RefCell::new(romfs), flow_chart, get_item, message })
-        } else {
-            Err(Error::new("Invalid ROM ID."))
-        }
+        Ok(Self { id, region, exheader, romfs: RefCell::new(romfs), flow_chart, get_item, message })
     }
 
     /// Gets the 64-bit title ID.
     pub fn id(&self) -> u64 {
         self.id
+    }
+
+    /// Gets the the region the ROM is from
+    pub fn region(&self) -> RomRegion {
+        self.region
     }
 
     /// Gets the ROM's extended header.
@@ -178,7 +200,10 @@ impl Rom {
 
     pub fn boot(&self) -> Result<Language> {
         let flow = self.flow_chart.get().load().boot()?.iter().cloned();
-        let archive = self.romfs.borrow_mut().read("US/RegionBoot.szs")?.map(Sarc::from);
+        let archive = match self.region {
+            RomRegion::US => self.romfs.borrow_mut().read("US/RegionBoot.szs")?.map(Sarc::from),
+            RomRegion::EU => self.romfs.borrow_mut().read("EU/RegionBoot.szs")?.map(Sarc::from),
+        };
         Ok(Language::new(flow, archive))
     }
 
@@ -196,7 +221,10 @@ impl Rom {
 
     pub fn language(&self, course: CourseId) -> Result<Language> {
         let flow = self.flow_chart.get().load().course(course).unwrap_or_default().iter().cloned();
-        let archive = self.romfs.borrow_mut().read(format!("US_English/{}.szs", course.as_str()))?.map(Sarc::from);
+        let archive = match self.region {
+            RomRegion::US => self.romfs.borrow_mut().read(format!("US_English/{}.szs", course.as_str()))?.map(Sarc::from),
+            RomRegion::EU => self.romfs.borrow_mut().read(format!("EU_English/{}.szs", course.as_str()))?.map(Sarc::from),
+        };
         Ok(Language::new(flow, archive))
     }
 
@@ -237,6 +265,7 @@ impl Rom {
 }
 
 const US_ID: u64 = 0x00040000000EC300;
+const EU_ID: u64 = 0x00040000000EC400;
 
 #[macro_export]
 macro_rules! string_constants {

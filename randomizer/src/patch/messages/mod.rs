@@ -18,13 +18,13 @@ mod msbt;
 pub fn patch_messages(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
     info!("Patching MSBT Files...");
 
-    patch_flavor_text(patcher, seed_info)?;
+    // patch_flavor_text(patcher, seed_info)?;
     patch_file_select(patcher, seed_info)?;
     // patch_pause_screen(patcher)?; TODO
     patch_item_names(patcher)?;
     patch_event_item_get(patcher)?;
     patch_collect(patcher, seed_info)?;
-    patch_actions(patcher)?;
+    // patch_actions(patcher)?; This is causing issues for some reason
     patch_ravio(patcher, seed_info)?;
     patch_impa(patcher)?;
     patch_great_rupee_fairy(patcher)?;
@@ -47,6 +47,7 @@ pub fn research(patcher: &mut Patcher, course: Course, file: &str, edotor: bool)
 }
 
 /// Flavor Text
+#[allow(unused)]
 fn patch_flavor_text(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
     let mut msbt = load_msbt(patcher, LanguageBoot, "Ed_StaffCreditMessageT")?;
     msbt.set("T_Text_00", &seed_info.text.credits);
@@ -156,6 +157,7 @@ fn patch_collect(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
 }
 
 /// Action icon text
+#[allow(unused)]
 fn patch_actions(patcher: &mut Patcher) -> Result<()> {
     let mut msbt = load_msbt(patcher, LanguageBoot, "Action")?;
     msbt.set("cmn_action_throw", "Yeet");
