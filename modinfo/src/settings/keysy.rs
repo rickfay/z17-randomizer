@@ -24,7 +24,21 @@ impl TryFrom<u8> for Keysy {
             1 => Ok(Self::SmallKeysy),
             2 => Ok(Self::BigKeysy),
             3 => Ok(Self::AllKeysy),
-            _ => Err("Invalid Keysy Setting: {}".to_owned()),
+            _ => Err(format!("Invalid Keysy setting: {}", value)),
+        }
+    }
+}
+
+impl TryFrom<String> for Keysy {
+    type Error = String;
+
+    fn try_from(value: String) -> Result<Self, Self::Error> {
+        match value.as_str() {
+            "Off" => Ok(Self::Off),
+            "Small Keysy" => Ok(Self::SmallKeysy),
+            "Big Keysy" => Ok(Self::BigKeysy),
+            "All Keysy" => Ok(Self::AllKeysy),
+            _ => Err(format!("Invalid Keysy setting: {}", value)),
         }
     }
 }

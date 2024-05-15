@@ -40,7 +40,22 @@ impl TryFrom<u8> for TrialsDoor {
             2 => Ok(Self::TwoTrialsRequired),
             3 => Ok(Self::ThreeTrialsRequired),
             4 => Ok(Self::AllTrialsRequired),
-            _ => Err("Invalid LcTrialsDoor index: {}".to_owned()),
+            _ => Err(format!("Invalid TrialsDoor setting: {}", value)),
+        }
+    }
+}
+
+impl TryFrom<String> for TrialsDoor {
+    type Error = String;
+
+    fn try_from(value: String) -> Result<Self, Self::Error> {
+        match value.as_str() {
+            "Open" => Ok(Self::Open),
+            "1 Trial Required" => Ok(Self::OneTrialRequired),
+            "2 Trials Required" => Ok(Self::TwoTrialsRequired),
+            "3 Trials Required" => Ok(Self::ThreeTrialsRequired),
+            "4 Trials Required" => Ok(Self::AllTrialsRequired),
+            _ => Err(format!("Invalid TrialsDoor setting: {}", value)),
         }
     }
 }

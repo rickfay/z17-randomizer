@@ -1,15 +1,12 @@
 //! A library for reading data from a The Legend of Zelda: A Link Between Worlds ROM.
 
+use std::io::Cursor;
 use std::{
     cell::RefCell,
     error::Error as StdError,
     fmt::{self, Display, Formatter},
-    fs, io,
-    path::Path,
+    io,
 };
-
-use log::info;
-use path_absolutize::*;
 
 use game::{
     Course::{self as CourseId, LanguageBoot},
@@ -102,7 +99,7 @@ pub enum ErrorKind {
 pub struct Rom {
     id: u64,
     exheader: ExHeader,
-    romfs: RefCell<RomFs<fs::File>>,
+    romfs: RefCell<RomFs<Cursor<Vec<u8>>>>,
     flow_chart: File<FlowChart>,
     get_item: File<Vec<GetItem>>,
     message: File<Load>,
@@ -113,13 +110,9 @@ impl Rom {
     ///
     /// Fails if the ROM is invalid for any reason, including general
     /// corruption, mismatched IDs, invalid region, etc.
-    pub fn load<P>(path: P) -> Result<Self>
-    where
-        P: AsRef<Path>,
-    {
-        let path = path.as_ref().to_path_buf();
-        info!("Loading ROM from:               {}", &path.absolutize()?.display());
-        let mut cxi = Cxi::open(&path)?;
+    pub fn load(rom: Vec<u8>) -> Result<Self> {
+        // info!("Loading ROM from:               {}", &path.absolutize()?.display());
+        let mut cxi = Cxi::open(rom)?;
         if cxi.id() == US_ID {
             let id = cxi.id();
             let exheader = cxi.exheader()?;

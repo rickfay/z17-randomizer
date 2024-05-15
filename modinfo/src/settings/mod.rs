@@ -35,7 +35,7 @@ pub struct Settings {
     pub lc_requirement: u8,
 
     /// The number of Portraits needed to fight Yuga Ganon
-    #[serde(default = "seven", skip_serializing)]
+    #[serde(default = "seven")]
     pub yuganon_requirement: u8,
 
     /// Configure which Pendants are required to reach the Master Sword Pedestal
@@ -56,7 +56,7 @@ pub struct Settings {
 
     /// Maiamai Limit
     #[serde(default = "fifty")]
-    pub maiamai_limit: usize,
+    pub maiamai_limit: u8,
 
     /// Maiamai Madness
     #[serde(default)]
@@ -153,7 +153,7 @@ pub struct Settings {
 
     /// Number of floors in Treacherous Tower
     #[serde(default = "five")]
-    pub treacherous_tower_floors: usize,
+    pub treacherous_tower_floors: u8,
 
     /// Purple Potion Bottles
     pub purple_potion_bottles: bool,
@@ -234,7 +234,7 @@ const fn is_false(b: &bool) -> bool {
     !(*b)
 }
 
-const fn five() -> usize {
+const fn five() -> u8 {
     5
 }
 
@@ -242,7 +242,7 @@ const fn seven() -> u8 {
     7
 }
 
-const fn fifty() -> usize {
+const fn fifty() -> u8 {
     50
 }
 

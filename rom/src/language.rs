@@ -1,14 +1,12 @@
-use std::collections::btree_map::BTreeMap;
-use std::{cell::Ref, collections::HashSet, marker::PhantomData, path::Path};
-
-use game::Course;
-use serde::{Deserialize, Serialize};
-
 use crate::{
     files::{sarc::Sarc, FromFile},
     flow::{Flow, FlowMut},
     Error, File, Result,
 };
+use game::Course;
+use serde::{Deserialize, Serialize};
+use std::collections::btree_map::BTreeMap;
+use std::{cell::Ref, collections::HashSet, marker::PhantomData};
 
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(rename_all = "PascalCase")]
@@ -102,11 +100,8 @@ impl Language {
         self.archive.map(Sarc::compress)
     }
 
-    pub fn dump<P>(self, path: P) -> Result<()>
-    where
-        P: AsRef<Path>,
-    {
-        self.archive.map(Sarc::compress).dump(path)
+    pub fn dump(self) -> Box<[u8]> {
+        self.archive.map(Sarc::compress).dump()
     }
 }
 

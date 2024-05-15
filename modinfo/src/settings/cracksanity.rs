@@ -27,7 +27,22 @@ impl TryFrom<u8> for Cracksanity {
             2 => Ok(Self::AnyWorldPairs),
             3 => Ok(Self::MirroredCrossWorldPairs),
             4 => Ok(Self::MirroredAnyWorldPairs),
-            _ => Err("Invalid CrackShuffle index: {}".to_owned()),
+            _ => Err(format!("Invalid CrackShuffle setting: {}", value)),
+        }
+    }
+}
+
+impl TryFrom<String> for Cracksanity {
+    type Error = String;
+
+    fn try_from(value: String) -> Result<Self, Self::Error> {
+        match value.as_str() {
+            "Off" => Ok(Self::Off),
+            "Cross World Pairs" => Ok(Self::CrossWorldPairs),
+            "Any World Pairs" => Ok(Self::AnyWorldPairs),
+            "Mirrored Cross World Pairs" => Ok(Self::MirroredCrossWorldPairs),
+            "Mirrored Any World Pairs" => Ok(Self::MirroredAnyWorldPairs),
+            _ => Err(format!("Invalid CrackShuffle setting: {}", value)),
         }
     }
 }

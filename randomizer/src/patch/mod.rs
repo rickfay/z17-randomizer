@@ -2,16 +2,14 @@ use crate::filler::cracks::Crack;
 use crate::filler::filler_item::{Randomizable, Vane};
 use crate::{patch::util::*, Error, Result, SeedInfo};
 use code::Code;
-use fs_extra::dir::CopyOptions;
+
 use game::{
     Course::{self as CourseId, *},
     Item, World,
 };
-use log::{debug, error, info};
-use macros::fail;
+use log::{debug, info};
 use modinfo::settings::cracksanity::Cracksanity;
 use modinfo::settings::weather_vanes::WeatherVanes::*;
-use path_absolutize::*;
 use rom::byaml::scene_env::SceneEnvFile;
 use rom::flag::Flag;
 use rom::scene::{Transform, Vec3};
@@ -21,10 +19,12 @@ use rom::{
     File, IntoBytes, Language, Rom, Scene,
 };
 use serde::Serialize;
+use std::collections::HashMap;
+use std::io::{Cursor, Write};
 use std::ops::Add;
-use std::{collections::HashMap, fs, path::Path};
-use tempfile::tempdir;
 use try_insert_ext::EntryInsertExt;
+use zip::write::FileOptions;
+use zip::CompressionMethod;
 
 mod actors;
 mod byaml;
@@ -657,7 +657,6 @@ impl Patcher {
             kakariko_actors.add(item_actors.get(&merchant[2]).unwrap().clone())?;
         }
         let code = code::create(&self, seed_info);
-        let Self { game, boot, courses, .. } = self;
         let mut romfs = Files(vec![]);
 
         // Add Actors to Common Archive
@@ -666,11 +665,11 @@ impl Patcher {
         //common.add(fresco_arrow)?; // Sorta works... but not really...
         //romfs.add(common.into_archive().unwrap());
 
-        romfs.add(boot.into_archive());
+        romfs.add(self.boot.into_archive());
         if let Some(scene_env_file) = scene_env_file {
             romfs.add_serialize(scene_env_file.into_file());
         };
-        for (_, Course { language, scenes, scene_meta }) in courses {
+        for (_, Course { language, scenes, scene_meta }) in self.courses {
             romfs.add(language.into_archive());
             if let Some(scene_meta) = scene_meta {
                 romfs.add_serialize(scene_meta.into_file());
@@ -686,7 +685,8 @@ impl Patcher {
         for cutscene in cutscenes {
             romfs.add(cutscene);
         }
-        Ok(Patches { game, code, romfs })
+
+        Ok(Patches { game: self.game, code, romfs })
     }
 }
 
@@ -752,32 +752,55 @@ pub struct Patches {
 }
 
 impl Patches {
-    pub fn dump<P>(self, path: P) -> Result<()>
-    where
-        P: AsRef<Path>,
-    {
-        let temp = tempdir()?;
-        let moddir = temp.path().join(format!("{:016X}", self.game.id()));
-        let romfs = moddir.join("romfs");
-        fs::create_dir_all(&romfs)?;
-        self.code.dump(&moddir, self.game.exheader())?;
-        for file in self.romfs.0 {
-            file.dump(&romfs)?;
-        }
-        let path = path.as_ref();
-        println!();
-        info!("Writing Patch Files to:         {}\\{:016X}", &path.absolutize()?.display(), self.game.id());
+    pub fn dump(self) -> std::result::Result<Vec<u8>, Error> {
+        info!("Dumping Patch Files...");
 
-        match fs_extra::copy_items(&[moddir], path, &CopyOptions { overwrite: true, ..Default::default() })
-            .map_err(Error::io)
-        {
-            Ok(_) => Ok(()),
-            Err(_) => {
-                error!("Couldn't write to:              {}", path.display());
-                error!("Please check that config.json points to a valid output destination.");
-                fail!();
-            },
+        let zip = Cursor::new(vec![]);
+        let mut zip_writer = zip::ZipWriter::new(zip);
+        let options = FileOptions::default().compression_method(CompressionMethod::Deflated).unix_permissions(0o755);
+
+        let region = "00040000000EC300"; // fixme
+
+        // code.ips
+        let code = self.code.dump_code()?;
+        zip_writer.start_file(format!("{}/code.ips", region), options).unwrap();
+        zip_writer.write_all(&code).unwrap();
+
+        // exheader.bin
+        let exheader = self.code.dump_exheader(self.game.exheader())?;
+        zip_writer.start_file(format!("{}/exheader.bin", region), options).unwrap();
+        zip_writer.write_all(&exheader).unwrap();
+
+        // romfs
+        for file in self.romfs.0 {
+            zip_writer.start_file(format!("{}/romfs/{}", region, file.path()), options).unwrap();
+            zip_writer.write_all(&file.dump()).unwrap();
         }
+
+        Ok(zip_writer.finish().unwrap().into_inner())
+
+        // let temp = tempdir()?;
+        // let moddir = temp.path().join(format!("{:016X}", self.game.id()));
+        // let romfs = moddir.join("romfs");
+        // fs::create_dir_all(&romfs)?;
+
+        // for file in self.romfs.0 {
+        //     file.dump(&romfs)?;
+        // }
+        // let path = path.as_ref();
+        //
+        // println!();
+        //
+        // match fs_extra::copy_items(&[moddir], path, &CopyOptions { overwrite: true, ..Default::default() })
+        //     .map_err(Error::io)
+        // {
+        //     Ok(_) => Ok(()),
+        //     Err(_) => {
+        //         error!("Couldn't write to:              {}", path.display());
+        //         error!("Please check that config.json points to a valid output destination.");
+        //         fail!();
+        //     },
+        // }
     }
 }
 

@@ -1,7 +1,4 @@
-use {
-    crate::{files::sarc::Sarc, File, Result},
-    std::path::Path,
-};
+use crate::{files::sarc::Sarc, File, Result};
 
 #[derive(Debug)]
 pub struct Actors {
@@ -48,14 +45,12 @@ impl Actors {
         self.dirty.then(|| self.archive.map(Sarc::compress))
     }
 
-    pub fn dump<P>(self, path: P) -> Result<()>
-    where
-        P: AsRef<Path>,
-    {
+    pub fn dump(self) -> Option<Box<[u8]>> {
         if self.dirty {
-            self.archive.map(Sarc::compress).dump(path)?;
+            Some(self.archive.map(Sarc::compress).dump())
+        } else {
+            None
         }
-        Ok(())
     }
 }
 

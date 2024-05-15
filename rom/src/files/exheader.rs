@@ -28,6 +28,10 @@ impl ExHeader {
     pub fn set_rodata_size(&mut self, size: u32) {
         self.0[0x28..0x2C].copy_from_slice(&size.to_le_bytes());
     }
+
+    pub fn dump(self) -> [u8; LEN] {
+        self.0
+    }
 }
 
 impl AsRef<[u8]> for ExHeader {

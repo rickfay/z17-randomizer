@@ -682,7 +682,7 @@ The destination of a Crack determines its appearance.
 
 Most Cracks in the game are "up" cracks, like the one in front of Link's House.
 
-However, there are 6 pairs of "down" cracks as well, that reside on the backs pillars, buildings, etc.
+However, there are 6 pairs of "down" cracks as well, that reside on the backs of pillars, buildings, etc.
 For technical reasons, these cracks can only be shuffled amongst themselves.
 
 ![Crack Pools](docs/down_cracks.png)
@@ -713,8 +713,8 @@ Because of this, the logic only requires bombs to enter the blocked side of crac
 
 #### Hyrule Castle Crack
 - This crack and its pair are the only cracks open without <img src="docs/quake.png" width="24" height="24" /> **Quake**.
-- If crack shuffle is off, <img src="docs/quake.png" width="24" height="24" /> **Quake** may appear in Central Lorule and players will need to use this crack to get there.
-- When crack shuffle is on, the Hyrule Castle crack will lead to a random crack in Lorule, and thus one random region of Lorule will become accessible. In this way, <img src="docs/quake.png" width="24" height="24" /> **Quake** has the potential to appear in any region of Lorule.
+- If Cracksanity is off, <img src="docs/quake.png" width="24" height="24" /> **Quake** may appear in Central Lorule and players will need to use this crack to get there.
+- When Cracksanity is on, the Hyrule Castle crack will lead to a random crack in Lorule, and thus one random region of Lorule will become accessible. In this way, <img src="docs/quake.png" width="24" height="24" /> **Quake** has the potential to appear in any region of Lorule.
 
 #### Lorule Castle Crack
 
@@ -734,18 +734,46 @@ Other than using the crack itself (or glitches), this is actually the _only_ way
 
 #### Desert Palace + Zaganaga Cracks
 
-These two cracks are forcibly kept paired vanilla so that Desert Palace does not lose its Boss and dungeon prize. For now...
+These two cracks are forcibly kept paired vanilla so that Desert Palace does not lose its Boss and dungeon prize.
+
+For now...
 
 #### Rosso's House Crack
 
 - This crack is locked inside Rosso's House, meaning rescuing Rosso is a requirement to access it.
 - If you enter Rosso's House using this crack before rescuing Rosso, it will be empty, and if you leave via the door it will lock behind you.
 
+### Mirrored Cracks
+
+Every crack has a vanilla counterpart: the crack it lead to in the vanilla game.
+
+The "Mirrored" settings randomizes crack destinations such that when random pairings are made, their vanilla counterparts will also be paired.
+
+#### Example Mirrored Pairings:
+- Your House → Lorule Castle
+  - Vacant House → Hyrule Castle
+- Eastern Ruins Pillar → Graveyard Ledge (Lorule)
+  - Dark Ruins Pillar → Graveyard Ledge (Hyrule)
+- Lost Woods Pillar → Floating Island (Lorule)
+  - Skull Woods Pillar → Floating Island (Hyrule)
+
+#### Tips for Gathering Information
+- Every crack entered with the Mirrored settings gives info on 4 total cracks:
+  1. Itself
+  2. Its pair
+  3. Its vanilla counterpart
+  4. Its pair's vanilla counterpart
+- You can figure out where **any** crack leads by going into its vanilla counterpart.
+  - Example:
+    - To figure out which crack leads to the Lorule Paradox Right crack (to get the Hookshot chest), you can enter the Paradox Right crack in Hyrule.
+    - If that takes you to e.g. the Hyrule Waterfall crack, then you'll know that it's the _Lorule_ Waterfall crack that will bring you to Lorule Paradox Right.
+
+
 ## Hint System
 
-New with version v0.3.0 is the addition of hints!
+New with version v0.3 is the addition of hints!
 
-_These are still fairly new, and are being fine-tuned based on player feedback!!_
+_These are still fairly new, and are being fine-tuned based on player feedback!_
 
 ### About Hint Ghosts
 
@@ -757,7 +785,7 @@ In the vanilla game, these specters would trade Link a small hint in exchange fo
 
 In the randomizer, the ghosts can be seen even without the Hint Glasses, and rather than charging Link Play Coins they will instead charge a small amount of rupees (which you can customize) in exchange for a hint.
 
-Due to the overwhelming number of Hint Ghosts in the game (a whopping 132!!), **only the 58 overworld Hint Ghosts will give out these hints**, and the dungeon Hint Ghosts have been removed.
+Due to the overwhelming number of Hint Ghosts in the game (a whopping 193!!), **only the 58 overworld Hint Ghosts will give out these hints**, and the dungeon Hint Ghosts have been removed.
 
 ### Path Hints
 

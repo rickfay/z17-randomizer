@@ -1,8 +1,8 @@
 use crate::{actors::Actors, files::sarc::Sarc, flag::Flag, File, Item, Result};
 use game::Course;
 use serde::{de, ser::SerializeTuple, Deserialize, Deserializer, Serialize, Serializer};
+use std::fmt;
 use std::ops::Add;
-use std::{fmt, path::Path};
 
 #[derive(Debug)]
 pub struct Scene {
@@ -35,13 +35,9 @@ impl Scene {
         (self.actors.into_archive(), self.stage)
     }
 
-    pub fn dump<P>(self, path: P) -> Result<()>
-    where
-        P: AsRef<Path>,
-    {
-        let path = path.as_ref();
-        self.actors.dump(path)?;
-        self.stage.serialize().dump(path)
+    pub fn dump<P>(self) -> Box<[u8]> {
+        self.actors.dump().expect("actors");
+        self.stage.serialize().dump()
     }
 }
 
@@ -67,11 +63,8 @@ impl SceneMeta {
         self.stage_meta
     }
 
-    pub fn dump<P>(self, path: P) -> Result<()>
-    where
-        P: AsRef<Path>,
-    {
-        self.stage_meta.serialize().dump(path.as_ref())
+    pub fn dump(self) -> Box<[u8]> {
+        self.stage_meta.serialize().dump()
     }
 }
 

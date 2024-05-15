@@ -1,0 +1,332 @@
+body {
+    margin: 0;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-attachment: fixed;
+    -webkit-backdrop-filter: blur(3px);
+    backdrop-filter: blur(3px);
+    max-width: 100%;
+}
+
+.top-links {
+    width: 640px;
+    display: flex;
+    text-align: center;
+    background-color: #222222dd;
+    border-radius: 20px 20px 0 0;
+    box-shadow: 0 3px 10px #000000;
+    max-width: 100%;
+}
+
+.top-links a {
+    color: white;
+    display: block;
+    user-select: none;
+    padding: 12px 0;
+    text-decoration: none;
+    font-weight: bold;
+    font-family: Helvetica, serif;
+    width: 25%;
+    border-width: 0 1px;
+    border-color: #333333;
+    border-style: solid;
+}
+
+.top-links a:hover {
+    background-color: #0075FF;
+}
+
+
+/*#theme-toggle {*/
+/*    color: white;*/
+/*    background-color: #00000088;*/
+/*    padding: 10px;*/
+/*    !*border-radius: 10px 0;*!*/
+/*    user-select: none;*/
+/*}*/
+
+#main {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    font-family: Tahoma, serif;
+    font-size: 15px;
+    min-height: 100%;
+}
+
+img.logo {
+    width: 400px;
+    padding: 20px 0;
+    max-width: 90%;
+}
+
+p {
+    display: block;
+    margin-bottom: 32px;
+}
+
+form {
+    background-color: #ffffff;
+    box-shadow: 0 3px 10px #000000;
+    border-radius: 0 0 20px 20px;
+    width: 640px;
+    max-width: 100%;
+}
+
+#waiting-screen {
+    box-shadow: 0 3px 10px #000000;
+    border-radius: 0 0 20px 20px;
+    width: 640px;
+    max-width: 100%;
+}
+
+#waiting-screen {
+    display: none;
+}
+
+#waiting-screen img {
+    width: 640px;
+    max-width: 100%;
+    margin-bottom: -64px;
+    z-index: -1;
+    position: relative;
+    border-radius: 0 0 20px 20px;
+}
+
+.button {
+    border: none;
+    padding: 20px 0;
+    border-radius: 0 0 19px 19px;
+    font-size: 20px;
+    font-weight: bold;
+    width: 660px;
+    max-width: 100%;
+    text-align: center;
+    background-color: #222222dd;
+    color: #DDDDDD;
+}
+
+input[type=submit] {
+    border: none;
+    padding: 20px 0;
+    border-radius: 0 0 15px 15px;
+    font-size: 20px;
+    font-weight: bold;
+    width: 660px;
+    max-width: 100%;
+}
+
+input[type=submit]:disabled {
+    background-color: #444444;
+    color: #696969;
+    cursor: not-allowed;
+}
+
+input[type=submit]:enabled {
+    background-color: #0075FF;
+    color: #FFFFFF;
+    cursor: pointer;
+}
+
+.section {
+    /*border: 1px dashed black;*/
+    margin-bottom: 30px;
+    padding: 10px;
+}
+
+.section > label {
+    border-bottom: 1px solid black;
+    display: block;
+    font-weight: bold;
+    width: 100%;
+    color: black;
+    text-shadow: none;
+}
+
+.setting {
+    padding: 5px 0;
+}
+
+.setting label {
+    display: inline-block;
+    border: none;
+    width: 100%;
+    color: #000000;
+}
+
+.setting:hover > label {
+    color: #0075FF;
+}
+
+
+
+.setting > label input, .setting > label > select, .setting > label .range_val, .setting > label > input[type=text] {
+    float: right;
+}
+
+.setting > label > input[type=text] {
+    width: 50%;
+    border-style: solid;
+    border-width: 1px;
+}
+
+.setting select, .setting select option {
+    width: 50%;
+}
+
+.checkbox {
+    padding: 5px 0;
+}
+
+.checkbox label {
+    display: inline-block;
+    border: none;
+    width: 100%;
+    color: #000000;
+}
+
+.checkbox:hover > label {
+    color: #0075FF;
+}
+
+.checkbox > label input {
+    float: right;
+}
+
+.pointer {
+    cursor: pointer;
+}
+
+input {
+    accent-color: #0075FF;
+}
+
+input[type="range"] {
+    width: 100%;
+}
+
+.range_val > input[type=text] {
+    color: black;
+    padding: 0 8px;
+    border: 1px solid #858585;
+    margin-right: 5px;
+    width: 20%;
+    min-width: 40px;
+    text-align: center;
+    background-color: #DDDDDD;
+}
+
+.range_val {
+    display: inline-flex;
+    width: 50%;
+}
+
+span.version {
+    float: right;
+}
+
+span.generate {
+    justify-content: center;
+    display: flex;
+    padding-bottom: 10px;
+    zoom: 120%
+}
+
+.footer {
+    font-size: 10px;
+    text-align: center;
+    margin-top: 30px;
+    color: gray;
+    background: #000000f0;
+    width: 100%;
+    padding: 20px 0;
+}
+
+/*.nav {*/
+/*    margin: 30px;*/
+/*    width: 800px;*/
+/*    text-align: center;*/
+/*    font-size: x-large;*/
+/*    color: white;*/
+/*    display: block;*/
+/*    flex-direction: column;*/
+/*}*/
+
+/*.nav a {*/
+/*    color: white;*/
+/*    text-decoration: none;*/
+/*    border: white 1px solid;*/
+/*    border-radius: 5px;*/
+/*    padding: 10px;*/
+/*}*/
+
+/*.nav a:hover {*/
+/*    background-color: #1f1f1f;*/
+/*    cursor: pointer;*/
+/*}*/
+
+.darkMode {
+    backdrop-filter: blur(3px) brightness(0.7);
+    /*.top-links a {*/
+    /*    background-color: #222222;*/
+    /*}*/
+    form {
+        color: #FFFFFF;
+        background-color: #000000f0;
+        box-shadow: 0 3px 10px #000000;
+    }
+
+    #waiting-screen {
+        color: #FFFFFF;
+        box-shadow: 0 3px 10px #000000;
+    }
+
+    #waiting-screen {
+        display: none;
+    }
+
+    #waiting-screen img {
+        width: 640px;
+        max-width: 100%;
+        margin-bottom: -64px;
+        z-index: -1;
+        position: relative;
+        border-radius: 0 0 20px 20px;
+    }
+    .section > label {
+        color: #FC212C;
+        border-bottom-color: white;
+        /*text-shadow: 3px 3px 10px darkslategrey;*/
+    }
+    .setting label {
+        color: #FFFFFF;
+    }
+    .setting:hover > label {
+        color: #00C8FF;
+    }
+    .setting > label > input[type=text] {
+        background: none;
+        color: #FFFFFF;
+    }
+    .setting select {
+        background: none;
+        color: #FFFFFF;
+    }
+    .setting select, .setting select option {
+        background: black;
+        color: white;
+    }
+    .range_val > input[type=text] {
+        color: white;
+        background-color: #222222;
+    }
+    .checkbox label {
+        color: #FFFFFF;
+    }
+    .checkbox:hover > label {
+        color: #00C8FF;
+    }
+}

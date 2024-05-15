@@ -1,10 +1,12 @@
+use std::io::Cursor;
 use {
     self::{exheader::ExHeader, romfs::RomFs},
     crate::{Error, Result},
     bytey::*,
     serde::Serialize,
-    std::{fs, io::prelude::*, path::Path},
+    std::io::prelude::*,
 };
+
 pub mod byaml;
 pub mod exheader;
 pub mod msgbn;
@@ -36,13 +38,12 @@ where
     }
 }
 
-impl Cxi<fs::File> {
-    pub fn open<P>(path: P) -> Result<Self>
-    where
-        P: AsRef<Path>,
-    {
-        let path = path.as_ref();
-        let mut file = fs::File::open(path)?;
+impl Cxi<Cursor<Vec<u8>>> {
+    pub fn open(rom: Vec<u8>) -> Result<Self> {
+        // let path = path.as_ref();
+        let mut file = Cursor::new(rom);
+        // let mut file = fs::File::create(&path)?;
+        // file.write_all(rom)?;
 
         //validate_rom(&file);
 
@@ -115,19 +116,8 @@ where
         File { path: self.path, inner: self.inner.into_bytes() }
     }
 
-    pub fn dump<P>(self, path: P) -> Result<()>
-    where
-        P: AsRef<Path>,
-    {
-        let path = path.as_ref().join(self.path);
-        if let Some(parent) = path.parent() {
-            if !parent.exists() {
-                fs::create_dir_all(parent)?;
-            }
-        }
-        let bytes = self.inner.into_bytes();
-        fs::write(path, bytes)?;
-        Ok(())
+    pub fn dump(self) -> Box<[u8]> {
+        self.inner.into_bytes()
     }
 }
 
@@ -137,7 +127,7 @@ where
 {
     pub fn serialize(self) -> File<Box<[u8]>> {
         let mut buf = vec![];
-        byaml::to_writer(std::io::Cursor::new(&mut buf), &self.inner).expect("Could not serialize.");
+        byaml::to_writer(Cursor::new(&mut buf), &self.inner).expect("Could not serialize.");
         File { path: self.path, inner: buf.into() }
     }
 }

@@ -24,7 +24,21 @@ impl TryFrom<u8> for NiceItems {
             1 => Ok(Self::Shuffled),
             2 => Ok(Self::Off),
 
-            _ => Err("Invalid NiceItems Setting: {}".to_owned()),
+            _ => Err(format!("Invalid NiceItems setting: {}", value)),
+        }
+    }
+}
+
+impl TryFrom<String> for NiceItems {
+    type Error = String;
+
+    fn try_from(value: String) -> Result<Self, Self::Error> {
+        match value.as_str() {
+            "Vanilla" => Ok(Self::Vanilla),
+            "Shuffled" => Ok(Self::Shuffled),
+            "Off" => Ok(Self::Off),
+
+            _ => Err(format!("Invalid NiceItems setting: {}", value)),
         }
     }
 }

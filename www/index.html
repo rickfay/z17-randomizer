@@ -1,0 +1,207 @@
+<html lang="en">
+<head>
+    <title>ALBW Randomizer</title>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <meta charset="UTF-8">
+    <link href="style.css" rel="stylesheet">
+    <link href="./img/favicon.ico" rel="icon" type="image/x-icon">
+</head>
+<body>
+<div id="main"><img alt="The Legend of Zelda: A Link Between Worlds Randomizer" class="logo" src="img/logo.png">
+    <!-- todo: less use of style tags -->
+    <div style="color: white; padding: 10px; background: #00000088; position: absolute; right: 0; top: 0; border-radius: 0 0 0 10px; font-family: Helvetica, serif; font-size: 10px;">
+        v0.4 BETA
+    </div>
+    <div style="max-width: 100%;">
+        <div class="top-links">
+            <a href="https://github.com/rickfay/z17-randomizer#setup" style="border-radius: 20px 0 0 0; border-left-width: 0;" target="_blank">Guides</a>
+            <a href="https://discord.gg/dmAJh2uY7M" target="_blank">Discord</a>
+            <a href="https://github.com/rickfay/z17-randomizer" target="_blank">GitHub</a>
+            <a id="theme-toggle" style="border-radius: 0 20px 0 0; border-right-width: 0;">Theme <span style="font-size: 13px;">🗘</span></a>
+        </div>
+        <div id="waiting-screen">
+            <img src="img/loading.gif"  alt="Randomizing..." />
+            <div class="button">Generating! Please wait...</div>
+        </div>
+        <form id="settings-form">
+            <div class="section">
+                <label>Seed Info</label>
+                <div class="setting" title="TODO">
+                    <label class="pointer">
+                        <input name="seed" type="text" value="0">
+                        Seed Number
+                    </label>
+                </div>
+            </div>
+            <div class="section">
+                <label>Major Settings</label>
+                <div class="setting"
+                     title="Determines the logical rules the randomizer will follow when placing items.&NewLine;&NewLine;[ Normal ]&NewLine;Standard gameplay, no tricky item use or glitches. If unsure, choose this.&NewLine;&NewLine;[ Hard ]&NewLine;Adds tricks that may be difficult or obscure, but aren't technically glitches.&NewLine;&NewLine;[ Glitched ]&NewLine;Includes the above plus a selection of easy-to-learn glitches.&NewLine;&NewLine;[ Advanced Glitched ]&NewLine;Includes the above plus &quot;advanced&quot; glitches that may be a challenge to master.&NewLine;&NewLine;[ Hell ]&NewLine;Includes every known RTA-viable glitch, including the insane ones. Don't choose this.&NewLine;&NewLine;[ No Logic ]&NewLine;Items are placed with no logic at all. Seeds have a high chance of being impossible to complete&NewLine;due (primarily) to dungeon key placement, but these odds improve if this setting is combined with&NewLine;the Keysy setting.">
+                    <label>
+                        <select name="logic_mode">
+                            <option value="Normal" selected="selected">Normal</option>
+                            <option value="Hard">Hard</option>
+                            <option value="Glitched">Glitched</option>
+                            <option value="Advanced Glitched">Advanced Glitched</option>
+                            <option value="Hell">Hell</option>
+                            <option value="No Logic">No Logic</option>
+                        </select>
+                        Logic Mode
+                    </label>
+                </div>
+                <div class="setting" title="TODO">
+                    <label>
+                        <select name="ped_requirement">
+                            <option value="Standard" selected="selected">Standard</option>
+                            <option value="Vanilla">Vanilla</option>
+                        </select>Master Sword Pedestal
+                    </label>
+                </div>
+                <div class="setting" title="TODO">
+                    <label>
+                        <select name="cracks">
+                            <option value="Closed" selected="selected">Closed</option>
+                            <option value="Open">Open</option>
+                        </select>
+                        Cracks
+                    </label>
+                </div>
+                <div class="setting" title="TODO">
+                    <label>
+                        <select name="trials_door">
+                            <option value="Open">Open</option>
+                            <option value="1 Trial Required" selected="selected">1 Trial Required</option>
+                            <option value="2 Trials Required">2 Trials Required</option>
+                            <option value="3 Trials Required">3 Trials Required</option>
+                            <option value="4 Trials Required">4 Trials Required</option>
+                        </select>Trials Door
+                    </label>
+                </div>
+                <div class="setting" title="TODO">
+                    <label>
+                        <div class="range_val">
+                            <input id="view_lc_requirement" name="view_lc_requirement" type="text" value="7" readonly />
+                            <input id="lc_requirement" name="lc_requirement" type="range" min="0" max="7" value="7" oninput="view_lc_requirement.value=lc_requirement.value">
+                        </div>
+                        Lorule Castle Requirement
+                    </label>
+                </div>
+                <div class="checkbox" title="TODO">
+                    <label class="pointer">
+                        <input name="dungeon_prize_shuffle" type="checkbox" checked="checked">
+                        Randomized Dungeon Prizes
+                    </label>
+                </div>
+            </div>
+            <div class="section">
+                <label>Entrance Randomizer</label>
+                <div class="setting" title="TODO"><label><select name="cracksanity">
+                    <option value="Off">Off</option>
+                    <option value="Cross World Pairs">Cross World Pairs</option>
+                    <option value="Any World Pairs">Any World Pairs</option>
+                    <option value="Mirrored Cross World Pairs">Mirrored Cross World Pairs</option>
+                    <option value="Mirrored Any World Pairs">Mirrored Any World Pairs</option>
+                </select>Cracksanity</label></div>
+                <div class="setting" title="TODO">
+                    <label>
+                        <select name="weather_vanes">
+                            <option value="Standard">Standard</option>
+                            <option value="Shuffled">Shuffled</option>
+                            <option value="Convenient" selected="selected">Convenient</option>
+                            <option value="Hyrule">Hyrule</option>
+                            <option value="Lorule">Lorule</option>
+                            <option value="All">All</option>
+                        </select>
+                        Weather Vanes
+                    </label>
+                </div>
+            </div>
+            <div class="section"><label>Maiamai Settings</label>
+                <div class="setting" title="TODO">
+                    <label>
+                        <select name="nice_items">
+                            <option value="Shuffled" selected="selected">Shuffled</option>
+                            <option value="Vanilla">Vanilla</option>
+                            <option value="Off">Off</option>
+                        </select>
+                        Nice Items
+                    </label>
+                </div>
+                <div class="setting" title="TODO">
+                    <label>
+                        <div class="range_val">
+                            <input id="view_maiamai_limit" name="view_maiamai_limit" type="text" value="50" readonly />
+                            <input id="maiamai_limit" name="maiamai_limit" type="range" min="0" max="100" value="50" step="10" oninput="view_maiamai_limit.value=maiamai_limit.value">
+                        </div>
+                        Maiamai Limit
+                    </label>
+                </div>
+                <div class="checkbox" title="TODO"><label class="pointer"><input name="maiamai_madness" type="checkbox">Maiamai Madness</label></div>
+            </div>
+            <div class="section"><label>Starting Inventory</label>
+                <div class="checkbox" title="TODO"><label class="pointer"><input name="start_with_merge" type="checkbox">Start with Merge</label></div>
+                <div class="checkbox" title="multiline&NewLine;description?"><label class="pointer"><input name="start_with_pouch" type="checkbox" checked="checked">Start with Pouch</label></div>
+                <div class="checkbox" title="TODO"><label class="pointer"><input name="bell_in_shop" type="checkbox" checked="checked">Bell in Shop</label></div>
+                <div class="checkbox" title="Guarantees Ravio's Shop will have at least one Sword."><label class="pointer"><input name="sword_in_shop" type="checkbox" checked="checked">Sword in Shop</label></div>
+                <div class="checkbox" title="TODO"><label class="pointer"><input name="boots_in_shop" type="checkbox">Boots in Shop</label></div>
+                <div class="checkbox" title="TODO"><label class="pointer"><input name="assured_weapon" type="checkbox">Assured Weapon</label></div>
+            </div>
+            <div class="section"><label>Misc. Settings</label>
+                <div class="setting" title="TODO"><label><select name="keysy">
+                    <option value="Off" selected="selected">Off</option>
+                    <option value="Small Keysy">Small Keysy</option>
+                    <option value="Big Keysy">Big Keysy</option>
+                    <option value="All Keysy">All Keysy</option>
+                </select>Keysy</label></div>
+                <div class="setting" title="TODO">
+                    <label>
+                        <div class="range_val">
+                            <input id="view_treacherous_tower_floors" name="view_treacherous_tower_floors" type="text" value="5" readonly />
+                            <input id="treacherous_tower_floors" name="treacherous_tower_floors" type="range" min="2" max="66" value="5" oninput="view_treacherous_tower_floors.value=treacherous_tower_floors.value">
+                        </div>
+                        Treacherous Tower Floors
+                    </label>
+                </div>
+                <div class="checkbox" title="TODO"><label class="pointer"><input name="super_items" type="checkbox" checked="checked">Super Items</label></div>
+                <div class="checkbox" title="TODO"><label class="pointer"><input name="skip_big_bomb_flower" type="checkbox" checked="checked">Skip Big Bomb Flower</label></div>
+                <div class="checkbox" title="TODO"><label class="pointer"><input name="progression_enemies" type="checkbox" checked="checked">Progression Enemies</label></div>
+                <div class="checkbox" title="TODO"><label class="pointer"><input name="bow_of_light_in_castle" type="checkbox">Bow of Light in Lorule Castle</label></div>
+                <div class="checkbox" title="TODO"><label class="pointer"><input name="purple_potion_bottles" type="checkbox">Purple Potion Bottles</label></div>
+                <div class="checkbox" title="TODO"><label class="pointer"><input name="minigames_excluded" type="checkbox" checked="checked">Exclude Minigames</label></div>
+            </div>
+            <div class="section"><label>Cosmetic</label>
+                <div class="checkbox" title="TODO"><label class="pointer"><input name="chest_size_matches_contents" type="checkbox" checked="checked">Chest Size Matches Contents</label></div>
+                <div class="checkbox" title="TODO"><label class="pointer"><input name="night_mode" type="checkbox">Night Mode</label></div>
+            </div>
+            <div class="section">
+                <label>Expert Player Settings</label>
+                <div class="checkbox" title="TODO"><label class="pointer"><input name="swordless_mode" type="checkbox">Swordless Mode</label></div>
+                <div class="checkbox" title="TODO"><label class="pointer"><input name="dark_rooms_lampless" type="checkbox">Cross Dark Rooms without Lamp</label></div>
+                <div class="checkbox" title="TODO"><label class="pointer"><input name="lamp_and_net_as_weapons" type="checkbox">Lamp &amp; Net as Weapons</label></div>
+            </div>
+            <div class="section"><label>ROM</label>
+                <div class="setting" title="&NewLine;You must provide your own copy of &quot;The Legend of Zelda: A Link Between Worlds&quot; to use the randomizer.&NewLine;&NewLine;The ROM must be:&NewLine;1. The US (North American) version of the game&NewLine;2. Decrypted&NewLine;3. In a .3ds format (converters exist to turn .cia files into .3ds)&NewLine;">
+                    <label><input id="rom" accept=".3ds" name="rom" style="width: 50%" type="file">Original ROM</label>
+                </div>
+            </div>
+            <span>
+                <input type="submit" value="Generate Seed">
+            </span>
+        </form>
+    </div>
+    <div id="resultField"></div>
+    <div class="footer">The ALBW Randomizer Project developers and community strongly<br>condemn piracy and the
+        distribution of copyrighted materials.<br><br>"The Legend of Zelda" is a registered trademark of Nintendo.<br>"The
+        Legend of Zelda: A Link Between Worlds" Copyright © Nintendo, 2013.<br>All in-game
+        imagery, logos, and their likenesses Copyright © Nintendo, 2013.
+    </div>
+</div>
+
+<script src="themes.js" type="text/javascript"></script>
+<!-- Here, we have to load the generated JS file directly in the document -->
+<script src="pkg/albwr.js" type="text/javascript"></script>
+<!-- Note that there is NO `type="module"` in the script tag -->
+<script src="index.js" type="text/javascript"></script>
+</body>
+</html>

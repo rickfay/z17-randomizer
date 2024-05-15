@@ -8,7 +8,7 @@ use rand::seq::SliceRandom;
 
 /// Choose which floors of Treacherous Tower to use
 pub fn choose_floors(settings: &Settings, rng: &mut StdRng) -> Result<Vec<TowerStage>> {
-    let mut chosen_floors = Vec::with_capacity(settings.treacherous_tower_floors);
+    let mut chosen_floors = Vec::with_capacity(settings.treacherous_tower_floors as usize);
 
     if settings.treacherous_tower_floors < 2 {
         fail!("Treacherous Tower must have at least 2 floors.");
@@ -21,7 +21,7 @@ pub fn choose_floors(settings: &Settings, rng: &mut StdRng) -> Result<Vec<TowerS
     // result set in roughly an even Advanced/Intermediate/Beginner split, if possible. This won't work as effectively
     // with more than 15 floors as we'll run out of Beginner and Intermediate floors.
     floors()
-        .choose_multiple_weighted(rng, settings.treacherous_tower_floors - 2, |(course, _)| match course {
+        .choose_multiple_weighted(rng, (settings.treacherous_tower_floors - 2) as usize, |(course, _)| match course {
             EnemyAttackS => 16.0,
             EnemyAttackM => 48.0 / 13.0,
             EnemyAttackL => 1.0,

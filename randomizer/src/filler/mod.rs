@@ -828,7 +828,7 @@ fn handle_maiamai_limit(
     check_map: &mut CheckMap, junk: &mut Pool,
 ) {
     // Early exit if we've already dealt with the limit
-    if *major_maiamai_items >= seed_info.settings.maiamai_limit / 10 {
+    if *major_maiamai_items >= (seed_info.settings.maiamai_limit / 10) as usize {
         return;
     }
 
@@ -840,7 +840,7 @@ fn handle_maiamai_limit(
 
     if MAIAMAI_CHECK_NAMES.contains(&chosen_check_name) && item.is_major_item() {
         *major_maiamai_items += 1;
-        if *major_maiamai_items >= seed_info.settings.maiamai_limit / 10 {
+        if *major_maiamai_items >= (seed_info.settings.maiamai_limit / 10) as usize {
             // info!("HANDLE MAIAMAI LIMIT: {}, MAJOR ITEMS: {}", seed_info.settings.maiamai_limit / 10, major_maiamai_items);
             for check_name in MAIAMAI_CHECK_NAMES {
                 if Some(&None) == check_map.get(check_name) {

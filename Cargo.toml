@@ -1,5 +1,5 @@
 [package]
-name = "albw-randomizer"
+name = "albwr"
 version = "0.4.0"
 authors = [
     "Kevin Marsolais <kevin@kevinmarsolais.co>",
@@ -11,21 +11,59 @@ license = "GPL-2.0-or-later"
 [dependencies]
 cli = { workspace = true }
 game = { workspace = true }
+getrandom = { version = "0.2", features = ["js"] }
 log = { workspace = true }
 macros = { workspace = true }
 modinfo = { workspace = true }
+peak_alloc = "0.2.0"
 rand = { workspace = true }
-randomizer = { path = "./randomizer" }
+randomizer = { workspace = true }
 rom = { workspace = true }
 simplelog = "0.12.1"
 structopt = "0.3.26"
+js-sys = "0.3"
+base64 = "0.21.2"
+lazy_static = "1.4"
+regex = "1"
+zip = { workspace = true }
+tokio = { workspace = true }
+wasm-bindgen = { workspace = true }
+console_error_panic_hook = { workspace = true, optional = true }
+wasm-logger = "0.2.0"
+serde_json = "1.0.115"
+serde = { version = "1.0.197", features = ["derive"] }
+wasm-bindgen-futures = "0.4.42"
+
+
+[features]
+default = ["console_error_panic_hook"]
+
+[dependencies.web-sys]
+version = "0.3.61"
+features = ["console", "Document", "HtmlElement", "HtmlInputElement", "MessageEvent", "Window", "Worker", "FormData", "HtmlCollection", "HtmlFormElement", "File", "ReadableStream", "ReadableStreamDefaultReader", "ReadableStreamReadResult", "FileSystemSyncAccessHandle", "FileReader", "FileList"]
 
 [build-dependencies]
 winres = "0.1"
 
-[[bin]]
-name = "albw-plandomizer"
-path = "./src/bin/plando.rs"
+[lib]
+crate-type = ["cdylib"]
+#path = "./gui/src/lib.rs"
+
+#[lib]
+#crate-type = ["cdylib", "rlib"]
+#path = "./src/bin/webapp.rs"
+
+#[[bin]]
+#name = "albwr-wasm"
+#path = "./src/bin/webapp.rs"
+
+#[[bin]]
+#name = "albw-randomizer"
+#path = "./src/bin/randomizer.rs"
+
+#[[bin]]
+#name = "albw-plandomizer"
+#path = "./src/bin/plando.rs"
 
 [workspace]
 members = [
@@ -46,19 +84,25 @@ bytey = { path = "./bytey" }
 cli = { path = "./cli" }
 game = { path = "./game" }
 jack = { path = "./jack" }
-log = "0.4.19"
+log = "0.4.21"
 macros = { path = "./macros" }
 modinfo = { path = "./modinfo" }
-path-absolutize = "3.1.0"
+randomizer = { path = "./randomizer" }
 rand = { version = "0.8.5", features = ["std_rng"] }
 rom = { path = "./rom" }
 serde = { version = "1.0.183", features = ["derive"] }
 serde_json = "1.0.104"
 strum = { version = "0.25.0", features = ["derive"] }
 yaz0 = "0.3.0"
+zip = { version = "0.6.6", default-features = false, features = ["deflate"] }
+tokio = { version = "^1.28.0", features = ["rt", "macros"] }
+futures = "0.3.30"
+futures-util = "0.3.30"
+wasm-bindgen = "0.2.84"
+console_error_panic_hook = { version = "0.1.7" }
 
 [profile.release]
+#panic = "abort"
 codegen-units = 1
+opt-level = "z"
 lto = true
-opt-level = "s"
-strip = true

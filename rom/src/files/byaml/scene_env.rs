@@ -1,6 +1,5 @@
-use crate::{File, Result};
+use crate::File;
 use serde::{Deserialize, Serialize};
-use std::path::Path;
 
 #[derive(Debug)]
 pub struct SceneEnvFile {
@@ -24,11 +23,8 @@ impl SceneEnvFile {
         self.scene_env
     }
 
-    pub fn dump<P>(self, path: P) -> Result<()>
-    where
-        P: AsRef<Path>,
-    {
-        self.scene_env.serialize().dump(path.as_ref())
+    pub fn dump(self) -> Box<[u8]> {
+        self.scene_env.serialize().dump()
     }
 }
 

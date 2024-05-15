@@ -20,7 +20,6 @@ log = { workspace = true }
 macros = { workspace = true }
 modinfo = { workspace = true }
 queue = "0.3.2-final"
-path-absolutize = { workspace = true }
 rand = { workspace = true }
 rom = { workspace = true }
 serde = { workspace = true }
@@ -29,3 +28,5 @@ strum = { workspace = true }
 tempfile = "3.7.1"
 try-insert-ext = "0.1.0"
 twox-hash = "1.6.3"
+zip = { workspace = true }
+base64 = "0.22.0"

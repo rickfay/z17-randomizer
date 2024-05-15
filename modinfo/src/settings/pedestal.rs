@@ -16,7 +16,19 @@ impl TryFrom<u8> for PedestalSetting {
         match value {
             2 => Ok(Vanilla),
             3 => Ok(Standard),
-            _ => Err("Invalid Pedestal Requirement: {}".to_owned()),
+            _ => Err(format!("Invalid Pedestal Requirement: {}", value)),
+        }
+    }
+}
+
+impl TryFrom<String> for PedestalSetting {
+    type Error = String;
+
+    fn try_from(value: String) -> Result<Self, Self::Error> {
+        match value.as_str() {
+            "Vanilla" => Ok(Vanilla),
+            "Standard" => Ok(Standard),
+            _ => Err(format!("Invalid Pedestal Requirement: {}", value)),
         }
     }
 }

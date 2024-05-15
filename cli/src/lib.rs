@@ -31,8 +31,7 @@ pub fn get_seed_settings() -> Result<Settings, String> {
     );
 
     let maiamai_limit =
-        prompt_u8_in_range("Maiamai Limit", "Choose the maximum number of Maiamai you're willing to collect:", 0, 100)
-            as usize;
+        prompt_u8_in_range("Maiamai Limit", "Choose the maximum number of Maiamai you're willing to collect:", 0, 100);
 
     let lc_requirement = prompt_u8_in_range(
         "Lorule Castle Requirement",
@@ -207,12 +206,12 @@ pub fn get_seed_settings() -> Result<Settings, String> {
         Note: Some large chests will have a reduced hitbox to prevent negative gameplay interference.",
     );
 
-    let treacherous_tower_floors = prompt_u16_in_range(
+    let treacherous_tower_floors = prompt_u8_in_range(
         "Treacherous Tower Floors",
         "How many floors should Treacherous Tower have? (2-66)\nRecommended: 5",
         2,
         66,
-    ) as usize;
+    );
 
     let purple_potion_bottles =
         prompt_bool("Purple Potion Bottles", "Fills all Empty Bottles with a free Purple Potion.");

@@ -18,7 +18,19 @@ impl TryFrom<u8> for Cracks {
         match value {
             0 => Ok(Self::Closed),
             1 => Ok(Self::Open),
-            _ => Err("Invalid Cracks index: {}".to_owned()),
+            _ => Err(format!("Invalid Cracks setting: {}", value)),
+        }
+    }
+}
+
+impl TryFrom<String> for Cracks {
+    type Error = String;
+
+    fn try_from(value: String) -> Result<Self, Self::Error> {
+        match value.as_str() {
+            "Closed" => Ok(Self::Closed),
+            "Open" => Ok(Self::Open),
+            _ => Err(format!("Invalid Cracks setting: {}", value)),
         }
     }
 }

@@ -8,16 +8,14 @@ use crate::{
     hints::{formatting::*, Hints},
     metrics::Metrics,
     patch::lms::msbf::MsbfKey,
-    system::UserConfig,
 };
 use filler::cracks::Crack;
 use filler::filler_item::Randomizable;
 use game::Item::{self};
-use log::{debug, error, info};
+use log::{error, info};
 use macros::fail;
 use modinfo::Settings;
 use patch::Patcher;
-use path_absolutize::*;
 use rand::{rngs::StdRng, SeedableRng};
 use regions::Subregion;
 use rom::Rom;
@@ -26,9 +24,8 @@ use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
 use std::hash::BuildHasherDefault;
 use std::{
     error::Error as StdError,
-    fs::File,
     hash::{Hash, Hasher},
-    io::{self, Write},
+    io::{self},
     ops::Deref,
 };
 use twox_hash::XxHash64;
@@ -222,7 +219,7 @@ impl Layout {
     pub fn set(&mut self, location: LocationInfo, item: Randomizable) {
         let LocationInfo { subregion: node, name } = location;
         self.get_node_mut(node).insert(name, item);
-        debug!("Placed {} in {}/{}", item.as_str(), location.subregion.name(), location.name);
+        log::debug!("Placed {} in {}/{}", item.as_str(), location.subregion.name(), location.name);
     }
 
     pub fn set_item<T>(&mut self, location: &'static str, subregion: &'static Subregion, item: T)
@@ -265,6 +262,8 @@ where
 
 /// Align JSON Key-Values for readability
 /// Can't find a decent library for this, so we're doing it manually
+/// FIXME Use this
+#[allow(unused)]
 fn align_json_values(json: &mut String) {
     const KEY_ALIGNMENT: usize = 56;
     let mut index_colon = 0;
@@ -377,23 +376,32 @@ impl Default for SeedInfo {
 }
 
 /// Main entry point to generate one ALBWR Seed.
-pub fn generate_seed(
-    seed: u32, settings: Settings, user_config: &UserConfig, no_patch: bool, no_spoiler: bool,
-) -> Result<()> {
+pub fn generate_seed(seed: u32, settings: Settings, rom: Vec<u8>) -> Result<Vec<u8>> {
     validate_settings(&settings)?;
 
     let rng = &mut StdRng::seed_from_u64(seed as u64);
 
     let hash = SeedHash::new(seed, &settings);
 
-    info!("Hash:                           {}", hash.text_hash);
-
-    // settings.log_settings();
+    info!("Seed: {}", seed);
+    info!("Hash: {}", hash.text_hash);
 
     let seed_info = &calculate_seed_info(seed, settings, hash, rng)?;
-    patch_seed(seed_info, user_config, no_patch, no_spoiler)?;
 
-    Ok(())
+    info!("{seed_info:?}");
+
+    let patch_u8 = patch_seed(seed_info, rom)?;
+
+    info!("Patch completed");
+
+    // let patch_base64 = general_purpose::STANDARD.encode(patch_u8);
+    // let patch_utf8 = String::from_utf8(Vec::from(patch_base64)).unwrap();
+    // let bytes_u16 = patch_u8.as_slice().iter().map(|byte| *byte as u16).collect::<Vec<_>>();
+    // let patch_u16 = String::from_utf16(&bytes_u16).unwrap();
+
+    info!("Patch size: {}", patch_u8.len());
+
+    Ok(patch_u8)
 }
 
 /// A hash used in-game to quickly verify that two players are playing the same seed.
@@ -550,49 +558,44 @@ fn calculate_seed_info(seed: u32, settings: Settings, hash: SeedHash, rng: &mut 
     Ok(seed_info)
 }
 
-pub fn patch_seed(seed_info: &SeedInfo, user_config: &UserConfig, no_patch: bool, no_spoiler: bool) -> Result<()> {
+pub fn patch_seed(seed_info: &SeedInfo, rom: Vec<u8>) -> std::result::Result<Vec<u8>, Error> {
     println!();
 
-    if !no_patch {
-        info!("Starting Patch Process...");
+    // if !no_patch {
+    info!("Starting Patch Process...");
 
-        let game = match Rom::load(user_config.rom()) {
-            Ok(rom) => rom,
-            Err(_) => {
-                // Retry once, people keep naming their ROMs "ALBW.3ds.3ds" :P
-                Rom::load(format!("{}.3ds", user_config.rom().to_str().unwrap()))?
-            },
-        };
-        let mut patcher = Patcher::new(game)?;
+    let game = Rom::load(rom)?;
+    let mut patcher = Patcher::new(game)?;
 
-        info!("ROM Loaded.\n");
+    info!("ROM Loaded.\n");
 
-        // patch::lms::msbf::research(&mut patcher, None, "HintGhost", vec![], true)?;
+    // FIXME actually do some patching, 'kay?
 
-        // patch::research_msbf_msbt(&mut patcher,
-        //     game::Course::IndoorLight, "FieldLight_18_SahasPupil", // MSBF
-        //     game::Course::IndoorLight, "FieldLight_18", // MSBT
-        //     true);
+    // patch::lms::msbf::research(&mut patcher, None, "HintGhost", vec![], true)?;
 
-        regions::patch(&mut patcher, seed_info)?;
-        let patches = patcher.prepare(seed_info)?;
-        patches.dump(user_config.output())?;
-    }
-    if !no_spoiler {
-        let path = user_config.output().join(format!("{:0>10}_spoiler.json", seed_info.seed));
-        info!("Writing Spoiler Log to:         {}", &path.absolutize()?.display());
+    // patch::research_msbf_msbt(&mut patcher,
+    //     game::Course::IndoorLight, "FieldLight_18_SahasPupil", // MSBF
+    //     game::Course::IndoorLight, "FieldLight_18", // MSBT
+    //     true);
 
-        //let spoiler = Spoiler::from(seed_info);
+    regions::patch(&mut patcher, seed_info)?;
+    let patches = patcher.prepare(seed_info)?;
+    patches.dump()
 
-        let mut serialized = serde_json::to_string_pretty(&seed_info).unwrap();
-        align_json_values(&mut serialized);
-
-        write!(File::create(path)?, "{}", serialized).expect("Could not write the spoiler log.");
-    }
+    // }
+    // if !no_spoiler {
+    //     let path = user_config.output().join(format!("{:0>10}_spoiler.json", seed_info.seed));
+    //     // info!("Writing Spoiler Log to:         {}", &path.absolutize()?.display());
+    //
+    //     //let spoiler = Spoiler::from(seed_info);
+    //
+    //     let mut serialized = serde_json::to_string_pretty(&seed_info).unwrap();
+    //     align_json_values(&mut serialized);
+    //
+    //     write!(File::create(path)?, "{}", serialized).expect("Could not write the spoiler log.");
+    // }
 
     // let path = user_config.output().join(format!("{:0>10}_world_graph.json", seed_info.seed));
     // let world_graph = serde_json::to_string_pretty(&seed_info.world_graph).unwrap();
     // write!(File::create(path)?, "{}", world_graph).expect("Could not write World Graph");
-
-    Ok(())
 }

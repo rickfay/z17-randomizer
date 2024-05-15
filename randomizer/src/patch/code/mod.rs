@@ -13,12 +13,7 @@ use modinfo::settings::{pedestal::PedestalSetting::*, Settings};
 use rom::flag::Flag;
 use rom::scene::SpawnPoint;
 use rom::ExHeader;
-use std::{
-    collections::HashMap,
-    fs::{self, File},
-    io::Write,
-    path::Path,
-};
+use std::collections::HashMap;
 
 mod arm;
 
@@ -65,17 +60,16 @@ impl Code {
         self.ips.append(addr, data.into());
     }
 
-    pub fn dump<P>(self, path: P, exheader: &ExHeader) -> Result<()>
-    where
-        P: AsRef<Path>,
-    {
-        let path = path.as_ref();
+    pub fn dump_code(&self) -> Result<Vec<u8>> {
+        self.ips.write()
+    }
+
+    pub fn dump_exheader(self, exheader: &ExHeader) -> Result<Vec<u8>> {
         let mut exheader = exheader.clone();
         exheader.set_text_size(self.text - exheader.get_text_address());
         exheader.set_rodata_size(self.rodata - exheader.get_rodata_address());
-        self.ips.write(File::create(path.join("code.ips"))?)?;
-        fs::write(path.join("exheader.bin"), exheader.as_ref())?;
-        Ok(())
+        // fs::write(path.join("exheader.bin"), exheader.as_ref())?;
+        Ok(Vec::from(exheader.dump()))
     }
 }
 
@@ -140,18 +134,18 @@ impl Ips {
         let offset = offset - self.offset;
         let data = data.as_ref();
         self.buf.extend_from_slice(&offset.to_be_bytes()[1..4]);
-        self.buf.extend_from_slice(&data.len().to_be_bytes()[6..8]);
+        self.buf.extend_from_slice(&(data.len() as u16).to_be_bytes());
         self.buf.extend(data);
     }
 
-    pub fn write<W>(self, mut writer: W) -> Result<()>
-    where
-        W: Write,
-    {
-        writer.write_all(b"PATCH")?;
-        writer.write_all(&self.buf)?;
-        writer.write_all(b"EOF")?;
-        Ok(())
+    pub fn write(&self) -> Result<Vec<u8>> {
+        let mut buffer = vec![];
+
+        buffer.extend_from_slice(b"PATCH");
+        buffer.extend(&self.buf);
+        buffer.extend_from_slice(b"EOF");
+
+        Ok(buffer)
     }
 }
 
@@ -393,7 +387,7 @@ fn warp(code: &mut Code) {
     code.text().patch(0x442498, [b(kill_player)]);
 
     // code.text().patch(0x12cc7c, [mov(R0, R0)]); // Don't play SE_S_SELECT sound effect when hit continue button
-    // Continue button sets: FUN_002317c0(0x3f800000,param_1 + 0x50);
+    // sets: FUN_002317c0(0x3f800000,param_1 + 0x50);
 }
 
 /// Create new item that sets Flag 510

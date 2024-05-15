@@ -34,6 +34,22 @@ impl TryFrom<u8> for WeatherVanes {
     }
 }
 
+impl TryFrom<String> for WeatherVanes {
+    type Error = String;
+
+    fn try_from(value: String) -> Result<Self, Self::Error> {
+        match value.as_str() {
+            "Standard" => Ok(Self::Standard),
+            "Shuffled" => Ok(Self::Shuffled),
+            "Convenient" => Ok(Self::Convenient),
+            "Hyrule" => Ok(Self::Hyrule),
+            "Lorule" => Ok(Self::Lorule),
+            "All" => Ok(Self::All),
+            _ => Err(format!("Invalid WeatherVanes setting: {}", value)),
+        }
+    }
+}
+
 impl Display for WeatherVanes {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(
