@@ -320,8 +320,22 @@ fn insert_items_into_random_locations(
 fn handle_exclusions(rng: &mut StdRng, seed_info: &mut SeedInfo, check_map: &mut CheckMap, junk: &mut Vec<Item>) {
     seed_info.full_exclusions = seed_info.settings.user_exclusions.clone();
 
+    // Always exclude 100 Maiamai check unless the Maiamai Limit is explicitly set to 100
     if seed_info.settings.maiamai_limit < 100 {
         seed_info.full_exclusions.insert("100 Maiamai".to_string());
+    }
+
+    // Exclude all Maiamai checks when the Maiamai Limit is (effectively) zero.
+    if seed_info.settings.maiamai_limit / 10 == 0 {
+        seed_info.full_exclusions.insert("Maiamai Bow Upgrade".to_string());
+        seed_info.full_exclusions.insert("Maiamai Boomerang Upgrade".to_string());
+        seed_info.full_exclusions.insert("Maiamai Hookshot Upgrade".to_string());
+        seed_info.full_exclusions.insert("Maiamai Hammer Upgrade".to_string());
+        seed_info.full_exclusions.insert("Maiamai Bombs Upgrade".to_string());
+        seed_info.full_exclusions.insert("Maiamai Fire Rod Upgrade".to_string());
+        seed_info.full_exclusions.insert("Maiamai Ice Rod Upgrade".to_string());
+        seed_info.full_exclusions.insert("Maiamai Tornado Rod Upgrade".to_string());
+        seed_info.full_exclusions.insert("Maiamai Sand Rod Upgrade".to_string());
     }
 
     // Exclude Minigames
