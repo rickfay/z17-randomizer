@@ -268,18 +268,6 @@ pub fn patch(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
         // },
     );
 
-    // Change 'System' properties
-    apply_system!(patcher,
-        // Link's House
-        IndoorLight 1 {
-            // Default Spawn Point
-            [47].call {|obj: &mut Obj| {
-                obj.srt_mut().rotate.y = 0.0;
-                obj.set_translate(0.0, 0.0, -6.5);
-            }},
-        },
-    );
-
     Ok(())
 }
 
@@ -810,6 +798,7 @@ fn patch_ravios_shop(patcher: &mut Patcher) -> Result<()> {
             disable(31),                    // Disable first time goodbye text
             disable(34),                    // Disable 1st Ravio
             disable(35),                    // Disable 1st Sheerow
+            call(36, |obj| obj.set_translate(0.0, 0.0, -3.5)), // Move first dialog to where player character is
             disable(46),                    // Disable Ravio's bye-bye
             disable(54),                    // Disable Ravio's welcome
             // Move 2nd Ravio to where 1st Ravio was

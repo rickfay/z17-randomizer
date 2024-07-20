@@ -14,7 +14,7 @@ use rom::{Demo, File};
 pub(crate) fn build_replacement_cutscenes(seed_info: &SeedInfo) -> crate::Result<Vec<File<Demo>>> {
     info!("Building Replacement Cutscenes...");
 
-    const INITIAL_SPAWN: SpawnPoint = SpawnPoint { course: IndoorLight, scene: 1, spawn: 2 };
+    const INITIAL_SPAWN: SpawnPoint = SpawnPoint { course: IndoorLight, scene: 1, spawn: 1 };
 
     // Demo1 - Link's Nightmare cutscene (goes to Link's House 0)
     let mut demo1 = Demo::new();
