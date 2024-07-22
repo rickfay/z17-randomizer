@@ -142,13 +142,14 @@ pub fn get_seed_settings() -> Result<Settings, String> {
     let trials_door = TrialsDoor::try_from(prompt_u8_in_range(
         "Trial's Door",
         "Choose the behavior of the Lorule Castle Trial's Door:\n\
-        [0] OFF - Trial's Door removed. (WARNING: May require entering LC via the crack.)\n\
+        [0] Opens automatically from inside LC.\n\
         [1] Trial  Required, randomly selected.\n\
         [2] Trials Required, randomly selected.\n\
         [3] Trials Required, randomly selected.\n\
-        [4] Trials Required",
+        [4] Trials Required.\n\
+        [5] Open from both sides (may require entering LC early via the crack).",
         0,
-        4,
+        5,
     ))?;
 
     // let progressive_bow_of_light = prompt_bool(

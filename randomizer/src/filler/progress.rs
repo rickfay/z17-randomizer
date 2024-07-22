@@ -679,11 +679,16 @@ impl<'s> Progress<'s> {
     }
 
     pub fn has_completed_trials(&self) -> bool {
-        self.seed_info.settings.trials_door == TrialsDoor::Open
+        self.seed_info.settings.trials_door == TrialsDoor::OpenFromInsideOnly
+            || self.seed_info.settings.trials_door == TrialsDoor::OpenFromBothSides
             || ((self.has(Goal::LcBombTrial) || !self.seed_info.trials_config.bomb_trial)
                 && (self.has(Goal::LcTileTrial) || !self.seed_info.trials_config.tile_trial)
                 && (self.has(Goal::LcLampTrial) || !self.seed_info.trials_config.lamp_trial)
                 && (self.has(Goal::LcHookTrial) || !self.seed_info.trials_config.hook_trial))
+    }
+
+    pub fn is_trials_door_open_from_both_sides(&self) -> bool {
+        self.seed_info.settings.trials_door == TrialsDoor::OpenFromBothSides
     }
 
     pub fn has_bow_of_light(&self) -> bool {
