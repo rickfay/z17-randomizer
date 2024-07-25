@@ -667,12 +667,12 @@ fn mother_maiamai(code: &mut Code, layout: &Layout, item_names: &HashMap<Item, u
         ldr(R0, (R0, 0x0)),
         ldr(R0, (R0, 0x40)),
         match region {
-            RomRegion::US => bl(FN_GET_LOCAL_FLAG_3_US),
+            RomRegion::US => bl(FN_GET_LOCAL_FLAG_3_US),    
             RomRegion::EU => bl(FN_GET_LOCAL_FLAG_3_EU),
         },
         cmp(R0, 0x0),
         match region {
-            RomRegion::US => b(0x46d848).eq(),
+            RomRegion::US => b(0x46d848).eq(),  
             RomRegion::EU => b(0x46d820).eq(),
         },
         match region {
@@ -747,7 +747,7 @@ fn mother_maiamai(code: &mut Code, layout: &Layout, item_names: &HashMap<Item, u
             (311, 0x310104, hookshot),
             (306, 0x3100dc, hammer),
             (302, 0x31010c, bombs),
-            (308, 0x3101ec, fire_rod),
+            (308, 0x3100ec, fire_rod),
             (309, 0x3100f4, ice_rod),
             (310, 0x3100fc, tornado_rod),
             (307, 0x3100e4, sand_rod),
