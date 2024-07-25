@@ -206,6 +206,7 @@ fn patch_ravio(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
 }
 
 /// Impa in Hyrule Castle dialogue
+#[allow(unused)]
 fn patch_impa(patcher: &mut Patcher) -> Result<()> {
     let mut msbt = load_msbt(patcher, IndoorLight, "FieldLight_1B")?;
     msbt.set(
