@@ -667,12 +667,12 @@ fn mother_maiamai(code: &mut Code, layout: &Layout, item_names: &HashMap<Item, u
         ldr(R0, (R0, 0x0)),
         ldr(R0, (R0, 0x40)),
         match region {
-            RomRegion::US => bl(FN_GET_LOCAL_FLAG_3_US),    
+            RomRegion::US => bl(FN_GET_LOCAL_FLAG_3_US),
             RomRegion::EU => bl(FN_GET_LOCAL_FLAG_3_EU),
         },
         cmp(R0, 0x0),
         match region {
-            RomRegion::US => b(0x46d848).eq(),  
+            RomRegion::US => b(0x46d848).eq(),
             RomRegion::EU => b(0x46d820).eq(),
         },
         match region {
