@@ -26,7 +26,7 @@ pub fn patch_messages(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()>
     patch_collect(patcher, seed_info)?;
     // patch_actions(patcher)?; This is causing issues for some reason
     patch_ravio(patcher, seed_info)?;
-    patch_impa(patcher)?;
+    //patch_impa(patcher)?; Causes crash when talking to Blacksmith
     patch_great_rupee_fairy(patcher)?;
     patch_treacherous_tower(patcher, seed_info)?;
     patch_thief_girl(patcher)?;
