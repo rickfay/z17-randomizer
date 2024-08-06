@@ -401,8 +401,8 @@ fn generate_maiamai_hints(
     rng: &mut StdRng, seed_info: &SeedInfo, check_map: &mut CheckMap, taken_checks: &mut Vec<String>,
     taken_ghosts: &mut Vec<HintGhost>,
 ) -> Vec<LocationHint> {
-    // Don't generate Maiamai Hints when Nice Items are vanilla
-    if seed_info.settings.nice_items == NiceItems::Vanilla {
+    // Don't generate Maiamai Hints when Nice Items are vanilla or the Maiamai Limit is zero
+    if seed_info.settings.nice_items == NiceItems::Vanilla || seed_info.settings.maiamai_limit / 10 == 0 {
         return vec![];
     }
 
