@@ -176,6 +176,7 @@ pub struct CrackHint {
     /// The
     pub destination: Crack,
 
+    #[allow(unused)]
     /// List of Hint Ghosts that are guaranteed to be logically reachable before the hinted item.
     pub logical_ghosts: Vec<HintGhost>,
 
