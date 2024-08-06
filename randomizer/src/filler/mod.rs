@@ -5,7 +5,7 @@ use crate::filler::item_pools::{get_maiamai_pool, Pool};
 use crate::filler::location::Location;
 use crate::filler::progress::Progress;
 use crate::{world::WorldGraph, CheckMap, DashMap, SeedInfo};
-use log::{error, info, warn};
+use log::{debug, error, info};
 use macros::fail;
 use modinfo::settings::logic::LogicMode;
 use modinfo::settings::nice_items::NiceItems;
@@ -360,8 +360,7 @@ fn handle_exclusions(rng: &mut StdRng, seed_info: &mut SeedInfo, check_map: &mut
             let check_name = exclusion.to_owned();
 
             if let Some(Some(_)) = check_map.get(&check_name) {
-                println!();
-                warn!("Other settings prevented excluding: \"{}\"\n", check_name);
+                debug!("Other settings prevented excluding: \"{}\"", check_name);
                 continue;
             }
 
