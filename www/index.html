@@ -27,7 +27,7 @@
         <form id="settings-form">
             <div class="section">
                 <label>Seed Info</label>
-                <div class="setting" title="TODO">
+                <div class="setting" title="Specify the number to use to seed the randomizer.&NewLine;Leave this as 0 to have this chosen randomly.">
                     <label class="pointer">
                         <input name="seed" type="text" value="0">
                         Seed Number
@@ -50,7 +50,7 @@
                         Logic Mode
                     </label>
                 </div>
-                <div class="setting" title="TODO">
+                <div class="setting" title="Determines the requirements to reach the Master Sword Pedestal.&NewLine;&NewLine;[ Standard ]&NewLine;Requires all three Pendants of Power, Wisdom, and Courage.&NewLine;&NewLine;[ Vanilla ]&NewLine;Requires just the Pendants of Power and Wisdom, as in the vanilla game.">
                     <label>
                         <select name="ped_requirement">
                             <option value="Standard" selected="selected">Standard</option>
@@ -58,7 +58,7 @@
                         </select>Master Sword Pedestal
                     </label>
                 </div>
-                <div class="setting" title="TODO">
+                <div class="setting" title="Determines the initial state of the Cracks between Hyrule and Lorule.&NewLine;&NewLine;[ Closed ]&NewLine;All cracks (except the one in Hyrule Castle) will be closed until the player finds Quake, a special randomizer-only item.&NewLine;&NewLine;[ Open ]&NewLine;All cracks are open from game start, and the Quake item is not included in the item pool.">
                     <label>
                         <select name="cracks">
                             <option value="Closed" selected="selected">Closed</option>
@@ -67,7 +67,7 @@
                         Cracks
                     </label>
                 </div>
-                <div class="setting" title="TODO">
+                <div class="setting" title="Determines the behavior of the Trial's Door in Lorule Castle.&NewLine;&NewLine;[ Open From Inside Only ]&NewLine;The door will automatically open when the player approaches it from within the Lorule Castle dungeon, effectively skipping the need to complete any of the trials. The door will NOT be open when approached from the side with the Lorule Castle crack, preventing early access to the dungeon.&NewLine;&NewLine;[ X Trial(s) Required ]&NewLine;X number of trials (randomly selected) must be completed to open the door.&NewLine;&NewLine;[ Open From Both Sides ]&NewLine;The door will automatically open when approached from either side. This option may require the player to enter the dungeon early by way of the Lorule Castle crack.">
                     <label>
                         <select name="trials_door">
                             <option value="Open From Inside Only" selected="selected">Open From Inside Only</option>
@@ -79,7 +79,7 @@
                         </select>Trials Door
                     </label>
                 </div>
-                <div class="setting" title="TODO">
+                <div class="setting" title="Determines the number of Sages that must be rescued to open the front door to Lorule Castle.&NewLine;&NewLine;A red X will appear by the dungeon door on the bottom screen map to indicate when this requirement has been met.">
                     <label>
                         <div class="range_val">
                             <input id="view_lc_requirement" name="view_lc_requirement" type="text" value="7" readonly />
@@ -88,7 +88,7 @@
                         Lorule Castle Requirement
                     </label>
                 </div>
-                <div class="checkbox" title="TODO">
+                <div class="checkbox" title="Shuffles the 7 Sages and 3 Pendants amongst themselves such that each dungeon will hold a random prize.">
                     <label class="pointer">
                         <input name="dungeon_prize_shuffle" type="checkbox" checked="checked">
                         Randomized Dungeon Prizes
@@ -97,14 +97,14 @@
             </div>
             <div class="section">
                 <label>Entrance Randomizer</label>
-                <div class="setting" title="TODO"><label><select name="cracksanity">
+                <div class="setting" title="Randomizes the destinations of the game's Cracks (sometimes called 'fissures' or 'portals').&NewLine;&NewLine;[ Off ]&NewLine;Cracks are not shuffled and will lead to their vanilla destinations.&NewLine;&NewLine;[ Cross World Pairs ]&NewLine;Cracks will be shuffled in pairs such that all Hyrule cracks lead to Lorule and vice-versa.&NewLine;&NewLine;[ Any World Pairs ]&NewLine;Cracks will be shuffled with no restrictions. This may result in Hyrule-Hyrule or Lorule-Lorule crack pairings.&NewLine;&NewLine;[ Mirrored Settings ]&NewLine;The two mirrored settings will operate the same as their non-mirrored counterparts, but with the additional restriction that any randomly paired cracks will have their vanilla counterparts paired together as well.&NewLine;&NewLine;Example:&NewLine;- Consider cracks A, B, X, and Y that are paired up as A-B and X-Y in the vanilla game.&NewLine;- If, as a result of this setting, A is paired with X, then the mirrored settings will guarantee that B is paired with Y.&NewLine;- Similarly, if A is paired with Y, then B will be paired with X."><label><select name="cracksanity">
                     <option value="Off">Off</option>
                     <option value="Cross World Pairs">Cross World Pairs</option>
                     <option value="Any World Pairs">Any World Pairs</option>
                     <option value="Mirrored Cross World Pairs">Mirrored Cross World Pairs</option>
                     <option value="Mirrored Any World Pairs">Mirrored Any World Pairs</option>
                 </select>Cracksanity</label></div>
-                <div class="setting" title="TODO">
+                <div class="setting" title="Determines the default state and behavior of the Weather Vanes.&NewLine;&NewLine;[ Standard ]&NewLine;All Weather Vanes will be off at the start of the game.&NewLine;&NewLine;[ Shuffled ]&NewLine;The Weather Vanes will be shuffled in 'pairs'.&NewLine;&NewLine;Example:&NewLine;- Activating Vane A enables fast travel to Vane B&NewLine;- Similarly, activating Vane B enables fast travel to Vane A.&NewLine;&NewLine;[ Convenient ]&NewLine;Weather Vanes that do not have logical requirements to them will be pre-activated at the start of the game. The specific vanes this setting will activate depend on other settings.&NewLine;&NewLine;[ Hyrule ]&NewLine;All the Hyrule Weather Vanes will be pre-activated.&NewLine;&NewLine;[ Lorule ]&NewLine;All the Lorule Weather Vanes will be pre-activated.&NewLine;&NewLine;[ All ]&NewLine;All Weather Vanes will be pre-activated.">
                     <label>
                         <select name="weather_vanes">
                             <option value="Standard">Standard</option>
@@ -119,7 +119,7 @@
                 </div>
             </div>
             <div class="section"><label>Maiamai Settings</label>
-                <div class="setting" title="TODO">
+                <div class="setting" title="Determines how the randomizer will handle Nice Items, which are the upgraded versions of the 9 core items originally sold in Ravio's Shop.&NewLine;&NewLine;[ Shuffled ]&NewLine;A second progressive copy of each Ravio Item will be freely shuffled anywhere in the game.&NewLine;&NewLine;[ Vanilla ]&NewLine;Mother Maiamai will upgrade a Ravio Item to its Nice version for 10 Maiamai each.&NewLine;&NewLine;[ Off ]&NewLine;Only the base versions of each Ravio Item will be obtainable.&NewLine;&NewLine;Note:&NewLine;- Selecting either 'Shuffled' or 'Off' will cause Mother Maiamai to have a random selection of items.">
                     <label>
                         <select name="nice_items">
                             <option value="Shuffled" selected="selected">Shuffled</option>
@@ -129,7 +129,7 @@
                         Nice Items
                     </label>
                 </div>
-                <div class="setting" title="TODO">
+                <div class="setting" title="Places a limit on the maximum number of Maiamai a player may have to collect to complete a seed *IF* they do not spend them foolishly.&NewLine;&NewLine;Notes:&NewLine;- The 100 Maiamai Reward can only ever be logically required if this is set to 100.">
                     <label>
                         <div class="range_val">
                             <input id="view_maiamai_limit" name="view_maiamai_limit" type="text" value="50" readonly />
