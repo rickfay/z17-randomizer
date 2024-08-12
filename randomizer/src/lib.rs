@@ -338,7 +338,7 @@ pub struct SeedInfo {
     #[serde(skip_deserializing)]
     pub metrics: Metrics,
 
-    #[serde(skip_deserializing)]
+    #[serde(skip_deserializing, skip_serializing)]
     pub text: Text,
 
     #[serde(skip_deserializing)]

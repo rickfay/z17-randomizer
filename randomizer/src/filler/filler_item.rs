@@ -1209,7 +1209,7 @@ impl Item {
             Bottle01 | Bottle02 | Bottle03 | Bottle04 | Bottle05 => "Empty Bottle",
             Lamp01 | Lamp02 => "Lamp+",
             Sword01 | Sword02 | Sword03 | Sword04 => "Sword+",
-            Glove01 | Glove02 => "Strength+",
+            Glove01 | Glove02 => "Glove+",
             Net01 | Net02 => "Net+",
             Mail01 | Mail02 => "Mail+",
             OreYellow | OreGreen | OreBlue | OreRed => "Master Ore",

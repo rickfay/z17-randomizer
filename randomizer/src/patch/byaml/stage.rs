@@ -5,7 +5,7 @@ use log::info;
 use macros::fail;
 use modinfo::settings::cracksanity::Cracksanity;
 use modinfo::settings::keysy::Keysy;
-use modinfo::settings::Settings;
+use modinfo::settings::{Settings, TrialsDoor};
 use rom::flag::Flag;
 use rom::scene::{Arg, Obj, SpawnPoint, Transform, Vec3};
 
@@ -23,19 +23,19 @@ macro_rules! apply {
     };
 }
 
-macro_rules! apply_system {
-    ($patcher:expr, $($course:ident $stage:literal {
-        $([$unq:literal].$action:ident $value:tt,)+
-    },)+) => {
-        $({
-            let stage = $patcher.scene(::game::Course::$course, $stage - 1)?.stage_mut().get_mut();
-            $(action!((stage
-                .get_system_mut($unq)
-                .ok_or_else(|| $crate::Error::game("Could not find scene."))?
-            ).$action $value);)+
-        })+
-    };
-}
+// macro_rules! apply_system {
+//     ($patcher:expr, $($course:ident $stage:literal {
+//         $([$unq:literal].$action:ident $value:tt,)+
+//     },)+) => {
+//         $({
+//             let stage = $patcher.scene(::game::Course::$course, $stage - 1)?.stage_mut().get_mut();
+//             $(action!((stage
+//                 .get_system_mut($unq)
+//                 .ok_or_else(|| $crate::Error::game("Could not find scene."))?
+//             ).$action $value);)+
+//         })+
+//     };
+// }
 
 macro_rules! action {
     ($unq:tt.id($id:literal)) => {
@@ -116,7 +116,7 @@ pub fn patch(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
     patch_hint_ghosts_dungeons(patcher)?;
 
     patch_blacksmith_lorule(patcher);
-    patch_trials_door(patcher);
+    patch_trials_door(patcher, &seed_info.settings);
     patch_hildas_study(patcher, &seed_info.settings);
 
     patch_cracksanity(patcher);
@@ -266,18 +266,6 @@ pub fn patch(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
         // DungeonWater 2 {
         //     [255].disable(), // Remove crystal switch, forces merge requirement to complete room to prevent softlock
         // },
-    );
-
-    // Change 'System' properties
-    apply_system!(patcher,
-        // Link's House
-        IndoorLight 1 {
-            // Default Spawn Point
-            [47].call {|obj: &mut Obj| {
-                obj.srt_mut().rotate.y = 0.0;
-                obj.set_translate(0.0, 0.0, -6.5);
-            }},
-        },
     );
 
     Ok(())
@@ -810,6 +798,7 @@ fn patch_ravios_shop(patcher: &mut Patcher) -> Result<()> {
             disable(31),                    // Disable first time goodbye text
             disable(34),                    // Disable 1st Ravio
             disable(35),                    // Disable 1st Sheerow
+            call(36, |obj| obj.set_translate(0.0, 0.0, -3.5)), // Move first dialog to where player character is
             disable(46),                    // Disable Ravio's bye-bye
             disable(54),                    // Disable Ravio's welcome
             // Move 2nd Ravio to where 1st Ravio was
@@ -1390,7 +1379,7 @@ fn patch_cracksanity(patcher: &mut Patcher) {
     );
 }
 
-fn patch_trials_door(patcher: &mut Patcher) {
+fn patch_trials_door(patcher: &mut Patcher, settings: &Settings) {
     let door_flag = Flag::Event(421);
 
     // Lorule Castle side
@@ -1405,6 +1394,28 @@ fn patch_trials_door(patcher: &mut Patcher) {
 
     // Hilda's Study side
     patcher.modify_objs(IndoorDark, 5, [set_46_args(4, door_flag), clear_disable_flag(4)]);
+
+    // Adds an invisible trigger to automatically set Flag 712
+    // Result: Trials Door should automatically open when the player reaches LC 3F
+    if settings.trials_door == TrialsDoor::OpenFromInsideOnly {
+        patcher.add_obj(
+            DungeonGanon,
+            1,
+            Obj {
+                arg: Arg(0, 0, 0, 0, 4, 0, 712, 0, 0, 0, 0, 0, 0, 0.0),
+                clp: 4,
+                flg: (0, 0, 0, 0),
+                id: 14,
+                lnk: vec![],
+                nme: Some(String::from("Invalid")),
+                ril: vec![],
+                ser: Some(367),
+                srt: Transform { scale: Vec3::UNIT, rotate: Vec3::ZERO, translate: Vec3 { x: -1.5, y: 25.0, z: 14.5 } },
+                typ: 6,
+                unq: 1636,
+            },
+        );
+    }
 }
 
 fn patch_hildas_study(patcher: &mut Patcher, settings: &Settings) {

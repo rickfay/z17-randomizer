@@ -4,9 +4,12 @@ use std::fmt::{Display, Formatter};
 /// Trial's Door
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Deserialize, Serialize)]
 pub enum TrialsDoor {
-    /// The Trials Door will open by itself automatically.
-    /// WARNING: This can require entering LC early via the crack.
-    Open,
+    /// The Trials Door will open by itself automatically, from inside LC only.
+    OpenFromInsideOnly,
+
+    /// The Trials Door will open by itself automatically, from inside LC or in Hilda's Study.
+    /// This option may require entering LC early.
+    OpenFromBothSides,
 
     /// Turns on 1 random trial.
     OneTrialRequired,
@@ -35,12 +38,13 @@ impl TryFrom<u8> for TrialsDoor {
 
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         match value {
-            0 => Ok(Self::Open),
+            0 => Ok(Self::OpenFromInsideOnly),
             1 => Ok(Self::OneTrialRequired),
             2 => Ok(Self::TwoTrialsRequired),
             3 => Ok(Self::ThreeTrialsRequired),
             4 => Ok(Self::AllTrialsRequired),
-            _ => Err(format!("Invalid TrialsDoor setting: {}", value)),
+            5 => Ok(Self::OpenFromBothSides),
+            _ => Err("Invalid LcTrialsDoor index: {}".to_owned()),
         }
     }
 }
@@ -50,11 +54,12 @@ impl TryFrom<String> for TrialsDoor {
 
     fn try_from(value: String) -> Result<Self, Self::Error> {
         match value.as_str() {
-            "Open" => Ok(Self::Open),
+            "Open From Inside Only" => Ok(Self::OpenFromInsideOnly),
             "1 Trial Required" => Ok(Self::OneTrialRequired),
             "2 Trials Required" => Ok(Self::TwoTrialsRequired),
             "3 Trials Required" => Ok(Self::ThreeTrialsRequired),
             "4 Trials Required" => Ok(Self::AllTrialsRequired),
+            "Open From Both Sides" => Ok(Self::OpenFromBothSides),
             _ => Err(format!("Invalid TrialsDoor setting: {}", value)),
         }
     }
@@ -66,11 +71,12 @@ impl Display for TrialsDoor {
             f,
             "{}",
             match self {
-                TrialsDoor::Open => "Open",
+                TrialsDoor::OpenFromInsideOnly => "Open From Inside Only",
                 TrialsDoor::OneTrialRequired => "1 Trial Required",
                 TrialsDoor::TwoTrialsRequired => "2 Trials Required",
                 TrialsDoor::ThreeTrialsRequired => "3 Trials Required",
                 TrialsDoor::AllTrialsRequired => "4 Trials Required",
+                TrialsDoor::OpenFromBothSides => "Open From Both Sides",
             }
         )
     }

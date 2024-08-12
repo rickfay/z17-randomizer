@@ -14,7 +14,7 @@ use rom::{Demo, File};
 pub(crate) fn build_replacement_cutscenes(seed_info: &SeedInfo) -> crate::Result<Vec<File<Demo>>> {
     info!("Building Replacement Cutscenes...");
 
-    const INITIAL_SPAWN: SpawnPoint = SpawnPoint { course: IndoorLight, scene: 1, spawn: 2 };
+    const INITIAL_SPAWN: SpawnPoint = SpawnPoint { course: IndoorLight, scene: 1, spawn: 1 };
 
     // Demo1 - Link's Nightmare cutscene (goes to Link's House 0)
     let mut demo1 = Demo::new();
@@ -175,7 +175,15 @@ fn get_initial_flags_to_set(SeedInfo { trials_config, settings, .. }: &SeedInfo)
 
     // Trial's Door
     match settings.trials_door {
-        TrialsDoor::Open => {
+        TrialsDoor::OpenFromInsideOnly => {
+            // Set flags to auto-complete 3 of the 4 trials, defeat minibosses, and advance LC music.
+            //
+            // Flags 712 and 713 (lower right square) are intentionally not set so that they can
+            // instead be set by the player when they reach Lorule Castle (the randomizer adds an
+            // invisible trigger to set 712 so the trials will still be effectively skipped).
+            flags.extend(vec![710, 711, /*712, 713,*/ 714, 715, 716, 717]);
+        },
+        TrialsDoor::OpenFromBothSides => {
             // Set flags to auto-complete the trials, open the trials door, defeat minibosses, and advance LC music.
             //
             // Flag 713 is intentionally not set so that when the door is first encountered it will fill in the bottom

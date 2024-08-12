@@ -369,10 +369,17 @@ impl Patcher {
     fn patch_crack(
         &mut self, course: CourseId, scene: u16, unq: u16, here_crack: Crack, seed_info: &SeedInfo,
     ) -> Result<()> {
+        // Patch Lorule cracks (and a few in Hyrule) to require Quake to open, except the crack paired with HC
+        if here_crack.must_patch_close() && here_crack != *seed_info.crack_map.get(&Crack::HyruleCastle).unwrap() {
+            self.modify_objs(course, scene, [set_enable_flag(unq, Flag::QUAKE)]);
+        }
+
+        // Early return if not Cracksanity
         if seed_info.settings.cracksanity == Cracksanity::Off {
             return Ok(());
         }
 
+        // Collect info about this crack's new destination
         let there_crack =
             seed_info.crack_map.get(&here_crack).unwrap_or_else(|| panic!("No crack_map entry for: {:?}", here_crack));
         let there_flag = there_crack.get_flag();
@@ -397,6 +404,7 @@ impl Patcher {
             })],
         );
 
+        // Hyrule Castle Crack special handling
         if here_crack == Crack::HyruleCastle {
             if *there_crack == Crack::LoruleCastle {
                 // Vanilla HC/LC pair - Delete the curtain and no merge zone
@@ -420,12 +428,6 @@ impl Patcher {
                     ],
                 );
             }
-        } else if here_crack == *seed_info.crack_map.get(&Crack::HyruleCastle).unwrap() {
-            // Crack paired with Hyrule Castle is always kept open
-            self.modify_objs(course, scene, [clear_enable_flag(unq)]);
-        } else {
-            // Lock all other cracks behind Flag 510
-            self.modify_objs(course, scene, [set_enable_flag(unq, Flag::QUAKE)]);
         }
 
         // TODO angle of Crack Blockages can't seem to be changed, no point in this function until the game respects

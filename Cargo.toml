@@ -17,10 +17,11 @@ macros = { workspace = true }
 modinfo = { workspace = true }
 peak_alloc = "0.2.0"
 rand = { workspace = true }
-randomizer = { workspace = true }
+randomizer = { path = "./randomizer" }
 rom = { workspace = true }
-simplelog = "0.12.1"
+simplelog = "0.12.2"
 structopt = "0.3.26"
+time = "0.3.36"
 js-sys = "0.3"
 base64 = "0.21.2"
 lazy_static = "1.4"
@@ -84,7 +85,7 @@ bytey = { path = "./bytey" }
 cli = { path = "./cli" }
 game = { path = "./game" }
 jack = { path = "./jack" }
-log = "0.4.21"
+log = "0.4.19"
 macros = { path = "./macros" }
 modinfo = { path = "./modinfo" }
 randomizer = { path = "./randomizer" }

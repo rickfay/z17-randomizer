@@ -156,8 +156,8 @@ pub fn create(patcher: &Patcher, seed_info: &SeedInfo) -> Code {
 
     do_dev_stuff(&mut code, seed_info);
 
-    warp(&mut code);
-    //shield_without_sword(&mut code);
+    // warp(&mut code);
+    // shield_without_sword(&mut code);
     // swordless_beams(&mut code);
     quake(&mut code);
 
@@ -359,6 +359,7 @@ fn file_select_screen_background(code: &mut Code) {
     code.text().patch(0x29d284, [b(reset_r6)]);
 }
 
+#[allow(unused)]
 fn warp(code: &mut Code) {
     // code.text().patch(0x441ec0, [b(0x442044)]); // Makes quit identical to cancel!
     // code.text().patch(0x4424b0, [mov(R0, R0)]); // Remove SE from "Quit" button!

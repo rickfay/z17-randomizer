@@ -137,7 +137,7 @@ pub(crate) fn graph(crack_map: &CrackMap) -> HashMap<Location, LocationNode> {
                 "Hilda's Study",
                 None,
                 vec![
-                    edge!(LoruleCastle2F3F, |p| p.has_completed_trials() && p.hearts(13.0)),
+                    edge!(LoruleCastle2F3F, |p| p.is_trials_door_open_from_both_sides() && p.hearts(13.0)),
                     crack_left(LoruleCastle, crack_map, false),
                     crack_right(LoruleCastle, crack_map, false),
                     edge!(LoruleBlacksmith),

@@ -18,7 +18,7 @@ mod msbt;
 pub fn patch_messages(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
     info!("Patching MSBT Files...");
 
-    patch_flavor_text(patcher, seed_info)?;
+    // patch_flavor_text(patcher, seed_info)?; // FIXME breaks Maiamai Map
     patch_file_select(patcher, seed_info)?;
     // patch_pause_screen(patcher)?; TODO
     patch_item_names(patcher)?;
@@ -47,6 +47,7 @@ pub fn research(patcher: &mut Patcher, course: Course, file: &str, edotor: bool)
 }
 
 /// Flavor Text
+#[allow(unused)]
 fn patch_flavor_text(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
     let mut msbt = load_msbt(patcher, LanguageBoot, "Ed_StaffCreditMessageT")?;
     msbt.set("T_Text_00", &seed_info.text.credits);
