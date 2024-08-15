@@ -332,7 +332,7 @@ where
 {
     // TODO: replace with `Box::new_uninit_slice` once stable
     let mut buf = unsafe {
-        mem::transmute::<_, Box<[u8]>>(slice::from_raw_parts(
+        mem::transmute::<&[u8], Box<[u8]>>(slice::from_raw_parts(
             alloc::alloc(alloc::Layout::from_size_align(len, 1).unwrap()),
             len,
         ))
