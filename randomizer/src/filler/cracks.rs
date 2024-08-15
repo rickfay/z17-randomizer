@@ -515,50 +515,6 @@ impl Crack {
             Self::LoruleCastle => Flag::ZERO_ZERO,
         }
     }
-
-    /// Cracks that don't check the Quake Flag (510) to be enabled in vanilla will return true
-    pub fn must_patch_close(self) -> bool {
-        matches!(
-            self,
-            // Hyrule Cracks that are open without Quake
-            Crack::StylishWoman |
-            Crack::DesertPillarRight |
-            Crack::DesertPillarLeft |
-            Crack::DesertMiddle |
-            Crack::DesertSW |
-            Crack::DesertPalace |
-            Crack::DesertNorth |
-            // All Lorule Cracks
-            Crack::ThievesTown |
-            Crack::VacantHouse |
-            Crack::ParadoxRightLorule |
-            Crack::ParadoxLeftLorule |
-            Crack::WaterfallLorule |
-            Crack::DarkRuinsPillar |
-            Crack::DarkRuinsSE |
-            Crack::SkullWoodsPillar |
-            Crack::NShapedHouse |
-            Crack::DestroyedHouse |
-            Crack::MiseryMireExit |
-            Crack::MirePillarRight |
-            Crack::MirePillarLeft |
-            Crack::MireMiddle |
-            Crack::MireSW |
-            Crack::Zaganaga |
-            Crack::MireNorth |
-            Crack::DeathWestLorule |
-            Crack::FloatingIslandLorule |
-            Crack::RiverLorule |
-            Crack::LoruleLake |
-            Crack::LoruleHotfoot |
-            Crack::Philosopher |
-            Crack::GraveyardLedgeLorule |
-            Crack::RossosOreMineLorule |
-            Crack::SwampPillarLorule |
-            Crack::KusDomain |
-            Crack::LoruleCastle
-        )
-    }
 }
 
 impl Display for Crack {

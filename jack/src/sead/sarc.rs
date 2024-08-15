@@ -306,14 +306,14 @@ impl IntoBytes for Sarc {
     }
 }
 
-///
+/// SarcInnerFile
 #[derive(Debug, Clone)]
 struct SarcInnerFile {
     filename: Option<String>,
     data: Vec<u8>,
 }
 
-///
+/// Alignment
 fn align(data: Vec<u8>, alignment: usize, value: u8) -> Vec<u8> {
     let padding_amt = alignment - (data.len() % alignment);
     if padding_amt < alignment {

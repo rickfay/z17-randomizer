@@ -1,3 +1,4 @@
+use crate::filler::cracks::Crack;
 use crate::patch::Patcher;
 use crate::{patch::util::*, regions, Result, SeedInfo};
 use game::Course::{self, *};
@@ -119,6 +120,7 @@ pub fn patch(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
     patch_trials_door(patcher, &seed_info.settings);
     patch_hildas_study(patcher, &seed_info.settings);
 
+    patch_curtain(patcher, seed_info);
     patch_cracksanity(patcher);
     patch_keysy_small(patcher, &seed_info.settings);
     patch_keysy_big(patcher, &seed_info.settings);
@@ -1332,6 +1334,35 @@ fn patch_keysy_big(patcher: &mut Patcher, settings: &Settings) {
     patcher.modify_objs(DungeonKame, 2, [disable(28)]); // Turtle Rock B1
     patcher.modify_objs(DungeonSand, 3, [disable(9)]); // Desert Palace 3F
     patcher.modify_objs(DungeonIce, 1, [disable(291)]); // Ice Ruins B4
+}
+
+/// Patch the Curtain in Zelda's Study
+fn patch_curtain(patcher: &mut Patcher, seed_info: &SeedInfo) {
+    let crack_paired_with_hc = seed_info.crack_map.get(&Crack::HyruleCastle).unwrap();
+
+    if Crack::LoruleCastle == *crack_paired_with_hc {
+        // Vanilla HC/LC pair - Delete the curtain and no merge zone
+        patcher.modify_objs(
+            IndoorLight,
+            7,
+            [
+                disable(26), // Curtain
+                disable(29), // AreaDisableWallIn
+            ],
+        );
+    } else {
+        // Wire the curtain + no merge zone to the other crack's flag
+        let other_crack_flag = crack_paired_with_hc.get_flag();
+        patcher.modify_objs(
+            IndoorLight,
+            7,
+            [
+                set_46_args(26, other_crack_flag),      // Curtain
+                set_46_args(29, other_crack_flag),      // AreaDisableWallIn
+                set_disable_flag(29, other_crack_flag), // AreaDisableWallIn
+            ],
+        );
+    }
 }
 
 fn patch_cracksanity(patcher: &mut Patcher) {
