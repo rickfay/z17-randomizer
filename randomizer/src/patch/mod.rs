@@ -9,7 +9,6 @@ use game::{
 };
 use log::{debug, error, info};
 use macros::fail;
-use modinfo::settings::cracksanity::Cracksanity;
 use modinfo::settings::weather_vanes::WeatherVanes::*;
 use path_absolutize::*;
 use rom::byaml::scene_env::SceneEnvFile;
@@ -369,16 +368,6 @@ impl Patcher {
     fn patch_crack(
         &mut self, course: CourseId, scene: u16, unq: u16, here_crack: Crack, seed_info: &SeedInfo,
     ) -> Result<()> {
-        // Patch Lorule cracks (and a few in Hyrule) to require Quake to open, except the crack paired with HC
-        if here_crack.must_patch_close() && here_crack != *seed_info.crack_map.get(&Crack::HyruleCastle).unwrap() {
-            self.modify_objs(course, scene, [set_enable_flag(unq, Flag::QUAKE)]);
-        }
-
-        // Early return if not Cracksanity
-        if seed_info.settings.cracksanity == Cracksanity::Off {
-            return Ok(());
-        }
-
         // Collect info about this crack's new destination
         let there_crack =
             seed_info.crack_map.get(&here_crack).unwrap_or_else(|| panic!("No crack_map entry for: {:?}", here_crack));
@@ -386,53 +375,33 @@ impl Patcher {
         let there_sp = there_crack.get_spawn_point();
 
         // Crack type
-        let here_arg2 = if here_crack.get_world() == there_crack.get_world() {
+        let crack_type = if here_crack.get_world() == there_crack.get_world() {
             here_crack.get_reverse_type()
         } else {
             here_crack.get_type()
         };
 
-        // Redirect Crack to new destination, and set correct flag to update destination icon on lower screen
+        // Enable Flag - if it's the HC Crack or its pair leave it open, else use the Quake Flag.
+        let enable_flag = if here_crack == Crack::HyruleCastle
+            || here_crack == *seed_info.crack_map.get(&Crack::HyruleCastle).unwrap()
+        {
+            Flag::ZERO_ZERO
+        } else {
+            Flag::QUAKE
+        };
+
+        // Apply the patch
         self.modify_objs(
             course,
             scene,
             [call(unq, move |obj| {
                 obj.redirect(there_sp);
-                obj.arg.2 = here_arg2;
+                obj.arg.2 = crack_type;
                 obj.set_active_flag(there_flag);
                 obj.set_inactive_flag(here_crack.get_flag());
+                obj.set_enable_flag(enable_flag);
             })],
         );
-
-        // Hyrule Castle Crack special handling
-        if here_crack == Crack::HyruleCastle {
-            if *there_crack == Crack::LoruleCastle {
-                // Vanilla HC/LC pair - Delete the curtain and no merge zone
-                self.modify_objs(
-                    IndoorLight,
-                    7,
-                    [
-                        disable(26), // Curtain
-                        disable(29), // AreaDisableWallIn
-                    ],
-                );
-            } else {
-                // Wire the curtain + no merge zone to the other crack's flag
-                self.modify_objs(
-                    IndoorLight,
-                    7,
-                    [
-                        set_46_args(26, there_flag),      // Curtain
-                        set_46_args(29, there_flag),      // AreaDisableWallIn
-                        set_disable_flag(29, there_flag), // AreaDisableWallIn
-                    ],
-                );
-            }
-        }
-
-        // TODO angle of Crack Blockages can't seem to be changed, no point in this function until the game respects
-        // the x-component of the MojWallBreakFieldLight/MojWallBreakFieldDark's rotation.
-        //self.block_cracks(course, scene, unq, here_crack, *there_crack)?;
 
         Ok(())
     }
