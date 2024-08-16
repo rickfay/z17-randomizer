@@ -80,8 +80,8 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                     ),
                     old_check(
                         LocationInfo::new("[TR] (B1) Big Chest (Top)", regions::dungeons::turtle::rock::SUBREGION),
-                        Some(|p| p.has_turtle_keys(1) && p.can_merge() && p.can_hit_shielded_switch()),
-                        Some(|p| (p.has_turtle_keys(1) && p.can_merge())), // hit switch with pots
+                        Some(|p| p.has_turtle_keys(3) && p.can_merge() && p.can_hit_shielded_switch()),
+                        Some(|p| (p.has_turtle_keys(3) && p.can_merge())), // hit switch with pots
                         None,
                         None,
                         None,
