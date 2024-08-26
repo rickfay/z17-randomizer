@@ -1478,7 +1478,7 @@ fn patch_hildas_study(patcher: &mut Patcher, settings: &Settings) {
         Obj {
             arg: Arg(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.0),
             clp: 1,
-            flg: (0, 0, 0, 0),
+            flg: (4, 0, Flag::TRIFORCE_OF_COURAGE.get_value(), 0),
             id: 235,
             lnk: vec![],
             nme: Some("HintGhostDark/HintGhost_FieldDark_2C_014".to_owned()),
