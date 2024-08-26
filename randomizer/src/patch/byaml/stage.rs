@@ -1455,7 +1455,7 @@ fn patch_hildas_study(patcher: &mut Patcher, settings: &Settings) {
         IndoorDark,
         5,
         Obj::green_warp(
-            Flag::Event(708),
+            Flag::TRIFORCE_OF_COURAGE,
             1,
             Some(14),
             48,
