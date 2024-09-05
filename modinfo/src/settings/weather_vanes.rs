@@ -6,7 +6,7 @@ pub enum WeatherVanes {
     /// Only the standard, complimentary Weather Vanes (Link's House & Vacant House) are active at game start
     #[default]
     Standard,
-    /// Shuffles the Weather Vanes, so each activates a warp to a random Weather Vane.
+    /// Shuffles the Weather Vanes in pairs, so each activates a warp to a random Weather Vane.
     Shuffled,
     /// Activate all the Weather Vanes that don't affect logic, but do make getting around easier
     Convenient,
