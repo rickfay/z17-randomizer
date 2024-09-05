@@ -1062,7 +1062,7 @@ fn item_names(code: &mut Code) -> HashMap<Item, u32> {
     map
 }
 
-const ACTOR_NAME_OFFSETS: [(Item, u32); 33] = [
+const ACTOR_NAME_OFFSETS: [(Item, u32); 32] = [
     (ItemStoneBeauty, 0x5D2060),
     (RupeeR, 0x5D639C),
     (RupeeG, 0x5D639C),
@@ -1091,14 +1091,13 @@ const ACTOR_NAME_OFFSETS: [(Item, u32); 33] = [
     (LiverYellow, 0x5D7640),
     (LiverBlue, 0x5D7654),
     (MessageBottle, 0x5D76A0),
-    (MilkMatured, 0x5D76A0),
     (Item::Pouch, 0x5D7734),
     (ItemBowLight, 0x5D776C),
     (HeartContainer, 0x5D7B7C),
     (HeartPiece, 0x5D7B94),
 ];
 
-const ACTOR_NAMES: [(Item, &str); 44] = [
+const ACTOR_NAMES: [(Item, &str); 45] = [
     (KeyBoss, "KeyBoss"),
     (TriforceCourage, "BadgeBee"),
     (Compass, "Compass"),
@@ -1131,6 +1130,7 @@ const ACTOR_NAMES: [(Item, &str); 44] = [
     (ItemHammerLv2, "GtEvHammerB"),
     (ItemBowLv2, "GtEvBowB"),
     (Milk, "GtEvBottleMedicine"),
+    (MilkMatured, "GtEvBottleMedicine"),
     (Kinsta, "KinSta"),
     (PendantPower, "Pendant"),
     (PendantWisdom, "Pendant"),
