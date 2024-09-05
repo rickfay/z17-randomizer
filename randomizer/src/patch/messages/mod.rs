@@ -9,6 +9,7 @@ use crate::{
 };
 use game::Course::{self, *};
 use log::info;
+use macros::fail;
 use std::collections::btree_map::BTreeMap;
 
 mod hint_ghosts;
@@ -175,16 +176,28 @@ fn patch_ravio(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
     let (irene, _) = seed_info.layout.find_single(SageIrene).unwrap();
     let (rosso, _) = seed_info.layout.find_single(SageRosso).unwrap();
 
-    let first_intro = &format!("What's that? You're looking for the\n{}?", name("Seven Sages"));
-    let second_intro = &format!("Yeah...if you're looking for those\n{}?", name("Seven Sages"));
+    let (article, demonstrative_pronoun, num_sages_txt) = match seed_info.settings.lc_requirement {
+        0 => ("", "those", "Zero Sages"),
+        1 => ("", "that", "One Sage"),
+        2 => ("", "those", "Two Sages"),
+        3 => ("", "those", "Three Sages"),
+        4 => ("", "those", "Four Sages"),
+        5 => ("", "those", "Five Sages"),
+        6 => ("", "those", "Six Sages"),
+        7 => (" the", "those", "Seven Sages"),
+        _ => fail!("Invalid lc_requirement: {}", seed_info.settings.lc_requirement),
+    };
 
-    let gulley = &format!("\n{} is in the {}.", green("Gulley"), green(gulley));
-    let oren = &format!("\n{} is in the {}.", beige("Queen Oren"), beige(oren));
-    let seres = &format!("\n{} is in the {}.", blue("Seres"), blue(seres));
-    let osfala = &format!("\n{} is in the {}.", beige("Osfala"), beige(osfala));
-    let impa = &format!("\n{} is in the {}.", purple("Lady Impa"), purple(impa));
-    let irene = &format!("\n{} is in the {}.", name("Irene"), name(irene));
-    let rosso = &format!("\n{} is in the {}.", attention("Rosso"), attention(rosso));
+    let first_intro = &format!("What's that? You're looking for{}\n{}?", article, name(num_sages_txt));
+    let second_intro = &format!("Yeah...if you're looking for {}\n{}?", demonstrative_pronoun, name(num_sages_txt));
+
+    let gulley = &format!("\n{} is in{} {}.", green("Gulley"), dungeon_article(gulley), green(gulley));
+    let oren = &format!("\n{} is in{} {}.", beige("Queen Oren"), dungeon_article(oren), beige(oren));
+    let seres = &format!("\n{} is in{} {}.", blue("Seres"), dungeon_article(seres), blue(seres));
+    let osfala = &format!("\n{} is in{} {}.", beige("Osfala"), dungeon_article(osfala), beige(osfala));
+    let impa = &format!("\n{} is in{} {}.", purple("Lady Impa"), dungeon_article(impa), purple(impa));
+    let irene = &format!("\n{} is in{} {}.", name("Irene"), dungeon_article(irene), name(irene));
+    let rosso = &format!("\n{} is in{} {}.", attention("Rosso"), dungeon_article(rosso), attention(rosso));
 
     let mut ravio_shop = load_msbt(patcher, IndoorLight, "FieldLight_2C")?;
 
@@ -202,6 +215,13 @@ fn patch_ravio(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
     patcher.update(ravio_shop.dump())?;
 
     Ok(())
+}
+
+fn dungeon_article(dungeon_name: &str) -> String {
+    match dungeon_name {
+        "Skull Woods" | "Turtle Rock" => "",
+        _ => " the",
+    }.to_string()
 }
 
 /// Impa in Hyrule Castle dialogue
