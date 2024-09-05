@@ -1,7 +1,7 @@
 {
   // "Visit the project GitHub for details about each option: https://github.com/rickfay/z17-randomizer/tree/dev#game-options"
   "seed": 0,
-  "version": "v0.4.0 - Beta Build 2024-08-26",
+  "version": "v0.4.0 - Beta Build 2024-09-05",
   "settings": {
 
 
@@ -39,7 +39,7 @@
     "assured_weapon":              true,                      // If enabled at least one weapon is guaranteed to be placed in Ravio's Shop. (Note: incompatible with boots_in_shop and sword_in_shop).
 
     "chest_size_matches_contents": true,                      // All chests containing progression or unique items will become large, and others will be made small.
-    "night_mode":                  false,                     // Enables certain shaders on the overworld that make it look like nighttime in Hyrule.
+    "night_mode":                  false,                     // Enables certain shaders on the overworld that make it look like nighttime.
 
     "user_exclusions": [
       // Exclude locations to guarantee Junk items will be placed there.
