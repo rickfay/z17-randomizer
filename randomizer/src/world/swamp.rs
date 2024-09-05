@@ -17,14 +17,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                 "Swamp Palace Outside",
                 vec![check!("Swamp Palace Weather Vane", regions::lorule::field::main::SUBREGION)],
                 vec![
-                    old_path(
-                        LoruleCastleArea,
-                        Some(|p| p.has_hookshot() || p.has_flippers() || p.has_bomb_flower()),
-                        None,
-                        None,
-                        None,
-                        None,
-                    ),
+                    edge!(LoruleCastleArea, |p| p.has_hookshot() || p.has_flippers() || p.has_bomb_flower()),
                     edge!(SwampPalaceAntechamber),
                 ],
             ),

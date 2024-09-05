@@ -28,8 +28,7 @@ pub(crate) fn graph(crack_map: &CrackMap) -> HashMap<Location, LocationNode> {
                     edge!(LoruleCastleArea, |p| p.has_weather_vane(VacantHouseWV)
                         || p.has_weather_vane(BlacksmithWV)
                         || p.has_weather_vane(ThievesTownWV)
-                        || p.has_weather_vane(LoruleCastleWV)
-                        || p.has_weather_vane(SwampPalaceWV)),
+                        || p.has_weather_vane(LoruleCastleWV)),
                     edge!(SkullWoodsOverworld, |p| p.has_weather_vane(SkullWoodsWV)),
                     edge!(MiseryMire, |p| p.has_weather_vane(MiseryMireWV)),
                     edge!(SwampPalaceOutside, |p| p.has_weather_vane(SwampPalaceWV)),

@@ -232,6 +232,17 @@ impl Flag {
         // 1017: LAST_FLAG,
     }
 
+    /// Flags of Standard Weather Vanes
+    pub fn get_standard_weather_vane_flags(cracksanity: bool) -> Option<Vec<Flag>> {
+        let mut standard_weather_vanes = vec![Flag::WV_YOUR_HOUSE];
+
+        if !cracksanity {
+            standard_weather_vanes.push(Flag::WV_VACANT_HOUSE);
+        }
+
+        Some(standard_weather_vanes)
+    }
+
     /// Flags of "Convenient" Weather Vanes, that don't affect logic but save time
     pub fn get_convenient_weather_vane_flags(cracksanity: bool) -> Option<Vec<Flag>> {
         let mut convenient_weather_vanes =

@@ -160,7 +160,8 @@ fn get_initial_flags_to_set(SeedInfo { trials_config, settings, .. }: &SeedInfo)
 
     // Weather Vanes
     let wv_flags = match settings.weather_vanes {
-        Standard | Shuffled => None,
+        Standard => Flag::get_standard_weather_vane_flags(settings.cracksanity != Cracksanity::Off),
+        Shuffled => None,
         Convenient => Flag::get_convenient_weather_vane_flags(settings.cracksanity != Cracksanity::Off),
         Hyrule => Flag::get_hyrule_weather_vane_flags(),
         Lorule => Flag::get_lorule_weather_vane_flags(),
