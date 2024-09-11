@@ -6,6 +6,7 @@ on:
     branches:
       - master
       - dev
+      - sgl-tournament-2024
 
 jobs:
   build:
