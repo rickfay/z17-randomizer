@@ -81,6 +81,7 @@ A randomizer for The Legend of Zelda: A Link Between Worlds.
   - Rosso
     - Now appears properly inside his house when rescued, instead of the "Crooked Chest".
   - Rupees will now be named correctly in shops instead of being referred to as "Play Coins"
+  - Fix the vanilla joystick bug that causes all inputs to be rotated 5 degrees counterclockwise.
 - **Logic Changes**
   - All:
     - Dungeons now expect a certain amount of health to be available before entering logic.
