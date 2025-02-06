@@ -1,18 +1,18 @@
 use super::Patcher;
 use crate::filler::filler_item::Item::*;
 use crate::filler::filler_item::Randomizable;
+use crate::patch::code::arm::Register::*;
 use crate::patch::code::arm::data::{add, cmp, mov};
 use crate::patch::code::arm::ls::{ldr, ldrb, str_, strb};
 use crate::patch::code::arm::lsm::{pop, push};
-use crate::patch::code::arm::Register::*;
-use crate::patch::code::arm::{b, bl, Instruction, LR, PC, SP};
-use crate::{patch::util::prize_flag, regions, Layout, Result, SeedInfo};
+use crate::patch::code::arm::{Instruction, LR, PC, SP, b, bl};
+use crate::{Layout, Result, SeedInfo, patch::util::prize_flag, regions};
 use game::Item;
 use game::Item::*;
-use modinfo::settings::{pedestal::PedestalSetting::*, Settings};
+use modinfo::settings::{Settings, pedestal::PedestalSetting::*};
+use rom::ExHeader;
 use rom::flag::Flag;
 use rom::scene::SpawnPoint;
-use rom::ExHeader;
 use std::{
     collections::HashMap,
     fs::{self, File},
@@ -178,6 +178,7 @@ pub fn create(patcher: &Patcher, seed_info: &SeedInfo) -> Code {
     // instant text
     code.overwrite(0x17A430, [0xFF]);
 
+    remove_charm_from_gear_menu(&mut code);
     fix_joystick_rotation(&mut code);
     rental_items(&mut code);
     progressive_items(&mut code);
@@ -349,6 +350,14 @@ fn do_dev_stuff(code: &mut Code, seed_info: &SeedInfo) {
     let amount = 25;
     code.patch(0x2559bc, [add(R1, R1, amount)]);
     code.patch(0x2559c0, [add(R2, R2, amount)]);
+}
+
+/// The game will show a green orb on the gear menu whether you have the Charm or the full Pendant
+/// of Courage. This gets confusing for players who don't understand that the Charm is a junk item
+/// that does nothing. This code prevents the green orb from appearing with the Charm, and will
+/// make it only appear when the player has the actual Pendant of Courage.
+fn remove_charm_from_gear_menu(code: &mut Code) {
+    code.text().patch(0x42644c, [b(0x4264a8).ne()]);
 }
 
 /// For what are certainly reasons, Nintendo decided to rotate all of Link's movements ever so
