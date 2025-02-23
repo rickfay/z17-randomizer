@@ -992,6 +992,9 @@ The Bow of Light Hint will be generated for every seed even if an [Always](#alwa
 - Unintended Item Duplication:
   - Players can receive the final item from Zelda multiple times if they die and restart the fight.
   - Items from the Hinox can be received multiple times if the player revisits the cave after a Save & Quit.
+- Visual Glitches:
+  - A small handful of rotating platforms will "jitter" while moving, but this should not affect gameplay.
+  - The camera will pan *way* too far downward when entering the Sacred Realm.
 - Miscellaneous:
   - Some text boxes will overflow or display incorrectly.
 
@@ -1011,6 +1014,7 @@ The Bow of Light Hint will be generated for every seed even if an [Always](#alwa
   - grizz
   - Herreteman
   - j_im
+  - MsBeccaFae
   - NesmaN88
   - ScorelessPine
 
