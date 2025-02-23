@@ -1,16 +1,17 @@
-use {
-    crate::{constants::CONFIG_FILE_NAME, Settings},
-    json_comments::StripComments,
-    log::info,
-    macros::fail,
-    serde::{de::DeserializeOwned, Deserialize, Serialize},
-    std::{
-        error::Error as StdError,
-        fmt::{self, Display, Formatter},
-        fs, io,
-        path::{Path, PathBuf},
-    },
+use std::{
+    error::Error as StdError,
+    fmt::{self, Display, Formatter},
+    fs, io,
+    path::{Path, PathBuf},
 };
+
+use json_comments::StripComments;
+use log::info;
+use macros::fail;
+use serde::{de::DeserializeOwned, Deserialize, Serialize};
+
+use crate::constants::CONFIG_FILE_NAME;
+use crate::SeedInfo;
 
 pub type Result<T, E = Error> = std::result::Result<T, E>;
 
@@ -49,7 +50,7 @@ impl From<io::Error> for Error {
 pub struct System;
 
 impl System {
-    pub fn load_preset(name: &str) -> Result<Settings> {
+    pub fn load_preset(name: &str) -> Result<SeedInfo> {
         let file = PathBuf::from("presets").join(format!("{}.json", name));
         info!("Loading preset from:            {}\n", file.display());
         Self::load_json(file)
@@ -60,7 +61,7 @@ impl System {
         if file.exists() {
             Self::load_json(file)
         } else {
-            fail!("No config file found at {}", file.to_path_buf().display());
+            fail!("No config file found at {}", file.display());
         }
     }
 

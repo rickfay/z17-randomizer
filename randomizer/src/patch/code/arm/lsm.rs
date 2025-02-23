@@ -21,9 +21,7 @@ impl Default for AddressingMode {
     }
 }
 
-pub fn instruction<R, L>(
-    addressing_mode: AddressingMode, load: bool, rn: R, registers: L,
-) -> Instruction
+pub fn instruction<R, L>(addressing_mode: AddressingMode, load: bool, rn: R, registers: L) -> Instruction
 where
     R: Into<RegisterW>,
     L: AsRef<[Register]>,
@@ -31,11 +29,7 @@ where
     let RegisterW(rn, w) = rn.into();
     let register_list = registers.as_ref().iter().fold(0, |list, &register| list | register.bit());
     Instruction::new(
-        addressing_mode.code()
-            | (w as u32) << 21
-            | (load as u32) << 20
-            | rn.shift(16)
-            | (register_list as u32),
+        addressing_mode.code() | (w as u32) << 21 | (load as u32) << 20 | rn.shift(16) | (register_list as u32),
     )
 }
 

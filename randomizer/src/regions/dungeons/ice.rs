@@ -5,9 +5,9 @@ crate::region! {
     ruins {
         locations: [
             "[IR] (1F) Hidden Chest": RupeeGold @Chest(1[1048]),
+            "[IR] (B2) Ice Pillar": KeySmall @Key(1[1057]),
             "[IR] (B3) Grate Chest (Left)": RupeeG @Chest(1[840]),
             "[IR] (B3) Grate Chest (Right)": LiverYellow @Chest(1[893]),
-            "[IR] (B4) Ice Pillar": KeySmall @Key(1[1057]),
             "[IR] (B5) Big Chest": KeyBoss @BigChest(1[282]),
             "[IR] (B1) East Chest": Compass @Chest(1[108]),
             "[IR] (B1) Narrow Ledge": KeySmall @Key(1[98]),
@@ -19,7 +19,7 @@ crate::region! {
             "[IR] (B2) Long Merge Chest": RupeeSilver @Chest(1[838]),
             "[IR] (B4) Southeast Chest (Fall)": KeySmall @Chest(1[273]),
             "[IR] Dharkstare": HeartContainer @Heart(1[554]),
-            "Ice Ruins Prize": None @None(),
+            "[IR] Prize": None @None(),
         ],
     },
 }

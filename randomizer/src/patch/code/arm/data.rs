@@ -9,9 +9,7 @@ pub enum ShifterOperand {
 impl ShifterOperand {
     pub fn code(&self) -> u32 {
         match self {
-            Self::Immediate { immed_8, rotate_imm } => {
-                0x2000000 | (*rotate_imm as u32) << 8 | *immed_8 as u32
-            }
+            Self::Immediate { immed_8, rotate_imm } => 0x2000000 | (*rotate_imm as u32) << 8 | *immed_8 as u32,
             Self::Register { rm } => rm.shift(0),
         }
     }
@@ -68,4 +66,14 @@ where
     O: Into<ShifterOperand>,
 {
     instruction(operand2.into().code(), 0b1101, false, R0, rd)
+}
+
+#[allow(unused)]
+pub fn nop() -> Instruction {
+    mov(R0, R0) // fixme not actually the NOP command
+}
+
+#[allow(unused)]
+pub fn raw(addr: u32) -> Instruction {
+    Instruction::Raw(addr)
 }

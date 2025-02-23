@@ -15,9 +15,21 @@ where
     }
 }
 
+impl From<u16> for Operand {
+    fn from(expr: u16) -> Self {
+        Self::Pseudo(expr as u32)
+    }
+}
+
 impl From<u32> for Operand {
     fn from(expr: u32) -> Self {
         Self::Pseudo(expr)
+    }
+}
+
+impl From<i32> for Operand {
+    fn from(expr: i32) -> Self {
+        Self::Pseudo(expr as u32)
     }
 }
 
@@ -37,7 +49,7 @@ impl AddressingMode {
 impl From<(Register, i32)> for AddressingMode {
     fn from(parameter: (Register, i32)) -> Self {
         let (rn, offset) = parameter;
-        Self { rn, plus: offset >= 0, offset: Offset::Immediate(offset.abs() as u32) }
+        Self { rn, plus: offset >= 0, offset: Offset::Immediate(offset.unsigned_abs()) }
     }
 }
 
@@ -86,12 +98,8 @@ where
     P: Into<Operand>,
 {
     match addressing_mode.into() {
-        Operand::AddressingMode(addressing_mode) => {
-            instruction(addressing_mode.code(), false, true, rd)
-        }
-        Operand::Pseudo(expr) => {
-            Instruction::Pseudo(Default::default(), Pseudo { rt: rd, expr }.into())
-        }
+        Operand::AddressingMode(addressing_mode) => instruction(addressing_mode.code(), false, true, rd),
+        Operand::Pseudo(expr) => Instruction::Pseudo(Default::default(), Pseudo { rt: rd, expr }.into()),
     }
 }
 

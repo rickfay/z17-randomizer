@@ -1,47 +1,56 @@
 {
-  // "Visit the project GitHub for details about each option: https://github.com/rickfay/z17-randomizer/tree/v0.3.0",
-  "logic": {
-    "logic_mode":                  "Normal",            // "Normal", "Hard", "Glitched", "AdvGlitched", "Hell", "NoLogic"
-    "randomize_dungeon_prizes":    true,                // This shuffles all Sage Portraits, Pendants, and the Charm among themselves.
-    "vanilla_charm":               false,               // Forces one of the two Pendant of Courage Upgrades to be in Zelda's Throne Room if enabled.
-    "lc_requirement":              7,                   // Sage Portraits needed to enter Lorule Castle's front door
-    "ped_requirement":             "Charmed",           // MS Pedestal Pendant requirement: (2) "Vanilla", (3) "Charmed", or (4) "Standard"
-    "hyrule_castle_setting":       "EarlyLoruleCastle", // Hyrule Castle Dungeon setting, choose either: "EarlyLoruleCastle" or "Closed"
+  // "Visit the project GitHub for details about each option: https://github.com/rickfay/z17-randomizer/tree/dev#game-options"
+  "seed": 0,
+  "version": "v0.4.0",
+  "settings": {
 
-    "nice_mode":                   false,               // This shuffles a second progressive copy of each Ravio Item into the general item pool.
-    "super_items":                 true,                // This shuffles a second progressive copy of the Lamp and Net into the general item pool.
-    "reverse_sage_events":         true,                // Ties Sage-related checks and events to actually rescuing that Sage.
-    "no_progression_enemies":      true,                // Removes Enemies from dungeons that are themselves Progression (e.g.: Bawbs, the bomb enemy)
 
-    "start_with_merge":            true,                // Start with the ability to Merge into walls, without Ravio's Bracelet.
-    "bell_in_shop":                true,                // If enabled the Bell will be placed in Ravio's Shop.
-    "pouch_in_shop":               false,               // If enabled the Pouch will be placed in Ravio's Shop.
-    "sword_in_shop":               false,               // If enabled at least one Sword will be placed in Ravio's Shop. (Note: This option is incompatible with Swordless Mode, which removes all Swords from the game.)
-    "boots_in_shop":               false,               // If enabled the Pegasus Boots will be placed in Ravio's Shop.
-    "assured_weapon":              false,               // If enabled at least one weapon is guaranteed to be placed in Ravio's Shop. (Note: incompatible with boots_in_shop and sword_in_shop).
+    "logic_mode":                  "Normal",                  // "Normal", "Hard", "Glitched", "AdvGlitched", "Hell", "NoLogic"
+    "lc_requirement":              7,                         // Sage Portraits needed to enter Lorule Castle's front door.
+    "ped_requirement":             "Standard",                // MS Pedestal Pendant requirement: (2) "Vanilla", (3) "Standard"
+    "dungeon_prize_shuffle":       true,                      // This shuffles all Sage Portraits and Pendants among themselves.
+    "cracks":                      "Closed",                  // "Closed", "Open"
+    "cracksanity":                 "Off",                     // "Off", "CrossWorldPairs", "AnyWorldPairs", "MirroredCrossWorldPairs", "MirroredAnyWorldPairs"
+    "keysy":                       "Off",                     // "Off", "SmallKeysy", "BigKeysy", "AllKeysy"
+    "trials_door":                 "OpenFromInsideOnly",      // "OpenFromInsideOnly", "OneTrialRequired", "TwoTrialsRequired", "ThreeTrialsRequired", "AllTrialsRequired", "OpenFromBothSides"
+    "weather_vanes":               "Hyrule",                  // Choose initially active Weather Vanes: "Standard", "Shuffled", "Convenient", "Hyrule", "Lorule", "All"
 
-    "maiamai_madness":             false,               // This shuffles Maiamai into the pool, adding 100 more locations.
+    "maiamai_limit":               50,                        // The MAXIMUM number of Maiamai (0-100) the seed may require you to collect, assuming you don't waste any on junk.
+    "maiamai_madness":             false,                     // This shuffles Maiamai into the pool, adding 100 more locations.
+    "nice_items":                  "Shuffled",                // "Vanilla", "Shuffled", "Off"
+    "super_items":                 true,                      // This shuffles a second progressive copy of the Lamp and Net into the general item pool.
 
-    "minigames_excluded":          true,                // Excludes the following: Octoball Derby, Dodge the Cuccos, Hyrule Hotfoot, Treacherous Tower, and both Rupee Rushes
-    "skip_big_bomb_flower":        false,               // Skips the Big Bomb Flower by removing the 5 Big Rocks in Lorule Field.
-    "skip_trials":                 false,               // Automatically opens the Lorule Castle Trials door.
-    "bow_of_light_in_castle":      false,               // Limits the Bow of Light's placement to somewhere in Lorule Castle (including possibly Zelda).
+    "bow_of_light_in_castle":      false,                     // Limits the Bow of Light's placement to somewhere in Lorule Castle (including possibly Zelda).
+    "minigames_excluded":          false,                     // Excludes the following: Octoball Derby, Dodge the Cuccos, Hyrule Hotfoot, Treacherous Tower, and both Rupee Rushes
+    "no_progression_enemies":      false,                     // Removes Enemies from dungeons that are themselves Progression (e.g.: Bawbs, the bomb enemy)
+    "purple_potion_bottles":       true,                      // Fills all Empty Bottles with a free Purple Potion.
+    "skip_big_bomb_flower":        true,                      // Skips the Big Bomb Flower by removing the 5 Big Rocks in Lorule Field.
+    "treacherous_tower_floors":    5,                         // The number (any integer between 2 and 66) of floors the Treacherous Tower minigame will have.
 
-    "weather_vanes_activated":     false,               // Begin the game with all Weather Vanes activated. Not supported by any trackers currently.
-    "dark_rooms_lampless":         false,               // If enabled the logic may expect players to cross Dark Rooms without the Lamp.
-    "swordless_mode":              false,               // Removes *ALL* Swords from the game.
+    "swordless_mode":              false,                     // Removes *ALL* Swords from the game.
+    "dark_rooms_lampless":         false,                     // If enabled the logic may expect players to cross Dark Rooms without the Lamp.
+    "lamp_and_net_as_weapons":     false,                     // Treats the red base Lamp and Net as logical weapons (recommended only for advanced players)
 
-    "hint_ghost_price":            30                   // Price of Hints from Hint Ghosts. Can be any integer between 0 and 9999 (Recommended: 30).
-  },
-  "options": {
-    "chest_size_matches_contents": true,                // All chests containing progression or unique items will become large, and others will be made small.
-    "night_mode":                  false                // Enables certain shaders on the overworld that make it look like nighttime in Hyrule.
-  },
-  "exclusions": {
-    // Exclude certain locations to guarantee Junk Items will be placed there.
-    // Check Names are all unique, consult a spoiler log for a complete list.
-    "exclusions": [
-      "Great Rupee Fairy"
+    "start_with_merge":            false,                     // Start with the ability to Merge into walls, without Ravio's Bracelet.
+    "start_with_pouch":            false,                     // Start with the Pouch and a usable X Button.
+    "bell_in_shop":                false,                      // If enabled the Bell will be placed in Ravio's Shop.
+    "sword_in_shop":               false,                     // If enabled at least one Sword will be placed in Ravio's Shop. (Note: This option is incompatible with Swordless Mode, which removes all Swords from the game.)
+    "boots_in_shop":               false,                     // If enabled the Pegasus Boots will be placed in Ravio's Shop.
+    "assured_weapon":              true,                      // If enabled at least one weapon is guaranteed to be placed in Ravio's Shop. (Note: incompatible with boots_in_shop and sword_in_shop).
+
+    "chest_size_matches_contents": true,                      // All chests containing progression or unique items will become large, and others will be made small.
+    "night_mode":                  false,                     // Enables certain shaders on the overworld that make it look like nighttime.
+
+    "user_exclusions": [
+      // Exclude locations to guarantee Junk items will be placed there.
+      // Check Names are all unique, consult a spoiler log for a complete list.
+      // Place a comma "," after each line (except the last line!)
+      "Dodge the Cuccos",
+      "Hyrule Hotfoot 65s",
+      "Hyrule Hotfoot 75s",
+      "Octoball Derby",
+      "Rupee Rush (Hyrule)",
+      "Rupee Rush (Lorule)"
     ]
   }
 }

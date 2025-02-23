@@ -33,9 +33,7 @@ impl<const N: usize> Bytes for [u8; N] {
 
     #[inline]
     fn from_slice(slice: &[u8]) -> Result<(&Self, &[u8])> {
-        let buf = slice
-            .get(0..N)
-            .ok_or_else(|| Error::new(ErrorKind::UnexpectedEof, "failed to fill whole buffer"))?;
+        let buf = slice.get(0..N).ok_or_else(|| Error::new(ErrorKind::UnexpectedEof, "failed to fill whole buffer"))?;
         unsafe { Ok((Bytes::from_slice_unchecked(buf), slice.get_unchecked(N..))) }
     }
 
@@ -334,7 +332,7 @@ where
 {
     // TODO: replace with `Box::new_uninit_slice` once stable
     let mut buf = unsafe {
-        mem::transmute::<_, Box<[u8]>>(slice::from_raw_parts(
+        mem::transmute::<&[u8], Box<[u8]>>(slice::from_raw_parts(
             alloc::alloc(alloc::Layout::from_size_align(len, 1).unwrap()),
             len,
         ))

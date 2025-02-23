@@ -1,26 +1,22 @@
-mod data;
-mod ls;
-mod lsm;
-pub use {
-    self::data::{add, cmp, mov},
-    ls::{ldr, ldrb, str_, strb},
-    lsm::{ldm, pop, push, stm, AddressingMode::*},
-    Register::*,
-};
+use crate::patch::code::arm::Register::*;
+
+pub(crate) mod data;
+pub(crate) mod ls;
+pub(crate) mod lsm;
 
 #[allow(unused)]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Register {
-    R0  = 0,
-    R1  = 1,
-    R2  = 2,
-    R3  = 3,
-    R4  = 4,
-    R5  = 5,
-    R6  = 6,
-    R7  = 7,
-    R8  = 8,
-    R9  = 9,
+    R0 = 0,
+    R1 = 1,
+    R2 = 2,
+    R3 = 3,
+    R4 = 4,
+    R5 = 5,
+    R6 = 6,
+    R7 = 7,
+    R8 = 8,
+    R9 = 9,
     R10 = 10,
     R11 = 11,
     R12 = 12,
@@ -198,9 +194,7 @@ impl Instruction {
     fn with_condition(self, cond: Condition) -> Self {
         match self {
             Self::Raw(raw) => Self::Raw(raw & 0x0FFFFFFF | cond.shift()),
-            Self::Branch { target_address, link, .. } => {
-                Self::Branch { cond, target_address, link }
-            }
+            Self::Branch { target_address, link, .. } => Self::Branch { cond, target_address, link },
             Self::Pseudo(_, pseudo) => Self::Pseudo(cond, pseudo),
         }
     }
@@ -210,14 +204,9 @@ impl Instruction {
             Self::Raw(code) => code,
             Self::Branch { cond, target_address, link } => {
                 let signed_immed_24 = ((target_address.diff(assembler.pc()) - 8) >> 2) & 0xFFFFFF;
-                0xA000000
-                    | (link as u32) << 24
-                    | u32::from_ne_bytes(signed_immed_24.to_ne_bytes())
-                    | cond.shift()
-            }
-            Self::Pseudo(cond, pseudo) => {
-                pseudo.into_raw(assembler).assemble(assembler) | cond.shift()
-            }
+                0xA000000 | (link as u32) << 24 | u32::from_ne_bytes(signed_immed_24.to_ne_bytes()) | cond.shift()
+            },
+            Self::Pseudo(cond, pseudo) => pseudo.into_raw(assembler).assemble(assembler) | cond.shift(),
         }
     }
 
@@ -329,22 +318,14 @@ pub fn b<A>(target_address: A) -> Instruction
 where
     A: Into<Address>,
 {
-    Instruction::Branch {
-        cond: Default::default(),
-        target_address: target_address.into(),
-        link: false,
-    }
+    Instruction::Branch { cond: Default::default(), target_address: target_address.into(), link: false }
 }
 
 pub fn bl<A>(target_address: A) -> Instruction
 where
     A: Into<Address>,
 {
-    Instruction::Branch {
-        cond: Default::default(),
-        target_address: target_address.into(),
-        link: true,
-    }
+    Instruction::Branch { cond: Default::default(), target_address: target_address.into(), link: true }
 }
 
 pub fn assemble<A, const N: usize>(start: A, instructions: [Instruction; N]) -> Box<[u8]>
@@ -359,6 +340,6 @@ where
     assembler.bytes.into_boxed_slice()
 }
 
-pub const SP: Register = Register::R13;
-pub const LR: Register = Register::R14;
-pub const PC: Register = Register::R15;
+pub const SP: Register = R13;
+pub const LR: Register = R14;
+pub const PC: Register = R15;

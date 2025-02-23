@@ -1,18 +1,20 @@
-use {
-    log::info,
-    settings::{
-        hyrule_castle_setting::HyruleCastleSetting, logic::Logic, logic_mode::LogicMode,
-        pedestal_setting::PedestalSetting, Options, Settings,
-    },
-    std::{
-        io::{stdin, stdout, Read, Write},
-        str::FromStr,
-    },
+use log::info;
+use modinfo::settings::cracks::Cracks;
+use modinfo::settings::cracksanity::Cracksanity;
+use modinfo::settings::keysy::Keysy;
+use modinfo::settings::nice_items::NiceItems;
+use modinfo::settings::ravios_shop::RaviosShop;
+use modinfo::settings::trials_door::TrialsDoor;
+use modinfo::settings::weather_vanes::WeatherVanes;
+use modinfo::settings::{logic::LogicMode, pedestal::PedestalSetting, Settings};
+use std::{
+    io::{stdin, stdout, Read, Write},
+    str::FromStr,
 };
 
 /// Pauses program execution
 pub fn pause() {
-    println!("\nPress Enter to continue...");
+    println!("Press Enter to continue...");
     stdin().read_exact(&mut [0]).unwrap();
 }
 
@@ -23,20 +25,14 @@ pub fn get_seed_settings() -> Result<Settings, String> {
 
     let logic_mode = prompt_logic_mode();
 
-    let randomize_dungeon_prizes = prompt_bool(
+    let dungeon_prize_shuffle = prompt_bool(
         "Randomize Dungeon Prizes",
         "This shuffles all Sage Portraits, Pendants, and the Charm among themselves.",
     );
 
-    let vanilla_charm = if randomize_dungeon_prizes {
-        prompt_bool(
-            "Vanilla Charm",
-            "Enabling this forces one of the two Pendant of Courage Upgrades to be in Zelda's Throne Room.\n\
-            Otherwise, a random Sage Portrait or Pendant will be placed in Zelda's Throne Room.",
-        )
-    } else {
-        false
-    };
+    let maiamai_limit =
+        prompt_u8_in_range("Maiamai Limit", "Choose the maximum number of Maiamai you're willing to collect:", 0, 100)
+            as usize;
 
     let lc_requirement = prompt_u8_in_range(
         "Lorule Castle Requirement",
@@ -49,39 +45,33 @@ pub fn get_seed_settings() -> Result<Settings, String> {
     let ped_requirement = PedestalSetting::try_from(prompt_u8_in_range(
         "Pedestal Requirement",
         "Choose which Pendants are required to reach the Master Sword Pedestal:\n\
-        [2] Vanilla  - Only the Pendants of Power and Wisdom are required\n\
-        [3] Charmed  - All three Pendants are required, but Charm may substitute for the Pendant of Courage\n\
-        [4] Standard - All Pendants are required\n",
+        [2] Vanilla  - Requires only the Pendants of Power and Wisdom.\n\
+        [3] Standard - Requires the Pendants of Power, Wisdom, and Courage.",
         2,
-        4,
+        3,
     ))?;
 
-    let hyrule_castle_setting = HyruleCastleSetting::try_from(prompt_u8_in_range(
-        "Hyrule Castle Setting",
-        "Choose how the Dungeon portion of Hyrule Castle should be handled:\n\
-        [1] Early Lorule Castle - Completing Hyrule Castle allows early access to Lorule Castle via the Trial's Door.\n\
-        [2] Closed              - The Dungeon is closed off completely, and removed from all logic.\n",
-        1,
+    let nice_items = NiceItems::try_from(prompt_u8_in_range(
+        "Nice Items",
+        "Choose how to handle Nice Items and Mother Maiamai's upgrades:\n\
+        [0] Vanilla  - Nice Items are obtained as upgrades from Mother Maiamai.\n\
+        [1] Shuffled - Freely shuffles two progressive copies of each Ravio Item, and randomizes Mother Maiamai's rewards.\n\
+        [2] Off      - Removes Nice Items from the game, and randomizes Mother Maiamai's rewards.",
+        0,
         2,
     ))?;
 
-    let nice_mode = prompt_bool(
-        "Shuffle Nice Items",
-        "This shuffles a second progressive copy of each Ravio Item into the general item pool.",
-    );
     let super_items = prompt_bool(
         "Shuffle Super Items",
         "This shuffles a second progressive copy of the Lamp and Net into the general item pool.",
     );
 
-    let reverse_sage_events = prompt_bool(
-        "Reverse Sage Events",
-        "Ties Sage-related checks and events to actually rescuing that Sage.\n\
-        Makes the following changes:\n\
-        - Irene => Unlocks the Irene check (instead of Pendant of Courage)\n\
-        - Rosso => Unlocks Rosso's House and his two checks (instead of Pendant of Courage)\n\
-        - Oren  => Unlocks the Smooth Gem check and the Shady Guy Event\n\
-        - Impa  => Unlocks the front door to Hyrule Castle",
+    let lamp_and_net_as_weapons = prompt_bool(
+        "Lamp & Net as Weapons (advanced)",
+        "Treat the base Lamp and Net as damage-dealing weapons?\n\
+        Details:\n\
+        - The red base Lamp and Net each deal 1/2 the damage of the Forgotten Sword (i.e. they're VERY BAD weapons).\n\
+        - The blue Super Lamp and Super Net each deal 4 damage (same as MS Lv3) and are always considered weapons, regardless of this setting.",
     );
 
     let no_progression_enemies = prompt_bool(
@@ -90,16 +80,12 @@ pub fn get_seed_settings() -> Result<Settings, String> {
         Logic will be adjusted to require the player's items instead.",
     );
 
-    let start_with_merge = prompt_bool(
-        "Start with Merge",
-        "Start with the ability to Merge into walls, without Ravio's Bracelet.",
-    );
+    let start_with_merge =
+        prompt_bool("Start with Merge", "Start with the ability to Merge into walls, without Ravio's Bracelet.");
 
-    let bell_in_shop =
-        prompt_bool("Bell in Shop", "If enabled the Bell will be placed in Ravio's Shop.");
+    let start_with_pouch = prompt_bool("Start with Pouch", "Start with the Pouch and a usable X Button.");
 
-    let pouch_in_shop =
-        prompt_bool("Pouch in Shop", "If enabled the Pouch will be placed in Ravio's Shop.");
+    let bell_in_shop = prompt_bool("Bell in Shop", "If enabled the Bell will be placed in Ravio's Shop.");
 
     let sword_in_shop = prompt_bool(
         "Sword in Shop",
@@ -107,12 +93,9 @@ pub fn get_seed_settings() -> Result<Settings, String> {
         Note: This option is incompatible with Swordless Mode, which removes all Swords from the game.",
     );
 
-    let boots_in_shop = prompt_bool(
-        "Boots in Shop",
-        "If enabled the Pegasus Boots will be placed in Ravio's Shop.",
-    );
+    let boots_in_shop = prompt_bool("Boots in Shop", "If enabled the Pegasus Boots will be placed in Ravio's Shop.");
 
-    let assured_weapon = if !sword_in_shop && !boots_in_shop {
+    let assured_weapon = if !&sword_in_shop && !&boots_in_shop {
         prompt_bool(
             "Assured Weapon in Shop",
             "If enabled at least one weapon is guaranteed to be placed in Ravio's Shop.",
@@ -121,10 +104,29 @@ pub fn get_seed_settings() -> Result<Settings, String> {
         false
     };
 
-    let maiamai_madness = prompt_bool(
-        "Maiamai Madness",
-        "This shuffles Maiamai into the pool, adding 100 more locations.",
-    );
+    let maiamai_madness =
+        prompt_bool("Maiamai Madness", "This shuffles Maiamai into the pool, adding 100 more locations.");
+
+    let cracks = Cracks::try_from(prompt_u8_in_range(
+        "Cracks",
+        "Choose the initial state of the cracks between worlds:\n\
+        [0] Closed - All cracks except the Hyrule Castle crack (and its pair) remain closed until Quake is found.\n\
+        [1] Open   - All cracks are open from the start of the game, and Quake is not in the item pool.",
+        0,
+        1,
+    ))?;
+
+    let cracksanity = Cracksanity::try_from(prompt_u8_in_range(
+        "Cracksanity",
+        "Choose how to shuffle cracks:\n\
+        [0] Off                        - Cracks are not shuffled.\n\
+        [1] Cross World Pairs          - Cracks are shuffled, but remain in Hyrule/Lorule pairs.\n\
+        [2] Any World Pairs            - Cracks are shuffled freely, and can lead to the same or opposite world.\n\
+        [3] Mirrored Cross World Pairs - Same as Cross World Pairs, but each pair's vanilla counterparts will be in a matching pair.\n\
+        [4] Mirrored Any World Pairs   - Same as Any World Pairs, but each pair's vanilla counterparts will be in a matching pair.",
+        0,
+        4,
+    ))?;
 
     let minigames_excluded = prompt_bool(
         "Exclude Minigames",
@@ -137,20 +139,52 @@ pub fn get_seed_settings() -> Result<Settings, String> {
         (Does not affect Lorule Castle Bomb Trial)",
     );
 
-    let skip_trials =
-        prompt_bool("Skip Trials", "Automatically opens the Lorule Castle Trials door.");
+    let trials_door = TrialsDoor::try_from(prompt_u8_in_range(
+        "Trial's Door",
+        "Choose the behavior of the Lorule Castle Trial's Door:\n\
+        [0] Opens automatically from inside LC.\n\
+        [1] Trial  Required, randomly selected.\n\
+        [2] Trials Required, randomly selected.\n\
+        [3] Trials Required, randomly selected.\n\
+        [4] Trials Required.\n\
+        [5] Open from both sides (may require entering LC early via the crack).",
+        0,
+        5,
+    ))?;
+
+    // let progressive_bow_of_light = prompt_bool(
+    //     "Progressive Bow of Light",
+    //     "Replaces the Bow of Light with a third copy of the Bow. Obtaining all 3 Bows will reward the Bow of Light.\n\
+    //     Note 1: There will *NOT* be a Bow of Light Hint in Hilda's Study if this is enabled.\n\
+    //     Note 2: This option is incompatible with the option to force Bow of Light in Lorule Castle.",
+    // );
 
     let bow_of_light_in_castle = prompt_bool(
         "Bow of Light in Castle",
         "Limits the Bow of Light's placement to somewhere in Lorule Castle (including possibly Zelda).",
     );
 
-    let weather_vanes_activated = prompt_bool(
-        "Pre-Activated Weather Vanes",
-        "Begin the game with all Weather Vanes activated.\n\
-        The logic may expect players to use the Bell to reach otherwise unreachable locations this way.\n\
-        Note: Trackers do not currently support this feature.",
-    );
+    let weather_vanes = WeatherVanes::try_from(prompt_u8_in_range(
+        "Weather Vanes",
+        "Choose Weather Vanes behavior. Logic may require using them to progress.\n\
+        [0] Standard   - Only the standard complimentary Weather Vanes (Link's House & Vacant House)\n\
+        [1] Shuffled   - Weather Vane destinations are shuffled into random pairs\n\
+        [2] Convenient - Only convenient Weather Vanes that don't affect logic\n\
+        [3] Hyrule     - Only the  9 Hyrule Weather Vanes (and Vacant House)\n\
+        [4] Lorule     - Only the 13 Lorule Weather Vanes (and Link's House)\n\
+        [5] All        - All 22 Weather Vanes\n",
+        0,
+        5,
+    ))?;
+
+    // let ravios_shop = RaviosShop::try_from(prompt_u8_in_range(
+    //     "Ravio's Shop",
+    //     "Choose whether Ravio's Shop is Closed or Open at the start of the game.\n\
+    //     [0] Closed\n\
+    //     [1] Open\n",
+    //     0,
+    //     1,
+    // ))?;
 
     let dark_rooms_lampless = prompt_bool(
         "Dark Room Crossing (advanced)",
@@ -158,7 +192,7 @@ pub fn get_seed_settings() -> Result<Settings, String> {
         Not for beginners and those who like being able to see things.",
     );
 
-    let swordless_mode = if !sword_in_shop {
+    let swordless_mode = if !&sword_in_shop {
         prompt_bool(
             "Swordless Mode (advanced)",
             "Removes *ALL* Swords from the game.\n\
@@ -174,52 +208,66 @@ pub fn get_seed_settings() -> Result<Settings, String> {
         Note: Some large chests will have a reduced hitbox to prevent negative gameplay interference.",
     );
 
-    let hint_ghost_price = prompt_u16_in_range(
-        "Hint Ghost Price",
-        "Set the price of Hints from a Hint Ghost:\nRecommended Price: 30",
-        0,
-        9999,
-    );
+    let treacherous_tower_floors = prompt_u16_in_range(
+        "Treacherous Tower Floors",
+        "How many floors should Treacherous Tower have? (2-66)\nRecommended: 5",
+        2,
+        66,
+    ) as usize;
 
-    if hint_ghost_price == 69 {
-        print!("\nNice.\n");
-    }
+    let purple_potion_bottles =
+        prompt_bool("Purple Potion Bottles", "Fills all Empty Bottles with a free Purple Potion.");
+
+    let keysy = Keysy::try_from(prompt_u8_in_range(
+        "Keysy",
+        "This setting removes locked keys and doors from dungeons if enabled.\n\
+        [0] Off         - Key doors remain as they are in vanilla.\n\
+        [1] Small Keysy - Small Keys and locked doors are removed from all dungeons.\n\
+        [2] Big Keysy   - Big Keys and huge doors are removed from all dungeons.\n\
+        [3] All Keysy   - All Keys and their doors are removed from all dungeons.\n",
+        0,
+        3,
+    ))?;
 
     println!();
     info!("Starting seed generation...\n");
 
     Ok(Settings {
-        logic: Logic {
-            logic_mode,
-            randomize_dungeon_prizes,
-            vanilla_charm,
-            lc_requirement,
-            yuganon_requirement: lc_requirement,
-            ped_requirement,
-            hyrule_castle_setting,
-            nice_mode,
-            super_items,
-            reverse_sage_events,
-            no_progression_enemies,
-            start_with_merge,
-            bell_in_shop,
-            pouch_in_shop,
-            sword_in_shop,
-            boots_in_shop,
-            assured_weapon,
-            maiamai_madness,
-            weather_vanes_activated,
-            minigames_excluded,
-            skip_big_bomb_flower,
-            skip_trials,
-            bow_of_light_in_castle,
-            dark_rooms_lampless,
-            swordless_mode,
-            hint_ghost_price,
-            ..Default::default()
-        },
-        options: Options { chest_size_matches_contents, ..Default::default() },
-        ..Default::default()
+        dev_mode: false,
+        user_exclusions: Default::default(),
+        lc_requirement,
+        yuganon_requirement: lc_requirement,
+        ped_requirement,
+        logic_mode,
+        dark_rooms_lampless,
+        dungeon_prize_shuffle,
+        maiamai_limit,
+        maiamai_madness,
+        nice_items,
+        super_items,
+        lamp_and_net_as_weapons,
+        cracks,
+        cracksanity,
+        trials_door,
+        weather_vanes,
+        ravios_shop: RaviosShop::Open,
+        bow_of_light_in_castle,
+        no_progression_enemies,
+        keysy,
+        progressive_bow_of_light: false,
+        swordless_mode,
+        start_with_merge,
+        start_with_pouch,
+        bell_in_shop,
+        sword_in_shop,
+        boots_in_shop,
+        assured_weapon,
+        chest_size_matches_contents,
+        minigames_excluded,
+        skip_big_bomb_flower,
+        treacherous_tower_floors,
+        purple_potion_bottles,
+        night_mode: false,
     })
 }
 
@@ -266,21 +314,19 @@ pub fn prompt_u8_in_range(title: &str, description: &str, range_start: u8, range
         stdin().read_line(&mut input).unwrap();
 
         match u8::from_str(input.trim()) {
-            Err(_) => {}
+            Err(_) => {},
             Ok(result) => {
                 if (range_start..=range_end).contains(&result) {
                     return result;
                 }
-            }
+            },
         }
 
         eprintln!("Invalid input.");
     }
 }
 
-pub fn prompt_u16_in_range(
-    title: &str, description: &str, range_start: u16, range_end: u16,
-) -> u16 {
+pub fn prompt_u16_in_range(title: &str, description: &str, range_start: u16, range_end: u16) -> u16 {
     print!("\n[{}]\n{}", title, description);
     loop {
         print!("\nEnter a number ({}-{}): ", range_start, range_end);
@@ -290,12 +336,12 @@ pub fn prompt_u16_in_range(
         stdin().read_line(&mut input).unwrap();
 
         match u16::from_str(input.trim()) {
-            Err(_) => {}
+            Err(_) => {},
             Ok(result) => {
                 if (range_start..=range_end).contains(&result) {
                     return result;
                 }
-            }
+            },
         }
 
         eprintln!("Invalid input.");

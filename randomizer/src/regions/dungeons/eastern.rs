@@ -17,7 +17,7 @@ crate::region! {
             "[EP] Yuga (2)": HeartContainer @Heart(3[94]),
             "[EP] (3F) Escape Chest": RupeeSilver @Chest(3[25]),
             "[EP] (1F) Escape Chest": RupeePurple @Chest(1[235]),
-            "Eastern Palace Prize": PendantCourage @None(), // @Event(FieldLight/FieldLight_1B_Sahasrahla[0x17]),
+            "[EP] Prize": PendantCourage @None(), // @Event(FieldLight/FieldLight_1B_Sahasrahla[0x17]),
         ],
     },
 }

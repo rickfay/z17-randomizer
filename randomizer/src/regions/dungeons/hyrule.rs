@@ -1,12 +1,14 @@
 crate::region! {
-    course: FieldLight,
+    course: IndoorLight,
     name: "Hyrule Castle",
     color: Name,
     castle {
         locations: [
-            "Hyrule Castle West Wing": RupeeB @Chest(IndoorLight 12[48]),
-            "Hyrule Castle Battlement": RupeePurple @Chest(18[224]),
-            "Hyrule Castle Prize": ZeldaAmulet @None(),
+            "[HC] Crack": None @Crack(7[10] HyruleCastle),
+
+            "[HC] Battlement": RupeePurple @Chest(FieldLight 18[224]),
+            "[HC] West Wing": RupeeB @Chest(12[48]),
+            "[HC] Throne": ZeldaAmulet @Chest(12[23]),
         ],
     },
 }

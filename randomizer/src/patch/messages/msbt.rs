@@ -1,9 +1,10 @@
-use {
-    crate::{Patcher, Result},
-    albw::{course::Id, File},
-    byteorder::{ByteOrder, LittleEndian},
-    std::str::from_utf8,
-};
+use std::str::from_utf8;
+
+use byteorder::{ByteOrder, LittleEndian};
+use game::Course;
+use rom::File;
+
+use crate::{Patcher, Result};
 
 /// MSBT File
 ///
@@ -12,7 +13,7 @@ use {
 /// Reference: https://github.com/Kinnay/Nintendo-File-Formats/wiki/MSBT-File-Format
 pub(crate) struct MsbtFile {
     filename: String,
-    course: Id,
+    course: Course,
     lbl1: Lbl1Block,
     #[allow(unused)]
     atr1: Atr1Block,
@@ -31,10 +32,17 @@ impl MsbtFile {
     }
 
     /// Looks up the message specified by `label` and sets it to `value`
-    /// Appends a null terminator `\0` to the end of value.
+    /// Automatically appends a null terminator `\0` to the end of value.
     pub(crate) fn set(&mut self, label: &str, value: &str) {
         if let Some(item_index) = self.get_item_index(label) {
             let _ = std::mem::replace(&mut self.txt2.messages[item_index], format!("{}\0", value));
+        }
+    }
+
+    /// Clears the the message specified by `label`, setting it to an empty string.
+    pub(crate) fn clear(&mut self, label: &str) {
+        if let Some(item_index) = self.get_item_index(label) {
+            let _ = std::mem::replace(&mut self.txt2.messages[item_index], String::from("\0"));
         }
     }
 
@@ -48,32 +56,37 @@ impl MsbtFile {
         let hash = calc_hash(String::from(key), self.lbl1.num_slots) as usize;
         let hash_table_slot = self.lbl1.hash_table.get(hash).unwrap();
 
-        return if let Some(label) = hash_table_slot.labels.iter().find(|&label| label.label.eq(key))
-        {
-            Some(label.item_index as usize)
-        } else {
-            None
-        };
+        return hash_table_slot.labels.iter().find(|&label| label.label.eq(key)).map(|label| label.item_index as usize);
     }
 
     #[allow(unused)]
-    pub(crate) fn debug(&self) {
-        let mut labels =
-            self.lbl1.hash_table.iter().flat_map(|slot| slot.labels.iter()).collect::<Vec<_>>();
+    pub(crate) fn research(&self, edotor: bool) -> Vec<(String, String)> {
+        let mut labels = self.lbl1.hash_table.iter().flat_map(|slot| slot.labels.iter()).collect::<Vec<_>>();
         labels.sort_by(|this, that| this.item_index.cmp(&that.item_index));
 
-        for label in &labels {
-            println!(
-                "\nIndex: {}\nLabel: \"{}\"\n\"{}\"\n\n",
-                label.item_index,
-                label.label,
-                self.txt2.messages.get(label.item_index as usize).unwrap()
-            );
+        let results = labels
+            .iter()
+            .map(|label: &&Label| {
+                (label.label.clone(), self.txt2.messages.get(label.item_index as usize).unwrap().clone())
+            })
+            .collect::<Vec<_>>();
+
+        if !edotor {
+            for label in &labels {
+                println!(
+                    "\nIndex: {}\nLabel: \"{}\"\n\"{}\"\n\n",
+                    label.item_index,
+                    label.label,
+                    self.txt2.messages.get(label.item_index as usize).unwrap()
+                );
+            }
         }
+
+        results
     }
 
     /// Builds a valid `.msbt` file and dumps it as a [`File<Vec<u8>>`]
-    pub(crate) fn dump(&self) -> (Id, File<Vec<u8>>) {
+    pub(crate) fn dump(&self) -> (Course, File<Vec<u8>>) {
         // LBL1 BLOCK
         let mut hash_table_buffer = Vec::new();
         let mut labels_buffer = Vec::new();
@@ -110,8 +123,7 @@ impl MsbtFile {
         let mut prev_msg_len = 0;
         for message in &self.txt2.messages {
             msg_offset_buffer.extend_from_slice(&(msgs_init_offset + prev_msg_len).to_le_bytes());
-            let msg =
-                message.encode_utf16().flat_map(|thing| thing.to_le_bytes()).collect::<Vec<u8>>();
+            let msg = message.encode_utf16().flat_map(|thing| thing.to_le_bytes()).collect::<Vec<u8>>();
             msgs_buffer.extend_from_slice(&msg);
             prev_msg_len += msg.len() as u32;
         }
@@ -156,7 +168,7 @@ impl MsbtFile {
         msbt_file.extend_from_slice(&atr1_block);
         msbt_file.extend_from_slice(&txt2_block);
 
-        (self.course, File::new(self.filename.clone(), Vec::from(msbt_file)))
+        (self.course, File::new(self.filename.clone(), msbt_file))
     }
 }
 
@@ -186,7 +198,7 @@ struct MsbtFileHeader {
 /// Header for blocks found in MSBT / MSBP files
 ///
 /// Reference: https://github.com/Kinnay/Nintendo-File-Formats/wiki/LMS-File-Format#block-header
-#[derive(Default)]
+#[derive(Default, Debug)]
 struct BlockHeader {
     /// Magic number for the block
     block_type: u32,
@@ -242,7 +254,7 @@ struct Label {
 
 /// Attributes Block
 /// Reference: https://github.com/Kinnay/Nintendo-File-Formats/wiki/MSBT-File-Format#atr1-block
-#[derive(Default)]
+#[derive(Default, Debug)]
 struct Atr1Block {
     /// Uses the magic number `ATR1`
     header: BlockHeader,
@@ -258,7 +270,7 @@ struct Atr1Block {
 /// Stores the actual text messages as UTF-16 strings.
 ///
 /// Reference: https://github.com/Kinnay/Nintendo-File-Formats/wiki/MSBT-File-Format#txt2-block
-#[derive(Default)]
+#[derive(Default, Debug)]
 struct Txt2Block {
     /// Uses the magic number `TXT2`
     header: BlockHeader,
@@ -269,10 +281,14 @@ struct Txt2Block {
 }
 
 /// Load MSBT File
-pub(crate) fn load_msbt(patcher: &mut Patcher, course: Id, file: &str) -> Result<MsbtFile> {
+pub(crate) fn load_msbt(patcher: &mut Patcher, course: Course, file: &str) -> Result<MsbtFile> {
     let filename = format!("US_English/{}.msbt", file);
-    let mut file =
-        patcher.language(course.clone()).unwrap().flow().extract(filename.as_str()).unwrap();
+    let mut file = patcher
+        .language(course)
+        .unwrap()
+        .flow()
+        .extract(filename.as_str())
+        .unwrap_or_else(|| panic!("loading MSBT file: {}", filename));
 
     let raw = file.get_mut();
 
@@ -319,6 +335,7 @@ pub(crate) fn load_msbt(patcher: &mut Patcher, course: Id, file: &str) -> Result
     // ATR1 BLOCK
 
     let atr1_idx = (((lbl1.header.block_size + 0x30) & 0xFFFFFFF0) + 0x10) as usize;
+    // let atr1_idx = ((lbl1.header.block_size + 0x30) & 0xFFFFFFF0) as usize; // CrossBattle.msbt required this...?
 
     let mut atr1 = Atr1Block::default();
     atr1.header.block_type = LittleEndian::read_u32(&raw[atr1_idx..]); // ATR1
@@ -351,9 +368,7 @@ pub(crate) fn load_msbt(patcher: &mut Patcher, course: Id, file: &str) -> Result
             msg_idx + txt2.header.block_size as usize
         };
 
-        txt2.messages.push(unsafe {
-            String::from_utf16(raw[start_idx..end_idx].align_to::<u16>().1).unwrap()
-        });
+        txt2.messages.push(unsafe { String::from_utf16(raw[start_idx..end_idx].align_to::<u16>().1).unwrap() });
     }
 
     Ok(MsbtFile { filename, course, lbl1, atr1, txt2 })

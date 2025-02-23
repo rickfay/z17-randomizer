@@ -22,28 +22,22 @@ impl Sarc {
     /// Adds a new file to this [`Sarc`] Archive
     /// The `named` field determines whether the file's actual name will be stored in the archive's SFNT Filename Table.
     /// This can usually be set to false safely, but a small number of files do need this to deal with Hash collisions.
-    #[allow(unused)]
-    pub(crate) fn create(&mut self, filename: &str, data: Vec<u8>, named: bool) {
+    pub fn create(&mut self, filename: &str, data: Vec<u8>, named: bool) {
         if self.read(filename).is_some() {
-            fail!(
-                "File '{}' with matching Hash already exists in SZS Archive: '{}'",
-                filename,
-                self.path
-            );
+            fail!("File '{}' with matching Hash already exists in SZS Archive: '{}'", filename, self.path);
         }
 
-        self.files.insert(self.calculate_hash(filename), vec![SarcInnerFile {
-            filename: if named { Some(filename.to_owned()) } else { None },
-            data,
-        }]);
+        self.files.insert(
+            self.calculate_hash(filename),
+            vec![SarcInnerFile { filename: if named { Some(filename.to_owned()) } else { None }, data }],
+        );
     }
 
     /// Gets a file with the given `filename` from within this [`Sarc`] Archive. Panics if the file does not exist.
-    #[allow(unused)]
-    pub(crate) fn read(&self, filename: &str) -> Option<Vec<u8>> {
+    pub fn read(&self, filename: &str) -> Option<Vec<u8>> {
         if let Some(files) = self.files.get(&self.calculate_hash(filename)) {
             if files.len() == 1 {
-                Some(files.get(0).unwrap().data.clone())
+                Some(files.first().unwrap().data.clone())
             } else {
                 Some(
                     files
@@ -55,10 +49,9 @@ impl Sarc {
                                 false
                             }
                         })
-                        .expect(&format!(
-                            "File with hash collision did not have matching filename: {}",
-                            filename
-                        ))
+                        .unwrap_or_else(|| {
+                            panic!("File with hash collision did not have matching filename: {}", filename)
+                        })
                         .data
                         .clone(),
                 )
@@ -69,8 +62,7 @@ impl Sarc {
     }
 
     /// Updates a file within this [`Sarc`] Archive
-    #[allow(unused)]
-    pub(crate) fn update(&mut self, filename: &str, data: Vec<u8>) {
+    pub fn update(&mut self, filename: &str, data: Vec<u8>) {
         if let Some(files) = self.files.get_mut(&self.calculate_hash(filename)) {
             if files.len() == 1 {
                 files.get_mut(0).unwrap().data = data;
@@ -84,46 +76,27 @@ impl Sarc {
                             false
                         }
                     })
-                    .expect(&format!(
-                        "File with hash collision did not have matching filename: {}",
-                        filename
-                    ))
+                    .unwrap_or_else(|| panic!("File with hash collision did not have matching filename: {}", filename))
                     .data = data;
             }
         } else {
-            fail!(
-                "Could not update file '{}' in SARC archive '{}': File doesn't exist.",
-                filename,
-                self.path
-            );
+            fail!("Could not update file '{}' in SARC archive '{}': File doesn't exist.", filename, self.path);
         }
     }
 
     /// Deletes a file with the given `filename` from within this [`Sarc`] Archive. Panics if the file does not exist.
-    #[allow(unused)]
-    pub(crate) fn delete(&mut self, filename: &str) {
+    pub fn delete(&mut self, filename: &str) {
         let filename_hash = self.calculate_hash(filename);
         if let Some(files) = self.files.get_mut(&filename_hash) {
             if files.len() == 1 {
                 self.files.remove(&filename_hash);
                 return; // success
-            } else {
-                let results = files
-                    .drain_filter(|file| {
-                        if let Some(fname) = &file.filename { filename == fname } else { false }
-                    })
-                    .collect::<Vec<_>>();
-
-                if !results.is_empty() {
-                    return; // success
-                }
+            } else if let Some(index) = files.iter().position(|file| file.filename.as_deref() == Some(filename)) {
+                files.remove(index);
+                return; // success
             }
         }
-        fail!(
-            "Could not delete file '{}' in SARC Archive '{}': File doesn't exist",
-            filename,
-            self.path
-        );
+        fail!("Could not delete file '{}' in SARC Archive '{}': File doesn't exist", filename, self.path);
     }
 
     /// Creates a representation of a [`Sarc`] Archive from the given file `path` and array of `bytes`.
@@ -163,7 +136,7 @@ impl Sarc {
             let file_end = buf.read_u32::<LittleEndian>()?;
 
             // First byte of attrs is the hash collision count, remaining 3 are the offset into the filename table
-            let filename_hash_count = (filename_attributes >> 0x18) as u8;
+            let filename_hash_count = (&filename_attributes >> 0x18) as u8;
             let filename_table_offset = filename_attributes & 0x00FFFFFF;
 
             fat_entries.push(FatEntry {
@@ -184,9 +157,7 @@ impl Sarc {
             let filename_hash = entry.filename_hash;
             let filename = if entry.filename_hash_count > 0 {
                 let mut filename_buffer = Vec::new();
-                buf.seek(SeekFrom::Start(
-                    filename_table_start + (entry.filename_table_offset * 4) as u64,
-                ))?;
+                buf.seek(SeekFrom::Start(filename_table_start + (entry.filename_table_offset * 4) as u64))?;
                 let filename_len = buf.read_until(0x0, &mut filename_buffer)?;
                 Some(from_utf8(&filename_buffer[0..filename_len - 1]).unwrap().to_owned())
             } else {
@@ -197,13 +168,13 @@ impl Sarc {
             let end = offset_to_data + entry.file_end as usize;
             let data = Vec::from(&bytes[start..end]);
 
-            let file = SarcInnerFile { filename, data: data.into() };
+            let file = SarcInnerFile { filename, data };
 
-            if files.contains_key(&filename_hash) {
+            if let std::collections::btree_map::Entry::Vacant(e) = files.entry(filename_hash) {
+                e.insert(vec![file]);
+            } else {
                 let hashed_files = files.get_mut(&filename_hash).unwrap();
                 hashed_files.push(file);
-            } else {
-                files.insert(filename_hash, vec![file]);
             }
         }
 
@@ -211,12 +182,11 @@ impl Sarc {
     }
 
     /// Hash function used to hash filenames
-    #[allow(unused)]
     fn calculate_hash(&self, filename: &str) -> u32 {
         filename.chars().fold(0, |hash, char| hash.wrapping_mul(self.multiplier) + (char as u32))
     }
 
-    /// List all files in this SARC Archive, for debugging purposes
+    /// List all files in this SARC Archive, for research purposes
     #[allow(unused)]
     #[deprecated]
     pub(crate) fn list_files(&self) {
@@ -224,11 +194,7 @@ impl Sarc {
         info!("Multiplier: {}", self.multiplier);
 
         for (filename_hash, files) in &self.files {
-            info!(
-                "0x{:0>8X}: {:?}",
-                filename_hash,
-                files.iter().flat_map(|f| f.filename.clone()).collect::<Vec<_>>()
-            );
+            info!("0x{:0>8X}: {:?}", filename_hash, files.iter().flat_map(|f| f.filename.clone()).collect::<Vec<_>>());
         }
     }
 }
@@ -295,12 +261,12 @@ impl IntoBytes for Sarc {
                     // pad to 4 byte alignment
                     let padding_amt = 4 - (filename.len() % 4);
                     if padding_amt < 4 {
-                        filename += &std::iter::repeat("\0").take(padding_amt).collect::<String>();
+                        filename += &"\0".repeat(padding_amt);
                     }
 
                     sfnt.extend_from_slice(filename.as_bytes());
 
-                    filename_attributes = (bucket_len << 0x18) | (filename_table_idx / 4);
+                    filename_attributes = (&bucket_len << 0x18) | (&filename_table_idx / 4);
                     filename_table_idx += filename.len() as u32;
                 } else {
                     filename_attributes = 0;
@@ -317,8 +283,8 @@ impl IntoBytes for Sarc {
         // SARC Header
         let sarc_header_len = 0x14;
         let mut offset_to_data = sarc_header_len + sfat.len() + sfnt.len();
-        let sfnt_padding = 0x80 - (offset_to_data % 0x80); // align - TODO see above alignment comment, same thing
-        offset_to_data += sfnt_padding;
+        let sfnt_padding = 0x80 - (&offset_to_data % 0x80); // align - TODO see above alignment comment, same thing
+        offset_to_data += &sfnt_padding;
 
         let filesize = offset_to_data + data.len();
 
@@ -331,27 +297,27 @@ impl IntoBytes for Sarc {
         szs.extend(&self.version.to_be_bytes());
         szs.extend(&0x0u16.to_le_bytes()); // padding
 
-        szs.extend(sfat.into_iter());
-        szs.extend(sfnt.into_iter());
+        szs.extend(sfat);
+        szs.extend(sfnt);
         szs.extend(std::iter::repeat(0x0).take(sfnt_padding));
-        szs.extend(data.into_iter());
+        szs.extend(data);
 
         szs.into()
     }
 }
 
-///
+/// SarcInnerFile
 #[derive(Debug, Clone)]
 struct SarcInnerFile {
     filename: Option<String>,
     data: Vec<u8>,
 }
 
-///
+/// Alignment
 fn align(data: Vec<u8>, alignment: usize, value: u8) -> Vec<u8> {
     let padding_amt = alignment - (data.len() % alignment);
     if padding_amt < alignment {
-        let mut data = data.clone();
+        let mut data = data;
         data.resize(data.len() + padding_amt, value);
         data
     } else {

@@ -1,13 +1,126 @@
-# A Link Between Worlds Randomizer
-A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [original](https://gitlab.com/marsolk/albw-randomizer).
+# The ALBW Randomizer
+A randomizer for The Legend of Zelda: A Link Between Worlds.
 
 <br />
 <p align="center">
-  <img src="randomizer/icon.ico" alt="icon" />
+  <img src="icon.ico" alt="icon" />
 </p>
 
 ## Updates
 <details open="open">
+<summary>Version 0.4</summary>
+
+- **Quake + Initially Closed Cracks**
+  - Games will now start with most cracks closed, until players finds the new item that opens them: Quake.
+  - The Hyrule Castle crack is the only crack open without Quake, and may be required to use if Quake is placed somewhere in Lorule.
+    - Only the crack connected to Hyrule Castle will be open in Lorule.
+    - If Cracksanity is enabled, the HC crack may lead to any crack in Lorule and therefore Quake may appear nearly anywhere in Lorule.
+  - Players may optionally choose to start with Cracks already open, in which case Quake will be omitted from the item pool.
+- **Cracksanity**
+  - Four different shuffling modes:
+    - Cross World Pairs
+    - Any World Pairs
+    - Mirrored Cross World Pairs
+    - Mirrored Any World Pairs
+  - Read the section for more details: [Cracksanity](#cracksanity)
+- **Weather Vanes**
+  - **Pair Shuffle**: Groups Weather Vanes into random pairs that unlock each other instead of themselves.
+  - **Convenient**: Activates the Vanes that don't affect logic
+  - Activate All Hyrule Weather Vanes
+  - Activate All Lorule Weather Vanes
+- **Skip Trials &rarr; Trial's Door Setting**
+  - Select 1-4 LC Trials to randomly enable.
+  - Set the door to open automatically
+    - Inside Only: Opens only from inside the dungeon
+    - Both Sides: Opens when approached from either direction. This can put LC into logic early via the dungeon's Crack.
+- **Keysy**
+  - Removes key doors in dungeons. This has the potential to make dungeons faster to complete, and also increases the odds of them having progression items.
+  - Options:
+    - Small Keysy
+    - Big Keysy
+    - All Keysy
+- **Hint Ghost Changes**
+  - Faster
+  - Free
+
+- **Gameplay Changes**
+  - Information
+    - Ravio will now reveal the locations of each Sage, as well as the `lc_requirement`.
+    - Sahasrahla will now reveal the locations of all three Pendants, and can now be found in his house in Kakariko Village.
+  - Charm
+    - The Charm is no longer a dungeon prize, and Hyrule Castle will no longer house a random dungeon prize as a reward.
+    - The Charm is still in the item pool, but does nothing. It is not progressive and is independent of the Pendant of Courage.
+    - The vanilla Charm location will instead be a standard check, but requires the Impa Portrait to appear.
+  - Changes to Reverse Sage Events (RSE):
+    - This is no longer a setting and is now always enabled.
+    - Dark Maze Guards will now disappear upon completion of the Dark Palace, instead of when Gulley is collected.
+    - Thief Girl will now appear in her cave after she has been rescued from Thieves' Hideout, instead of when Osfala is collected.
+    - The Shady Guy can now be bumped into at any time and does not require rescuing Oren.
+    - For more details see: [Dungeon Prizes](#dungeon-prizes)
+  - Ice Ruins:
+    - A non-missable copy of the missable torch that opens the door on B3 has been added next to the East tongue statue.
+      - This is a QoL change made to address a randomizer-only problem where the 3rd Small Key Door is opened earlier than the vanilla game intends.
+      - This prevents players from needing to fall carefully to avoid the wind current.
+      - This has no impact on logic.
+  - Inside Hyrule Castle
+    - No longer requires the Pendant of Courage (either) to enter, just Master Sword.
+    - A courtesy green Warp will now appear after HC Yuga has been defeated, linking Zelda's Study with the Castle Gate.
+  - Lorule Castle
+    - The state of the Trials Door in Hilda's Study will now match its twin in the Lorule Castle dungeon.
+    - If the player has not rescued all the Sages, the loading zone to Yuganon will instead drop the player at the Blacksmith's.
+      - Once all Sages are rescued the path to the Lorule Blacksmith remains open via newly placed green Warp.
+      - A courtesy green Warp will appear in the Lorule Blacksmith if it is entered from LC.
+  - Thieves' Hideout Big Key Chest:
+    - After defeating Stalblind the shield device used to reach the chest will activate automatically to prevent it from being missable.
+    - Previously Thief Girl had been rigged to stick around to address this issue. That solution has been replaced by this one.
+  - Treacherous Tower:
+    - Reworked into a single check given by a single mode with a random selection of floors from all difficulties.
+    - Can choose how many floors the tower has (2-66).
+  - Eastern Palace
+    - Map icons for "escape" chests will now appear before defeating the boss.
+  - Rosso
+    - Now appears properly inside his house when rescued, instead of the "Crooked Chest".
+  - Rupees will now be named correctly in shops instead of being referred to as "Play Coins"
+  - Fix the vanilla joystick bug that causes all inputs to be rotated 5 degrees counterclockwise.
+- **Logic Changes**
+  - All:
+    - Dungeons now expect a certain amount of health to be available before entering logic.
+  - Normal:
+    - Knucklemaster, Zaganaga, and Yuga Ganon each now logically require the Master Sword to defeat
+    - The Merge Chest on the right side of the Eastern Palace lobby now logically requires that dungeon's Compass.
+    - The Hidden Chest on Ice Ruins 1F now logically requires that dungeon's Compass.
+    - The Ice Rod or Bombs are now considered viable ways to activate the Eastern Palace switch(es) that activate the bridge to the Boss Door.
+    - Misery Mire Ledge is now considered logically accessible with the Stamina Scroll as an alternative to the Sand Rod.
+    - The Dark Palace right-side entrance chest no longer logically requires Lamp
+    - House of Gales 1F Northwest chest no longer requires Merge or an escape item.
+    - Ice Ruins logic updated to consider B3 crystal switch.
+  - Glitched:
+    - The new Sandcastling trick makes it possible to complete the Misery Mire Treasure dungeon without the Tornado Rod.
+  - Hell:
+    - The new Sand Hopping trick has been added. It allows completing the Hyrule portion of Desert Palace without Merge and reaching the 1F miniboss chest without the Titan's Mitt.
+- **Hint System Changes**
+  - Ravio's Shop is now considered its own region, separate from Central Hyrule.
+  - The Graveyard Area now refers solely to the Lorule Graveyard.
+  - Path Hints will now explicitly list their underlying Path Item in the Spoiler Log.
+  - Hints should overall generate more quickly.
+- **Spoiler Logs**
+  - Can now be used as preset files to simplify seed sharing.
+- Misc. Text Improvments:
+  - Bee Guy
+  - Hint Ghosts (sped up, less text if price is free)
+  - Impa / Soldier
+  - Mother Maiamai
+  - Ravio
+  - Rosso
+  - Stylish Woman
+  - Thief Girl
+  - TR Turtles (Tallo, Jillo, and Sabro)
+  - Witch
+  - Woman
+
+</details>
+
+<details>
 <summary>Version 0.3.1</summary>
 
 - Always Hint pool expanded to include most checks that are locked behind Dungeon Prizes.
@@ -16,7 +129,7 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
 
 </details>
 
-<details open="open">
+<details>
 <summary>Version 0.3.0</summary>
 
 - <u>Dungeon Rewards Shuffled</u>
@@ -45,7 +158,7 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
     - No longer a merge-free path to Lorule
   - Completing HC rewards players with early access to:
       - Lorule Castle via the Trials Door
-        - Taking the Portal to Hilda's Study will automatically mark the LC Trials as complete.
+        - Taking the crack to Hilda's Study will automatically mark the LC Trials as complete.
       - Throne Room (Final Boss Room)
         - Yuga Ganon will not spawn unless Portrait requirements are met
   - Option to disable the Hyrule Castle Dungeon entirely
@@ -88,7 +201,7 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
   - Rosso's House starts locked again
     - Needs Pendant of Courage to unlock (or Rosso if playing with the new RSE Setting)
 - <u>Night Mode Improved</u>:
-  - The effect no longer disappears when entering a Portal and will last indefinitely.
+  - The effect no longer disappears when entering a Crack and will last indefinitely.
 - <u>Spoiler Log</u>:
   - New Playthrough section
       - Shows Sphere-by-Sphere logical path through seed.
@@ -244,7 +357,7 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
 
 
 - **FIXED:** Duplicate/Wrong Enemies in Hyrule Field
-  - The enemies present in Hyrule Field should now be those typically present in the vanilla game after beating Eastern Palace and opening the Portals to Lorule. The seemingly random duplicates in certain areas have been removed.
+  - The enemies present in Hyrule Field should now be those typically present in the vanilla game after beating Eastern Palace and opening the cracks to Lorule. The seemingly random duplicates in certain areas have been removed.
 
 
 - **FIXED:** Kakariko now has the correct number of NPCs and Cuccos.
@@ -261,7 +374,7 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
   - `skip_trials` option added. Removes the Trials Door in Lorule Castle if enabled.
   - `boots_in_shop` promoted to a UI option instead of requiring a preset to use.
   - Glitched logic now considers using the Ice Rod to reach the Eastern Palace Boss door.
-  - Long Portal animation from Zelda's Study has been shortened.
+  - Long Crack animation from Zelda's Study has been shortened.
   - The following cutscenes have been removed:
     - Zelda in the Sacred Realm
     - Thief Girl Cave
@@ -304,7 +417,7 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
 <summary>Version 0.0.1</summary>
 
 - Highlights:
-  - Portals to Lorule are open from game start
+  - Cracks to Lorule are open from game start
   - Start with Ravio's Bracelet option
   - Glitched Logic option
   - Ravio's Shop is fully open from game start
@@ -333,17 +446,32 @@ A randomizer for The Legend of Zelda: A Link Between Worlds, built off the [orig
 - Download: [https://github.com/rickfay/z17-randomizer/releases/tag/v0.3.1-release](https://github.com/rickfay/z17-randomizer/releases/tag/v0.3.1-release)
 
 1. Unzip the download to your directory of choice.
-2. Move your A Link Between Worlds ROM into the same folder. Name it: `ALBW.3ds`
-   - If your ROM is located elsewhere or if you'd like to name it something different, you can modify the `config.json` file to point to the ROM instead
+2. ROM Requirements:
+   - Must be the **North American** version of ALBW
+   - Must be a `.3ds` file
+   - Must be **decrypted**
+     - You can use Godmode9 to decrypt your ROM, if necessary.
+3. How to dump and/or decrypt a legal ROM from your owned copy of game:
+   - Instructions are available here: https://citra-emu.org/wiki/dumping-game-cartidges/
+   - If you need to convert your ROM from `.cia` to `.3DS` you can use this tool: https://github.com/davFaithid/CIA-to-3DS-Rom-Converter/releases/tag/1.0
+4. Move your A Link Between Worlds ROM into the same folder. Name it: `ALBW.3ds`
+   - Be careful not to accidentally give it two extensions, i.e. `ALBW.3ds.3ds`. This is an easy mistake to make if you have Windows set to hide known file extensions.
+   - You can modify the `config.json` file if you'd like to name your ROM something else or put it in a different location.
+
 
 ![fs-setup.png](docs/fs-setup.png)
 
 ## Running the Randomizer
 
+First, make sure your system's language is set to **ENGLISH**.
+- Using any other language will cause your seed to patch incorrectly.
+- Support for other language options is planned, but not supported at this time.
+
 There are two ways you can run ALBWR:
 
 1. Double click `albw-randomizer.exe` (or `albw-randomizer` on Linux) to start the randomizer with basic settings. The randomizer will provide a simple interface for setting game options, after which it will attempt to generate a completable seed.
    - The randomizer may make multiple attempts to generate a completable seed. This is normal, and will happen automatically.
+     - Seed Generation usually completes in 1-3 attempts, slightly higher if using some form of Entrance Randomization.
 
 2. Use a command line interface. If you take this approach you may also specify a preset and/or seed to use for seed generation.
    - Using a preset will give you some additional options and allow you to manually configure excluded checks.
@@ -374,12 +502,13 @@ For 3DS hardware:
 - Ensure that `Enable game patching` is selected in Luma's config (this can be opened by holding `Select` when powering on the console).
 
 For Citra (emulator):
-- Copy `00040000000EC300` to `<Citra folder>/load/mods/`. You may need to create these folders.
+- Copy `00040000000EC300` to `<Citra folder>/load/mods/`.
+  - You may need to create these folders.
   - You can find the Citra folder by selecting `File > Open Citra folder...` in Citra.
 
 ## Uninstalling Seeds
 
-Uninstalling seeds is almost literally just the reverse of the installation process.
+Uninstalling seeds is essentially just the reverse of the installation process.
 
 For 3DS hardware:
 
@@ -406,71 +535,145 @@ For Citra (emulator):
 | `Hell`        | Includes every known RTA-viable glitch, including the insane ones. Don't choose this.        |
 | `NoLogic`     | Items are placed with no logic at all. Seeds are likely to not be completable.               |
 
-
-`randomize_dungeon_prizes`
-- This shuffles all Sage Portraits, Pendants, and the Charm among themselves.
-
-`vanilla_charm`
-- Enabling this forces one of the two Pendant of Courage Upgrades to be in Zelda's Throne Room.
-- Otherwise, a random Sage Portrait or Pendant will be placed in Zelda's Throne Room.
-- <u>Note</u>: Has no effect unless `randomize_dungeon_prizes` is enabled.
-
-
 `lc_requirement`
-- Choose how many Portraits are needed to enter Lorule Castle and fight Yuganon
+- This setting determines how many Portraits are needed to:
+  - Enter Lorule Castle's front door
+  - Spawn the Bow of Light Hint Ghost
+  - Fight Yuganon
 
 `ped_requirement`
 - Choose which Pendants are required to reach the Master Sword Pedestal:
 - Available options are:
 
-| Setting    | Description                                                                          |
-|------------|--------------------------------------------------------------------------------------|
-| `Vanilla`  | Only the Pendants of Power and Wisdom are required                                   |
-| `Charmed`  | All three Pendants are required, but Charm may substitute for the Pendant of Courage |
-| `Standard` | All Pendants are required                                                            |
+| Setting    | Description                                                           |
+|------------|-----------------------------------------------------------------------|
+| `Vanilla`  | Only the Pendants of Power and Wisdom are required (vanilla behavior) |
+| `Standard` | All three Pendants are required                                       |
 
-`hyrule_castle_setting`
-- Choose how the Dungeon portion of Hyrule Castle should be handled:
-- Available options are:
+`dungeon_prize_shuffle`
+- This shuffles all Sage Portraits and Pendants amongst themselves as the prizes for completing dungeons.
 
-| Setting             | Description                                                                                                                                                 |
-|---------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `EarlyLoruleCastle` | Completing Hyrule Castle allows early access to Lorule Castle via the Trial's Door. Note that the Pendant of Courage is needed to enter the dungeon at all. |
-| `Closed`            | The Dungeon is closed off completely, and removed from all logic.                                                                                           |
+`cracks`
+- Choose the intial state of the Cracks between Hyrule and Lorule
 
+| Setting | Description                                                                                      |
+|---------|--------------------------------------------------------------------------------------------------|
+| Closed  | All Cracks, except the one in Hyrule Castle, are closed and require the Quake item to be opened. |
+| Open    | Begin the game with all Cracks open. The Quake item is not included in the item pool.            |
 
-`nice_mode`
-- This shuffles a second progressive copy of each Ravio Item into the general item pool.
-- <u>Note 1</u>: Removes Mother Maiamai Cave from the game
-  - This is temporary, until Maiamai Rewards are properly implemented
-- <u>Note 2</u>: For Glitched modes, tricks that become impossible or very difficult with the Nice version of an item will go out of logic
+`cracksanity`
+- Randomizes the pairings between the Cracks that (normally) go between Hyrule and Lorule.
+  - Note: For technical reasons, The Desert Palace Crack is not yet randomized.
+
+| Setting                    | Description                                                                                 |
+|----------------------------|---------------------------------------------------------------------------------------------|
+| Off                        | Cracks are not shuffled.                                                                    |
+| Cross World Pairs          | Cracks are shuffled, but remain in Hyrule/Lorule pairs.                                     |
+| Any World Pairs            | Cracks are shuffled freely, and can lead to the same or opposite world.                     |
+| Mirrored Cross World Pairs | Same as Cross World Pairs, but each pair's vanilla counterparts will be in a matching pair. |
+| Mirrored Any World Pairs   | Same as Any World Pairs, but each pair's vanilla counterparts will be in a matching pair.   |
+
+`keysy`
+- Removes locked doors from dungeons, eliminating the need for collecting keys.
+
+| Setting     | Description                                                  |
+|-------------|--------------------------------------------------------------|
+| Off         | No effect.                                                   |
+| Small Keysy | Small Key doors are removed from all dungeons.               |
+| Big Keysy   | Huge Doors are removed from all dungeons.                    |
+| All Keysy   | Both Small Key and Huge Doors are removed from all dungeons. |
+
+`trials_door`
+- Configures the Lorule Castle Trial's Door.
+
+| Settings            | Description                                                                                                                       |
+|---------------------|-----------------------------------------------------------------------------------------------------------------------------------|
+| OpenFromInsideOnly  | The Trials Door will open by itself automatically, from inside LC only.                                                           |
+| OpenFromBothSides   | The Trials Door will open by itself automatically, from inside LC or in Hilda's Study. This option may require entering LC early. |
+| OneTrialRequired    | Turns on 1 random trial.                                                                                                          |
+| TwoTrialsRequired   | Turns on 2 random trials.                                                                                                         |
+| ThreeTrialsRequired | Turns on 3 random trials.                                                                                                         |
+| AllTrialsRequired   | Turns on all trials.                                                                                                              |
+
+`weather_vanes`
+- Choose Weather Vanes behavior. Logic may require using them to progress.
+
+| Settings   | Description                                                                                |
+|------------|--------------------------------------------------------------------------------------------|
+| Standard   | Only the standard, complimentary Weather Vanes are active at game start.                   |
+| Shuffled   | Shuffles the Weather Vanes in pairs, so each activates a warp to a random Weather Vane.    |
+| Convenient | Activate all the Weather Vanes that don't affect logic, but do make getting around easier. |
+| Hyrule     | Activate the 9 Hyrule Weather Vanes at game start.                                         |
+| Lorule     | Activate the 13 Lorule Weather Vanes at game start.                                        |
+| All        | Activate all 22 Weather Vanes at game start.                                               |
+
+`maiamai_limit`
+- The MAXIMUM number of Maiamai (0-100) the seed may require you to collect, assuming you don't waste any on junk.
+  - Defaults to 50, meaning Mother Maiamai may have up to 5 Progression Items in her shop.
+  - Only by setting this setting to 100 can the 100 Maiamai check ever be a Progression Item.
+
+`maiamai_madness`
+- Shuffles Maiamai into the pool, adding 100 more locations
+
+`nice_items`
+- Choose how to handle the second progressive copy of each Ravio Item, normally available as upgrades from Mother Maiamai.
+  - Note: Mother Maiamai's items always require the base Ravio Item in addition to 10 Maiamai, each, regardless of which setting is chosen.
+
+| Setting  | Description                                                                                                 |
+|----------|-------------------------------------------------------------------------------------------------------------|
+| Vanilla  | Nice Items are obtained as upgrades from Mother Maiamai as in the vanilla game.                             |
+| Shuffled | Two progressive copies of each Ravio item are freely shuffled, and Mother Maiamai's rewards are randomized. |
+| Off      | Remove and replaces the Nice Items with junk, and Mother Maiamai's rewards are randomized.                  |
 
 `super_items`
 - This shuffles a second progressive copy of the Lamp and Net into the general item pool.
+  - Obtaining both rewards the Super Lamp and Super Net, respectively.
 
-`reverse_sage_events`
-- Ties Sage-related checks and events to actually rescuing that Sage.
-- Makes the following changes for each rescued Sage:
+`bow_of_light_in_castle`
+- Limits the Bow of Light's placement to somewhere in Lorule Castle (including possibly Zelda).
 
-| Sage  | Effects                                                                  |
-|-------|--------------------------------------------------------------------------|
-| Irene | Unlocks the Irene check (instead of Pendant of Courage)                  |
-| Rosso | Unlocks Rosso's House and his two checks (instead of Pendant of Courage) |
-| Oren  | Unlocks the Smooth Gem check and the Shady Guy Event                     |
-| Impa  | Unlocks the front door to Hyrule Castle (talk to the Guard)              |
+`minigames_excluded`
+- Excludes Cucco Rush, Hyrule Hotfoot, Treacherous Tower, Octoball Derby, and both Rupee Rush minigames from having progression.
+  - If `maiamai_madness` is enabled, the two Maiamai inside the two Rupee Rush minigames will also be excluded.
 
 `no_progression_enemies`
 - Removes Enemies from dungeons that are themselves Progression (e.g.: Bawbs, the bomb enemy).
 - Logic will be adjusted to require the player's items instead.
 
+`purple_potion_bottles`
+- Fills all Empty Bottles with a free Purple Potion.
+  - Purple Potions deal 4x your current Sword damage to all loaded enemies!
+
+`skip_big_bomb_flower`
+- Skips the Big Bomb Flower by removing the 5 Big Rocks in Lorule Field.
+- This setting does not affect the Vacant House or the Lorule Castle Bomb Trial.
+
+`treacherous_tower_floors`
+- The number (any integer between 2 and 66) of floors the Treacherous Tower minigame will have.
+  - The first floor will always be one of the 3 starting floors (from Beginner, Intermediate, or Advanced).
+  - The final floor will always be the (Tower of Hera) Moldorm fight.
+  - The minigame will always reward 1000 rupees, regardless of the number of floors chosen.
+
+`swordless_mode`
+- Removes *ALL* Swords from the game.
+- [The Bug Net becomes a required item to play Dead Man's Volley against Yuga Ganon.](https://www.twitch.tv/videos/1265170513)
+- <u>Note</u>: Incompatible with the `sword_in_shop` setting.
+
+`dark_rooms_lampless`
+- If enabled the logic may expect players to cross Dark Rooms without the Lamp.
+- Not for beginners and those who like being able to see things.
+
+`lamp_and_net_as_weapons`
+- Treats the red base Lamp and Net as logical weapons (recommended only for advanced players)
+
 `start_with_merge`
 - Start with the ability to Merge into walls, without Ravio's Bracelet.
 
+`start_with_pouch`
+- Start with the Pouch and a usable X Button.
+
 `bell_in_shop`
 - If enabled, guarantees the Bell will be placed in Ravio's Shop.
-
-`pouch_in_shop`
-- If enabled, guarantees the Pouch will be placed in Ravio's Shop.
 
 `sword_in_shop`
 - If enabled, guarantees the Pegasus Boots will be placed in Ravio's Shop.
@@ -490,61 +693,157 @@ For Citra (emulator):
   - Fire Rod
   - Ice Rod
   - Bombs
-  - Lamp/Net (if playing Hard Logic or higher)
-
-`maiamai_madness`
-- Shuffles Maiamai into the pool, adding 100 more locations
-
-`minigames_excluded`
-- Excludes Cucco Rush, Hyrule Hotfoot, Treacherous Tower, Octoball Derby, and both Rupee Rush minigames from having progression.
-
-`skip_big_bomb_flower`
-- Skips the Big Bomb Flower by removing the 5 Big Rocks in Lorule Field.
-- This setting does not affect the Vacant House or the Lorule Castle Bomb Trial.
-
-`skip_trials`
-- Automatically opens the Lorule Castle Trials door.
-
-`bow_of_light_in_castle`
-- Limits the Bow of Light's placement to somewhere in Lorule Castle (including possibly Zelda).
-
-`weather_vanes_activated`
-- Begin the game with all Weather Vanes activated.
-- The logic may expect players to use the Bell to reach otherwise unreachable locations this way.
-- <u>Note</u>: No trackers currently support this feature.
-
-`dark_rooms_lampless`
-- If enabled the logic may expect players to cross Dark Rooms without the Lamp.
-- Not for beginners and those who like being able to see things.
-
-`swordless_mode`
-- Removes *ALL* Swords from the game.
-- [The Bug Net becomes a required item to play Dead Man's Volley against Yuga Ganon.](https://www.twitch.tv/videos/1265170513)
-- <u>Note</u>: Incompatible with the `sword_in_shop` setting.
+  - Pegasus Boots
+  - Lamp/Net (if `lamp_and_net_as_weapons` is enabled)
 
 `chest_size_matches_contents`
 - All chests containing progression or unique items will become large, and others will be made small.
 - <u>Note</u>: Some large chests will have a reduced hitbox to prevent negative gameplay interference.
 
+`night_mode`
+- Enables certain shaders on the overworld that make it look like nighttime.
+  - Warning: Can change the visual cues for certain glitches and tricks.
+
+### Dungeon Prizes
+
+| Name               | Prize                                           | Effect / Unlocks                                                                                                                    |
+|--------------------|-------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------|
+| Gulley Portrait    | ![Gulley](docs/sage_gulley.png)                 |                                                                                                                                     |
+| Oren Portrait      | ![Oren](docs/sage_oren.png)                     | Makes Queen Oren return to Zora's Domain, allowing the player to collect her check by giving her the Smooth Gem.                    | 
+| Seres Portrait     | ![Seres](docs/sage_seres.png)                   |                                                                                                                                     | 
+| Osfala Portrait    | ![Osfala](docs/sage_osfala.png)                 | Returns the item he rented to Ravio's Shop, allowing the player to buy it from him.                                                 | 
+| Impa Portrait      | ![Impa](docs/sage_impa.png)                     | Makes the check in the Hyrule Castle Throne Room available.                                                                         | 
+| Irene Portrait     | ![Irene](docs/sage_irene.png)                   | Makes Irene available to be bumped into at one of four locations.                                                                   | 
+| Rosso Portrait     | ![Rosso](docs/sage_rosso.png)                   | Causes Rosso to return home. He has two checks himself, and he also opens his front door allowing access to the Crack in his house. | 
+| Pendant of Power   | ![Pendant of Power](docs/pendant_power.png)     |                                                                                                                                     |
+| Pendant of Wisdom  | ![Pendant of Wisdom](docs/pendant_wisdom.png)   |                                                                                                                                     |
+| Pendant of Courage | ![Pendant of Courage](docs/pendant_courage.png) | Makes a single check appear on the Wildlife Clearing Stump.                                                                         |
+
+
+## Quake
+
+<img src="docs/quake.png"  alt=""/>
+
+Obtaining the Quake item activates the second quake event in the vanilla game, which opens the cracks and adjusts some overworld enemy spawns. It'll also affect some NPCs' dialog.
+
+This item was created for the randomizer to give an experience closer to the vanilla game where the cracks are not open early-on, meaning Lorule is unreachable even once the player has the ability to Merge.
+
+Importantly, the Hyrule Castle Crack is the only one that will be open without Quake. Because of this, Hyrule Castle has a much more substantial role to play in the randomizer as a sometimes necessary dungeon to complete if Quake (or something that leads to it) happens to be in Lorule. Or simply for its crack, when playing with Cracksanity.
+
+The item is called "Quake" because that is how several NPCs refer to the story event in dialog. Interestingly, they always refer to it as "quake", but never "earthquake".
+
+The sprite commonly found on trackers is borrowed from the item of the same name from this game's predecessor, A Link to the Past.
+
+## Cracksanity
+
+
+There are 56 Cracks (aka "fissures") in the game formed into pairs that connect areas of Hyrule with Lorule.
+
+We shuffle them!
+
+| Setting                    | Description                                                                  |
+|----------------------------|------------------------------------------------------------------------------|
+| Cross World Pairs          | All Cracks will connect Hyrule + Lorule                                      |
+| Any World Pairs            | Any Crack can lead to any other Crack.                                       |
+| Mirrored Cross World Pairs | Same as Cross World Pairs, but each pair's counterparts will also be paired. |
+| Mirrored Any World Pairs   | Same as Any World Pairs, but each pair's counterparts will also be paired.   |
+
+
+
+### Crack Appearance
+
+The destination of a Crack determines its appearance.
+
+![Crack Appearance Matches Destination](docs/crack_appearance_matches_destination.png)
+
+- White light &rarr; Hyrule
+- Black fog &rarr; Lorule
+
+### Crack Pools
+
+Most Cracks in the game are "up" cracks, like the one in front of Link's House.
+
+However, there are 6 pairs of "down" cracks as well, that reside on the backs pillars, buildings, etc.
+For technical reasons, these cracks can only be shuffled amongst themselves.
+
+![Crack Pools](docs/down_cracks.png)
+<div style="text-align: center; font-style: italic; margin-bottom: 75px;">Down Crack Locations</div>
+
+| Hyrule                | Lorule            | Lorule Area    |
+|-----------------------|-------------------|----------------|
+| Sahasrahla's House    | n-Shaped House    | Skull Woods    |
+| Eastern Ruins Pillar  | Dark Ruins Pillar | Dark Ruins     |
+| Zora's Domain         | Ku's Domain       | Dark Ruins     |
+| Paradox Left          | Paradox Left      | Central Lorule |
+| Paradox Right         | Paradox Right     | Central Lorule |
+| Southern Ruins Pillar | Swamp Pillar      | Central Lorule |
+
+### Blocked Cracks
+
+There are 4 Cracks that are blocked by bombable walls:
+  - Eastern Ruins Southeast Crack
+  - Dark Ruins Southeast Crack
+  - Desert North Crack
+  - Graveyard Ledge (Lorule)
+
+If you enter a crack paired with one of these cracks, the blockage will automatically be cleared as though you had blown it up.
+
+Because of this, the logic only requires bombs to enter the blocked side of cracks.
+
+### Cracks of Interest
+
+#### Hyrule Castle Crack
+- This crack and its pair are the only cracks open without **Quake**.
+- If Cracksanity is off, **Quake** may appear in Central Lorule and players will need to use this crack to get there.
+- When Cracksanity is on, the Hyrule Castle crack will lead to a random crack in Lorule, and thus one random region of Lorule will become accessible. In this way, **Quake** has the potential to appear in any region of Lorule.
+  - For technical reasons, the Hyrule Castle Crack will *only* go to Lorule. It cannot be paired with another Hyrule Crack.
+
+#### Lorule Castle Crack
+
+AKA the Final Boss crack, the Yuganon Crack, etc.
+- This crack is treated as access to the Central Lorule area, because if players haven't yet met the LC Requirement the loading zone to the Throne Room will instead send them to the Lorule Blacksmith.
+  - A courtesy return warp will appear in the Lorule Blacksmith if this path is used.
+  - Once the LC Requirement has been met this path will remain open with a new warp placed near the doorway.
+- This crack can allow access into Lorule Castle 3F if `trials_door` is set to the `OpenFromBothSides` setting.
+- While not necessary to complete the game, this crack allows skipping the entirety of the Lorule Castle dungeon and is simply a faster way to the final boss once all requirements are met.
+
+
+#### Southwest Desert Crack
+
+Logic may require players to use the **Stamina Scroll** to have enough Energy to merge from the top part of the East wall going South to reach the crack in the Southwest corner.
+
+Other than using the crack itself (or glitches), this is actually the _only_ way to reach this Crack.
+
+#### Desert Palace + Zaganaga Cracks
+
+These two cracks are forcibly kept paired vanilla so that Desert Palace does not lose its Boss and dungeon prize. For now...
+
+#### Rosso's House Crack
+
+- This crack is locked inside Rosso's House, meaning rescuing Rosso is a requirement to access it.
+- If you enter Rosso's House using this crack before rescuing Rosso, it will be empty, and if you leave via the door it will lock behind you.
+
 ## Hint System
 
-New with version v0.3.0 is the addition of hints!
+Hints were introduced in Version 0.3 and have been refined slightly in Version 0.4.
 
-_These are still fairly new, and are being fine-tuned based on player feedback!!_
+> Hints are still a relatively new feature, and are being fine-tuned based on player feedback.
 
 ### About Hint Ghosts
 
-Hints in this randomizer are sold by Hint Ghosts.
+Hints in this randomizer are given by Hint Ghosts.
 
-![Ghost Hint](docs/ghost-hint.png)
+![Ghost Hint](docs/hint-ghost.png)
 
-In the vanilla game, these specters would trade Link a small hint in exchange for a Play Coin, the 3DS system currency gained by walking around with your console. The ghosts can only be seen if the player uses the Hint Glasses.
+In the vanilla game, these specters would trade Link a small hint in exchange for a Play Coin, the 3DS system currency gained by walking around with your console. The ghosts could only be seen if the player uses the Hint Glasses.
 
-In the randomizer, the ghosts can be seen even without the Hint Glasses, and rather than charging Link Play Coins they will instead charge a small amount of rupees (which you can customize) in exchange for a hint.
+In the randomizer, the ghosts can be seen even without the Hint Glasses, and (starting in v0.4) give their hints freely.
 
-Due to the overwhelming number of Hint Ghosts in the game (a whopping 132!!), **only the 58 overworld Hint Ghosts will give out these hints**, and the dungeon Hint Ghosts have been removed.
+Due to the overwhelming number of Hint Ghosts in the game (a whopping 193!!), **only the 58 overworld Hint Ghosts will give out these hints**, and the dungeon Hint Ghosts have been removed.
 
 ### Path Hints
+
+![Path Hint](docs/hint-path.png)
 
 Path Hints in ALBWR are similar to Path Hints in recent seasons of ZOOTR.
 
@@ -553,25 +852,25 @@ They can be thought of like "Way of the Hero" Hints from other Zelda randomizers
 Path Hints take the following form:
 
 ```
-It says here that [REGION] is on the path to [GOAL].
+[AREA] is on the path to [GOAL]
 ```
-
-(The actual text may differ slightly as things are rapidly changing)
 
 `[GOAL]`
 - Presently, goals will always be the Bosses of dungeons housing a Sage Portrait.
 
-`[REGION]`
+`[AREA]`
 - Refers to the specific region where the hinted `Path Item` can be found.
-- To keep locations from being arbitrarily defined, the Maiamai Map boundaries are used for (nearly) all region boundaries.
-  - <u>The One Exception</u>: The screens containing the Hyrule Sanctuary, Hyrule Graveyard, Lorule Graveyard, and their associated dungeons are all collectively referred to as the `Graveyard`.
+- To keep locations from being arbitrarily defined, the Maiamai Map boundaries are used for all region boundaries.
   - <u>Special Cases</u>:
-    - Hyrule Hotfoot is considered part of the `Lost Woods Region`, as it is there that the reward is given out.
+    - `Ravio's Shop` is considered its own region, separate from Central Hyrule.
+    - Hyrule Hotfoot is considered part of the `Lost Woods Area`, as it is there that the reward is given out.
     - Irene can appear in multiple regions, and so she has a unique region called `Irene the Witch`.
-    - Osfala's item is given out in a special region called `Chamber of the Sages`
 
-
-![region-names](docs/region-names.png)
+#### Area Names
+<div style="text-align: center; display: flex;">
+  <img src="docs/regions-hyrule.png" style="width: 50%; padding: 0 5px;" alt="Hyrule Areas" />
+  <img src="docs/regions-lorule.png" style="width: 50%; padding: 0 5px;" alt="Lorule Areas" />
+</div>
 
 #### Path Items
 
@@ -579,13 +878,14 @@ A `Path Item` is any item that, according to the logic used to generate the seed
 
 Path Items are not guaranteed to be the traditional items needed to complete a dungeon, so long as they are in some way logically required.
   - E.g. The Sand Rod can be Path to Moldorm if the Hammer is in Desert Palace.
+    - This is because the Sand Rod, while not required to beat Moldorm, is necessary to retrieve the Hammer, which is.
 
 An item cannot be Path if an in-logic alternative exists. Put another way, an item with a 2nd copy must "lock" that copy in order for it to be Path, as if they don't then that copy could be used to reach the Goal instead of that would-be Path Item.
   - E.g. If Ravio's Shop contains two Lamps, neither of them can be Path to Knucklemaster as neither Lamp locks the other.
 
-Two Path Hints cannot refer to the same Path Item. They may refer to two items in the same logical chain, but each hint will refer to single item.
+> Two Path Hints cannot refer to the same underlying Path Item. They may refer to two items in the same logical chain, but each hint will uniquely refer to a specific item.
 
-Locations hinted by an [Always Hint](#always-hints) will never contain a Path Item, as they are already hinted.
+> Locations hinted by an [Always Hint](#always-hints) will never contain a Path Item, as they are already hinted.
 
 The following will NEVER be Path Items:
 - Ravio's Bracelet
@@ -596,7 +896,7 @@ The following will NEVER be Path Items:
 
 #### Extra Path Hints
 
-The randomizer will attempt to generate a Path Hint for every Boss guarding a Sage Portrait, but depending on settings (especially if [Nice Mode](#game-options) is enabled) there may not be *any* viable Path Items leading to the Boss.
+The randomizer will attempt to generate a Path Hint for every Boss guarding a Sage Portrait, but depending on settings (especially if Nice Items are Shuffled freely) there may not be *any* viable Path Items leading to the Boss.
 
 In that case, other Bosses may receive an extra Path Hint to make up the numbers.
 
@@ -610,7 +910,50 @@ Always Hints are hints that will be generated with every seed to give away the i
 
 The locations chosen for Always Hints are considered to be especially terrible, to the point where players will always want to know what item is held there as that knowledge can have a major impact on routing.
 
-Different settings will affect which locations are selected to be Always Hints.
+The default* list of Always Hint locations is as follows:
+- Blacksmith (Lorule)
+- Bouldering Guy
+- Great Rupee Fairy
+- Haunted Grove Stump
+- Irene
+- Master Sword Pedestal
+- Octoball Derby
+- Queen Oren
+- Rosso (1)
+- Rosso (2)
+- Thief Girl
+- Treacherous Tower
+- [HC] Throne
+
+> *Locations that are excluded, either directly or with settings like `minigames_excluded`, will not receive an Always Hint.
+
+### Maiamai Hints
+
+![Maiamai Hint](docs/hint-maiamai.png)
+
+These are similar in nature to Always Hints, but have specific constraints due to the nature of Mother Maiamai's item upgrades.
+
+> These Hints are not generated when the `nice_items` setting is set to Vanilla.
+
+The `maiamai_limit` setting has an influence on how these hints affect the game:
+
+| maiamai_limit                     | Effect on Hints                                                                                                                                       |
+|-----------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 0-9                               | Maiamai Hints are not generated, because Mother Maiamai cannot have any Progression Items.                                                            |
+| 10-59<br />(most common scenario) | 5 Maiamai Hints are generated and are guaranteed to encompass all Progression Items Mother Maiamai has.                                               |
+| 60-100                            | Same as the 10-59 range, BUT, in the extraordinarily rare event that Mother Maiamai has more than 5 Progression Items, only 5 of them will be hinted. |
+
+#### How to Use Maiamai Hints
+
+Players looking to use these hints effectively should be on the lookout for all 5 unique Maiamai Hints, bearing in mind that there are 2 copies of each hint somewhere in the game.
+
+Finding all copies will reveal:
+- How many Maiamai the player should collect (10 for each necessary Progression Item)
+- Which Ravio Items are needed and which items they are tied to
+
+> The 4 Mother Maiamai Items that are not hinted are guaranteed to be junk, except in the extraorindarily rare case where the `maiamai_limit` is 60+ AND all 5 Maiamai Hints refer to Progression Items.
+
+> Remember you can always visit Mother Maiamai, when you have enough Maiamai, to be told what item(s) she has for each Ravio Item you already have.
 
 ### Sometimes Hints
 
@@ -624,7 +967,7 @@ These types of hints are generated last as filler to achieve the desired total a
 
 The Bow of Light is a special hint specifically for (you guessed it) the Bow of Light.
 
-**The hint is given out in Hilda's Study, from a Ghost right before entering the Final Boss arena.**
+The Hint Ghost appears in Hilda's Study after the `lc_requirement` is met, right before entering the Final Boss arena.
 
 Much like the Light Arrows in ZOOTR, the Bow of Light is required to beat the game, but since it does not lock anything else it can theoretically be placed anywhere. Unlucky Bow of Light placements have the potential to artificially extend the time it takes to beat a seed, hence this hint is created to prevent an extended "Bow of Light Hunt" at the end of a seed.
 
@@ -632,161 +975,33 @@ The Hint will give away the region where the Bow of Light has been placed.
 
 The Bow of Light Hint will be generated for every seed even if an [Always](#always-hints) or [Sometimes](#sometimes-hints) Hint was already generated that explicitly gives away the Bow of Light's location.
 
-## Logic Breakdown
-
-### Normal Logic
-
-This is the standard logic mode and is recommended for new and casual players.
-
-- Includes:
-  - Standard gameplay
-  - No glitches
-  - No obscure tricks
-
-### Hard Logic
-
-This mode is recommended for players who have played the game before and are familiar with its mechanics. This is still a glitch-free mode, but the logic may require players to perform actions or use items in obscure, non-obvious ways to reach checks.
-
-- Includes:
-  - Using the Lamp or Net as weapons (they deal 1/2 the damage of the Forgotten Sword)
-  - Completing the Boots Dungeon with either Bombs, Boomerang, or Sword Beams
-  - Entering Eastern Ruins with Power Glove
-  - Entering the Vacant House rear with the Bomb Flower
-  - Hyrule Hotfoot with Merge + Bell
-  - Jumping into the Kakariko Well with a Cucco
-  - Reaching the Misery Mire Ledge with Stamina Scroll + Bombs
-  - Southern Ruins Treasure Dungeon
-    - Flippers, Hookshot, and either Bombs or Master Sword to hit the Boomerang switch
-  - Eastern Palace:
-    - Using Sword Beams or thrown Pots to activate switches
-    - Skipping a Small Key with either bombs or the Ice Rod
-  - House of Gales:
-    - Using the Tornado Rod to jump on moving blocks to reach 2F without merge
-    - Deathwarping from NE room on 1F without merge
-  - Swamp Palace:
-    - Precise Bow Shot to bypass River Room without merge
-    - Access 1F Big Chest without extinguishing flames
-  - Desert Palace:
-    - Run past Armos on 3F
-  - Turtle Rock
-    - Hit the B1 crystal Switch with a thrown skull
-  - Lorule Castle
-    - Play Tennis with Yuganon using the Net
-
-### Glitched Logic
-
-This mode is intended for players who want to use some of the game's many glitches, but not the hard ones.
-
-<u>Note</u>: Glitched Logic EXPECTS you to spend your first 10 Maiamai on Nice Bombs due to the many glitches they enable. Failure to do so could make your seed much harder or potentially even impossible to complete.
-
-- Includes:
-  - Armos Boost to reach:
-    - Eastern Ruins merge chest
-  - Bird Boost to reach Waterfall Cave
-  - Fire Rod or Lemon Boosts to get onto small ledges
-  - Enemy Clips
-  - Reaching the Misery Mire Ledge with Nice Bombs or Fire Rod with either Boots or regular Bombs
-  - Southern Ruins Treasure Dungeon Flipperless w/ Nice Bombs
-  - House of Gales:
-    - Skip Skip to do 2F in reverse
-    - Skip Skip Skip to reach 3F
-  - Hyrule Castle:
-    - Using Nice Bombs to kill the Red Spear Soldier on 3F
-  - Swamp Palace:
-    - Miniboss Skip with Pegasus Boots
-  - Thieves' Hideout:
-    - Jailbreak to activate switches and reach B2 without merge (Boots + either Boomerang or Ice Rod)
-
-### Adv. Glitched Logic
-
-This mode is for experienced players who are comfortable with this game's harder, more involved glitches. 
-
-<u>Note</u>: Glitched Logic EXPECTS you to spend your first 10 Maiamai on Nice Bombs due to the many glitches they enable. Failure to do so could make your seed much harder or potentially even impossible to complete.
-
-- Includes:
-  - Entering Southern Ruins Treasure Dungeon with just Ice Rod
-  - Desert Palace Skip
-    - Skip Desert with Ice Rod + Tornado Rod
-    - OoB with Fire Rod or Nice Bombs
-    - Zaganaga Skip with Pegasus Boots
-    - Reverse Desert Palace
-  - Fake Flipper Tricks
-  - Flipperless House of Gales with Hookshot/Ice Rod
-  - Reaching the Misery Mire Ledge with Regular Bombs + Vulture Boost
-  - Shield Rod Clips
-  - Tornado Rod Enemy Clip to reach Eastern Ruins Peg Circle
-  - Mergeless Death Mountain Climb
-    - Logic will guarantee either Blue Mail or a Bottle (for potions) is available
-  - Eastern Palace
-    - Armos Boost to skip the Boss Key and a Small Key
-  - Tower of Hera
-    - Bombrods
-    - Mergeless strategy
-  - Swamp Palace
-    - Ice Rod Clipping to skip merge requirements and raise/lower water levels
-    - Ice Rod + Tornado Rod to skip dungeon entirely
-  - Thieves' Hideout
-    - Flipperless Thieves strategies with Tornado Rod + either Bombs or Ice Rod
-      - Note: B1 Behind the Wall chest and the B1 Big Chest are reachable but excluded from this, due to the repetitive nature of the trick
-    - Reach miniboss and/or B2 jail cell without merge (just Ice Rod or just Boomerang)
-  - Ice Ruins
-    - Get Out of Bounds with Pegasus Boots to:
-      - Skip entire dungeon
-      - Scroll Skip
-      - Small Key skip with Tornado Rod
-  - Desert Palace
-    - Reverse Desert Palace with Fire Rod or Nice Bombs
-    - Armos Boost to skip West 2F
-
-### Hell Logic
-
-This mode logically includes every known RTA-viable glitch, including those that are wildly inconsistent and/or inconsiderate of a player's time. It is not recommended for anyone, other than those seeking a challenge.
-
-<u>Note</u>: Glitched Logic EXPECTS you to spend your first 10 Maiamai on Nice Bombs due to the many glitches they enable. Failure to do so could make your seed much harder or potentially even impossible to complete.
-
-- Includes:
-  - Bee Boost Tricks
-  - Defeating Yuga 1 with just Sword Beams or just Ice Rod
-  - Fake Flippers via Bee Boosting
-  - Catching a natural Golden Bee before Lorule with Bottle + Net
-  - Lost Woods Alcove enemy clip with no means of escape (lure Crow to kill Link)
-  - Lost Woods Big Rock Chest enemy clip, also with no means of escape
-  - Bomb Boosts with Regular Bombs
-  - Enemy Clips with the Sand Rod
-  - Thieves' Hideout B1 with just Bombs
-  - Desert Palace
-    - Skip via Portal Clipping with Hookshot/Boomerang + Tornado Rod
-    - Defeat Zaganaga with just Bow or just Sword Beams
-
-### No Logic
-
-It's all in the name: no logic is used to place items at all. Dungeon items are in their respective dungeons due to technical limitations, but otherwise any item could show up anywhere. Seeds are not guaranteed to be completable.
 
 ## Known Issues
-
-- ### WARNING: Bow of Light _CRASHES_ the game if used outside the final boss arena (3DS console players)
+> ### WARNING: Bow of Light _CRASHES_ the game if used outside the final boss arena (3DS console players)
 - Freestanding Item Model Issues:
   - The Kakariko Street Merchant's items may appear invisible for a small selection of items (they're actually clipping through the floor). They can still be interacted with and purchased (the left one always, the right one after bumping into the Shady Guy).
   - Not all item models have their transforms applied to them (rotation, scaling, etc.) and may look slightly odd.
   - Only the Items in Ravio's Shop and the Kakariko Street Merchant have had their models replaced -- all others will appear vanilla.
-    - Except the Letter in a Bottle's vanilla location, which will always look like a Heart Piece.
+    - The Letter in a Bottle's vanilla location will appear as a Heart Piece.
+- Cracksanity:
+  - The player's location on the bottom screen may not be reflected accurately after exiting a same-world crack, until the player loads another area.
+- Weather Vanes:
+  - When these are Shuffled, if a Weather Vane activates the fast travel point in the opposite world it will not display on the bottom screen and will be a mystery to the player until they visit the opposite world and check their map with the Bell.
 - Music:
-  - Hyrule Castle overworld music may be missing until the player has either broken the barrier or obtained the Pendant of Courage.
-- Maiamai:
-  - Mother Maiamai item text is wrong, the text reflects the slots in Ravio's Shop. The pictures are correct, use those when selecting which item to upgrade.
-  - **Not Confirmed:** There has been a report of an elusive bug when playing Maiamai Madness that causes Mother Maiamai to not properly "bank" Maiamai that were turned in but not yet used for an upgrade. We have been unable to reproduce the issue -- if you encounter it, please let us know on the Discord!
+  - Hyrule Castle overworld music may be incorrect.
 - Unintended Item Duplication:
   - Players can receive the final item from Zelda multiple times if they die and restart the fight.
-  - Items from the Scared Hinox can be received multiple times if the player revisits the cave after a Save & Quit.
+  - Items from the Hinox can be received multiple times if the player revisits the cave after a Save & Quit.
 - Miscellaneous:
-  - Some text boxes will overflow
-  - Players using the Pre-Activated Weather Vanes setting may encounter some Hilda dialog in the Lorule Graveyard if they visit it without completing the Hyrule Sanctuary Dungeon first.
-  - After giving the player the 3000 Rupee item, the Great Rupee Fairy herself does not actually appear to restore Link's health nor does she spawn any capturable Fairies like she does in vanilla.
+  - Some text boxes will overflow or display incorrectly.
 
 ## Special Thanks
 
-- Tocapa for building the original ALBW Randomizer used as the basis for this mod
-- Gamestabled for his ASM contributions to development
+- Tocapa for building the [original ALBW Randomizer](https://gitlab.com/marsolk/albw-randomizer) used as the basis for this mod
+- Development Contributors:
+  - Gamestabled
+  - Phantop
+  - randomsalience
 - The ALBW Modding community for their work creating the tools and knowledge base that made this possible, notably:
   - KillzXGaming
   - Steven Tyler Sean Herr

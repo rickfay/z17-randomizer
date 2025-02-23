@@ -6,11 +6,11 @@ crate::region! {
         locations: [
             "[TR] (1F) Center": Compass @Chest(1[115]),
             "[TR] (1F) Grate Chest": RupeePurple @Chest(1[58]),
-            "[TR] (1F) Portal Room NW": KeySmall @Key(1[153]),
+            "[TR] (1F) Northwest Room": KeySmall @Key(1[153]),
             "[TR] (1F) Northeast Ledge": KeySmall @Key(1[243]),
             "[TR] (1F) Southeast Chest": RupeePurple @Chest(1[173]),
             "[TR] (1F) Defeat Flamolas": RupeeSilver @Chest(1[220]),
-            "Turtle Rock Left Balcony": HeartPiece @Heart(FieldDark 35[54]),
+            "[TR] Left Balcony": HeartPiece @Heart(FieldDark 35[54]),
 
             "[TR] (1F) Under Center": RupeeSilver @SilverRupee(1[114]),
             "[TR] (B1) Under Center": RupeeGold @GoldRupee(2[211]),
@@ -22,7 +22,7 @@ crate::region! {
             "[TR] (B1) Big Chest (Top)": KeyBoss @BigChest(2[29]),
 
             "[TR] Grinexx": HeartContainer @Heart(3[6]),
-            "Turtle Rock Prize": None @None(),
+            "[TR] Prize": None @None(),
         ],
     },
 }
