@@ -346,7 +346,6 @@ fn handle_exclusions(rng: &mut StdRng, seed_info: &mut SeedInfo, check_map: &mut
         seed_info.full_exclusions.insert("Rupee Rush (Hyrule)".to_string());
         seed_info.full_exclusions.insert("Rupee Rush (Lorule)".to_string());
         seed_info.full_exclusions.insert("Octoball Derby".to_string());
-        seed_info.full_exclusions.insert("Treacherous Tower".to_string());
 
         // For Maiamai Madness, also turn the rupee rush maiamai into random junk
         if seed_info.settings.maiamai_madness {
