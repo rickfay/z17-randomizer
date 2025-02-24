@@ -1014,6 +1014,7 @@ The Bow of Light Hint will be generated for every seed even if an [Always](#alwa
   - grizz
   - Herreteman
   - j_im
+  - Matkap
   - MsBeccaFae
   - NesmaN88
   - ScorelessPine
