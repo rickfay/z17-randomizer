@@ -11,12 +11,12 @@ A randomizer for The Legend of Zelda: A Link Between Worlds.
 <summary>Version 0.4</summary>
 
 - **Quake + Initially Closed Cracks**
-  - Games will now start with most cracks closed, until players finds the new item that opens them: Quake.
-  - The Hyrule Castle crack is the only crack open without Quake, and may be required to use if Quake is placed somewhere in Lorule.
-    - Only the crack connected to Hyrule Castle will be open in Lorule.
-    - If Cracksanity is enabled, the HC crack may lead to any crack in Lorule and therefore Quake may appear nearly anywhere in Lorule.
+  - Games will now start with most cracks closed, until players find the new item that opens them: Quake.
+  - The Crack in Hyrule Castle is the only one open without Quake, and may be required to use if Quake is placed somewhere in Lorule.
+    - Only the Crack connected to Hyrule Castle will be open in Lorule.
+    - If Cracksanity is enabled, the HC Crack may lead to any crack in Lorule and therefore Quake may appear nearly anywhere in Lorule.
   - Players may optionally choose to start with Cracks already open, in which case Quake will be omitted from the item pool.
-- **Cracksanity**
+- **Crack Shuffle / "Cracksanity"**
   - Four different shuffling modes:
     - Cross World Pairs
     - Any World Pairs
@@ -99,7 +99,7 @@ A randomizer for The Legend of Zelda: A Link Between Worlds.
   - Hell:
     - The new Sand Hopping trick has been added. It allows completing the Hyrule portion of Desert Palace without Merge and reaching the 1F miniboss chest without the Titan's Mitt.
 - **Hint System Changes**
-  - Ravio's Shop is now considered its own region, separate from Central Hyrule.
+  - Ravio's Shop is now considered its own region, separate from the Hyrule Castle Area.
   - The Graveyard Area now refers solely to the Lorule Graveyard.
   - Path Hints will now explicitly list their underlying Path Item in the Spoiler Log.
   - Hints should overall generate more quickly.
@@ -676,8 +676,8 @@ For Citra (emulator):
 - If enabled, guarantees the Bell will be placed in Ravio's Shop.
 
 `sword_in_shop`
-- If enabled, guarantees the Pegasus Boots will be placed in Ravio's Shop.
-- <u>Note</u>: Incompatible with `assured_weapon` or `swordless_mode` settings.
+- If enabled, guarantees a Sword will be placed in Ravio's Shop.
+- <u>Note</u>: Incompatible with the `assured_weapon` and `swordless_mode` settings.
 
 `boots_in_shop`
 - If enabled, guarantees the Pegasus Boots will be placed in Ravio's Shop.
@@ -685,7 +685,7 @@ For Citra (emulator):
 
 `assured_weapon`
 - If enabled, guarantees that a weapon will be placed in Ravio's Shop
-- <u>Note</u>: Incompatible with `sword_in_shop` or `boots_in_shop` settings.
+- <u>Note</u>: Incompatible with the `sword_in_shop` and `boots_in_shop` settings.
 - Potential weapons include:
   - Sword (if not playing Swordless)
   - Bow
@@ -737,16 +737,16 @@ The sprite commonly found on trackers is borrowed from the item of the same name
 ## Cracksanity
 
 
-There are 56 Cracks (aka "fissures") in the game formed into pairs that connect areas of Hyrule with Lorule.
+There are 56 Cracks (aka "fissures" or "portals") in the game formed into pairs that connect areas of Hyrule with Lorule.
 
 We shuffle them!
 
-| Setting                    | Description                                                                  |
-|----------------------------|------------------------------------------------------------------------------|
-| Cross World Pairs          | All Cracks will connect Hyrule + Lorule                                      |
-| Any World Pairs            | Any Crack can lead to any other Crack.                                       |
-| Mirrored Cross World Pairs | Same as Cross World Pairs, but each pair's counterparts will also be paired. |
-| Mirrored Any World Pairs   | Same as Any World Pairs, but each pair's counterparts will also be paired.   |
+| Setting                    | Dev Notes    | Description                                                                  |
+|----------------------------|--------------|------------------------------------------------------------------------------|
+| Cross World Pairs          | Simplest     | All Cracks will connect Hyrule + Lorule                                      |
+| Any World Pairs            | Most Chaotic | Any Crack can lead to any other Crack.                                       |
+| Mirrored Cross World Pairs | Easiest      | Same as Cross World Pairs, but each pair's counterparts will also be paired. |
+| Mirrored Any World Pairs   | Best         | Same as Any World Pairs, but each pair's counterparts will also be paired.   |
 
 
 
@@ -769,14 +769,14 @@ For technical reasons, these cracks can only be shuffled amongst themselves.
 ![Crack Pools](docs/down_cracks.png)
 <div style="text-align: center; font-style: italic; margin-bottom: 75px;">Down Crack Locations</div>
 
-| Hyrule                | Lorule            | Lorule Area    |
-|-----------------------|-------------------|----------------|
-| Sahasrahla's House    | n-Shaped House    | Skull Woods    |
-| Eastern Ruins Pillar  | Dark Ruins Pillar | Dark Ruins     |
-| Zora's Domain         | Ku's Domain       | Dark Ruins     |
-| Paradox Left          | Paradox Left      | Central Lorule |
-| Paradox Right         | Paradox Right     | Central Lorule |
-| Southern Ruins Pillar | Swamp Pillar      | Central Lorule |
+| Hyrule                | Lorule            | Lorule Area        |
+|-----------------------|-------------------|--------------------|
+| Sahasrahla's House    | n-Shaped House    | Skull Woods        |
+| Eastern Ruins Pillar  | Dark Ruins Pillar | Dark Ruins         |
+| Zora's Domain         | Ku's Domain       | Dark Ruins         |
+| Paradox Left          | Paradox Left      | Lorule Castle Area |
+| Paradox Right         | Paradox Right     | Lorule Castle Area |
+| Southern Ruins Pillar | Swamp Pillar      | Lorule Castle Area |
 
 ### Blocked Cracks
 
@@ -794,14 +794,14 @@ Because of this, the logic only requires bombs to enter the blocked side of crac
 
 #### Hyrule Castle Crack
 - This crack and its pair are the only cracks open without **Quake**.
-- If Cracksanity is off, **Quake** may appear in Central Lorule and players will need to use this crack to get there.
-- When Cracksanity is on, the Hyrule Castle crack will lead to a random crack in Lorule, and thus one random region of Lorule will become accessible. In this way, **Quake** has the potential to appear in any region of Lorule.
+- If Cracksanity is off, **Quake** may appear in the Lorule Castle Area and players will need to use this crack to get there.
+- When Cracksanity is on, the Hyrule Castle Crack will lead to a random crack in Lorule, and thus one random region of Lorule will become accessible. In this way, **Quake** has the potential to appear in any region of Lorule.
   - For technical reasons, the Hyrule Castle Crack will *only* go to Lorule. It cannot be paired with another Hyrule Crack.
 
 #### Lorule Castle Crack
 
-AKA the Final Boss crack, the Yuganon Crack, etc.
-- This crack is treated as access to the Central Lorule area, because if players haven't yet met the LC Requirement the loading zone to the Throne Room will instead send them to the Lorule Blacksmith.
+AKA the Final Boss Crack, the Yuganon Crack, etc.
+- This crack is treated as access to the Lorule Castle Area, because if players haven't yet met the LC Requirement the loading zone to the Throne Room will instead send them to the Lorule Blacksmith.
   - A courtesy return warp will appear in the Lorule Blacksmith if this path is used.
   - Once the LC Requirement has been met this path will remain open with a new warp placed near the doorway.
 - This crack can allow access into Lorule Castle 3F if `trials_door` is set to the `OpenFromBothSides` setting.
@@ -813,6 +813,17 @@ AKA the Final Boss crack, the Yuganon Crack, etc.
 Logic may require players to use the **Stamina Scroll** to have enough Energy to merge from the top part of the East wall going South to reach the crack in the Southwest corner.
 
 Other than using the crack itself (or glitches), this is actually the _only_ way to reach this Crack.
+
+#### Mire Bridge Cracks
+
+The two Cracks that lead to each other on Misery Mire's bridge can be something of a monkey wrench when trying to locate other Cracks.
+
+Example:
+- Let's say the two Mire Bridges Cracks lead to Hyrule Floating Island and the Lost Woods Pillar.
+- If you're searching for the Crack leading to Floating Island, you might reasonably think (from peaking its appearance) that you should go scour Lorule looking for it.
+- But you'd be wrong! Because of the Mire Bridge acting like a buffer between two Cracks, the Crack you really need to find (Lost Woods Pillar) is in fact in Hyrule.
+
+This is the only instance of two Cracks exclusively locking each other like this in the game, keep it in mind!
 
 #### Desert Palace + Zaganaga Cracks
 
@@ -862,7 +873,7 @@ Path Hints take the following form:
 - Refers to the specific region where the hinted `Path Item` can be found.
 - To keep locations from being arbitrarily defined, the Maiamai Map boundaries are used for all region boundaries.
   - <u>Special Cases</u>:
-    - `Ravio's Shop` is considered its own region, separate from Central Hyrule.
+    - `Ravio's Shop` is considered its own region, separate from the Hyrule Castle Area.
     - Hyrule Hotfoot is considered part of the `Lost Woods Area`, as it is there that the reward is given out.
     - Irene can appear in multiple regions, and so she has a unique region called `Irene the Witch`.
 
