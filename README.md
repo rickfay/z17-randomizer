@@ -814,17 +814,6 @@ Logic may require players to use the **Stamina Scroll** to have enough Energy to
 
 Other than using the crack itself (or glitches), this is actually the _only_ way to reach this Crack.
 
-#### Mire Bridge Cracks
-
-The two Cracks that lead to each other on Misery Mire's bridge can be something of a monkey wrench when trying to locate other Cracks.
-
-Example:
-- Let's say the two Mire Bridges Cracks lead to Hyrule Floating Island and the Lost Woods Pillar.
-- If you're searching for the Crack leading to Floating Island, you might reasonably think (from peaking its appearance) that you should go scour Lorule looking for it.
-- But you'd be wrong! Because of the Mire Bridge acting like a buffer between two Cracks, the Crack you really need to find (Lost Woods Pillar) is in fact in Hyrule.
-
-This is the only instance of two Cracks exclusively locking each other like this in the game, keep it in mind!
-
 #### Desert Palace + Zaganaga Cracks
 
 These two cracks are forcibly kept paired vanilla so that Desert Palace does not lose its Boss and dungeon prize. For now...
