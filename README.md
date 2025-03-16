@@ -443,7 +443,7 @@ A randomizer for The Legend of Zelda: A Link Between Worlds.
 
 ## Setup
 
-- Download: [https://github.com/rickfay/z17-randomizer/releases/tag/v0.3.1-release](https://github.com/rickfay/z17-randomizer/releases/tag/v0.3.1-release)
+- Download: [https://github.com/rickfay/z17-randomizer/releases/tag/v0.4.0-release](https://github.com/rickfay/z17-randomizer/releases/tag/v0.4.0-release)
 
 1. Unzip the download to your directory of choice.
 2. ROM Requirements:
