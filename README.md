@@ -889,6 +889,7 @@ An item cannot be Path if an in-logic alternative exists. Put another way, an it
 
 The following will NEVER be Path Items:
 - Ravio's Bracelet
+- Quake
 - Keys
 - Sage Portraits
 - Pendants
