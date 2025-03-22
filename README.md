@@ -452,7 +452,7 @@ A randomizer for The Legend of Zelda: A Link Between Worlds.
    - Must be **decrypted**
      - You can use Godmode9 to decrypt your ROM, if necessary.
 3. How to dump and/or decrypt a legal ROM from your owned copy of game:
-   - Instructions are available here: [https://citra-emu.org/wiki/dumping-game-cartidges/](https://wiki.hacks.guide/wiki/3DS:Dump_titles_and_game_cartridges)
+   - Instructions are available here: [https://wiki.hacks.guide/wiki/3DS:Dump_titles_and_game_cartridges](https://wiki.hacks.guide/wiki/3DS:Dump_titles_and_game_cartridges)
    - If you need to convert your ROM from `.cia` to `.3DS` you can use this tool: https://github.com/davFaithid/CIA-to-3DS-Rom-Converter/releases/tag/1.0
 4. Move your A Link Between Worlds ROM into the same folder. Name it: `ALBW.3ds`
    - Be careful not to accidentally give it two extensions, i.e. `ALBW.3ds.3ds`. This is an easy mistake to make if you have Windows set to hide known file extensions.
