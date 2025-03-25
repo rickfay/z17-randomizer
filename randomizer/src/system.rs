@@ -8,10 +8,10 @@ use std::{
 use json_comments::StripComments;
 use log::info;
 use macros::fail;
-use serde::{de::DeserializeOwned, Deserialize, Serialize};
+use serde::{Deserialize, Serialize, de::DeserializeOwned};
 
-use crate::constants::CONFIG_FILE_NAME;
 use crate::SeedInfo;
+use crate::constants::CONFIG_FILE_NAME;
 
 pub type Result<T, E = Error> = std::result::Result<T, E>;
 

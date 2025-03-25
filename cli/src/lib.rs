@@ -6,9 +6,9 @@ use modinfo::settings::nice_items::NiceItems;
 use modinfo::settings::ravios_shop::RaviosShop;
 use modinfo::settings::trials_door::TrialsDoor;
 use modinfo::settings::weather_vanes::WeatherVanes;
-use modinfo::settings::{logic::LogicMode, pedestal::PedestalSetting, Settings};
+use modinfo::settings::{DoorShuffle, Settings, logic::LogicMode, pedestal::PedestalSetting};
 use std::{
-    io::{stdin, stdout, Read, Write},
+    io::{Read, Write, stdin, stdout},
     str::FromStr,
 };
 
@@ -107,6 +107,15 @@ pub fn get_seed_settings() -> Result<Settings, String> {
     let maiamai_madness =
         prompt_bool("Maiamai Madness", "This shuffles Maiamai into the pool, adding 100 more locations.");
 
+    let door_shuffle = DoorShuffle::try_from(prompt_u8_in_range(
+        "Door Shuffle",
+        "Choose how to shuffle doors:\n\
+        [0] Off                      - Doors are not shuffled.\n\
+        [1] Dungeon Entrance Shuffle - Dungeon Entrances are shuffled amongst each other.",
+        0,
+        1,
+    ))?;
+
     let cracks = Cracks::try_from(prompt_u8_in_range(
         "Cracks",
         "Choose the initial state of the cracks between worlds:\n\
@@ -130,7 +139,7 @@ pub fn get_seed_settings() -> Result<Settings, String> {
 
     let minigames_excluded = prompt_bool(
         "Exclude Minigames",
-        "Excludes the following: Octoball Derby, Dodge the Cuccos, Hyrule Hotfoot, Treacherous Tower, and both Rupee Rushes",
+        "Excludes the following: Octoball Derby, Dodge the Cuccos, Hyrule Hotfoot, and both Rupee Rushes",
     );
 
     let skip_big_bomb_flower = prompt_bool(
@@ -246,6 +255,7 @@ pub fn get_seed_settings() -> Result<Settings, String> {
         nice_items,
         super_items,
         lamp_and_net_as_weapons,
+        door_shuffle,
         cracks,
         cracksanity,
         trials_door,

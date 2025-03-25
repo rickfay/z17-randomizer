@@ -5,7 +5,7 @@ pub use bytey_macro::strip_lifetime;
 pub use std::io::{Error, ErrorKind, Result};
 use std::{
     alloc,
-    io::{prelude::*, SeekFrom},
+    io::{SeekFrom, prelude::*},
     mem::{self, MaybeUninit},
     slice,
 };

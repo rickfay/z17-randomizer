@@ -1,5 +1,5 @@
 use {
-    crate::{files::sarc::Sarc, File, Result},
+    crate::{File, Result, files::sarc::Sarc},
     std::path::Path,
 };
 

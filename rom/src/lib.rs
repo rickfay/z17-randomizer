@@ -20,7 +20,7 @@ pub use {
     actors::{Actor, Actors},
     course::Course,
     demo::Demo,
-    files::{byaml, exheader::ExHeader, romfs::RomFs, sarc::Sarc, Cxi, File, IntoBytes},
+    files::{Cxi, File, IntoBytes, byaml, exheader::ExHeader, romfs::RomFs, sarc::Sarc},
     item::GetItem,
     language::Language,
     scene::{Scene, Stage},

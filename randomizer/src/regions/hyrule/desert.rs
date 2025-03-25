@@ -4,6 +4,8 @@ crate::region! {
     color: Name,
     mystery {
         locations: [
+            "Desert Palace Entrance": None @Door(31[10] DesertPalaceEntrance),
+
             "Misery Mire Entrance Crack": None @Crack(37[29] MiseryMireEntrance),
             "Desert Right Pillar Crack": None @Crack(31[42] DesertPillarRight),
             "Desert Left Pillar Crack": None @Crack(31[41] DesertPillarLeft),

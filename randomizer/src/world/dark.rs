@@ -1,17 +1,17 @@
+use crate::LocationInfo;
 use crate::filler::check::Check;
 use crate::filler::filler_item::Goal;
 use crate::filler::location::Location::{self, *};
 use crate::filler::location_node::LocationNode;
 use crate::filler::logic::Logic;
 use crate::filler::path::Path;
-use crate::regions;
-use crate::world::{check, edge, goal, location};
-use crate::LocationInfo;
+use crate::world::{check, door, edge, goal, location};
+use crate::{DoorMap, regions};
 
 use std::collections::HashMap;
 
 /// Dark Palace World Graph
-pub(crate) fn graph() -> HashMap<Location, LocationNode> {
+pub(crate) fn graph(door_map: &DoorMap) -> HashMap<Location, LocationNode> {
     HashMap::from([
         (
             DarkPalaceFoyer,
@@ -19,9 +19,11 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                 "Dark Palace",
                 vec![check!("[PD] (1F) Right Pit", regions::dungeons::dark::palace::SUBREGION, |p| p.has_bombs())],
                 vec![
-                    edge!(DarkRuins),
-                    edge!(DarkPalaceSecondRoom, |p| (p.has_bombs() || (p.has_nice_ice_rod() && p.has_fire_rod()))
-                        && (p.has_lamp() || p.lampless())),
+                    door!(DarkPalaceExit, door_map),
+                    edge!(DarkPalaceSecondRoom => {
+                        normal: |p| p.has_bombs() && (p.has_lamp() || p.lampless()),
+                        hard: |p| p.has_fire_rod() && p.has_nice_ice_rod() && (p.has_lamp() || p.lampless()),
+                    }),
                 ],
             ),
         ),
@@ -41,15 +43,25 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                 "Dark Palace",
                 vec![
                     check!("[PD] (1F) Switch Puzzle", regions::dungeons::dark::palace::SUBREGION),
-                    check!("[PD] (1F) Hidden Room (Upper)", regions::dungeons::dark::palace::SUBREGION),
+                    check!("[PD] (1F) Hidden Room (Upper)", regions::dungeons::dark::palace::SUBREGION, |p| p
+                        .has_bombs()),
                     check!("[PD] (1F) Hidden Room (Lower)", regions::dungeons::dark::palace::SUBREGION),
-                    check!("[PD] (B1) Fall From 1F", regions::dungeons::dark::palace::SUBREGION),
+                    check!("[PD] (B1) Fall From 1F", regions::dungeons::dark::palace::SUBREGION, |p| p.has_bombs()
+                        || p.has_hammer()),
                     check!("[PD] (B1) Helmasaur Room", regions::dungeons::dark::palace::SUBREGION),
-                    check!("[PD] (B1) Helmasaur Room (Fall)", regions::dungeons::dark::palace::SUBREGION),
+                    check!("[PD] (B1) Helmasaur Room (Fall)", regions::dungeons::dark::palace::SUBREGION, |p| p
+                        .has_bombs()
+                        || p.has_hammer()),
                     check!("[PD] (B1) Glow-in-the-Dark Maze", regions::dungeons::dark::palace::SUBREGION, |p| p
                         .can_merge()),
                 ],
-                vec![edge!(DarkPalaceSecondRoom), edge!(DarkPalaceLockedDoors, |p| p.has_dark_keys(4))],
+                vec![
+                    edge!(DarkPalaceSecondRoom),
+                    edge!(DarkPalaceLockedDoors => {
+                        normal: |p| p.has_dark_keys(4) && p.can_hit_far_switch(), // need to hit 2F switch at start
+                        hard: |p| p.has_dark_keys(4), // throw skulls
+                    }),
+                ],
             ),
         ),
         (
@@ -57,17 +69,23 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
             location(
                 "Dark Palace Locked Doors",
                 vec![
-                    check!("[PD] (1F) Fall From 2F", regions::dungeons::dark::palace::SUBREGION),
-                    check!("[PD] (2F) Big Chest (Hidden)", regions::dungeons::dark::palace::SUBREGION),
-                    check!("[PD] (2F) South Hidden Room", regions::dungeons::dark::palace::SUBREGION),
+                    check!("[PD] (1F) Fall From 2F", regions::dungeons::dark::palace::SUBREGION, |p| p.has_bombs()
+                        || p.has_hammer()),
+                    check!("[PD] (2F) Big Chest (Hidden)", regions::dungeons::dark::palace::SUBREGION, |p| p
+                        .has_bombs()),
+                    check!("[PD] (2F) South Hidden Room", regions::dungeons::dark::palace::SUBREGION, |p| p
+                        .has_bombs()),
                     check!("[PD] (2F) Alcove", regions::dungeons::dark::palace::SUBREGION, |p| p.can_merge()),
-                    check!("[PD] (B1) Bomb Bowling", regions::dungeons::dark::palace::SUBREGION),
+                    check!("[PD] (B1) Bomb Bowling", regions::dungeons::dark::palace::SUBREGION, |p| p.has_bombs()),
                 ],
                 vec![
                     edge!(DarkPalaceMain),
                     edge!(DarkPalaceBoss => {
-                        normal: |p| p.has_dark_big_key() && p.can_merge(),
-                        hard: |p| p.has_dark_big_key() && (p.has_ice_rod() || p.has_nice_bombs()),
+                        normal: |p| p.has_dark_big_key()
+                            // requirement to hit B1 Crystal Switch
+                            && (p.can_merge() || p.has_ice_rod() || p.has_nice_bombs())
+                            // requirement to unblock East window on 2F
+                            && (p.has_bombs() || (p.has_fire_rod() && p.can_merge())),
                     }),
                 ],
             ),

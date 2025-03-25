@@ -4,6 +4,8 @@ crate::region! {
     color: Name,
     lorule {
         locations: [
+            "Turtle Rock Entrance": None @Door(35[29] TurtleRockEntrance),
+
             "Lorule River Crack": None @Crack(29[53] RiverLorule),
             "Lorule Lake Crack": None @Crack(35[30] LoruleLake),
             "Lorule Hotfoot Crack": None @Crack(36[43] LoruleHotfoot),

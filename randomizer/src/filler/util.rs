@@ -1,5 +1,5 @@
 use crate::Error;
-use rand::{rngs::StdRng, Rng};
+use rand::{Rng, rngs::StdRng};
 use std::collections::BTreeMap;
 use std::hash::Hash;
 

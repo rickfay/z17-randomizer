@@ -1,4 +1,4 @@
-use super::{Assembler, Instruction, Register, PC};
+use super::{Assembler, Instruction, PC, Register};
 
 #[derive(Debug)]
 pub enum Operand {

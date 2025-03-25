@@ -4,6 +4,8 @@ crate::region! {
     color: Name,
     main {
         locations: [
+            "Inside Hyrule Castle Entrance": None @Door(18[155] InsideHyruleCastleEntrance),
+
             "Your House Crack": None @Crack(27[68] YourHouse),
             "Hyrule Right Paradox Crack": None @Crack(32[60] ParadoxRightHyrule),
             "Hyrule Left Paradox Crack": None @Crack(32[56] ParadoxLeftHyrule),

@@ -4,6 +4,8 @@ crate::region! {
     color: Purple,
     castle {
         locations: [
+            "Lorule Castle Exit": None @Door(1[1528] LoruleCastleExit),
+
             "[LC] Crack": None @Crack(IndoorDark 5[14] LoruleCastle),
 
             "[LC] (1F) Ledge": RupeeR @Chest(1[714]),

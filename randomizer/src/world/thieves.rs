@@ -1,16 +1,16 @@
+use crate::LocationInfo;
 use crate::filler::check::Check;
 use crate::filler::filler_item::Goal;
 use crate::filler::location::Location::{self, *};
 use crate::filler::location_node::LocationNode;
 use crate::filler::logic::Logic;
 use crate::filler::path::Path;
-use crate::regions;
-use crate::world::{check, edge, goal, location};
-use crate::LocationInfo;
+use crate::world::{check, door, edge, goal, location};
+use crate::{DoorMap, regions};
 
 use std::collections::HashMap;
 
-pub(crate) fn graph() -> HashMap<Location, LocationNode> {
+pub(crate) fn graph(door_map: &DoorMap) -> HashMap<Location, LocationNode> {
     HashMap::from([
         (
             ThievesHideoutB1,
@@ -99,7 +99,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                     }),
                 ],
                 vec![
-                    edge!(LoruleCastleArea),
+                    door!(ThievesHideoutExit, door_map),
                     edge!(ThievesBoss, |p| p.has_thieves_big_key()
                         && p.has_thieves_key()
                         && p.thieves_escape_equipment()

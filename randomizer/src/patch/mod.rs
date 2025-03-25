@@ -1,29 +1,33 @@
-use crate::filler::cracks::Crack;
-use crate::filler::filler_item::{Randomizable, Vane};
-use crate::{patch::util::*, Error, Result, SeedInfo};
-use code::Code;
+use std::ops::Add;
+use std::{collections::HashMap, fs, path::Path};
+
 use fs_extra::dir::CopyOptions;
+use log::{debug, error, info};
+use path_absolutize::*;
+use serde::Serialize;
+use tempfile::tempdir;
+use try_insert_ext::EntryInsertExt;
+
+use code::Code;
 use game::{
     Course::{self as CourseId, *},
     Item, World,
 };
-use log::{debug, error, info};
 use macros::fail;
 use modinfo::settings::weather_vanes::WeatherVanes::*;
-use path_absolutize::*;
 use rom::byaml::scene_env::SceneEnvFile;
 use rom::flag::Flag;
 use rom::scene::{Transform, Vec3};
 use rom::{
+    File, IntoBytes, Language, Rom, Scene,
     flow::FlowMut,
     scene::{Arg, Obj, Rail, SceneMeta},
-    File, IntoBytes, Language, Rom, Scene,
 };
-use serde::Serialize;
-use std::ops::Add;
-use std::{collections::HashMap, fs, path::Path};
-use tempfile::tempdir;
-use try_insert_ext::EntryInsertExt;
+
+use crate::filler::cracks::Crack;
+use crate::filler::doors::Door;
+use crate::filler::filler_item::{Randomizable, Vane};
+use crate::{Error, Result, SeedInfo, patch::util::*};
 
 mod actors;
 mod byaml;
@@ -276,6 +280,9 @@ impl Patcher {
             | Patch::GoldRupee { course, scene, unq } => {
                 self.parse_args(course, scene, unq).1 = filler_item.into().unwrap().as_item_index() as i32;
             },
+            Patch::Door { course, scene, unq, door } => {
+                self.patch_door(course, scene + 1, unq, door, seed_info)?;
+            },
             Patch::Crack { course, scene, unq, crack } => {
                 self.patch_crack(course, scene + 1, unq, crack, seed_info)?;
             },
@@ -340,11 +347,7 @@ impl Patcher {
         let large_chest = (34, "TreasureBoxL");
 
         let chest_data = if settings.chest_size_matches_contents {
-            if item.is_major_item() {
-                large_chest
-            } else {
-                small_chest
-            }
+            if item.is_major_item() { large_chest } else { small_chest }
         } else if is_big {
             large_chest
         } else {
@@ -360,6 +363,21 @@ impl Patcher {
             let actor = self.scene(DungeonHera, 0)?.actors().get_actor_bch(chest_data.1)?;
             self.scene(course, stage).unwrap().actors_mut().add(actor)?;
         }
+
+        Ok(())
+    }
+
+    /// Doors!
+    fn patch_door(
+        &mut self, course: CourseId, scene: u16, unq: u16, here_door: Door, seed_info: &SeedInfo,
+    ) -> Result<()> {
+        // Collect info about this door's new destination
+        let there_door =
+            seed_info.door_map.get(&here_door).unwrap_or_else(|| panic!("No door_map entry for: {:?}", here_door));
+        let there_sp = there_door.get_spawn_point();
+
+        // Apply the patch
+        self.modify_objs(course, scene, [redirect(unq, there_sp)]);
 
         Ok(())
     }
@@ -391,17 +409,13 @@ impl Patcher {
         };
 
         // Apply the patch
-        self.modify_objs(
-            course,
-            scene,
-            [call(unq, move |obj| {
-                obj.redirect(there_sp);
-                obj.arg.2 = crack_type;
-                obj.set_active_flag(there_flag);
-                obj.set_inactive_flag(here_crack.get_flag());
-                obj.set_enable_flag(enable_flag);
-            })],
-        );
+        self.modify_objs(course, scene, [call(unq, move |obj| {
+            obj.redirect(there_sp);
+            obj.arg.2 = crack_type;
+            obj.set_active_flag(there_flag);
+            obj.set_inactive_flag(here_crack.get_flag());
+            obj.set_enable_flag(enable_flag);
+        })]);
 
         Ok(())
     }
@@ -471,51 +485,43 @@ impl Patcher {
                 let flag = here_crack.get_flag();
 
                 // Curtain
-                self.add_obj(
-                    course,
-                    scene,
-                    Obj {
-                        arg: Arg(0, 0, 0, 0, flag.get_type(), 0, flag.get_value(), 0, 0, 0, 0, 0, 0, 0.0),
-                        clp,
-                        flg: (0, 0, 0, 0),
-                        id: 550,
-                        lnk: vec![],
-                        nme: None,
-                        ril: vec![],
-                        ser: curtain_ser,
-                        srt: Transform {
-                            scale: Vec3 { x: 1.0, y: 16.0, z: 1.0 },
-                            rotate: Vec3 { x: 339.3735, y: 0.0, z: 0.0 },
-                            translate: t_curtain,
-                        },
-                        typ: 1,
-                        unq: curtain_unq,
+                self.add_obj(course, scene, Obj {
+                    arg: Arg(0, 0, 0, 0, flag.get_type(), 0, flag.get_value(), 0, 0, 0, 0, 0, 0, 0.0),
+                    clp,
+                    flg: (0, 0, 0, 0),
+                    id: 550,
+                    lnk: vec![],
+                    nme: None,
+                    ril: vec![],
+                    ser: curtain_ser,
+                    srt: Transform {
+                        scale: Vec3 { x: 1.0, y: 16.0, z: 1.0 },
+                        rotate: Vec3 { x: 339.3735, y: 0.0, z: 0.0 },
+                        translate: t_curtain,
                     },
-                );
+                    typ: 1,
+                    unq: curtain_unq,
+                });
 
                 // WallDisableIn
                 let (disable_merge_unq, disable_merge_ser) = self.find_objs_unq_ser(course, scene);
-                self.add_obj(
-                    course,
-                    scene,
-                    Obj {
-                        arg: Arg(0, 0, 0, 0, flag.get_type(), 0, flag.get_value(), 0, 0, 0, 0, 0, 0, 0.0),
-                        clp,
-                        flg: (0, flag.get_type(), 0, flag.get_value()),
-                        id: 568,
-                        lnk: vec![],
-                        nme: None,
-                        ril: vec![],
-                        ser: disable_merge_ser,
-                        srt: Transform {
-                            scale: Vec3 { x: 5.25577, y: 1.0, z: 2.43051 },
-                            rotate: Vec3::ZERO,
-                            translate: t_wall,
-                        },
-                        typ: 6,
-                        unq: disable_merge_unq,
+                self.add_obj(course, scene, Obj {
+                    arg: Arg(0, 0, 0, 0, flag.get_type(), 0, flag.get_value(), 0, 0, 0, 0, 0, 0, 0.0),
+                    clp,
+                    flg: (0, flag.get_type(), 0, flag.get_value()),
+                    id: 568,
+                    lnk: vec![],
+                    nme: None,
+                    ril: vec![],
+                    ser: disable_merge_ser,
+                    srt: Transform {
+                        scale: Vec3 { x: 5.25577, y: 1.0, z: 2.43051 },
+                        rotate: Vec3::ZERO,
+                        translate: t_wall,
                     },
-                );
+                    typ: 6,
+                    unq: disable_merge_unq,
+                });
 
                 self.copy_bch("Curtain", (IndoorLight, 7), (course, scene))?;
             },
@@ -595,7 +601,7 @@ impl Patcher {
         lms::msbf::patch(&mut self, seed_info)?;
         messages::patch_messages(&mut self, seed_info)?;
         let prizes = get_dungeon_prizes(&seed_info.layout);
-        prizes::patch_dungeon_prizes(&mut self, &prizes);
+        prizes::patch_dungeon_prizes(&mut self, seed_info, &prizes);
         // byaml::get_item::patch(&mut self)?;
         byaml::course::patch(&mut self, &prizes, seed_info);
         byaml::stage::patch(&mut self, seed_info)?;
@@ -693,6 +699,7 @@ pub enum Patch {
     Maiamai { course: CourseId, scene: u16, unq: u16 },
     SilverRupee { course: CourseId, scene: u16, unq: u16 },
     GoldRupee { course: CourseId, scene: u16, unq: u16 },
+    Door { course: CourseId, scene: u16, unq: u16, door: Door },
     Crack { course: CourseId, scene: u16, unq: u16, crack: Crack },
     WeatherVane { course: CourseId, scene: u16, unq: u16, vane: Vane },
     Shop(Shop),

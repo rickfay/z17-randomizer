@@ -187,11 +187,7 @@ pub trait FromFile {
 }
 
 fn cmp_id(left: u64, right: u64) -> Result<()> {
-    if left == right {
-        Ok(())
-    } else {
-        Err(Error::new("IDs did not match."))
-    }
+    if left == right { Ok(()) } else { Err(Error::new("IDs did not match.")) }
 }
 
 fn from_media_units(media_units: u32) -> u32 {

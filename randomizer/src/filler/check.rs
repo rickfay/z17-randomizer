@@ -1,8 +1,8 @@
 use serde::Serialize;
 use {
     crate::{
-        filler::{logic::Logic, progress::Progress},
         LocationInfo, Randomizable,
+        filler::{logic::Logic, progress::Progress},
     },
     std::hash::{Hash, Hasher},
 };

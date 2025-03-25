@@ -125,17 +125,13 @@ fn determine_settings(opt_preset: Option<String>, opt_seed: Option<u32>) -> (Opt
         let (seeded, seed): (bool, u32) =
             if let Some(seed) = opt_seed { (true, seed) } else { (false, rand::random()) };
 
-        (
-            None,
-            seeded,
-            SeedInfo {
-                seed,
-                version: VERSION.to_owned(),
-                settings: cli::get_seed_settings().unwrap_or_else(|err| {
-                    fail!("Failed to create Settings: {}", err);
-                }),
-                ..Default::default()
-            },
-        )
+        (None, seeded, SeedInfo {
+            seed,
+            version: VERSION.to_owned(),
+            settings: cli::get_seed_settings().unwrap_or_else(|err| {
+                fail!("Failed to create Settings: {}", err);
+            }),
+            ..Default::default()
+        })
     }
 }

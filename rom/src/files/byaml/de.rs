@@ -3,9 +3,9 @@
 use serde::de;
 use {
     super::Kind,
-    crate::{files::align, Error, Result},
+    crate::{Error, Result, files::align},
     bytey::*,
-    serde::de::{value::BorrowedBytesDeserializer, DeserializeSeed, MapAccess, SeqAccess, Unexpected, Visitor},
+    serde::de::{DeserializeSeed, MapAccess, SeqAccess, Unexpected, Visitor, value::BorrowedBytesDeserializer},
     std::{
         convert::{TryFrom, TryInto},
         fmt::{self, Display, Formatter},
@@ -203,11 +203,7 @@ impl<'de> de::Deserializer<'de> for Deserializer<'de> {
     where
         V: Visitor<'de>,
     {
-        if NonZeroU32::new(self.document()?.root).is_some() {
-            visitor.visit_some(self)
-        } else {
-            visitor.visit_none()
-        }
+        if NonZeroU32::new(self.document()?.root).is_some() { visitor.visit_some(self) } else { visitor.visit_none() }
     }
 
     fn deserialize_unit<V>(self, visitor: V) -> Result<V::Value, Self::Error>
@@ -555,11 +551,7 @@ impl<'doc, 'de> de::Deserializer<'de> for Node<'doc, 'de> {
     where
         V: Visitor<'de>,
     {
-        if self.is_null() {
-            visitor.visit_none()
-        } else {
-            visitor.visit_some(self)
-        }
+        if self.is_null() { visitor.visit_none() } else { visitor.visit_some(self) }
     }
 
     fn deserialize_unit<V>(self, visitor: V) -> Result<V::Value, Self::Error>
@@ -733,21 +725,16 @@ impl<'doc, 'de> MapAccess<'de> for Map<'doc, 'de> {
 
 impl Display for Kind {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        write!(
-            f,
-            "{:02X} [{}]",
-            *self as u8,
-            match self {
-                Kind::String => "string",
-                Kind::Array => "array",
-                Kind::Map => "map",
-                Kind::Strings => "strings",
-                Kind::Boolean => "boolean",
-                Kind::Integer => "integer",
-                Kind::Float => "float",
-                Kind::Null => "null",
-            }
-        )
+        write!(f, "{:02X} [{}]", *self as u8, match self {
+            Kind::String => "string",
+            Kind::Array => "array",
+            Kind::Map => "map",
+            Kind::Strings => "strings",
+            Kind::Boolean => "boolean",
+            Kind::Integer => "integer",
+            Kind::Float => "float",
+            Kind::Null => "null",
+        })
     }
 }
 
@@ -788,11 +775,7 @@ fn read_strings(source: &[u8]) -> Result<Vec<&[u8]>> {
 }
 
 fn split(slice: &[u8], mid: usize) -> Result<(&[u8], &[u8])> {
-    if mid > slice.len() {
-        Err(Error::eof())
-    } else {
-        Ok(slice.split_at(mid))
-    }
+    if mid > slice.len() { Err(Error::eof()) } else { Ok(slice.split_at(mid)) }
 }
 
 fn header(source: &[u8], kind: Kind) -> Result<(u32, &[u8])> {

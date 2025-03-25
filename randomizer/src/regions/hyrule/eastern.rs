@@ -4,6 +4,8 @@ crate::region! {
     color: Name,
     ruins {
         locations: [
+            "Eastern Palace Entrance": None @Door(20[36] EasternPalaceEntrance),
+
             "Eastern Ruins Pillar Crack": None @Crack(22[33] EasternRuinsPillar),
             "Eastern Ruins SE Crack": None @Crack(30[54] EasternRuinsSE),
             "Hyrule River Crack": None @Crack(29[46] RiverHyrule),

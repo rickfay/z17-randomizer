@@ -1,7 +1,7 @@
 use crate::filler::filler_item::Randomizable;
 use crate::{
-    patch::{util::*, DungeonPrizes},
     Patcher, SeedInfo,
+    patch::{DungeonPrizes, util::*},
 };
 use game::Course::{self, *};
 use log::info;

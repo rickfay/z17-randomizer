@@ -1,4 +1,4 @@
-use crate::filler::filler_item::Item::Quake;
+use crate::filler::filler_item::Item::{Quake, ScootFruit01};
 use crate::filler::filler_item::Vane;
 use crate::filler::filler_item::{Goal, Item, Randomizable};
 use crate::filler::item_pools;
@@ -9,8 +9,7 @@ use modinfo::settings::keysy::Keysy;
 use modinfo::settings::nice_items::NiceItems;
 use modinfo::settings::ravios_shop::RaviosShop;
 use modinfo::settings::trials_door::TrialsDoor;
-use modinfo::settings::weather_vanes::WeatherVanes;
-use modinfo::settings::{pedestal::PedestalSetting, Settings};
+use modinfo::settings::{Settings, pedestal::PedestalSetting};
 
 #[derive(Clone, Debug)]
 pub struct Progress<'s> {
@@ -20,12 +19,24 @@ pub struct Progress<'s> {
 
 impl<'s> Progress<'s> {
     pub fn new(seed_info: &'s SeedInfo) -> Progress<'s> {
-        Self { items: Default::default(), seed_info }
+        let mut items: DashSet<Randomizable> = Default::default();
+
+        // Starting Inventory
+        items.insert(ScootFruit01.into());
+
+        // Weather Vanes
+        let vanes = item_pools::get_default_weather_vanes(&seed_info.settings);
+        vanes.iter().for_each(|&vane| {
+            items.insert(vane.into());
+        });
+
+        Self { items, seed_info }
     }
 
-    /// Constructs a new [`Progress`] instance that already has all minor progression items.
-    pub fn nothing_but_hearts_and_rupees(seed_info: &'s SeedInfo) -> Progress<'s> {
-        let mut items = DashSet::default();
+    /// Constructs a new [`Progress`] instance that already has items we don't want to affect logic
+    pub fn compasses_hearts_and_rupees(seed_info: &'s SeedInfo) -> Progress<'s> {
+        let mut items = Self::new(seed_info).items;
+        items.extend(item_pools::get_compass_pool().iter().map(|&i| i.into()).collect::<DashSet<Randomizable>>());
         items.extend(item_pools::get_heart_pieces().iter().map(|&i| i.into()).collect::<DashSet<Randomizable>>());
         items.extend(item_pools::get_heart_containers().iter().map(|&i| i.into()).collect::<DashSet<Randomizable>>());
         items.extend(item_pools::get_gold_rupee_pool().iter().map(|&i| i.into()).collect::<DashSet<Randomizable>>());
@@ -217,7 +228,6 @@ impl<'s> Progress<'s> {
         self.has_either(Item::ScootFruit01, Item::ScootFruit02)
     }
 
-    #[allow(unused)]
     pub fn has_foul_fruit(&self) -> bool {
         self.has_either(Item::FoulFruit01, Item::FoulFruit02)
     }
@@ -243,14 +253,6 @@ impl<'s> Progress<'s> {
 
     pub fn has_bell(&self) -> bool {
         self.has(Item::Bell)
-    }
-
-    pub fn are_hyrule_vanes_active(&self) -> bool {
-        matches!(self.seed_info.settings.weather_vanes, WeatherVanes::Hyrule | WeatherVanes::All)
-    }
-
-    pub fn are_lorule_vanes_active(&self) -> bool {
-        matches!(self.seed_info.settings.weather_vanes, WeatherVanes::Lorule | WeatherVanes::All)
     }
 
     pub fn cracksanity(&self) -> bool {
@@ -520,7 +522,10 @@ impl<'s> Progress<'s> {
 
     /// Knucklemaster
     pub fn can_defeat_knucklemaster(&self) -> bool {
-        self.can_merge() && (self.has_master_sword() || (self.swordless_mode() && self.can_attack_bowproof()))
+        self.can_merge()
+            && (self.has_master_sword()
+                || (self.swordless_mode() && self.can_attack_bowproof())
+                || (self.has_lamp_or_net_as_weapon() && self.has_super_lamp()))
     }
 
     /// Grinexx
@@ -565,10 +570,12 @@ impl<'s> Progress<'s> {
 
     pub fn has_gales_keys(&self, amount: u8) -> bool {
         self.is_small_keysy()
-            || self.has_amount(
-                amount,
-                [Item::GalesKeySmall01, Item::GalesKeySmall02, Item::GalesKeySmall03, Item::GalesKeySmall04],
-            )
+            || self.has_amount(amount, [
+                Item::GalesKeySmall01,
+                Item::GalesKeySmall02,
+                Item::GalesKeySmall03,
+                Item::GalesKeySmall04,
+            ])
     }
 
     pub fn has_gales_big_key(&self) -> bool {
@@ -585,10 +592,12 @@ impl<'s> Progress<'s> {
 
     pub fn has_dark_keys(&self, amount: u8) -> bool {
         self.is_small_keysy()
-            || self.has_amount(
-                amount,
-                [Item::DarkKeySmall01, Item::DarkKeySmall02, Item::DarkKeySmall03, Item::DarkKeySmall04],
-            )
+            || self.has_amount(amount, [
+                Item::DarkKeySmall01,
+                Item::DarkKeySmall02,
+                Item::DarkKeySmall03,
+                Item::DarkKeySmall04,
+            ])
     }
 
     pub fn has_dark_big_key(&self) -> bool {
@@ -597,10 +606,12 @@ impl<'s> Progress<'s> {
 
     pub fn has_swamp_keys(&self, amount: u8) -> bool {
         self.is_small_keysy()
-            || self.has_amount(
-                amount,
-                [Item::SwampKeySmall01, Item::SwampKeySmall02, Item::SwampKeySmall03, Item::SwampKeySmall04],
-            )
+            || self.has_amount(amount, [
+                Item::SwampKeySmall01,
+                Item::SwampKeySmall02,
+                Item::SwampKeySmall03,
+                Item::SwampKeySmall04,
+            ])
     }
 
     pub fn has_swamp_big_key(&self) -> bool {
@@ -639,16 +650,13 @@ impl<'s> Progress<'s> {
 
     pub fn has_desert_keys(&self, amount: u8) -> bool {
         self.is_small_keysy()
-            || self.has_amount(
-                amount,
-                [
-                    Item::DesertKeySmall01,
-                    Item::DesertKeySmall02,
-                    Item::DesertKeySmall03,
-                    Item::DesertKeySmall04,
-                    Item::DesertKeySmall05,
-                ],
-            )
+            || self.has_amount(amount, [
+                Item::DesertKeySmall01,
+                Item::DesertKeySmall02,
+                Item::DesertKeySmall03,
+                Item::DesertKeySmall04,
+                Item::DesertKeySmall05,
+            ])
     }
 
     pub fn has_desert_big_key(&self) -> bool {
@@ -666,16 +674,13 @@ impl<'s> Progress<'s> {
 
     pub fn has_lorule_keys(&self, amount: u8) -> bool {
         self.is_small_keysy()
-            || self.has_amount(
-                amount,
-                [
-                    Item::LoruleCastleKeySmall01,
-                    Item::LoruleCastleKeySmall02,
-                    Item::LoruleCastleKeySmall03,
-                    Item::LoruleCastleKeySmall04,
-                    Item::LoruleCastleKeySmall05,
-                ],
-            )
+            || self.has_amount(amount, [
+                Item::LoruleCastleKeySmall01,
+                Item::LoruleCastleKeySmall02,
+                Item::LoruleCastleKeySmall03,
+                Item::LoruleCastleKeySmall04,
+                Item::LoruleCastleKeySmall05,
+            ])
     }
 
     pub fn has_completed_trials(&self) -> bool {
@@ -837,18 +842,16 @@ impl<'s> Progress<'s> {
 
     pub fn has_lc_requirement(&self) -> bool {
         use Item::*;
-        self.has_amount(
-            self.seed_info.settings.lc_requirement,
-            [SageGulley, SageOren, SageSeres, SageOsfala, SageImpa, SageIrene, SageRosso],
-        )
+        self.has_amount(self.seed_info.settings.lc_requirement, [
+            SageGulley, SageOren, SageSeres, SageOsfala, SageImpa, SageIrene, SageRosso,
+        ])
     }
 
     pub fn has_yuganon_requirement(&self) -> bool {
         use Item::*;
-        self.has_amount(
-            self.seed_info.settings.yuganon_requirement,
-            [SageGulley, SageOren, SageSeres, SageOsfala, SageImpa, SageIrene, SageRosso],
-        )
+        self.has_amount(self.seed_info.settings.yuganon_requirement, [
+            SageGulley, SageOren, SageSeres, SageOsfala, SageImpa, SageIrene, SageRosso,
+        ])
     }
 
     pub fn has_saved_thief_girl(&self) -> bool {

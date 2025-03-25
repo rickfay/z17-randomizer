@@ -1,11 +1,15 @@
-use crate::filler::cracks::Crack;
-use crate::hints::{hint_color::HintColor::*, hint_ghost_name};
-use crate::patch::lms::msbf::MsbfKey;
-use crate::Result;
+use std::fmt::Debug;
+
+use serde::{Serialize, Serializer};
+
 use game::ghosts::HintGhost;
 use rom::flag::Flag;
-use serde::{Serialize, Serializer};
-use std::fmt::Debug;
+
+use crate::Result;
+use crate::filler::cracks::Crack;
+use crate::filler::doors::Door;
+use crate::hints::{hint_color::HintColor::*, hint_ghost_name};
+use crate::patch::lms::msbf::MsbfKey;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum Randomizable {
@@ -13,6 +17,7 @@ pub enum Randomizable {
     Goal(Goal),
     HintGhost(HintGhost),
     Vane(Vane),
+    Door(Door),
     Crack(Crack),
 }
 
@@ -25,8 +30,8 @@ impl Randomizable {
     }
 
     pub fn normalize(self) -> game::Item {
-        use game::Item::*;
         use Randomizable::*;
+        use game::Item::*;
         match self {
             Item(item) => match item.to_game_item() {
                 PackageSword | ItemSwordLv1 | ItemSwordLv3 | ItemSwordLv4 => ItemSwordLv2,
@@ -344,6 +349,7 @@ impl Randomizable {
             Self::Goal(goal) => goal.as_str(),
             Self::HintGhost(ghost) => hint_ghost_name(&ghost),
             Self::Vane(vane) => vane.as_str(),
+            Self::Door(door) => door.as_str(),
             Self::Crack(crack) => crack.as_str(),
         }
     }
@@ -830,6 +836,9 @@ pub enum Item {
     GoldBee03,
     Fairy02,
     Shield04,
+
+    EnergyPotion,
+    Heart,
 }
 
 impl Item {
@@ -860,6 +869,8 @@ impl Item {
             Pouch => game::Item::Pouch,
             BeeBadge => game::Item::BadgeBee,
             HintGlasses => game::Item::HintGlasses,
+            EnergyPotion => game::Item::GanbariTubo,
+            Heart => game::Item::Heart,
 
             HeartPiece01 | HeartPiece02 | HeartPiece03 | HeartPiece04 | HeartPiece05 | HeartPiece06 | HeartPiece07
             | HeartPiece08 | HeartPiece09 | HeartPiece10 | HeartPiece11 | HeartPiece12 | HeartPiece13
@@ -1020,6 +1031,10 @@ impl Item {
             HylianShield | SmoothGem | LetterInABottle | PremiumMilk | Pouch | BeeBadge | HintGlasses | GreatSpin => {
                 "the"
             },
+
+            EnergyPotion => "an",
+
+            Heart => "a",
 
             RupeeGreen | RupeeBlue | RupeeRed | RupeePurple01 | RupeePurple02 | RupeePurple03 | RupeePurple04
             | RupeePurple05 | RupeePurple06 | RupeePurple07 | RupeePurple08 | RupeePurple09 | RupeePurple10
@@ -1211,6 +1226,8 @@ impl Item {
             Net01 | Net02 => "Net+",
             Mail01 | Mail02 => "Mail+",
             OreYellow | OreGreen | OreBlue | OreRed => "Master Ore",
+            EnergyPotion => "Energy Potion",
+            Heart => "Heart",
             HyruleSanctuaryKey => "Hyrule Sewers Key",
             LoruleSanctuaryKey => "Lorule Sewers Key",
             EasternCompass => "Eastern Palace Compass",

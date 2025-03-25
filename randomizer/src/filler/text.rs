@@ -2,8 +2,8 @@
 
 use crate::Result;
 use crate::Text;
-use rand::prelude::StdRng;
 use rand::Rng;
+use rand::prelude::StdRng;
 
 /// Text generation
 pub(crate) fn generate(rng: &mut StdRng) -> Result<Text> {

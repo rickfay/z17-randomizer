@@ -4,6 +4,8 @@ crate::region! {
     color: Name,
     ruins {
         locations: [
+            "Dark Palace Entrance": None @Door(20[36] DarkPalaceEntrance),
+
             "Lorule Waterfall Crack": None @Crack(13[60] WaterfallLorule),
             "Dark Ruins Pillar Crack": None @Crack(22[26] DarkRuinsPillar),
             "Dark Ruins SE Crack": None @Crack(30[27] DarkRuinsSE),

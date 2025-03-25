@@ -1,4 +1,4 @@
-use crate::{hints::hint_color::HintColor, patch::Patcher, SeedInfo};
+use crate::{SeedInfo, hints::hint_color::HintColor, patch::Patcher};
 use log::info;
 use serde::Serialize;
 use std::{
@@ -273,6 +273,12 @@ macro_rules! patch {
     };
     (GoldRupee($scene:literal[$unq:literal])) => {
         Patch::GoldRupee { course: COURSE, scene: $scene - 1, unq: $unq }
+    };
+    (Door($course:ident $scene:literal[$unq:literal] $door:ident)) => {
+        Patch::Door { course: ::game::Course::$course, scene: $scene - 1, unq: $unq, door: $crate::Door::$door }
+    };
+    (Door($scene:literal[$unq:literal] $door:ident)) => {
+        Patch::Door { course: COURSE, scene: $scene - 1, unq: $unq, door: $crate::Door::$door }
     };
     (Crack($course:ident $scene:literal[$unq:literal] $crack:ident)) => {
         Patch::Crack { course: ::game::Course::$course, scene: $scene - 1, unq: $unq, crack: $crate::Crack::$crack }

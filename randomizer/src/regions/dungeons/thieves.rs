@@ -4,6 +4,8 @@ crate::region! {
     color: Beige,
     hideout {
         locations: [
+            "Thieves' Hideout Exit": None @Door(1[35] ThievesHideoutExit),
+
             "[TT] (B1) Jail Cell": RupeePurple @Chest(1[1323]),
             "[TT] (B1) Grate Chest": RupeePurple @Chest(1[576]),
             "[TT] (B2) Grate Chest (Fall)": RupeePurple @Chest(1[1292]),

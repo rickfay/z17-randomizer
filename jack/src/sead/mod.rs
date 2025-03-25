@@ -1,6 +1,6 @@
+use crate::IntoBytes;
 use crate::sead::sarc::Sarc;
 use crate::sead::yaz0::{Compressed, Yaz0File};
-use crate::IntoBytes;
 use std::io::Error;
 
 pub(crate) mod sarc;

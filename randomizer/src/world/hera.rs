@@ -1,27 +1,23 @@
+use crate::LocationInfo;
 use crate::filler::check::Check;
 use crate::filler::filler_item::Goal;
 use crate::filler::location::Location::{self, *};
 use crate::filler::location_node::LocationNode;
 use crate::filler::logic::Logic;
 use crate::filler::path::Path;
-use crate::regions;
-use crate::world::{check, edge, goal, location, old_check, old_path};
-use crate::LocationInfo;
+use crate::world::{check, door, edge, goal, location, old_check, old_path};
+use crate::{DoorMap, regions};
 
 use std::collections::HashMap;
 
-pub(crate) fn graph() -> HashMap<Location, LocationNode> {
+pub(crate) fn graph(door_map: &DoorMap) -> HashMap<Location, LocationNode> {
     HashMap::from([
         (
             TowerOfHeraFoyer,
-            location(
-                "Tower of Hera Entrance",
-                vec![],
-                vec![
-                    edge!(DeathMountainWestTop),
-                    old_path(TowerOfHeraBottom, Some(|p| p.has_hammer()), None, None, None, None),
-                ],
-            ),
+            location("Tower of Hera Entrance", vec![], vec![
+                door!(TowerOfHeraExit, door_map),
+                old_path(TowerOfHeraBottom, Some(|p| p.has_hammer()), None, None, None, None),
+            ]),
         ),
         (
             TowerOfHeraBottom,
@@ -105,11 +101,14 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
         ),
         (
             TowerOfHeraBoss,
-            location(
-                "Tower of Hera Boss",
-                vec![],
-                vec![old_path(TowerOfHeraPostBoss, Some(|p| p.can_defeat_moldorm()), None, None, None, None)],
-            ),
+            location("Tower of Hera Boss", vec![], vec![old_path(
+                TowerOfHeraPostBoss,
+                Some(|p| p.can_defeat_moldorm()),
+                None,
+                None,
+                None,
+                None,
+            )]),
         ),
         (
             TowerOfHeraPostBoss,

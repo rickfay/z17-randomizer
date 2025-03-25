@@ -1,5 +1,6 @@
 pub use crate::settings::cracks::Cracks;
 pub use crate::settings::cracksanity::Cracksanity;
+pub use crate::settings::door_shuffle::DoorShuffle;
 pub use crate::settings::keysy::Keysy;
 pub use crate::settings::logic::LogicMode;
 pub use crate::settings::nice_items::NiceItems;
@@ -15,6 +16,7 @@ use std::hash::Hash;
 
 pub mod cracks;
 pub mod cracksanity;
+pub mod door_shuffle;
 pub mod keysy;
 pub mod logic;
 pub mod nice_items;
@@ -76,6 +78,10 @@ pub struct Settings {
 
     /// Cracks Open/Closed Setting
     pub cracks: Cracks,
+
+    /// Shuffles door destinations amongst each other
+    #[serde(default)]
+    pub door_shuffle: DoorShuffle,
 
     /// Shuffles the crack destinations amongst each other
     #[serde(default)]
@@ -139,7 +145,7 @@ pub struct Settings {
     /// Alters treasure chest sizes depending on their contents: Large for Progression items, Small for everything else.
     pub chest_size_matches_contents: bool,
 
-    /// Excludes Cucco Ranch, both Rupee Rushes, Treacherous Tower, Octoball Derby, and Hyrule Hotfoot (both races)
+    /// Excludes Cucco Ranch, both Rupee Rushes, Octoball Derby, and Hyrule Hotfoot (both races)
     #[serde(default)]
     pub minigames_excluded: bool,
 
@@ -167,17 +173,14 @@ pub struct Settings {
 
 impl Settings {
     pub fn log_settings(&self) {
-        info!(
-            "Logic Mode:                     {}",
-            match self.logic_mode {
-                Normal => "Normal",
-                Hard => "Hard",
-                Glitched => "Glitched",
-                AdvGlitched => "Adv. Glitched",
-                Hell => "Hell - Did you really mean to choose this?",
-                NoLogic => "No Logic",
-            }
-        );
+        info!("Logic Mode:                     {}", match self.logic_mode {
+            Normal => "Normal",
+            Hard => "Hard",
+            Glitched => "Glitched",
+            AdvGlitched => "Adv. Glitched",
+            Hell => "Hell - Did you really mean to choose this?",
+            NoLogic => "No Logic",
+        });
         info!(
             "Dungeon Prizes:                 {}",
             if self.dungeon_prize_shuffle { "Randomized" } else { "Not Randomized" }

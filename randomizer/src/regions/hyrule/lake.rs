@@ -4,6 +4,8 @@ crate::region! {
     color: Name,
     hylia {
         locations: [
+            "House of Gales Entrance": None @Door(35[43] HouseOfGalesEntrance),
+
             "Lake Hylia Crack": None @Crack(35[76] LakeHylia),
             "Hyrule Hotfoot Crack": None @Crack(36[30] HyruleHotfoot),
 
@@ -13,8 +15,8 @@ crate::region! {
             "Lake Hylia Dark Cave": RupeePurple @Chest(CaveLight 11[8]),
             "Lake Hylia Eastern Shore": MessageBottle @Heart(36[38]),
             "Lake Hylia Ledge Chest": RupeeR @Chest(35[155]),
-            "Lakeside Item Shop (1)": EscapeFruit @None(),
-            "Lakeside Item Shop (2)": StopFruit @None(),
+            // "Lakeside Item Shop (1)": EscapeFruit @None(),
+            // "Lakeside Item Shop (2)": StopFruit @None(),
             "Lakeside Item Shop (3)": ItemShield @None(),
             "[Mai] Hyrule Hotfoot Rock": Maiamai @Maiamai(36[31]),
             "[Mai] Lake Hylia Island Tile": Maiamai @Maiamai(35[130]),
