@@ -32,7 +32,8 @@ pub(crate) fn get_item_pools(rng: &mut StdRng, SeedInfo { settings, .. }: &SeedI
     let small_keys = get_small_key_pool(settings);
     let compasses = get_compass_pool();
 
-    // At base, we need two extra items (for Blacksmith Table and Bouldering Guy)
+    // At base, we have 2 items slots with no matching vanilla item (Blacksmith Table and Bouldering Guy)
+    // but we also have Foul Fruit with no vanilla location, which brings our starting point to 1.
     let mut extra_items_needed = 1;
 
     progression_items.push(if settings.progressive_bow_of_light { Bow03 } else { BowOfLight });
@@ -98,7 +99,7 @@ pub(crate) fn get_item_pools(rng: &mut StdRng, SeedInfo { settings, .. }: &SeedI
         // Add Energy Potions to the pool if we need extra items
         Ordering::Greater => (0..extra_items_needed).for_each(|_| junk_pool.push(EnergyPotion)),
         // Remove a random junk item from the pool if we have too many items
-        Ordering::Less => (0..extra_items_needed).for_each(|_| {
+        Ordering::Less => (0..-extra_items_needed).for_each(|_| {
             junk_pool.pop();
         }),
         Ordering::Equal => {},
