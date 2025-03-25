@@ -5,9 +5,9 @@ use game::Course;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    files::{sarc::Sarc, FromFile},
-    flow::{Flow, FlowMut},
     Error, File, Result,
+    files::{FromFile, sarc::Sarc},
+    flow::{Flow, FlowMut},
 };
 
 #[derive(Debug, Deserialize, Serialize)]

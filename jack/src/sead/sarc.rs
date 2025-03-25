@@ -27,10 +27,10 @@ impl Sarc {
             fail!("File '{}' with matching Hash already exists in SZS Archive: '{}'", filename, self.path);
         }
 
-        self.files.insert(
-            self.calculate_hash(filename),
-            vec![SarcInnerFile { filename: if named { Some(filename.to_owned()) } else { None }, data }],
-        );
+        self.files.insert(self.calculate_hash(filename), vec![SarcInnerFile {
+            filename: if named { Some(filename.to_owned()) } else { None },
+            data,
+        }]);
     }
 
     /// Gets a file with the given `filename` from within this [`Sarc`] Archive. Panics if the file does not exist.

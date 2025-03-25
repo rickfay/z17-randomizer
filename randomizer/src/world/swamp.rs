@@ -1,15 +1,15 @@
+use crate::LocationInfo;
 use crate::filler::check::Check;
 use crate::filler::filler_item::Goal;
 use crate::filler::location::Location::{self, *};
 use crate::filler::location_node::LocationNode;
 use crate::filler::logic::Logic;
 use crate::filler::path::Path;
-use crate::regions;
-use crate::world::{check, edge, goal, location, old_check, old_path};
-use crate::LocationInfo;
+use crate::world::{check, door, edge, goal, location, old_check, old_path};
+use crate::{DoorMap, regions};
 use std::collections::HashMap;
 
-pub(crate) fn graph() -> HashMap<Location, LocationNode> {
+pub(crate) fn graph(door_map: &DoorMap) -> HashMap<Location, LocationNode> {
     HashMap::from([
         (
             SwampPalaceOutside,
@@ -24,42 +24,34 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
         ),
         (
             SwampPalaceAntechamber,
-            location(
-                "Swamp Palace Antechamber",
-                vec![],
-                vec![
-                    edge!(SwampPalaceOutside),
-                    edge!(SwampPalaceFoyer => {
-                        normal: |p| p.has_bomb_flower() && p.hearts(6.0),
-                        adv_glitched: |p| {
-                            p.not_nice_mode()
-                                && p.can_merge()
-                                && p.has_ice_rod()
-                                && p.has_flippers()
-                                && (p.has_sword() || p.has_tornado_rod() || p.has_net() || p.has_bombs())
-                                && p.hearts(6.0)
-                        },
-                    }),
-                ],
-            ),
+            location("Swamp Palace Antechamber", vec![], vec![
+                edge!(SwampPalaceOutside),
+                door!(SwampPalaceEntrance, door_map => {
+                    normal: |p| p.has_bomb_flower() && p.hearts(6.0),
+                    adv_glitched: |p| {
+                        p.not_nice_mode()
+                            && p.can_merge()
+                            && p.has_ice_rod()
+                            && p.has_flippers()
+                            && (p.has_sword() || p.has_tornado_rod() || p.has_net() || p.has_bombs())
+                            && p.hearts(6.0)
+                    },
+                }),
+            ]),
         ),
         (
             SwampPalaceFoyer,
-            location(
-                "Swamp Palace Foyer",
-                vec![],
-                vec![
-                    edge!(SwampPalaceAntechamber),
-                    old_path(
-                        SwampPalaceMain,
-                        Some(|p| p.has_flippers() && p.has_hookshot()),
-                        None,
-                        None, // what a cruel game
-                        None,
-                        None,
-                    ),
-                ],
-            ),
+            location("Swamp Palace Foyer", vec![], vec![
+                door!(SwampPalaceExit, door_map),
+                old_path(
+                    SwampPalaceMain,
+                    Some(|p| p.has_flippers() && p.has_hookshot()),
+                    None,
+                    None, // what a cruel game
+                    None,
+                    None,
+                ),
+            ]),
         ),
         (
             SwampPalaceMain,

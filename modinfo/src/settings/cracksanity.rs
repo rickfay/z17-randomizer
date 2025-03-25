@@ -34,16 +34,12 @@ impl TryFrom<u8> for Cracksanity {
 
 impl Display for Cracksanity {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "{}",
-            match self {
-                Self::Off => "Off",
-                Self::CrossWorldPairs => "Cross World Pairs",
-                Self::AnyWorldPairs => "Any World Pairs",
-                Self::MirroredCrossWorldPairs => "Mirrored Cross World Pairs",
-                Self::MirroredAnyWorldPairs => "Mirrored Any World Pairs",
-            }
-        )
+        write!(f, "{}", match self {
+            Self::Off => "Off",
+            Self::CrossWorldPairs => "Cross World Pairs",
+            Self::AnyWorldPairs => "Any World Pairs",
+            Self::MirroredCrossWorldPairs => "Mirrored Cross World Pairs",
+            Self::MirroredAnyWorldPairs => "Mirrored Any World Pairs",
+        })
     }
 }

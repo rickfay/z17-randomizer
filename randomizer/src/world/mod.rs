@@ -1,9 +1,9 @@
 use crate::regions::Subregion;
 use crate::{
+    CrackMap, DashMap, DoorMap, LocationInfo,
     filler::filler_item::Randomizable,
     filler::{check::Check, location::Location, location_node::LocationNode, logic::Logic, progress::Progress},
     hints::hint_ghost_name,
-    CrackMap, DashMap, LocationInfo,
 };
 use game::ghosts::HintGhost;
 use log::info;
@@ -51,29 +51,28 @@ impl DerefMut for WorldGraph {
 }
 
 /// Build the World Graph
-/// FIXME shouldn't take crack_map as argument, map should be independent of that randomization
-pub fn build_world_graph(crack_map: &CrackMap) -> WorldGraph {
+pub fn build_world_graph(door_map: &DoorMap, crack_map: &CrackMap) -> WorldGraph {
     info!("Building World Graph...");
     let mut world = WorldGraph::new();
 
-    world.extend(hyrule::graph(crack_map));
-    world.extend(lorule::graph(crack_map));
+    world.extend(hyrule::graph(door_map, crack_map));
+    world.extend(lorule::graph(door_map, crack_map));
 
-    world.extend(eastern::graph());
-    world.extend(gales::graph());
-    world.extend(hera::graph());
+    world.extend(eastern::graph(door_map));
+    world.extend(gales::graph(door_map));
+    world.extend(hera::graph(door_map));
 
-    world.extend(hyrule_castle::graph(crack_map));
+    world.extend(hyrule_castle::graph(door_map, crack_map));
 
-    world.extend(dark::graph());
-    world.extend(swamp::graph());
-    world.extend(skull::graph());
-    world.extend(thieves::graph());
-    world.extend(ice::graph());
-    world.extend(desert::graph(crack_map));
-    world.extend(turtle::graph());
+    world.extend(dark::graph(door_map));
+    world.extend(swamp::graph(door_map));
+    world.extend(skull::graph(door_map));
+    world.extend(thieves::graph(door_map));
+    world.extend(ice::graph(door_map));
+    world.extend(desert::graph(door_map, crack_map));
+    world.extend(turtle::graph(door_map));
 
-    world.extend(lorule_castle::graph(crack_map));
+    world.extend(lorule_castle::graph(door_map, crack_map));
 
     world
 }
@@ -181,9 +180,36 @@ macro_rules! edge {
     );
 }
 
+macro_rules! door {
+    ($door:ident, $door_map:expr) => (
+        Path::new($door_map.get(&crate::doors::Door::$door).unwrap().get_location(), Logic::free())
+    );
+    ($door:ident, $door_map:expr, $normal:expr) => (
+        Path::new($door_map.get(&crate::doors::Door::$door).unwrap().get_location(), *Logic::new()
+            .normal($normal))
+    );
+    ($door:ident, $door_map:expr => {
+        $(normal: $normal:expr,)?
+        $(hard: $hard:expr,)?
+        $(glitched: $glitched:expr,)?
+        $(adv_glitched: $adv_glitched:expr,)?
+        $(hell: $hell:expr,)?
+    }) => (
+        Path::new($door_map.get(&crate::doors::Door::$door).unwrap().get_location(),
+            *Logic::new()
+            $(.normal($normal))?
+            $(.hard($hard))?
+            $(.glitched($glitched))?
+            $(.adv_glitched($adv_glitched))?
+            $(.hell($hell))?
+        )
+    );
+}
+
 use crate::filler::cracks::Crack;
 use crate::filler::path::Path;
 pub(crate) use check;
+pub(crate) use door;
 pub(crate) use edge;
 pub(crate) use goal;
 
@@ -245,11 +271,11 @@ fn crack_right(crack: Crack, crack_map: &CrackMap, is_hc: bool) -> Path {
 }
 
 fn fast_travel_hyrule() -> Path {
-    edge!(HyruleBellTravel, |p| p.has_bell() && p.are_hyrule_vanes_active())
+    edge!(HyruleBellTravel, |p| p.has_bell())
 }
 
 fn fast_travel_lorule() -> Path {
-    edge!(LoruleBellTravel, |p| p.has_bell() && p.are_lorule_vanes_active())
+    edge!(LoruleBellTravel, |p| p.has_bell())
 }
 
 /// Hint Ghost checks

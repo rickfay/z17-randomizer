@@ -1,14 +1,14 @@
+use crate::Result;
 use crate::filler::filler_item::Randomizable;
 use crate::filler::item_pools;
 use crate::filler::location::Location;
-use crate::Result;
-use crate::{filler, CrackMap, DashMap};
+use crate::{CrackMap, DashMap, filler};
 use game::Course::{CaveDark, FieldDark, FieldLight, IndoorDark, IndoorLight};
 use log::info;
-use modinfo::settings::cracksanity::Cracksanity;
 use modinfo::Settings;
-use rand::rngs::StdRng;
+use modinfo::settings::cracksanity::Cracksanity;
 use rand::Rng;
+use rand::rngs::StdRng;
 use rom::flag::Flag;
 use rom::scene::SpawnPoint;
 use serde::{Serialize, Serializer};

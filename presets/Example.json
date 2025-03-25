@@ -1,7 +1,7 @@
 {
   // "Visit the project GitHub for details about each option: https://github.com/rickfay/z17-randomizer/tree/dev#game-options"
   "seed": 0,
-  "version": "v0.4.0",
+  "version": "v0.4.1 - Beta Build 2025-03-25",
   "settings": {
 
 
@@ -9,6 +9,7 @@
     "lc_requirement":              7,                         // Sage Portraits needed to enter Lorule Castle's front door.
     "ped_requirement":             "Standard",                // MS Pedestal Pendant requirement: (2) "Vanilla", (3) "Standard"
     "dungeon_prize_shuffle":       true,                      // This shuffles all Sage Portraits and Pendants among themselves.
+    "door_shuffle":                "DungeonEntrances",
     "cracks":                      "Closed",                  // "Closed", "Open"
     "cracksanity":                 "Off",                     // "Off", "CrossWorldPairs", "AnyWorldPairs", "MirroredCrossWorldPairs", "MirroredAnyWorldPairs"
     "keysy":                       "Off",                     // "Off", "SmallKeysy", "BigKeysy", "AllKeysy"
@@ -21,7 +22,7 @@
     "super_items":                 true,                      // This shuffles a second progressive copy of the Lamp and Net into the general item pool.
 
     "bow_of_light_in_castle":      false,                     // Limits the Bow of Light's placement to somewhere in Lorule Castle (including possibly Zelda).
-    "minigames_excluded":          false,                     // Excludes the following: Octoball Derby, Dodge the Cuccos, Hyrule Hotfoot, Treacherous Tower, and both Rupee Rushes
+    "minigames_excluded":          false,                     // Excludes the following: Octoball Derby, Dodge the Cuccos, Hyrule Hotfoot, and both Rupee Rushes
     "no_progression_enemies":      false,                     // Removes Enemies from dungeons that are themselves Progression (e.g.: Bawbs, the bomb enemy)
     "purple_potion_bottles":       true,                      // Fills all Empty Bottles with a free Purple Potion.
     "skip_big_bomb_flower":        true,                      // Skips the Big Bomb Flower by removing the 5 Big Rocks in Lorule Field.

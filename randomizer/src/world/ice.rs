@@ -1,24 +1,23 @@
+use crate::LocationInfo;
 use crate::filler::check::Check;
 use crate::filler::filler_item::Goal;
 use crate::filler::location::Location::{self, *};
 use crate::filler::location_node::LocationNode;
 use crate::filler::logic::Logic;
 use crate::filler::path::Path;
-use crate::regions;
-use crate::world::{check, edge, goal, location};
-use crate::LocationInfo;
+use crate::world::{check, door, edge, goal, location};
+use crate::{DoorMap, regions};
 
 use std::collections::HashMap;
 
-pub(crate) fn graph() -> HashMap<Location, LocationNode> {
+pub(crate) fn graph(door_map: &DoorMap) -> HashMap<Location, LocationNode> {
     HashMap::from([
         (
             IceRuinsFoyer,
-            location(
-                "Ice Ruins Entrance",
-                vec![],
-                vec![edge!(LoruleDeathEastTop), edge!(IceRuins, |p| p.has_fire_rod())],
-            ),
+            location("Ice Ruins Entrance", vec![], vec![
+                door!(IceRuinsExit, door_map),
+                edge!(IceRuins, |p| p.has_fire_rod()),
+            ]),
         ),
         // Require Fire Rod
         (
@@ -40,7 +39,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                         adv_glitched: |p| p.has_boots() && p.has_tornado_rod(),
                     }),
                     check!("[IR] (B1) Upper Chest", regions::dungeons::ice::ruins::SUBREGION => {
-                        normal: |p| p.has_ice_keys(2),
+                        normal: |p| p.can_merge() && p.has_ice_keys(2),
                         adv_glitched: |p| p.has_boots() && p.has_tornado_rod(),
                     }),
                     check!("[IR] (B2) Long Merge Chest", regions::dungeons::ice::ruins::SUBREGION => {
@@ -77,7 +76,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                         adv_glitched: |p| p.has_boots(),
                     }),
                     check!("[IR] (B4) Southeast Chest (Fall)", regions::dungeons::ice::ruins::SUBREGION => {
-                        normal: |p| p.has_ice_keys(3) || (p.has_ice_keys(2) && p.can_hit_switch()) && p.can_merge(),
+                        normal: |p| (p.has_ice_keys(3) || (p.has_ice_keys(2) && p.can_hit_switch())) && p.can_merge(),
                         adv_glitched: |p| p.has_boots(),
                     }),
                 ],

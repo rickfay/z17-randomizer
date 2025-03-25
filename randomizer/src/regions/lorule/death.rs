@@ -4,6 +4,8 @@ crate::region! {
     color: Name,
     mountain {
         locations: [
+            "Ice Ruins Entrance": None @Door(5[14] IceRuinsEntrance),
+
             "Lorule Death West Crack": None @Crack(3[45] DeathWestLorule),
             "Lorule Floating Island Crack": None @Crack(4[70] FloatingIslandLorule),
             "Lorule Rosso's Ore Mine Crack": None @Crack(4[29] RossosOreMineLorule),

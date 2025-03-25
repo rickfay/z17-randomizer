@@ -4,8 +4,8 @@ pub mod scene_env;
 mod ser;
 
 pub use {
-    de::{from_bytes, from_bytes_mut, Deserializer},
-    ser::{to_writer, Serializer},
+    de::{Deserializer, from_bytes, from_bytes_mut},
+    ser::{Serializer, to_writer},
 };
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, serde_repr::Deserialize_repr, serde_repr::Serialize_repr)]

@@ -1,9 +1,9 @@
+use crate::VaneMap;
 use crate::filler::item_pools;
 use crate::filler::util::pair_randomly;
-use crate::VaneMap;
 use log::info;
-use modinfo::settings::weather_vanes::WeatherVanes;
 use modinfo::Settings;
+use modinfo::settings::weather_vanes::WeatherVanes;
 use rand::rngs::StdRng;
 
 /// Build the Weather Vane Map

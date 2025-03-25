@@ -3,9 +3,10 @@ use crate::filler::filler_item::Item::{
     SageRosso, SageSeres,
 };
 use crate::{
-    hints::{formatting::*, Hint},
+    DashMap, Patcher, Result, SeedInfo,
+    hints::{Hint, formatting::*},
     patch::messages::{hint_ghosts::HintGhost, msbt::load_msbt},
-    regions, DashMap, Patcher, Result, SeedInfo,
+    regions,
 };
 use game::Course::{self, *};
 use log::info;
@@ -134,6 +135,7 @@ fn patch_event_item_get(patcher: &mut Patcher) -> Result<()> {
 
     msbt.set("kandelaar", "You got the lamp!");
     msbt.set("zelda_amulet", &format!("You got a special charm!\nIt's {}!", attention("useless"))); // Cut " from Princess Zelda"
+    msbt.set("heart", "You got a heart!");
 
     patcher.update(msbt.dump())?;
 
@@ -221,7 +223,8 @@ fn dungeon_article(dungeon_name: &str) -> String {
     match dungeon_name {
         "Skull Woods" | "Turtle Rock" => "",
         _ => " the",
-    }.to_string()
+    }
+    .to_string()
 }
 
 /// Impa in Hyrule Castle dialogue

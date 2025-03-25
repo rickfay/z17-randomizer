@@ -4,6 +4,8 @@ crate::region! {
     color: Beige,
     palace {
         locations: [
+            "Swamp Palace Exit": None @Door(1[5] SwampPalaceExit),
+
             "[SP] (B1) Center": Compass @Chest(2[319]),
             "[SP] (B1) Raft Room (Left)": RupeeR @Chest(2[620]),
             "[SP] (B1) Raft Room (Right)": LiverPurple @Chest(2[621]),

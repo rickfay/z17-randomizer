@@ -4,6 +4,8 @@ crate::region! {
     color: Name,
     palace {
         locations: [
+            "Desert Palace Exit": None @Door(1[38] DesertPalaceExit),
+
             "[DP] (1F) Entrance": RupeeB @Chest(1[78]),
 
             "[DP] (1F) Sand Room (South)": LiverBlue @Chest(1[565]),

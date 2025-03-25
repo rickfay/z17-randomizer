@@ -2,7 +2,7 @@ pub use courses::Course;
 pub use items::Item;
 use std::error::Error as StdError;
 
-mod courses;
+pub mod courses;
 pub mod ghosts;
 mod items;
 

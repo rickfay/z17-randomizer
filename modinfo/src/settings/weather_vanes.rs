@@ -36,17 +36,13 @@ impl TryFrom<u8> for WeatherVanes {
 
 impl Display for WeatherVanes {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "{}",
-            match self {
-                WeatherVanes::Standard => "Standard",
-                WeatherVanes::Shuffled => "Shuffled",
-                WeatherVanes::Convenient => "Convenient",
-                WeatherVanes::Hyrule => "Hyrule",
-                WeatherVanes::Lorule => "Lorule",
-                WeatherVanes::All => "All",
-            }
-        )
+        write!(f, "{}", match self {
+            WeatherVanes::Standard => "Standard",
+            WeatherVanes::Shuffled => "Shuffled",
+            WeatherVanes::Convenient => "Convenient",
+            WeatherVanes::Hyrule => "Hyrule",
+            WeatherVanes::Lorule => "Lorule",
+            WeatherVanes::All => "All",
+        })
     }
 }

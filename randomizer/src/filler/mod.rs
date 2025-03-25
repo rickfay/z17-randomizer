@@ -1,22 +1,23 @@
 use crate::filler::check::Check;
 use crate::filler::filler_item::Randomizable::{Crack, Vane};
 use crate::filler::filler_item::{Item, Randomizable};
-use crate::filler::item_pools::{get_maiamai_pool, Pool};
+use crate::filler::item_pools::{Pool, get_maiamai_pool};
 use crate::filler::location::Location;
 use crate::filler::progress::Progress;
-use crate::{world::WorldGraph, CheckMap, DashMap, SeedInfo};
+use crate::{CheckMap, DashMap, SeedInfo, world::WorldGraph};
 use log::{debug, error, info};
 use macros::fail;
 use modinfo::settings::logic::LogicMode;
 use modinfo::settings::nice_items::NiceItems;
 use path::Path;
 use queue::Queue;
-use rand::{rngs::StdRng, Rng};
+use rand::{Rng, rngs::StdRng};
 use rom::Error;
 use std::collections::HashSet;
 
 pub mod check;
 pub mod cracks;
+pub mod doors;
 pub mod filler_item;
 pub mod item_pools;
 mod loading_zone_pair;
@@ -182,13 +183,13 @@ fn preplace_items(
     place_static(check_map, progression, Item::HeartPiece28, "Fortune's Choice");
 
     // Kakariko Item Shop
-    place_static(check_map, progression, Item::ScootFruit01, "Kakariko Item Shop (1)");
-    place_static(check_map, progression, Item::FoulFruit01, "Kakariko Item Shop (2)");
+    //place_static(check_map, progression, Item::ScootFruit01, "Kakariko Item Shop (1)");
+    //place_static(check_map, progression, Item::FoulFruit01, "Kakariko Item Shop (2)");
     place_static(check_map, progression, Item::Shield01, "Kakariko Item Shop (3)");
 
     // Lakeside Item Shop
-    place_static(check_map, progression, Item::ScootFruit02, "Lakeside Item Shop (1)");
-    place_static(check_map, progression, Item::FoulFruit02, "Lakeside Item Shop (2)");
+    //place_static(check_map, progression, Item::ScootFruit02, "Lakeside Item Shop (1)");
+    //place_static(check_map, progression, Item::FoulFruit02, "Lakeside Item Shop (2)");
     place_static(check_map, progression, Item::Shield02, "Lakeside Item Shop (3)");
 
     // Mysterious Man
@@ -319,6 +320,9 @@ fn insert_items_into_random_locations(
 /// Handle Exclusions
 fn handle_exclusions(rng: &mut StdRng, seed_info: &mut SeedInfo, check_map: &mut CheckMap, junk: &mut Vec<Item>) {
     seed_info.full_exclusions = seed_info.settings.user_exclusions.clone();
+
+    // Always exclude Stylish Woman's Repeat item
+    seed_info.full_exclusions.insert("Stylish Woman (Repeat)".to_string());
 
     // Always exclude 100 Maiamai check unless the Maiamai Limit is explicitly set to 100
     if seed_info.settings.maiamai_limit < 100 {
@@ -679,7 +683,8 @@ fn verify_all_locations_accessible(
     const STANDARD_CHECKS: usize = 264;
     const MAIAMAI: usize = 100;
     const DUNGEON_PRIZES: usize = 10;
-    const STATIC_ITEMS: usize = 20;
+    const RANDOMIZED_JUNK: usize = 1;
+    const STATIC_ITEMS: usize = 16;
     const PROGRESSION_EVENTS: usize = 36; // "Progression Events" (non-item checks that are still progression)
     const WEATHER_VANES: usize = 22;
     const HINT_GHOSTS_OW: usize = 58; // Hint Ghosts (Overworld)
@@ -688,7 +693,8 @@ fn verify_all_locations_accessible(
     const IN_LOGIC_CHECKS: usize = STANDARD_CHECKS + MAIAMAI + DUNGEON_PRIZES + STATIC_ITEMS;
 
     /// Total count of expected, reachable checks
-    const EXPECTED_REACHABLE: usize = IN_LOGIC_CHECKS + PROGRESSION_EVENTS + WEATHER_VANES + HINT_GHOSTS_OW;
+    const EXPECTED_REACHABLE: usize =
+        IN_LOGIC_CHECKS + PROGRESSION_EVENTS + WEATHER_VANES + HINT_GHOSTS_OW + RANDOMIZED_JUNK;
 
     if reachable_checks.len() != EXPECTED_REACHABLE {
         // let reachable_check_names: Vec<&str> = reachable_checks.iter().map(|c| c.get_name()).collect();

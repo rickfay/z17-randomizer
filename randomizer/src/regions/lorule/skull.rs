@@ -4,6 +4,8 @@ crate::region! {
     color: Name,
     overworld {
         locations: [
+            "Skull Woods Entrance": None @Door(1[31] SkullWoodsEntrance),
+
             "Skull Woods Pillar Crack": None @Crack(1[366] SkullWoodsPillar),
             "n-Shaped House Crack": None @Crack(16[92] NShapedHouse),
             "Destroyed House Crack": None @Crack(2[135] DestroyedHouse),

@@ -4,6 +4,8 @@ crate::region! {
     color: Attention,
     ruins {
         locations: [
+            "Ice Ruins Exit": None @Door(1[21] IceRuinsExit),
+
             "[IR] (1F) Hidden Chest": RupeeGold @Chest(1[1048]),
             "[IR] (B2) Ice Pillar": KeySmall @Key(1[1057]),
             "[IR] (B3) Grate Chest (Left)": RupeeG @Chest(1[840]),

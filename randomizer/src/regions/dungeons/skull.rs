@@ -4,6 +4,8 @@ crate::region! {
     color: Blue,
     woods {
         locations: [
+            "Skull Woods Exit": None @Door(1[55] SkullWoodsExit),
+
             "[SW] (B1) Gibdo Room (Lower)": Compass @Chest(1[100]),
             "[SW] (B1) South Chest": KeySmall @Chest(1[101]),
             "[SW] (B1) Gibdo Room (Hole)": RupeeSilver @Chest(1[640]),

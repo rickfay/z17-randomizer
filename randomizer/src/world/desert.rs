@@ -4,15 +4,17 @@ use crate::filler::location::Location::{self, *};
 use crate::filler::location_node::LocationNode;
 use crate::filler::logic::Logic;
 use crate::filler::path::Path;
-use crate::world::{check, crack_left, crack_right, edge, fast_travel_hyrule, fast_travel_lorule, goal, location};
-use crate::LocationInfo;
-use crate::{regions, CrackMap};
+use crate::world::{
+    check, crack_left, crack_right, door, edge, fast_travel_hyrule, fast_travel_lorule, goal, location,
+};
+use crate::{CrackMap, regions};
+use crate::{DoorMap, LocationInfo};
 
 use crate::filler::cracks::Crack::{DesertPalace, Zaganaga};
 use std::collections::HashMap;
 
 /// Desert Palace World Graph
-pub(crate) fn graph(crack_map: &CrackMap) -> HashMap<Location, LocationNode> {
+pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Location, LocationNode> {
     HashMap::from([
         (
             DesertPalaceFoyer,
@@ -23,7 +25,7 @@ pub(crate) fn graph(crack_map: &CrackMap) -> HashMap<Location, LocationNode> {
                     hell: |p| p.has_sand_rod() && p.has_tornado_rod(),
                 })],
                 vec![
-                    edge!(DesertPalaceWeatherVane),
+                    door!(DesertPalaceExit, door_map),
                     edge!(DesertPalace1F => {
                         normal: |p| p.has_sand_rod() && p.can_merge() && p.can_attack(),
                         hell: |p| p.has_sand_rod() && p.has_tornado_rod() && p.can_attack(),
@@ -76,35 +78,27 @@ pub(crate) fn graph(crack_map: &CrackMap) -> HashMap<Location, LocationNode> {
         ),
         (
             DesertPalaceMidwayLedge,
-            location(
-                "Desert Palace Midway Ledge",
-                None,
-                vec![
-                    fast_travel_hyrule(),
-                    edge!(DesertPalaceWeatherVane),
-                    edge!(DesertPalace1F, |p| p.hearts(9.0)),
-                    edge!(DesertPalace2FMiniboss, |p| p.hearts(9.0)),
-                ],
-            ),
+            location("Desert Palace Midway Ledge", None, vec![
+                fast_travel_hyrule(),
+                edge!(DesertPalaceWeatherVane),
+                edge!(DesertPalace1F, |p| p.hearts(9.0)),
+                edge!(DesertPalace2FMiniboss, |p| p.hearts(9.0)),
+            ]),
         ),
         (
             DesertPalace2FMiniboss,
-            location(
-                "Desert Palace 2F Miniboss",
-                None,
-                vec![
-                    edge!(
-                        DesertPalaceMidwayLedge => {
-                            glitched: |_| true,
-                        }
-                    ),
-                    edge!(DesertPalace1F, |p| p.can_attack()),
-                    edge!(DesertPalace2F => {
-                        normal: |p| p.can_attack() && p.has_sand_rod() && p.can_merge(),
-                        glitched: |p| p.can_attack() && p.has_sand_rod() && p.has_boots(),
-                    }),
-                ],
-            ),
+            location("Desert Palace 2F Miniboss", None, vec![
+                edge!(
+                    DesertPalaceMidwayLedge => {
+                        glitched: |_| true,
+                    }
+                ),
+                edge!(DesertPalace1F, |p| p.can_attack()),
+                edge!(DesertPalace2F => {
+                    normal: |p| p.can_attack() && p.has_sand_rod() && p.can_merge(),
+                    glitched: |p| p.can_attack() && p.has_sand_rod() && p.has_boots(),
+                }),
+            ]),
         ),
         (
             DesertPalace2F,
@@ -172,41 +166,32 @@ pub(crate) fn graph(crack_map: &CrackMap) -> HashMap<Location, LocationNode> {
         ),
         (
             DesertPalaceExit3F,
-            location(
-                "Desert Palace Exit 3F",
-                None,
-                vec![edge!(DesertPalace3F, |p| p.has_sand_rod()), edge!(DesertZaganagaLedge)],
-            ),
+            location("Desert Palace Exit 3F", None, vec![
+                edge!(DesertPalace3F, |p| p.has_sand_rod()),
+                edge!(DesertZaganagaLedge),
+            ]),
         ),
         (
             DesertZaganagaLedge,
-            location(
-                "Desert Zaganaga Ledge",
-                None,
-                vec![
-                    fast_travel_hyrule(),
-                    edge!(DesertPalaceExit3F, |p| p.hearts(9.0)),
-                    crack_left(DesertPalace, crack_map, false),
-                    crack_right(DesertPalace, crack_map, false),
-                ],
-            ),
+            location("Desert Zaganaga Ledge", None, vec![
+                fast_travel_hyrule(),
+                edge!(DesertPalaceExit3F, |p| p.hearts(9.0)),
+                crack_left(DesertPalace, crack_map, false),
+                crack_right(DesertPalace, crack_map, false),
+            ]),
         ),
         (
             ZaganagasArena,
-            location(
-                "Zaganaga's Arena",
-                None,
-                vec![
-                    fast_travel_lorule(),
-                    crack_left(Zaganaga, crack_map, false),
-                    crack_right(Zaganaga, crack_map, false),
-                    edge!(MiseryMireRewardBasket => {
-                        normal: |p| p.has_sand_rod() && p.hearts(9.0) && (p.has_master_sword() || (p.swordless_mode() && p.can_attack())),
-                        hard: |p| p.has_sand_rod() && p.can_attack(),
-                        hell: |p| p.has_bow() || p.has_master_sword(),
-                    }),
-                ],
-            ),
+            location("Zaganaga's Arena", None, vec![
+                fast_travel_lorule(),
+                crack_left(Zaganaga, crack_map, false),
+                crack_right(Zaganaga, crack_map, false),
+                edge!(MiseryMireRewardBasket => {
+                    normal: |p| p.has_sand_rod() && p.hearts(9.0) && (p.has_master_sword() || (p.swordless_mode() && p.can_attack())),
+                    hard: |p| p.has_sand_rod() && p.can_attack(),
+                    hell: |p| p.has_bow() || p.has_master_sword(),
+                }),
+            ]),
         ),
         (
             MiseryMireRewardBasket,

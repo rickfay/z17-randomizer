@@ -1,8 +1,8 @@
 use {
-    proc_macro2::TokenStream,
     proc_macro_error::proc_macro_error,
+    proc_macro2::TokenStream,
     quote::quote,
-    syn::{parse_macro_input, Type, TypeGroup, TypeReference},
+    syn::{Type, TypeGroup, TypeReference, parse_macro_input},
 };
 
 #[proc_macro]

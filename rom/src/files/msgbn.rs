@@ -1,5 +1,5 @@
 use {
-    crate::{files::align, Error, Result},
+    crate::{Error, Result, files::align},
     bytey::*,
     std::{mem::MaybeUninit, ops::Range},
 };

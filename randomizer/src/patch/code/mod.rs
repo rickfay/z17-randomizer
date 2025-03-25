@@ -1120,7 +1120,7 @@ const ACTOR_NAME_OFFSETS: [(Item, u32); 32] = [
     (HeartPiece, 0x5D7B94),
 ];
 
-const ACTOR_NAMES: [(Item, &str); 45] = [
+const ACTOR_NAMES: [(Item, &str); 46] = [
     (KeyBoss, "KeyBoss"),
     (TriforceCourage, "BadgeBee"),
     (Compass, "Compass"),
@@ -1135,12 +1135,13 @@ const ACTOR_NAMES: [(Item, &str); 45] = [
     (ItemInsectNetLv2, "GtEvNet"),
     (BadgeBee, "BadgeBee"),
     (ClothesBlue, "GtEvCloth"),
-    (Heart, "Heart"),
+    (Item::Heart, "Heart"),
     (HyruleShield, "GtEvShieldB"),
     (Item::OreYellow, "OreSword"),
     (Item::OreGreen, "OreSword"),
     (Item::OreBlue, "OreSword"),
     (GanbariPowerUp, "PowerUp"),
+    (GanbariTubo, "MagicBottle"),
     (DashBoots, "GtEvBoots"),
     (Item::OreRed, "OreSword"),
     (ItemIceRodLv2, "GtEvRodIceB"),
@@ -1193,7 +1194,7 @@ const ITEM_NAME_OFFSETS: [(Item, u32); 20] = [
     (RupeeGold, 0x6f9be2),       // item_name_sandrod_rental
 ];
 
-const ITEM_NAMES: [(Item, &str); 57] = [
+const ITEM_NAMES: [(Item, &str); 58] = [
     (BadgeBee, "beebadge"),
     (Compass, "compass"),
     (ItemBell, "bell"),
@@ -1204,6 +1205,7 @@ const ITEM_NAMES: [(Item, &str); 57] = [
     (EscapeFruit, "doron"),
     (StopFruit, "durian"),
     (GanbariPowerUp, "ganbari_power_up"),
+    (GanbariTubo, "ganbaritubo"),
     (HeartContainer, "heartcontioner"),
     (HeartPiece, "heartpiece"),
     (Item::HintGlasses, "hintglass"),
@@ -1229,7 +1231,7 @@ const ITEM_NAMES: [(Item, &str); 57] = [
     (Item::OreBlue, "ore"),
     (Item::OreRed, "ore"),
     (DashBoots, "pegasus"),
-    (Heart, "potshop_heart"),
+    (Item::Heart, "potshop_heart"),
     (PendantCourage, "courage"),
     (PendantPower, "power"),
     (PendantWisdom, "wisdom"),

@@ -7,21 +7,21 @@ use crate::filler::{find_reachable_checks, get_items_from_reachable_checks};
 use crate::hints::formatting::name;
 use crate::patch::util::is_sage;
 use crate::{CheckMap, DashSet, SeedInfo};
+use Item::*;
 use game::ghosts::HintGhost;
 use log::{debug, info};
 use macros::fail;
-use modinfo::settings::cracksanity::Cracksanity;
 use modinfo::settings::NiceItems;
+use modinfo::settings::cracksanity::Cracksanity;
 use rand::seq::IteratorRandom;
 use rand::seq::SliceRandom;
-use rand::{rngs::StdRng, Rng};
+use rand::{Rng, rngs::StdRng};
 use rom::Error;
 use serde::{
-    ser::{SerializeSeq, SerializeStruct},
     Serialize, Serializer,
+    ser::{SerializeSeq, SerializeStruct},
 };
 use strum::IntoEnumIterator;
-use Item::*;
 
 pub mod formatting;
 pub mod hint_color;
@@ -500,7 +500,7 @@ fn generate_sometimes_hints(
         "[DP] (2F) Under Rock (Ball Room)", "[DP] (2F) Under Rock (Left)", "[DP] (2F) Under Rock (Right)",
         "[EP] (1F) Escape Chest", "[HG] (3F) Fire Bubbles", "[HG] (2F) Fire Ring", "[IR] (B2) Long Merge Chest",
         "[IR] (B4) Southeast Chest (Fall)", "[LC] Tile Trial (2)", "[LC] Bomb Trial (2)", "[LC] Hook Trial (2)",
-        "[LC] Lamp Trial", "[PD] (2F) Big Chest (Hidden)", "[PD] (B1) Bomb Bowling", "[SP] (B1) Big Chest (Secret)",
+        "[LC] Lamp Trial", "[PD] (2F) Big Chest (Hidden)", "[PD] (B1) Bomb Bowling", "[SP] (1F) Water Puzzle",
         "[SW] (B1) Big Chest (Eyes)", "[SW] (B1) South Chest", "[TT] (B2) Eyegores", "[TT] (B3) Big Chest (Hidden)",
         "[TH] (8F) Fairy Room", "[TR] (B1) Big Chest (Center)", "[TR] (1F) Defeat Flamolas",
     ];
@@ -689,13 +689,13 @@ fn get_potential_path_hints(
 
     // Always start with all hearts and rupees to prevent "weird" hints where items can be considered path for them in
     // in a way that confuses players and is rarely helpful.
-    let nothing_but_hearts_and_rupees = Progress::nothing_but_hearts_and_rupees(seed_info);
+    let compasses_hearts_and_rupees = Progress::compasses_hearts_and_rupees(seed_info);
 
     // Test candidate items to see if Boss can be defeated without them
     for check in potential_path_checks {
         // Reset Progression.
         // Cloning is more efficient than constructing here because that constructor is fat. (and ugly)
-        let mut progress = nothing_but_hearts_and_rupees.clone();
+        let mut progress = compasses_hearts_and_rupees.clone();
 
         loop {
             reachable_checks = find_reachable_checks(seed_info, &progress);

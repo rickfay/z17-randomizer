@@ -1,4 +1,4 @@
-use log::{error, info, LevelFilter};
+use log::{LevelFilter, error, info};
 use macros::fail;
 use modinfo::settings::Keysy;
 use modinfo::settings::RaviosShop;
@@ -12,10 +12,10 @@ use randomizer::filler::filler_item::Randomizable;
 use randomizer::filler::filler_item::Vane::*;
 use randomizer::filler::{filler_item, item_pools};
 use randomizer::{
+    CrackMap, Layout, SeedHash, SeedInfo, VaneMap,
     constants::VERSION,
     regions,
     system::{System, UserConfig},
-    CrackMap, Layout, SeedHash, SeedInfo, VaneMap,
 };
 use simplelog::SimpleLogger;
 use std::collections::BTreeSet;
@@ -334,8 +334,8 @@ fn build_layout() -> Layout {
     layout.set_item("Bee Guy (1)", regions::hyrule::kakariko::village::SUBREGION, Net01);
     layout.set_item("Bee Guy (2)", regions::hyrule::kakariko::village::SUBREGION, BeeBadge);
     layout.set_item("Dodge the Cuccos", regions::hyrule::kakariko::village::SUBREGION, heart_pieces.pop().unwrap());
-    layout.set_item("Kakariko Item Shop (1)", regions::hyrule::kakariko::village::SUBREGION, ScootFruit01);
-    layout.set_item("Kakariko Item Shop (2)", regions::hyrule::kakariko::village::SUBREGION, FoulFruit01);
+    // layout.set_item("Kakariko Item Shop (1)", regions::hyrule::kakariko::village::SUBREGION, ScootFruit01);
+    // layout.set_item("Kakariko Item Shop (2)", regions::hyrule::kakariko::village::SUBREGION, FoulFruit01);
     layout.set_item("Kakariko Item Shop (3)", regions::hyrule::kakariko::village::SUBREGION, Shield01);
     layout.set_item("Kakariko Jail", regions::hyrule::kakariko::village::SUBREGION, silver_rupees.pop().unwrap());
     layout.set_item("Kakariko Well (Bottom)", regions::hyrule::kakariko::village::SUBREGION, Empty);
@@ -411,8 +411,8 @@ fn build_layout() -> Layout {
     layout.set_item("Ice Rod Cave", regions::hyrule::lake::hylia::SUBREGION, Empty);
     layout.set_item("Lake Hylia Dark Cave", regions::hyrule::lake::hylia::SUBREGION, Empty);
     layout.set_item("Lake Hylia Ledge Chest", regions::hyrule::lake::hylia::SUBREGION, Empty);
-    layout.set_item("Lakeside Item Shop (1)", regions::hyrule::lake::hylia::SUBREGION, Empty);
-    layout.set_item("Lakeside Item Shop (2)", regions::hyrule::lake::hylia::SUBREGION, Empty);
+    // layout.set_item("Lakeside Item Shop (1)", regions::hyrule::lake::hylia::SUBREGION, Empty);
+    // layout.set_item("Lakeside Item Shop (2)", regions::hyrule::lake::hylia::SUBREGION, Empty);
     layout.set_item("Lakeside Item Shop (3)", regions::hyrule::lake::hylia::SUBREGION, Empty);
     layout.set_item("Lake Hylia Eastern Shore", regions::hyrule::lake::hylia::SUBREGION, Empty);
 
