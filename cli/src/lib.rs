@@ -25,10 +25,8 @@ pub fn get_seed_settings() -> Result<Settings, String> {
 
     let logic_mode = prompt_logic_mode();
 
-    let dungeon_prize_shuffle = prompt_bool(
-        "Randomize Dungeon Prizes",
-        "This shuffles all Sage Portraits, Pendants, and the Charm among themselves.",
-    );
+    let dungeon_prize_shuffle =
+        prompt_bool("Randomize Dungeon Prizes", "This shuffles all Sage Portraits and Pendants amongst themselves.");
 
     let maiamai_limit =
         prompt_u8_in_range("Maiamai Limit", "Choose the maximum number of Maiamai you're willing to collect:", 0, 100)

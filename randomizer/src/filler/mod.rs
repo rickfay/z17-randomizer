@@ -39,7 +39,8 @@ pub mod vanes;
 pub fn fill_all_locations_reachable(
     rng: &mut StdRng, seed_info: &mut SeedInfo, check_map: &mut CheckMap,
 ) -> crate::Result<()> {
-    let (mut progression_pool, mut junk_pool) = item_pools::get_item_pools(rng, seed_info);
+    let (mut progression_pool, mut junk_pool, removed_from_play) = item_pools::get_item_pools(rng, seed_info);
+    seed_info.removed_from_play = removed_from_play;
 
     place_cracks(seed_info, check_map);
     place_weather_vanes(seed_info, check_map);

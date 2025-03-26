@@ -8,7 +8,7 @@
     "logic_mode":                  "Normal",                  // "Normal", "Hard", "Glitched", "AdvGlitched", "Hell", "NoLogic"
     "lc_requirement":              7,                         // Sage Portraits needed to enter Lorule Castle's front door.
     "ped_requirement":             "Standard",                // MS Pedestal Pendant requirement: (2) "Vanilla", (3) "Standard"
-    "dungeon_prize_shuffle":       true,                      // This shuffles all Sage Portraits and Pendants among themselves.
+    "dungeon_prize_shuffle":       true,                      // This shuffles all Sage Portraits and Pendants amongst themselves.
     "door_shuffle":                "DungeonEntrances",
     "cracks":                      "Closed",                  // "Closed", "Open"
     "cracksanity":                 "Off",                     // "Off", "CrossWorldPairs", "AnyWorldPairs", "MirroredCrossWorldPairs", "MirroredAnyWorldPairs"
