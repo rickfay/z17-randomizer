@@ -483,12 +483,12 @@ fn patch_dark(patcher: &mut Patcher, seed_info: &SeedInfo, prize: Randomizable) 
     //                 Obj::step_switch(Flag::Course(21), 4, 400, 400,
     //                                  Vec3 { x: 0.0, y: 0.0, z: -44.75 }));
 
+    let sp = get_dungeon_prize_spawn(DarkPalaceExit, &seed_info.door_map);
+    modify_dungeon_reward(patcher, prize, 262, DungeonDark, 1, false, sp);
+
     if prize == Item(SageGulley) {
         return;
     }
-
-    let sp = get_dungeon_prize_spawn(DarkPalaceExit, &seed_info.door_map);
-    modify_dungeon_reward(patcher, prize, 262, DungeonDark, 1, false, sp);
 
     if is_pendant(prize) {
         // Don't take camera control away from player to watch Mask break and reveal... nothing...
@@ -552,30 +552,18 @@ fn patch_dark(patcher: &mut Patcher, seed_info: &SeedInfo, prize: Randomizable) 
 
 /// Swamp Palace
 fn patch_swamp(patcher: &mut Patcher, seed_info: &SeedInfo, prize: Randomizable) {
-    if prize == Item(SageOren) {
-        return;
-    }
-
     let sp = get_dungeon_prize_spawn(SwampPalaceExit, &seed_info.door_map);
     modify_dungeon_reward(patcher, prize, 13, DungeonWater, 3, true, sp);
 }
 
 /// Skull Woods
 fn patch_skull(patcher: &mut Patcher, seed_info: &SeedInfo, prize: Randomizable) {
-    if prize == Item(SageSeres) {
-        return;
-    }
-
     let sp = get_dungeon_prize_spawn(SkullWoodsExit, &seed_info.door_map);
     modify_dungeon_reward(patcher, prize, 273, FieldDark, 1, true, sp);
 }
 
 /// Thieves' Hideout
 fn patch_thieves(patcher: &mut Patcher, prize: Randomizable) {
-    if prize == Item(SageOsfala) {
-        return;
-    }
-
     // Always put the player outside the Portrait House, even in Door Shuffle
     modify_dungeon_reward(patcher, prize, 3, IndoorDark, 15, true, SpawnPoint::new(FieldDark, 16, 14));
 }
@@ -591,16 +579,17 @@ fn patch_turtle(patcher: &mut Patcher, seed_info: &SeedInfo, prize: Randomizable
     //                 Obj::step_switch(Flag::Course(130), 0, 32, 100,
     //                                  Vec3 { x: 0.0, y: 5.0, z: -39.0 }));
 
+    const UNQ_PRIZE: u16 = 56;
+
+    let sp = get_dungeon_prize_spawn(TurtleRockExit, &seed_info.door_map);
+    modify_dungeon_reward(patcher, prize, UNQ_PRIZE, DungeonKame, 3, false, sp);
+
     if prize == Item(SageImpa) {
         return;
     }
 
-    const UNQ_PRIZE: u16 = 56;
     const DY: f32 = -2.0;
     const DZ: f32 = 0.5;
-
-    let sp = get_dungeon_prize_spawn(TurtleRockExit, &seed_info.door_map);
-    modify_dungeon_reward(patcher, prize, UNQ_PRIZE, DungeonKame, 3, false, sp);
 
     if is_pendant(prize) {
         // Pendants don't ride on the pillar, so manually move them and remove the pillar
@@ -650,12 +639,8 @@ fn patch_desert(patcher: &mut Patcher, seed_info: &SeedInfo, prize: Randomizable
     //                 Obj::step_switch(Flag::Course(252), 0, 58, 137,
     //                                  Vec3 { x: -19.0, y: 0.0, z: -19.0 }));
 
-    if prize == Item(SageIrene) {
-        return;
-    }
-
-    // When DoorShuffle is enabled have the DP prize and blue warp send the player to outside the
-    // dungeon's entrance, but otherwise keep the vanilla behavior of sending them to the Mire WV.
+    // When DoorShuffle is enabled have the DP prize send the player to outside the dungeon's
+    // entrance, but otherwise keep the vanilla behavior of sending them to the Mire WV.
     let sp = if seed_info.settings.door_shuffle != DoorShuffle::Off {
         get_dungeon_prize_spawn(DesertPalaceExit, &seed_info.door_map)
     } else {
@@ -663,6 +648,10 @@ fn patch_desert(patcher: &mut Patcher, seed_info: &SeedInfo, prize: Randomizable
     };
 
     modify_dungeon_reward(patcher, prize, 76, FieldDark, 31, true, sp);
+
+    if prize == Item(SageIrene) {
+        return;
+    }
 
     let prize_flag = prize_flag(prize);
     patcher.modify_objs(FieldDark, 31, [
@@ -680,12 +669,22 @@ fn patch_ice(patcher: &mut Patcher, seed_info: &SeedInfo, prize: Randomizable) {
     //     }),
     // ]);
 
-    if prize == Item(SageRosso) {
-        return;
-    }
-
     let sp = get_dungeon_prize_spawn(IceRuinsExit, &seed_info.door_map);
     modify_dungeon_reward(patcher, prize, 16, DungeonIce, 1, true, sp);
+
+    // Remove old trigger in dungeon
+    patcher.modify_objs(DungeonIce, 1, [disable(942)]);
+
+    // Add trigger overlapping loading zone to set Flag 610 to clear the entrance blocker
+    patcher.add_obj(
+        FieldDark,
+        5,
+        Obj::trigger_cube(Flag::Event(610), 0, 18, 34, Transform {
+            scale: Vec3 { x: 2.0, y: 2.0, z: 2.0 },
+            rotate: Vec3::ZERO,
+            translate: Vec3 { x: 0.5, y: 9.5, z: -3.5 },
+        }),
+    );
 }
 
 fn get_dungeon_prize_spawn(exit: Door, door_map: &DoorMap) -> SpawnPoint {

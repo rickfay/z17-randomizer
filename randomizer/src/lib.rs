@@ -323,6 +323,9 @@ pub struct SeedInfo {
     pub full_exclusions: BTreeSet<String>,
 
     #[serde(skip_deserializing)]
+    pub removed_from_play: Vec<Randomizable>,
+
+    #[serde(skip_deserializing)]
     pub treacherous_tower_floors: Vec<TowerStage>,
 
     #[serde(skip_deserializing)]
@@ -367,6 +370,7 @@ impl Default for SeedInfo {
             hash: Default::default(),
             settings: Default::default(),
             full_exclusions: Default::default(),
+            removed_from_play: Default::default(),
             door_map: Default::default(),
             crack_map: Default::default(),
             vane_map: Default::default(),
@@ -532,6 +536,7 @@ fn calculate_seed_info(seed: u32, settings: Settings, hash: SeedHash, rng: &mut 
         hash,
         settings,
         full_exclusions: Default::default(),
+        removed_from_play: Default::default(),
         vane_map,
         crack_map,
         door_map,

@@ -1,10 +1,10 @@
 use crate::SeedInfo;
 use crate::filler::cracks::Crack;
 use crate::filler::doors::Door;
-use crate::filler::filler_item::Item;
 use crate::filler::filler_item::Item::*;
 use crate::filler::filler_item::Vane;
 use crate::filler::filler_item::Vane::*;
+use crate::filler::filler_item::{Item, Randomizable};
 use crate::filler::util::shuffle;
 use modinfo::Settings;
 use modinfo::settings::cracks::Cracks;
@@ -24,7 +24,9 @@ pub type Pool = Vec<Item>;
  * The total number of items returned between both pools should match the total number of locations
  * in the world graph, including locations that statically set their contents.
  */
-pub(crate) fn get_item_pools(rng: &mut StdRng, SeedInfo { settings, .. }: &SeedInfo) -> (Pool, Pool) {
+pub(crate) fn get_item_pools(
+    rng: &mut StdRng, SeedInfo { settings, .. }: &SeedInfo,
+) -> (Pool, Pool, Vec<Randomizable>) {
     let mut progression_items = get_base_progression_pool();
     let minor_progression = get_minor_progression_pool();
     let dungeon_prizes = get_dungeon_prize_pool();
@@ -95,13 +97,15 @@ pub(crate) fn get_item_pools(rng: &mut StdRng, SeedInfo { settings, .. }: &SeedI
     let junk_pool = get_base_junk_pool();
     let mut junk_pool = shuffle(rng, junk_pool);
 
+    let mut removed_from_play = vec![];
+
     match extra_items_needed.cmp(&0) {
         // Add Energy Potions to the pool if we need extra items
         Ordering::Greater => (0..extra_items_needed).for_each(|_| junk_pool.push(EnergyPotion)),
         // Remove a random junk item from the pool if we have too many items
-        Ordering::Less => (0..-extra_items_needed).for_each(|_| {
-            junk_pool.pop();
-        }),
+        Ordering::Less => {
+            (0..-extra_items_needed).for_each(|_| removed_from_play.push(junk_pool.pop().unwrap().into()))
+        },
         Ordering::Equal => {},
     }
 
@@ -112,6 +116,7 @@ pub(crate) fn get_item_pools(rng: &mut StdRng, SeedInfo { settings, .. }: &SeedI
             dungeon_prizes, big_keys, small_keys, compasses, progression_items, minor_progression,
         ]),
         junk_pool,
+        removed_from_play,
     )
 }
 
