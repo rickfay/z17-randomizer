@@ -1,5 +1,5 @@
-use modinfo::settings::trials_door::TrialsDoor;
 use modinfo::Settings;
+use modinfo::settings::trials_door::TrialsDoor;
 use rand::rngs::StdRng;
 use rand::seq::SliceRandom;
 use serde::Serialize;

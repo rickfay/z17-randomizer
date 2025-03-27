@@ -37,13 +37,9 @@ impl TryFrom<String> for Cracks {
 
 impl Display for Cracks {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "{}",
-            match self {
-                Self::Closed => "Closed",
-                Self::Open => "Open",
-            }
-        )
+        write!(f, "{}", match self {
+            Self::Closed => "Closed",
+            Self::Open => "Open",
+        })
     }
 }

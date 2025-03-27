@@ -1,24 +1,24 @@
+use std::collections::HashMap;
+
+use crate::LocationInfo;
 use crate::filler::check::Check;
 use crate::filler::filler_item::Goal;
 use crate::filler::location::Location::{self, *};
 use crate::filler::location_node::LocationNode;
 use crate::filler::logic::Logic;
 use crate::filler::path::Path;
-use crate::regions;
-use crate::world::{check, edge, goal, location};
-use crate::LocationInfo;
-use std::collections::HashMap;
+use crate::world::{check, door, edge, goal, location};
+use crate::{DoorMap, regions};
 
 /// House of Gales World Graph
-pub(crate) fn graph() -> HashMap<Location, LocationNode> {
+pub(crate) fn graph(door_map: &DoorMap) -> HashMap<Location, LocationNode> {
     HashMap::from([
         (
             HouseOfGalesFoyer,
-            location(
-                "House of Gales Entrance",
-                None,
-                vec![edge!(HouseOfGalesIsland), edge!(HouseOfGalesEast1F, |p| p.has_tornado_rod())],
-            ),
+            location("House of Gales Entrance", None, vec![
+                door!(HouseOfGalesExit, door_map),
+                edge!(HouseOfGalesEast1F, |p| p.has_tornado_rod()),
+            ]),
         ),
         (
             HouseOfGalesEast1F,

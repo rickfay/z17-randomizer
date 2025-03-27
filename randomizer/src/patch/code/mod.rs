@@ -1,18 +1,18 @@
 use super::Patcher;
 use crate::filler::filler_item::Item::*;
 use crate::filler::filler_item::Randomizable;
+use crate::patch::code::arm::Register::*;
 use crate::patch::code::arm::data::{add, cmp, mov};
 use crate::patch::code::arm::ls::{ldr, ldrb, str_, strb};
 use crate::patch::code::arm::lsm::{pop, push};
-use crate::patch::code::arm::Register::*;
-use crate::patch::code::arm::{b, bl, Instruction, LR, PC, SP};
-use crate::{patch::util::prize_flag, regions, Layout, Result, SeedInfo};
+use crate::patch::code::arm::{Instruction, LR, PC, SP, b, bl};
+use crate::{Layout, Result, SeedInfo, patch::util::prize_flag, regions};
 use game::Item;
 use game::Item::*;
-use modinfo::settings::{pedestal::PedestalSetting::*, Settings};
+use modinfo::settings::{Settings, pedestal::PedestalSetting::*};
+use rom::ExHeader;
 use rom::flag::Flag;
 use rom::scene::SpawnPoint;
-use rom::ExHeader;
 use std::collections::HashMap;
 
 mod arm;
@@ -172,6 +172,8 @@ pub fn create(patcher: &Patcher, seed_info: &SeedInfo) -> Code {
     // instant text
     code.overwrite(0x17A430, [0xFF]);
 
+    remove_charm_from_gear_menu(&mut code);
+    fix_joystick_rotation(&mut code);
     rental_items(&mut code);
     progressive_items(&mut code);
     bracelet(&mut code, &seed_info.settings);
@@ -342,6 +344,27 @@ fn do_dev_stuff(code: &mut Code, seed_info: &SeedInfo) {
     let amount = 25;
     code.patch(0x2559bc, [add(R1, R1, amount)]);
     code.patch(0x2559c0, [add(R2, R2, amount)]);
+}
+
+/// The game will show a green orb on the gear menu whether you have the Charm or the full Pendant
+/// of Courage. This gets confusing for players who don't understand that the Charm is a junk item
+/// that does nothing. This code prevents the green orb from appearing with the Charm, and will
+/// make it only appear when the player has the actual Pendant of Courage.
+fn remove_charm_from_gear_menu(code: &mut Code) {
+    code.text().patch(0x42644c, [b(0x4264a8).ne()]);
+}
+
+/// For what are certainly reasons, Nintendo decided to rotate all of Link's movements ever so
+/// slightly (about 5 degrees) counterclockwise in the vanilla game. This isn't often complained
+/// about by people who play on physical 3DS hardware because reasons, but is very jarring to folks
+/// who play on Emulators, and makes navigating the Ice Cave much more difficult than intended.
+///
+/// This code sets the rotation angle for each direction to zero, eliminating the issue.
+fn fix_joystick_rotation(code: &mut Code) {
+    code.overwrite(0x6c3ae8, [0x0; 8]); // Fix Down
+    code.overwrite(0x6c3ef0, [0x0; 8]); // Fix Right
+    code.overwrite(0x6c42e8, [0x0; 8]); // Fix Up
+    code.overwrite(0x6c46f0, [0x0; 8]); // Fix Left
 }
 
 /// File Select Screen Background
@@ -1056,7 +1079,7 @@ fn item_names(code: &mut Code) -> HashMap<Item, u32> {
     map
 }
 
-const ACTOR_NAME_OFFSETS: [(Item, u32); 33] = [
+const ACTOR_NAME_OFFSETS: [(Item, u32); 32] = [
     (ItemStoneBeauty, 0x5D2060),
     (RupeeR, 0x5D639C),
     (RupeeG, 0x5D639C),
@@ -1085,14 +1108,13 @@ const ACTOR_NAME_OFFSETS: [(Item, u32); 33] = [
     (LiverYellow, 0x5D7640),
     (LiverBlue, 0x5D7654),
     (MessageBottle, 0x5D76A0),
-    (MilkMatured, 0x5D76A0),
     (Item::Pouch, 0x5D7734),
     (ItemBowLight, 0x5D776C),
     (HeartContainer, 0x5D7B7C),
     (HeartPiece, 0x5D7B94),
 ];
 
-const ACTOR_NAMES: [(Item, &str); 44] = [
+const ACTOR_NAMES: [(Item, &str); 46] = [
     (KeyBoss, "KeyBoss"),
     (TriforceCourage, "BadgeBee"),
     (Compass, "Compass"),
@@ -1107,12 +1129,13 @@ const ACTOR_NAMES: [(Item, &str); 44] = [
     (ItemInsectNetLv2, "GtEvNet"),
     (BadgeBee, "BadgeBee"),
     (ClothesBlue, "GtEvCloth"),
-    (Heart, "Heart"),
+    (Item::Heart, "Heart"),
     (HyruleShield, "GtEvShieldB"),
     (Item::OreYellow, "OreSword"),
     (Item::OreGreen, "OreSword"),
     (Item::OreBlue, "OreSword"),
     (GanbariPowerUp, "PowerUp"),
+    (GanbariTubo, "MagicBottle"),
     (DashBoots, "GtEvBoots"),
     (Item::OreRed, "OreSword"),
     (ItemIceRodLv2, "GtEvRodIceB"),
@@ -1125,6 +1148,7 @@ const ACTOR_NAMES: [(Item, &str); 44] = [
     (ItemHammerLv2, "GtEvHammerB"),
     (ItemBowLv2, "GtEvBowB"),
     (Milk, "GtEvBottleMedicine"),
+    (MilkMatured, "GtEvBottleMedicine"),
     (Kinsta, "KinSta"),
     (PendantPower, "Pendant"),
     (PendantWisdom, "Pendant"),
@@ -1164,7 +1188,7 @@ const ITEM_NAME_OFFSETS: [(Item, u32); 20] = [
     (RupeeGold, 0x6f9be2),       // item_name_sandrod_rental
 ];
 
-const ITEM_NAMES: [(Item, &str); 57] = [
+const ITEM_NAMES: [(Item, &str); 58] = [
     (BadgeBee, "beebadge"),
     (Compass, "compass"),
     (ItemBell, "bell"),
@@ -1175,6 +1199,7 @@ const ITEM_NAMES: [(Item, &str); 57] = [
     (EscapeFruit, "doron"),
     (StopFruit, "durian"),
     (GanbariPowerUp, "ganbari_power_up"),
+    (GanbariTubo, "ganbaritubo"),
     (HeartContainer, "heartcontioner"),
     (HeartPiece, "heartpiece"),
     (Item::HintGlasses, "hintglass"),
@@ -1200,7 +1225,7 @@ const ITEM_NAMES: [(Item, &str); 57] = [
     (Item::OreBlue, "ore"),
     (Item::OreRed, "ore"),
     (DashBoots, "pegasus"),
-    (Heart, "potshop_heart"),
+    (Item::Heart, "potshop_heart"),
     (PendantCourage, "courage"),
     (PendantPower, "power"),
     (PendantWisdom, "wisdom"),

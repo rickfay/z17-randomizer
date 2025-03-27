@@ -4,6 +4,8 @@ crate::region! {
     color: Green,
     palace {
         locations: [
+            "Dark Palace Exit": None @Door(2[151] DarkPalaceExit),
+
             "[PD] (1F) Right Pit": RupeeB @Chest(2[23]),
             "[PD] (1F) Left Pit": KeySmall @Key(2[25]),
             "[PD] (1F) Switch Puzzle": Compass @Chest(2[122]),

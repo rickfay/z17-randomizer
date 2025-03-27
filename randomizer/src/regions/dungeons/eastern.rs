@@ -4,6 +4,8 @@ crate::region! {
     color: Green,
     palace {
         locations: [
+            "Eastern Palace Exit": None @Door(1[31] EasternPalaceExit),
+
             "[EP] (1F) Merge Chest": RupeeSilver @Chest(1[244]),
             "[EP] (1F) Left Door Chest": RupeeR @Chest(1[132]),
             "[EP] (1F) Popo Room": Compass @Chest(1[61]),

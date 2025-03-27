@@ -1,5 +1,5 @@
 use {
-    super::{align, File, FromFile, IntoBytes},
+    super::{File, FromFile, IntoBytes, align},
     crate::{Error, Result},
     bytey::*,
     log::debug,

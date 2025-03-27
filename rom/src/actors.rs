@@ -1,4 +1,4 @@
-use crate::{files::sarc::Sarc, File, Result};
+use crate::{File, Result, files::sarc::Sarc};
 
 #[derive(Debug)]
 pub struct Actors {
@@ -46,11 +46,7 @@ impl Actors {
     }
 
     pub fn dump(self) -> Option<Box<[u8]>> {
-        if self.dirty {
-            Some(self.archive.map(Sarc::compress).dump())
-        } else {
-            None
-        }
+        if self.dirty { Some(self.archive.map(Sarc::compress).dump()) } else { None }
     }
 }
 

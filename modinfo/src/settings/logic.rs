@@ -14,18 +14,14 @@ pub enum LogicMode {
 
 impl Display for LogicMode {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "{}",
-            match self {
-                Self::Normal => "Normal",
-                Self::Hard => "Hard",
-                Self::Glitched => "Glitched",
-                Self::AdvGlitched => "Advanced Glitched",
-                Self::Hell => "Hell",
-                Self::NoLogic => "No Logic",
-            }
-        )
+        write!(f, "{}", match self {
+            Self::Normal => "Normal",
+            Self::Hard => "Hard",
+            Self::Glitched => "Glitched",
+            Self::AdvGlitched => "Advanced Glitched",
+            Self::Hell => "Hell",
+            Self::NoLogic => "No Logic",
+        })
     }
 }
 

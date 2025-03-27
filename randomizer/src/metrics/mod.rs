@@ -1,8 +1,9 @@
 use crate::filler::check::Check;
 use crate::filler::cracks::Crack;
+use crate::filler::doors::Door;
 use crate::filler::filler_item::{Goal, Item, Randomizable, Vane};
 use crate::filler::progress::Progress;
-use crate::{filler, CheckMap, SeedInfo};
+use crate::{CheckMap, SeedInfo, filler};
 use game::ghosts::HintGhost;
 use log::info;
 use rom::Error;
@@ -31,6 +32,9 @@ pub struct Sphere {
     goals: BTreeMap<String, Goal>,
 
     #[serde(skip_serializing_if = "BTreeMap::is_empty")]
+    doors: BTreeMap<String, Door>,
+
+    #[serde(skip_serializing_if = "BTreeMap::is_empty")]
     cracks: BTreeMap<String, Crack>,
 
     #[serde(skip_serializing_if = "BTreeMap::is_empty")]
@@ -43,6 +47,7 @@ impl Sphere {
             items: Default::default(),
             ghosts: Default::default(),
             goals: Default::default(),
+            doors: Default::default(),
             cracks: Default::default(),
             weather_vanes: Default::default(),
         }
@@ -61,6 +66,9 @@ impl Sphere {
             },
             Randomizable::Vane(vane) => {
                 self.weather_vanes.insert(String::from(check_name), vane);
+            },
+            Randomizable::Door(door) => {
+                self.doors.insert(String::from(check_name), door);
             },
             Randomizable::Crack(crack) => {
                 self.cracks.insert(String::from(check_name), crack);
@@ -81,7 +89,7 @@ impl Sphere {
 fn sphere_search(seed_info: &mut SeedInfo, check_map: &mut CheckMap) -> BTreeMap<String, Sphere> {
     info!("Generating Playthrough...");
 
-    let mut progress = Progress::new(seed_info);
+    let mut progress = Progress::compasses_hearts_and_rupees(seed_info);
     let mut reachable_checks: Vec<Check>;
     let mut spheres = BTreeMap::new();
     let mut sphere_num = 0;

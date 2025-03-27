@@ -1,6 +1,6 @@
-use crate::patch::Patcher;
 use crate::Result;
 use crate::SeedInfo;
+use crate::patch::Patcher;
 use game::Course::{FieldLight, IndoorDark};
 use modinfo::Settings;
 

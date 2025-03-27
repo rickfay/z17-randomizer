@@ -1,5 +1,5 @@
 use {
-    crate::{byaml, files::sarc::Sarc, File},
+    crate::{File, byaml, files::sarc::Sarc},
     serde::{Deserialize, Serialize},
 };
 

@@ -1,15 +1,18 @@
+use crate::SeedInfo;
 use crate::filler::cracks::Crack;
-use crate::filler::filler_item::Item;
+use crate::filler::doors::Door;
 use crate::filler::filler_item::Item::*;
 use crate::filler::filler_item::Vane;
+use crate::filler::filler_item::Vane::*;
+use crate::filler::filler_item::{Item, Randomizable};
 use crate::filler::util::shuffle;
-use crate::SeedInfo;
+use modinfo::Settings;
 use modinfo::settings::cracks::Cracks;
 use modinfo::settings::keysy::Keysy;
 use modinfo::settings::logic::LogicMode;
 use modinfo::settings::nice_items::NiceItems;
-use modinfo::Settings;
-use rand::{rngs::StdRng, Rng};
+use modinfo::settings::{Cracksanity, DoorShuffle};
+use rand::{Rng, rngs::StdRng};
 use std::cmp::Ordering;
 use std::iter::repeat;
 
@@ -21,7 +24,9 @@ pub type Pool = Vec<Item>;
  * The total number of items returned between both pools should match the total number of locations
  * in the world graph, including locations that statically set their contents.
  */
-pub(crate) fn get_item_pools(rng: &mut StdRng, SeedInfo { settings, .. }: &SeedInfo) -> (Pool, Pool) {
+pub(crate) fn get_item_pools(
+    rng: &mut StdRng, SeedInfo { settings, .. }: &SeedInfo,
+) -> (Pool, Pool, Vec<Randomizable>) {
     let mut progression_items = get_base_progression_pool();
     let minor_progression = get_minor_progression_pool();
     let dungeon_prizes = get_dungeon_prize_pool();
@@ -29,7 +34,9 @@ pub(crate) fn get_item_pools(rng: &mut StdRng, SeedInfo { settings, .. }: &SeedI
     let small_keys = get_small_key_pool(settings);
     let compasses = get_compass_pool();
 
-    let mut delta_junk_items = 0;
+    // At base, we have 2 items slots with no matching vanilla item (Blacksmith Table and Bouldering Guy)
+    // but we also have Foul Fruit with no vanilla location, which brings our starting point to 1.
+    let mut extra_items_needed = 1;
 
     progression_items.push(if settings.progressive_bow_of_light { Bow03 } else { BowOfLight });
 
@@ -38,7 +45,7 @@ pub(crate) fn get_item_pools(rng: &mut StdRng, SeedInfo { settings, .. }: &SeedI
 
     // Cracks
     if settings.cracks == Cracks::Closed {
-        delta_junk_items -= 1;
+        extra_items_needed -= 1;
         progression_items.push(Quake);
     }
 
@@ -47,19 +54,19 @@ pub(crate) fn get_item_pools(rng: &mut StdRng, SeedInfo { settings, .. }: &SeedI
         NiceItems::Vanilla | NiceItems::Shuffled => progression_items.extend_from_slice(&[
             Bow02, Boomerang02, Hookshot02, Hammer02, Bombs02, FireRod02, IceRod02, TornadoRod02, SandRod02,
         ]),
-        NiceItems::Off => delta_junk_items += 9,
+        NiceItems::Off => extra_items_needed += 9,
     }
 
     // Replaces two pieces of junk with an extra Lamp and Net
     if settings.super_items {
-        delta_junk_items -= 2;
+        extra_items_needed -= 2;
         progression_items.push(Lamp02);
         progression_items.push(Net02);
     }
 
     // Ravio's Bracelets
     if settings.start_with_merge {
-        delta_junk_items += 2;
+        extra_items_needed += 2;
     } else {
         progression_items.push(RaviosBracelet01);
         progression_items.push(RaviosBracelet02);
@@ -67,43 +74,49 @@ pub(crate) fn get_item_pools(rng: &mut StdRng, SeedInfo { settings, .. }: &SeedI
 
     // Pouch
     if settings.start_with_pouch {
-        delta_junk_items += 1;
+        extra_items_needed += 1;
     } else {
         progression_items.push(Pouch);
     }
 
     // Remove the Bee Badge from Hell Logic to keep Bee Boosting viable
     if settings.logic_mode == LogicMode::Hell {
-        delta_junk_items += 1;
+        extra_items_needed += 1;
     } else {
         progression_items.push(BeeBadge);
     };
 
     // Swordless Mode
     if settings.swordless_mode {
-        delta_junk_items += 4;
+        extra_items_needed += 4;
     } else {
         progression_items.extend_from_slice(&[Sword01, Sword02, Sword03, Sword04]);
     }
 
     // Junk Pool. Add or remove elements from the junk pool based on chosen settings.
-    let junk_pool = get_base_junk_pool(rng);
+    let junk_pool = get_base_junk_pool();
     let mut junk_pool = shuffle(rng, junk_pool);
 
-    match delta_junk_items.cmp(&0) {
-        Ordering::Greater => (0..delta_junk_items).for_each(|_| add_random_junk_item(rng, &mut junk_pool)),
-        Ordering::Less => (0..-delta_junk_items).for_each(|_| {
-            junk_pool.pop();
-        }),
+    let mut removed_from_play = vec![];
+
+    match extra_items_needed.cmp(&0) {
+        // Add Energy Potions to the pool if we need extra items
+        Ordering::Greater => (0..extra_items_needed).for_each(|_| junk_pool.push(EnergyPotion)),
+        // Remove a random junk item from the pool if we have too many items
+        Ordering::Less => {
+            (0..-extra_items_needed).for_each(|_| removed_from_play.push(junk_pool.pop().unwrap().into()))
+        },
         Ordering::Equal => {},
     }
 
+    junk_pool.extend(get_preserved_junk_pool());
+
     (
-        shuffle_order_progression_pools(
-            rng,
-            vec![dungeon_prizes, big_keys, small_keys, compasses, progression_items, minor_progression],
-        ),
+        shuffle_order_progression_pools(rng, vec![
+            dungeon_prizes, big_keys, small_keys, compasses, progression_items, minor_progression,
+        ]),
         junk_pool,
+        removed_from_play,
     )
 }
 
@@ -132,7 +145,10 @@ fn get_base_progression_pool() -> Vec<Item> {
         GreatSpin, Lamp01, Bow01, Boomerang01, Hookshot01, Hammer01, Bombs01, FireRod01, IceRod01, TornadoRod01,
         SandRod01, Net01, HintGlasses, Bottle01, Bottle02, Bottle03, Bottle04, Bell, StaminaScroll, PegasusBoots,
         Flippers, HylianShield, SmoothGem, Glove01, Glove02, Mail01, Mail02, OreYellow, OreGreen, OreBlue, OreRed,
-        ScootFruit01, ScootFruit02, FoulFruit01, FoulFruit02, Shield01, Shield02, Shield03, Shield04, GoldBee01, Charm,
+        // ScootFruit01,
+        // ScootFruit02,
+        FoulFruit01, // FoulFruit02,
+        Shield01, Shield02, Shield03, Shield04, GoldBee01, Charm,
     ];
 
     progression_pool
@@ -147,13 +163,13 @@ pub(crate) fn get_minor_progression_pool() -> Vec<Item> {
     minor_progression_pool.extend(get_gold_rupee_pool());
     minor_progression_pool.extend(get_silver_rupee_pool());
     minor_progression_pool.extend(get_purple_rupee_pool());
-    minor_progression_pool.extend(get_greg_pool());
 
     minor_progression_pool
 }
 
-fn get_greg_pool() -> Vec<Item> {
-    vec![RupeeGreen, RupeeGreen]
+/// Junk items we want to preserve, and not allow to be removed when the pool is too large
+fn get_preserved_junk_pool() -> Vec<Item> {
+    vec![RupeeGreen, RupeeGreen, Heart]
 }
 
 fn get_dungeon_prize_pool() -> Vec<Item> {
@@ -234,7 +250,7 @@ fn get_small_key_pool(settings: &Settings) -> Vec<Item> {
     }
 }
 
-fn get_compass_pool() -> Vec<Item> {
+pub fn get_compass_pool() -> Vec<Item> {
     vec![
         EasternCompass, GalesCompass, HeraCompass, DarkCompass, SwampCompass, SkullCompass, ThievesCompass,
         TurtleCompass, DesertCompass, IceCompass, LoruleCastleCompass,
@@ -289,13 +305,13 @@ pub fn get_heart_containers() -> Vec<Item> {
 }
 
 /// Junk Pool
-fn get_base_junk_pool(rng: &mut StdRng) -> Vec<Item> {
+fn get_base_junk_pool() -> Vec<Item> {
     const BLUES: usize = 8;
     const REDS: usize = 20;
     const TAILS: usize = 4;
     const HORNS: usize = 3;
     const GUTS: usize = 12;
-    const EXTRAS: usize = 3; // Osfala, Blacksmith Table, Bouldering Guy's Emptied Bottle
+    const EXTRAS: usize = 3; // 2 gregs + heart
 
     let mut junk = Vec::with_capacity(BLUES + REDS + TAILS + HORNS + GUTS + EXTRAS);
 
@@ -305,15 +321,7 @@ fn get_base_junk_pool(rng: &mut StdRng) -> Vec<Item> {
     junk.extend(repeat(MonsterHorn).take(HORNS));
     junk.extend(repeat(MonsterGuts).take(GUTS));
 
-    add_random_junk_item(rng, &mut junk); // replaces Captain's Sword
-    add_random_junk_item(rng, &mut junk); // replaces Bouldering Guy Extra
-
     junk
-}
-
-fn add_random_junk_item(rng: &mut StdRng, junk_pool: &mut Vec<Item>) {
-    const POSSIBLE_EXTRA_ITEMS: [Item; 3] = [MonsterTail, MonsterHorn, MonsterGuts];
-    junk_pool.push(POSSIBLE_EXTRA_ITEMS[rng.gen_range(0..POSSIBLE_EXTRA_ITEMS.len())]);
 }
 
 pub fn get_maiamai_pool() -> Vec<Item> {
@@ -331,4 +339,78 @@ pub fn get_maiamai_pool() -> Vec<Item> {
         Maiamai091, Maiamai092, Maiamai093, Maiamai094, Maiamai095, Maiamai096, Maiamai097, Maiamai098, Maiamai099,
         Maiamai100,
     ]
+}
+
+pub(crate) fn get_door_entrances() -> Vec<Door> {
+    use crate::doors::Door::*;
+    vec![
+        EasternPalaceEntrance, HouseOfGalesEntrance, TowerOfHeraEntrance, InsideHyruleCastleEntrance,
+        DarkPalaceEntrance, SwampPalaceEntrance, SkullWoodsEntrance, ThievesHideoutEntrance, TurtleRockEntrance,
+        DesertPalaceEntrance, IceRuinsEntrance, LoruleCastleEntrance,
+    ]
+}
+
+pub(crate) fn get_door_exits() -> Vec<Door> {
+    use crate::doors::Door::*;
+    vec![
+        EasternPalaceExit, HouseOfGalesExit, TowerOfHeraExit, InsideHyruleCastleExit, DarkPalaceExit, SwampPalaceExit,
+        SkullWoodsExit, ThievesHideoutExit, TurtleRockExit, DesertPalaceExit, IceRuinsExit, LoruleCastleExit,
+    ]
+}
+
+pub(crate) fn get_default_weather_vanes(settings: &Settings) -> Vec<Vane> {
+    use modinfo::settings::WeatherVanes::*;
+    match settings.weather_vanes {
+        Standard => get_standard_weather_vane_flags(settings),
+        Shuffled => vec![],
+        Convenient => get_convenient_weather_vane_flags(settings),
+        Hyrule => get_hyrule_weather_vane_flags(),
+        Lorule => get_lorule_weather_vane_flags(),
+        All => get_all_weather_vane_flags(),
+    }
+}
+
+/// Flags of Standard Weather Vanes
+pub(crate) fn get_standard_weather_vane_flags(settings: &Settings) -> Vec<Vane> {
+    let mut standard_weather_vanes = vec![YourHouseWV];
+
+    // Include Vacant House as a complimentary Weather Vane only when Door + Crack shuffle are both
+    // off, so that it doesn't accidentally create a path to LCA earlier than intended.
+    if settings.door_shuffle == DoorShuffle::Off && settings.cracksanity == Cracksanity::Off {
+        standard_weather_vanes.push(VacantHouseWV);
+    }
+
+    standard_weather_vanes
+}
+
+/// Flags of "Convenient" Weather Vanes, that don't affect logic but save time
+pub(crate) fn get_convenient_weather_vane_flags(settings: &Settings) -> Vec<Vane> {
+    let mut convenient_weather_vanes = vec![YourHouseWV, KakarikoVillageWV, WitchsHouseWV, SanctuaryWV];
+
+    if settings.door_shuffle == DoorShuffle::Off && settings.cracksanity == Cracksanity::Off {
+        convenient_weather_vanes.extend(&[LoruleCastleWV, ThievesTownWV, BlacksmithWV, VacantHouseWV]);
+    }
+
+    convenient_weather_vanes
+}
+
+pub(crate) fn get_hyrule_weather_vane_flags() -> Vec<Vane> {
+    vec![
+        YourHouseWV, KakarikoVillageWV, EasternPalaceWV, HouseOfGalesWV, TowerOfHeraWV, WitchsHouseWV,
+        DeathMountainHyruleWV, DesertPalaceWV, SanctuaryWV,
+    ]
+}
+
+pub(crate) fn get_lorule_weather_vane_flags() -> Vec<Vane> {
+    vec![
+        SkullWoodsWV, TreacherousTowerWV, IceRuinsWV, LoruleCastleWV, GraveyardWV, ThievesTownWV, DarkPalaceWV,
+        BlacksmithWV, VacantHouseWV, MiseryMireWV, SwampPalaceWV, TurtleRockWV, DeathMountainLoruleWV,
+    ]
+}
+
+pub(crate) fn get_all_weather_vane_flags() -> Vec<Vane> {
+    let mut flags = Vec::with_capacity(22);
+    flags.extend(get_hyrule_weather_vane_flags());
+    flags.extend(get_lorule_weather_vane_flags());
+    flags
 }

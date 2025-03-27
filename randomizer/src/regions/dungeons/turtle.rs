@@ -4,6 +4,8 @@ crate::region! {
     color: Purple,
     rock {
         locations: [
+            "Turtle Rock Exit": None @Door(1[43] TurtleRockExit),
+
             "[TR] (1F) Center": Compass @Chest(1[115]),
             "[TR] (1F) Grate Chest": RupeePurple @Chest(1[58]),
             "[TR] (1F) Northwest Room": KeySmall @Key(1[153]),

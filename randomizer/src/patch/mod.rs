@@ -1,30 +1,29 @@
 use crate::filler::cracks::Crack;
+use crate::filler::doors::Door;
 use crate::filler::filler_item::{Randomizable, Vane};
-use crate::{patch::util::*, Error, Result, SeedInfo};
+use crate::{Error, Result, SeedInfo, patch::util::*};
 use code::Code;
-
 use game::{
     Course::{self as CourseId, *},
     Item, World,
 };
 use log::{debug, info};
-use modinfo::settings::cracksanity::Cracksanity;
 use modinfo::settings::weather_vanes::WeatherVanes::*;
 use rom::byaml::scene_env::SceneEnvFile;
 use rom::flag::Flag;
 use rom::scene::{Transform, Vec3};
 use rom::{
+    File, IntoBytes, Language, Rom, Scene,
     flow::FlowMut,
     scene::{Arg, Obj, Rail, SceneMeta},
-    File, IntoBytes, Language, Rom, Scene,
 };
 use serde::Serialize;
 use std::collections::HashMap;
 use std::io::{Cursor, Write};
 use std::ops::Add;
 use try_insert_ext::EntryInsertExt;
-use zip::write::FileOptions;
 use zip::CompressionMethod;
+use zip::write::FileOptions;
 
 mod actors;
 mod byaml;
@@ -277,6 +276,9 @@ impl Patcher {
             | Patch::GoldRupee { course, scene, unq } => {
                 self.parse_args(course, scene, unq).1 = filler_item.into().unwrap().as_item_index() as i32;
             },
+            Patch::Door { course, scene, unq, door } => {
+                self.patch_door(course, scene + 1, unq, door, seed_info)?;
+            },
             Patch::Crack { course, scene, unq, crack } => {
                 self.patch_crack(course, scene + 1, unq, crack, seed_info)?;
             },
@@ -341,11 +343,7 @@ impl Patcher {
         let large_chest = (34, "TreasureBoxL");
 
         let chest_data = if settings.chest_size_matches_contents {
-            if item.is_major_item() {
-                large_chest
-            } else {
-                small_chest
-            }
+            if item.is_major_item() { large_chest } else { small_chest }
         } else if is_big {
             large_chest
         } else {
@@ -365,20 +363,25 @@ impl Patcher {
         Ok(())
     }
 
+    /// Doors!
+    fn patch_door(
+        &mut self, course: CourseId, scene: u16, unq: u16, here_door: Door, seed_info: &SeedInfo,
+    ) -> Result<()> {
+        // Collect info about this door's new destination
+        let there_door =
+            seed_info.door_map.get(&here_door).unwrap_or_else(|| panic!("No door_map entry for: {:?}", here_door));
+        let there_sp = there_door.get_spawn_point();
+
+        // Apply the patch
+        self.modify_objs(course, scene, [redirect(unq, there_sp)]);
+
+        Ok(())
+    }
+
     /// Cracks!
     fn patch_crack(
         &mut self, course: CourseId, scene: u16, unq: u16, here_crack: Crack, seed_info: &SeedInfo,
     ) -> Result<()> {
-        // Patch Lorule cracks (and a few in Hyrule) to require Quake to open, except the crack paired with HC
-        if here_crack.must_patch_close() && here_crack != *seed_info.crack_map.get(&Crack::HyruleCastle).unwrap() {
-            self.modify_objs(course, scene, [set_enable_flag(unq, Flag::QUAKE)]);
-        }
-
-        // Early return if not Cracksanity
-        if seed_info.settings.cracksanity == Cracksanity::Off {
-            return Ok(());
-        }
-
         // Collect info about this crack's new destination
         let there_crack =
             seed_info.crack_map.get(&here_crack).unwrap_or_else(|| panic!("No crack_map entry for: {:?}", here_crack));
@@ -386,53 +389,29 @@ impl Patcher {
         let there_sp = there_crack.get_spawn_point();
 
         // Crack type
-        let here_arg2 = if here_crack.get_world() == there_crack.get_world() {
+        let crack_type = if here_crack.get_world() == there_crack.get_world() {
             here_crack.get_reverse_type()
         } else {
             here_crack.get_type()
         };
 
-        // Redirect Crack to new destination, and set correct flag to update destination icon on lower screen
-        self.modify_objs(
-            course,
-            scene,
-            [call(unq, move |obj| {
-                obj.redirect(there_sp);
-                obj.arg.2 = here_arg2;
-                obj.set_active_flag(there_flag);
-                obj.set_inactive_flag(here_crack.get_flag());
-            })],
-        );
+        // Enable Flag - if it's the HC Crack or its pair leave it open, else use the Quake Flag.
+        let enable_flag = if here_crack == Crack::HyruleCastle
+            || here_crack == *seed_info.crack_map.get(&Crack::HyruleCastle).unwrap()
+        {
+            Flag::ZERO_ZERO
+        } else {
+            Flag::QUAKE
+        };
 
-        // Hyrule Castle Crack special handling
-        if here_crack == Crack::HyruleCastle {
-            if *there_crack == Crack::LoruleCastle {
-                // Vanilla HC/LC pair - Delete the curtain and no merge zone
-                self.modify_objs(
-                    IndoorLight,
-                    7,
-                    [
-                        disable(26), // Curtain
-                        disable(29), // AreaDisableWallIn
-                    ],
-                );
-            } else {
-                // Wire the curtain + no merge zone to the other crack's flag
-                self.modify_objs(
-                    IndoorLight,
-                    7,
-                    [
-                        set_46_args(26, there_flag),      // Curtain
-                        set_46_args(29, there_flag),      // AreaDisableWallIn
-                        set_disable_flag(29, there_flag), // AreaDisableWallIn
-                    ],
-                );
-            }
-        }
-
-        // TODO angle of Crack Blockages can't seem to be changed, no point in this function until the game respects
-        // the x-component of the MojWallBreakFieldLight/MojWallBreakFieldDark's rotation.
-        //self.block_cracks(course, scene, unq, here_crack, *there_crack)?;
+        // Apply the patch
+        self.modify_objs(course, scene, [call(unq, move |obj| {
+            obj.redirect(there_sp);
+            obj.arg.2 = crack_type;
+            obj.set_active_flag(there_flag);
+            obj.set_inactive_flag(here_crack.get_flag());
+            obj.set_enable_flag(enable_flag);
+        })]);
 
         Ok(())
     }
@@ -502,51 +481,43 @@ impl Patcher {
                 let flag = here_crack.get_flag();
 
                 // Curtain
-                self.add_obj(
-                    course,
-                    scene,
-                    Obj {
-                        arg: Arg(0, 0, 0, 0, flag.get_type(), 0, flag.get_value(), 0, 0, 0, 0, 0, 0, 0.0),
-                        clp,
-                        flg: (0, 0, 0, 0),
-                        id: 550,
-                        lnk: vec![],
-                        nme: None,
-                        ril: vec![],
-                        ser: curtain_ser,
-                        srt: Transform {
-                            scale: Vec3 { x: 1.0, y: 16.0, z: 1.0 },
-                            rotate: Vec3 { x: 339.3735, y: 0.0, z: 0.0 },
-                            translate: t_curtain,
-                        },
-                        typ: 1,
-                        unq: curtain_unq,
+                self.add_obj(course, scene, Obj {
+                    arg: Arg(0, 0, 0, 0, flag.get_type(), 0, flag.get_value(), 0, 0, 0, 0, 0, 0, 0.0),
+                    clp,
+                    flg: (0, 0, 0, 0),
+                    id: 550,
+                    lnk: vec![],
+                    nme: None,
+                    ril: vec![],
+                    ser: curtain_ser,
+                    srt: Transform {
+                        scale: Vec3 { x: 1.0, y: 16.0, z: 1.0 },
+                        rotate: Vec3 { x: 339.3735, y: 0.0, z: 0.0 },
+                        translate: t_curtain,
                     },
-                );
+                    typ: 1,
+                    unq: curtain_unq,
+                });
 
                 // WallDisableIn
                 let (disable_merge_unq, disable_merge_ser) = self.find_objs_unq_ser(course, scene);
-                self.add_obj(
-                    course,
-                    scene,
-                    Obj {
-                        arg: Arg(0, 0, 0, 0, flag.get_type(), 0, flag.get_value(), 0, 0, 0, 0, 0, 0, 0.0),
-                        clp,
-                        flg: (0, flag.get_type(), 0, flag.get_value()),
-                        id: 568,
-                        lnk: vec![],
-                        nme: None,
-                        ril: vec![],
-                        ser: disable_merge_ser,
-                        srt: Transform {
-                            scale: Vec3 { x: 5.25577, y: 1.0, z: 2.43051 },
-                            rotate: Vec3::ZERO,
-                            translate: t_wall,
-                        },
-                        typ: 6,
-                        unq: disable_merge_unq,
+                self.add_obj(course, scene, Obj {
+                    arg: Arg(0, 0, 0, 0, flag.get_type(), 0, flag.get_value(), 0, 0, 0, 0, 0, 0, 0.0),
+                    clp,
+                    flg: (0, flag.get_type(), 0, flag.get_value()),
+                    id: 568,
+                    lnk: vec![],
+                    nme: None,
+                    ril: vec![],
+                    ser: disable_merge_ser,
+                    srt: Transform {
+                        scale: Vec3 { x: 5.25577, y: 1.0, z: 2.43051 },
+                        rotate: Vec3::ZERO,
+                        translate: t_wall,
                     },
-                );
+                    typ: 6,
+                    unq: disable_merge_unq,
+                });
 
                 self.copy_bch("Curtain", (IndoorLight, 7), (course, scene))?;
             },
@@ -626,7 +597,7 @@ impl Patcher {
         lms::msbf::patch(&mut self, seed_info)?;
         messages::patch_messages(&mut self, seed_info)?;
         let prizes = get_dungeon_prizes(&seed_info.layout);
-        prizes::patch_dungeon_prizes(&mut self, &prizes);
+        prizes::patch_dungeon_prizes(&mut self, seed_info, &prizes);
         // byaml::get_item::patch(&mut self)?;
         byaml::course::patch(&mut self, &prizes, seed_info);
         byaml::stage::patch(&mut self, seed_info)?;
@@ -724,6 +695,7 @@ pub enum Patch {
     Maiamai { course: CourseId, scene: u16, unq: u16 },
     SilverRupee { course: CourseId, scene: u16, unq: u16 },
     GoldRupee { course: CourseId, scene: u16, unq: u16 },
+    Door { course: CourseId, scene: u16, unq: u16, door: Door },
     Crack { course: CourseId, scene: u16, unq: u16, crack: Crack },
     WeatherVane { course: CourseId, scene: u16, unq: u16, vane: Vane },
     Shop(Shop),

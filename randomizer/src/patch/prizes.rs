@@ -1,29 +1,34 @@
+use crate::filler::doors::Door;
+use crate::filler::doors::Door::{
+    DarkPalaceExit, DesertPalaceExit, EasternPalaceExit, HouseOfGalesExit, IceRuinsExit, SkullWoodsExit,
+    SwampPalaceExit, TowerOfHeraExit, TurtleRockExit,
+};
 use crate::filler::filler_item::Item::*;
 use crate::filler::filler_item::Item::{SageOren, SageSeres};
 use crate::filler::filler_item::Randomizable;
 use crate::filler::filler_item::Randomizable::Item;
 use crate::{
-    patch::{util::*, DungeonPrizes},
-    MsbfKey, Patcher,
+    DoorMap, MsbfKey, Patcher, SeedInfo,
+    patch::{DungeonPrizes, util::*},
 };
 use game::Course::{self, *};
 use log::info;
 use macros::fail;
+use modinfo::settings::DoorShuffle;
 use rom::flag::Flag;
 use rom::{
-    byaml,
+    Actor, File, byaml,
     language::FlowChart,
     scene::{Arg, Obj, Point, Rail, SpawnPoint, Transform, Vec3},
-    Actor, File,
 };
 use std::collections::HashMap;
 
-pub(crate) fn patch_dungeon_prizes(patcher: &mut Patcher, prizes: &DungeonPrizes) {
+pub(crate) fn patch_dungeon_prizes(patcher: &mut Patcher, seed_info: &SeedInfo, prizes: &DungeonPrizes) {
     info!("Patching Dungeon Prizes...");
     patch_flowchart(patcher, prizes);
     patch_msbf_files(patcher, prizes);
     patch_dungeon_prize_actors(patcher, prizes);
-    patch_prize_byaml(patcher, prizes);
+    patch_prize_byaml(patcher, seed_info, prizes);
 }
 
 /// Adds entries to the FlowChart for the MSBF files related to each Portrait
@@ -132,17 +137,17 @@ fn patch_dungeon_prize_actors(patcher: &mut Patcher, prizes: &DungeonPrizes) {
 }
 
 /// Patches the BYAML files to shuffle Dungeon Prizes
-fn patch_prize_byaml(patcher: &mut Patcher, prizes: &DungeonPrizes) {
-    patch_eastern(patcher, prizes.ep_prize);
-    patch_gales(patcher, prizes.hg_prize);
-    patch_hera(patcher, prizes.th_prize);
-    patch_dark(patcher, prizes.pd_prize);
-    patch_swamp(patcher, prizes.sp_prize);
-    patch_skull(patcher, prizes.sw_prize);
+fn patch_prize_byaml(patcher: &mut Patcher, seed_info: &SeedInfo, prizes: &DungeonPrizes) {
+    patch_eastern(patcher, seed_info, prizes.ep_prize);
+    patch_gales(patcher, seed_info, prizes.hg_prize);
+    patch_hera(patcher, seed_info, prizes.th_prize);
+    patch_dark(patcher, seed_info, prizes.pd_prize);
+    patch_swamp(patcher, seed_info, prizes.sp_prize);
+    patch_skull(patcher, seed_info, prizes.sw_prize);
     patch_thieves(patcher, prizes.tt_prize);
-    patch_turtle(patcher, prizes.tr_prize);
-    patch_desert(patcher, prizes.dp_prize);
-    patch_ice(patcher, prizes.ir_prize);
+    patch_turtle(patcher, seed_info, prizes.tr_prize);
+    patch_desert(patcher, seed_info, prizes.dp_prize);
+    patch_ice(patcher, seed_info, prizes.ir_prize);
 
     patch_checks_unlocked_by_prizes(patcher);
 }
@@ -160,212 +165,168 @@ fn patch_oren(patcher: &mut Patcher) {
     let credits_flag = Flag::Event(730);
 
     // Zora's Domain
-    patcher.modify_objs(
-        CaveLight,
-        7,
-        [
-            set_disable_flag(116, credits_flag), // Thin Oren
-            set_disable_flag(119, credits_flag), // Zora Attendant
-            set_disable_flag(127, credits_flag), // Zora Attendant
-            set_disable_flag(134, credits_flag), // Thicc Oren
-        ],
-    );
+    patcher.modify_objs(CaveLight, 7, [
+        set_disable_flag(116, credits_flag), // Thin Oren
+        set_disable_flag(119, credits_flag), // Zora Attendant
+        set_disable_flag(127, credits_flag), // Zora Attendant
+        set_disable_flag(134, credits_flag), // Thicc Oren
+    ]);
 
     // Zora's Domain
-    patcher.modify_objs(
-        CaveLight,
-        7,
-        [
-            // Hide Oren + Attendants until Oren is saved
-            set_enable_flag(116, Flag::SAGE_OREN), // Thin Oren
-            set_enable_flag(119, Flag::SAGE_OREN), // Zora Attendant
-            set_enable_flag(127, Flag::SAGE_OREN), // Zora Attendant
-            set_enable_flag(134, Flag::SAGE_OREN), // Thicc Oren
-            // Require saving Oren to turn in Smooth Gem
-            set_enable_flag(131, Flag::SAGE_OREN), // AreaSwitchCube
-            set_enable_flag(132, Flag::SAGE_OREN), // Throw Smooth Gem textbox trigger
-        ],
-    );
+    patcher.modify_objs(CaveLight, 7, [
+        // Hide Oren + Attendants until Oren is saved
+        set_enable_flag(116, Flag::SAGE_OREN), // Thin Oren
+        set_enable_flag(119, Flag::SAGE_OREN), // Zora Attendant
+        set_enable_flag(127, Flag::SAGE_OREN), // Zora Attendant
+        set_enable_flag(134, Flag::SAGE_OREN), // Thicc Oren
+        // Require saving Oren to turn in Smooth Gem
+        set_enable_flag(131, Flag::SAGE_OREN), // AreaSwitchCube
+        set_enable_flag(132, Flag::SAGE_OREN), // Throw Smooth Gem textbox trigger
+    ]);
 }
 
 /// Impa
 fn patch_impa(patcher: &mut Patcher) {
-    patcher.modify_objs(
-        IndoorLight,
-        12,
-        [
-            // Show Impa
-            call(36, move |obj| {
-                obj.set_enable_flag(Flag::Event(1));
-                obj.clear_disable_flag();
-            }),
-        ],
-    );
+    patcher.modify_objs(IndoorLight, 12, [
+        // Show Impa
+        call(36, move |obj| {
+            obj.set_enable_flag(Flag::Event(1));
+            obj.clear_disable_flag();
+        }),
+    ]);
 }
 
 /// Irene
 fn patch_irene(patcher: &mut Patcher) {
     // Bridge
-    patcher.modify_objs(
-        FieldLight,
-        28,
-        [
-            set_46_args(55, Flag::SAGE_IRENE),     // Trigger - NpcMaple_BellGet_2D
-            set_enable_flag(56, Flag::SAGE_IRENE), // Irene
-        ],
-    );
+    patcher.modify_objs(FieldLight, 28, [
+        set_46_args(55, Flag::SAGE_IRENE),     // Trigger - NpcMaple_BellGet_2D
+        set_enable_flag(56, Flag::SAGE_IRENE), // Irene
+    ]);
 
     // Fortune-Teller
-    patcher.modify_objs(
-        FieldLight,
-        9,
-        [
-            set_46_args(83, Flag::SAGE_IRENE),     // Trigger - NpcMaple_BellGet_11
-            set_enable_flag(85, Flag::SAGE_IRENE), // Irene
-        ],
-    );
+    patcher.modify_objs(FieldLight, 9, [
+        set_46_args(83, Flag::SAGE_IRENE),     // Trigger - NpcMaple_BellGet_11
+        set_enable_flag(85, Flag::SAGE_IRENE), // Irene
+    ]);
 
     // Small Pond
-    patcher.modify_objs(
-        FieldLight,
-        10,
-        [
-            set_46_args(65, Flag::SAGE_IRENE),     // Trigger - NpcMaple_BellGet_12_00
-            set_enable_flag(67, Flag::SAGE_IRENE), // Irene
-            set_46_args(68, Flag::SAGE_IRENE),     // Trigger - NpcMaple_BellGet_12_01
-        ],
-    );
+    patcher.modify_objs(FieldLight, 10, [
+        set_46_args(65, Flag::SAGE_IRENE),     // Trigger - NpcMaple_BellGet_12_00
+        set_enable_flag(67, Flag::SAGE_IRENE), // Irene
+        set_46_args(68, Flag::SAGE_IRENE),     // Trigger - NpcMaple_BellGet_12_01
+    ]);
 }
 
 /// Rosso
 fn patch_rosso(patcher: &mut Patcher) {
     // Outside Rosso's House
-    patcher.modify_objs(
-        FieldLight,
-        2,
-        [
-            set_enable_flag(11, Flag::SAGE_ROSSO),   // Small Rock (controller, see below)
-            disable(88),                             // early game LZ to Rosso's House
-            clear_disable_flag(100),                 // Keep Entry_KikoriMan3 from disappearing
-            clear_disable_flag(100),                 // NpcMountaineer
-            clear_enable_flag(101),                  // Rosso
-            set_disable_flag(101, Flag::CREDITS),    // Rosso
-            set_disable_flag(128, Flag::SAGE_ROSSO), // "Not in right now." signboard
-            set_46_args(132, Flag::SAGE_ROSSO),      // Door
-            disable(135),                            // Disable LZ to IndoorLight4 cutscene
-            set_enable_flag(136, Flag::SAGE_ROSSO),  // LZ to Rosso's House
-        ],
-    );
+    patcher.modify_objs(FieldLight, 2, [
+        set_enable_flag(11, Flag::SAGE_ROSSO),   // Small Rock (controller, see below)
+        disable(88),                             // early game LZ to Rosso's House
+        clear_disable_flag(100),                 // Keep Entry_KikoriMan3 from disappearing
+        clear_disable_flag(100),                 // NpcMountaineer
+        clear_enable_flag(101),                  // Rosso
+        set_disable_flag(101, Flag::CREDITS),    // Rosso
+        set_disable_flag(128, Flag::SAGE_ROSSO), // "Not in right now." signboard
+        set_46_args(132, Flag::SAGE_ROSSO),      // Door
+        disable(135),                            // Disable LZ to IndoorLight4 cutscene
+        set_enable_flag(136, Flag::SAGE_ROSSO),  // LZ to Rosso's House
+    ]);
 
     // Rosso's House
-    patcher.modify_objs(
-        IndoorLight,
-        10,
-        [call(7, move |obj| {
-            obj.set_enable_flag(Flag::SAGE_ROSSO);
-            obj.clear_disable_flag();
-        })],
-    );
+    patcher.modify_objs(IndoorLight, 10, [call(7, move |obj| {
+        obj.set_enable_flag(Flag::SAGE_ROSSO);
+        obj.clear_disable_flag();
+    })]);
 
     // Rosso Rocks
-    patcher.modify_system(
-        FieldLight,
-        2,
-        [
-            set_enable_flag(11, Flag::SAGE_ROSSO), // controller
-            set_enable_flag(12, Flag::SAGE_ROSSO),
-            set_enable_flag(14, Flag::SAGE_ROSSO),
-            set_enable_flag(15, Flag::SAGE_ROSSO),
-            set_enable_flag(16, Flag::SAGE_ROSSO),
-            set_enable_flag(18, Flag::SAGE_ROSSO),
-            set_enable_flag(19, Flag::SAGE_ROSSO),
-            set_enable_flag(20, Flag::SAGE_ROSSO),
-            set_enable_flag(21, Flag::SAGE_ROSSO),
-            set_enable_flag(93, Flag::SAGE_ROSSO),
-            set_enable_flag(94, Flag::SAGE_ROSSO),
-            set_enable_flag(102, Flag::SAGE_ROSSO),
-            set_enable_flag(103, Flag::SAGE_ROSSO),
-            set_enable_flag(104, Flag::SAGE_ROSSO),
-            set_enable_flag(105, Flag::SAGE_ROSSO),
-            set_enable_flag(106, Flag::SAGE_ROSSO),
-            set_enable_flag(107, Flag::SAGE_ROSSO),
-            set_enable_flag(108, Flag::SAGE_ROSSO),
-            set_enable_flag(109, Flag::SAGE_ROSSO),
-            set_enable_flag(110, Flag::SAGE_ROSSO),
-            set_enable_flag(111, Flag::SAGE_ROSSO),
-            set_enable_flag(112, Flag::SAGE_ROSSO),
-            set_enable_flag(118, Flag::SAGE_ROSSO),
-            set_enable_flag(119, Flag::SAGE_ROSSO),
-            set_enable_flag(120, Flag::SAGE_ROSSO),
-            set_enable_flag(121, Flag::SAGE_ROSSO),
-            set_enable_flag(122, Flag::SAGE_ROSSO),
-            set_enable_flag(123, Flag::SAGE_ROSSO),
-            set_enable_flag(124, Flag::SAGE_ROSSO),
-            set_enable_flag(125, Flag::SAGE_ROSSO),
-            set_enable_flag(126, Flag::SAGE_ROSSO),
-        ],
-    );
+    patcher.modify_system(FieldLight, 2, [
+        set_enable_flag(11, Flag::SAGE_ROSSO), // controller
+        set_enable_flag(12, Flag::SAGE_ROSSO),
+        set_enable_flag(14, Flag::SAGE_ROSSO),
+        set_enable_flag(15, Flag::SAGE_ROSSO),
+        set_enable_flag(16, Flag::SAGE_ROSSO),
+        set_enable_flag(18, Flag::SAGE_ROSSO),
+        set_enable_flag(19, Flag::SAGE_ROSSO),
+        set_enable_flag(20, Flag::SAGE_ROSSO),
+        set_enable_flag(21, Flag::SAGE_ROSSO),
+        set_enable_flag(93, Flag::SAGE_ROSSO),
+        set_enable_flag(94, Flag::SAGE_ROSSO),
+        set_enable_flag(102, Flag::SAGE_ROSSO),
+        set_enable_flag(103, Flag::SAGE_ROSSO),
+        set_enable_flag(104, Flag::SAGE_ROSSO),
+        set_enable_flag(105, Flag::SAGE_ROSSO),
+        set_enable_flag(106, Flag::SAGE_ROSSO),
+        set_enable_flag(107, Flag::SAGE_ROSSO),
+        set_enable_flag(108, Flag::SAGE_ROSSO),
+        set_enable_flag(109, Flag::SAGE_ROSSO),
+        set_enable_flag(110, Flag::SAGE_ROSSO),
+        set_enable_flag(111, Flag::SAGE_ROSSO),
+        set_enable_flag(112, Flag::SAGE_ROSSO),
+        set_enable_flag(118, Flag::SAGE_ROSSO),
+        set_enable_flag(119, Flag::SAGE_ROSSO),
+        set_enable_flag(120, Flag::SAGE_ROSSO),
+        set_enable_flag(121, Flag::SAGE_ROSSO),
+        set_enable_flag(122, Flag::SAGE_ROSSO),
+        set_enable_flag(123, Flag::SAGE_ROSSO),
+        set_enable_flag(124, Flag::SAGE_ROSSO),
+        set_enable_flag(125, Flag::SAGE_ROSSO),
+        set_enable_flag(126, Flag::SAGE_ROSSO),
+    ]);
 }
 
 /// Eastern Palace
-fn patch_eastern(patcher: &mut Patcher, prize: Randomizable) {
+fn patch_eastern(patcher: &mut Patcher, seed_info: &SeedInfo, prize: Randomizable) {
     let data = PrizePatchData::get(prize);
-    let sp_outside_eastern = SpawnPoint::new(FieldLight, 20, 0);
+    let sp = get_dungeon_prize_spawn(EasternPalaceExit, &seed_info.door_map);
 
     // Eastern Palace 1F - Add Dungeon Reward
-    patcher.add_obj(
-        DungeonEast,
-        1,
-        Obj {
-            arg: Arg(
-                sp_outside_eastern.spawn,
-                data.arg1,
-                0,
-                0,
-                4,
-                data.flag.get_type(),
-                250,
-                data.flag.get_value(),
-                0,
-                data.arg9,
-                sp_outside_eastern.course as i32,
-                sp_outside_eastern.scene - 1,
-                data.arg12,
-                0.0,
-            ),
-            clp: 0,
-            flg: (4, data.flag.get_type(), 250, data.flag.get_value()),
-            id: data.actor_id,
-            lnk: vec![],
-            nme: None,
-            ril: vec![],
-            ser: Some(129),
-            srt: Transform {
-                scale: Vec3::UNIT,
-                rotate: Vec3 { x: data.rot_x, y: 0.0, z: 0.0 },
-                translate: Vec3 { x: 0.0, y: 2.5, z: -5.75 },
-            },
-            typ: 4,
-            unq: 301,
+    patcher.add_obj(DungeonEast, 1, Obj {
+        arg: Arg(
+            sp.spawn,
+            data.arg1,
+            0,
+            0,
+            4,
+            data.flag.get_type(),
+            250,
+            data.flag.get_value(),
+            0,
+            data.arg9,
+            sp.course as i32,
+            sp.scene - 1,
+            data.arg12,
+            0.0,
+        ),
+        clp: 0,
+        flg: (4, data.flag.get_type(), 250, data.flag.get_value()),
+        id: data.actor_id,
+        lnk: vec![],
+        nme: None,
+        ril: vec![],
+        ser: Some(129),
+        srt: Transform {
+            scale: Vec3::UNIT,
+            rotate: Vec3 { x: data.rot_x, y: 0.0, z: 0.0 },
+            translate: Vec3 { x: 0.0, y: 2.5, z: -5.75 },
         },
-    );
+        typ: 4,
+        unq: 301,
+    });
 
     if is_sage(prize) {
-        reroute_sage_warp(patcher, prize, sp_outside_eastern);
+        reroute_sage_warp(patcher, prize, sp);
     }
 
     // Eastern Ruins - Disable Post-EP cutscene
-    patcher.modify_objs(
-        FieldLight,
-        20,
-        [
-            enable(214), // Paint Heart
-            enable(215), // Paint Heart
-            disable(83), // Sahasrahla
-            disable(84), // Text box
-            disable(85), // Loading Zone to FL18
-        ],
-    );
+    patcher.modify_objs(FieldLight, 20, [
+        enable(214), // Paint Heart
+        enable(215), // Paint Heart
+        disable(83), // Sahasrahla
+        disable(84), // Text box
+        disable(85), // Loading Zone to FL18
+    ]);
 
     // patcher.modify_system(FieldLight, 18, &[call(199, |obj| {
     //     obj.srt.translate.z = 12.75; // move to where cutscene normally ends
@@ -373,7 +334,7 @@ fn patch_eastern(patcher: &mut Patcher, prize: Randomizable) {
 }
 
 /// House of Gales
-fn patch_gales(patcher: &mut Patcher, prize: Randomizable) {
+fn patch_gales(patcher: &mut Patcher, seed_info: &SeedInfo, prize: Randomizable) {
     // Debug stuff
     // patcher.modify_objs(DungeonWind, 3, &[
     //     disable(436), // Margomill
@@ -387,68 +348,57 @@ fn patch_gales(patcher: &mut Patcher, prize: Randomizable) {
 
     // Insta-spawn Pendants
     if is_pendant(prize) {
-        patcher.modify_objs(
-            DungeonWind,
-            3,
-            [call(UNQ_PRIZE, |obj| {
-                obj.lnk.clear();
-            })],
-        );
+        patcher.modify_objs(DungeonWind, 3, [call(UNQ_PRIZE, |obj| {
+            obj.lnk.clear();
+        })]);
     }
 
-    modify_dungeon_reward(patcher, prize, UNQ_PRIZE, DungeonWind, 3, false, SpawnPoint::new(FieldLight, 35, 0));
+    let sp = get_dungeon_prize_spawn(HouseOfGalesExit, &seed_info.door_map);
+    modify_dungeon_reward(patcher, prize, UNQ_PRIZE, DungeonWind, 3, false, sp);
 
     let prize_flag = prize_flag(prize);
-    patcher.modify_objs(
-        DungeonWind,
-        3,
-        [
-            set_enable_flag(490, prize_flag), // Warp to leave boss room
-            set_enable_flag(543, prize_flag), // Destination Warp
-        ],
-    );
+    patcher.modify_objs(DungeonWind, 3, [
+        set_enable_flag(490, prize_flag), // Warp to leave boss room
+        set_enable_flag(543, prize_flag), // Destination Warp
+    ]);
 
     // Gulley will fall down on his own, other Sages need to be put on a Rail to appear
     if is_sage(prize) && prize != Item(SageGulley) {
         patcher.modify_objs(DungeonWind, 3, [add_rail(UNQ_PRIZE, (12, 0))]);
 
         let (end_y, end_z) = if prize == Item(SageImpa) { (2.0, -47.0) } else { (0.0, -46.5) };
-        patcher.add_rail(
-            DungeonWind,
-            3,
-            Rail {
-                arg: (0, 0, 0, 0, 0.0, 0.0),
-                pnt: vec![
-                    Point {
-                        arg: (0, 0, 0, 0, 0.0, 0.0),
-                        ctl: [0.0, end_y, end_z - 15.0, 0.0, end_y, end_z - 15.0],
-                        lnk: vec![],
-                        srt: Transform {
-                            scale: Vec3::UNIT,
-                            rotate: Vec3 { x: 330.0, y: 0.0, z: 0.0 },
-                            translate: Vec3 { x: 0.0, y: end_y, z: end_z - 15.0 },
-                        },
+        patcher.add_rail(DungeonWind, 3, Rail {
+            arg: (0, 0, 0, 0, 0.0, 0.0),
+            pnt: vec![
+                Point {
+                    arg: (0, 0, 0, 0, 0.0, 0.0),
+                    ctl: [0.0, end_y, end_z - 15.0, 0.0, end_y, end_z - 15.0],
+                    lnk: vec![],
+                    srt: Transform {
+                        scale: Vec3::UNIT,
+                        rotate: Vec3 { x: 330.0, y: 0.0, z: 0.0 },
+                        translate: Vec3 { x: 0.0, y: end_y, z: end_z - 15.0 },
                     },
-                    Point {
-                        arg: (0, 0, 0, 0, 0.0, 0.0),
-                        ctl: [0.0, end_y, end_z, 0.0, end_y, end_z],
-                        lnk: vec![],
-                        srt: Transform {
-                            scale: Vec3::UNIT,
-                            rotate: Vec3 { x: 330.0, y: 0.0, z: 0.0 },
-                            translate: Vec3 { x: 0.0, y: end_y, z: end_z },
-                        },
+                },
+                Point {
+                    arg: (0, 0, 0, 0, 0.0, 0.0),
+                    ctl: [0.0, end_y, end_z, 0.0, end_y, end_z],
+                    lnk: vec![],
+                    srt: Transform {
+                        scale: Vec3::UNIT,
+                        rotate: Vec3 { x: 330.0, y: 0.0, z: 0.0 },
+                        translate: Vec3 { x: 0.0, y: end_y, z: end_z },
                     },
-                ],
-                rng: false,
-                unq: 12,
-            },
-        );
+                },
+            ],
+            rng: false,
+            unq: 12,
+        });
     }
 }
 
 /// Tower of Hera
-fn patch_hera(patcher: &mut Patcher, prize: Randomizable) {
+fn patch_hera(patcher: &mut Patcher, seed_info: &SeedInfo, prize: Randomizable) {
     // Debug stuff
     // patcher.modify_objs(DungeonHera, 1, &[
     //     disable(737), // Moldorm
@@ -462,58 +412,68 @@ fn patch_hera(patcher: &mut Patcher, prize: Randomizable) {
 
     // Insta-spawn Pendants
     if is_pendant(prize) {
-        patcher.modify_objs(
-            DungeonHera,
-            1,
-            [call(UNQ_PRIZE, |obj| {
-                obj.lnk.clear();
-            })],
-        );
+        patcher.modify_objs(DungeonHera, 1, [call(UNQ_PRIZE, |obj| {
+            obj.lnk.clear();
+        })]);
     }
 
-    modify_dungeon_reward(patcher, prize, UNQ_PRIZE, DungeonHera, 1, false, SpawnPoint::new(FieldLight, 3, 3));
+    let sp = get_dungeon_prize_spawn(TowerOfHeraExit, &seed_info.door_map);
+    modify_dungeon_reward(patcher, prize, UNQ_PRIZE, DungeonHera, 1, false, sp);
 
     // Gulley will fall down on his own, other Sages need to be put on a Rail to appear
     if is_sage(prize) && prize != Item(SageGulley) {
         patcher.modify_objs(DungeonHera, 1, [add_rail(UNQ_PRIZE, (56, 0))]);
 
         let (end_y, end_z) = if prize == Item(SageImpa) { (103.0, -6.0) } else { (101.0, -5.5) };
-        patcher.add_rail(
-            DungeonHera,
-            1,
-            Rail {
-                arg: (0, 0, 0, 0, 0.0, 0.0),
-                pnt: vec![
-                    Point {
-                        arg: (0, 0, 0, 0, 0.0, 0.0),
-                        ctl: [0.0, end_y, end_z - 15.0, 0.0, end_y, end_z - 15.0],
-                        lnk: vec![],
-                        srt: Transform {
-                            scale: Vec3::UNIT,
-                            rotate: Vec3 { x: 330.0, y: 0.0, z: 0.0 },
-                            translate: Vec3 { x: 0.0, y: end_y, z: end_z - 15.0 },
-                        },
+        patcher.add_rail(DungeonHera, 1, Rail {
+            arg: (0, 0, 0, 0, 0.0, 0.0),
+            pnt: vec![
+                Point {
+                    arg: (0, 0, 0, 0, 0.0, 0.0),
+                    ctl: [0.0, end_y, end_z - 15.0, 0.0, end_y, end_z - 15.0],
+                    lnk: vec![],
+                    srt: Transform {
+                        scale: Vec3::UNIT,
+                        rotate: Vec3 { x: 330.0, y: 0.0, z: 0.0 },
+                        translate: Vec3 { x: 0.0, y: end_y, z: end_z - 15.0 },
                     },
-                    Point {
-                        arg: (0, 0, 0, 0, 0.0, 0.0),
-                        ctl: [0.0, end_y, end_z, 0.0, end_y, end_z],
-                        lnk: vec![],
-                        srt: Transform {
-                            scale: Vec3::UNIT,
-                            rotate: Vec3 { x: 330.0, y: 0.0, z: 0.0 },
-                            translate: Vec3 { x: 0.0, y: end_y, z: end_z },
-                        },
+                },
+                Point {
+                    arg: (0, 0, 0, 0, 0.0, 0.0),
+                    ctl: [0.0, end_y, end_z, 0.0, end_y, end_z],
+                    lnk: vec![],
+                    srt: Transform {
+                        scale: Vec3::UNIT,
+                        rotate: Vec3 { x: 330.0, y: 0.0, z: 0.0 },
+                        translate: Vec3 { x: 0.0, y: end_y, z: end_z },
                     },
-                ],
-                rng: false,
-                unq: 56,
-            },
-        );
+                },
+            ],
+            rng: false,
+            unq: 56,
+        });
     }
+
+    /* Move the trigger that removes the 3 pegs outside Tower of Hera from inside the dungeon itself
+    to right outside it. This is needed so that Dungeon ER doesn't make things weird. */
+
+    // Disable old trigger
+    patcher.modify_objs(DungeonHera, 1, [disable(872)]);
+
+    // Add new trigger overlapping loading zone to Tower of Hera
+    patcher.add_obj(
+        FieldLight,
+        3,
+        Obj::trigger_cube(Flag::Event(360), 0, 105, 398, Transform {
+            scale: Vec3 { x: 3.0, y: 3.0, z: 3.0 },
+            rotate: Vec3::ZERO,
+            translate: Vec3 { x: 25.0, y: 22.5, z: -31.5 },
+        }),
+    )
 }
 
 /// Dark Palace
-fn patch_dark(patcher: &mut Patcher, prize: Randomizable) {
+fn patch_dark(patcher: &mut Patcher, seed_info: &SeedInfo, prize: Randomizable) {
     // Debug stuff
     // patcher.modify_objs(DungeonDark, 1, &[
     //     disable(118), // Gemesaur
@@ -523,57 +483,50 @@ fn patch_dark(patcher: &mut Patcher, prize: Randomizable) {
     //                 Obj::step_switch(Flag::Course(21), 4, 400, 400,
     //                                  Vec3 { x: 0.0, y: 0.0, z: -44.75 }));
 
+    let sp = get_dungeon_prize_spawn(DarkPalaceExit, &seed_info.door_map);
+    modify_dungeon_reward(patcher, prize, 262, DungeonDark, 1, false, sp);
+
     if prize == Item(SageGulley) {
         return;
     }
 
-    modify_dungeon_reward(patcher, prize, 262, DungeonDark, 1, false, SpawnPoint::new(FieldDark, 20, 5));
-
     if is_pendant(prize) {
         // Don't take camera control away from player to watch Mask break and reveal... nothing...
-        patcher.modify_objs(
-            DungeonDark,
-            1,
-            [
-                disable(121), // ObjJewelMask Camera
-            ],
-        );
+        patcher.modify_objs(DungeonDark, 1, [
+            disable(121), // ObjJewelMask Camera
+        ]);
     } else {
         // Put non-Gulley Portraits on a Rail so they drop down after the boss
         // TODO Figure out how to attach skeletal animation to portraits so they drop non-jankily
         patcher.modify_objs(DungeonDark, 1, [add_rail(262, (14, 0))]);
         let (end_y, end_z) = if prize == Item(SageImpa) { (2.0, -48.0) } else { (0.0, -47.5) };
-        patcher.add_rail(
-            DungeonDark,
-            1,
-            Rail {
-                arg: (0, 0, 0, 0, 0.0, 0.0),
-                pnt: vec![
-                    Point {
-                        arg: (0, 0, 0, 0, 0.0, 0.0),
-                        ctl: [0.0, 6.7700896, -48.948_357, 0.0, 6.7700896, -48.948_357],
-                        lnk: vec![],
-                        srt: Transform {
-                            scale: Vec3 { x: 1.0, y: 1.0, z: 1.0 },
-                            rotate: Vec3 { x: 335.99999945441, y: 0.0, z: 0.0 },
-                            translate: Vec3 { x: 0.0, y: 6.7700896, z: -48.948_357 },
-                        },
+        patcher.add_rail(DungeonDark, 1, Rail {
+            arg: (0, 0, 0, 0, 0.0, 0.0),
+            pnt: vec![
+                Point {
+                    arg: (0, 0, 0, 0, 0.0, 0.0),
+                    ctl: [0.0, 6.7700896, -48.948_357, 0.0, 6.7700896, -48.948_357],
+                    lnk: vec![],
+                    srt: Transform {
+                        scale: Vec3 { x: 1.0, y: 1.0, z: 1.0 },
+                        rotate: Vec3 { x: 335.99999945441, y: 0.0, z: 0.0 },
+                        translate: Vec3 { x: 0.0, y: 6.7700896, z: -48.948_357 },
                     },
-                    Point {
-                        arg: (0, 0, 0, 0, 0.0, 0.0),
-                        ctl: [0.0, end_y, end_z, 0.0, end_y, end_z],
-                        lnk: vec![],
-                        srt: Transform {
-                            scale: Vec3 { x: 1.0, y: 1.0, z: 1.0 },
-                            rotate: Vec3 { x: 331.999999459, y: 0.0, z: 0.0 },
-                            translate: Vec3 { x: 0.0, y: end_y, z: end_z },
-                        },
+                },
+                Point {
+                    arg: (0, 0, 0, 0, 0.0, 0.0),
+                    ctl: [0.0, end_y, end_z, 0.0, end_y, end_z],
+                    lnk: vec![],
+                    srt: Transform {
+                        scale: Vec3 { x: 1.0, y: 1.0, z: 1.0 },
+                        rotate: Vec3 { x: 331.999999459, y: 0.0, z: 0.0 },
+                        translate: Vec3 { x: 0.0, y: end_y, z: end_z },
                     },
-                ],
-                rng: false,
-                unq: 14,
-            },
-        );
+                },
+            ],
+            rng: false,
+            unq: 14,
+        });
     }
 
     // Remove Maze Guards after Dark Palace
@@ -598,34 +551,25 @@ fn patch_dark(patcher: &mut Patcher, prize: Randomizable) {
 }
 
 /// Swamp Palace
-fn patch_swamp(patcher: &mut Patcher, prize: Randomizable) {
-    if prize == Item(SageOren) {
-        return;
-    }
-
-    modify_dungeon_reward(patcher, prize, 13, DungeonWater, 3, true, SpawnPoint::new(FieldDark, 33, 0));
+fn patch_swamp(patcher: &mut Patcher, seed_info: &SeedInfo, prize: Randomizable) {
+    let sp = get_dungeon_prize_spawn(SwampPalaceExit, &seed_info.door_map);
+    modify_dungeon_reward(patcher, prize, 13, DungeonWater, 3, true, sp);
 }
 
 /// Skull Woods
-fn patch_skull(patcher: &mut Patcher, prize: Randomizable) {
-    if prize == Item(SageSeres) {
-        return;
-    }
-
-    modify_dungeon_reward(patcher, prize, 273, FieldDark, 1, true, SpawnPoint::new(FieldDark, 1, 10));
+fn patch_skull(patcher: &mut Patcher, seed_info: &SeedInfo, prize: Randomizable) {
+    let sp = get_dungeon_prize_spawn(SkullWoodsExit, &seed_info.door_map);
+    modify_dungeon_reward(patcher, prize, 273, FieldDark, 1, true, sp);
 }
 
 /// Thieves' Hideout
 fn patch_thieves(patcher: &mut Patcher, prize: Randomizable) {
-    if prize == Item(SageOsfala) {
-        return;
-    }
-
+    // Always put the player outside the Portrait House, even in Door Shuffle
     modify_dungeon_reward(patcher, prize, 3, IndoorDark, 15, true, SpawnPoint::new(FieldDark, 16, 14));
 }
 
 /// Turtle Rock
-fn patch_turtle(patcher: &mut Patcher, prize: Randomizable) {
+fn patch_turtle(patcher: &mut Patcher, seed_info: &SeedInfo, prize: Randomizable) {
     // Debug stuff
     // patcher.modify_objs(DungeonKame, 3, &[
     //     disable(8), // Grinexx
@@ -635,40 +579,34 @@ fn patch_turtle(patcher: &mut Patcher, prize: Randomizable) {
     //                 Obj::step_switch(Flag::Course(130), 0, 32, 100,
     //                                  Vec3 { x: 0.0, y: 5.0, z: -39.0 }));
 
+    const UNQ_PRIZE: u16 = 56;
+
+    let sp = get_dungeon_prize_spawn(TurtleRockExit, &seed_info.door_map);
+    modify_dungeon_reward(patcher, prize, UNQ_PRIZE, DungeonKame, 3, false, sp);
+
     if prize == Item(SageImpa) {
         return;
     }
 
-    const UNQ_PRIZE: u16 = 56;
     const DY: f32 = -2.0;
     const DZ: f32 = 0.5;
 
-    modify_dungeon_reward(patcher, prize, UNQ_PRIZE, DungeonKame, 3, false, SpawnPoint::new(FieldDark, 35, 6));
-
     if is_pendant(prize) {
         // Pendants don't ride on the pillar, so manually move them and remove the pillar
-        patcher.modify_objs(
-            DungeonKame,
-            3,
-            [
-                call(UNQ_PRIZE, move |obj| {
-                    obj.srt.translate.z = -44.0;
-                    obj.srt.translate.y = 5.0;
-                }),
-                disable(9), // dgn_Kame_Pillar
-            ],
-        );
+        patcher.modify_objs(DungeonKame, 3, [
+            call(UNQ_PRIZE, move |obj| {
+                obj.srt.translate.z = -44.0;
+                obj.srt.translate.y = 5.0;
+            }),
+            disable(9), // dgn_Kame_Pillar
+        ]);
     } else {
         // Gulley is a difficult child
         if prize == Item(SageGulley) {
-            patcher.modify_objs(
-                DungeonKame,
-                3,
-                [call(UNQ_PRIZE, move |obj| {
-                    obj.srt.translate.z += DZ;
-                    obj.srt.translate.y += 15.0 + DY;
-                })],
-            );
+            patcher.modify_objs(DungeonKame, 3, [call(UNQ_PRIZE, move |obj| {
+                obj.srt.translate.z += DZ;
+                obj.srt.translate.y += 15.0 + DY;
+            })]);
         }
 
         // Modify Rails so that non-Impa Portraits are reachable
@@ -683,19 +621,15 @@ fn patch_turtle(patcher: &mut Patcher, prize: Randomizable) {
             rail.pnt.push(p);
         };
 
-        patcher.modify_rails(
-            DungeonKame,
-            3,
-            [
-                call_rail(1, fn_extend_rails),  // dgn_Kame_Pillar
-                call_rail(17, fn_extend_rails), // Impa
-            ],
-        );
+        patcher.modify_rails(DungeonKame, 3, [
+            call_rail(1, fn_extend_rails),  // dgn_Kame_Pillar
+            call_rail(17, fn_extend_rails), // Impa
+        ]);
     }
 }
 
 /// Desert Palace
-fn patch_desert(patcher: &mut Patcher, prize: Randomizable) {
+fn patch_desert(patcher: &mut Patcher, seed_info: &SeedInfo, prize: Randomizable) {
     // Debug stuff
     // patcher.modify_objs(FieldDark, 31, &[
     //     disable(67), // Zaganaga
@@ -705,39 +639,29 @@ fn patch_desert(patcher: &mut Patcher, prize: Randomizable) {
     //                 Obj::step_switch(Flag::Course(252), 0, 58, 137,
     //                                  Vec3 { x: -19.0, y: 0.0, z: -19.0 }));
 
+    // When DoorShuffle is enabled have the DP prize send the player to outside the dungeon's
+    // entrance, but otherwise keep the vanilla behavior of sending them to the Mire WV.
+    let sp = if seed_info.settings.door_shuffle != DoorShuffle::Off {
+        get_dungeon_prize_spawn(DesertPalaceExit, &seed_info.door_map)
+    } else {
+        SpawnPoint::new(FieldDark, 31, 30) // Misery Mire Weather Vane
+    };
+
+    modify_dungeon_reward(patcher, prize, 76, FieldDark, 31, true, sp);
+
     if prize == Item(SageIrene) {
         return;
     }
 
-    modify_dungeon_reward(patcher, prize, 76, FieldDark, 31, true, SpawnPoint::new(FieldDark, 31, 30));
-
     let prize_flag = prize_flag(prize);
-
-    // Add blue warp to allow going from Zaga to Mire repeatedly, not just when first picking up the dungeon prize
-    let (unq, ser) = patcher.find_objs_unq_ser(FieldDark, 31);
-    let mut warp_tile = Obj::blue_warp(
-        prize_flag,
-        0,
-        ser,
-        unq,
-        SpawnPoint::new(FieldDark, 31, 30),
-        Vec3 { x: -13.0, y: 0.0, z: -24.0 },
-    );
-    warp_tile.set_enable_flag(prize_flag);
-    patcher.add_obj(FieldDark, 31, warp_tile);
-
-    patcher.modify_objs(
-        FieldDark,
-        31,
-        [
-            set_enable_flag(132, prize_flag), // Warp to leave boss area
-            set_enable_flag(133, prize_flag), // Destination Warp
-        ],
-    );
+    patcher.modify_objs(FieldDark, 31, [
+        set_enable_flag(132, prize_flag), // Warp to leave boss area
+        set_enable_flag(133, prize_flag), // Destination Warp
+    ]);
 }
 
 /// Ice Ruins
-fn patch_ice(patcher: &mut Patcher, prize: Randomizable) {
+fn patch_ice(patcher: &mut Patcher, seed_info: &SeedInfo, prize: Randomizable) {
     // Debug stuff
     // patcher.modify_system(DungeonIce, 1, &[
     //     call(68, |obj| {
@@ -745,11 +669,30 @@ fn patch_ice(patcher: &mut Patcher, prize: Randomizable) {
     //     }),
     // ]);
 
-    if prize == Item(SageRosso) {
-        return;
-    }
+    let sp = get_dungeon_prize_spawn(IceRuinsExit, &seed_info.door_map);
+    modify_dungeon_reward(patcher, prize, 16, DungeonIce, 1, true, sp);
 
-    modify_dungeon_reward(patcher, prize, 16, DungeonIce, 1, true, SpawnPoint::new(FieldDark, 5, 0));
+    // Remove old trigger in dungeon
+    patcher.modify_objs(DungeonIce, 1, [disable(942)]);
+
+    // Add trigger overlapping loading zone to set Flag 610 to clear the entrance blocker
+    patcher.add_obj(
+        FieldDark,
+        5,
+        Obj::trigger_cube(Flag::Event(610), 0, 18, 34, Transform {
+            scale: Vec3 { x: 2.0, y: 2.0, z: 2.0 },
+            rotate: Vec3::ZERO,
+            translate: Vec3 { x: 0.5, y: 9.5, z: -3.5 },
+        }),
+    );
+}
+
+fn get_dungeon_prize_spawn(exit: Door, door_map: &DoorMap) -> SpawnPoint {
+    let entrance = door_map.get(&exit).unwrap();
+
+    // If this dungeon exits to the Swamp Palace entrance, spawn them directly outside the
+    // building just like it does in vanilla. Otherwise, just use the entrance's spawn point.
+    if entrance == &Door::SwampPalaceEntrance { SpawnPoint::new(FieldDark, 33, 0) } else { entrance.get_spawn_point() }
 }
 
 struct PrizePatchData {
@@ -808,23 +751,19 @@ fn modify_dungeon_reward(
     sp: SpawnPoint,
 ) {
     let data = PrizePatchData::get(prize);
-    patcher.modify_objs(
-        scene,
-        scene_index,
-        [call(unq, move |obj| {
-            obj.set_id(data.actor_id);
-            obj.arg.1 = data.arg1;
-            if activate {
-                obj.set_active_flag(Flag::Event(1));
-            }
-            obj.set_inactive_flag(data.flag);
-            obj.set_rotate(data.rot_x, 0.0, 0.0);
-            obj.set_disable_flag(data.flag);
-            if is_pendant(prize) {
-                obj.redirect(sp);
-            }
-        })],
-    );
+    patcher.modify_objs(scene, scene_index, [call(unq, move |obj| {
+        obj.set_id(data.actor_id);
+        obj.arg.1 = data.arg1;
+        if activate {
+            obj.set_active_flag(Flag::Event(1));
+        }
+        obj.set_inactive_flag(data.flag);
+        obj.set_rotate(data.rot_x, 0.0, 0.0);
+        obj.set_disable_flag(data.flag);
+        if is_pendant(prize) {
+            obj.redirect(sp);
+        }
+    })]);
     if is_sage(prize) {
         reroute_sage_warp(patcher, prize, sp);
     }

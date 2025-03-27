@@ -4,6 +4,8 @@ crate::region! {
     color: Name,
     palace {
         locations: [
+            "Desert Palace Exit": None @Door(1[38] DesertPalaceExit),
+
             "[DP] (1F) Entrance": RupeeB @Chest(1[78]),
 
             "[DP] (1F) Sand Room (South)": LiverBlue @Chest(1[565]),
@@ -13,9 +15,9 @@ crate::region! {
             "[DP] (1F) Big Chest (Behind Wall)": PowerfulGlove @BigChest(1[70]),
 
             "[DP] (2F) Under Rock (Left)": RupeeSilver @Chest(2[550]),
-            "[DP] (2F) Beamos Room": RupeeSilver @Chest(2[545]),
+            "[DP] (2F) Beamos Room": RupeeSilver @Chest(2[276]),
             "[DP] (2F) Under Rock (Right)": RupeeSilver @Chest(2[548]),
-            "[DP] (2F) Under Rock (Ball Room)": RupeeSilver @Chest(2[276]),
+            "[DP] (2F) Under Rock (Ball Room)": RupeeSilver @Chest(2[545]),
             "[DP] (2F) Big Chest (Puzzle)": KeyBoss @BigChest(2[35]),
             "[DP] (2F) Red/Blue Switches": KeySmall @Chest(2[462]),
 

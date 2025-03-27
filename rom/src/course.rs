@@ -1,9 +1,9 @@
 use game::Course as Id;
 
 use crate::{
+    Result, Rom, SceneMeta,
     language::Language,
     scene::{Scene, Stage},
-    Result, Rom, SceneMeta,
 };
 
 #[derive(Debug)]

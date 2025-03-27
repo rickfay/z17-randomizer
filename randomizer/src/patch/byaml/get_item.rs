@@ -1,5 +1,5 @@
-use crate::patch::Patcher;
 use crate::Result;
+use crate::patch::Patcher;
 
 /// GetItem.byaml patches
 /// FIXME causes visual effects to stop working for... some reason.

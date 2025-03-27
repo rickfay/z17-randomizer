@@ -1,6 +1,6 @@
-use crate::{actors::Actors, files::sarc::Sarc, flag::Flag, File, Item, Result};
+use crate::{File, Item, Result, actors::Actors, files::sarc::Sarc, flag::Flag};
 use game::Course;
-use serde::{de, ser::SerializeTuple, Deserialize, Deserializer, Serialize, Serializer};
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeTuple};
 use std::fmt;
 use std::ops::Add;
 
@@ -153,51 +153,27 @@ impl Stage {
     }
 
     pub fn get_obj(&mut self, unq: u16) -> Option<&Obj> {
-        if let Some(i) = self.objs.iter().position(|obj| obj.unq == unq) {
-            self.objs.get(i)
-        } else {
-            None
-        }
+        if let Some(i) = self.objs.iter().position(|obj| obj.unq == unq) { self.objs.get(i) } else { None }
     }
 
     pub fn get_obj_mut(&mut self, unq: u16) -> Option<&mut Obj> {
-        if let Some(i) = self.objs.iter().position(|obj| obj.unq == unq) {
-            self.objs.get_mut(i)
-        } else {
-            None
-        }
+        if let Some(i) = self.objs.iter().position(|obj| obj.unq == unq) { self.objs.get_mut(i) } else { None }
     }
 
     pub fn get_rail(&mut self, unq: u16) -> Option<&Rail> {
-        if let Some(i) = self.rails.iter().position(|obj| obj.unq == unq) {
-            self.rails.get(i)
-        } else {
-            None
-        }
+        if let Some(i) = self.rails.iter().position(|obj| obj.unq == unq) { self.rails.get(i) } else { None }
     }
 
     pub fn get_rails_mut(&mut self, unq: u16) -> Option<&mut Rail> {
-        if let Some(i) = self.rails.iter().position(|rail| rail.unq == unq) {
-            self.rails.get_mut(i)
-        } else {
-            None
-        }
+        if let Some(i) = self.rails.iter().position(|rail| rail.unq == unq) { self.rails.get_mut(i) } else { None }
     }
 
     pub fn get_system(&mut self, unq: u16) -> Option<&Obj> {
-        if let Some(i) = self.system.iter().position(|obj| obj.unq == unq) {
-            self.system.get(i)
-        } else {
-            None
-        }
+        if let Some(i) = self.system.iter().position(|obj| obj.unq == unq) { self.system.get(i) } else { None }
     }
 
     pub fn get_system_mut(&mut self, unq: u16) -> Option<&mut Obj> {
-        if let Some(i) = self.system.iter().position(|sys| sys.unq == unq) {
-            self.system.get_mut(i)
-        } else {
-            None
-        }
+        if let Some(i) = self.system.iter().position(|sys| sys.unq == unq) { self.system.get_mut(i) } else { None }
     }
 
     /// Finds the lowest currently unused Objs UNQ
@@ -209,11 +185,7 @@ impl Stage {
     pub fn find_objs_ser(&self) -> u16 {
         self.objs.iter().fold(0, |max_ser, obj| {
             let ser = obj.ser.unwrap();
-            if ser > max_ser {
-                ser
-            } else {
-                max_ser
-            }
+            if ser > max_ser { ser } else { max_ser }
         }) + 1
     }
 
@@ -231,11 +203,7 @@ impl Stage {
     pub fn find_system_ser(&self) -> u16 {
         self.system.iter().fold(0, |max_ser, obj| {
             let ser = obj.ser.unwrap();
-            if ser > max_ser {
-                ser
-            } else {
-                max_ser
-            }
+            if ser > max_ser { ser } else { max_ser }
         }) + 1
     }
 }
@@ -305,7 +273,7 @@ impl Obj {
 
     /// Generate a new AreaSwitchCube trigger object
     /// ID: 14
-    pub fn trigger_cube(trigger_flag: Flag, clp: i16, ser: u16, unq: u16, translate: Vec3) -> Self {
+    pub fn trigger_cube(trigger_flag: Flag, clp: i16, ser: u16, unq: u16, srt: Transform) -> Self {
         let (arg4, arg6) = trigger_flag.into_pair();
         Self {
             arg: Arg(0, 0, 0, 0, arg4, 0, arg6, 0, 0, 0, 0, 0, 0, 0.0),
@@ -316,7 +284,7 @@ impl Obj {
             nme: Some(String::from("Invalid")),
             ril: vec![],
             ser: Some(ser),
-            srt: Transform { scale: Vec3::UNIT, rotate: Vec3::ZERO, translate },
+            srt,
             typ: 6,
             unq,
         }

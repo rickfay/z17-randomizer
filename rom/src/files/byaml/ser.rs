@@ -167,10 +167,7 @@ where
         self.empty()
     }
 
-    fn serialize_some<T: ?Sized>(self, value: &T) -> Result<Self::Ok, Self::Error>
-    where
-        T: Serialize,
-    {
+    fn serialize_some<T: Serialize + ?Sized>(self, value: &T) -> Result<Self::Ok, Self::Error> {
         value.serialize(self)
     }
 
@@ -188,19 +185,15 @@ where
         Err(Self::invalid_root("unit variant"))
     }
 
-    fn serialize_newtype_struct<T: ?Sized>(self, _name: &'static str, value: &T) -> Result<Self::Ok, Self::Error>
-    where
-        T: Serialize,
-    {
+    fn serialize_newtype_struct<T: Serialize + ?Sized>(
+        self, _name: &'static str, value: &T,
+    ) -> Result<Self::Ok, Self::Error> {
         value.serialize(self)
     }
 
-    fn serialize_newtype_variant<T: ?Sized>(
+    fn serialize_newtype_variant<T: Serialize + ?Sized>(
         self, _name: &'static str, _variant_index: u32, _variant: &'static str, _value: &T,
-    ) -> Result<Self::Ok, Self::Error>
-    where
-        T: Serialize,
-    {
+    ) -> Result<Self::Ok, Self::Error> {
         Err(Self::invalid_root("newtype variant"))
     }
 
@@ -436,10 +429,7 @@ where
     type Ok = ();
     type Error = Error;
 
-    fn serialize_element<T: ?Sized>(&mut self, value: &T) -> Result<Self::Ok, Self::Error>
-    where
-        T: Serialize,
-    {
+    fn serialize_element<T: Serialize + ?Sized>(&mut self, value: &T) -> Result<Self::Ok, Self::Error> {
         self.array.push(&mut self.document, value)
     }
 
@@ -455,10 +445,7 @@ where
     type Ok = ();
     type Error = Error;
 
-    fn serialize_element<T: ?Sized>(&mut self, value: &T) -> Result<(), Self::Error>
-    where
-        T: Serialize,
-    {
+    fn serialize_element<T: Serialize + ?Sized>(&mut self, value: &T) -> Result<(), Self::Error> {
         self.array.push(&mut self.document, value)
     }
 
@@ -474,10 +461,7 @@ where
     type Ok = ();
     type Error = Error;
 
-    fn serialize_field<T: ?Sized>(&mut self, value: &T) -> Result<(), Self::Error>
-    where
-        T: Serialize,
-    {
+    fn serialize_field<T: Serialize + ?Sized>(&mut self, value: &T) -> Result<(), Self::Error> {
         self.array.push(&mut self.document, value)
     }
 
@@ -515,17 +499,11 @@ where
     type Ok = ();
     type Error = Error;
 
-    fn serialize_key<T: ?Sized>(&mut self, key: &T) -> Result<(), Self::Error>
-    where
-        T: Serialize,
-    {
+    fn serialize_key<T: Serialize + ?Sized>(&mut self, key: &T) -> Result<(), Self::Error> {
         self.map.insert_key(&mut self.document, key)
     }
 
-    fn serialize_value<T: ?Sized>(&mut self, value: &T) -> Result<(), Self::Error>
-    where
-        T: Serialize,
-    {
+    fn serialize_value<T: Serialize + ?Sized>(&mut self, value: &T) -> Result<(), Self::Error> {
         self.map.insert_value(&mut self.document, value)
     }
 
@@ -541,10 +519,7 @@ where
     type Ok = ();
     type Error = Error;
 
-    fn serialize_field<T: ?Sized>(&mut self, key: &'static str, value: &T) -> Result<(), Self::Error>
-    where
-        T: Serialize,
-    {
+    fn serialize_field<T: Serialize + ?Sized>(&mut self, key: &'static str, value: &T) -> Result<(), Self::Error> {
         self.map.insert_key(&mut self.document, key)?;
         self.map.insert_value(&mut self.document, value)
     }
@@ -672,10 +647,7 @@ impl<'doc> ser::Serializer for &'doc mut Document {
         Ok(self.null())
     }
 
-    fn serialize_some<T: ?Sized>(self, value: &T) -> Result<Self::Ok, Self::Error>
-    where
-        T: Serialize,
-    {
+    fn serialize_some<T: Serialize + ?Sized>(self, value: &T) -> Result<Self::Ok, Self::Error> {
         value.serialize(self)
     }
 
@@ -693,19 +665,15 @@ impl<'doc> ser::Serializer for &'doc mut Document {
         Err(ser::Error::custom("enum variant serialization not supported"))
     }
 
-    fn serialize_newtype_struct<T: ?Sized>(self, _name: &'static str, value: &T) -> Result<Self::Ok, Self::Error>
-    where
-        T: Serialize,
-    {
+    fn serialize_newtype_struct<T: Serialize + ?Sized>(
+        self, _name: &'static str, value: &T,
+    ) -> Result<Self::Ok, Self::Error> {
         value.serialize(self)
     }
 
-    fn serialize_newtype_variant<T: ?Sized>(
+    fn serialize_newtype_variant<T: Serialize + ?Sized>(
         self, _name: &'static str, _variant_index: u32, _variant: &'static str, _value: &T,
-    ) -> Result<Self::Ok, Self::Error>
-    where
-        T: Serialize,
-    {
+    ) -> Result<Self::Ok, Self::Error> {
         Err(ser::Error::custom("enum variant serialization not supported"))
     }
 
@@ -764,10 +732,7 @@ impl Array {
         self.0.len() as u32
     }
 
-    fn push<T: ?Sized>(&mut self, document: &mut Document, value: &T) -> Result<()>
-    where
-        T: Serialize,
-    {
+    fn push<T: Serialize + ?Sized>(&mut self, document: &mut Document, value: &T) -> Result<()> {
         self.0.push(value.serialize(document)?);
         Ok(())
     }
@@ -797,10 +762,7 @@ impl<'doc> SerializeSeq for BArray<'doc> {
     type Ok = Node;
     type Error = Error;
 
-    fn serialize_element<T: ?Sized>(&mut self, value: &T) -> Result<(), Self::Error>
-    where
-        T: Serialize,
-    {
+    fn serialize_element<T: Serialize + ?Sized>(&mut self, value: &T) -> Result<(), Self::Error> {
         self.array.push(self.document, value)
     }
 
@@ -813,10 +775,7 @@ impl<'doc> SerializeTuple for BArray<'doc> {
     type Ok = Node;
     type Error = Error;
 
-    fn serialize_element<T: ?Sized>(&mut self, value: &T) -> Result<(), Self::Error>
-    where
-        T: Serialize,
-    {
+    fn serialize_element<T: Serialize + ?Sized>(&mut self, value: &T) -> Result<(), Self::Error> {
         self.array.push(self.document, value)
     }
 
@@ -829,10 +788,7 @@ impl<'doc> SerializeTupleStruct for BArray<'doc> {
     type Ok = Node;
     type Error = Error;
 
-    fn serialize_field<T: ?Sized>(&mut self, value: &T) -> Result<(), Self::Error>
-    where
-        T: Serialize,
-    {
+    fn serialize_field<T: Serialize + ?Sized>(&mut self, value: &T) -> Result<(), Self::Error> {
         self.array.push(self.document, value)
     }
 
@@ -845,10 +801,7 @@ impl<'doc> SerializeTupleVariant for BArray<'doc> {
     type Ok = Node;
     type Error = Error;
 
-    fn serialize_field<T: ?Sized>(&mut self, value: &T) -> Result<(), Self::Error>
-    where
-        T: Serialize,
-    {
+    fn serialize_field<T: Serialize + ?Sized>(&mut self, value: &T) -> Result<(), Self::Error> {
         self.array.push(self.document, value)
     }
 
@@ -880,18 +833,12 @@ impl Map {
         self.entries.len() as u32
     }
 
-    fn insert_key<T: ?Sized>(&mut self, document: &mut Document, key: &T) -> Result<()>
-    where
-        T: Serialize,
-    {
+    fn insert_key<T: Serialize + ?Sized>(&mut self, document: &mut Document, key: &T) -> Result<()> {
         self.last_key = Some(key.serialize(&mut document.keys)?);
         Ok(())
     }
 
-    fn insert_value<T: ?Sized>(&mut self, document: &mut Document, value: &T) -> Result<()>
-    where
-        T: Serialize,
-    {
+    fn insert_value<T: Serialize + ?Sized>(&mut self, document: &mut Document, value: &T) -> Result<()> {
         if let Some(key) = self.last_key.take() {
             self.entries.push((key, value.serialize(document)?));
             Ok(())
@@ -925,17 +872,11 @@ impl<'doc> SerializeMap for BMap<'doc> {
     type Ok = Node;
     type Error = Error;
 
-    fn serialize_key<T: ?Sized>(&mut self, key: &T) -> Result<(), Self::Error>
-    where
-        T: Serialize,
-    {
+    fn serialize_key<T: Serialize + ?Sized>(&mut self, key: &T) -> Result<(), Self::Error> {
         self.map.insert_key(self.document, key)
     }
 
-    fn serialize_value<T: ?Sized>(&mut self, value: &T) -> Result<(), Self::Error>
-    where
-        T: Serialize,
-    {
+    fn serialize_value<T: Serialize + ?Sized>(&mut self, value: &T) -> Result<(), Self::Error> {
         self.map.insert_value(self.document, value)
     }
 
@@ -948,10 +889,7 @@ impl<'doc> SerializeStruct for BMap<'doc> {
     type Ok = Node;
     type Error = Error;
 
-    fn serialize_field<T: ?Sized>(&mut self, key: &'static str, value: &T) -> Result<(), Self::Error>
-    where
-        T: Serialize,
-    {
+    fn serialize_field<T: Serialize + ?Sized>(&mut self, key: &'static str, value: &T) -> Result<(), Self::Error> {
         self.map.insert_key(self.document, key)?;
         self.map.insert_value(self.document, value)
     }
@@ -965,10 +903,7 @@ impl<'doc> SerializeStructVariant for BMap<'doc> {
     type Ok = Node;
     type Error = Error;
 
-    fn serialize_field<T: ?Sized>(&mut self, key: &'static str, value: &T) -> Result<(), Self::Error>
-    where
-        T: Serialize,
-    {
+    fn serialize_field<T: Serialize + ?Sized>(&mut self, key: &'static str, value: &T) -> Result<(), Self::Error> {
         self.map.insert_key(self.document, key)?;
         self.map.insert_value(self.document, value)
     }
@@ -1080,10 +1015,7 @@ impl<'doc> ser::Serializer for &'doc mut Strings {
         Err(Strings::invalid("None"))
     }
 
-    fn serialize_some<T: ?Sized>(self, _value: &T) -> Result<Self::Ok, Self::Error>
-    where
-        T: Serialize,
-    {
+    fn serialize_some<T: Serialize + ?Sized>(self, _value: &T) -> Result<Self::Ok, Self::Error> {
         Err(Strings::invalid("Some"))
     }
 
@@ -1101,19 +1033,15 @@ impl<'doc> ser::Serializer for &'doc mut Strings {
         Err(Strings::invalid("unit variant"))
     }
 
-    fn serialize_newtype_struct<T: ?Sized>(self, _name: &'static str, _value: &T) -> Result<Self::Ok, Self::Error>
-    where
-        T: Serialize,
-    {
+    fn serialize_newtype_struct<T: Serialize + ?Sized>(
+        self, _name: &'static str, _value: &T,
+    ) -> Result<Self::Ok, Self::Error> {
         Err(Strings::invalid("newtype struct"))
     }
 
-    fn serialize_newtype_variant<T: ?Sized>(
+    fn serialize_newtype_variant<T: Serialize + ?Sized>(
         self, _name: &'static str, _variant_index: u32, _variant: &'static str, _value: &T,
-    ) -> Result<Self::Ok, Self::Error>
-    where
-        T: Serialize,
-    {
+    ) -> Result<Self::Ok, Self::Error> {
         Err(Strings::invalid("newtype variant"))
     }
 

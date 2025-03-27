@@ -4,7 +4,7 @@ use super::DungeonPrizes;
 use crate::filler::filler_item;
 use crate::filler::filler_item::Randomizable;
 use crate::filler::filler_item::Randomizable::Item;
-use crate::{regions, Layout};
+use crate::{Layout, regions};
 use macros::fail;
 use rom::flag::Flag;
 use rom::scene::{Obj, Rail, SpawnPoint, Vec3};

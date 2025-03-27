@@ -4,6 +4,8 @@ crate::region! {
     color: Name,
     castle {
         locations: [
+            "Inside Hyrule Castle Exit": None @Door(DungeonCastle 1[15] InsideHyruleCastleExit),
+
             "[HC] Crack": None @Crack(7[10] HyruleCastle),
 
             "[HC] Battlement": RupeePurple @Chest(FieldLight 18[224]),

@@ -1,11 +1,15 @@
-use crate::filler::cracks::Crack;
-use crate::hints::{hint_color::HintColor::*, hint_ghost_name};
-use crate::patch::lms::msbf::MsbfKey;
-use crate::Result;
+use std::fmt::Debug;
+
+use serde::{Serialize, Serializer};
+
 use game::ghosts::HintGhost;
 use rom::flag::Flag;
-use serde::{Serialize, Serializer};
-use std::fmt::Debug;
+
+use crate::Result;
+use crate::filler::cracks::Crack;
+use crate::filler::doors::Door;
+use crate::hints::{hint_color::HintColor::*, hint_ghost_name};
+use crate::patch::lms::msbf::MsbfKey;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum Randomizable {
@@ -13,6 +17,7 @@ pub enum Randomizable {
     Goal(Goal),
     HintGhost(HintGhost),
     Vane(Vane),
+    Door(Door),
     Crack(Crack),
 }
 
@@ -25,8 +30,8 @@ impl Randomizable {
     }
 
     pub fn normalize(self) -> game::Item {
-        use game::Item::*;
         use Randomizable::*;
+        use game::Item::*;
         match self {
             Item(item) => match item.to_game_item() {
                 PackageSword | ItemSwordLv1 | ItemSwordLv3 | ItemSwordLv4 => ItemSwordLv2,
@@ -192,136 +197,134 @@ impl Randomizable {
 
     pub fn is_major_item(&self) -> bool {
         use crate::filler::filler_item::Item::*;
-        if let Randomizable::Item(item) = self {
-            match item {
+        matches!(
+            self,
+            Randomizable::Item(
                 Bow01
-                | Bow02
-                | Bow03
-                | Boomerang01
-                | Boomerang02
-                | Hookshot01
-                | Hookshot02
-                | Bombs01
-                | Bombs02
-                | FireRod01
-                | FireRod02
-                | IceRod01
-                | IceRod02
-                | Hammer01
-                | Hammer02
-                | SandRod01
-                | SandRod02
-                | TornadoRod01
-                | TornadoRod02
-                | Bell
-                | StaminaScroll
-                | BowOfLight
-                | PegasusBoots
-                | Flippers
-                | RaviosBracelet01
-                | RaviosBracelet02
-                | HylianShield
-                | SmoothGem
-                | LetterInABottle
-                | PremiumMilk
-                | Pouch
-                | BeeBadge
-                | HintGlasses
-                | GreatSpin
-                | Bottle01
-                | Bottle02
-                | Bottle03
-                | Bottle04
-                | Bottle05
-                | Lamp01
-                | Lamp02
-                | Sword01
-                | Sword02
-                | Sword03
-                | Sword04
-                | Glove01
-                | Glove02
-                | Net01
-                | Net02
-                | Mail01
-                | Mail02
-                | OreYellow
-                | OreGreen
-                | OreBlue
-                | OreRed
-                | HyruleSanctuaryKey
-                | LoruleSanctuaryKey
-                | EasternKeyBig
-                | EasternKeySmall01
-                | EasternKeySmall02
-                | GalesKeyBig
-                | GalesKeySmall01
-                | GalesKeySmall02
-                | GalesKeySmall03
-                | GalesKeySmall04
-                | HeraKeyBig
-                | HeraKeySmall01
-                | HeraKeySmall02
-                | DarkKeyBig
-                | DarkKeySmall01
-                | DarkKeySmall02
-                | DarkKeySmall03
-                | DarkKeySmall04
-                | SwampKeyBig
-                | SwampKeySmall01
-                | SwampKeySmall02
-                | SwampKeySmall03
-                | SwampKeySmall04
-                | SkullKeyBig
-                | SkullKeySmall01
-                | SkullKeySmall02
-                | SkullKeySmall03
-                | ThievesKeyBig
-                | ThievesKeySmall
-                | IceKeyBig
-                | IceKeySmall01
-                | IceKeySmall02
-                | IceKeySmall03
-                | DesertKeyBig
-                | DesertKeySmall01
-                | DesertKeySmall02
-                | DesertKeySmall03
-                | DesertKeySmall04
-                | DesertKeySmall05
-                | TurtleKeyBig
-                | TurtleKeySmall01
-                | TurtleKeySmall02
-                | TurtleKeySmall03
-                | LoruleCastleKeySmall01
-                | LoruleCastleKeySmall02
-                | LoruleCastleKeySmall03
-                | LoruleCastleKeySmall04
-                | LoruleCastleKeySmall05
-                | PendantOfPower
-                | PendantOfWisdom
-                | Charm
-                | PendantOfCourage
-                | SageGulley
-                | SageOren
-                | SageSeres
-                | SageOsfala
-                | SageRosso
-                | SageIrene
-                | SageImpa
-                | Quake
-                | ScootFruit01
-                | FoulFruit01
-                | Shield01
-                | ScootFruit02
-                | FoulFruit02
-                | Shield02
-                | Shield03
-                | Shield04 => return true,
-                _ => {},
-            }
-        };
-
-        false
+                    | Bow02
+                    | Bow03
+                    | Boomerang01
+                    | Boomerang02
+                    | Hookshot01
+                    | Hookshot02
+                    | Bombs01
+                    | Bombs02
+                    | FireRod01
+                    | FireRod02
+                    | IceRod01
+                    | IceRod02
+                    | Hammer01
+                    | Hammer02
+                    | SandRod01
+                    | SandRod02
+                    | TornadoRod01
+                    | TornadoRod02
+                    | Bell
+                    | StaminaScroll
+                    | BowOfLight
+                    | PegasusBoots
+                    | Flippers
+                    | RaviosBracelet01
+                    | RaviosBracelet02
+                    | HylianShield
+                    | SmoothGem
+                    | LetterInABottle
+                    | PremiumMilk
+                    | Pouch
+                    | BeeBadge
+                    | HintGlasses
+                    | GreatSpin
+                    | Bottle01
+                    | Bottle02
+                    | Bottle03
+                    | Bottle04
+                    | Bottle05
+                    | Lamp01
+                    | Lamp02
+                    | Sword01
+                    | Sword02
+                    | Sword03
+                    | Sword04
+                    | Glove01
+                    | Glove02
+                    | Net01
+                    | Net02
+                    | Mail01
+                    | Mail02
+                    | OreYellow
+                    | OreGreen
+                    | OreBlue
+                    | OreRed
+                    | HyruleSanctuaryKey
+                    | LoruleSanctuaryKey
+                    | EasternKeyBig
+                    | EasternKeySmall01
+                    | EasternKeySmall02
+                    | GalesKeyBig
+                    | GalesKeySmall01
+                    | GalesKeySmall02
+                    | GalesKeySmall03
+                    | GalesKeySmall04
+                    | HeraKeyBig
+                    | HeraKeySmall01
+                    | HeraKeySmall02
+                    | DarkKeyBig
+                    | DarkKeySmall01
+                    | DarkKeySmall02
+                    | DarkKeySmall03
+                    | DarkKeySmall04
+                    | SwampKeyBig
+                    | SwampKeySmall01
+                    | SwampKeySmall02
+                    | SwampKeySmall03
+                    | SwampKeySmall04
+                    | SkullKeyBig
+                    | SkullKeySmall01
+                    | SkullKeySmall02
+                    | SkullKeySmall03
+                    | ThievesKeyBig
+                    | ThievesKeySmall
+                    | IceKeyBig
+                    | IceKeySmall01
+                    | IceKeySmall02
+                    | IceKeySmall03
+                    | DesertKeyBig
+                    | DesertKeySmall01
+                    | DesertKeySmall02
+                    | DesertKeySmall03
+                    | DesertKeySmall04
+                    | DesertKeySmall05
+                    | TurtleKeyBig
+                    | TurtleKeySmall01
+                    | TurtleKeySmall02
+                    | TurtleKeySmall03
+                    | LoruleCastleKeySmall01
+                    | LoruleCastleKeySmall02
+                    | LoruleCastleKeySmall03
+                    | LoruleCastleKeySmall04
+                    | LoruleCastleKeySmall05
+                    | PendantOfPower
+                    | PendantOfWisdom
+                    | Charm
+                    | PendantOfCourage
+                    | SageGulley
+                    | SageOren
+                    | SageSeres
+                    | SageOsfala
+                    | SageRosso
+                    | SageIrene
+                    | SageImpa
+                    | Quake
+                    | ScootFruit01
+                    | FoulFruit01
+                    | Shield01
+                    | ScootFruit02
+                    | FoulFruit02
+                    | Shield02
+                    | Shield03
+                    | Shield04
+            )
+        )
     }
 
     pub fn msbf_key(self) -> Option<&'static str> {
@@ -346,6 +349,7 @@ impl Randomizable {
             Self::Goal(goal) => goal.as_str(),
             Self::HintGhost(ghost) => hint_ghost_name(&ghost),
             Self::Vane(vane) => vane.as_str(),
+            Self::Door(door) => door.as_str(),
             Self::Crack(crack) => crack.as_str(),
         }
     }
@@ -832,6 +836,9 @@ pub enum Item {
     GoldBee03,
     Fairy02,
     Shield04,
+
+    EnergyPotion,
+    Heart,
 }
 
 impl Item {
@@ -862,6 +869,8 @@ impl Item {
             Pouch => game::Item::Pouch,
             BeeBadge => game::Item::BadgeBee,
             HintGlasses => game::Item::HintGlasses,
+            EnergyPotion => game::Item::GanbariTubo,
+            Heart => game::Item::Heart,
 
             HeartPiece01 | HeartPiece02 | HeartPiece03 | HeartPiece04 | HeartPiece05 | HeartPiece06 | HeartPiece07
             | HeartPiece08 | HeartPiece09 | HeartPiece10 | HeartPiece11 | HeartPiece12 | HeartPiece13
@@ -1022,6 +1031,10 @@ impl Item {
             HylianShield | SmoothGem | LetterInABottle | PremiumMilk | Pouch | BeeBadge | HintGlasses | GreatSpin => {
                 "the"
             },
+
+            EnergyPotion => "an",
+
+            Heart => "a",
 
             RupeeGreen | RupeeBlue | RupeeRed | RupeePurple01 | RupeePurple02 | RupeePurple03 | RupeePurple04
             | RupeePurple05 | RupeePurple06 | RupeePurple07 | RupeePurple08 | RupeePurple09 | RupeePurple10
@@ -1213,6 +1226,8 @@ impl Item {
             Net01 | Net02 => "Net+",
             Mail01 | Mail02 => "Mail+",
             OreYellow | OreGreen | OreBlue | OreRed => "Master Ore",
+            EnergyPotion => "Energy Potion",
+            Heart => "Heart",
             HyruleSanctuaryKey => "Hyrule Sewers Key",
             LoruleSanctuaryKey => "Lorule Sewers Key",
             EasternCompass => "Eastern Palace Compass",

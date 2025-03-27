@@ -1,5 +1,5 @@
 use {
-    crate::{actors::Actor, scene::Vec3, Error, Result, Rom},
+    crate::{Error, Result, Rom, actors::Actor, scene::Vec3},
     once_cell::sync::Lazy,
     regex::Regex,
     serde::{Deserialize, Serialize},

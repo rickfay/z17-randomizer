@@ -45,15 +45,11 @@ impl TryFrom<String> for Keysy {
 
 impl Display for Keysy {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "{}",
-            match self {
-                Self::Off => "Off",
-                Self::SmallKeysy => "Small Keysy",
-                Self::BigKeysy => "Big Keysy",
-                Self::AllKeysy => "All Keysy",
-            }
-        )
+        write!(f, "{}", match self {
+            Self::Off => "Off",
+            Self::SmallKeysy => "Small Keysy",
+            Self::BigKeysy => "Big Keysy",
+            Self::AllKeysy => "All Keysy",
+        })
     }
 }

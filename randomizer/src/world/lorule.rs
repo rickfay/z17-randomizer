@@ -8,39 +8,34 @@ use crate::filler::location_node::LocationNode;
 use crate::filler::logic::Logic;
 use crate::filler::path::Path;
 use crate::world::{
-    check, crack_left, crack_right, edge, fast_travel_hyrule, fast_travel_lorule, ghost, goal, location, old_path,
-    out_of_logic,
+    check, crack_left, crack_right, door, edge, fast_travel_hyrule, fast_travel_lorule, ghost, goal, location,
+    old_path, out_of_logic,
 };
-use crate::LocationInfo;
-use crate::{regions, CrackMap};
+use crate::{CrackMap, regions};
+use crate::{DoorMap, LocationInfo};
 use game::ghosts::HintGhost;
 use std::collections::HashMap;
 
 /// Lorule
-pub(crate) fn graph(crack_map: &CrackMap) -> HashMap<Location, LocationNode> {
+pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Location, LocationNode> {
     HashMap::from([
         (
             LoruleBellTravel,
-            location(
-                "Lorule Bell Travel",
-                vec![],
-                vec![
-                    edge!(LoruleCastleArea, |p| p.has_weather_vane(VacantHouseWV)
-                        || p.has_weather_vane(BlacksmithWV)
-                        || p.has_weather_vane(ThievesTownWV)
-                        || p.has_weather_vane(LoruleCastleWV)
-                        || p.has_weather_vane(SwampPalaceWV)),
-                    edge!(SkullWoodsOverworld, |p| p.has_weather_vane(SkullWoodsWV)),
-                    edge!(MiseryMire, |p| p.has_weather_vane(MiseryMireWV)),
-                    edge!(SwampPalaceOutside, |p| p.has_weather_vane(SwampPalaceWV)),
-                    edge!(LoruleDeathWest, |p| p.has_weather_vane(TreacherousTowerWV)),
-                    edge!(LoruleGraveyard, |p| p.has_weather_vane(GraveyardWV)),
-                    edge!(RossosOreMineLorule, |p| p.has_weather_vane(DeathMountainLoruleWV)),
-                    edge!(TurtleRockWeatherVane, |p| p.has_weather_vane(TurtleRockWV)),
-                    edge!(LoruleDeathEastTop, |p| p.has_weather_vane(IceRuinsWV)),
-                    edge!(DarkPalaceWeatherVane, |p| p.has_weather_vane(DarkPalaceWV)),
-                ],
-            ),
+            location("Lorule Bell Travel", vec![], vec![
+                edge!(LoruleCastleArea, |p| p.has_weather_vane(VacantHouseWV)
+                    || p.has_weather_vane(BlacksmithWV)
+                    || p.has_weather_vane(ThievesTownWV)
+                    || p.has_weather_vane(LoruleCastleWV)),
+                edge!(SkullWoodsOverworld, |p| p.has_weather_vane(SkullWoodsWV)),
+                edge!(MiseryMire, |p| p.has_weather_vane(MiseryMireWV)),
+                edge!(SwampPalaceOutside, |p| p.has_weather_vane(SwampPalaceWV)),
+                edge!(LoruleDeathWest, |p| p.has_weather_vane(TreacherousTowerWV)),
+                edge!(LoruleGraveyard, |p| p.has_weather_vane(GraveyardWV)),
+                edge!(RossosOreMineLorule, |p| p.has_weather_vane(DeathMountainLoruleWV)),
+                edge!(TurtleRockWeatherVane, |p| p.has_weather_vane(TurtleRockWV)),
+                edge!(LoruleDeathEastTop, |p| p.has_weather_vane(IceRuinsWV)),
+                edge!(DarkPalaceWeatherVane, |p| p.has_weather_vane(DarkPalaceWV)),
+            ]),
         ),
         (
             LoruleCastleArea,
@@ -115,8 +110,8 @@ pub(crate) fn graph(crack_map: &CrackMap) -> HashMap<Location, LocationNode> {
                         None,
                         None,
                     ),
-                    edge!(ThievesHideoutB1, |p| p.hearts(6.0)),
-                    edge!(LoruleCastle1F, |p| p.has_lc_requirement() && p.hearts(13.0)),
+                    door!(ThievesHideoutEntrance, door_map, |p| p.hearts(6.0)),
+                    door!(LoruleCastleEntrance, door_map, |p| p.has_lc_requirement() && p.hearts(13.0)),
                     edge!(BigBombFlowerShop),
                     old_path(
                         BigBombFlowerField,
@@ -138,11 +133,9 @@ pub(crate) fn graph(crack_map: &CrackMap) -> HashMap<Location, LocationNode> {
         ),
         (
             FortunesChoiceLorule,
-            location(
-                "Fortune's Choice (Lorule)",
-                vec![ghost(HintGhost::FortunesChoice)],
-                vec![edge!(LoruleCastleArea)],
-            ),
+            location("Fortune's Choice (Lorule)", vec![ghost(HintGhost::FortunesChoice)], vec![edge!(
+                LoruleCastleArea
+            )]),
         ),
         (
             ThievesTownItemShop,
@@ -194,31 +187,24 @@ pub(crate) fn graph(crack_map: &CrackMap) -> HashMap<Location, LocationNode> {
                 vec![
                     fast_travel_lorule(),
                     edge!(LoruleSanctuaryCaveLower),
-                    old_path(LoruleSanctuary, Some(|p| p.has_titans_mitt()), None, None, None, None),
-                    old_path(
-                        DarkRuins,
-                        None,
-                        None,
-                        Some(|p| (p.has_fire_rod() || p.has_nice_bombs()) && p.has_flippers()),
-                        Some(|p| (p.has_fire_rod() || p.has_nice_bombs()) && (p.has_flippers() || p.has_hookshot())), // Hookshot trick
-                        Some(|p| p.has_flippers() || p.has_hookshot()), // Bee Boost
-                    ),
-                    old_path(Location::GraveyardLedgeLorule, Some(|p| p.has_bombs()), None, None, None, None),
+                    edge!(LoruleSanctuary, |p| p.has_titans_mitt()),
+                    edge!(DarkRuins => {
+                        glitched: |p| (p.has_fire_rod() || p.has_nice_bombs()) && p.has_flippers(),
+                        adv_glitched: |p| (p.has_fire_rod() || p.has_nice_bombs()) && (p.has_flippers() || p.has_hookshot()), // Hookshot trick
+                        hell: |p| p.has_flippers() || p.has_hookshot(), // Bee Boost
+                    }),
+                    edge!(GraveyardLedgeLorule, |p| p.has_bombs()),
                 ],
             ),
         ),
         (
             Location::GraveyardLedgeLorule,
-            location(
-                "Graveyard Ledge Lorule",
-                vec![],
-                vec![
-                    fast_travel_lorule(),
-                    crack_left(Crack::GraveyardLedgeLorule, crack_map, false),
-                    crack_right(Crack::GraveyardLedgeLorule, crack_map, false),
-                    edge!(LoruleGraveyard),
-                ],
-            ),
+            location("Graveyard Ledge Lorule", vec![], vec![
+                fast_travel_lorule(),
+                crack_left(Crack::GraveyardLedgeLorule, crack_map, false),
+                crack_right(Crack::GraveyardLedgeLorule, crack_map, false),
+                edge!(LoruleGraveyard),
+            ]),
         ),
         (
             LoruleSanctuary,
@@ -253,15 +239,11 @@ pub(crate) fn graph(crack_map: &CrackMap) -> HashMap<Location, LocationNode> {
         ),
         (
             LoruleSanctuaryCaveLower,
-            location(
-                "Philosopher's Cave Lower",
-                vec![],
-                vec![
-                    crack_left(Philosopher, crack_map, false),
-                    crack_right(Philosopher, crack_map, false),
-                    edge!(LoruleGraveyard),
-                ],
-            ),
+            location("Philosopher's Cave Lower", vec![], vec![
+                crack_left(Philosopher, crack_map, false),
+                crack_right(Philosopher, crack_map, false),
+                edge!(LoruleGraveyard),
+            ]),
         ),
         (
             LoruleSanctuaryCaveUpper,
@@ -397,63 +379,43 @@ pub(crate) fn graph(crack_map: &CrackMap) -> HashMap<Location, LocationNode> {
         ),
         (
             DesertNorthLedge,
-            location(
-                "Desert North Ledge",
-                None,
-                vec![
-                    edge!(Desert),
-                    edge!(DesertUseBlockedCrackRight, |p| p.has_bombs()),
-                    edge!(DesertUseBlockedCrackLeft, |p| p.has_bombs() && p.has_sand_rod()),
-                ],
-            ),
+            location("Desert North Ledge", None, vec![
+                edge!(Desert),
+                edge!(DesertUseBlockedCrackRight, |p| p.has_bombs()),
+                edge!(DesertUseBlockedCrackLeft, |p| p.has_bombs() && p.has_sand_rod()),
+            ]),
         ),
         (
             DesertUseBlockedCrackRight,
-            location(
-                "Desert Use Blocked Crack Right",
-                None,
-                vec![
-                    // crack is blocked, no return paths
-                    crack_right(DesertNorth, crack_map, false),
-                ],
-            ),
+            location("Desert Use Blocked Crack Right", None, vec![
+                // crack is blocked, no return paths
+                crack_right(DesertNorth, crack_map, false),
+            ]),
         ),
         (
             DesertUseBlockedCrackLeft,
-            location(
-                "Desert Use Blocked Crack Left",
-                None,
-                vec![
-                    // crack is blocked, no return paths
-                    crack_left(DesertNorth, crack_map, false),
-                ],
-            ),
+            location("Desert Use Blocked Crack Left", None, vec![
+                // crack is blocked, no return paths
+                crack_left(DesertNorth, crack_map, false),
+            ]),
         ),
         (
             DesertCenterLedge,
-            location(
-                "Desert Center Ledge",
-                vec![ghost(HintGhost::DesertCenter)],
-                vec![
-                    edge!(Desert),
-                    // crack_left unpossible
-                    crack_right(DesertMiddle, crack_map, false),
-                ],
-            ),
+            location("Desert Center Ledge", vec![ghost(HintGhost::DesertCenter)], vec![
+                edge!(Desert),
+                // crack_left unpossible
+                crack_right(DesertMiddle, crack_map, false),
+            ]),
         ),
         (
             DesertSouthWestLedge,
-            location(
-                "Desert South West Ledge",
-                vec![ghost(HintGhost::DesertSouthWest)],
-                vec![
-                    fast_travel_hyrule(),
-                    crack_left(DesertSW, crack_map, false),
-                    crack_right(DesertSW, crack_map, false),
-                    edge!(Desert),
-                    edge!(DesertPalaceWeatherVane, |p| p.has_sand_rod()),
-                ],
-            ),
+            location("Desert South West Ledge", vec![ghost(HintGhost::DesertSouthWest)], vec![
+                fast_travel_hyrule(),
+                crack_left(DesertSW, crack_map, false),
+                crack_right(DesertSW, crack_map, false),
+                edge!(Desert),
+                edge!(DesertPalaceWeatherVane, |p| p.has_sand_rod()),
+            ]),
         ),
         (
             DesertPalaceWeatherVane,
@@ -467,7 +429,7 @@ pub(crate) fn graph(crack_map: &CrackMap) -> HashMap<Location, LocationNode> {
                 vec![
                     fast_travel_hyrule(),
                     edge!(Desert),
-                    edge!(DesertPalaceFoyer, |p| p.has_sand_rod() && p.hearts(9.0)),
+                    door!(DesertPalaceEntrance, door_map, |p| p.has_sand_rod() && p.hearts(9.0)),
                 ],
             ),
         ),
@@ -523,54 +485,42 @@ pub(crate) fn graph(crack_map: &CrackMap) -> HashMap<Location, LocationNode> {
             // This is the useless crack surrounded by water
             // Psst... it can be used to reverse the side of the crack you entered
             MiseryMireLeftPillarMerged,
-            location(
-                "Misery Mire Left Pillar Merged",
-                None,
-                vec![
-                    edge!(MiseryMire, |p| p.has_flippers()),
-                    crack_left(MirePillarLeft, crack_map, false),
-                    crack_right(MirePillarLeft, crack_map, false),
-                ],
-            ),
+            location("Misery Mire Left Pillar Merged", None, vec![
+                edge!(MiseryMire, |p| p.has_flippers()),
+                crack_left(MirePillarLeft, crack_map, false),
+                crack_right(MirePillarLeft, crack_map, false),
+            ]),
         ),
         (
             MiseryMireBridge,
-            location(
-                "Misery Mire Bridge",
-                vec![],
-                vec![
-                    fast_travel_lorule(),
-                    edge!(MiseryMire),
-                    crack_left(MireMiddle, crack_map, false),
-                    crack_right(MireMiddle, crack_map, false),
-                    crack_left(MireSW, crack_map, false),
-                    crack_right(MireSW, crack_map, false),
-                    old_path(
-                        MiseryMireOoB,
-                        None,
-                        None,
-                        None,
-                        Some(|p| p.has_fire_rod() || p.has_nice_bombs()),
-                        Some(|p| (p.has_hookshot() || p.has_boomerang()) && p.has_tornado_rod()), // crack clip
-                    ),
-                ],
-            ),
+            location("Misery Mire Bridge", vec![], vec![
+                fast_travel_lorule(),
+                edge!(MiseryMire),
+                crack_left(MireMiddle, crack_map, false),
+                crack_right(MireMiddle, crack_map, false),
+                crack_left(MireSW, crack_map, false),
+                crack_right(MireSW, crack_map, false),
+                old_path(
+                    MiseryMireOoB,
+                    None,
+                    None,
+                    None,
+                    Some(|p| p.has_fire_rod() || p.has_nice_bombs()),
+                    Some(|p| (p.has_hookshot() || p.has_boomerang()) && p.has_tornado_rod()), // crack clip
+                ),
+            ]),
         ),
         (
             MiseryMireOoB,
-            location(
-                "Misery Mire Out of Bounds",
-                vec![],
-                vec![
-                    fast_travel_lorule(),
-                    edge!(MiseryMire),
-                    edge!(MiseryMireBridge),
-                    crack_left(Zaganaga, crack_map, false),
-                    crack_right(Zaganaga, crack_map, false),
-                    edge!(ZaganagasArena),
-                    old_path(MiseryMireRewardBasket, None, None, None, Some(|p| p.has_boots()), None),
-                ],
-            ),
+            location("Misery Mire Out of Bounds", vec![], vec![
+                fast_travel_lorule(),
+                edge!(MiseryMire),
+                edge!(MiseryMireBridge),
+                crack_left(Zaganaga, crack_map, false),
+                crack_right(Zaganaga, crack_map, false),
+                edge!(ZaganagasArena),
+                old_path(MiseryMireRewardBasket, None, None, None, Some(|p| p.has_boots()), None),
+            ]),
         ),
         (
             SandRodDungeon,
@@ -675,16 +625,12 @@ pub(crate) fn graph(crack_map: &CrackMap) -> HashMap<Location, LocationNode> {
         ),
         (
             LoruleRiverCrackShallows,
-            location(
-                "Lorule River Crack Shallows",
-                None,
-                vec![
-                    fast_travel_lorule(),
-                    crack_left(RiverLorule, crack_map, false),
-                    crack_right(RiverLorule, crack_map, false),
-                    edge!(LoruleLakeWater, |p| p.has_flippers()),
-                ],
-            ),
+            location("Lorule River Crack Shallows", None, vec![
+                fast_travel_lorule(),
+                crack_left(RiverLorule, crack_map, false),
+                crack_right(RiverLorule, crack_map, false),
+                edge!(LoruleLakeWater, |p| p.has_flippers()),
+            ]),
         ),
         // This location assumes the player is already swimming, real or fake
         (
@@ -729,16 +675,12 @@ pub(crate) fn graph(crack_map: &CrackMap) -> HashMap<Location, LocationNode> {
         ),
         (
             TurtleRockFrontDoor,
-            location(
-                "Turtle Rock Front Door",
-                vec![],
-                vec![
-                    fast_travel_lorule(),
-                    edge!(TurtleRockFoyer, |p| p.hearts(9.0)),
-                    old_path(TurtleRockWeatherVane, Some(|p| p.has_ice_rod() && p.can_merge()), None, None, None, None),
-                    old_path(LoruleLakeWater, Some(|p| p.has_flippers()), None, None, None, None),
-                ],
-            ),
+            location("Turtle Rock Front Door", vec![], vec![
+                fast_travel_lorule(),
+                door!(TurtleRockEntrance, door_map, |p| p.hearts(9.0)),
+                old_path(TurtleRockWeatherVane, Some(|p| p.has_ice_rod() && p.can_merge()), None, None, None, None),
+                old_path(LoruleLakeWater, Some(|p| p.has_flippers()), None, None, None, None),
+            ]),
         ),
         // Dark Ruins Area
         (
@@ -785,15 +727,11 @@ pub(crate) fn graph(crack_map: &CrackMap) -> HashMap<Location, LocationNode> {
         ),
         (
             DarkRuinsBlockedCrack,
-            location(
-                "Dark Ruins Blocked Crack",
-                None,
-                vec![
-                    edge!(DarkRuins),
-                    crack_left(DarkRuinsSE, crack_map, false),
-                    crack_right(DarkRuinsSE, crack_map, false),
-                ],
-            ),
+            location("Dark Ruins Blocked Crack", None, vec![
+                edge!(DarkRuins),
+                crack_left(DarkRuinsSE, crack_map, false),
+                crack_right(DarkRuinsSE, crack_map, false),
+            ]),
         ),
         (
             DarkMazeEntrance,
@@ -862,32 +800,27 @@ pub(crate) fn graph(crack_map: &CrackMap) -> HashMap<Location, LocationNode> {
                 vec![
                     old_path(DarkMazeEntrance, Some(|p| p.can_merge() || p.has_sage_gulley()), None, None, None, None),
                     old_path(DarkMazeHalfway, Some(|p| p.can_merge() || p.has_sage_gulley()), None, None, None, None),
-                    edge!(DarkPalaceFoyer, |p| p.has_bombs() && p.hearts(6.0)),
+                    door!(DarkPalaceEntrance, door_map, |p| p.has_bombs() && p.hearts(6.0)),
                 ],
             ),
         ),
         (
             DarkRuinsRiver,
-            location(
-                "Dark Ruins River",
-                None,
-                vec![edge!(DarkRuins, |p| p.has_flippers()), edge!(DarkRuinsShallowWater, |p| p.has_flippers())],
-            ),
+            location("Dark Ruins River", None, vec![
+                edge!(DarkRuins, |p| p.has_flippers()),
+                edge!(DarkRuinsShallowWater, |p| p.has_flippers()),
+            ]),
         ),
         (
             DarkRuinsShallowWater,
-            location(
-                "Dark Ruins Shallow Water",
-                None,
-                vec![
-                    fast_travel_lorule(),
-                    // crack_left unpossible
-                    crack_right(WaterfallLorule, crack_map, false),
-                    edge!(HinoxCaveWater, |p| p.can_merge() && p.has_flippers()),
-                    edge!(HinoxCaveShallowWater, |p| p.can_merge()),
-                    edge!(DarkRuins, |p| p.has_flippers()),
-                ],
-            ),
+            location("Dark Ruins Shallow Water", None, vec![
+                fast_travel_lorule(),
+                // crack_left unpossible
+                crack_right(WaterfallLorule, crack_map, false),
+                edge!(HinoxCaveWater, |p| p.can_merge() && p.has_flippers()),
+                edge!(HinoxCaveShallowWater, |p| p.can_merge()),
+                edge!(DarkRuins, |p| p.has_flippers()),
+            ]),
         ),
         (
             KusDomainSouth,
@@ -953,16 +886,12 @@ pub(crate) fn graph(crack_map: &CrackMap) -> HashMap<Location, LocationNode> {
         ),
         (
             HinoxCaveShallowWater,
-            location(
-                "Hinox Cave Shallow Water",
-                vec![],
-                vec![
-                    fast_travel_lorule(),
-                    edge!(HinoxCave),
-                    old_path(HinoxCaveWater, Some(|p| p.has_flippers()), None, None, None, None),
-                    old_path(DarkRuinsShallowWater, Some(|p| p.can_merge()), None, None, None, None),
-                ],
-            ),
+            location("Hinox Cave Shallow Water", vec![], vec![
+                fast_travel_lorule(),
+                edge!(HinoxCave),
+                old_path(HinoxCaveWater, Some(|p| p.has_flippers()), None, None, None, None),
+                old_path(DarkRuinsShallowWater, Some(|p| p.can_merge()), None, None, None, None),
+            ]),
         ),
         (
             HinoxCave,
@@ -1018,7 +947,7 @@ pub(crate) fn graph(crack_map: &CrackMap) -> HashMap<Location, LocationNode> {
                     crack_left(SkullWoodsPillar, crack_map, false),
                     crack_right(SkullWoodsPillar, crack_map, false),
                     edge!(MysteriousManCave),
-                    edge!(SkullWoodsFoyer, |p| p.hearts(6.0)),
+                    door!(SkullWoodsEntrance, door_map, |p| p.hearts(6.0)),
                 ],
             ),
         ),
@@ -1037,8 +966,7 @@ pub(crate) fn graph(crack_map: &CrackMap) -> HashMap<Location, LocationNode> {
                 "Lorule Death Mountain West",
                 vec![
                     check!("Treacherous Tower Weather Vane", regions::lorule::death::mountain::SUBREGION),
-                    check!("Ice Gimos Fight", regions::lorule::death::mountain::SUBREGION, |p| p
-                        .can_defeat_margomill()),
+                    check!("Ice Gimos Fight", regions::lorule::death::mountain::SUBREGION, |p| p.can_attack_iceproof()),
                     check!("Lorule Mountain W Ledge", regions::lorule::death::mountain::SUBREGION => {
                         normal: |p| p.can_merge(),
                         glitched: |p| p.has_nice_bombs(),
@@ -1089,88 +1017,64 @@ pub(crate) fn graph(crack_map: &CrackMap) -> HashMap<Location, LocationNode> {
                     fast_travel_lorule(),
                     crack_left(Crack::RossosOreMineLorule, crack_map, false),
                     crack_right(Crack::RossosOreMineLorule, crack_map, false),
-                    old_path(LoruleDeathWest, Some(|p| p.has_hookshot()), None, None, None, None),
+                    edge!(LoruleDeathWest, |p| p.has_hookshot()),
                     edge!(IceCaveEast),
                 ],
             ),
         ),
         (
             IceCaveEast,
-            location(
-                "Ice Cave East",
-                vec![],
-                vec![
-                    edge!(RossosOreMineLorule),
-                    old_path(IceCaveCenter, Some(|p| p.can_merge()), None, None, None, None),
-                ],
-            ),
+            location("Ice Cave East", vec![], vec![
+                edge!(RossosOreMineLorule),
+                edge!(IceCaveCenter, |p| p.can_merge()),
+            ]),
         ),
         (
             IceCaveCenter,
-            location(
-                "Ice Cave Center",
-                vec![],
-                vec![
-                    old_path(IceCaveEast, Some(|p| p.can_merge()), None, None, None, None),
-                    old_path(
-                        IceCaveSouth,
-                        Some(|p| p.can_merge()),
-                        Some(|p| p.has_tornado_rod()), // jump over merge block
-                        None,
-                        None,
-                        Some(|_| true), // big yeets from the statue
-                    ),
-                    old_path(IceCaveWest, Some(|p| p.has_tornado_rod()), None, None, None, None),
-                    edge!(LoruleDeathEastTop),
-                ],
-            ),
+            location("Ice Cave Center", vec![], vec![
+                edge!(IceCaveEast, |p| p.can_merge()),
+                edge!(IceCaveSouth => {
+                    normal: |p| p.can_merge(),
+                    hard: |p| p.has_tornado_rod(), // jump over merge block
+                    hell: |_| true, // big yeets from the statue
+                }),
+                edge!(IceCaveWest, |p| p.has_tornado_rod()),
+                edge!(LoruleDeathEastTop),
+            ]),
         ),
         (
             IceCaveSouth,
-            location(
-                "Ice Cave South",
-                vec![],
-                vec![
-                    edge!(LoruleDeathEastLedgeLower),
-                    old_path(IceCaveCenter, Some(|p| p.can_merge()), None, None, None, None),
-                ],
-            ),
+            location("Ice Cave South", vec![], vec![
+                edge!(LoruleDeathEastLedgeLower),
+                edge!(IceCaveCenter, |p| p.can_merge()),
+            ]),
         ),
         (
             IceCaveWest,
-            location(
-                "Ice Cave West",
-                vec![],
-                vec![
-                    edge!(IceCaveCenter),
-                    old_path(IceCaveNorthWest, Some(|p| p.has_tornado_rod()), None, None, None, None),
-                    old_path(IceCaveSouthWest, Some(|p| p.has_tornado_rod()), None, None, None, None),
-                ],
-            ),
+            location("Ice Cave West", vec![], vec![
+                edge!(IceCaveCenter),
+                edge!(IceCaveNorthWest, |p| p.has_tornado_rod()),
+                edge!(IceCaveSouthWest, |p| p.has_tornado_rod()),
+            ]),
         ),
         (
             IceCaveNorthWest,
-            location(
-                "Ice Cave North West",
-                vec![],
-                vec![
-                    edge!(FloatingIslandLorule),
-                    old_path(IceCaveWest, Some(|p| p.has_tornado_rod()), None, Some(|p| p.has_boots()), None, None),
-                ],
-            ),
+            location("Ice Cave North West", vec![], vec![
+                edge!(FloatingIslandLorule),
+                edge!(IceCaveWest => {
+                    normal: |p| p.has_tornado_rod(),
+                    glitched: |p| p.has_boots(),
+                }),
+            ]),
         ),
         (
             Location::FloatingIslandLorule,
-            location(
-                "Floating Island Lorule",
-                vec![],
-                vec![
-                    fast_travel_lorule(),
-                    edge!(IceCaveNorthWest),
-                    crack_left(Crack::FloatingIslandLorule, crack_map, false),
-                    crack_right(Crack::FloatingIslandLorule, crack_map, false),
-                ],
-            ),
+            location("Floating Island Lorule", vec![], vec![
+                fast_travel_lorule(),
+                edge!(IceCaveNorthWest),
+                crack_left(Crack::FloatingIslandLorule, crack_map, false),
+                crack_right(Crack::FloatingIslandLorule, crack_map, false),
+            ]),
         ),
         (
             IceCaveSouthWest,
@@ -1211,7 +1115,7 @@ pub(crate) fn graph(crack_map: &CrackMap) -> HashMap<Location, LocationNode> {
                 vec![
                     fast_travel_lorule(),
                     edge!(IceCaveCenter),
-                    edge!(IceRuinsFoyer, |p| p.has_fire_rod() && p.hearts(9.0)),
+                    door!(IceRuinsEntrance, door_map, |p| p.has_fire_rod() && p.hearts(9.0)),
                 ],
             ),
         ),

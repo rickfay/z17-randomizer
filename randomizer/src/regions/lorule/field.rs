@@ -4,6 +4,10 @@ crate::region! {
     color: Name,
     main {
         locations: [
+            "Swamp Palace Entrance": None @Door(CaveDark 1[13] SwampPalaceEntrance),
+            "Thieves' Hideout Entrance": None @Door(16[54] ThievesHideoutEntrance),
+            "Lorule Castle Entrance": None @Door(18[34] LoruleCastleEntrance),
+
             "Thieves' Town Crack": None @Crack(16[56] ThievesTown),
             "Vacant House Crack": None @Crack(27[57] VacantHouse),
             "Lorule Right Paradox Crack": None @Crack(32[93] ParadoxRightLorule),

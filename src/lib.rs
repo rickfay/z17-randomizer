@@ -1,10 +1,10 @@
 use log::info;
-use modinfo::settings::{Cracks, Cracksanity, Keysy, LogicMode, NiceItems, PedestalSetting, RaviosShop, WeatherVanes};
 use modinfo::Settings;
+use modinfo::settings::{Cracks, Cracksanity, Keysy, LogicMode, NiceItems, PedestalSetting, RaviosShop, WeatherVanes};
 use std::str::FromStr;
 use wasm_bindgen::prelude::wasm_bindgen;
-use wasm_bindgen::{prelude::*, JsCast};
-use web_sys::{console, FormData, HtmlElement, HtmlFormElement, MessageEvent, Worker};
+use wasm_bindgen::{JsCast, prelude::*};
+use web_sys::{FormData, HtmlElement, HtmlFormElement, MessageEvent, Worker, console};
 
 /// Run entry point for the main thread.
 #[wasm_bindgen]
@@ -173,6 +173,7 @@ fn get_worker_request() -> Result<WorkerRequest, String> {
             super_items,
             lamp_and_net_as_weapons,
             cracks,
+            door_shuffle: Default::default(),
             cracksanity,
             weather_vanes,
             ravios_shop: RaviosShop::Open,

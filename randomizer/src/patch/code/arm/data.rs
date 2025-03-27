@@ -1,4 +1,4 @@
-use super::{Instruction, Register, R0};
+use super::{Instruction, R0, Register};
 
 #[derive(Debug)]
 pub enum ShifterOperand {

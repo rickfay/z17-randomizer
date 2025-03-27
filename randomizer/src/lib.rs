@@ -1,11 +1,12 @@
+use crate::filler::doors::Door;
 use crate::filler::filler_item::Vane;
 use crate::filler::tower_stage::TowerStage;
 use crate::filler::trials::TrialsConfig;
-use crate::filler::{cracks, text, treacherous_tower, trials, vanes};
+use crate::filler::{cracks, doors, text, treacherous_tower, trials, vanes};
 use crate::world::WorldGraph;
 use crate::{
     constants::VERSION,
-    hints::{formatting::*, Hints},
+    hints::{Hints, formatting::*},
     metrics::Metrics,
     patch::lms::msbf::MsbfKey,
 };
@@ -16,10 +17,10 @@ use log::{error, info};
 use macros::fail;
 use modinfo::Settings;
 use patch::Patcher;
-use rand::{rngs::StdRng, SeedableRng};
+use rand::{SeedableRng, rngs::StdRng};
 use regions::Subregion;
 use rom::Rom;
-use serde::{ser::SerializeMap, Deserialize, Serialize, Serializer};
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeMap};
 use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
 use std::hash::BuildHasherDefault;
 use std::{
@@ -321,6 +322,9 @@ pub struct SeedInfo {
     pub full_exclusions: BTreeSet<String>,
 
     #[serde(skip_deserializing)]
+    pub removed_from_play: Vec<Randomizable>,
+
+    #[serde(skip_deserializing)]
     pub treacherous_tower_floors: Vec<TowerStage>,
 
     #[serde(skip_deserializing)]
@@ -328,6 +332,9 @@ pub struct SeedInfo {
 
     #[serde(skip_deserializing)]
     pub layout: Layout,
+
+    #[serde(skip_deserializing)]
+    pub door_map: DoorMap,
 
     #[serde(skip_deserializing)]
     pub crack_map: CrackMap,
@@ -362,6 +369,8 @@ impl Default for SeedInfo {
             hash: Default::default(),
             settings: Default::default(),
             full_exclusions: Default::default(),
+            removed_from_play: Default::default(),
+            door_map: Default::default(),
             crack_map: Default::default(),
             vane_map: Default::default(),
             layout: Default::default(),
@@ -380,11 +389,8 @@ pub fn generate_seed(seed: u32, settings: Settings, rom: Vec<u8>) -> Result<Vec<
     validate_settings(&settings)?;
 
     let rng = &mut StdRng::seed_from_u64(seed as u64);
-
     let hash = SeedHash::new(seed, &settings);
-
-    info!("Seed: {}", seed);
-    info!("Hash: {}", hash.text_hash);
+    info!("Hash:                           {}", hash.text_hash);
 
     let seed_info = &calculate_seed_info(seed, settings, hash, rng)?;
 
@@ -510,8 +516,12 @@ pub type DashSet<T> = HashSet<T, BuildHasherDefault<XxHash64>>;
 /// Map of all checks (as Strings) to their held item
 pub type CheckMap = DashMap<String, Option<Randomizable>>;
 
+/// Map of all Doors to their destinations. Map is not bidirectional to allow for (eventual) decoupled shuffle,
+/// so each Door and its destination must have an entry.
+pub type DoorMap = BTreeMap<Door, Door>;
+
 /// Map of all cracks to their destination cracks. Map is not bidirectional to allow for (eventual) decoupled shuffle,
-/// so each Crack and its destination must have a corresponding reversed entry.
+/// so each Crack and its destination must have an entry.
 pub type CrackMap = BTreeMap<Crack, Crack>;
 
 /// Map of all Weather Vanes to the destination Vanes they unlock.
@@ -521,12 +531,13 @@ fn calculate_seed_info(seed: u32, settings: Settings, hash: SeedHash, rng: &mut 
     println!();
     info!("Calculating Seed Info...");
 
+    let door_map = doors::build_door_map(&settings, rng)?;
     let crack_map = cracks::build_crack_map(&settings, rng)?;
     let vane_map = vanes::build_vanes_map(&settings, rng)?;
     let text = text::generate(rng)?;
     let trials_config = trials::configure(rng, &settings)?;
     let treacherous_tower_floors = treacherous_tower::choose_floors(&settings, rng)?;
-    let world_graph = world::build_world_graph(&crack_map);
+    let world_graph = world::build_world_graph(&door_map, &crack_map);
 
     let mut seed_info = SeedInfo {
         seed,
@@ -534,8 +545,10 @@ fn calculate_seed_info(seed: u32, settings: Settings, hash: SeedHash, rng: &mut 
         hash,
         settings,
         full_exclusions: Default::default(),
+        removed_from_play: Default::default(),
         vane_map,
         crack_map,
+        door_map,
         layout: Default::default(),
         metrics: Default::default(),
         hints: Default::default(),
@@ -574,9 +587,9 @@ pub fn patch_seed(seed_info: &SeedInfo, rom: Vec<u8>) -> std::result::Result<Vec
     // patch::lms::msbf::research(&mut patcher, None, "HintGhost", vec![], true)?;
 
     // patch::research_msbf_msbt(&mut patcher,
-    //     game::Course::IndoorLight, "FieldLight_18_SahasPupil", // MSBF
-    //     game::Course::IndoorLight, "FieldLight_18", // MSBT
-    //     true);
+    //     game::Course::IndoorLight, "FieldLight_2C_Rental", // MSBF
+    //     game::Course::IndoorLight, "FieldLight_2C", // MSBT
+    //     false);
 
     regions::patch(&mut patcher, seed_info)?;
     let patches = patcher.prepare(seed_info)?;

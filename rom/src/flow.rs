@@ -2,8 +2,8 @@ use crate::flag::Flag;
 use game::Item;
 use {
     crate::{
-        files::{msgbn::MsgBn, FromFile},
         Error, Result,
+        files::{FromFile, msgbn::MsgBn},
     },
     bytey::*,
 };
@@ -171,11 +171,7 @@ pub struct FlowMut<'input> {
 
 impl<'input> FlowMut<'input> {
     pub fn get_mut<'s>(&'s mut self, index: u16) -> Option<StepMut<'s, 'input>> {
-        if self.steps.get_mut(index).is_some() {
-            Some(StepMut { flow: self, index })
-        } else {
-            None
-        }
+        if self.steps.get_mut(index).is_some() { Some(StepMut { flow: self, index }) } else { None }
     }
 
     /// Hacky thing that prints out MSBF file info
@@ -398,43 +394,23 @@ pub struct StepMut<'flow, 'input> {
 
 impl<'flow, 'input> StepMut<'flow, 'input> {
     pub fn into_text(self) -> Option<TextMut<'flow, 'input>> {
-        if self.flow.steps.get_mut(self.index).unwrap()[0] == 1 {
-            Some(TextMut(self))
-        } else {
-            None
-        }
+        if self.flow.steps.get_mut(self.index).unwrap()[0] == 1 { Some(TextMut(self)) } else { None }
     }
 
     pub fn into_branch(self) -> Option<BranchMut<'flow, 'input>> {
-        if self.flow.steps.get_mut(self.index).unwrap()[0] == 2 {
-            Some(BranchMut(self))
-        } else {
-            None
-        }
+        if self.flow.steps.get_mut(self.index).unwrap()[0] == 2 { Some(BranchMut(self)) } else { None }
     }
 
     pub fn into_action(self) -> Option<ActionMut<'flow, 'input>> {
-        if self.flow.steps.get_mut(self.index).unwrap()[0] == 3 {
-            Some(ActionMut(self))
-        } else {
-            None
-        }
+        if self.flow.steps.get_mut(self.index).unwrap()[0] == 3 { Some(ActionMut(self)) } else { None }
     }
 
     pub fn into_start(self) -> Option<StartMut<'flow, 'input>> {
-        if self.flow.steps.get_mut(self.index).unwrap()[0] == 4 {
-            Some(StartMut(self))
-        } else {
-            None
-        }
+        if self.flow.steps.get_mut(self.index).unwrap()[0] == 4 { Some(StartMut(self)) } else { None }
     }
 
     pub fn into_goto(self) -> Option<GotoMut<'flow, 'input>> {
-        if self.flow.steps.get_mut(self.index).unwrap()[0] == 5 {
-            Some(GotoMut(self))
-        } else {
-            None
-        }
+        if self.flow.steps.get_mut(self.index).unwrap()[0] == 5 { Some(GotoMut(self)) } else { None }
     }
 
     pub fn convert_into_action(self) -> Option<ActionMut<'flow, 'input>> {
@@ -679,11 +655,7 @@ impl<'input, const SIZE: usize> List<Ref<'input>, SIZE> {
 impl<'input, const SIZE: usize> List<RefMut<'input>, SIZE> {
     fn new(count: u16, inner: RefMut<'input>) -> Option<Self> {
         let len = SIZE * count as usize;
-        if inner.len() < len {
-            None
-        } else {
-            Some(Self { count, inner: unsafe { inner.get_unchecked_mut(0..len) } })
-        }
+        if inner.len() < len { None } else { Some(Self { count, inner: unsafe { inner.get_unchecked_mut(0..len) } }) }
     }
 
     fn get_mut(&mut self, index: u16) -> Option<&mut [u8; SIZE]> {

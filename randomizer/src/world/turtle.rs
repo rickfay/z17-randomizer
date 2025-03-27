@@ -1,27 +1,22 @@
+use crate::LocationInfo;
 use crate::filler::check::Check;
 use crate::filler::filler_item::Goal;
 use crate::filler::location::Location::{self, *};
 use crate::filler::location_node::LocationNode;
 use crate::filler::logic::Logic;
 use crate::filler::path::Path;
-use crate::regions;
-use crate::world::{check, edge, fast_travel_lorule, goal, location, old_check, old_path};
-use crate::LocationInfo;
-
+use crate::world::{check, door, edge, fast_travel_lorule, goal, location};
+use crate::{DoorMap, regions};
 use std::collections::HashMap;
 
-pub(crate) fn graph() -> HashMap<Location, LocationNode> {
+pub(crate) fn graph(door_map: &DoorMap) -> HashMap<Location, LocationNode> {
     HashMap::from([
         (
             TurtleRockFoyer,
-            location(
-                "Turtle Rock Foyer",
-                vec![],
-                vec![
-                    edge!(TurtleRockFrontDoor),
-                    old_path(TurtleRockMain, Some(|p| p.has_ice_rod()), None, None, None, None),
-                ],
-            ),
+            location("Turtle Rock Foyer", vec![], vec![
+                door!(TurtleRockExit, door_map),
+                edge!(TurtleRockMain, |p| p.has_ice_rod()),
+            ]),
         ),
         (
             TurtleRockMain,
@@ -29,107 +24,48 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                 "Turtle Rock Main",
                 vec![
                     check!("[TR] (1F) Center", regions::dungeons::turtle::rock::SUBREGION),
-                    old_check(
-                        LocationInfo::new("[TR] (1F) Northeast Ledge", regions::dungeons::turtle::rock::SUBREGION),
-                        Some(|p| p.can_merge() || p.has_boomerang() || p.has_hookshot()),
-                        None,
-                        None,
-                        None,
-                        None,
-                    ),
-                    old_check(
-                        LocationInfo::new("[TR] (1F) Southeast Chest", regions::dungeons::turtle::rock::SUBREGION),
-                        Some(|p| p.can_merge()),
-                        None,
-                        Some(|p| p.has_nice_bombs() && p.has_tornado_rod()), // bombrod into warp tile
-                        None,
-                        None,
-                    ),
-                    old_check(
-                        LocationInfo::new("[TR] (1F) Defeat Flamolas", regions::dungeons::turtle::rock::SUBREGION),
-                        Some(|p| p.can_merge()),
-                        None,
-                        None,
-                        None,
-                        None,
-                    ),
-                    old_check(
-                        LocationInfo::new("[TR] (1F) Northwest Room", regions::dungeons::turtle::rock::SUBREGION),
-                        Some(|p| p.can_merge()),
-                        None,
-                        None,
-                        None,
-                        None,
-                    ),
-                    old_check(
-                        LocationInfo::new("[TR] (1F) Grate Chest", regions::dungeons::turtle::rock::SUBREGION),
-                        Some(|p| p.can_merge()),
-                        None,
-                        None,
-                        None,
-                        None,
-                    ),
+                    check!("[TR] (1F) Northeast Ledge", regions::dungeons::turtle::rock::SUBREGION, |p| p.can_merge()
+                        || p.has_boomerang()
+                        || p.has_hookshot()),
+                    check!("[TR] (1F) Southeast Chest", regions::dungeons::turtle::rock::SUBREGION => {
+                        normal: |p| p.can_merge(),
+                        glitched: |p| p.has_nice_bombs() && p.has_tornado_rod(), // bombrod into warp tile
+                    }),
+                    check!("[TR] (1F) Defeat Flamolas", regions::dungeons::turtle::rock::SUBREGION, |p| p.can_merge()),
+                    check!("[TR] (1F) Northwest Room", regions::dungeons::turtle::rock::SUBREGION, |p| p.can_merge()),
+                    check!("[TR] (1F) Grate Chest", regions::dungeons::turtle::rock::SUBREGION, |p| p.can_merge()),
                     check!("[TR] (B1) Northeast Room", regions::dungeons::turtle::rock::SUBREGION),
-                    old_check(
-                        LocationInfo::new("[TR] (B1) Grate Chest (Small)", regions::dungeons::turtle::rock::SUBREGION),
-                        Some(|p| p.can_merge()),
-                        None,
-                        None,
-                        None, // I swear there was a bombrod you could do here, idk, leaving it off for now
-                        None,
-                    ),
-                    old_check(
-                        LocationInfo::new("[TR] (B1) Big Chest (Top)", regions::dungeons::turtle::rock::SUBREGION),
-                        Some(|p| p.has_turtle_keys(1) && p.can_merge() && p.can_hit_shielded_switch()),
-                        Some(|p| (p.has_turtle_keys(1) && p.can_merge())), // hit switch with pots
-                        None,
-                        None,
-                        None,
-                    ),
-                    old_check(
-                        LocationInfo::new("[TR] (B1) Big Chest (Center)", regions::dungeons::turtle::rock::SUBREGION),
-                        Some(|p| p.can_merge() && p.can_hit_shielded_switch()),
-                        Some(|p| p.can_merge()), // hit switch with pots
-                        None,
-                        None,
-                        None,
-                    ),
-                    old_check(
-                        LocationInfo::new("[TR] (B1) Platform", regions::dungeons::turtle::rock::SUBREGION),
-                        Some(|p| p.can_merge()),
-                        None,
-                        None,
-                        None,
-                        None,
-                    ),
+                    check!("[TR] (B1) Grate Chest (Small)", regions::dungeons::turtle::rock::SUBREGION, |p| p
+                        .can_merge()),
+                    check!("[TR] (B1) Big Chest (Top)", regions::dungeons::turtle::rock::SUBREGION => {
+                        normal: |p| p.has_turtle_keys(1) && p.can_merge() && p.can_hit_shielded_switch(),
+                        hard: |p| (p.has_turtle_keys(1) && p.can_merge()), // hit switch with pots
+                    }),
+                    check!("[TR] (B1) Big Chest (Center)", regions::dungeons::turtle::rock::SUBREGION => {
+                        normal: |p| p.can_merge() && p.can_hit_shielded_switch(),
+                        hard: |p| p.can_merge(), // hit switch with pots
+                    }),
+                    check!("[TR] (B1) Platform", regions::dungeons::turtle::rock::SUBREGION, |p| p.can_merge()),
                     check!("[TR] (1F) Under Center", regions::dungeons::turtle::rock::SUBREGION),
                     check!("[TR] (B1) Under Center", regions::dungeons::turtle::rock::SUBREGION),
                 ],
                 vec![
-                    old_path(TurtleRockFoyer, Some(|p| p.has_ice_rod()), None, None, None, None),
-                    old_path(TurtleRockLeftBalconyPath, Some(|p| p.can_merge()), None, None, None, None),
-                    old_path(TurtleRockRightBalconyPath, Some(|p| p.can_merge()), None, None, None, None),
-                    old_path(
-                        TurtleRockBoss,
-                        Some(|p| p.has_turtle_keys(3) && p.can_merge() && p.has_turtle_big_key()),
-                        None,
-                        None,
-                        Some(|p| p.has_tornado_rod() && p.has_nice_bombs()),
-                        None,
-                    ),
+                    edge!(TurtleRockFoyer, |p| p.has_ice_rod()),
+                    edge!(TurtleRockLeftBalconyPath, |p| p.can_merge()),
+                    edge!(TurtleRockRightBalconyPath, |p| p.can_merge()),
+                    edge!(TurtleRockBoss => {
+                        normal: |p| p.has_turtle_keys(3) && p.can_merge() && p.has_turtle_big_key(),
+                        adv_glitched: |p| p.has_tornado_rod() && p.has_nice_bombs(),
+                    }),
                 ],
             ),
         ),
         (
             TurtleRockLeftBalconyPath,
-            location(
-                "Turtle Rock Left Balcony Path",
-                vec![],
-                vec![
-                    old_path(TurtleRockMain, Some(|p| p.has_ice_rod()), None, None, None, None),
-                    old_path(TurtleRockLeftBalcony, Some(|p| p.has_ice_rod()), None, None, None, None),
-                ],
-            ),
+            location("Turtle Rock Left Balcony Path", vec![], vec![
+                edge!(TurtleRockMain, |p| p.has_ice_rod()),
+                edge!(TurtleRockLeftBalcony, |p| p.has_ice_rod()),
+            ]),
         ),
         (
             TurtleRockLeftBalcony,
@@ -143,30 +79,21 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
         ),
         (
             TurtleRockRightBalconyPath,
-            location(
-                "Turtle Rock Right Balcony Path",
-                vec![],
-                vec![
-                    old_path(TurtleRockMain, Some(|p| p.has_ice_rod()), None, None, None, None),
-                    old_path(TurtleRockRightBalcony, Some(|p| p.has_ice_rod()), None, None, None, None),
-                ],
-            ),
+            location("Turtle Rock Right Balcony Path", vec![], vec![
+                edge!(TurtleRockMain, |p| p.has_ice_rod()),
+                edge!(TurtleRockRightBalcony, |p| p.has_ice_rod()),
+            ]),
         ),
         (
             TurtleRockRightBalcony,
-            location(
-                "Turtle Rock Right Balcony",
-                vec![],
-                vec![fast_travel_lorule(), edge!(TurtleRockRightBalconyPath, |p| p.hearts(9.0))],
-            ),
+            location("Turtle Rock Right Balcony", vec![], vec![
+                fast_travel_lorule(),
+                edge!(TurtleRockRightBalconyPath, |p| p.hearts(9.0)),
+            ]),
         ),
         (
             TurtleRockBoss,
-            location(
-                "Turtle Rock Boss",
-                vec![],
-                vec![old_path(TurtleRockPostBoss, Some(|p| p.can_defeat_grinexx()), None, None, None, None)],
-            ),
+            location("Turtle Rock Boss", vec![], vec![edge!(TurtleRockPostBoss, |p| p.can_defeat_grinexx())]),
         ),
         (
             TurtleRockPostBoss,

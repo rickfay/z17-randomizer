@@ -4,6 +4,8 @@ crate::region! {
     color: Blue,
     gales {
         locations: [
+            "House of Gales Exit": None @Door(1[305] HouseOfGalesExit),
+
             "[HG] (1F) Torches": RupeeR @Chest(1[365]),
             "[HG] (1F) Switch Room": LiverPurple @Chest(1[331]),
             "[HG] (1F) Fire Bubbles": KeySmall @Chest(1[44]),

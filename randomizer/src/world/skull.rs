@@ -1,25 +1,24 @@
+use crate::LocationInfo;
 use crate::filler::check::Check;
 use crate::filler::filler_item::Goal;
 use crate::filler::location::Location::{self, *};
 use crate::filler::location_node::LocationNode;
 use crate::filler::logic::Logic;
 use crate::filler::path::Path;
-use crate::regions;
-use crate::world::{check, edge, fast_travel_lorule, goal, location};
-use crate::LocationInfo;
+use crate::world::{check, door, edge, fast_travel_lorule, goal, location};
+use crate::{DoorMap, regions};
 
 use std::collections::HashMap;
 
 /// Skull Woods World Graph
-pub(crate) fn graph() -> HashMap<Location, LocationNode> {
+pub(crate) fn graph(door_map: &DoorMap) -> HashMap<Location, LocationNode> {
     HashMap::from([
         (
             SkullWoodsFoyer,
-            location(
-                "Skull Woods Foyer",
-                None,
-                vec![edge!(SkullWoodsOverworld), edge!(SkullWoodsMain, |p| p.has_lamp() || p.lampless())],
-            ),
+            location("Skull Woods Foyer", None, vec![
+                door!(SkullWoodsExit, door_map),
+                edge!(SkullWoodsMain, |p| p.has_lamp() || p.lampless()),
+            ]),
         ),
         (
             SkullWoodsMain,
@@ -34,6 +33,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                         && (p.progression_enemies() || p.break_floor_tiles())),
                 ],
                 vec![
+                    fast_travel_lorule(),
                     edge!(SkullWoodsFoyer),
                     edge!(SkullWoodsB2, |p| p.has_skull_keys(2)
                         && p.can_merge()
@@ -43,14 +43,10 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
         ),
         (
             SkullWoodsB2,
-            location(
-                "Skull Woods B2",
-                None,
-                vec![
-                    edge!(SkullWoodsMain, |p| p.can_merge() && p.can_attack()),
-                    edge!(SkullWoodsElevatorHallway, |p| p.can_merge() && p.can_attack()),
-                ],
-            ),
+            location("Skull Woods B2", None, vec![
+                edge!(SkullWoodsMain, |p| p.can_merge() && p.can_attack()),
+                edge!(SkullWoodsElevatorHallway, |p| p.can_merge() && p.can_attack()),
+            ]),
         ),
         (
             SkullWoodsElevatorHallway,
@@ -62,18 +58,14 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
         ),
         (
             SkullWoodsBossHallway,
-            location(
-                "Skull Woods Boss Hallway",
-                None,
-                vec![
-                    edge!(SkullWoodsElevatorHallway),
-                    edge!(SkullWoodsEastB1NorthFoyer => {
-                        normal: |p| p.has_fire_source() && p.can_attack(),
-                        hard: |p| p.has_lamp(),
-                    }),
-                    edge!(SkullWoodsBossRoom, |p| p.has_skull_big_key()),
-                ],
-            ),
+            location("Skull Woods Boss Hallway", None, vec![
+                edge!(SkullWoodsElevatorHallway),
+                edge!(SkullWoodsEastB1NorthFoyer => {
+                    normal: |p| p.has_fire_source() && p.can_attack(),
+                    hard: |p| p.has_lamp(),
+                }),
+                edge!(SkullWoodsBossRoom, |p| p.has_skull_big_key()),
+            ]),
         ),
         (
             SkullWoodsBossRoom,
@@ -84,7 +76,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                 vec![
                     edge!(SkullWoodsBossHallway, |p| p.can_defeat_knucklemaster()),
                     edge!(SkullWoodsSeresGrove => {
-                        normal: |p| p.has_master_sword() || p.can_defeat_knucklemaster(),
+                        normal: |p| p.can_defeat_knucklemaster(),
                         glitched: |p| p.has_tornado_rod(),
                     }),
                 ],
@@ -103,11 +95,10 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
         ),
         (
             SkullWoodsEastB1NorthFoyer,
-            location(
-                "Skull Woods East B1 North Foyer",
-                None,
-                vec![edge!(SkullWoodsBossHallway), edge!(SkullWoodsEastB1North, |p| p.can_merge())],
-            ),
+            location("Skull Woods East B1 North Foyer", None, vec![
+                edge!(SkullWoodsBossHallway),
+                edge!(SkullWoodsEastB1North, |p| p.can_merge()),
+            ]),
         ),
         (
             SkullWoodsEastB1North,
@@ -127,22 +118,17 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
         ),
         (
             SkullWoodsEastB1South,
-            location(
-                "Skull Woods East B1 South",
-                None,
-                vec![
-                    edge!(SkullWoodsEastB1North, |p| p.can_merge() && p.has_skull_eye_right()),
-                    edge!(SkullWoodsEastB1SouthFoyer, |p| p.can_merge()),
-                ],
-            ),
+            location("Skull Woods East B1 South", None, vec![
+                edge!(SkullWoodsEastB1North, |p| p.can_merge() && p.has_skull_eye_right()),
+                edge!(SkullWoodsEastB1SouthFoyer, |p| p.can_merge()),
+            ]),
         ),
         (
             SkullWoodsEastB1SouthFoyer,
-            location(
-                "Skull Woods East B1 South Foyer",
-                None,
-                vec![edge!(SkullWoodsEastB1South, |p| p.can_merge()), edge!(SkullWoodsOutdoor3)],
-            ),
+            location("Skull Woods East B1 South Foyer", None, vec![
+                edge!(SkullWoodsEastB1South, |p| p.can_merge()),
+                edge!(SkullWoodsOutdoor3),
+            ]),
         ),
         (
             SkullWoodsEastB1SouthLedges,

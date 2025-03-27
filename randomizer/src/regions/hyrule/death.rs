@@ -4,6 +4,8 @@ crate::region! {
     color: Name,
     mountain {
         locations: [
+            "Tower of Hera Entrance": None @Door(3[14] TowerOfHeraEntrance),
+
             "Hyrule Death West Crack": None @Crack(3[361] DeathWestHyrule),
             "Hyrule Floating Island Crack": None @Crack(4[111] FloatingIslandHyrule),
             "Hyrule Rosso's Ore Mine Crack": None @Crack(4[65] RossosOreMineHyrule),

@@ -1,14 +1,14 @@
+use crate::Result;
 use crate::filler::filler_item::Randomizable;
 use crate::filler::item_pools;
 use crate::filler::location::Location;
-use crate::Result;
-use crate::{filler, CrackMap, DashMap};
+use crate::{CrackMap, DashMap, filler};
 use game::Course::{CaveDark, FieldDark, FieldLight, IndoorDark, IndoorLight};
 use log::info;
-use modinfo::settings::cracksanity::Cracksanity;
 use modinfo::Settings;
-use rand::rngs::StdRng;
+use modinfo::settings::cracksanity::Cracksanity;
 use rand::Rng;
+use rand::rngs::StdRng;
 use rom::flag::Flag;
 use rom::scene::SpawnPoint;
 use serde::{Serialize, Serializer};
@@ -514,50 +514,6 @@ impl Crack {
             Self::KusDomain => Flag::CRACK_KUS_DOMAIN,
             Self::LoruleCastle => Flag::ZERO_ZERO,
         }
-    }
-
-    /// Cracks that don't check the Quake Flag (510) to be enabled in vanilla will return true
-    pub fn must_patch_close(self) -> bool {
-        matches!(
-            self,
-            // Hyrule Cracks that are open without Quake
-            Crack::StylishWoman |
-            Crack::DesertPillarRight |
-            Crack::DesertPillarLeft |
-            Crack::DesertMiddle |
-            Crack::DesertSW |
-            Crack::DesertPalace |
-            Crack::DesertNorth |
-            // All Lorule Cracks
-            Crack::ThievesTown |
-            Crack::VacantHouse |
-            Crack::ParadoxRightLorule |
-            Crack::ParadoxLeftLorule |
-            Crack::WaterfallLorule |
-            Crack::DarkRuinsPillar |
-            Crack::DarkRuinsSE |
-            Crack::SkullWoodsPillar |
-            Crack::NShapedHouse |
-            Crack::DestroyedHouse |
-            Crack::MiseryMireExit |
-            Crack::MirePillarRight |
-            Crack::MirePillarLeft |
-            Crack::MireMiddle |
-            Crack::MireSW |
-            Crack::Zaganaga |
-            Crack::MireNorth |
-            Crack::DeathWestLorule |
-            Crack::FloatingIslandLorule |
-            Crack::RiverLorule |
-            Crack::LoruleLake |
-            Crack::LoruleHotfoot |
-            Crack::Philosopher |
-            Crack::GraveyardLedgeLorule |
-            Crack::RossosOreMineLorule |
-            Crack::SwampPillarLorule |
-            Crack::KusDomain |
-            Crack::LoruleCastle
-        )
     }
 }
 

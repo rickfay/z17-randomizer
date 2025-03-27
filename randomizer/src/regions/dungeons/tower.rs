@@ -4,6 +4,8 @@ crate::region! {
     color: Attention,
     hera {
         locations: [
+            "Tower of Hera Exit": None @Door(1[758] TowerOfHeraExit),
+
             "[TH] (1F) Outside": RupeePurple @Chest(1[6]),
             "[TH] (1F) Center": Compass @Chest(1[5]),
             "[TH] (3F) Platform": KeySmall @Key(1[244]),

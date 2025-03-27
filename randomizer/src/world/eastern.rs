@@ -1,17 +1,17 @@
+use crate::LocationInfo;
 use crate::filler::check::Check;
 use crate::filler::filler_item::Goal;
 use crate::filler::location::Location::{self, *};
 use crate::filler::location_node::LocationNode;
 use crate::filler::logic::Logic;
 use crate::filler::path::Path;
-use crate::regions;
-use crate::world::{check, edge, goal, location};
-use crate::LocationInfo;
+use crate::world::{check, door, edge, goal, location};
+use crate::{DoorMap, regions};
 
 use std::collections::HashMap;
 
 /// Eastern Palace World Graph
-pub(crate) fn graph() -> HashMap<Location, LocationNode> {
+pub(crate) fn graph(door_map: &DoorMap) -> HashMap<Location, LocationNode> {
     HashMap::from([
         (
             EasternPalaceFoyer,
@@ -20,6 +20,7 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
                 vec![check!("[EP] (1F) Merge Chest", regions::dungeons::eastern::palace::SUBREGION, |p| p.can_merge()
                     && p.has_eastern_compass())],
                 vec![
+                    door!(EasternPalaceExit, door_map),
                     edge!(EasternRuinsUpper),
                     edge!(EasternPalace1F => {
                         normal: |p| p.can_hit_far_switch() || p.can_merge() || p.has_nice_ice_rod(),
@@ -52,11 +53,10 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
         ),
         (
             EasternPalaceMiniboss,
-            location(
-                "Eastern Palace Miniboss",
-                None,
-                vec![edge!(EasternPalace1F, |p| p.can_attack()), edge!(EasternPalace2F, |p| p.can_attack())],
-            ),
+            location("Eastern Palace Miniboss", None, vec![
+                edge!(EasternPalace1F, |p| p.can_attack()),
+                edge!(EasternPalace2F, |p| p.can_attack()),
+            ]),
         ),
         (
             EasternPalace2F,
@@ -88,20 +88,16 @@ pub(crate) fn graph() -> HashMap<Location, LocationNode> {
         ),
         (
             EasternPalaceBoss,
-            location(
-                "Eastern Palace 3F",
-                None,
-                vec![edge!(EasternPalacePostYuga => {
-                    normal: |p| p.has_bow(),
-                    hard: |p| {
-                        p.has_bombs()
-                            || p.has_master_sword()
-                            || ((p.has_boomerang() || p.has_hookshot()) && p.can_attack())
-                            || p.has_nice_ice_rod()
-                    },
-                    hell: |p| p.has_ice_rod(), // gross
-                })],
-            ),
+            location("Eastern Palace 3F", None, vec![edge!(EasternPalacePostYuga => {
+                normal: |p| p.has_bow(),
+                hard: |p| {
+                    p.has_bombs()
+                        || p.has_master_sword()
+                        || ((p.has_boomerang() || p.has_hookshot() || p.has_foul_fruit()) && p.can_attack())
+                        || p.has_nice_ice_rod()
+                },
+                hell: |p| p.has_ice_rod(), // gross
+            })]),
         ),
         (
             EasternPalacePostYuga,

@@ -1,7 +1,7 @@
 use crate::scene::SpawnPoint;
-use crate::{files::IntoBytes, Result};
+use crate::{Result, files::IntoBytes};
 use game::Course;
-use serde::{ser::SerializeSeq, Serialize, Serializer};
+use serde::{Serialize, Serializer, ser::SerializeSeq};
 use std::vec;
 
 /// A cutscene file (CSV)
@@ -26,10 +26,11 @@ impl Demo {
     }
 
     pub fn finish(&mut self, timestamp: usize, sp: SpawnPoint) {
-        self.commands.push(TimedCommand::new(
-            timestamp,
-            Command::Finish { course: sp.course, scene: sp.scene as u16 - 1, index: sp.spawn as u16 },
-        ));
+        self.commands.push(TimedCommand::new(timestamp, Command::Finish {
+            course: sp.course,
+            scene: sp.scene as u16 - 1,
+            index: sp.spawn as u16,
+        }));
     }
 }
 
