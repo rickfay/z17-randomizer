@@ -12,7 +12,7 @@ use game::ghosts::HintGhost;
 use log::{debug, info};
 use macros::fail;
 use modinfo::settings::NiceItems;
-use modinfo::settings::cracksanity::Cracksanity;
+use modinfo::settings::crack_shuffle::CrackShuffle;
 use rand::seq::IteratorRandom;
 use rand::seq::SliceRandom;
 use rand::{Rng, rngs::StdRng};
@@ -285,7 +285,7 @@ fn generate_crack_hints(
     rng: &mut StdRng, seed_info: &mut SeedInfo, check_map: &mut CheckMap, taken_checks: &mut [&str],
     taken_ghosts: &mut [HintGhost],
 ) -> Vec<CrackHint> {
-    if seed_info.settings.cracksanity == Cracksanity::Off {
+    if seed_info.settings.crack_shuffle == CrackShuffle::Off {
         return Vec::with_capacity(0);
     }
 

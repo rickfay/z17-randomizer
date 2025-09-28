@@ -98,7 +98,7 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
                         "Hyrule Hotfoot 65s",
                         regions::hyrule::lost::woods::SUBREGION => {
                             normal: | p | p.has_boots(),
-                            hard: |p| p.can_merge() && p.has_bell() && p.are_cracks_open() && !p.cracksanity(),
+                            hard: |p| p.can_merge() && p.has_bell() && p.are_cracks_open() && !p.crack_shuffle(),
                             hell: |_| true, // Can just walk it
                         }
                     ),

@@ -11,7 +11,7 @@ use modinfo::settings::cracks::Cracks;
 use modinfo::settings::keysy::Keysy;
 use modinfo::settings::logic::LogicMode;
 use modinfo::settings::nice_items::NiceItems;
-use modinfo::settings::{Cracksanity, DoorShuffle};
+use modinfo::settings::{CrackShuffle, DoorShuffle};
 use rand::{Rng, rngs::StdRng};
 use std::cmp::Ordering;
 use std::iter::repeat;
@@ -376,7 +376,7 @@ pub(crate) fn get_standard_weather_vane_flags(settings: &Settings) -> Vec<Vane> 
 
     // Include Vacant House as a complimentary Weather Vane only when Door + Crack shuffle are both
     // off, so that it doesn't accidentally create a path to LCA earlier than intended.
-    if settings.door_shuffle == DoorShuffle::Off && settings.cracksanity == Cracksanity::Off {
+    if settings.door_shuffle == DoorShuffle::Off && settings.crack_shuffle == CrackShuffle::Off {
         standard_weather_vanes.push(VacantHouseWV);
     }
 
@@ -387,7 +387,7 @@ pub(crate) fn get_standard_weather_vane_flags(settings: &Settings) -> Vec<Vane> 
 pub(crate) fn get_convenient_weather_vane_flags(settings: &Settings) -> Vec<Vane> {
     let mut convenient_weather_vanes = vec![YourHouseWV, KakarikoVillageWV, WitchsHouseWV, SanctuaryWV];
 
-    if settings.door_shuffle == DoorShuffle::Off && settings.cracksanity == Cracksanity::Off {
+    if settings.door_shuffle == DoorShuffle::Off && settings.crack_shuffle == CrackShuffle::Off {
         convenient_weather_vanes.extend(&[LoruleCastleWV, ThievesTownWV, BlacksmithWV, VacantHouseWV]);
     }
 

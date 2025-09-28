@@ -1,10 +1,9 @@
-use crate::filler::filler_item::Item::{Quake, ScootFruit01};
 use crate::filler::filler_item::Vane;
 use crate::filler::filler_item::{Goal, Item, Randomizable};
 use crate::filler::item_pools;
 use crate::{DashSet, SeedInfo};
 use modinfo::settings::cracks::Cracks;
-use modinfo::settings::cracksanity::Cracksanity;
+use modinfo::settings::crack_shuffle::CrackShuffle;
 use modinfo::settings::keysy::Keysy;
 use modinfo::settings::nice_items::NiceItems;
 use modinfo::settings::ravios_shop::RaviosShop;
@@ -22,7 +21,7 @@ impl<'s> Progress<'s> {
         let mut items: DashSet<Randomizable> = Default::default();
 
         // Starting Inventory
-        items.insert(ScootFruit01.into());
+        items.insert(Item::ScootFruit01.into());
 
         // Weather Vanes
         let vanes = item_pools::get_default_weather_vanes(&seed_info.settings);
@@ -255,8 +254,8 @@ impl<'s> Progress<'s> {
         self.has(Item::Bell)
     }
 
-    pub fn cracksanity(&self) -> bool {
-        self.seed_info.settings.cracksanity != Cracksanity::Off
+    pub fn crack_shuffle(&self) -> bool {
+        self.seed_info.settings.crack_shuffle != CrackShuffle::Off
     }
 
     pub fn can_escape(&self) -> bool {
@@ -292,7 +291,7 @@ impl<'s> Progress<'s> {
     }
 
     pub fn are_cracks_open(&self) -> bool {
-        self.seed_info.settings.cracks == Cracks::Open || self.has(Quake)
+        self.seed_info.settings.cracks == Cracks::Open || self.has(Item::Quake)
     }
 
     pub fn can_merge(&self) -> bool {

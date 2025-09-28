@@ -8,21 +8,44 @@ A randomizer for The Legend of Zelda: A Link Between Worlds.
 
 ## Updates
 <details open="open">
-<summary>Version 0.4</summary>
+<summary>Version 0.4.1</summary>
+
+- Introduced Door Shuffle for Dungeon Entrances
+- Give the player a Scoot Fruit at the start of the game
+    - This is a temporary measure until we have some form of "warp" working to prevent softlocks in dungeons
+- Randomized Foul Fruit and added it to logic
+- Removed fruits from Hyrule Item Shops (they'll just sell the basic Shield)
+- Randomized Stylish Woman's revisit item, which will always be some random junk
+    - The single "Heart" item will be randomized as a junk item
+- Changed extra items added by the randomizer to always be Energy Potions (i.e., instant stamina refills)
+- Changed the Sometimes Hint for Swamp Palace to be for the chest in the southwest room on 1F
+- Logic Changes:
+    - Add defeating Knucklemaster with Super Lamp to Normal Logic when Lamp is treated as a weapon
+    - Restore HC Curtain Logic (only affects Swordless Mode)
+    - Add defeating Yuga (EP) with Fire Rod to Hard Logic
+    - Add EP 1F Out of Bounds to Hell Logic
+    - Move accessing the SW Desert Crack with Nice Sand Rod to Hard Logic
+- Fixed `minigames_excluded` description to not include Treacherous Tower
+- Removed softlock prevention in Skull and Gales and removed blue warp from Mire
+- Spoiler log adds new `removed_from_play` section that lists items not included in the seed
+
+</details>
+<details>
+<summary>Version 0.4.0</summary>
 
 - **Quake + Initially Closed Cracks**
   - Games will now start with most cracks closed, until players find the new item that opens them: Quake.
   - The Crack in Hyrule Castle is the only one open without Quake, and may be required to use if Quake is placed somewhere in Lorule.
     - Only the Crack connected to Hyrule Castle will be open in Lorule.
-    - If Cracksanity is enabled, the HC Crack may lead to any crack in Lorule and therefore Quake may appear nearly anywhere in Lorule.
+    - If Crack Shuffle is enabled, the HC Crack may lead to any crack in Lorule and therefore Quake may appear nearly anywhere in Lorule.
   - Players may optionally choose to start with Cracks already open, in which case Quake will be omitted from the item pool.
-- **Crack Shuffle / "Cracksanity"**
+- **Crack Shuffle**
   - Four different shuffling modes:
     - Cross World Pairs
     - Any World Pairs
     - Mirrored Cross World Pairs
     - Mirrored Any World Pairs
-  - Read the section for more details: [Cracksanity](#cracksanity)
+  - Read the section for more details: [Crack Shuffle](#crack-shuffle)
 - **Weather Vanes**
   - **Pair Shuffle**: Groups Weather Vanes into random pairs that unlock each other instead of themselves.
   - **Convenient**: Activates the Vanes that don't affect logic
@@ -561,7 +584,7 @@ For Citra (emulator):
 | Closed  | All Cracks, except the one in Hyrule Castle, are closed and require the Quake item to be opened. |
 | Open    | Begin the game with all Cracks open. The Quake item is not included in the item pool.            |
 
-`cracksanity`
+`crack_shuffle`
 - Randomizes the pairings between the Cracks that (normally) go between Hyrule and Lorule.
   - Note: For technical reasons, The Desert Palace Crack is not yet randomized.
 
@@ -728,13 +751,13 @@ Obtaining the Quake item activates the second quake event in the vanilla game, w
 
 This item was created for the randomizer to give an experience closer to the vanilla game where the cracks are not open early-on, meaning Lorule is unreachable even once the player has the ability to Merge.
 
-Importantly, the Hyrule Castle Crack is the only one that will be open without Quake. Because of this, Hyrule Castle has a much more substantial role to play in the randomizer as a sometimes necessary dungeon to complete if Quake (or something that leads to it) happens to be in Lorule. Or simply for its crack, when playing with Cracksanity.
+Importantly, the Hyrule Castle Crack is the only one that will be open without Quake. Because of this, Hyrule Castle has a much more substantial role to play in the randomizer as a sometimes necessary dungeon to complete if Quake (or something that leads to it) happens to be in Lorule. Or simply for its crack, when playing with Crack Shuffle.
 
 The item is called "Quake" because that is how several NPCs refer to the story event in dialog. Interestingly, they always refer to it as "quake", but never "earthquake".
 
 The sprite commonly found on trackers is borrowed from the item of the same name from this game's predecessor, A Link to the Past.
 
-## Cracksanity
+## Crack Shuffle
 
 
 There are 56 Cracks (aka "fissures" or "portals") in the game formed into pairs that connect areas of Hyrule with Lorule.
@@ -763,7 +786,7 @@ The destination of a Crack determines its appearance.
 
 Most Cracks in the game are "up" cracks, like the one in front of Link's House.
 
-However, there are 6 pairs of "down" cracks as well, that reside on the backs pillars, buildings, etc.
+However, there are 6 pairs of "down" cracks as well, that reside on the backs of pillars, buildings, etc.
 For technical reasons, these cracks can only be shuffled amongst themselves.
 
 ![Crack Pools](docs/down_cracks.png)
@@ -794,8 +817,8 @@ Because of this, the logic only requires bombs to enter the blocked side of crac
 
 #### Hyrule Castle Crack
 - This crack and its pair are the only cracks open without **Quake**.
-- If Cracksanity is off, **Quake** may appear in the Lorule Castle Area and players will need to use this crack to get there.
-- When Cracksanity is on, the Hyrule Castle Crack will lead to a random crack in Lorule, and thus one random region of Lorule will become accessible. In this way, **Quake** has the potential to appear in any region of Lorule.
+- If Crack Shuffle is off, **Quake** may appear in the Lorule Castle Area and players will need to use this crack to get there.
+- When Crack Shufffle is on, the Hyrule Castle Crack will lead to a random crack in Lorule, and thus one random region of Lorule will become accessible. In this way, **Quake** has the potential to appear in any region of Lorule.
   - For technical reasons, the Hyrule Castle Crack will *only* go to Lorule. It cannot be paired with another Hyrule Crack.
 
 #### Lorule Castle Crack
@@ -984,7 +1007,7 @@ The Bow of Light Hint will be generated for every seed even if an [Always](#alwa
   - Not all item models have their transforms applied to them (rotation, scaling, etc.) and may look slightly odd.
   - Only the Items in Ravio's Shop and the Kakariko Street Merchant have had their models replaced -- all others will appear vanilla.
     - The Letter in a Bottle's vanilla location will appear as a Heart Piece.
-- Cracksanity:
+- Crack Shuffle:
   - The player's location on the bottom screen may not be reflected accurately after exiting a same-world crack, until the player loads another area.
 - Weather Vanes:
   - When these are Shuffled, if a Weather Vane activates the fast travel point in the opposite world it will not display on the bottom screen and will be a mystery to the player until they visit the opposite world and check their map with the Bell.

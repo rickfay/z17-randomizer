@@ -367,7 +367,8 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
                     }),
                     edge!(DesertCenterLedge, |p| p.has_sand_rod()),
                     edge!(DesertSouthWestLedge => {
-                        normal: |p| p.can_merge() && (p.has_stamina_scroll() || p.has_nice_sand_rod()), // YUP
+                        normal: |p| p.can_merge() && p.has_stamina_scroll(),
+                        hard: |p| p.can_merge() && p.has_nice_sand_rod(), // YUP
                         glitched: |p| p.has_fire_rod() || p.has_nice_bombs(),
                         adv_glitched: |_| true, // vulture boost
                     }),

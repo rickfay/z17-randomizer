@@ -30,14 +30,23 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
             ZeldasStudy,
             location(
                 "Zelda's Study",
-                //vec![check!("[HC] Crack", regions::dungeons::hyrule::castle::SUBREGION, |p| p.can_merge())],
                 None,
                 vec![
                     //path!(HyruleCastleDungeonBoss), // Don't allow reverse Hyrule Castle
-                    crack_left(HyruleCastle, crack_map, true),
-                    crack_right(HyruleCastle, crack_map, true),
+                    edge!(CurtainWall, |p| p.has_sword()
+                        || p.has_lamp()
+                        || p.has_fire_rod()
+                        || p.has_bombs()
+                        || p.has_boots()),
                 ],
             ),
+        ),
+        (
+            CurtainWall,
+            location("Curtain Wall", None, vec![
+                crack_left(HyruleCastle, crack_map, true),
+                crack_right(HyruleCastle, crack_map, true),
+            ]),
         ),
     ])
 }

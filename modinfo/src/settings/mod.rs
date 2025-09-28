@@ -1,5 +1,5 @@
 pub use crate::settings::cracks::Cracks;
-pub use crate::settings::cracksanity::Cracksanity;
+pub use crate::settings::crack_shuffle::CrackShuffle;
 pub use crate::settings::door_shuffle::DoorShuffle;
 pub use crate::settings::keysy::Keysy;
 pub use crate::settings::logic::LogicMode;
@@ -15,7 +15,7 @@ use std::collections::btree_set::BTreeSet;
 use std::hash::Hash;
 
 pub mod cracks;
-pub mod cracksanity;
+pub mod crack_shuffle;
 pub mod door_shuffle;
 pub mod keysy;
 pub mod logic;
@@ -85,7 +85,7 @@ pub struct Settings {
 
     /// Shuffles the crack destinations amongst each other
     #[serde(default)]
-    pub cracksanity: Cracksanity,
+    pub crack_shuffle: CrackShuffle,
 
     /// Weather Vanes behavior and activation setting.
     #[serde(default)]
@@ -225,7 +225,7 @@ impl Settings {
             "Chest Size:                     {}",
             if self.chest_size_matches_contents { "Matches Contents" } else { "Normal" }
         );
-        info!("Cracksanity:                   {}", self.cracksanity)
+        info!("Crack Shuffle:                 {}", self.crack_shuffle)
     }
 }
 
