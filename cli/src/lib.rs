@@ -143,18 +143,18 @@ pub fn get_seed_settings() -> Result<Settings, String> {
     let skip_big_bomb_flower = prompt_bool(
         "Skip Big Bomb Flower",
         "Skips the Big Bomb Flower by removing the 5 Big Rocks in Lorule Field.\n\
-        (Does not affect Lorule Castle Bomb Trial)",
+        Note: Does not affect the Big Rock in the Lorule Castle Bomb Trial.",
     );
 
     let trials_door = TrialsDoor::try_from(prompt_u8_in_range(
         "Trial's Door",
         "Choose the behavior of the Lorule Castle Trial's Door:\n\
-        [0] Opens automatically from inside LC.\n\
+        [0] Opens automatically when approached from inside Lorule Castle.\n\
         [1] Trial  Required, randomly selected.\n\
         [2] Trials Required, randomly selected.\n\
         [3] Trials Required, randomly selected.\n\
         [4] Trials Required.\n\
-        [5] Open from both sides (may require entering LC early via the crack).",
+        [5] Open from both sides (allows and may require entering LC early via the crack).",
         0,
         5,
     ))?;
@@ -236,6 +236,12 @@ pub fn get_seed_settings() -> Result<Settings, String> {
         3,
     ))?;
 
+    let night_mode = prompt_bool(
+        "Night Mode (cosmetic)",
+        "Modifies overworld lighting. Mostly makes things purple, but also brighter/shinier in some areas.\n\
+        Note: May make certain glitch setups more difficult to perform.",
+    );
+
     println!();
     info!("Starting seed generation...\n");
 
@@ -275,7 +281,7 @@ pub fn get_seed_settings() -> Result<Settings, String> {
         skip_big_bomb_flower,
         treacherous_tower_floors,
         purple_potion_bottles,
-        night_mode: false,
+        night_mode,
     })
 }
 

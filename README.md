@@ -23,6 +23,8 @@ A randomizer for The Legend of Zelda: A Link Between Worlds.
     - Add defeating Knucklemaster with Super Lamp to Normal Logic when Lamp is treated as a weapon
     - Restore HC Curtain Logic (only affects Swordless Mode)
     - Add defeating Yuga (EP) with Fire Rod to Hard Logic
+    - Add EP 1F Escape Chest early to Advanced Glitched Logic
+      - The elevator from Escape 2F to 3F is now disabled until the boss is defeated, to prevent softlocks
     - Add EP 1F Out of Bounds to Hell Logic
     - Move accessing the SW Desert Crack with Nice Sand Rod to Hard Logic
 - Fixed `minigames_excluded` description to not include Treacherous Tower
