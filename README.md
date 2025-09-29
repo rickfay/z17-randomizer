@@ -18,6 +18,7 @@ A randomizer for The Legend of Zelda: A Link Between Worlds.
 - Randomized Stylish Woman's revisit item, which will always be some random junk
     - The single "Heart" item will be randomized as a junk item
 - Changed extra items added by the randomizer to always be Energy Potions (i.e., instant stamina refills)
+- Exposed Night Mode setting in CLI, allowing non-preset users to access it
 - Changed the Sometimes Hint for Swamp Palace to be for the chest in the southwest room on 1F
 - Logic Changes:
     - Add defeating Knucklemaster with Super Lamp to Normal Logic when Lamp is treated as a weapon
