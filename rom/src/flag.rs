@@ -109,6 +109,7 @@ impl Flag {
     event_flags! {
         106: REPURPOSED_106,
         // ...
+        250: YUGA_EP_DEFEATED,
         251: EASTERN_COMPLETE,
         // ...
         342: GALES_COMPLETE,

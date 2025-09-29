@@ -1,11 +1,14 @@
-use crate::SeedInfo;
-use crate::filler::item_pools;
-use game::Course::*;
 use log::info;
+
+use game::Course::*;
 use modinfo::settings::cracks::Cracks;
 use modinfo::settings::trials_door::TrialsDoor;
-use rom::scene::SpawnPoint;
 use rom::{Demo, File};
+use rom::flag::Flag;
+use rom::scene::SpawnPoint;
+
+use crate::filler::item_pools;
+use crate::SeedInfo;
 
 /// Cutscene file recreation.
 /// Files are not read from the ROM but instead created from scratch given their (mostly) short lengths.
@@ -26,7 +29,7 @@ pub(crate) fn build_replacement_cutscenes(seed_info: &SeedInfo) -> crate::Result
 
     // Demo3 - Eastern Palace Yuga cutscene (goes to Eastern Palace 3F)
     let mut demo3 = Demo::new();
-    demo3.set_event_flag(0, 250); // todo
+    demo3.set_event_flag(0, Flag::YUGA_EP_DEFEATED.get_value());
     demo3.finish(0, SpawnPoint::new(DungeonEast, 3, 1));
 
     // Demo4 - Yuga revives Ganon (after IHC) cutscene (goes to Lorule Blacksmith)

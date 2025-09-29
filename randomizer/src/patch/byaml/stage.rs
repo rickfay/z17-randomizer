@@ -111,6 +111,7 @@ pub fn patch(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
     patch_thief_girl_cave(patcher, seed_info);
     patch_treasure_dungeons(patcher, seed_info);
     patch_zora(patcher);
+    patch_eastern_palace(patcher);
     patch_swamp_palace(patcher);
     patch_hint_ghosts_overworld(patcher)?;
     patch_hint_ghosts_dungeons(patcher)?;
@@ -240,7 +241,7 @@ pub fn patch(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
         DungeonEast 3 {
             // Open door after defeating Yuga
             [0x5D].each [
-                inactive(250),
+                inactive(Flag::YUGA_EP_DEFEATED.get_value()),
                 enable(),
             ],
         },
@@ -951,6 +952,19 @@ fn patch_zora(patcher: &mut Patcher) {
     // Lake Hylia
     patcher.modify_objs(FieldLight, 35, [
         enable(151), // Zora outside House of Gales
+    ]);
+}
+
+fn patch_eastern_palace(patcher: &mut Patcher) {
+    // Disable elevator + loading zone to 3F from 2F escape until Yuga is defeated, to avoid softlocks
+    // TODO come up with way to avoid the softlock entirely so the 3F Escape Chest is accessible early
+    patcher.modify_objs(DungeonEast, 2, [
+        
+        // loading zone
+        set_enable_flag(203, Flag::YUGA_EP_DEFEATED),
+        
+        // elevator thing
+        set_46_args(202, Flag::YUGA_EP_DEFEATED),
     ]);
 }
 
