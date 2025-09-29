@@ -6,7 +6,7 @@ use crate::{CrackMap, DashMap, filler};
 use game::Course::{CaveDark, FieldDark, FieldLight, IndoorDark, IndoorLight};
 use log::info;
 use modinfo::Settings;
-use modinfo::settings::cracksanity::Cracksanity;
+use modinfo::settings::crack_shuffle::CrackShuffle;
 use rand::Rng;
 use rand::rngs::StdRng;
 use rom::flag::Flag;
@@ -573,8 +573,8 @@ pub fn build_crack_map(settings: &Settings, rng: &mut StdRng) -> Result<CrackMap
     hyrule_up_cracks.retain(|&p| p != Crack::DesertPalace);
     lorule_up_cracks.retain(|&p| p != Crack::Zaganaga);
 
-    match settings.cracksanity {
-        Cracksanity::Off => {
+    match settings.crack_shuffle {
+        CrackShuffle::Off => {
             let mut hyrule_cracks = hyrule_up_cracks;
             hyrule_cracks.extend(hyrule_down_cracks);
 
@@ -585,7 +585,7 @@ pub fn build_crack_map(settings: &Settings, rng: &mut StdRng) -> Result<CrackMap
                 crack_map.insert(lorule_crack, hyrule_crack);
             }
         },
-        Cracksanity::CrossWorldPairs => {
+        CrackShuffle::CrossWorldPairs => {
             let mut hyrule_cracks = hyrule_up_cracks;
             hyrule_cracks.extend(hyrule_down_cracks);
 
@@ -594,7 +594,7 @@ pub fn build_crack_map(settings: &Settings, rng: &mut StdRng) -> Result<CrackMap
 
             create_map(&mut crack_map, &hyrule_cracks, &lorule_cracks);
         },
-        Cracksanity::AnyWorldPairs => {
+        CrackShuffle::AnyWorldPairs => {
             // Force Hyrule Castle crack to always be paired with a Lorule (Up) crack
             let hc_match = lorule_up_cracks.remove(rng.gen_range(0..lorule_up_cracks.len()));
             hyrule_up_cracks.retain(|&p| p != Crack::HyruleCastle);
@@ -614,7 +614,7 @@ pub fn build_crack_map(settings: &Settings, rng: &mut StdRng) -> Result<CrackMap
             crack_map.extend(filler::util::pair_randomly(rng, up_cracks)?);
             crack_map.extend(filler::util::pair_randomly(rng, down_cracks)?);
         },
-        Cracksanity::MirroredCrossWorldPairs => {
+        CrackShuffle::MirroredCrossWorldPairs => {
             // UP
             let mut lorule_up_cracks = filler::util::shuffle(rng, lorule_up_cracks);
 
@@ -661,7 +661,7 @@ pub fn build_crack_map(settings: &Settings, rng: &mut StdRng) -> Result<CrackMap
                 }
             }
         },
-        Cracksanity::MirroredAnyWorldPairs => {
+        CrackShuffle::MirroredAnyWorldPairs => {
             // Force Hyrule Castle crack to always be paired with a Lorule (Up) crack
             let hc_match = lorule_up_cracks.remove(rng.gen_range(0..lorule_up_cracks.len()));
             hyrule_up_cracks.retain(|&p| p != Crack::HyruleCastle);

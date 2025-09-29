@@ -1,7 +1,7 @@
 {
   // "Visit the project GitHub for details about each option: https://github.com/rickfay/z17-randomizer/tree/dev#game-options"
   "seed": 0,
-  "version": "v0.4.1 - Beta Build 2025-03-26",
+  "version": "v0.4.1 - Beta Build 2025-09-28",
   "settings": {
 
 
@@ -11,7 +11,7 @@
     "dungeon_prize_shuffle":       true,                      // This shuffles all Sage Portraits and Pendants amongst themselves.
     "door_shuffle":                "Off",                     // "Off", "DungeonEntrances"
     "cracks":                      "Closed",                  // "Closed", "Open"
-    "cracksanity":                 "Off",                     // "Off", "CrossWorldPairs", "AnyWorldPairs", "MirroredCrossWorldPairs", "MirroredAnyWorldPairs"
+    "crack_shuffle":               "Off",                     // "Off", "CrossWorldPairs", "AnyWorldPairs", "MirroredCrossWorldPairs", "MirroredAnyWorldPairs"
     "keysy":                       "Off",                     // "Off", "SmallKeysy", "BigKeysy", "AllKeysy"
     "trials_door":                 "OpenFromInsideOnly",      // "OpenFromInsideOnly", "OneTrialRequired", "TwoTrialsRequired", "ThreeTrialsRequired", "AllTrialsRequired", "OpenFromBothSides"
     "weather_vanes":               "Hyrule",                  // Choose initially active Weather Vanes: "Standard", "Shuffled", "Convenient", "Hyrule", "Lorule", "All"

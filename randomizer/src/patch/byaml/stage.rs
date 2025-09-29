@@ -4,7 +4,7 @@ use crate::{Result, SeedInfo, patch::util::*, regions};
 use game::Course::{self, *};
 use log::info;
 use macros::fail;
-use modinfo::settings::cracksanity::Cracksanity;
+use modinfo::settings::crack_shuffle::CrackShuffle;
 use modinfo::settings::keysy::Keysy;
 use modinfo::settings::{Settings, TrialsDoor};
 use rom::flag::Flag;
@@ -111,6 +111,7 @@ pub fn patch(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
     patch_thief_girl_cave(patcher, seed_info);
     patch_treasure_dungeons(patcher, seed_info);
     patch_zora(patcher);
+    patch_eastern_palace(patcher);
     patch_swamp_palace(patcher);
     patch_hint_ghosts_overworld(patcher)?;
     patch_hint_ghosts_dungeons(patcher)?;
@@ -120,7 +121,7 @@ pub fn patch(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
     patch_hildas_study(patcher, &seed_info.settings);
 
     patch_curtain(patcher, seed_info);
-    patch_cracksanity(patcher);
+    patch_crack_shuffle(patcher);
     patch_keysy_small(patcher, &seed_info.settings);
     patch_keysy_big(patcher, &seed_info.settings);
     // patch_reverse_desert_palace(patcher, settings);
@@ -240,7 +241,7 @@ pub fn patch(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
         DungeonEast 3 {
             // Open door after defeating Yuga
             [0x5D].each [
-                inactive(250),
+                inactive(Flag::YUGA_EP_DEFEATED.get_value()),
                 enable(),
             ],
         },
@@ -954,6 +955,19 @@ fn patch_zora(patcher: &mut Patcher) {
     ]);
 }
 
+fn patch_eastern_palace(patcher: &mut Patcher) {
+    // Disable elevator + loading zone to 3F from 2F escape until Yuga is defeated, to avoid softlocks
+    // TODO come up with way to avoid the softlock entirely so the 3F Escape Chest is accessible early
+    patcher.modify_objs(DungeonEast, 2, [
+        
+        // loading zone
+        set_enable_flag(203, Flag::YUGA_EP_DEFEATED),
+        
+        // elevator thing
+        set_46_args(202, Flag::YUGA_EP_DEFEATED),
+    ]);
+}
+
 // Swamp Palace
 fn patch_swamp_palace(patcher: &mut Patcher) {
     patcher.modify_objs(DungeonWater, 2, [call(633, |obj| {
@@ -1228,7 +1242,7 @@ fn patch_curtain(patcher: &mut Patcher, seed_info: &SeedInfo) {
     }
 }
 
-fn patch_cracksanity(patcher: &mut Patcher) {
+fn patch_crack_shuffle(patcher: &mut Patcher) {
     // Eastern Ruins SE Crack Blockage
     patcher.modify_objs(FieldLight, 30, [call(57, |obj| {
         obj.set_active_flag(Flag::CRACK_EASTERN_RUINS_SE);
@@ -1336,7 +1350,7 @@ fn patch_hildas_study(patcher: &mut Patcher, settings: &Settings) {
 /// Currently not being used as I'm keeping the DP/Z Cracks vanilla for the first release.
 #[allow(unused)]
 fn patch_reverse_desert_palace(patcher: &mut Patcher, settings: &Settings) {
-    if settings.cracksanity == Cracksanity::Off {
+    if settings.crack_shuffle == CrackShuffle::Off {
         return;
     }
 

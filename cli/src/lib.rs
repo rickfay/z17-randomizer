@@ -1,6 +1,6 @@
 use log::info;
 use modinfo::settings::cracks::Cracks;
-use modinfo::settings::cracksanity::Cracksanity;
+use modinfo::settings::crack_shuffle::CrackShuffle;
 use modinfo::settings::keysy::Keysy;
 use modinfo::settings::nice_items::NiceItems;
 use modinfo::settings::ravios_shop::RaviosShop;
@@ -123,8 +123,8 @@ pub fn get_seed_settings() -> Result<Settings, String> {
         1,
     ))?;
 
-    let cracksanity = Cracksanity::try_from(prompt_u8_in_range(
-        "Cracksanity",
+    let crack_shuffle = CrackShuffle::try_from(prompt_u8_in_range(
+        "Crack Shuffle",
         "Choose how to shuffle cracks:\n\
         [0] Off                        - Cracks are not shuffled.\n\
         [1] Cross World Pairs          - Cracks are shuffled, but remain in Hyrule/Lorule pairs.\n\
@@ -137,24 +137,24 @@ pub fn get_seed_settings() -> Result<Settings, String> {
 
     let minigames_excluded = prompt_bool(
         "Exclude Minigames",
-        "Excludes the following: Octoball Derby, Dodge the Cuccos, Hyrule Hotfoot, and both Rupee Rushes",
+        "Excludes the following: Octoball Derby, Dodge the Cuccos, Hyrule Hotfoot and both Rupee Rushes",
     );
 
     let skip_big_bomb_flower = prompt_bool(
         "Skip Big Bomb Flower",
         "Skips the Big Bomb Flower by removing the 5 Big Rocks in Lorule Field.\n\
-        (Does not affect Lorule Castle Bomb Trial)",
+        Note: Does not affect the Big Rock in the Lorule Castle Bomb Trial.",
     );
 
     let trials_door = TrialsDoor::try_from(prompt_u8_in_range(
         "Trial's Door",
         "Choose the behavior of the Lorule Castle Trial's Door:\n\
-        [0] Opens automatically from inside LC.\n\
+        [0] Opens automatically when approached from inside Lorule Castle.\n\
         [1] Trial  Required, randomly selected.\n\
         [2] Trials Required, randomly selected.\n\
         [3] Trials Required, randomly selected.\n\
         [4] Trials Required.\n\
-        [5] Open from both sides (may require entering LC early via the crack).",
+        [5] Open from both sides (allows and may require entering LC early via the crack).",
         0,
         5,
     ))?;
@@ -173,13 +173,13 @@ pub fn get_seed_settings() -> Result<Settings, String> {
 
     let weather_vanes = WeatherVanes::try_from(prompt_u8_in_range(
         "Weather Vanes",
-        "Choose Weather Vanes behavior. Logic may require using them to progress.\n\
-        [0] Standard   - Only the standard complimentary Weather Vanes (Link's House & Vacant House)\n\
+        "Choose Weather Vane behavior. Logic may require using them to progress.\n\
+        [0] Standard   - Pre-activate only the complimentary Weather Vanes (Link's House & Vacant House)\n\
         [1] Shuffled   - Weather Vane destinations are shuffled into random pairs\n\
-        [2] Convenient - Only convenient Weather Vanes that don't affect logic\n\
-        [3] Hyrule     - Only the  9 Hyrule Weather Vanes (and Vacant House)\n\
-        [4] Lorule     - Only the 13 Lorule Weather Vanes (and Link's House)\n\
-        [5] All        - All 22 Weather Vanes\n",
+        [2] Convenient - Pre-activate only convenient Weather Vanes that don't affect logic\n\
+        [3] Hyrule     - Pre-activate only the  9 Hyrule Weather Vanes (and Vacant House)\n\
+        [4] Lorule     - Pre-activate only the 13 Lorule Weather Vanes (and Link's House)\n\
+        [5] All        - Pre-activate all 22 Weather Vanes\n",
         0,
         5,
     ))?;
@@ -236,6 +236,12 @@ pub fn get_seed_settings() -> Result<Settings, String> {
         3,
     ))?;
 
+    let night_mode = prompt_bool(
+        "Night Mode (cosmetic)",
+        "Modifies overworld lighting. Mostly makes things purple, but also brighter/shinier in some areas.\n\
+        Note: May make certain glitch setups more difficult to perform.",
+    );
+
     println!();
     info!("Starting seed generation...\n");
 
@@ -255,7 +261,7 @@ pub fn get_seed_settings() -> Result<Settings, String> {
         lamp_and_net_as_weapons,
         door_shuffle,
         cracks,
-        cracksanity,
+        crack_shuffle,
         trials_door,
         weather_vanes,
         ravios_shop: RaviosShop::Open,
@@ -275,7 +281,7 @@ pub fn get_seed_settings() -> Result<Settings, String> {
         skip_big_bomb_flower,
         treacherous_tower_floors,
         purple_potion_bottles,
-        night_mode: false,
+        night_mode,
     })
 }
 

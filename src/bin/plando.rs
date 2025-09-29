@@ -1,18 +1,19 @@
 use log::{LevelFilter, error, info};
 use macros::fail;
-use modinfo::settings::Keysy;
 use modinfo::settings::RaviosShop;
 use modinfo::settings::TrialsDoor;
 use modinfo::settings::WeatherVanes;
+use modinfo::settings::{CrackShuffle, LogicMode, PedestalSetting, Settings};
 use modinfo::settings::{Cracks, NiceItems};
-use modinfo::settings::{Cracksanity, LogicMode, PedestalSetting, Settings};
+use modinfo::settings::{DoorShuffle, Keysy};
 use randomizer::filler::cracks::Crack;
+use randomizer::filler::doors::Door;
 use randomizer::filler::filler_item::Item::*;
 use randomizer::filler::filler_item::Randomizable;
 use randomizer::filler::filler_item::Vane::*;
 use randomizer::filler::{filler_item, item_pools};
 use randomizer::{
-    CrackMap, Layout, SeedHash, SeedInfo, VaneMap,
+    CrackMap, DoorMap, Layout, SeedHash, SeedInfo, VaneMap,
     constants::VERSION,
     regions,
     system::{System, UserConfig},
@@ -58,8 +59,10 @@ fn main() {
         hash: SeedHash::new(seed, &settings),
         settings,
         full_exclusions: Default::default(),
+        removed_from_play: vec![],
         treacherous_tower_floors: vec![],
         vane_map: get_plando_weather_vane_map(),
+        door_map: get_plando_door_map(),
         crack_map: get_plando_crack_map(),
         layout: build_layout(),
         metrics: Default::default(),
@@ -110,6 +113,24 @@ fn get_plando_weather_vane_map() -> VaneMap {
         (SwampPalaceWV, SwampPalaceWV),
         (TurtleRockWV, TurtleRockWV),
         (DeathMountainLoruleWV, DeathMountainLoruleWV),
+    ])
+}
+
+fn get_plando_door_map() -> DoorMap {
+    use Door::*;
+    DoorMap::from_iter([
+        (EasternPalaceEntrance, EasternPalaceExit),
+        (HouseOfGalesEntrance, HouseOfGalesExit),
+        (TowerOfHeraEntrance, TowerOfHeraExit),
+        (InsideHyruleCastleEntrance, InsideHyruleCastleExit),
+        (DarkPalaceEntrance, DarkPalaceExit),
+        (SwampPalaceEntrance, SwampPalaceExit),
+        (SkullWoodsEntrance, SkullWoodsExit),
+        (ThievesHideoutEntrance, ThievesHideoutExit),
+        (TurtleRockEntrance, TurtleRockExit),
+        (DesertPalaceEntrance, DesertPalaceExit),
+        (IceRuinsEntrance, IceRuinsExit),
+        (LoruleCastleEntrance, LoruleCastleExit),
     ])
 }
 
@@ -183,6 +204,7 @@ fn plando_settings() -> Settings {
         ped_requirement: PedestalSetting::Standard,
         logic_mode: LogicMode::Normal,
         dark_rooms_lampless: false,
+        door_shuffle: DoorShuffle::Off,
         dungeon_prize_shuffle: true,
         maiamai_limit: 50,
         maiamai_madness: false,
@@ -190,7 +212,7 @@ fn plando_settings() -> Settings {
         super_items: false,
         lamp_and_net_as_weapons: false,
         cracks: Cracks::Open,
-        cracksanity: Cracksanity::AnyWorldPairs,
+        crack_shuffle: CrackShuffle::AnyWorldPairs,
         weather_vanes: WeatherVanes::Hyrule,
         ravios_shop: RaviosShop::Open,
         bow_of_light_in_castle: false,

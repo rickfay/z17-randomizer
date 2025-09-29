@@ -1,9 +1,9 @@
 use serde::{Deserialize, Serialize};
 use std::fmt::{Display, Formatter};
 
-/// Crackanity
+/// Crack Shuffle
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq, Deserialize, Serialize)]
-pub enum Cracksanity {
+pub enum CrackShuffle {
     /// Cracks are not shuffled
     #[default]
     Off,
@@ -17,7 +17,7 @@ pub enum Cracksanity {
     MirroredAnyWorldPairs,
 }
 
-impl TryFrom<u8> for Cracksanity {
+impl TryFrom<u8> for CrackShuffle {
     type Error = String;
 
     fn try_from(value: u8) -> Result<Self, Self::Error> {
@@ -32,7 +32,7 @@ impl TryFrom<u8> for Cracksanity {
     }
 }
 
-impl Display for Cracksanity {
+impl Display for CrackShuffle {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", match self {
             Self::Off => "Off",

@@ -181,12 +181,17 @@ pub enum Location {
 
     // Dungeons -----------------
     EasternPalaceFoyer,
+    EasternPalaceFoyerCrack,
     EasternPalace1F,
+    EasternPalace1FOutOfBounds,
     EasternPalaceMiniboss,
     EasternPalace2F,
     EasternPalaceBoss,
     EasternPalacePostYuga,
-    EasternPalaceEscape,
+    EasternPalaceEscape3F,
+    EasternPalaceEscape2F,
+    EasternPalaceEscape1F,
+    EasternPalaceFinalChest,
 
     HouseOfGalesFoyer,
     HouseOfGalesEast1F,
@@ -267,6 +272,7 @@ pub enum Location {
     LoruleCastle4F5F,
     HildasStudy,
     ZeldasStudy,
+    CurtainWall,
     ThroneRoom,
 
     SacredRealm,
