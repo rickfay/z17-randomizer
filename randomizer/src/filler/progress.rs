@@ -475,6 +475,7 @@ impl<'s> Progress<'s> {
     pub fn can_hit_far_switch(&self) -> bool {
         use Item::*;
         self.has_any([Bow01, Bow02, Bow03, Boomerang01, Boomerang02, Hookshot01, Hookshot02, Bombs01, Bombs02])
+            || self.can_great_spin()
     }
 
     pub fn can_hit_shielded_switch(&self) -> bool {
@@ -488,7 +489,6 @@ impl<'s> Progress<'s> {
     pub fn can_hit_hog_1f_switch(&self) -> bool {
         self.can_hit_far_switch()
             || self.has_ice_rod()
-            || self.can_great_spin()
             || (self.can_merge() && (self.has_sword() || self.has_hammer()))
     }
 

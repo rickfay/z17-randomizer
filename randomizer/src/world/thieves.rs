@@ -37,6 +37,7 @@ pub(crate) fn graph(door_map: &DoorMap) -> HashMap<Location, LocationNode> {
                     }),
                     goal!("Thieves' Hideout B2 Door Open", Goal::ThievesB2DoorOpen => {
                         normal: |p| p.thieves_b1_door_open() && p.can_merge() && (p.progression_enemies() || p.has_bombs()),
+                        glitched: |p| p.thieves_b1_door_open() && p.can_great_spin(),
                         adv_glitched: |p| (p.can_merge() || p.can_escape_dungeon()) && p.adv_thieves_statue_clip(),
                         hell: |p| p.has_bombs(),
                     }),
