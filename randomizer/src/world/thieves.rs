@@ -122,7 +122,7 @@ pub(crate) fn graph(door_map: &DoorMap) -> HashMap<Location, LocationNode> {
                     check!("[TT] Prize", regions::dungeons::thieves::hideout::SUBREGION),
                     goal!("Stalblind Defeated", Goal::Stalblind),
                 ],
-                vec![],
+                None,
             ),
         ),
     ])

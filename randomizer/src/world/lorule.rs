@@ -23,7 +23,7 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
             LoruleBellTravel,
             location(
                 "Lorule Bell Travel",
-                vec![],
+                None,
                 vec![
                     edge!(LoruleCastleArea, |p| p.has_weather_vane(VacantHouseWV)
                         || p.has_weather_vane(BlacksmithWV)
@@ -147,7 +147,7 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
         ),
         (
             BigBombFlowerShop,
-            location("Big Bomb Flower Shop", vec![], vec![edge!(LoruleCastleArea), edge!(BigBombFlowerField)]),
+            location("Big Bomb Flower Shop", None, vec![edge!(LoruleCastleArea), edge!(BigBombFlowerField)]),
         ),
         (
             BigBombFlowerField,
@@ -192,7 +192,7 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
             Location::GraveyardLedgeLorule,
             location(
                 "Graveyard Ledge Lorule",
-                vec![],
+                None,
                 vec![
                     fast_travel_lorule(),
                     crack_left(Crack::GraveyardLedgeLorule, crack_map, false),
@@ -232,7 +232,7 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
             LoruleSanctuaryCaveLower,
             location(
                 "Philosopher's Cave Lower",
-                vec![],
+                None,
                 vec![
                     crack_left(Philosopher, crack_map, false),
                     crack_right(Philosopher, crack_map, false),
@@ -281,7 +281,7 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
                 vec![edge!(LoruleCastleArea)],
             ),
         ),
-        (VacantHouseBottom, location("Vacant House (Bottom)", vec![], vec![edge!(LoruleCastleArea)])),
+        (VacantHouseBottom, location("Vacant House (Bottom)", None, vec![edge!(LoruleCastleArea)])),
         (
             VacantHouseTop,
             location(
@@ -501,7 +501,7 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
             MiseryMireBridge,
             location(
                 "Misery Mire Bridge",
-                vec![],
+                None,
                 vec![
                     fast_travel_lorule(),
                     edge!(MiseryMire),
@@ -520,7 +520,7 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
             MiseryMireOoB,
             location(
                 "Misery Mire Out of Bounds",
-                vec![],
+                None,
                 vec![
                     fast_travel_lorule(),
                     edge!(MiseryMire),
@@ -682,7 +682,7 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
             TurtleRockFrontDoor,
             location(
                 "Turtle Rock Front Door",
-                vec![],
+                None,
                 vec![
                     fast_travel_lorule(),
                     door!(TurtleRockEntrance, door_map, |p| p.hearts(9.0)),
@@ -881,7 +881,7 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
             HinoxCaveShallowWater,
             location(
                 "Hinox Cave Shallow Water",
-                vec![],
+                None,
                 vec![
                     fast_travel_lorule(),
                     edge!(HinoxCave),
@@ -1016,17 +1016,13 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
         ),
         (
             IceCaveEast,
-            location(
-                "Ice Cave East",
-                vec![],
-                vec![edge!(RossosOreMineLorule), edge!(IceCaveCenter, |p| p.can_merge())],
-            ),
+            location("Ice Cave East", None, vec![edge!(RossosOreMineLorule), edge!(IceCaveCenter, |p| p.can_merge())]),
         ),
         (
             IceCaveCenter,
             location(
                 "Ice Cave Center",
-                vec![],
+                None,
                 vec![
                     edge!(IceCaveEast, |p| p.can_merge()),
                     edge!(IceCaveSouth => {
@@ -1043,7 +1039,7 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
             IceCaveSouth,
             location(
                 "Ice Cave South",
-                vec![],
+                None,
                 vec![edge!(LoruleDeathEastLedgeLower), edge!(IceCaveCenter, |p| p.can_merge())],
             ),
         ),
@@ -1051,7 +1047,7 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
             IceCaveWest,
             location(
                 "Ice Cave West",
-                vec![],
+                None,
                 vec![
                     edge!(IceCaveCenter),
                     edge!(IceCaveNorthWest, |p| p.has_tornado_rod()),
@@ -1063,7 +1059,7 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
             IceCaveNorthWest,
             location(
                 "Ice Cave North West",
-                vec![],
+                None,
                 vec![
                     edge!(FloatingIslandLorule),
                     edge!(IceCaveWest => {
@@ -1077,7 +1073,7 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
             Location::FloatingIslandLorule,
             location(
                 "Floating Island Lorule",
-                vec![],
+                None,
                 vec![
                     fast_travel_lorule(),
                     edge!(IceCaveNorthWest),
@@ -1088,7 +1084,7 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
         ),
         (
             IceCaveSouthWest,
-            location("Ice Cave South West", vec![], vec![edge!(IceCaveWest), edge!(LoruleDeathEastLedgeUpper)]),
+            location("Ice Cave South West", None, vec![edge!(IceCaveWest), edge!(LoruleDeathEastLedgeUpper)]),
         ),
         (
             LoruleDeathEastLedgeUpper,

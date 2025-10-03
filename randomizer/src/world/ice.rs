@@ -16,7 +16,7 @@ pub(crate) fn graph(door_map: &DoorMap) -> HashMap<Location, LocationNode> {
             IceRuinsFoyer,
             location(
                 "Ice Ruins Entrance",
-                vec![],
+                None,
                 vec![door!(IceRuinsExit, door_map), edge!(IceRuins, |p| p.has_fire_rod())],
             ),
         ),
@@ -90,10 +90,7 @@ pub(crate) fn graph(door_map: &DoorMap) -> HashMap<Location, LocationNode> {
                 ],
             ),
         ),
-        (
-            IceRuinsBoss,
-            location("Ice Ruins Boss", vec![], vec![edge!(IceRuinsPostBoss, |p| p.can_defeat_dharkstare())]),
-        ),
+        (IceRuinsBoss, location("Ice Ruins Boss", None, vec![edge!(IceRuinsPostBoss, |p| p.can_defeat_dharkstare())])),
         (
             IceRuinsPostBoss,
             location(
@@ -103,7 +100,7 @@ pub(crate) fn graph(door_map: &DoorMap) -> HashMap<Location, LocationNode> {
                     check!("[IR] Prize", regions::dungeons::ice::ruins::SUBREGION),
                     goal!("Dharkstare", Goal::Dharkstare),
                 ],
-                vec![],
+                None,
             ),
         ),
     ])

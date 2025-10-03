@@ -15,7 +15,7 @@ pub(crate) fn graph(door_map: &DoorMap) -> HashMap<Location, LocationNode> {
             TurtleRockFoyer,
             location(
                 "Turtle Rock Foyer",
-                vec![],
+                None,
                 vec![door!(TurtleRockExit, door_map), edge!(TurtleRockMain, |p| p.has_ice_rod())],
             ),
         ),
@@ -65,7 +65,7 @@ pub(crate) fn graph(door_map: &DoorMap) -> HashMap<Location, LocationNode> {
             TurtleRockLeftBalconyPath,
             location(
                 "Turtle Rock Left Balcony Path",
-                vec![],
+                None,
                 vec![edge!(TurtleRockMain, |p| p.has_ice_rod()), edge!(TurtleRockLeftBalcony, |p| p.has_ice_rod())],
             ),
         ),
@@ -83,7 +83,7 @@ pub(crate) fn graph(door_map: &DoorMap) -> HashMap<Location, LocationNode> {
             TurtleRockRightBalconyPath,
             location(
                 "Turtle Rock Right Balcony Path",
-                vec![],
+                None,
                 vec![edge!(TurtleRockMain, |p| p.has_ice_rod()), edge!(TurtleRockRightBalcony, |p| p.has_ice_rod())],
             ),
         ),
@@ -91,13 +91,13 @@ pub(crate) fn graph(door_map: &DoorMap) -> HashMap<Location, LocationNode> {
             TurtleRockRightBalcony,
             location(
                 "Turtle Rock Right Balcony",
-                vec![],
+                None,
                 vec![fast_travel_lorule(), edge!(TurtleRockRightBalconyPath, |p| p.hearts(9.0))],
             ),
         ),
         (
             TurtleRockBoss,
-            location("Turtle Rock Boss", vec![], vec![edge!(TurtleRockPostBoss, |p| p.can_defeat_grinexx())]),
+            location("Turtle Rock Boss", None, vec![edge!(TurtleRockPostBoss, |p| p.can_defeat_grinexx())]),
         ),
         (
             TurtleRockPostBoss,
@@ -108,7 +108,7 @@ pub(crate) fn graph(door_map: &DoorMap) -> HashMap<Location, LocationNode> {
                     check!("[TR] Prize", regions::dungeons::turtle::rock::SUBREGION),
                     goal!("Grinexx", Goal::Grinexx),
                 ],
-                vec![],
+                None,
             ),
         ),
     ])

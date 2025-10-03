@@ -16,7 +16,7 @@ pub(crate) fn graph(door_map: &DoorMap) -> HashMap<Location, LocationNode> {
             TowerOfHeraFoyer,
             location(
                 "Tower of Hera Entrance",
-                vec![],
+                None,
                 vec![door!(TowerOfHeraExit, door_map), edge!(TowerOfHeraBottom, |p| p.has_hammer())],
             ),
         ),
@@ -79,7 +79,7 @@ pub(crate) fn graph(door_map: &DoorMap) -> HashMap<Location, LocationNode> {
         ),
         (
             TowerOfHeraBoss,
-            location("Tower of Hera Boss", vec![], vec![edge!(TowerOfHeraPostBoss, |p| p.can_defeat_moldorm())]),
+            location("Tower of Hera Boss", None, vec![edge!(TowerOfHeraPostBoss, |p| p.can_defeat_moldorm())]),
         ),
         (
             TowerOfHeraPostBoss,
@@ -90,7 +90,7 @@ pub(crate) fn graph(door_map: &DoorMap) -> HashMap<Location, LocationNode> {
                     check!("[TH] Prize", regions::dungeons::tower::hera::SUBREGION),
                     goal!("Moldorm", Goal::Moldorm),
                 ],
-                vec![],
+                None,
             ),
         ),
     ])

@@ -42,7 +42,7 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
             HyruleBellTravel,
             location(
                 "Hyrule Bell Travel",
-                vec![],
+                None,
                 vec![
                     edge!(HyruleField, |p| p.has_weather_vane(YourHouseWV)
                         || p.has_weather_vane(KakarikoVillageWV)
@@ -419,7 +419,7 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
                 vec![edge!(HyruleField)],
             ),
         ),
-        (CuccoHouse, location("Cucco House", vec![], vec![edge!(HyruleField), edge!(CuccoHouseRear)])),
+        (CuccoHouse, location("Cucco House", None, vec![edge!(HyruleField), edge!(CuccoHouseRear)])),
         (
             CuccoHouseRear,
             location(
@@ -524,7 +524,7 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
                 ],
             ),
         ),
-        (WitchCave, location("Witch Cave", vec![], vec![edge!(EasternRuinsUpper), edge!(HyruleField)])),
+        (WitchCave, location("Witch Cave", None, vec![edge!(EasternRuinsUpper), edge!(HyruleField)])),
         (
             ZoraDomain,
             location(
@@ -600,7 +600,7 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
                 ],
             ),
         ),
-        (EastRuinsBombCaveLower, location("Eastern Ruins Bomb Cave Lower", vec![], vec![edge!(HyruleField)])),
+        (EastRuinsBombCaveLower, location("Eastern Ruins Bomb Cave Lower", None, vec![edge!(HyruleField)])),
         (
             HouseOfGalesIsland,
             location(
@@ -698,7 +698,7 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
             HyruleCastleCourtyard,
             location(
                 "Hyrule Castle Courtyard",
-                vec![],
+                None,
                 vec![
                     fast_travel_hyrule(),
                     edge!(HyruleCastleLeftRoom),
@@ -716,7 +716,7 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
                 vec![edge!(HyruleCastleCourtyard), edge!(HyruleCastleRoof)],
             ),
         ),
-        (HyruleCastleRightRoom, location("Hyrule Castle Right Room", vec![], vec![edge!(HyruleCastleCourtyard)])),
+        (HyruleCastleRightRoom, location("Hyrule Castle Right Room", None, vec![edge!(HyruleCastleCourtyard)])),
         (
             HyruleCastleLeftRoom,
             location(
@@ -935,7 +935,7 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
             SanctuaryChurch,
             location(
                 "Sanctuary Church",
-                vec![],
+                None,
                 vec![
                     crack_left(Crack::Sanctuary, crack_map, false),
                     crack_right(Crack::Sanctuary, crack_map, false),
@@ -974,17 +974,13 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
             MoldormCave,
             location(
                 "Moldorm Cave",
-                vec![],
+                None,
                 vec![edge!(HyruleField), edge!(MoldormCaveTop, |p| p.has_titans_mitt()), edge!(DeathMountainBase)],
             ),
         ),
         (
             MoldormCaveTop,
-            location(
-                "Moldorm Cave Top",
-                vec![],
-                vec![edge!(MoldormLedge), edge!(MoldormCave, |p| p.has_titans_mitt())],
-            ),
+            location("Moldorm Cave Top", None, vec![edge!(MoldormLedge), edge!(MoldormCave, |p| p.has_titans_mitt())]),
         ),
         (
             MoldormLedge,
@@ -1046,7 +1042,7 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
             DonkeyCaveLower,
             location(
                 "Donkey Cave Lower",
-                vec![],
+                None,
                 vec![
                     edge!(DeathMountainBase),
                     edge!(DonkeyCaveUpper => {
@@ -1087,7 +1083,7 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
             DeathSecondFloor,
             location(
                 "Death Mountain Second Floor",
-                vec![],
+                None,
                 vec![
                     fast_travel_hyrule(),
                     edge!(DonkeyCaveUpper),
@@ -1107,7 +1103,7 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
             AmidaCaveLower,
             location(
                 "Amida Cave Lower",
-                vec![],
+                None,
                 vec![
                     edge!(DeathSecondFloor),
                     edge!(DeathThirdFloor),
@@ -1121,7 +1117,7 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
             DeathThirdFloor,
             location(
                 "Death Mountain Third Floor",
-                vec![],
+                None,
                 vec![
                     fast_travel_hyrule(),
                     edge!(AmidaCaveLower),
@@ -1220,7 +1216,7 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
                 vec![edge!(DeathMountainEastTop)],
             ),
         ),
-        (FireCaveTop, location("Fire Cave Top", vec![], vec![edge!(DeathMountainEastTop), edge!(FireCaveCenter)])),
+        (FireCaveTop, location("Fire Cave Top", None, vec![edge!(DeathMountainEastTop), edge!(FireCaveCenter)])),
         (
             FireCaveCenter,
             location(
@@ -1234,7 +1230,7 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
             FireCaveMiddle,
             location(
                 "Fire Cave Middle",
-                vec![],
+                None,
                 vec![
                     edge!(FireCaveCenter, |p| p.can_merge()),
                     edge!(BoulderingLedgeLeft),
@@ -1242,12 +1238,12 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
                 ],
             ),
         ),
-        (FireCaveBottom, location("Fire Cave Bottom", vec![], vec![edge!(RossosOreMine), edge!(FireCaveTop)])),
+        (FireCaveBottom, location("Fire Cave Bottom", None, vec![edge!(RossosOreMine), edge!(FireCaveTop)])),
         (
             BoulderingLedgeLeft,
             location(
                 "Bouldering Guy Left Ledge",
-                vec![],
+                None,
                 vec![
                     fast_travel_hyrule(),
                     edge!(FireCaveMiddle),

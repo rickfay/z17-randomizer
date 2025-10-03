@@ -26,7 +26,7 @@ pub(crate) fn graph(door_map: &DoorMap) -> HashMap<Location, LocationNode> {
             SwampPalaceAntechamber,
             location(
                 "Swamp Palace Antechamber",
-                vec![],
+                None,
                 vec![
                     edge!(SwampPalaceOutside),
                     door!(SwampPalaceEntrance, door_map => {
@@ -47,7 +47,7 @@ pub(crate) fn graph(door_map: &DoorMap) -> HashMap<Location, LocationNode> {
             SwampPalaceFoyer,
             location(
                 "Swamp Palace Foyer",
-                vec![],
+                None,
                 vec![
                     door!(SwampPalaceExit, door_map),
                     edge!(SwampPalaceMain, |p| p.has_flippers() && p.has_hookshot()),
@@ -111,7 +111,7 @@ pub(crate) fn graph(door_map: &DoorMap) -> HashMap<Location, LocationNode> {
                     check!("[SP] Prize", regions::dungeons::swamp::palace::SUBREGION),
                     goal!("Arrghus", Goal::Arrghus),
                 ],
-                vec![],
+                None,
             ),
         ),
     ])
