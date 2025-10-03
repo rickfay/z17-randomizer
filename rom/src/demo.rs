@@ -26,11 +26,10 @@ impl Demo {
     }
 
     pub fn finish(&mut self, timestamp: usize, sp: SpawnPoint) {
-        self.commands.push(TimedCommand::new(timestamp, Command::Finish {
-            course: sp.course,
-            scene: sp.scene as u16 - 1,
-            index: sp.spawn as u16,
-        }));
+        self.commands.push(TimedCommand::new(
+            timestamp,
+            Command::Finish { course: sp.course, scene: sp.scene as u16 - 1, index: sp.spawn as u16 },
+        ));
     }
 }
 

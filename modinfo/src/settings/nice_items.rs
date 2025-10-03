@@ -31,10 +31,14 @@ impl TryFrom<u8> for NiceItems {
 
 impl Display for NiceItems {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", match self {
-            Self::Vanilla => "Vanilla",
-            Self::Shuffled => "Shuffled",
-            Self::Off => "Off",
-        })
+        write!(
+            f,
+            "{}",
+            match self {
+                Self::Vanilla => "Vanilla",
+                Self::Shuffled => "Shuffled",
+                Self::Off => "Off",
+            }
+        )
     }
 }

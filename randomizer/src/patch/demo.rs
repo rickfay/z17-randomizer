@@ -3,12 +3,12 @@ use log::info;
 use game::Course::*;
 use modinfo::settings::cracks::Cracks;
 use modinfo::settings::trials_door::TrialsDoor;
-use rom::{Demo, File};
 use rom::flag::Flag;
 use rom::scene::SpawnPoint;
+use rom::{Demo, File};
 
-use crate::filler::item_pools;
 use crate::SeedInfo;
+use crate::filler::item_pools;
 
 /// Cutscene file recreation.
 /// Files are not read from the ROM but instead created from scratch given their (mostly) short lengths.

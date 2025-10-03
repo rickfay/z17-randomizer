@@ -1,5 +1,5 @@
-pub use crate::settings::cracks::Cracks;
 pub use crate::settings::crack_shuffle::CrackShuffle;
+pub use crate::settings::cracks::Cracks;
 pub use crate::settings::door_shuffle::DoorShuffle;
 pub use crate::settings::keysy::Keysy;
 pub use crate::settings::logic::LogicMode;
@@ -14,8 +14,8 @@ use serde::{Deserialize, Serialize};
 use std::collections::btree_set::BTreeSet;
 use std::hash::Hash;
 
-pub mod cracks;
 pub mod crack_shuffle;
+pub mod cracks;
 pub mod door_shuffle;
 pub mod keysy;
 pub mod logic;
@@ -173,14 +173,17 @@ pub struct Settings {
 
 impl Settings {
     pub fn log_settings(&self) {
-        info!("Logic Mode:                     {}", match self.logic_mode {
-            Normal => "Normal",
-            Hard => "Hard",
-            Glitched => "Glitched",
-            AdvGlitched => "Adv. Glitched",
-            Hell => "Hell - Did you really mean to choose this?",
-            NoLogic => "No Logic",
-        });
+        info!(
+            "Logic Mode:                     {}",
+            match self.logic_mode {
+                Normal => "Normal",
+                Hard => "Hard",
+                Glitched => "Glitched",
+                AdvGlitched => "Adv. Glitched",
+                Hell => "Hell - Did you really mean to choose this?",
+                NoLogic => "No Logic",
+            }
+        );
         info!(
             "Dungeon Prizes:                 {}",
             if self.dungeon_prize_shuffle { "Randomized" } else { "Not Randomized" }

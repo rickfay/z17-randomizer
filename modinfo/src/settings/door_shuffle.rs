@@ -25,9 +25,13 @@ impl TryFrom<u8> for DoorShuffle {
 
 impl Display for DoorShuffle {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", match self {
-            Self::Off => "Off",
-            Self::DungeonEntrances => "Dungeon Entrances",
-        })
+        write!(
+            f,
+            "{}",
+            match self {
+                Self::Off => "Off",
+                Self::DungeonEntrances => "Dungeon Entrances",
+            }
+        )
     }
 }

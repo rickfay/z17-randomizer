@@ -14,10 +14,11 @@ pub(crate) fn graph(door_map: &DoorMap) -> HashMap<Location, LocationNode> {
     HashMap::from([
         (
             IceRuinsFoyer,
-            location("Ice Ruins Entrance", vec![], vec![
-                door!(IceRuinsExit, door_map),
-                edge!(IceRuins, |p| p.has_fire_rod()),
-            ]),
+            location(
+                "Ice Ruins Entrance",
+                vec![],
+                vec![door!(IceRuinsExit, door_map), edge!(IceRuins, |p| p.has_fire_rod())],
+            ),
         ),
         // Require Fire Rod
         (

@@ -14,10 +14,14 @@ pub(crate) fn graph(door_map: &DoorMap) -> HashMap<Location, LocationNode> {
     HashMap::from([
         (
             TowerOfHeraFoyer,
-            location("Tower of Hera Entrance", vec![], vec![
-                door!(TowerOfHeraExit, door_map),
-                old_path(TowerOfHeraBottom, Some(|p| p.has_hammer()), None, None, None, None),
-            ]),
+            location(
+                "Tower of Hera Entrance",
+                vec![],
+                vec![
+                    door!(TowerOfHeraExit, door_map),
+                    old_path(TowerOfHeraBottom, Some(|p| p.has_hammer()), None, None, None, None),
+                ],
+            ),
         ),
         (
             TowerOfHeraBottom,
@@ -101,14 +105,11 @@ pub(crate) fn graph(door_map: &DoorMap) -> HashMap<Location, LocationNode> {
         ),
         (
             TowerOfHeraBoss,
-            location("Tower of Hera Boss", vec![], vec![old_path(
-                TowerOfHeraPostBoss,
-                Some(|p| p.can_defeat_moldorm()),
-                None,
-                None,
-                None,
-                None,
-            )]),
+            location(
+                "Tower of Hera Boss",
+                vec![],
+                vec![old_path(TowerOfHeraPostBoss, Some(|p| p.can_defeat_moldorm()), None, None, None, None)],
+            ),
         ),
         (
             TowerOfHeraPostBoss,

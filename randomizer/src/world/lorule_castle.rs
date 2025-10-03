@@ -16,17 +16,21 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
     HashMap::from([
         (
             LoruleCastle1F,
-            location("Lorule Castle 1F", None, vec![
-                door!(LoruleCastleExit, door_map),
-                edge!(LoruleCastleEastLedge1F, |p| p.can_merge()),
-                edge!(LoruleCastle2F3F => {
-                    normal: |p| p.can_attack(),
-                    hard: |_| true, // throw skulls
-                }),
-                edge!(LoruleCastleCenter1F => {
-                    glitched: |p| p.has_boots(),
-                }),
-            ]),
+            location(
+                "Lorule Castle 1F",
+                None,
+                vec![
+                    door!(LoruleCastleExit, door_map),
+                    edge!(LoruleCastleEastLedge1F, |p| p.can_merge()),
+                    edge!(LoruleCastle2F3F => {
+                        normal: |p| p.can_attack(),
+                        hard: |_| true, // throw skulls
+                    }),
+                    edge!(LoruleCastleCenter1F => {
+                        glitched: |p| p.has_boots(),
+                    }),
+                ],
+            ),
         ),
         (
             LoruleCastleEastLedge1F,
@@ -129,13 +133,17 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
         ),
         (
             HildasStudy,
-            location("Hilda's Study", None, vec![
-                edge!(LoruleCastle2F3F, |p| p.is_trials_door_open_from_both_sides() && p.hearts(13.0)),
-                crack_left(LoruleCastle, crack_map, false),
-                crack_right(LoruleCastle, crack_map, false),
-                edge!(LoruleBlacksmith),
-                edge!(ThroneRoom, |p| p.has_yuganon_requirement()),
-            ]),
+            location(
+                "Hilda's Study",
+                None,
+                vec![
+                    edge!(LoruleCastle2F3F, |p| p.is_trials_door_open_from_both_sides() && p.hearts(13.0)),
+                    crack_left(LoruleCastle, crack_map, false),
+                    crack_right(LoruleCastle, crack_map, false),
+                    edge!(LoruleBlacksmith),
+                    edge!(ThroneRoom, |p| p.has_yuganon_requirement()),
+                ],
+            ),
         ),
         (
             ThroneRoom,

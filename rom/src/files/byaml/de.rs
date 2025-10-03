@@ -725,16 +725,21 @@ impl<'doc, 'de> MapAccess<'de> for Map<'doc, 'de> {
 
 impl Display for Kind {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        write!(f, "{:02X} [{}]", *self as u8, match self {
-            Kind::String => "string",
-            Kind::Array => "array",
-            Kind::Map => "map",
-            Kind::Strings => "strings",
-            Kind::Boolean => "boolean",
-            Kind::Integer => "integer",
-            Kind::Float => "float",
-            Kind::Null => "null",
-        })
+        write!(
+            f,
+            "{:02X} [{}]",
+            *self as u8,
+            match self {
+                Kind::String => "string",
+                Kind::Array => "array",
+                Kind::Map => "map",
+                Kind::Strings => "strings",
+                Kind::Boolean => "boolean",
+                Kind::Integer => "integer",
+                Kind::Float => "float",
+                Kind::Null => "null",
+            }
+        )
     }
 }
 

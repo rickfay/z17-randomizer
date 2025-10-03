@@ -13,10 +13,11 @@ pub(crate) fn graph(door_map: &DoorMap) -> HashMap<Location, LocationNode> {
     HashMap::from([
         (
             TurtleRockFoyer,
-            location("Turtle Rock Foyer", vec![], vec![
-                door!(TurtleRockExit, door_map),
-                edge!(TurtleRockMain, |p| p.has_ice_rod()),
-            ]),
+            location(
+                "Turtle Rock Foyer",
+                vec![],
+                vec![door!(TurtleRockExit, door_map), edge!(TurtleRockMain, |p| p.has_ice_rod())],
+            ),
         ),
         (
             TurtleRockMain,
@@ -62,10 +63,11 @@ pub(crate) fn graph(door_map: &DoorMap) -> HashMap<Location, LocationNode> {
         ),
         (
             TurtleRockLeftBalconyPath,
-            location("Turtle Rock Left Balcony Path", vec![], vec![
-                edge!(TurtleRockMain, |p| p.has_ice_rod()),
-                edge!(TurtleRockLeftBalcony, |p| p.has_ice_rod()),
-            ]),
+            location(
+                "Turtle Rock Left Balcony Path",
+                vec![],
+                vec![edge!(TurtleRockMain, |p| p.has_ice_rod()), edge!(TurtleRockLeftBalcony, |p| p.has_ice_rod())],
+            ),
         ),
         (
             TurtleRockLeftBalcony,
@@ -79,17 +81,19 @@ pub(crate) fn graph(door_map: &DoorMap) -> HashMap<Location, LocationNode> {
         ),
         (
             TurtleRockRightBalconyPath,
-            location("Turtle Rock Right Balcony Path", vec![], vec![
-                edge!(TurtleRockMain, |p| p.has_ice_rod()),
-                edge!(TurtleRockRightBalcony, |p| p.has_ice_rod()),
-            ]),
+            location(
+                "Turtle Rock Right Balcony Path",
+                vec![],
+                vec![edge!(TurtleRockMain, |p| p.has_ice_rod()), edge!(TurtleRockRightBalcony, |p| p.has_ice_rod())],
+            ),
         ),
         (
             TurtleRockRightBalcony,
-            location("Turtle Rock Right Balcony", vec![], vec![
-                fast_travel_lorule(),
-                edge!(TurtleRockRightBalconyPath, |p| p.hearts(9.0)),
-            ]),
+            location(
+                "Turtle Rock Right Balcony",
+                vec![],
+                vec![fast_travel_lorule(), edge!(TurtleRockRightBalconyPath, |p| p.hearts(9.0))],
+            ),
         ),
         (
             TurtleRockBoss,

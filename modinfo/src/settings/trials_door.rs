@@ -51,13 +51,17 @@ impl TryFrom<u8> for TrialsDoor {
 
 impl Display for TrialsDoor {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", match self {
-            TrialsDoor::OpenFromInsideOnly => "Open From Inside Only",
-            TrialsDoor::OneTrialRequired => "1 Trial Required",
-            TrialsDoor::TwoTrialsRequired => "2 Trials Required",
-            TrialsDoor::ThreeTrialsRequired => "3 Trials Required",
-            TrialsDoor::AllTrialsRequired => "4 Trials Required",
-            TrialsDoor::OpenFromBothSides => "Open From Both Sides",
-        })
+        write!(
+            f,
+            "{}",
+            match self {
+                TrialsDoor::OpenFromInsideOnly => "Open From Inside Only",
+                TrialsDoor::OneTrialRequired => "1 Trial Required",
+                TrialsDoor::TwoTrialsRequired => "2 Trials Required",
+                TrialsDoor::ThreeTrialsRequired => "3 Trials Required",
+                TrialsDoor::AllTrialsRequired => "4 Trials Required",
+                TrialsDoor::OpenFromBothSides => "Open From Both Sides",
+            }
+        )
     }
 }
