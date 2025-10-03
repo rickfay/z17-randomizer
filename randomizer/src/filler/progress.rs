@@ -2,8 +2,8 @@ use crate::filler::filler_item::Vane;
 use crate::filler::filler_item::{Goal, Item, Randomizable};
 use crate::filler::item_pools;
 use crate::{DashSet, SeedInfo};
-use modinfo::settings::cracks::Cracks;
 use modinfo::settings::crack_shuffle::CrackShuffle;
+use modinfo::settings::cracks::Cracks;
 use modinfo::settings::keysy::Keysy;
 use modinfo::settings::nice_items::NiceItems;
 use modinfo::settings::ravios_shop::RaviosShop;
@@ -475,6 +475,7 @@ impl<'s> Progress<'s> {
     pub fn can_hit_far_switch(&self) -> bool {
         use Item::*;
         self.has_any([Bow01, Bow02, Bow03, Boomerang01, Boomerang02, Hookshot01, Hookshot02, Bombs01, Bombs02])
+            || self.can_great_spin()
     }
 
     pub fn can_hit_shielded_switch(&self) -> bool {
@@ -486,10 +487,7 @@ impl<'s> Progress<'s> {
     }
 
     pub fn can_hit_hog_1f_switch(&self) -> bool {
-        self.can_hit_far_switch()
-            || self.has_ice_rod()
-            || self.can_great_spin()
-            || (self.can_merge() && (self.has_sword() || self.has_hammer()))
+        self.can_hit_far_switch() || self.has_ice_rod() || (self.can_merge() && (self.has_sword() || self.has_hammer()))
     }
 
     // BOSSES ----------------------------------------------------------------------------------------------------------
@@ -569,12 +567,10 @@ impl<'s> Progress<'s> {
 
     pub fn has_gales_keys(&self, amount: u8) -> bool {
         self.is_small_keysy()
-            || self.has_amount(amount, [
-                Item::GalesKeySmall01,
-                Item::GalesKeySmall02,
-                Item::GalesKeySmall03,
-                Item::GalesKeySmall04,
-            ])
+            || self.has_amount(
+                amount,
+                [Item::GalesKeySmall01, Item::GalesKeySmall02, Item::GalesKeySmall03, Item::GalesKeySmall04],
+            )
     }
 
     pub fn has_gales_big_key(&self) -> bool {
@@ -591,12 +587,10 @@ impl<'s> Progress<'s> {
 
     pub fn has_dark_keys(&self, amount: u8) -> bool {
         self.is_small_keysy()
-            || self.has_amount(amount, [
-                Item::DarkKeySmall01,
-                Item::DarkKeySmall02,
-                Item::DarkKeySmall03,
-                Item::DarkKeySmall04,
-            ])
+            || self.has_amount(
+                amount,
+                [Item::DarkKeySmall01, Item::DarkKeySmall02, Item::DarkKeySmall03, Item::DarkKeySmall04],
+            )
     }
 
     pub fn has_dark_big_key(&self) -> bool {
@@ -605,12 +599,10 @@ impl<'s> Progress<'s> {
 
     pub fn has_swamp_keys(&self, amount: u8) -> bool {
         self.is_small_keysy()
-            || self.has_amount(amount, [
-                Item::SwampKeySmall01,
-                Item::SwampKeySmall02,
-                Item::SwampKeySmall03,
-                Item::SwampKeySmall04,
-            ])
+            || self.has_amount(
+                amount,
+                [Item::SwampKeySmall01, Item::SwampKeySmall02, Item::SwampKeySmall03, Item::SwampKeySmall04],
+            )
     }
 
     pub fn has_swamp_big_key(&self) -> bool {
@@ -649,13 +641,16 @@ impl<'s> Progress<'s> {
 
     pub fn has_desert_keys(&self, amount: u8) -> bool {
         self.is_small_keysy()
-            || self.has_amount(amount, [
-                Item::DesertKeySmall01,
-                Item::DesertKeySmall02,
-                Item::DesertKeySmall03,
-                Item::DesertKeySmall04,
-                Item::DesertKeySmall05,
-            ])
+            || self.has_amount(
+                amount,
+                [
+                    Item::DesertKeySmall01,
+                    Item::DesertKeySmall02,
+                    Item::DesertKeySmall03,
+                    Item::DesertKeySmall04,
+                    Item::DesertKeySmall05,
+                ],
+            )
     }
 
     pub fn has_desert_big_key(&self) -> bool {
@@ -673,13 +668,16 @@ impl<'s> Progress<'s> {
 
     pub fn has_lorule_keys(&self, amount: u8) -> bool {
         self.is_small_keysy()
-            || self.has_amount(amount, [
-                Item::LoruleCastleKeySmall01,
-                Item::LoruleCastleKeySmall02,
-                Item::LoruleCastleKeySmall03,
-                Item::LoruleCastleKeySmall04,
-                Item::LoruleCastleKeySmall05,
-            ])
+            || self.has_amount(
+                amount,
+                [
+                    Item::LoruleCastleKeySmall01,
+                    Item::LoruleCastleKeySmall02,
+                    Item::LoruleCastleKeySmall03,
+                    Item::LoruleCastleKeySmall04,
+                    Item::LoruleCastleKeySmall05,
+                ],
+            )
     }
 
     pub fn has_completed_trials(&self) -> bool {
@@ -841,16 +839,18 @@ impl<'s> Progress<'s> {
 
     pub fn has_lc_requirement(&self) -> bool {
         use Item::*;
-        self.has_amount(self.seed_info.settings.lc_requirement, [
-            SageGulley, SageOren, SageSeres, SageOsfala, SageImpa, SageIrene, SageRosso,
-        ])
+        self.has_amount(
+            self.seed_info.settings.lc_requirement,
+            [SageGulley, SageOren, SageSeres, SageOsfala, SageImpa, SageIrene, SageRosso],
+        )
     }
 
     pub fn has_yuganon_requirement(&self) -> bool {
         use Item::*;
-        self.has_amount(self.seed_info.settings.yuganon_requirement, [
-            SageGulley, SageOren, SageSeres, SageOsfala, SageImpa, SageIrene, SageRosso,
-        ])
+        self.has_amount(
+            self.seed_info.settings.yuganon_requirement,
+            [SageGulley, SageOren, SageSeres, SageOsfala, SageImpa, SageIrene, SageRosso],
+        )
     }
 
     pub fn has_saved_thief_girl(&self) -> bool {

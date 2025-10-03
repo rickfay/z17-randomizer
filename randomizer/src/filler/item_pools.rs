@@ -112,9 +112,10 @@ pub(crate) fn get_item_pools(
     junk_pool.extend(get_preserved_junk_pool());
 
     (
-        shuffle_order_progression_pools(rng, vec![
-            dungeon_prizes, big_keys, small_keys, compasses, progression_items, minor_progression,
-        ]),
+        shuffle_order_progression_pools(
+            rng,
+            vec![dungeon_prizes, big_keys, small_keys, compasses, progression_items, minor_progression],
+        ),
         junk_pool,
         removed_from_play,
     )

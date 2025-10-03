@@ -26,9 +26,13 @@ impl TryFrom<u8> for RaviosShop {
 
 impl Display for RaviosShop {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", match self {
-            Self::Closed => "Closed",
-            Self::Open => "Open",
-        })
+        write!(
+            f,
+            "{}",
+            match self {
+                Self::Closed => "Closed",
+                Self::Open => "Open",
+            }
+        )
     }
 }

@@ -33,12 +33,9 @@ pub(crate) fn graph(door_map: &DoorMap) -> HashMap<Location, LocationNode> {
             EasternPalaceFoyerCrack,
             location(
                 "Eastern Palace Foyer Crack",
-                vec![
-                    check!("[EP] (1F) Merge Chest", regions::dungeons::eastern::palace::SUBREGION, |p| p.has_eastern_compass())
-                ],
-                vec![
-                    edge!(EasternPalaceFoyer, |p| p.can_merge()),
-                ],
+                vec![check!("[EP] (1F) Merge Chest", regions::dungeons::eastern::palace::SUBREGION, |p| p
+                    .has_eastern_compass())],
+                vec![edge!(EasternPalaceFoyer, |p| p.can_merge())],
             ),
         ),
         (
@@ -90,10 +87,11 @@ pub(crate) fn graph(door_map: &DoorMap) -> HashMap<Location, LocationNode> {
         ),
         (
             EasternPalaceMiniboss,
-            location("Eastern Palace Miniboss", None, vec![
-                edge!(EasternPalace1F, |p| p.can_attack()),
-                edge!(EasternPalace2F, |p| p.can_attack()),
-            ]),
+            location(
+                "Eastern Palace Miniboss",
+                None,
+                vec![edge!(EasternPalace1F, |p| p.can_attack()), edge!(EasternPalace2F, |p| p.can_attack())],
+            ),
         ),
         (
             EasternPalace2F,
@@ -128,17 +126,21 @@ pub(crate) fn graph(door_map: &DoorMap) -> HashMap<Location, LocationNode> {
         ),
         (
             EasternPalaceBoss,
-            location("Eastern Palace 3F", None, vec![edge!(EasternPalacePostYuga => {
-                normal: |p| p.has_bow(),
-                hard: |p| {
-                    p.has_bombs()
-                        || p.has_master_sword()
-                        || p.has_fire_rod()
-                        || ((p.has_boomerang() || p.has_hookshot() || p.has_foul_fruit()) && p.can_attack())
-                        || p.has_nice_ice_rod()
-                },
-                hell: |p| p.has_ice_rod(), // gross
-            })]),
+            location(
+                "Eastern Palace 3F",
+                None,
+                vec![edge!(EasternPalacePostYuga => {
+                    normal: |p| p.has_bow(),
+                    hard: |p| {
+                        p.has_bombs()
+                            || p.has_master_sword()
+                            || p.has_fire_rod()
+                            || ((p.has_boomerang() || p.has_hookshot() || p.has_foul_fruit()) && p.can_attack())
+                            || p.has_nice_ice_rod()
+                    },
+                    hell: |p| p.has_ice_rod(), // gross
+                })],
+            ),
         ),
         (
             EasternPalacePostYuga,
@@ -150,22 +152,15 @@ pub(crate) fn graph(door_map: &DoorMap) -> HashMap<Location, LocationNode> {
                     check!("[EP] Prize", regions::dungeons::eastern::palace::SUBREGION),
                     goal!("Eastern Palace Complete", Goal::Yuga),
                 ],
-                vec![
-                    edge!(EasternPalace2F),
-                    edge!(EasternPalaceEscape3F, |p| p.can_merge())
-                ],
+                vec![edge!(EasternPalace2F), edge!(EasternPalaceEscape3F, |p| p.can_merge())],
             ),
         ),
         (
             EasternPalaceEscape3F,
             location(
                 "Eastern Palace Escape 3F",
-                vec![
-                    check!("[EP] (3F) Escape Chest", regions::dungeons::eastern::palace::SUBREGION),
-                ],
-                vec![
-                    edge!(EasternPalaceEscape2F, |p| p.can_merge()),
-                ],
+                vec![check!("[EP] (3F) Escape Chest", regions::dungeons::eastern::palace::SUBREGION)],
+                vec![edge!(EasternPalaceEscape2F, |p| p.can_merge())],
             ),
         ),
         (
@@ -201,12 +196,8 @@ pub(crate) fn graph(door_map: &DoorMap) -> HashMap<Location, LocationNode> {
             EasternPalaceFinalChest,
             location(
                 "Eastern Palace Final Chest",
-                vec![
-                    check!("[EP] (1F) Escape Chest", regions::dungeons::eastern::palace::SUBREGION, |p| p.can_merge()),
-                ],
-                 vec![
-                     edge!(EasternPalaceEscape1F, |p| p.can_merge()),
-                 ],
+                vec![check!("[EP] (1F) Escape Chest", regions::dungeons::eastern::palace::SUBREGION, |p| p.can_merge())],
+                vec![edge!(EasternPalaceEscape1F, |p| p.can_merge())],
             ),
         ),
     ])

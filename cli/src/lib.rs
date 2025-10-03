@@ -1,6 +1,6 @@
 use log::info;
-use modinfo::settings::cracks::Cracks;
 use modinfo::settings::crack_shuffle::CrackShuffle;
+use modinfo::settings::cracks::Cracks;
 use modinfo::settings::keysy::Keysy;
 use modinfo::settings::nice_items::NiceItems;
 use modinfo::settings::ravios_shop::RaviosShop;

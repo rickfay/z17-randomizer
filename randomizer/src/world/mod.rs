@@ -221,26 +221,6 @@ where
     LocationNode::new(name, checks.into(), paths.into())
 }
 
-// TODO REMOVE
-// #[deprecated]
-fn old_check(
-    location_info: LocationInfo, normal: Option<fn(&Progress) -> bool>, hard: Option<fn(&Progress) -> bool>,
-    glitched: Option<fn(&Progress) -> bool>, adv_glitched: Option<fn(&Progress) -> bool>,
-    hell: Option<fn(&Progress) -> bool>,
-) -> Check {
-    Check::new(location_info.name, Logic::config(normal, hard, glitched, adv_glitched, hell), None, Some(location_info))
-}
-
-// todo REMOVE
-// #[deprecated]
-fn old_path(
-    default: Location, normal: Option<fn(&Progress) -> bool>, hard: Option<fn(&Progress) -> bool>,
-    glitched: Option<fn(&Progress) -> bool>, adv_glitched: Option<fn(&Progress) -> bool>,
-    hell: Option<fn(&Progress) -> bool>,
-) -> Path {
-    Path::new(default, Logic::config(normal, hard, glitched, adv_glitched, hell))
-}
-
 /// Used for checks that the Randomizer should be aware of existing, but are not considered part of any logic.
 /// Most things that use this are typically not in logic *yet*
 fn out_of_logic(name: &'static str, subregion: &'static Subregion) -> Check {

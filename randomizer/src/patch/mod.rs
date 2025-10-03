@@ -409,13 +409,17 @@ impl Patcher {
         };
 
         // Apply the patch
-        self.modify_objs(course, scene, [call(unq, move |obj| {
-            obj.redirect(there_sp);
-            obj.arg.2 = crack_type;
-            obj.set_active_flag(there_flag);
-            obj.set_inactive_flag(here_crack.get_flag());
-            obj.set_enable_flag(enable_flag);
-        })]);
+        self.modify_objs(
+            course,
+            scene,
+            [call(unq, move |obj| {
+                obj.redirect(there_sp);
+                obj.arg.2 = crack_type;
+                obj.set_active_flag(there_flag);
+                obj.set_inactive_flag(here_crack.get_flag());
+                obj.set_enable_flag(enable_flag);
+            })],
+        );
 
         Ok(())
     }
@@ -485,43 +489,51 @@ impl Patcher {
                 let flag = here_crack.get_flag();
 
                 // Curtain
-                self.add_obj(course, scene, Obj {
-                    arg: Arg(0, 0, 0, 0, flag.get_type(), 0, flag.get_value(), 0, 0, 0, 0, 0, 0, 0.0),
-                    clp,
-                    flg: (0, 0, 0, 0),
-                    id: 550,
-                    lnk: vec![],
-                    nme: None,
-                    ril: vec![],
-                    ser: curtain_ser,
-                    srt: Transform {
-                        scale: Vec3 { x: 1.0, y: 16.0, z: 1.0 },
-                        rotate: Vec3 { x: 339.3735, y: 0.0, z: 0.0 },
-                        translate: t_curtain,
+                self.add_obj(
+                    course,
+                    scene,
+                    Obj {
+                        arg: Arg(0, 0, 0, 0, flag.get_type(), 0, flag.get_value(), 0, 0, 0, 0, 0, 0, 0.0),
+                        clp,
+                        flg: (0, 0, 0, 0),
+                        id: 550,
+                        lnk: vec![],
+                        nme: None,
+                        ril: vec![],
+                        ser: curtain_ser,
+                        srt: Transform {
+                            scale: Vec3 { x: 1.0, y: 16.0, z: 1.0 },
+                            rotate: Vec3 { x: 339.3735, y: 0.0, z: 0.0 },
+                            translate: t_curtain,
+                        },
+                        typ: 1,
+                        unq: curtain_unq,
                     },
-                    typ: 1,
-                    unq: curtain_unq,
-                });
+                );
 
                 // WallDisableIn
                 let (disable_merge_unq, disable_merge_ser) = self.find_objs_unq_ser(course, scene);
-                self.add_obj(course, scene, Obj {
-                    arg: Arg(0, 0, 0, 0, flag.get_type(), 0, flag.get_value(), 0, 0, 0, 0, 0, 0, 0.0),
-                    clp,
-                    flg: (0, flag.get_type(), 0, flag.get_value()),
-                    id: 568,
-                    lnk: vec![],
-                    nme: None,
-                    ril: vec![],
-                    ser: disable_merge_ser,
-                    srt: Transform {
-                        scale: Vec3 { x: 5.25577, y: 1.0, z: 2.43051 },
-                        rotate: Vec3::ZERO,
-                        translate: t_wall,
+                self.add_obj(
+                    course,
+                    scene,
+                    Obj {
+                        arg: Arg(0, 0, 0, 0, flag.get_type(), 0, flag.get_value(), 0, 0, 0, 0, 0, 0, 0.0),
+                        clp,
+                        flg: (0, flag.get_type(), 0, flag.get_value()),
+                        id: 568,
+                        lnk: vec![],
+                        nme: None,
+                        ril: vec![],
+                        ser: disable_merge_ser,
+                        srt: Transform {
+                            scale: Vec3 { x: 5.25577, y: 1.0, z: 2.43051 },
+                            rotate: Vec3::ZERO,
+                            translate: t_wall,
+                        },
+                        typ: 6,
+                        unq: disable_merge_unq,
                     },
-                    typ: 6,
-                    unq: disable_merge_unq,
-                });
+                );
 
                 self.copy_bch("Curtain", (IndoorLight, 7), (course, scene))?;
             },

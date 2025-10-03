@@ -23,9 +23,13 @@ impl TryFrom<u8> for PedestalSetting {
 
 impl Display for PedestalSetting {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", match self {
-            Vanilla => "Vanilla",
-            Standard => "Standard",
-        })
+        write!(
+            f,
+            "{}",
+            match self {
+                Vanilla => "Vanilla",
+                Standard => "Standard",
+            }
+        )
     }
 }

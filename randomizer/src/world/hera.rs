@@ -5,7 +5,7 @@ use crate::filler::location::Location::{self, *};
 use crate::filler::location_node::LocationNode;
 use crate::filler::logic::Logic;
 use crate::filler::path::Path;
-use crate::world::{check, door, edge, goal, location, old_check, old_path};
+use crate::world::{check, door, edge, goal, location};
 use crate::{DoorMap, regions};
 
 use std::collections::HashMap;
@@ -14,51 +14,36 @@ pub(crate) fn graph(door_map: &DoorMap) -> HashMap<Location, LocationNode> {
     HashMap::from([
         (
             TowerOfHeraFoyer,
-            location("Tower of Hera Entrance", vec![], vec![
-                door!(TowerOfHeraExit, door_map),
-                old_path(TowerOfHeraBottom, Some(|p| p.has_hammer()), None, None, None, None),
-            ]),
+            location(
+                "Tower of Hera Entrance",
+                None,
+                vec![door!(TowerOfHeraExit, door_map), edge!(TowerOfHeraBottom, |p| p.has_hammer())],
+            ),
         ),
         (
             TowerOfHeraBottom,
             location(
                 "Tower of Hera Bottom",
                 vec![
-                    old_check(
-                        LocationInfo::new("[TH] (1F) Outside", regions::dungeons::tower::hera::SUBREGION),
-                        Some(|p| p.can_merge()),
-                        None,
-                        None,
-                        Some(|p| p.has_sword() && p.has_bombs() && p.has_tornado_rod()),
-                        None,
-                    ),
-                    old_check(
-                        LocationInfo::new("[TH] (1F) Center", regions::dungeons::tower::hera::SUBREGION),
-                        Some(|p| p.can_merge()),
-                        None,
-                        None,
-                        Some(|p| p.has_sword() && p.has_bombs()),
-                        None,
-                    ),
-                    old_check(
-                        LocationInfo::new("[TH] (3F) Platform", regions::dungeons::tower::hera::SUBREGION),
-                        Some(|p| p.can_merge()),
-                        None,
-                        None,
-                        Some(|p| p.has_sword() && p.has_bombs()),
-                        None,
-                    ),
+                    check!("[TH] (1F) Outside", regions::dungeons::tower::hera::SUBREGION => {
+                        normal: |p| p.can_merge(),
+                        adv_glitched: |p| p.has_sword() && p.has_bombs() && p.has_tornado_rod(),
+                    }),
+                    check!("[TH] (1F) Center", regions::dungeons::tower::hera::SUBREGION => {
+                        normal: |p| p.can_merge(),
+                        adv_glitched: |p| p.has_sword() && p.has_bombs(),
+                    }),
+                    check!("[TH] (3F) Platform", regions::dungeons::tower::hera::SUBREGION => {
+                        normal: |p| p.can_merge(),
+                        adv_glitched: |p| p.has_sword() && p.has_bombs(),
+                    }),
                 ],
                 vec![
-                    old_path(TowerOfHeraFoyer, Some(|p| p.has_hammer()), None, None, None, None),
-                    old_path(
-                        TowerOfHeraMiddle,
-                        Some(|p| p.has_hera_keys(1) && p.can_merge()),
-                        None,
-                        None,
-                        Some(|p| p.has_sword() && p.has_bombs() && p.has_tornado_rod()),
-                        None,
-                    ),
+                    edge!(TowerOfHeraFoyer, |p| p.has_hammer()),
+                    edge!(TowerOfHeraMiddle => {
+                        normal: |p| p.has_hera_keys(1) && p.can_merge(),
+                        adv_glitched: |p| p.has_sword() && p.has_bombs() && p.has_tornado_rod(),
+                    }),
                 ],
             ),
         ),
@@ -73,14 +58,10 @@ pub(crate) fn graph(door_map: &DoorMap) -> HashMap<Location, LocationNode> {
                 ],
                 vec![
                     edge!(TowerOfHeraBottom),
-                    old_path(
-                        TowerOfHeraTop,
-                        Some(|p| p.has_hera_keys(2)),
-                        None,
-                        None,
-                        Some(|p| p.has_bombs() && p.has_tornado_rod()),
-                        None,
-                    ),
+                    edge!(TowerOfHeraTop => {
+                        normal: |p| p.has_hera_keys(2),
+                        adv_glitched: |p| p.has_bombs() && p.has_tornado_rod(),
+                    }),
                 ],
             ),
         ),
@@ -93,22 +74,12 @@ pub(crate) fn graph(door_map: &DoorMap) -> HashMap<Location, LocationNode> {
                     check!("[TH] (8F) Fairy Room", regions::dungeons::tower::hera::SUBREGION),
                     check!("[TH] (11F) Big Chest", regions::dungeons::tower::hera::SUBREGION),
                 ],
-                vec![
-                    edge!(TowerOfHeraMiddle),
-                    old_path(TowerOfHeraBoss, Some(|p| p.has_hera_big_key()), None, None, None, None),
-                ],
+                vec![edge!(TowerOfHeraMiddle), edge!(TowerOfHeraBoss, |p| p.has_hera_big_key())],
             ),
         ),
         (
             TowerOfHeraBoss,
-            location("Tower of Hera Boss", vec![], vec![old_path(
-                TowerOfHeraPostBoss,
-                Some(|p| p.can_defeat_moldorm()),
-                None,
-                None,
-                None,
-                None,
-            )]),
+            location("Tower of Hera Boss", None, vec![edge!(TowerOfHeraPostBoss, |p| p.can_defeat_moldorm())]),
         ),
         (
             TowerOfHeraPostBoss,
@@ -119,7 +90,7 @@ pub(crate) fn graph(door_map: &DoorMap) -> HashMap<Location, LocationNode> {
                     check!("[TH] Prize", regions::dungeons::tower::hera::SUBREGION),
                     goal!("Moldorm", Goal::Moldorm),
                 ],
-                vec![],
+                None,
             ),
         ),
     ])

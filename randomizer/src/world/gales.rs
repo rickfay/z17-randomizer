@@ -15,10 +15,11 @@ pub(crate) fn graph(door_map: &DoorMap) -> HashMap<Location, LocationNode> {
     HashMap::from([
         (
             HouseOfGalesFoyer,
-            location("House of Gales Entrance", None, vec![
-                door!(HouseOfGalesExit, door_map),
-                edge!(HouseOfGalesEast1F, |p| p.has_tornado_rod()),
-            ]),
+            location(
+                "House of Gales Entrance",
+                None,
+                vec![door!(HouseOfGalesExit, door_map), edge!(HouseOfGalesEast1F, |p| p.has_tornado_rod())],
+            ),
         ),
         (
             HouseOfGalesEast1F,
