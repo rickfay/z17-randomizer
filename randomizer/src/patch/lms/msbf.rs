@@ -382,6 +382,10 @@ fn patch_lorule_castle_requirements(patcher: &mut Patcher, settings: &Settings) 
         // Final Hilda before LC
         FieldDark/FieldDark_1B_Hilda {
             [3] => 5, // Skip text
+            [4] each [
+                command(30), // Set Course Flag
+                value(3069), // Unused FieldDark Course Flag 69
+            ],
         },
 
         // Set custom number of Portraits to enter LC

@@ -141,7 +141,7 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
                     crack_left(LoruleCastle, crack_map, false),
                     crack_right(LoruleCastle, crack_map, false),
                     edge!(LoruleBlacksmith),
-                    edge!(ThroneRoom, |p| p.has_yuganon_requirement()),
+                    edge!(ThroneRoom, |p| p.has_final_boss_requirement()),
                 ],
             ),
         ),
@@ -150,19 +150,17 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
             location(
                 "Throne Room",
                 vec![check!("[LC] Zelda", regions::dungeons::lorule::castle::SUBREGION => {
-                    normal: |p| p.has_yuganon_requirement() && (p.has_master_sword() || (p.swordless_mode() && p.has_net())),
-                    hell: |p| p.has_yuganon_requirement() && p.has_sword(),
+                    normal: |p| p.has_master_sword() || (p.swordless_mode() && p.has_net()),
+                    hell: |p| p.has_sword(),
                 })],
                 vec![edge!(SacredRealm => {
                     normal: |p| {
-                        p.has_yuganon_requirement()
-                            && (p.has_master_sword() || (p.swordless_mode() && p.has_net()))
+                        (p.has_master_sword() || (p.swordless_mode() && p.has_net()))
                             && p.can_merge()
                             && p.has_bow_of_light()
                     },
                     hell: |p| {
-                        p.has_yuganon_requirement()
-                            && (p.has_sword() || (p.swordless_mode() && p.has_net()))
+                        (p.has_sword() || (p.swordless_mode() && p.has_net()))
                             && p.can_merge()
                             && p.has_bow_of_light()
                     },

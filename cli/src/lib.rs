@@ -34,11 +34,16 @@ pub fn get_seed_settings() -> Result<Settings, String> {
 
     let lc_requirement = prompt_u8_in_range(
         "Lorule Castle Requirement",
-        "Choose how many Portraits are needed to enter Lorule Castle and fight Yuganon:",
+        "Choose how many Sage Portraits are needed to enter Lorule Castle's front door:",
         0,
         7,
     );
-    //let yuganon_requirement = prompt_u8_in_range("Choose how many Portraits are needed to fight Yuganon:", 0, 7);
+    let final_boss_requirement = prompt_u8_in_range(
+        "Final Boss Requirement",
+        "Choose how many Sage Portraits are needed to fight the Final Boss:",
+        0,
+        7
+    );
 
     let ped_requirement = PedestalSetting::try_from(prompt_u8_in_range(
         "Pedestal Requirement",
@@ -203,7 +208,7 @@ pub fn get_seed_settings() -> Result<Settings, String> {
         prompt_bool(
             "Swordless Mode (advanced)",
             "Removes *ALL* Swords from the game.\n\
-        The Bug Net becomes a required item to play Dead Man's Volley against Yuga Ganon.",
+        The Bug Net becomes a required item to play Dead Man's Volley against the Final Boss.",
         )
     } else {
         false
@@ -249,7 +254,7 @@ pub fn get_seed_settings() -> Result<Settings, String> {
         dev_mode: false,
         user_exclusions: Default::default(),
         lc_requirement,
-        yuganon_requirement: lc_requirement,
+        final_boss_requirement,
         ped_requirement,
         logic_mode,
         dark_rooms_lampless,

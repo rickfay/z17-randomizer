@@ -34,9 +34,7 @@ fn main() {
 
     info!("Initializing ALBW Randomizer...");
 
-    let (preset_name, seeded, SeedInfo { mut seed, mut settings, .. }) = determine_settings(opt.preset, opt.seed);
-
-    settings.yuganon_requirement = settings.lc_requirement; // FIXME Temporary: Force Yuganon Requirement to be equal to LC Requirement
+    let (preset_name, seeded, SeedInfo { mut seed, settings, .. }) = determine_settings(opt.preset, opt.seed);
 
     // Load User Config
     let user_config: UserConfig = System::load_config().unwrap_or_else(|error| {

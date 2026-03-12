@@ -151,7 +151,12 @@ fn get_initial_flags_to_set(SeedInfo { trials_config, settings, .. }: &SeedInfo)
 
     // Enable opening Lorule Castle from start
     if settings.lc_requirement == 0 {
-        flags.push(670);
+        flags.push(Flag::TRIFORCE_OF_COURAGE.get_value());
+    }
+
+    // Enable fighting the Final Boss from start
+    if settings.final_boss_requirement == 0 {
+        flags.push(Flag::FINAL_BOSS_ENABLED.get_value());
     }
 
     // Night Mode

@@ -462,18 +462,9 @@ fn validate_settings(settings: &Settings) -> Result<()> {
         fail!("Invalid Lorule Castle Requirement: \"{}\" was not between 0-7, inclusive.", settings.lc_requirement);
     }
 
-    // Yuganon Requirement
-    // if !(0..=7).contains(&settings.logic.yuganon_requirement) {
-    //     fail!("Invalid Yuga Ganon Requirement: \"{}\" was not between 0-7, inclusive.", settings.logic.yuganon_requirement);
-    // }
-
-    if settings.yuganon_requirement != settings.lc_requirement {
-        fail!(
-            "Yuga Ganon Requirement: \"{}\" is different than Lorule Castle Requirement: \"{}\"\n\
-        Different values for these settings are not yet supported!",
-            settings.yuganon_requirement,
-            settings.lc_requirement
-        );
+    // Final Boss Requirement
+    if !(0..=7).contains(&settings.final_boss_requirement) {
+        fail!("Invalid Final Boss Requirement: \"{}\" was not between 0-7, inclusive.", settings.final_boss_requirement);
     }
 
     // Progressive Bow of Light
@@ -582,9 +573,9 @@ pub fn patch_seed(seed_info: &SeedInfo, user_config: &UserConfig, no_patch: bool
         // patch::lms::msbf::research(&mut patcher, None, "HintGhost", vec![], true)?;
 
         // patch::research_msbf_msbt(&mut patcher,
-        //     game::Course::IndoorLight, "FieldLight_2C_Rental", // MSBF
-        //     game::Course::IndoorLight, "FieldLight_2C", // MSBT
-        //     false);
+        //     game::Course::DungeonDark, "Dark", // MSBF
+        //     game::Course::DungeonDark, "Dark", // MSBT
+        //     true);
 
         regions::patch(&mut patcher, seed_info)?;
         let patches = patcher.prepare(seed_info)?;
