@@ -11,6 +11,7 @@ A randomizer for The Legend of Zelda: A Link Between Worlds.
 <summary>Version 0.4.1</summary>
 
 - Introduced Door Shuffle for Dungeon Entrances
+- Final Boss Requirement as setting independent of Lorule Castle Requirement
 - Give the player a Scoot Fruit at the start of the game
     - This is a temporary measure until we have some form of "warp" working to prevent softlocks in dungeons
 - Randomized Foul Fruit and added it to logic
@@ -562,10 +563,12 @@ For Citra (emulator):
 | `NoLogic`     | Items are placed with no logic at all. Seeds are likely to not be completable.               |
 
 `lc_requirement`
-- This setting determines how many Portraits are needed to:
-  - Enter Lorule Castle's front door
+- Determines how many Sage Portraits are needed to enter Lorule Castle's front door.
+
+`final_boss_requirement`
+- Determines how many Sage Portraits are needed to:
+  - Fight the Final Boss: Yuga Ganon
   - Spawn the Bow of Light Hint Ghost
-  - Fight Yuganon
 
 `ped_requirement`
 - Choose which Pendants are required to reach the Master Sword Pedestal:

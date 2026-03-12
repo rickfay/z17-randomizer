@@ -36,9 +36,9 @@ pub struct Settings {
     #[serde(default = "seven")]
     pub lc_requirement: u8,
 
-    /// The number of Portraits needed to fight Yuga Ganon
-    #[serde(default = "seven", skip_serializing)]
-    pub yuganon_requirement: u8,
+    /// The number of Portraits needed to fight the Final Boss
+    #[serde(default = "seven")]
+    pub final_boss_requirement: u8,
 
     /// Configure which Pendants are required to reach the Master Sword Pedestal
     #[serde(default)]
@@ -189,7 +189,7 @@ impl Settings {
             if self.dungeon_prize_shuffle { "Randomized" } else { "Not Randomized" }
         );
         info!("Lorule Castle Requirement:      {} Portraits", self.lc_requirement);
-        info!("Yuga Ganon Requirement:         {} Portraits", self.yuganon_requirement);
+        info!("Final Boss Requirement:         {} Portraits", self.final_boss_requirement);
         info!("Pedestal Requirement:           {}", self.ped_requirement);
 
         info!("Super Items:                    {}", if self.super_items { "Shuffled" } else { "Not Shuffled" });

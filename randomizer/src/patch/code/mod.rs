@@ -191,6 +191,7 @@ pub fn create(patcher: &Patcher, seed_info: &SeedInfo) -> Code {
     mother_maiamai(&mut code, &seed_info.layout, &item_names);
     pause_menu_warp(&mut code);
     purple_potion_bottles(&mut code, &seed_info.settings);
+    patch_final_boss_requirement(&mut code, &seed_info.settings);
     // golden_bees(&mut code);
     // file_select_screen_background(&mut code);
 
@@ -350,6 +351,27 @@ fn do_dev_stuff(code: &mut Code, seed_info: &SeedInfo) {
     let amount = 25;
     code.patch(0x2559bc, [add(R1, R1, amount)]);
     code.patch(0x2559c0, [add(R2, R2, amount)]);
+}
+
+/// When the game calculates how many Sages have been collected, inject code that separately checks
+/// if we've met the requirement to fight the final boss, and set its flag if so.
+fn patch_final_boss_requirement(code: &mut Code, settings: &Settings) {
+    let return_address = 0x30bc44;
+    let final_boss_sage_check = code.text().define([
+
+        // Return to normal flow if we don't meet Sage requirement
+        cmp(R5, settings.final_boss_requirement as u32),
+        b(return_address).ne(),
+
+        // Set Flag 708
+        ldr(R0, EVENT_FLAG_PTR),
+        mov(R2, 0x1),
+        ldr(R1, Flag::FINAL_BOSS_ENABLED.get_value()),
+        ldr(R0, (R0, 0x0)),
+        bl(FN_SET_EVENT_FLAG),
+        b(return_address),
+    ]);
+    code.patch(0x30bc24, [b(final_boss_sage_check)]);
 }
 
 /// The game will show a green orb on the gear menu whether you have the Charm or the full Pendant

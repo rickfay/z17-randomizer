@@ -200,7 +200,7 @@ fn plando_settings() -> Settings {
     Settings {
         dev_mode: true,
         lc_requirement: 7,
-        yuganon_requirement: 7,
+        final_boss_requirement: 7,
         ped_requirement: PedestalSetting::Standard,
         logic_mode: LogicMode::Normal,
         dark_rooms_lampless: false,

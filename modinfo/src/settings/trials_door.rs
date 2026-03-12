@@ -23,7 +23,7 @@ pub enum TrialsDoor {
     /// Turns on all trials.
     AllTrialsRequired,
     // /// The Trials door is sealed shut and cannot be opened from either direction.
-    // /// The Lorule Castle Crack must be used to reach Yuga Ganon.
+    // /// The Lorule Castle Crack must be used to reach the Final Boss.
     // Sealed, todo
 }
 

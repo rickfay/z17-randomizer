@@ -845,10 +845,10 @@ impl<'s> Progress<'s> {
         )
     }
 
-    pub fn has_yuganon_requirement(&self) -> bool {
+    pub fn has_final_boss_requirement(&self) -> bool {
         use Item::*;
         self.has_amount(
-            self.seed_info.settings.yuganon_requirement,
+            self.seed_info.settings.final_boss_requirement,
             [SageGulley, SageOren, SageSeres, SageOsfala, SageImpa, SageIrene, SageRosso],
         )
     }

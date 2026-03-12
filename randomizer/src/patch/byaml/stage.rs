@@ -119,6 +119,7 @@ pub fn patch(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
     patch_hint_ghosts_dungeons(patcher)?;
 
     patch_blacksmith_lorule(patcher);
+    patch_lorule_castle_entrance(patcher);
     patch_trials_door(patcher, &seed_info.settings);
     patch_hildas_study(patcher, &seed_info.settings);
 
@@ -1441,6 +1442,22 @@ fn patch_crack_shuffle(patcher: &mut Patcher) {
     );
 }
 
+fn patch_lorule_castle_entrance(patcher: &mut Patcher) {
+
+    let some_flag = Flag::Course(69); // Unused FieldDark Course Flag 69
+
+    patcher.modify_objs(FieldDark, 18, [
+        set_57_args(32, some_flag), // Hilda Dialog
+        set_disable_flag(32, some_flag), // Hilda Dialog
+        set_disable_flag(71, some_flag), // NPC Hilda (???)
+        set_disable_flag(190, some_flag), // Lorule Barrier
+    ]);
+    
+    patcher.modify_system(FieldDark, 18, [
+        clear_disable_flag(33), // Spawn Point 10
+    ]);
+}
+
 fn patch_trials_door(patcher: &mut Patcher, settings: &Settings) {
     let door_flag = Flag::Event(421);
 
@@ -1486,7 +1503,7 @@ fn patch_hildas_study(patcher: &mut Patcher, settings: &Settings) {
         IndoorDark,
         5,
         Obj::green_warp(
-            Flag::TRIFORCE_OF_COURAGE,
+            Flag::FINAL_BOSS_ENABLED,
             1,
             Some(14),
             48,
@@ -1509,7 +1526,7 @@ fn patch_hildas_study(patcher: &mut Patcher, settings: &Settings) {
         Obj {
             arg: Arg(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.0),
             clp: 1,
-            flg: (4, 0, Flag::TRIFORCE_OF_COURAGE.get_value(), 0),
+            flg: (4, 0, Flag::FINAL_BOSS_ENABLED.get_value(), 0),
             id: 235,
             lnk: vec![],
             nme: Some("HintGhostDark/HintGhost_FieldDark_2C_014".to_owned()),
@@ -1820,25 +1837,8 @@ fn patch_castles(patcher: &mut Patcher) {
         IndoorDark,
         5,
         [
-            set_disable_flag(4, Flag::TRIFORCE_OF_COURAGE),  // Trial's Door
-            clear_enable_flag(12),                           // Yuga revives Ganon cutscene
-            set_disable_flag(12, Flag::TRIFORCE_OF_COURAGE), // Yuga revives Ganon cutscene
-            set_enable_flag(34, Flag::TRIFORCE_OF_COURAGE),  // Throne Room Loading Zone
-            set_enable_flag(23, Flag::TRIFORCE_OF_COURAGE),  // Skull (top right, controller obj)
-        ],
-    );
-
-    // Hilda's Study (system)
-    patcher.modify_system(
-        IndoorDark,
-        5,
-        [
-            set_enable_flag(23, Flag::TRIFORCE_OF_COURAGE), // Skull (top right, controller system obj)
-            set_enable_flag(24, Flag::TRIFORCE_OF_COURAGE), // Skull (middle right)
-            set_enable_flag(25, Flag::TRIFORCE_OF_COURAGE), // Skull (bottom right)
-            set_enable_flag(41, Flag::TRIFORCE_OF_COURAGE), // Skull (bottom left)
-            set_enable_flag(46, Flag::TRIFORCE_OF_COURAGE), // Skull (middle left)
-            set_enable_flag(47, Flag::TRIFORCE_OF_COURAGE), // Skull (top left)
+            clear_enable_flag(12),                          // Yuga revives Ganon cutscene
+            set_disable_flag(12, Flag::FINAL_BOSS_ENABLED), // Yuga revives Ganon cutscene
         ],
     );
 
@@ -1857,11 +1857,6 @@ fn patch_castles(patcher: &mut Patcher) {
         DungeonBoss,
         1,
         [
-            // fight start trigger
-            call(10, move |obj| {
-                obj.set_enable_flag(Flag::TRIFORCE_OF_COURAGE);
-                obj.set_active_flag(Flag::TRIFORCE_OF_COURAGE);
-            }),
             clear_enable_flag(27), // Hilda
             clear_enable_flag(41), // camera offset
             clear_enable_flag(43), // NpcAttention1
