@@ -27,7 +27,7 @@ pub(crate) fn graph(door_map: &DoorMap) -> HashMap<Location, LocationNode> {
                 "House of Gales East 1F",
                 vec![
                     check!("[HG] (1F) Torches", regions::dungeons::house::gales::SUBREGION, |p| p.has_fire_source()),
-                    check!("[HG] (1F) Switch Room", regions::dungeons::house::gales::SUBREGION),
+                    check!("[HG] (1F) Switch Room", regions::dungeons::house::gales::SUBREGION, |p| p.can_hit_switch()),
                     check!("[HG] (1F) Fire Bubbles", regions::dungeons::house::gales::SUBREGION => {
                         normal: |p| p.can_merge() && p.can_attack_fireproof(),
                         hard: |p| p.can_merge() && p.has_net(),
