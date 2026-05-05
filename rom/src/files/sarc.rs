@@ -1,11 +1,11 @@
 use {
-    super::{File, FromFile, IntoBytes, align},
+    super::{align, File, FromFile, IntoBytes},
     crate::{Error, Result},
     bytey::*,
     log::debug,
     std::{
         cell::{Ref, RefCell},
-        cmp::Ordering,
+        collections::BTreeMap,
         io::Cursor,
     },
 };
@@ -18,7 +18,7 @@ impl Sarc {
         Self(RefCell::new(Inner::Compressed(data)))
     }
 
-    fn decompress(&self) -> Result<Ref<Archive>> {
+    fn decompress(&self) -> Result<Ref<'_, Archive>> {
         self.0.borrow_mut().decompress()?;
         Ok(Ref::map(self.0.borrow(), |inner| match inner {
             Inner::Decompressed(archive) => archive,
@@ -36,18 +36,18 @@ impl Sarc {
     {
         let path = path.into();
         let archive = self.decompress()?;
-        Ok(archive.find(&path).is_ok())
+        Ok(archive.get(&path).is_ok())
     }
 
-    pub fn read<P>(&self, path: P) -> Result<File<Ref<[u8]>>>
+    pub fn read<P>(&self, path: P) -> Result<File<Ref<'_, [u8]>>>
     where
         P: Into<String>,
     {
         let path = path.into();
         debug!("Reading {} from archive", &path);
         let archive = self.decompress()?;
-        let (start, end) = archive.find(&path).map_err(|_| Error::new(format!("File not found: '{}'.", path)))?;
-        let data = Ref::map(archive, |archive| &archive.files[start as usize..end as usize]);
+        let data = Ref::filter_map(archive, |archive| archive.get(&path).ok())
+            .map_err(|_| Error::new(format!("File not found: '{}'.", path)))?;
         Ok(File::new(path, data))
     }
 
@@ -58,9 +58,9 @@ impl Sarc {
         let path = T::path(args);
         debug!("Reading {} from archive", &path);
         let archive = self.decompress()?;
-        let (start, end) = archive.find(&path).map_err(|_| Error::new(format!("File not found: '{}'.", path)))?;
-        let input = Ref::map(archive, |archive| &archive.files[start as usize..end as usize]);
-        Ok(File::new(path, T::from_file(input)?))
+        let data = Ref::filter_map(archive, |archive| archive.get(&path).ok())
+            .map_err(|_| Error::new(format!("File not found: '{}'.", path)))?;
+        Ok(File::new(path, T::from_file(data)?))
     }
 
     pub fn extract<P>(&self, path: P) -> Result<File<Box<[u8]>>>
@@ -70,7 +70,8 @@ impl Sarc {
         let path = path.into();
         debug!("Extracting {} from archive", &path);
         let archive = self.decompress()?;
-        let data = archive.get(&path)?;
+        let data = archive.get(&path)
+            .map_err(|_| Error::new(format!("File not found: '{}'.", path)))?;
         Ok(File::new(path, data.into()))
     }
 
@@ -80,7 +81,8 @@ impl Sarc {
     {
         let path = path.into();
         debug!("Opening {} from archive", &path);
-        let data = self.decompress_mut()?.get_mut(&path)?;
+        let data = self.decompress_mut()?.get_mut(&path)
+            .map_err(|_| Error::new(format!("File not found: '{}'.", path)))?;
         Ok(File::new(path, data))
     }
 
@@ -89,10 +91,9 @@ impl Sarc {
         T: FromFile<Input = &'s mut [u8]>,
     {
         let path = T::path(args);
-        let archive = self.decompress_mut()?;
-        let (start, end) = archive.find(&path).map_err(|_| Error::new(format!("File not found: '{}'.", path)))?;
-        let input = &mut archive.files[start as usize..end as usize];
-        Ok(File::new(path, T::from_file(input)?))
+        let data = self.decompress_mut()?.get_mut(&path)
+            .map_err(|_| Error::new(format!("File not found: '{}'.", path)))?;
+        Ok(File::new(path, T::from_file(data)?))
     }
 
     pub fn add(&mut self, file: File<Box<[u8]>>) -> Result<()> {
@@ -154,10 +155,8 @@ impl Inner {
 
 #[derive(Debug)]
 pub struct Archive {
-    count: u16,
     multiplier: u32,
-    nodes: Vec<u8>,
-    files: Vec<u8>,
+    files: BTreeMap<u32, Vec<u8>>,
 }
 
 impl Archive {
@@ -179,8 +178,27 @@ impl Archive {
             let (sfat, nodes) = SFAT::try_from_slice(sfat)?;
             let mut nodes: Vec<_> = nodes.into();
             nodes.truncate(0x10 * sfat.count as usize);
-            let files = file[header.offset as usize..].into();
-            Ok(Self { count: sfat.count, multiplier: sfat.multiplier, nodes, files })
+            let data = &file[header.offset as usize..];
+            typedef! { struct Node: TryFromBytes<'_> [0x10] {
+                [0] hash: u32,
+                [4] attr: u32,
+                [8] start: u32,
+                [0xc] end: u32,
+            }}
+            let files = nodes
+                .chunks(0x10)
+                .map(|chunk| {
+                    let (node, _) = Node::try_from_slice(chunk)?;
+                    if node.attr != 0 {
+                        Err(Error::new("Hash collision".to_string()))
+                    } else {
+                        let start = node.start as usize;
+                        let end = node.end as usize;
+                        Ok((node.hash, data[start..end].to_vec()))
+                    }
+                })
+                .collect::<Result<_>>()?;
+            Ok(Self { multiplier: sfat.multiplier, files })
         } else {
             Err(Error::new("unimpl113".to_string()))
         }
@@ -191,210 +209,64 @@ impl Archive {
     }
 
     fn get(&self, path: &str) -> Result<&[u8]> {
-        if let Ok((start, end)) = self.find(path) {
-            Ok(&self.files[start as usize..end as usize])
-        } else {
-            Err(Error::new(format!("File not found: {path}")))
-        }
+        self.files.get(&self.hash(path)).map(|file| &file[..]).ok_or(Error::new(format!("File not found: {path}")))
     }
 
     fn get_mut(&mut self, path: &str) -> Result<&mut [u8]> {
-        if let Ok((start, end)) = self.find(path) {
-            Ok(&mut self.files[start as usize..end as usize])
-        } else {
-            Err(Error::new(format!("File not found: {path}")))
-        }
+        self.files.get_mut(&self.hash(path)).map(|file| &mut file[..]).ok_or(Error::new(format!("File not found: {path}")))
     }
 
     fn update(&mut self, file: File<Box<[u8]>>) {
         debug!("Updating: {}", file.path);
-        match self.search(self.hash(&file.path), 0, self.count - 1) {
-            Ok((start, _end, node_index)) => {
-                // info!("File already exists: {}", file.path);
-                // info!("Start: {}, End: {}", start, end);
-                // info!("self.files.len(): {}", self.files.len());
-                // info!("self.nodes.len(): {}", self.nodes.len());
-
-                let File { path, inner } = file;
-                let hash = self.hash(&path);
-                let mut buf: Vec<_> = inner.into();
-
-                // let old_len = self.files.len();
-                // let old_size = end as usize - start as usize;
-                // let new_size = buf.len();
-
-                // let start = align::<0x80>(self.files.len() as u32);
-                // self.files.resize(start as usize, 0);
-
-                buf.resize(align::<0x80>(buf.len() as u32) as usize, 0);
-                let new_end = start + buf.len() as u32;
-
-                //self.files.append(&mut buf);
-
-                let mut node = vec![];
-                node.extend_from_slice(&hash.to_le_bytes());
-                node.extend_from_slice(&[0, 0, 0, 0]);
-                node.extend_from_slice(&start.to_le_bytes());
-                node.extend_from_slice(&new_end.to_le_bytes());
-                self.nodes.splice((node_index * 0x10)..(node_index * 0x10) + 0x10, node.clone());
-
-                typedef! { struct Node: FromBytes<'_> [0x10] {
-                    [0] hash: u32,
-                    [8] start: u32,
-                    [0xC] end: u32,
-                }}
-
-                let _display: Node = unsafe { Node::from_slice_unchecked(&node[..]) };
-
-                // TODO go back and resize this properly
-
-                // info!("node_index is: {}", node_index);
-                // info!("OG          Node - {},{},{}", &start, &end, &hash);
-                // info!("Replacement Node - {},{},{}\n", &display.start, &display.end, &display.hash);
-
-                // Adjust other files start/end
-                // for i in node_index + 1..(self.nodes.len() / 0x10) {
-                //
-                //     let index = i * 0x10;
-                //     let n = unsafe { Node::from_slice_unchecked(&self.nodes[index..index + 0x10]) };
-                //     info!("Before - {},{},{} - {}", n.start, n.end, n.hash, i);
-                //
-                //     let size = n.end - n.start;
-                //     let new_start: u32 = align::<0x80>(prev.end as u32);
-                //     let new_end: u32 = new_start + size;
-                //
-                //     self.nodes.splice((index + 8)..(index + 0xC), new_start.to_le_bytes());
-                //     self.nodes.splice((index + 0xC)..(index + 0x10), new_end.to_le_bytes());
-                //
-                //     display = unsafe { Node::from_slice_unchecked(&self.nodes[index..index + 0x10]) };
-                //     info!("After  - {},{},{}\n", display.start, display.end, display.hash);
-                //
-                //     prev = Node { hash: n.hash, start: new_start, end: new_end };
-                //
-                //
-                //     //self.nodes.splice(index..index + 0x10, n);
-                //
-                //     // let index = i * 0x10;
-                //     // let n = unsafe { Node::from_slice_unchecked(&self.nodes[index..index + 0x10]) };
-                //     //
-                //     // info!("node {}: {{ start: {}, end: {}, hash: {} }} {}", i, n.start, n.end, n.hash, n.end % 4 == 0);
-                //     // if !found && n.start == start {
-                //     //     info!("index found: {}", i);
-                //     //     found = true;
-                //     //     //let m = unsafe { Node::from_slice_unchecked(&node[0..0x10]) };
-                //     //     //info!("replacement node: {{ start: {}, end: {}, hash: {} }} {}", m.start, m.end, m.hash, n.end % 4 == 0);
-                //     //     self.nodes.splice(index..index + 0x10, node.clone());
-                //     // } else if found {
-                //     //
-                //     // }
-                // }
-
-                //self.files.resize(prev.start as usize, 0);
-
-                // info!("Old File Length: {}", old_len);
-                // info!("New File Length: {}", ((old_len - old_size + new_size) as u32) as usize);
-                //
-                // if new_size > old_size {
-                //     self.files.resize(((old_len - old_size + new_size) as u32) as usize, 0);
-                self.files.splice(start as usize..new_end as usize, buf);
-                // } else if new_size < old_size {
-                //     self.files.splice(start as usize..new_end as usize, buf);
-                //     self.files.resize(((old_len - old_size + new_size) as u32) as usize, 0);
-                // }
-
-                //info!("Do we get here...");
-                //fail!();
-            },
-            Err(_) => {
-                panic!("Can't update non-existent file: {}", file.path);
-            },
+        if self.files.contains_key(&self.hash(&file.path)) {
+            self.files.insert(self.hash(&file.path), file.inner.into());
+        } else {
+            panic!("Can't update non-existent file: {}", file.path);
         }
     }
 
     fn add(&mut self, file: File<Box<[u8]>>) {
         debug!("Add {}", file.path);
-        match self.search(self.hash(&file.path), 0, self.count - 1) {
-            Ok(_) => {
-                debug!("Not adding duplicate file: {}", file.path);
-            },
-            Err(i) => {
-                let i = i as usize * 0x10;
-                let File { path, inner } = file;
-                let hash = self.hash(&path);
-                let mut buf: Vec<_> = inner.into();
-                let start = align::<0x80>(self.files.len() as u32);
-                self.files.resize(start as usize, 0);
-                let end = start + buf.len() as u32;
-                buf.resize(align::<0x80>(buf.len() as u32) as usize, 0);
-                self.files.append(&mut buf);
-                let mut node = vec![];
-                node.extend_from_slice(&hash.to_le_bytes());
-                node.extend_from_slice(&[0, 0, 0, 0]);
-                node.extend_from_slice(&start.to_le_bytes());
-                node.extend_from_slice(&end.to_le_bytes());
-                self.nodes.splice(i..i, node);
-                self.count += 1;
-            },
-        }
-    }
-
-    fn find(&self, path: &str) -> Result<(u32, u32), u16> {
-        match self.search(self.hash(path), 0, self.count - 1) {
-            Ok(v) => {
-                let (start, end, _) = v;
-                Ok((start, end))
-            },
-            Err(v) => Err(v),
-        }
-    }
-
-    fn search(&self, hash: u32, start: u16, end: u16) -> Result<(u32, u32, usize), u16> {
-        if start <= end {
-            let mid = (start + end) / 2;
-            let index = (mid as usize) * 0x10;
-            bytey::typedef! { struct Node: FromBytes<'_> [0x10] {
-                [0] hash: u32,
-                [8] start: u32,
-                [0xC] end: u32,
-            }}
-            let node = unsafe { Node::from_slice_unchecked(&self.nodes[index..]) };
-            match hash.cmp(&node.hash) {
-                Ordering::Less => {
-                    if mid == 0 {
-                        Err(start)
-                    } else {
-                        self.search(hash, start, mid - 1)
-                    }
-                },
-                Ordering::Equal => Ok((node.start, node.end, index / 0x10)),
-                Ordering::Greater => self.search(hash, mid + 1, end),
-            }
+        if self.files.contains_key(&self.hash(&file.path)) {
+            debug!("Not adding duplicate file: {}", file.path);
         } else {
-            Err(start)
+            self.files.insert(self.hash(&file.path), file.inner.into());
         }
     }
 }
 
 impl IntoBytes for Archive {
-    fn into_bytes(mut self) -> Box<[u8]> {
-        let offset = (0x28 + self.nodes.len() as u32 + 0xFF) & !0xFF;
-        let len = offset + self.files.len() as u32;
-        let count = (self.nodes.len() / 0x10) as u16;
+    fn into_bytes(self) -> Box<[u8]> {
+        let count = self.files.len() as u16;
         let mut buf = vec![];
         buf.extend_from_slice(b"SARC");
         buf.extend_from_slice(&[0x14, 0, 0xFF, 0xFE]);
-        buf.extend_from_slice(&len.to_le_bytes());
-        buf.extend_from_slice(&offset.to_le_bytes());
+        buf.extend_from_slice(&[0, 0, 0, 0]);
+        buf.extend_from_slice(&[0, 0, 0, 0]);
         buf.extend_from_slice(&[0, 1, 0, 0]);
         buf.extend_from_slice(b"SFAT");
         buf.extend_from_slice(&[0xC, 0]);
         buf.extend_from_slice(&count.to_le_bytes());
         buf.extend_from_slice(&self.multiplier.to_le_bytes());
-        buf.append(&mut self.nodes);
+        let mut offset = 0u32;
+        for (hash, file) in &self.files {
+            buf.extend_from_slice(&hash.to_le_bytes());
+            buf.extend_from_slice(&[0, 0, 0, 0]);
+            buf.extend_from_slice(&offset.to_le_bytes());
+            offset = align::<0x80>(offset + file.len() as u32);
+            buf.extend_from_slice(&offset.to_le_bytes());
+        }
         buf.extend_from_slice(b"SFNT");
         buf.extend_from_slice(&[0x8, 0, 0, 0]);
-        buf.resize(offset as usize, 0);
-        buf.append(&mut self.files);
+        buf.resize(align::<0x80>(buf.len() as u32) as usize, 0);
+        let file_offset = buf.len() as u32;
+        buf[0xc..0x10].copy_from_slice(&file_offset.to_le_bytes());
+        for (_, file) in &self.files {
+            buf.extend_from_slice(&file);
+            buf.resize(align::<0x80>(buf.len() as u32) as usize, 0);
+        }
+        let size = buf.len() as u32;
+        buf[8..0xc].copy_from_slice(&size.to_le_bytes());
         buf.into()
     }
 }
