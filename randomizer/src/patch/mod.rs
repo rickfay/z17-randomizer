@@ -214,6 +214,7 @@ impl Patcher {
     }
 
     /// Subtract 1 from stage
+    #[allow(unstable_name_collisions)]
     fn scene(&mut self, course: CourseId, stage: u16) -> Result<&mut Scene> {
         let Self { game, ref mut courses, .. } = self;
         courses
@@ -255,7 +256,7 @@ impl Patcher {
         Ok(if let Some(course) = course.into() { &mut self.course(course)?.language } else { &mut self.boot })
     }
 
-    fn flow<C>(&mut self, course: C) -> Result<rom::language::LoadedMut<FlowMut>>
+    fn flow<C>(&mut self, course: C) -> Result<rom::language::LoadedMut<'_, FlowMut<'_>>>
     where
         C: Into<Option<CourseId>>,
     {

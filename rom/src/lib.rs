@@ -186,7 +186,7 @@ impl Rom {
         Ok(Actors::new(self.romfs.borrow_mut().read("Archive/ActorCommon.szs")?.map(Sarc::from)))
     }
 
-    pub fn course(&self, id: CourseId) -> Course {
+    pub fn course(&self, id: CourseId) -> Course<'_> {
         Course::new(self, id)
     }
 

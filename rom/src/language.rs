@@ -77,11 +77,11 @@ impl Language {
         Self { flow: flow.into_iter().collect(), archive }
     }
 
-    pub fn flow(&self) -> Loaded<Flow> {
+    pub fn flow(&self) -> Loaded<'_, Flow<'_>> {
         Loaded::new(&self.flow, &self.archive)
     }
 
-    pub fn flow_mut(&mut self) -> LoadedMut<FlowMut> {
+    pub fn flow_mut(&mut self) -> LoadedMut<'_, FlowMut<'_>> {
         LoadedMut::new(&mut self.flow, &mut self.archive)
     }
 
