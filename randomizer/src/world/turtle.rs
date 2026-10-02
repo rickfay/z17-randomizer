@@ -16,7 +16,7 @@ pub(crate) fn graph(door_map: &DoorMap) -> HashMap<Location, LocationNode> {
             location(
                 "Turtle Rock Foyer",
                 None,
-                vec![door!(TurtleRockExit, door_map), edge!(TurtleRockMain, |p| p.has_ice_rod())],
+                vec![door!(TurtleRockExit, door_map), edge!(TurtleRockMain, |p| p.has_ice_rod() && p.hearts(9.0))],
             ),
         ),
         (

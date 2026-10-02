@@ -5,6 +5,18 @@ crate::region! {
     mountain {
         locations: [
             "Ice Ruins Entrance": None @Door(5[14] IceRuinsEntrance),
+            "Lorule Death Mountain Big Fairy Cave Entrance": None @Door (3[118] LoruleDeathMountainBigFairyCaveEntrance),
+            "Lorule Death Mountain Big Fairy Cave Exit": None @Door (CaveDark 7[6] LoruleDeathMountainBigFairyCaveExit),
+            "Ice Cave Lower Entrance": None @Door (4[59] IceCaveLowerEntrance),
+            "Ice Cave Lower Exit": None @Door (CaveDark 9[108] IceCaveLowerExit),
+            "Ice Cave Middle Left Entrance": None @Door (4[60] IceCaveMiddleLeftEntrance),
+            "Ice Cave Middle Left Exit": None @Door (CaveDark 9[106] IceCaveMiddleLeftExit),
+            "Ice Cave Middle Right Entrance": None @Door (4[86] IceCaveMiddleRightEntrance),
+            "Ice Cave Middle Right Exit": None @Door (CaveDark 9[107] IceCaveMiddleRightExit),
+            "Ice Cave Upper Entrance": None @Door (4[58] IceCaveUpperEntrance),
+            "Ice Cave Upper Exit": None @Door (CaveDark 9[105] IceCaveUpperExit),
+            "Ice Cave Back Entrance": None @Door (4[57] IceCaveBackEntrance),
+            "Ice Cave Back Exit": None @Door (CaveDark 9[198] IceCaveBackExit),
 
             "Lorule Death West Crack": None @Crack(3[45] DeathWestLorule),
             "Lorule Floating Island Crack": None @Crack(4[70] FloatingIslandLorule),

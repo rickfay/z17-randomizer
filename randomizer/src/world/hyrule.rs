@@ -1,7 +1,5 @@
 use std::collections::HashMap;
 
-use game::ghosts::HintGhost;
-
 use crate::filler::check::Check;
 use crate::filler::cracks::Crack;
 use crate::filler::cracks::Crack::*;
@@ -13,6 +11,7 @@ use crate::filler::path::Path;
 use crate::world::{check, crack_left, crack_right, door, edge, fast_travel_hyrule, ghost, goal, location};
 use crate::{CrackMap, regions};
 use crate::{DoorMap, LocationInfo};
+use game::ghosts::HintGhost;
 
 /// Hyrule
 pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Location, LocationNode> {
@@ -35,7 +34,7 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
                     check!("Ravio's Shop (8)", regions::hyrule::ravio::shop::SUBREGION, |p| p.is_ravio_shop_open()),
                     check!("Ravio's Shop (9)", regions::hyrule::ravio::shop::SUBREGION, |p| p.is_ravio_shop_open()),
                 ],
-                vec![edge!(HyruleField)],
+                vec![door!(YourHouseExit, door_map)],
             ),
         ),
         (
@@ -232,8 +231,8 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
                     crack_right(MiseryMireEntrance, crack_map, false),
                     crack_left(LostWoodsPillar, crack_map, false),
                     crack_right(LostWoodsPillar, crack_map, false),
-                    crack_left(SahasrahlasHouse, crack_map, false),
-                    crack_right(SahasrahlasHouse, crack_map, false),
+                    crack_left(Crack::SahasrahlasHouse, crack_map, false),
+                    crack_right(Crack::SahasrahlasHouse, crack_map, false),
                     crack_left(EasternRuinsPillar, crack_map, false),
                     crack_right(EasternRuinsPillar, crack_map, false),
                     crack_left(SwampPillarHyrule, crack_map, false),
@@ -241,64 +240,78 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
                     crack_left(Crack::LakeHylia, crack_map, false),
                     crack_right(Crack::LakeHylia, crack_map, false),
                     edge!(EasternRuinsBlockedCrack, |p| p.has_bombs()),
-                    edge!(RavioShop),
+                    door!(YourHouseEntrance, door_map),
+                    door!(EasternRuinsBigFairyCaveEntrance, door_map),
                     edge!(EasternRuinsUpper => {
                         normal: |p| p.can_hit_far_switch() || p.has_ice_rod() || p.can_merge(),
                         hard: |p| p.has_power_glove(),
                     }),
+                    door!(EasternRuinsCaveBottomEntrance, door_map),
                     edge!(EasternRuinsEastLedge, |p| p.has_power_glove()),
-                    edge!(WitchCave, |p| p.has_bombs()),
+                    door!(EasternRuinsFairyCaveEntrance, door_map, |p| p.has_bombs()),
+                    door!(WitchCaveBackEntrance, door_map, |p| p.has_bombs()),
                     edge!(ZoraDomainArea => {
                         normal: |p| p.can_merge(),
                         hell: |_| true, // Bee Boost
                     }),
                     edge!(WaterfallCaveShallowWater, |p| p.has_flippers()),
-                    edge!(BlacksmithHouse),
-                    edge!(BlacksmithCave => {
+                    door!(BlacksmithEntrance, door_map),
+                    door!(BlacksmithCaveEntrance, door_map => {
                         normal: |p| p.has_titans_mitt(),
                         glitched: |p| p.has_fire_rod() || p.has_nice_bombs(),
                         hell: |_| true, // Bee Boost
                     }),
                     edge!(LostWoods),
                     edge!(HyruleCastleCourtyard, |p| p.has_master_sword() || p.swordless_mode()),
-                    edge!(FortuneTeller),
-                    edge!(KakarikoJailCell),
+                    door!(FortuneTellerTentEntrance, door_map),
+                    door!(FortuneTellerCaveEntrance, door_map => {
+                        normal: |p| p.has_titans_mitt(),
+                        glitched: |p| p.has_nice_bombs(),
+                        hell: |p| p.has_bombs(),
+                    }),
+                    door!(HyruleFortunesChoiceEntrance, door_map),
+                    door!(JailEntrance, door_map),
+                    door!(SahasrahlaLeftEntrance, door_map),
+                    door!(SahasrahlaRightEntrance, door_map),
                     edge!(WellUpper => {
                         normal: |p| p.has_power_glove(),
                         hard: |_| true, // Cucco jump
                     }),
-                    edge!(WellLower),
-                    edge!(MilkBar),
-                    edge!(BeeGuyHouse),
-                    edge!(KakarikoItemShop),
-                    edge!(LakesideItemShop),
-                    edge!(ItemSellerCave, |p| p.has_bombs()),
-                    edge!(FlippersDungeon => {
+                    door!(KakarikoCaveEntrance, door_map),
+                    door!(MilkBarEntrance, door_map),
+                    door!(BeeGuyHouseEntrance, door_map),
+                    door!(KakarikoItemShopEntrance, door_map),
+                    door!(LakesideItemShopEntrance, door_map),
+                    door!(RunawayItemSellerCaveEntrance, door_map, |p| p.has_bombs()),
+                    edge!(OutsideFlippersDungeon => {
                         normal: |p| p.has_titans_mitt(),
                         glitched: |p| p.has_sword() && p.has_ice_rod(),
                         adv_glitched: |p| p.has_ice_rod(),
                     }),
-                    edge!(SouthernRuinsBombCave, |p| p.has_bombs()),
-                    edge!(LakeDarkCave),
-                    edge!(IceRodCave, |p| p.has_bombs()),
-                    edge!(Sanctuary, |p| p.has_sword()
+                    door!(SouthernRuinsBombCaveEntrance, door_map, |p| p.has_bombs()),
+                    door!(SouthernRuinsFairyCaveEntrance, door_map, |p| p.has_bombs()),
+                    door!(DesertBigFairyCaveEntrance, door_map),
+                    door!(LakeHyliaDarkCaveEntrance, door_map),
+                    door!(IceRodCaveLeftEntrance, door_map, |p| p.has_bombs()),
+                    door!(IceRodCaveRightEntrance, door_map),
+                    edge!(SewersEntrance, |p| p.has_sword()
                         || p.has_bombs()
                         || p.has_fire_rod()
                         || p.has_ice_rod()
                         || p.has_lamp()
                         || p.has_boots()),
-                    edge!(MoldormCave => {
+                    door!(MoldormCaveLowerEntrance, door_map => {
                         normal: |p| p.has_power_glove(),
                         glitched: |_| true, // Crow boost
                     }),
-                    edge!(RossosHouse, |p| p.has_sage_rosso()),
-                    edge!(RossoCave => {
+                    door!(RossoHouseEntrance, door_map, |p| p.has_sage_rosso()),
+                    door!(RossoCaveEntrance, door_map => {
                         normal: |p| p.has_hammer(),
                         glitched: |p| p.has_boomerang() || (p.not_nice_mode() && p.has_hookshot()),
                         adv_glitched: |p| p.not_nice_mode() && (p.can_use_shield() && p.has_tornado_rod()),
                         hell: |p| p.has_foul_fruit(),
                     }),
-                    edge!(TornadoRodDungeon, |p| p.has_bombs()),
+                    door!(RiverMiniDungeonEntrance, door_map, |p| p.has_bombs()),
                     edge!(HouseOfGalesIsland => {
                         normal: |p| p.has_flippers(),
                         adv_glitched: |p| {
@@ -312,7 +325,7 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
                         glitched: |p| p.has_fire_rod() || p.has_nice_bombs(),
                         hell: |_| true, // Bee Boost
                     }),
-                    edge!(WitchHouse),
+                    door!(WitchHouseEntrance, door_map),
                     edge!(SanctuaryChurch, |p| p.has_opened_sanctuary_doors()),
                     edge!(CuccoDungeonLedge, |p| p.can_merge()),
                     edge!(WaterfallLedge => {
@@ -320,10 +333,13 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
                         adv_glitched: |p| p.has_boots() && (p.has_fire_rod() || p.has_nice_bombs()), // todo hookshot?
                         hell: |p| p.has_boots(),
                     }),
-                    edge!(CuccoHouse),
-                    edge!(WomanHouse),
-                    edge!(StylishWomanHouse, |p| p.has_opened_stylish_womans_house()),
-                    edge!(MaiamaiCave),
+                    door!(CuccoHouseFrontEntrance, door_map),
+                    edge!(CuccoHouseRear => {
+                        hard: |p| p.has_hookshot(), // cucco flight
+                    }),
+                    door!(WomanHouseEntrance, door_map),
+                    door!(StylishWomansHouseEntrance, door_map, |p| p.has_opened_stylish_womans_house()),
+                    door!(MotherMaiamaiCaveEntrance, door_map, |p| p.open_maiamai_cave() || p.has_bombs()),
                     edge!(ZoraRiver, |p| p.has_flippers()),
                     edge!(LakeHylia, |p| p.has_flippers()),
                 ],
@@ -408,7 +424,7 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
                         && p.has_tornado_rod()
                         && p.has_100_maiamai()),
                 ],
-                vec![edge!(HyruleField)],
+                vec![door!(MotherMaiamaiCaveExit, door_map)],
             ),
         ),
         (
@@ -416,16 +432,23 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
             location(
                 "Woman's House",
                 vec![check!("Woman", regions::hyrule::kakariko::village::SUBREGION, |p| p.has_woman_roof_maiamai())],
-                vec![edge!(HyruleField)],
+                vec![door!(WomanHouseExit, door_map)],
             ),
         ),
-        (CuccoHouse, location("Cucco House", None, vec![edge!(HyruleField), edge!(CuccoHouseRear)])),
+        (
+            CuccoHouse,
+            location(
+                "Cucco House",
+                None,
+                vec![door!(CuccoHouseFrontExit, door_map), door!(CuccoHouseBackExit, door_map)],
+            ),
+        ),
         (
             CuccoHouseRear,
             location(
                 "Cucco House Rear",
                 vec![check!("[Mai] Kakariko Sand", regions::hyrule::kakariko::village::SUBREGION, |p| p.has_sand_rod())],
-                vec![fast_travel_hyrule(), edge!(CuccoHouseRear)],
+                vec![fast_travel_hyrule(), door!(CuccoHouseBackEntrance, door_map)],
             ),
         ),
         (
@@ -455,7 +478,7 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
                 vec![
                     fast_travel_hyrule(),
                     edge!(HyruleField),
-                    edge!(CuccoDungeon),
+                    door!(CuccoMiniDungeonEntrance, door_map),
                     crack_left(ParadoxLeftHyrule, crack_map, false),
                     crack_right(ParadoxLeftHyrule, crack_map, false),
                 ],
@@ -466,7 +489,7 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
             location(
                 "Cucco Mini-Dungeon",
                 vec![check!("Cucco Mini-Dungeon", regions::hyrule::field::main::SUBREGION)],
-                vec![edge!(CuccoDungeonLedge)],
+                vec![door!(CuccoMiniDungeonExit, door_map)],
             ),
         ),
         (
@@ -477,8 +500,12 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
                     goal!("Access Potion Shop", Goal::AccessPotionShop),
                     check!("[Mai] Witch's House", regions::hyrule::river::area::SUBREGION, |p| p.can_merge()),
                 ],
-                vec![edge!(HyruleField)],
+                vec![door!(WitchHouseExit, door_map)],
             ),
+        ),
+        (
+            EasternBigFairyCave,
+            location("Eastern Ruins Big Fairy Cave", None, vec![door!(EasternRuinsBigFairyCaveExit, door_map)]),
         ),
         (
             EasternRuinsUpper,
@@ -506,8 +533,8 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
                         glitched: |p| p.has_tornado_rod(), // Armos boost
                     }),
                     door!(EasternPalaceEntrance, door_map),
-                    edge!(MergeDungeon),
-                    edge!(WitchCave, |p| p.has_bombs()),
+                    door!(MergeMiniDungeonEntrance, door_map),
+                    door!(WitchCaveFrontEntrance, door_map, |p| p.has_bombs()),
                 ],
             ),
         ),
@@ -518,13 +545,24 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
                 vec![ghost(HintGhost::EasternRuinsCave)],
                 vec![
                     fast_travel_hyrule(),
-                    edge!(EastRuinsBombCaveUpper, |p| p.has_bombs()),
+                    door!(EasternRuinsCaveTopEntrance, door_map, |p| p.has_bombs()),
                     edge!(EasternRuinsUpper, |p| p.can_merge()),
                     edge!(HyruleField),
                 ],
             ),
         ),
-        (WitchCave, location("Witch Cave", None, vec![edge!(EasternRuinsUpper), edge!(HyruleField)])),
+        (
+            EasternFairyCave,
+            location(
+                "Eastern Ruins Fairy Cave",
+                vec![goal!("Eastern Ruins Fairy Cave", Goal::AccessFairyFountain)],
+                vec![door!(EasternRuinsFairyCaveExit, door_map)],
+            ),
+        ),
+        (
+            WitchCave,
+            location("Witch Cave", None, vec![door!(WitchCaveFrontExit, door_map), door!(WitchCaveBackExit, door_map)]),
+        ),
         (
             ZoraDomain,
             location(
@@ -534,7 +572,7 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
                         && p.has_sage_oren()),
                     goal!("Give Oren Smooth Gem", Goal::RavioShopOpen, |p| p.has_smooth_gem() && p.has_sage_oren()),
                 ],
-                vec![edge!(ZoraDomainArea)],
+                vec![door!(ZorasDomainExit, door_map)],
             ),
         ),
         (
@@ -554,7 +592,7 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
                     crack_left(ZorasDomain, crack_map, false),
                     crack_right(ZorasDomain, crack_map, false),
                     edge!(HyruleField),
-                    edge!(ZoraDomain),
+                    door!(ZorasDomainEntrance, door_map),
                     edge!(WaterfallCaveShallowWater => {
                         normal: |p| p.has_flippers(),
                         glitched: |_| true, // Crow Boost
@@ -567,7 +605,11 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
             location(
                 "Waterfall Cave Shallow Water",
                 None,
-                vec![fast_travel_hyrule(), edge!(WaterfallCave), edge!(ZoraRiver, |p| p.has_flippers())],
+                vec![
+                    fast_travel_hyrule(),
+                    door!(WaterfallCaveEntrance, door_map),
+                    edge!(ZoraRiver, |p| p.has_flippers()),
+                ],
             ),
         ),
         (
@@ -575,7 +617,7 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
             location(
                 "Waterfall Cave",
                 vec![check!("Waterfall Cave", regions::hyrule::river::area::SUBREGION)],
-                vec![edge!(WaterfallCaveShallowWater)],
+                vec![door!(WaterfallCaveExit, door_map)],
             ),
         ),
         (
@@ -583,7 +625,7 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
             location(
                 "Merge Mini-Dungeon",
                 vec![check!("Merge Mini-Dungeon", regions::hyrule::eastern::ruins::SUBREGION, |p| p.can_merge())],
-                vec![edge!(EasternRuinsUpper)],
+                vec![door!(MergeMiniDungeonExit, door_map)],
             ),
         ),
         (
@@ -596,11 +638,14 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
                         normal: |p| p.can_merge(),
                         hard: |_| true, // It's not obvious but you can just walk
                     }),
-                    edge!(EasternRuinsUpper),
+                    door!(EasternRuinsCaveTopExit, door_map, |p| p.has_bombs()),
                 ],
             ),
         ),
-        (EastRuinsBombCaveLower, location("Eastern Ruins Bomb Cave Lower", None, vec![edge!(HyruleField)])),
+        (
+            EastRuinsBombCaveLower,
+            location("Eastern Ruins Bomb Cave Lower", None, vec![door!(EasternRuinsCaveBottomExit, door_map)]),
+        ),
         (
             HouseOfGalesIsland,
             location(
@@ -629,7 +674,7 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
                         && p.has_sage_rosso()),
                 ],
                 vec![
-                    edge!(HyruleField),
+                    door!(RossoHouseExit, door_map),
                     crack_left(Crack::RossosHouse, crack_map, false),
                     crack_right(Crack::RossosHouse, crack_map, false),
                 ],
@@ -640,7 +685,7 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
             location(
                 "Rosso Cave",
                 vec![check!("Rosso Cave", regions::hyrule::lost::woods::SUBREGION)],
-                vec![edge!(HyruleField)],
+                vec![door!(RossoCaveExit, door_map)],
             ),
         ),
         (
@@ -648,7 +693,7 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
             location(
                 "River Mini-Dungeon",
                 vec![check!("River Mini-Dungeon", regions::hyrule::river::area::SUBREGION, |p| p.can_merge())],
-                vec![edge!(HyruleField)],
+                vec![door!(RiverMiniDungeonExit, door_map)],
             ),
         ),
         (
@@ -659,7 +704,7 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
                 vec![
                     fast_travel_hyrule(),
                     edge!(HyruleField),
-                    edge!(GraveyardLedgeCave),
+                    door!(GraveyardLedgeCaveEntrance, door_map),
                     crack_left(Crack::GraveyardLedgeHyrule, crack_map, false),
                     crack_right(Crack::GraveyardLedgeHyrule, crack_map, false),
                 ],
@@ -670,7 +715,7 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
             location(
                 "Graveyard Ledge Cave",
                 vec![check!("Graveyard Ledge Cave", regions::hyrule::river::area::SUBREGION)],
-                vec![edge!(GraveyardLedgeHyrule)],
+                vec![door!(GraveyardLedgeCaveExit, door_map)],
             ),
         ),
         (
@@ -682,7 +727,7 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
                     check!("Blacksmith", regions::hyrule::field::main::SUBREGION, |p| p.has_master_ore(2)),
                     goal!("Access Hyrule Blacksmith", Goal::AccessHyruleBlacksmith),
                 ],
-                vec![edge!(HyruleField)],
+                vec![door!(BlacksmithExit, door_map)],
             ),
         ),
         (
@@ -690,7 +735,7 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
             location(
                 "Blacksmith Cave",
                 vec![check!("Blacksmith Cave", regions::hyrule::field::main::SUBREGION)],
-                vec![edge!(HyruleField)],
+                vec![door!(BlacksmithCaveExit, door_map)],
             ),
         ),
         // Hyrule Castle
@@ -701,9 +746,9 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
                 None,
                 vec![
                     fast_travel_hyrule(),
-                    edge!(HyruleCastleLeftRoom),
-                    edge!(HyruleCastleRightRoom),
-                    edge!(HyruleCastleInterior),
+                    door!(HyruleCastleLowerLeftEntrance, door_map),
+                    door!(HyruleCastleLowerRightEntrance, door_map),
+                    door!(HyruleCastleMainEntrance, door_map),
                     edge!(HyruleField, |p| p.has_master_sword() || p.swordless_mode()),
                 ],
             ),
@@ -713,16 +758,23 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
             location(
                 "Hyrule Castle Interior",
                 vec![check!("[HC] Throne", regions::dungeons::hyrule::castle::SUBREGION, |p| p.has_sage_impa())],
-                vec![edge!(HyruleCastleCourtyard), edge!(HyruleCastleRoof)],
+                vec![
+                    door!(HyruleCastleUpperLeftExit, door_map),
+                    door!(HyruleCastleUpperRightExit, door_map),
+                    door!(HyruleCastleMainExit, door_map),
+                ],
             ),
         ),
-        (HyruleCastleRightRoom, location("Hyrule Castle Right Room", None, vec![edge!(HyruleCastleCourtyard)])),
+        (
+            HyruleCastleRightRoom,
+            location("Hyrule Castle Right Room", None, vec![door!(HyruleCastleLowerRightExit, door_map)]),
+        ),
         (
             HyruleCastleLeftRoom,
             location(
                 "Hyrule Castle Left Room",
                 vec![check!("[HC] West Wing", regions::dungeons::hyrule::castle::SUBREGION)],
-                vec![edge!(HyruleCastleCourtyard)],
+                vec![door!(HyruleCastleLowerLeftExit, door_map)],
             ),
         ),
         (
@@ -734,8 +786,9 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
                     fast_travel_hyrule(),
                     edge!(HyruleField),
                     edge!(HyruleCastleCourtyard),
-                    edge!(HyruleCastleInterior),
-                    door!(InsideHyruleCastleEntrance, door_map, |p| p.hearts(6.0)),
+                    door!(HyruleCastleUpperLeftEntrance, door_map),
+                    door!(HyruleCastleUpperRightEntrance, door_map),
+                    door!(InsideHyruleCastleEntrance, door_map),
                 ],
             ),
         ),
@@ -756,9 +809,23 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
                     check!("[Mai] Lost Woods Bush", regions::hyrule::lost::woods::SUBREGION),
                     check!("[Mai] Lost Woods Rock", regions::hyrule::lost::woods::SUBREGION, |p| p.has_power_glove()),
                 ],
-                vec![fast_travel_hyrule(), edge!(HyruleField), edge!(MasterSwordArea, |p| p.has_required_pendants())],
+                vec![
+                    fast_travel_hyrule(),
+                    edge!(HyruleField),
+                    edge!(RumorGuyCaveEntrance, |p| p.has_hookshot()),
+                    edge!(MasterSwordArea, |p| p.has_required_pendants()),
+                ],
             ),
         ),
+        (
+            RumorGuyCaveEntrance,
+            location(
+                "Rumor Guy Cave Entrance",
+                None,
+                vec![door!(RumorGuyCaveEntrance, door_map), edge!(LostWoods, |p| p.has_hookshot())],
+            ),
+        ),
+        (RumorGuyCave, location("Rumor Guy Cave", None, vec![door!(RumorGuyCaveExit, door_map)])),
         (
             MasterSwordArea,
             location(
@@ -772,15 +839,35 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
             location(
                 "Fortune-Teller (Hyrule)",
                 vec![check!("Fortune-Teller", regions::hyrule::lost::woods::SUBREGION)],
-                vec![edge!(HyruleField)],
+                vec![door!(FortuneTellerTentExit, door_map)],
             ),
+        ),
+        (
+            FortuneTellerCave,
+            location(
+                "Fortune-Teller Cave",
+                vec![goal!("Fortune-Teller Fairy Fountain", Goal::AccessFairyFountain)],
+                vec![door!(FortuneTellerCaveExit, door_map)],
+            ),
+        ),
+        (
+            FortunesChoiceHyrule,
+            location("Fortune's Choice Hyrule", None, vec![door!(HyruleFortunesChoiceExit, door_map)]),
         ),
         (
             KakarikoJailCell,
             location(
                 "Kakariko Jail Cell",
                 vec![check!("Kakariko Jail", regions::hyrule::kakariko::village::SUBREGION, |p| p.can_merge())],
-                vec![edge!(HyruleField)],
+                vec![door!(JailExit, door_map)],
+            ),
+        ),
+        (
+            Location::SahasrahlasHouse,
+            location(
+                "Sahasrahla's House",
+                None,
+                vec![door!(SahasrahlaLeftExit, door_map), door!(SahasrahlaRightExit, door_map)],
             ),
         ),
         (
@@ -796,7 +883,7 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
             location(
                 "Kakariko Well Lower",
                 vec![check!("Kakariko Well (Bottom)", regions::hyrule::kakariko::village::SUBREGION)],
-                vec![edge!(HyruleField)],
+                vec![door!(KakarikoCaveExit, door_map)],
             ),
         ),
         (
@@ -806,17 +893,23 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
                 vec![
                     check!("Stylish Woman", regions::hyrule::kakariko::village::SUBREGION),
                     check!("Stylish Woman (Repeat)", regions::hyrule::kakariko::village::SUBREGION),
-                    //check!("Stylish Woman's House Crack", regions::hyrule::kakariko::village::SUBREGION, |p| p.can_merge()),
                     goal!("Open Stylish Woman's House", Goal::StylishWomansHouseOpen),
                 ],
                 vec![
                     crack_left(StylishWoman, crack_map, false),
                     crack_right(StylishWoman, crack_map, false),
-                    edge!(HyruleField),
+                    door!(StylishWomansHouseExit, door_map),
                 ],
             ),
         ),
-        (MilkBar, location("Milk Bar", vec![goal!("Access Milk Bar", Goal::AccessMilkBar)], vec![edge!(HyruleField)])),
+        (
+            MilkBar,
+            location(
+                "Milk Bar",
+                vec![goal!("Access Milk Bar", Goal::AccessMilkBar)],
+                vec![door!(MilkBarExit, door_map)],
+            ),
+        ),
         (
             BeeGuyHouse,
             location(
@@ -828,7 +921,7 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
                         hell: |p| p.has_bottle() && p.has_net(),
                     }),
                 ],
-                vec![edge!(HyruleField)],
+                vec![door!(BeeGuyHouseExit, door_map)],
             ),
         ),
         (
@@ -840,7 +933,7 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
                     // check!("Kakariko Item Shop (2)", regions::hyrule::kakariko::village::SUBREGION),
                     check!("Kakariko Item Shop (3)", regions::hyrule::kakariko::village::SUBREGION),
                 ],
-                vec![edge!(HyruleField)],
+                vec![door!(KakarikoItemShopExit, door_map)],
             ),
         ),
         (
@@ -852,7 +945,7 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
                     // check!("Lakeside Item Shop (2)", regions::hyrule::lake::hylia::SUBREGION),
                     check!("Lakeside Item Shop (3)", regions::hyrule::lake::hylia::SUBREGION),
                 ],
-                vec![edge!(HyruleField)],
+                vec![door!(LakesideItemShopExit, door_map)],
             ),
         ),
         (
@@ -862,7 +955,15 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
                 vec![
                     check!("Runaway Item Seller", regions::hyrule::southern::ruins::SUBREGION, |p| p.has_scoot_fruit())
                 ],
-                vec![edge!(HyruleField)],
+                vec![door!(RunawayItemSellerCaveExit, door_map)],
+            ),
+        ),
+        (
+            OutsideFlippersDungeon,
+            location(
+                "Outside Flippers Mini-Dungeon",
+                None,
+                vec![door!(SouthernRuinsMiniDungeonEntrance, door_map), edge!(HyruleField, |p| p.has_titans_mitt())],
             ),
         ),
         (
@@ -895,7 +996,7 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
                     },
                     hell: |p| p.has_nice_ice_rod(), // possible but sucks
                 })],
-                vec![edge!(HyruleField)],
+                vec![door!(SouthernRuinsMiniDungeonExit, door_map)],
             ),
         ),
         (
@@ -904,7 +1005,7 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
                 "Southern Ruins Bomb Cave",
                 vec![check!("[Mai] Southern Ruins Bomb Cave", regions::hyrule::southern::ruins::SUBREGION, |p| p
                     .has_flippers())],
-                vec![edge!(HyruleField), edge!(SouthernRuinsPillars)],
+                vec![door!(SouthernRuinsBombCaveExit, door_map), door!(SouthernRuinsPillarCaveExit, door_map)],
             ),
         ),
         (
@@ -912,23 +1013,44 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
             location(
                 "Southern Ruins Pillars",
                 vec![check!("Southern Ruins Pillar Cave", regions::hyrule::southern::ruins::SUBREGION)],
-                vec![fast_travel_hyrule(), edge!(SouthernRuinsBombCave)],
+                vec![fast_travel_hyrule(), door!(SouthernRuinsPillarCaveEntrance, door_map)],
             ),
+        ),
+        (
+            SouthernRuinsFairyCave,
+            location(
+                "Southern Ruins Fairy Cave",
+                vec![goal!("Southern Ruins Fairy Cave", Goal::AccessFairyFountain)],
+                vec![door!(SouthernRuinsFairyCaveExit, door_map)],
+            ),
+        ),
+        (
+            SouthernRuinsBigFairyCave,
+            location("Southern Ruins Big Fairy Cave", None, vec![door!(DesertBigFairyCaveExit, door_map)]),
         ),
         (
             LakeDarkCave,
             location(
                 "Lake Hylia Dark Cave",
                 vec![check!("Lake Hylia Dark Cave", regions::hyrule::lake::hylia::SUBREGION, |p| p.has_fire_source())],
-                vec![edge!(HyruleField)],
+                vec![door!(LakeHyliaDarkCaveExit, door_map)],
             ),
         ),
         (
-            IceRodCave,
+            IceRodCaveLeft,
             location(
-                "Ice Rod Cave",
+                "Ice Rod Cave Left Side",
                 vec![check!("Ice Rod Cave", regions::hyrule::lake::hylia::SUBREGION)],
-                vec![edge!(HyruleField)],
+                vec![door!(IceRodCaveLeftExit, door_map)],
+            ),
+        ),
+        (
+            IceRodCaveRight,
+            location(
+                "Ice Rod Cave Right Side",
+                vec![goal!("Ice Rod Cave Fairy Fountain", Goal::AccessFairyFountain, |p| p.has_tornado_rod()
+                    || p.has_ice_rod())],
+                vec![door!(IceRodCaveRightExit, door_map)],
             ),
         ),
         (
@@ -937,16 +1059,32 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
                 "Sanctuary Church",
                 None,
                 vec![
-                    crack_left(Crack::Sanctuary, crack_map, false),
-                    crack_right(Crack::Sanctuary, crack_map, false),
+                    crack_left(Sanctuary, crack_map, false),
+                    crack_right(Sanctuary, crack_map, false),
                     edge!(HyruleField, |p| p.has_opened_sanctuary_doors()),
                 ],
             ),
         ),
         (
-            Location::Sanctuary,
+            SewersEntrance,
             location(
-                "Sanctuary",
+                "Sewers Entrance",
+                None,
+                vec![
+                    door!(HyruleSewersEntrance, door_map),
+                    edge!(HyruleField, |p| p.has_sword()
+                        || p.has_bombs()
+                        || p.has_fire_rod()
+                        || p.has_ice_rod()
+                        || p.has_lamp()
+                        || p.has_boots()),
+                ],
+            ),
+        ),
+        (
+            Sewers,
+            location(
+                "Sewers",
                 vec![
                     check!("[HS] Entrance", regions::hyrule::river::area::SUBREGION),
                     check!("[HS] Lower Chest", regions::hyrule::river::area::SUBREGION, |p| p.has_lamp()
@@ -962,7 +1100,7 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
                     }),
                 ],
                 vec![
-                    edge!(HyruleField),
+                    door!(HyruleSewersExit, door_map),
                     edge!(SanctuaryChurch => {
                         normal: |p| (p.has_lamp() || (p.has_fire_rod() && p.lampless())) && p.can_attack() && p.has_sanctuary_key(),
                         hard: |p| p.has_lamp() && p.has_sanctuary_key(),
@@ -975,19 +1113,27 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
             location(
                 "Moldorm Cave",
                 None,
-                vec![edge!(HyruleField), edge!(MoldormCaveTop, |p| p.has_titans_mitt()), edge!(DeathMountainBase)],
+                vec![
+                    door!(MoldormCaveLowerExit, door_map),
+                    edge!(MoldormCaveTop, |p| p.has_titans_mitt()),
+                    door!(MoldormCaveTopExit, door_map),
+                ],
             ),
         ),
         (
             MoldormCaveTop,
-            location("Moldorm Cave Top", None, vec![edge!(MoldormLedge), edge!(MoldormCave, |p| p.has_titans_mitt())]),
+            location(
+                "Moldorm Cave Top",
+                None,
+                vec![door!(MoldormCaveLedgeExit, door_map), edge!(MoldormCave, |p| p.has_titans_mitt())],
+            ),
         ),
         (
             MoldormLedge,
             location(
                 "Moldorm Ledge",
                 vec![check!("[Mai] Moldorm Ledge", regions::hyrule::lost::woods::SUBREGION, |p| p.can_merge())],
-                vec![fast_travel_hyrule(), edge!(MoldormCaveTop), edge!(HyruleField)],
+                vec![fast_travel_hyrule(), door!(MoldormCaveLedgeEntrance, door_map), edge!(HyruleField)],
             ),
         ),
         (
@@ -1002,14 +1148,22 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
                 ],
                 vec![
                     fast_travel_hyrule(),
-                    edge!(MoldormCave),
-                    edge!(DeathBombCave, |p| p.can_merge() && p.has_bombs()),
-                    edge!(DeathWeatherVaneCaveLeft),
-                    edge!(DeathFairyCave, |p| p.can_merge()),
-                    edge!(DonkeyCaveLower),
+                    door!(MoldormCaveTopEntrance, door_map),
+                    edge!(DeathBombCaveLedge, |p| p.can_merge()),
+                    door!(DeathMountainWeatherVaneLeftCaveEntrance, door_map),
+                    edge!(DeathFairyCaveLedge, |p| p.can_merge()),
+                    door!(DonkeyCaveLowerEntrance, door_map),
                     // crack_left is unpossible
                     crack_right(DeathWestHyrule, crack_map, false),
                 ],
+            ),
+        ),
+        (
+            DeathBombCaveLedge,
+            location(
+                "Death Mountain Bomb Cave Ledge",
+                None,
+                vec![edge!(DeathMountainBase), door!(DeathMountainBombCaveEntrance, door_map, |p| p.has_bombs())],
             ),
         ),
         (
@@ -1017,7 +1171,7 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
             location(
                 "Death Mountain Blocked Cave",
                 vec![check!("Death Mountain Blocked Cave", regions::hyrule::death::mountain::SUBREGION)],
-                vec![edge!(DeathMountainBase)],
+                vec![door!(DeathMountainBombCaveExit, door_map)],
             ),
         ),
         (
@@ -1025,17 +1179,28 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
             location(
                 "Death Mountain Cave Left of Weather Vane",
                 vec![check!("Death Mountain Open Cave", regions::hyrule::death::mountain::SUBREGION)],
-                vec![edge!(DeathMountainBase)],
+                vec![door!(DeathMountainWeatherVaneLeftCaveExit, door_map)],
+            ),
+        ),
+        (
+            DeathFairyCaveLedge,
+            location(
+                "Death Mountain Fairy Cave Ledge",
+                None,
+                vec![door!(DeathMountainWestFairyCaveEntrance, door_map)],
             ),
         ),
         (
             DeathFairyCave,
             location(
                 "Death Mountain Fairy Cave",
-                vec![check!("Death Mountain Fairy Cave", regions::hyrule::death::mountain::SUBREGION, |p| p
-                    .has_hammer()
-                    || p.has_bombs())],
-                vec![edge!(DeathMountainBase)],
+                vec![
+                    check!("Death Mountain Fairy Cave", regions::hyrule::death::mountain::SUBREGION, |p| p
+                        .has_hammer()
+                        || p.has_bombs()),
+                    goal!("Death Mountain Fairy Cave Fountain", Goal::AccessFairyFountain),
+                ],
+                vec![door!(DeathMountainWestFairyCaveExit, door_map)],
             ),
         ),
         (
@@ -1044,7 +1209,7 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
                 "Donkey Cave Lower",
                 None,
                 vec![
-                    edge!(DeathMountainBase),
+                    door!(DonkeyCaveLowerExit, door_map),
                     edge!(DonkeyCaveUpper => {
                         normal: |p| p.can_merge(),
                         adv_glitched: |p| p.can_get_potion() || p.has_mail(),
@@ -1062,8 +1227,8 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
                         normal: |p| p.can_merge(),
                         adv_glitched: |p| p.can_get_potion() || p.has_mail(),
                     }),
-                    edge!(DeathWestLedge),
-                    edge!(DeathSecondFloor),
+                    door!(DonkeyCaveUpperExit, door_map),
+                    door!(DonkeyCaveMiddleExit, door_map),
                 ],
             ),
         ),
@@ -1076,7 +1241,7 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
                     check!("[Mai] Death Mountain West Ledge", regions::hyrule::death::mountain::SUBREGION, |p| p
                         .can_merge()),
                 ],
-                vec![fast_travel_hyrule(), edge!(DonkeyCaveUpper), edge!(DeathSecondFloor)],
+                vec![fast_travel_hyrule(), door!(DonkeyCaveUpperEntrance, door_map), edge!(DeathSecondFloor)],
             ),
         ),
         (
@@ -1086,15 +1251,18 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
                 None,
                 vec![
                     fast_travel_hyrule(),
-                    edge!(DonkeyCaveUpper),
-                    edge!(AmidaCaveLower),
+                    door!(DonkeyCaveMiddleEntrance, door_map),
+                    door!(AmidaCaveLowerEntrance, door_map),
                     edge!(DeathMountainBase),
-                    edge!(DeathFairyCave => {
+                    edge!(DeathFairyCaveLedge => {
                         glitched: |p| p.has_fire_rod() || p.has_nice_bombs() || p.has_boomerang() || p.has_hookshot(),
                         hell: |p| p.has_bombs(),
                     }),
-                    edge!(DeathBombCave => {
-                        glitched: |p| p.has_bombs() && (p.has_boomerang() || p.has_hookshot()),
+                    edge!(DeathBombCaveLedge => {
+                        glitched: |p| p.has_boomerang() || p.has_hookshot(),
+                    }),
+                    door!(DeathMountainBombCaveEntrance, door_map => {
+                        hell: |p| p.has_boomerang() || p.has_hookshot(),
                     }),
                 ],
             ),
@@ -1105,8 +1273,8 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
                 "Amida Cave Lower",
                 None,
                 vec![
-                    edge!(DeathSecondFloor),
-                    edge!(DeathThirdFloor),
+                    door!(AmidaCaveLowerExit, door_map),
+                    door!(AmidaCaveMiddleRightExit, door_map),
                     edge!(AmidaCaveUpper => {
                         glitched: |p| p.has_boots(),
                     }),
@@ -1120,8 +1288,8 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
                 None,
                 vec![
                     fast_travel_hyrule(),
-                    edge!(AmidaCaveLower),
-                    edge!(AmidaCaveUpper),
+                    door!(AmidaCaveMiddleRightEntrance, door_map),
+                    door!(AmidaCaveMiddleLeftEntrance, door_map),
                     edge!(DeathSecondFloor),
                     edge!(DeathWestLedge => {
                         glitched: |p| p.has_fire_rod() || p.has_nice_bombs(),
@@ -1134,7 +1302,11 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
             location(
                 "Amida Cave Upper",
                 vec![check!("Death Mountain West Highest Cave", regions::hyrule::death::mountain::SUBREGION)],
-                vec![edge!(AmidaCaveLower), edge!(DeathThirdFloor), edge!(DeathTopLeftLedge)],
+                vec![
+                    edge!(AmidaCaveLower),
+                    door!(AmidaCaveMiddleLeftExit, door_map),
+                    door!(AmidaCaveUpperExit, door_map),
+                ],
             ),
         ),
         (
@@ -1144,7 +1316,7 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
                 vec![ghost(HintGhost::SpectacleRock)],
                 vec![
                     fast_travel_hyrule(),
-                    edge!(AmidaCaveUpper),
+                    door!(AmidaCaveUpperEntrance, door_map),
                     edge!(DeathThirdFloor),
                     edge!(SpectacleRock),
                     edge!(DeathMountainWestTop, |p| p.can_merge()),
@@ -1156,14 +1328,21 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
             location(
                 "Spectacle Rock",
                 vec![check!("Spectacle Rock", regions::hyrule::death::mountain::SUBREGION)],
-                vec![fast_travel_hyrule(), edge!(DeathThirdFloor), edge!(SpectacleRockCaveLeft)],
+                vec![fast_travel_hyrule(), edge!(DeathThirdFloor), door!(SpectacleRockCaveLeftEntrance, door_map)],
             ),
         ),
         (
             SpectacleRockCaveLeft,
-            location("Spectacle Rock Cave Left", None, vec![edge!(SpectacleRock), edge!(SpectacleRockCaveRight)]),
+            location(
+                "Spectacle Rock Cave Left",
+                vec![goal!("Spectacle Rock Fairy Fountain", Goal::AccessFairyFountain)],
+                vec![door!(SpectacleRockCaveLeftExit, door_map), edge!(SpectacleRockCaveRight)],
+            ),
         ),
-        (SpectacleRockCaveRight, location("Spectacle Rock Cave Right", None, vec![edge!(DeathMountainWestTop)])),
+        (
+            SpectacleRockCaveRight,
+            location("Spectacle Rock Cave Right", None, vec![door!(SpectacleRockCaveRightExit, door_map)]),
+        ),
         (
             DeathMountainWestTop,
             location(
@@ -1174,13 +1353,21 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
                 ],
                 vec![
                     fast_travel_hyrule(),
-                    edge!(SpectacleRockCaveRight),
-                    door!(TowerOfHeraEntrance, door_map, |p| p.has_hammer()),
+                    door!(SpectacleRockCaveRightEntrance, door_map),
+                    edge!(TowerOfHeraEntrancePegs, |p| p.has_hammer()),
                     edge!(DeathTopLeftLedge, |p| p.can_merge()),
                     edge!(SpectacleRock),
                     edge!(DeathThirdFloor),
                     edge!(DeathMountainEastTop, |p| p.has_hookshot()),
                 ],
+            ),
+        ),
+        (
+            TowerOfHeraEntrancePegs,
+            location(
+                "Tower of Hera Entrance Pegs",
+                None,
+                vec![edge!(DeathMountainWestTop, |p| p.has_hammer()), door!(TowerOfHeraEntrance, door_map)],
             ),
         ),
         (
@@ -1196,8 +1383,8 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
                 vec![
                     fast_travel_hyrule(),
                     edge!(DeathMountainWestTop, |p| p.has_hookshot()),
-                    edge!(FireCaveTop),
-                    edge!(HookshotDungeon),
+                    door!(FireCaveTopEntrance, door_map),
+                    door!(HookshotMiniDungeonEntrance, door_map),
                     edge!(BoulderingLedgeRight => {
                         glitched: |p| p.has_tornado_rod() && p.has_boots(),
                     }),
@@ -1213,10 +1400,10 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
                 "Hookshot Mini-Dungeon",
                 vec![check!("Hookshot Mini-Dungeon", regions::hyrule::death::mountain::SUBREGION, |p| p.can_merge()
                     && p.has_hookshot())],
-                vec![edge!(DeathMountainEastTop)],
+                vec![door!(HookshotMiniDungeonExit, door_map)],
             ),
         ),
-        (FireCaveTop, location("Fire Cave Top", None, vec![edge!(DeathMountainEastTop), edge!(FireCaveCenter)])),
+        (FireCaveTop, location("Fire Cave Top", None, vec![door!(FireCaveTopExit, door_map), edge!(FireCaveCenter)])),
         (
             FireCaveCenter,
             location(
@@ -1233,12 +1420,15 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
                 None,
                 vec![
                     edge!(FireCaveCenter, |p| p.can_merge()),
-                    edge!(BoulderingLedgeLeft),
-                    edge!(BoulderingLedgeBottom),
+                    door!(FireCaveMiddleLeftExit, door_map),
+                    door!(FireCaveMiddleRightExit, door_map),
                 ],
             ),
         ),
-        (FireCaveBottom, location("Fire Cave Bottom", None, vec![edge!(RossosOreMine), edge!(FireCaveTop)])),
+        (
+            FireCaveBottom,
+            location("Fire Cave Bottom", None, vec![door!(FireCaveBottomExit, door_map), edge!(FireCaveTop)]),
+        ),
         (
             BoulderingLedgeLeft,
             location(
@@ -1246,7 +1436,7 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
                 None,
                 vec![
                     fast_travel_hyrule(),
-                    edge!(FireCaveMiddle),
+                    door!(FireCaveMiddleLeftEntrance, door_map),
                     edge!(BoulderingLedgeRight, |p| p.can_merge()),
                     edge!(BoulderingLedgeBottom),
                     edge!(RossosOreMine => {
@@ -1261,7 +1451,7 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
                 "Bouldering Guy Bottom Ledge",
                 vec![check!("[Mai] Fire Cave Ledge", regions::hyrule::death::mountain::SUBREGION, |p| p
                     .has_power_glove())],
-                vec![fast_travel_hyrule(), edge!(FireCaveMiddle)],
+                vec![fast_travel_hyrule(), door!(FireCaveMiddleRightEntrance, door_map)],
             ),
         ),
         (
@@ -1294,11 +1484,16 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
                     .has_power_glove())],
                 vec![
                     fast_travel_hyrule(),
-                    edge!(FireCaveBottom),
+                    door!(FireCaveBottomEntrance, door_map),
+                    door!(DeathMountainBigFairyCaveEntrance, door_map),
                     crack_left(RossosOreMineHyrule, crack_map, false),
                     crack_right(RossosOreMineHyrule, crack_map, false),
                 ],
             ),
+        ),
+        (
+            RossosOreMineBigFairyCave,
+            location("Death Mountain East Big Fairy Cave", None, vec![door!(DeathMountainBigFairyCaveExit, door_map)]),
         ),
         (
             Location::FloatingIslandHyrule,

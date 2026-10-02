@@ -1345,8 +1345,7 @@ pub enum Goal {
     TurtleWall,
     AccessPotionShop,
     AccessMilkBar,
-    #[allow(unused)]
-    AccessFairyFountain, // todo add to world graph
+    AccessFairyFountain,
     AccessHyruleBlacksmith,
     AccessLoruleCastleField,
     LcBombTrial,

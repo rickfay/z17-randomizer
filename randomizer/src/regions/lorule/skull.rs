@@ -5,6 +5,8 @@ crate::region! {
     overworld {
         locations: [
             "Skull Woods Entrance": None @Door(1[31] SkullWoodsEntrance),
+            "Mysterious Man Cave Entrance": None @Door (1[507] MysteriousManCaveEntrance),
+            "Mysterious Man Cave Exit": None @Door (CaveDark 8[6] MysteriousManCaveExit),
 
             "Skull Woods Pillar Crack": None @Crack(1[366] SkullWoodsPillar),
             "n-Shaped House Crack": None @Crack(16[92] NShapedHouse),

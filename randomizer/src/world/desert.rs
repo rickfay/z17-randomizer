@@ -19,13 +19,21 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
         (
             DesertPalaceFoyer,
             location(
-                "Desert Palace Entrance",
+                "Desert Palace Foyer",
+                None,
+                vec![door!(DesertPalaceExit, door_map), edge!(DesertPalaceStart, |p| p.hearts(9.0))],
+            ),
+        ),
+        (
+            DesertPalaceStart,
+            location(
+                "Desert Palace Start",
                 vec![check!("[DP] (1F) Entrance", regions::dungeons::desert::palace::SUBREGION => {
                     normal: |p| p.has_sand_rod() && p.can_merge(),
                     hell: |p| p.has_sand_rod() && p.has_tornado_rod(),
                 })],
                 vec![
-                    door!(DesertPalaceExit, door_map),
+                    edge!(DesertPalaceFoyer),
                     edge!(DesertPalace1F => {
                         normal: |p| p.has_sand_rod() && p.can_merge() && p.can_attack(),
                         hell: |p| p.has_sand_rod() && p.has_tornado_rod() && p.can_attack(),

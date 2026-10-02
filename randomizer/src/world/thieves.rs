@@ -13,6 +13,14 @@ use std::collections::HashMap;
 pub(crate) fn graph(door_map: &DoorMap) -> HashMap<Location, LocationNode> {
     HashMap::from([
         (
+            ThievesHideoutFoyer,
+            location(
+                "Thieves' Hideout Foyer",
+                None,
+                vec![door!(ThievesHideoutExit, door_map), edge!(ThievesHideoutB1, |p| p.hearts(6.0))],
+            ),
+        ),
+        (
             ThievesHideoutB1,
             location(
                 "Thieves' Hideout",
@@ -100,7 +108,7 @@ pub(crate) fn graph(door_map: &DoorMap) -> HashMap<Location, LocationNode> {
                     }),
                 ],
                 vec![
-                    door!(ThievesHideoutExit, door_map),
+                    edge!(ThievesHideoutFoyer),
                     edge!(ThievesBoss, |p| p.has_thieves_big_key()
                         && p.has_thieves_key()
                         && p.thieves_escape_equipment()

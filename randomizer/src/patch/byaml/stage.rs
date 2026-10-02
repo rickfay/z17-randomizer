@@ -4,7 +4,7 @@ use game::Course::{self, *};
 use macros::fail;
 use modinfo::settings::crack_shuffle::CrackShuffle;
 use modinfo::settings::keysy::Keysy;
-use modinfo::settings::{Settings, TrialsDoor};
+use modinfo::settings::{DoorShuffle, Settings, TrialsDoor};
 use rom::flag::Flag;
 use rom::scene::{Arg, Obj, SpawnPoint, Transform, Vec3};
 
@@ -100,13 +100,13 @@ pub fn patch(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
     patch_flag_510_effects(patcher)?;
     patch_ravios_shop(patcher)?;
     patch_sahasrahlas_house(patcher)?;
-    patch_maiamai_cave(patcher);
+    patch_maiamai_cave(patcher, seed_info);
     patch_treacherous_tower(patcher, seed_info)?;
     patch_big_problem_chests(patcher, seed_info);
     patch_blacksmith_hyrule(patcher);
     patch_castles(patcher);
     patch_chamber_of_sages(patcher);
-    patch_dark_maze(patcher, seed_info);
+    patch_dark_maze(patcher);
     patch_kus_domain(patcher);
     patch_letter_in_a_bottle(patcher);
     patch_master_sword(patcher);
@@ -125,6 +125,7 @@ pub fn patch(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
 
     patch_curtain(patcher, seed_info);
     patch_crack_shuffle(patcher);
+    patch_door_shuffle(patcher, seed_info);
     patch_keysy_small(patcher, &seed_info.settings);
     patch_keysy_big(patcher, &seed_info.settings);
     // patch_reverse_desert_palace(patcher, settings);
@@ -1442,20 +1443,78 @@ fn patch_crack_shuffle(patcher: &mut Patcher) {
     );
 }
 
-fn patch_lorule_castle_entrance(patcher: &mut Patcher) {
+fn patch_door_shuffle(patcher: &mut Patcher, seed_info: &SeedInfo) {
+    // Only apply these changes for entrance rando
+    if seed_info.settings.door_shuffle == DoorShuffle::Off {
+        return;
+    }
 
+    // Dark Maze - Remove Bell Reject Zones in jail cells
+    patcher.modify_objs(
+        FieldDark,
+        20,
+        [
+            disable(242), // First Jail
+            disable(241), // Second Jail
+        ],
+    );
+
+    // Pegs in front of Tower of Hera - make them not disappear
+    patcher.modify_objs(FieldLight, 3, [clear_disable_flag(345)]);
+    patcher.modify_system(
+        FieldLight,
+        3,
+        [
+            clear_disable_flag(345),
+            clear_disable_flag(346),
+            clear_disable_flag(366),
+            clear_disable_flag(367),
+            clear_disable_flag(368),
+        ],
+    );
+
+    // Only apply the following changes for full entrance rando
+    if seed_info.settings.door_shuffle != DoorShuffle::Crossed {
+        return;
+    }
+
+    // Vacant House Inner Breakable Wall - Remove to prevent getting stuck
+    patcher.modify_objs(IndoorDark, 11, [disable(32)]);
+
+    // Rosso Cave Peg - Make it not disappear
+    patcher.modify_objs(FieldLight, 2, [clear_disable_flag(116)]);
+    patcher.modify_system(FieldLight, 2, [clear_disable_flag(116)]);
+
+    // Fortune-Teller Cave Big Rock - Make it not disappear
+    patcher.modify_objs(FieldLight, 9, [clear_disable_flag(54)]);
+    patcher.modify_system(FieldLight, 9, [clear_disable_flag(54)]);
+
+    // Blacksmith Cave Big Rock - Make it not disappear
+    patcher.modify_objs(FieldLight, 21, [clear_disable_flag(47)]);
+    patcher.modify_system(FieldLight, 21, [clear_disable_flag(47)]);
+}
+
+fn patch_lorule_castle_entrance(patcher: &mut Patcher) {
     let some_flag = Flag::Course(69); // Unused FieldDark Course Flag 69
 
-    patcher.modify_objs(FieldDark, 18, [
-        set_57_args(32, some_flag), // Hilda Dialog
-        set_disable_flag(32, some_flag), // Hilda Dialog
-        set_disable_flag(71, some_flag), // NPC Hilda (???)
-        set_disable_flag(190, some_flag), // Lorule Barrier
-    ]);
-    
-    patcher.modify_system(FieldDark, 18, [
-        clear_disable_flag(33), // Spawn Point 10
-    ]);
+    patcher.modify_objs(
+        FieldDark,
+        18,
+        [
+            set_57_args(32, some_flag),       // Hilda Dialog
+            set_disable_flag(32, some_flag),  // Hilda Dialog
+            set_disable_flag(71, some_flag),  // NPC Hilda (???)
+            set_disable_flag(190, some_flag), // Lorule Barrier
+        ],
+    );
+
+    patcher.modify_system(
+        FieldDark,
+        18,
+        [
+            clear_disable_flag(33), // Spawn Point 10
+        ],
+    );
 }
 
 fn patch_trials_door(patcher: &mut Patcher, settings: &Settings) {
@@ -1892,10 +1951,7 @@ fn patch_master_sword(patcher: &mut Patcher) {
     );
 }
 
-fn patch_dark_maze(patcher: &mut Patcher, seed_info: &SeedInfo) {
-    let pd_prize = seed_info.layout.get_unsafe("[PD] Prize", regions::dungeons::dark::palace::SUBREGION);
-    let prize_flag = prize_flag(pd_prize);
-
+fn patch_dark_maze(patcher: &mut Patcher) {
     // Remove dialog
     patcher.modify_objs(
         FieldDark,
@@ -1911,22 +1967,6 @@ fn patch_dark_maze(patcher: &mut Patcher, seed_info: &SeedInfo) {
             disable(196), // NpcGuardMan
             disable(231), // AreaEventTalk
             disable(235), // Hilda Text
-            // Remove Maze Guards after Dark Palace
-            set_disable_flag(73, prize_flag),
-            set_disable_flag(82, prize_flag),
-            set_disable_flag(83, prize_flag),
-            set_disable_flag(84, prize_flag),
-            set_disable_flag(113, prize_flag),
-            set_disable_flag(123, prize_flag),
-            set_disable_flag(135, prize_flag),
-            set_disable_flag(136, prize_flag),
-            set_disable_flag(143, prize_flag),
-            set_disable_flag(171, prize_flag),
-            set_disable_flag(176, prize_flag),
-            set_disable_flag(177, prize_flag),
-            set_disable_flag(178, prize_flag),
-            set_disable_flag(179, prize_flag),
-            set_disable_flag(197, prize_flag),
         ],
     );
 }
@@ -1975,8 +2015,12 @@ fn patch_sahasrahlas_house(patcher: &mut Patcher) -> Result<()> {
 }
 
 /// Mother Maiamai's Cave
-fn patch_maiamai_cave(patcher: &mut Patcher) {
-    // Open automatically, without need for Bombs
+fn patch_maiamai_cave(patcher: &mut Patcher, seed_info: &SeedInfo) {
+    // Open Maiamai Cave automatically, without Bombs, but only when entrances aren't shuffled
+    if seed_info.settings.door_shuffle == DoorShuffle::Crossed {
+        return;
+    }
+
     patcher.modify_objs(
         FieldLight,
         35,
@@ -2136,82 +2180,50 @@ fn patch_no_progression_enemies(patcher: &mut Patcher, settings: &Settings) {
 #[rustfmt::skip]
 /// Development Sandbox
 /// Make changes here for dev & testing we don't want to risk making it into the actual release.
-fn do_dev_stuff(patcher: &mut Patcher, settings: &Settings) -> Result<()> {
+fn do_dev_stuff(_patcher: &mut Patcher, settings: &Settings) -> Result<()> {
     if !settings.dev_mode {
         return Ok(());
     }
 
-    // Maiamai Cave
-    // patcher.add_obj(CaveLight, 15, Obj::chest(game::Item::Empty, Flag::ZERO_ZERO, Flag::Course(300), 0, 10, 10, Vec3 { x: -7.0, y: 0.0, z: -13.0 }));
-    // patcher.add_obj(CaveLight, 15, Obj::chest(game::Item::Empty, Flag::ZERO_ZERO, Flag::Course(301), 0, 11, 11, Vec3 { x: -6.0, y: 0.0, z: -13.0 }));
-    // patcher.add_obj(CaveLight, 15, Obj::chest(game::Item::Empty, Flag::ZERO_ZERO, Flag::Course(302), 0, 12, 12, Vec3 { x: -5.0, y: 0.0, z: -13.0 }));
-    // patcher.add_obj(CaveLight, 15, Obj::chest(game::Item::Empty, Flag::ZERO_ZERO, Flag::Course(303), 0, 13, 13, Vec3 { x: -4.0, y: 0.0, z: -13.0 }));
-    // patcher.add_obj(CaveLight, 15, Obj::chest(game::Item::Empty, Flag::ZERO_ZERO, Flag::Course(304), 0, 14, 14, Vec3 { x: -3.0, y: 0.0, z: -13.0 }));
-    // patcher.add_obj(CaveLight, 15, Obj::chest(game::Item::Empty, Flag::ZERO_ZERO, Flag::Course(305), 0, 15, 15, Vec3 { x: -2.0, y: 0.0, z: -13.0 })); // shouldn't be used but anywho
-    // patcher.add_obj(CaveLight, 15, Obj::chest(game::Item::Empty, Flag::ZERO_ZERO, Flag::Course(306), 0, 16, 16, Vec3 { x: -1.0, y: 0.0, z: -13.0 }));
-    //
-    // patcher.add_obj(CaveLight, 15, Obj::chest(game::Item::Empty, Flag::ZERO_ZERO, Flag::Course(307), 0, 17, 17, Vec3 { x: 1.0, y: 0.0, z: -13.0 }));
-    // patcher.add_obj(CaveLight, 15, Obj::chest(game::Item::Empty, Flag::ZERO_ZERO, Flag::Course(308), 0, 18, 18, Vec3 { x: 2.0, y: 0.0, z: -13.0 }));
-    // patcher.add_obj(CaveLight, 15, Obj::chest(game::Item::Empty, Flag::ZERO_ZERO, Flag::Course(309), 0, 19, 19, Vec3 { x: 3.0, y: 0.0, z: -13.0 }));
-    // patcher.add_obj(CaveLight, 15, Obj::chest(game::Item::Empty, Flag::ZERO_ZERO, Flag::Course(310), 0, 20, 20, Vec3 { x: 4.0, y: 0.0, z: -13.0 }));
-    // patcher.add_obj(CaveLight, 15, Obj::chest(game::Item::Empty, Flag::ZERO_ZERO, Flag::Course(311), 0, 21, 21, Vec3 { x: 5.0, y: 0.0, z: -13.0 }));
-    // patcher.add_obj(CaveLight, 15, Obj::chest(game::Item::Empty, Flag::ZERO_ZERO, Flag::Course(312), 0, 22, 22, Vec3 { x: 6.0, y: 0.0, z: -13.0 }));
-    // patcher.add_obj(CaveLight, 15, Obj::chest(game::Item::Empty, Flag::ZERO_ZERO, Flag::Course(313), 0, 23, 23, Vec3 { x: 7.0, y: 0.0, z: -13.0 }));
-
-
     // Ravio's Shop Exit Door
-    patcher.modify_objs(IndoorLight, 1, [
-        redirect(24, SpawnPoint::new(
-            FieldLight, 27, 5, // No Redirect
-            // CaveLight, 15, 0, // Maiamai Cave
-            // Demo, 4, 0,
-            // IndoorDark, 4, 0,  // Lorule Blacksmith
-            // DungeonSand, 1, 16,  // Desert Palace 1F Exit
-            // FieldLight, 4, 8,  // Floating Island
-            // IndoorLight, 14, 0,  // Stylish Woman's House
-            // IndoorLight, 12, 4,  // Hyrule Castle
-            // FieldDark, 29, 5,  // Lorule River Crack
-            // FieldLight, 16, 5,  // Kakariko Village
-            // CaveLight, 15, 0, // Maiamai Cave
-            // IndoorLight, 17, 0, // Bee Guy's House
-            // CaveLight, 30, 0, // Witch Cave
-            // DungeonKame, 1, 0,  // Turtle Rock
-            // DungeonHagure, 1, 0,  // Thieves' Hideout
-            // DungeonHagure, 1, 15,  // Thief Girl's Cell
-            // DungeonHagure, 1, 30,  // Thieves' Miniboss outside
-            // DungeonIce, 1, 0,  // Ice Ruins
-            // FieldDark, 3, 0, // Lorule Death Mountain West
-            // IndoorLight, 2, 0, // Witch's House
-            // IndoorLight, 14, 0, // Stylish Woman's House
-            // CaveLight, 15, 0, // Maiamai Cave
-            // IndoorLight, 10, 0, // Rosso's House
-            // FieldLight, 43, 0, // Sacred Realm
-            // FieldLight, 36, 0,  // Hotfoot Area
-            // FieldLight, 4, 3,
-            // FieldLight, 18, 10, // Hyrule Castle Front Door
-            // CaveLight, 7, 0, // Zora's Domain
-            // IndoorLight, 15, 0, // Osfala Portrait
-            // DungeonGanon, 1, 18, // LC 3F Center Warp Tile
-            // CaveDark, 8, 0,     // Mysterious Man Cave
-            // FieldDark, 31, 0, // Misery Mire
-            // IndoorDark, 5, 0, // Hilda's Study
-            // IndoorLight, 7, 0, // Zelda's Study (lighting gets weird)
-            // DungeonCastle, 6, 0, // Yuga 2 Boss
-        ))
-    ]);
-
-    // Ravio's Shop Front Door
-    // patcher.modify_objs(FieldLight, 27, [
-    //     call(51, |obj| {
-    //         obj.redirect(Dest::new(
-    //         // IndoorLight, 1, 1,  // No Redirect
-    //         FieldDark, 29, 5,  // Lorule River Crack
-    //     ));
-    // })]);
-
-    // Osfala Portrait House
-    // patcher.modify_objs(IndoorDark, 15, [
-    //     redirect(6, 20, 1, 0), // Seres Portrait
+    // patcher.modify_objs(IndoorLight, 1, [
+    //     redirect(24, SpawnPoint::new(
+    //         FieldLight, 27, 5, // No Redirect
+    //         // CaveLight, 15, 0, // Maiamai Cave
+    //         // Demo, 4, 0,
+    //         // IndoorDark, 4, 0,  // Lorule Blacksmith
+    //         // DungeonSand, 1, 16,  // Desert Palace 1F Exit
+    //         // FieldLight, 4, 8,  // Floating Island
+    //         // IndoorLight, 14, 0,  // Stylish Woman's House
+    //         // IndoorLight, 12, 4,  // Hyrule Castle
+    //         // FieldDark, 29, 5,  // Lorule River Crack
+    //         // FieldLight, 16, 5,  // Kakariko Village
+    //         // CaveLight, 15, 0, // Maiamai Cave
+    //         // IndoorLight, 17, 0, // Bee Guy's House
+    //         // CaveLight, 30, 0, // Witch Cave
+    //         // DungeonKame, 1, 0,  // Turtle Rock
+    //         // DungeonHagure, 1, 0,  // Thieves' Hideout
+    //         // DungeonHagure, 1, 15,  // Thief Girl's Cell
+    //         // DungeonHagure, 1, 30,  // Thieves' Miniboss outside
+    //         // DungeonIce, 1, 0,  // Ice Ruins
+    //         // FieldDark, 3, 0, // Lorule Death Mountain West
+    //         // IndoorLight, 2, 0, // Witch's House
+    //         // IndoorLight, 14, 0, // Stylish Woman's House
+    //         // CaveLight, 15, 0, // Maiamai Cave
+    //         // IndoorLight, 10, 0, // Rosso's House
+    //         // FieldLight, 43, 0, // Sacred Realm
+    //         // FieldLight, 36, 0,  // Hotfoot Area
+    //         // FieldLight, 4, 3,
+    //         // FieldLight, 18, 10, // Hyrule Castle Front Door
+    //         // CaveLight, 7, 0, // Zora's Domain
+    //         // IndoorLight, 15, 0, // Osfala Portrait
+    //         // DungeonGanon, 1, 18, // LC 3F Center Warp Tile
+    //         // CaveDark, 8, 0,     // Mysterious Man Cave
+    //         // FieldDark, 31, 0, // Misery Mire
+    //         // IndoorDark, 5, 0, // Hilda's Study
+    //         // IndoorLight, 7, 0, // Zelda's Study (lighting gets weird)
+    //         // DungeonCastle, 6, 0, // Yuga 2 Boss
+    //     ))
     // ]);
 
     Ok(())

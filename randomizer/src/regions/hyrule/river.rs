@@ -4,6 +4,21 @@ crate::region! {
     color: Name,
     area {
         locations: [
+            "Hyrule Sewers Entrance": None @Door (12[75] HyruleSewersEntrance),
+            "Hyrule Sewers Exit": None @Door (CaveLight 18[106] HyruleSewersExit),
+            "Graveyard Ledge Cave Entrance": None @Door (12[125] GraveyardLedgeCaveEntrance),
+            "Graveyard Ledge Cave Exit": None @Door (CaveLight 5[4] GraveyardLedgeCaveExit),
+            "Zora's Domain Entrance": None @Door (7[13] ZorasDomainEntrance),
+            "Zora's Domain Exit": None @Door (CaveLight 7[112] ZorasDomainExit),
+            "Waterfall Cave Entrance": None @Door (15[38] WaterfallCaveEntrance),
+            "Waterfall Cave Exit": None @Door (CaveLight 13[50] WaterfallCaveExit),
+            "Witch's House Entrance": None @Door (14[48] WitchHouseEntrance),
+            "Witch's House Exit": None @Door (IndoorLight 2[8] WitchHouseExit),
+            "River Mini Dungeon Entrance": None @Door (13[37] RiverMiniDungeonEntrance),
+            "River Mini Dungeon Exit": None @Door (AttractionLight 5[3] RiverMiniDungeonExit),
+            "Witch Cave Back Entrance": None @Door (14[75] WitchCaveBackEntrance),
+            "Witch Cave Back Exit": None @Door (CaveLight 30[4] WitchCaveBackExit),
+
             "Sanctuary Crack": None @Crack(IndoorLight 11[21] Sanctuary),
             "Hyrule Graveyard Ledge Crack": None @Crack(12[107] GraveyardLedgeHyrule),
             "Hyrule Waterfall Crack": None @Crack(13[30] WaterfallHyrule),

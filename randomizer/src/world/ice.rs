@@ -17,7 +17,7 @@ pub(crate) fn graph(door_map: &DoorMap) -> HashMap<Location, LocationNode> {
             location(
                 "Ice Ruins Entrance",
                 None,
-                vec![door!(IceRuinsExit, door_map), edge!(IceRuins, |p| p.has_fire_rod())],
+                vec![door!(IceRuinsExit, door_map), edge!(IceRuins, |p| p.has_fire_rod() && p.hearts(9.0))],
             ),
         ),
         // Require Fire Rod

@@ -4,6 +4,9 @@ crate::region! {
     color: Name,
     shop {
         locations: [
+            "Your House Entrance": None @Door(FieldLight 27[51] YourHouseEntrance),
+            "Your House Exit": None @Door(IndoorLight 1[24] YourHouseExit),
+
             "Ravio's Gift": RingHekiga @Event(FieldLight_2C_Rental[237]),
             "Ravio's Shop (1)": ItemRentalIceRod @Shop(Ravio(0)),
             "Ravio's Shop (2)": ItemRentalHookshot @Shop(Ravio(5)),

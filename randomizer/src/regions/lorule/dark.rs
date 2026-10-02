@@ -5,6 +5,12 @@ crate::region! {
     ruins {
         locations: [
             "Dark Palace Entrance": None @Door(20[36] DarkPalaceEntrance),
+            "Hinox Cave Entrance": None @Door (15[73] HinoxCaveEntrance),
+            "Hinox Cave Exit": None @Door (CaveDark 6[3] HinoxCaveExit),
+            "Dark Ruins Fairy Cave Entrance": None @Door (29[51] DarkRuinsFairyCaveEntrance),
+            "Dark Ruins Fairy Cave Exit": None @Door (CaveDark 12[6] DarkRuinsFairyCaveExit),
+            "Dark Ruins Big Fairy Cave Entrance": None @Door (30[38] DarkRuinsBigFairyCaveEntrance),
+            "Dark Ruins Big Fairy Cave Exit": None @Door (CaveDark 13[5] DarkRuinsBigFairyCaveExit),
 
             "Lorule Waterfall Crack": None @Crack(13[60] WaterfallLorule),
             "Dark Ruins Pillar Crack": None @Crack(22[26] DarkRuinsPillar),
