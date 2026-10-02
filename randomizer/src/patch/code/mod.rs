@@ -38,11 +38,11 @@ impl Code {
         Self { text, rodata, ips }
     }
 
-    pub fn text(&mut self) -> Segment {
+    pub fn text(&mut self) -> Segment<'_> {
         Segment { address: &mut self.text, ips: &mut self.ips }
     }
 
-    pub fn rodata(&mut self) -> Segment {
+    pub fn rodata(&mut self) -> Segment<'_> {
         Segment { address: &mut self.rodata, ips: &mut self.ips }
     }
 

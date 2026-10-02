@@ -40,7 +40,7 @@ pub(crate) fn graph(door_map: &DoorMap) -> HashMap<Location, LocationNode> {
                         .can_merge()),
                     check!("[TR] (B1) Big Chest (Top)", regions::dungeons::turtle::rock::SUBREGION => {
                         normal: |p| p.has_turtle_keys(1) && p.can_merge() && p.can_hit_shielded_switch(),
-                        hard: |p| (p.has_turtle_keys(1) && p.can_merge()), // hit switch with pots
+                        hard: |p| p.has_turtle_keys(1) && p.can_merge(), // hit switch with pots
                     }),
                     check!("[TR] (B1) Big Chest (Center)", regions::dungeons::turtle::rock::SUBREGION => {
                         normal: |p| p.can_merge() && p.can_hit_shielded_switch(),
