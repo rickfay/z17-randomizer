@@ -178,7 +178,7 @@ fn patch_ravio(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
     let (irene, _) = seed_info.layout.find_single(SageIrene).unwrap();
     let (rosso, _) = seed_info.layout.find_single(SageRosso).unwrap();
 
-    let (article, demonstrative_pronoun, num_sages_txt) = match seed_info.settings.lc_requirement {
+    let (article, demonstrative_pronoun, num_sages_txt) = match seed_info.settings.final_boss_requirement {
         0 => ("", "those", "Zero Sages"),
         1 => ("", "that", "One Sage"),
         2 => ("", "those", "Two Sages"),
@@ -187,7 +187,7 @@ fn patch_ravio(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
         5 => ("", "those", "Five Sages"),
         6 => ("", "those", "Six Sages"),
         7 => (" the", "those", "Seven Sages"),
-        _ => fail!("Invalid lc_requirement: {}", seed_info.settings.lc_requirement),
+        _ => fail!("Invalid final_boss_requirement: {}", seed_info.settings.final_boss_requirement),
     };
 
     let first_intro = &format!("What's that? You're looking for{}\n{}?", article, name(num_sages_txt));

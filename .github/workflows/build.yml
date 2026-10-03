@@ -2,11 +2,12 @@ name: build
 
 on:
   workflow_dispatch:
-  push:
+  pull_request:
     branches:
       - master
       - dev
-
+      - 'release/**'
+    types: [opened, reopened, synchronize]
 jobs:
   build:
     name: Build

@@ -5,6 +5,16 @@ crate::region! {
     hylia {
         locations: [
             "House of Gales Entrance": None @Door(35[43] HouseOfGalesEntrance),
+            "Lake Hylia Dark Cave Entrance": None @Door (35[135] LakeHyliaDarkCaveEntrance),
+            "Lake Hylia Dark Cave Exit": None @Door (CaveLight 11[7] LakeHyliaDarkCaveExit),
+            "Lakeside Item Shop Entrance": None @Door (35[86] LakesideItemShopEntrance),
+            "Lakeside Item Shop Exit": None @Door (IndoorLight 6[5] LakesideItemShopExit),
+            "Mother Maiamai Cave Entrance": None @Door (35[140] MotherMaiamaiCaveEntrance),
+            "Mother Maiamai Cave Exit": None @Door (CaveLight 15[4] MotherMaiamaiCaveExit),
+            "Ice Rod Cave Left Entrance": None @Door (36[34] IceRodCaveLeftEntrance),
+            "Ice Rod Cave Left Exit": None @Door (CaveLight 9[10] IceRodCaveLeftExit),
+            "Ice Rod Cave Right Entrance": None @Door (36[24] IceRodCaveRightEntrance),
+            "Ice Rod Cave Right Exit": None @Door (CaveLight 9[5] IceRodCaveRightExit),
 
             "Lake Hylia Crack": None @Crack(35[76] LakeHylia),
             "Hyrule Hotfoot Crack": None @Crack(36[30] HyruleHotfoot),

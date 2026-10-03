@@ -18,7 +18,7 @@ pub(crate) fn graph(door_map: &DoorMap) -> HashMap<Location, LocationNode> {
                 vec![check!("Swamp Palace Weather Vane", regions::lorule::field::main::SUBREGION)],
                 vec![
                     edge!(LoruleCastleArea, |p| p.has_hookshot() || p.has_flippers() || p.has_bomb_flower()),
-                    edge!(SwampPalaceAntechamber),
+                    door!(SwampPalaceEntrance, door_map),
                 ],
             ),
         ),
@@ -28,16 +28,15 @@ pub(crate) fn graph(door_map: &DoorMap) -> HashMap<Location, LocationNode> {
                 "Swamp Palace Antechamber",
                 None,
                 vec![
-                    edge!(SwampPalaceOutside),
-                    door!(SwampPalaceEntrance, door_map => {
-                        normal: |p| p.has_bomb_flower() && p.hearts(6.0),
+                    door!(SwampPalaceExit, door_map),
+                    edge!(SwampPalaceFoyer => {
+                        normal: |p| p.has_bomb_flower(),
                         adv_glitched: |p| {
                             p.not_nice_mode()
                                 && p.can_merge()
                                 && p.has_ice_rod()
                                 && p.has_flippers()
                                 && (p.has_sword() || p.has_tornado_rod() || p.has_net() || p.has_bombs())
-                                && p.hearts(6.0)
                         },
                     }),
                 ],
@@ -49,8 +48,8 @@ pub(crate) fn graph(door_map: &DoorMap) -> HashMap<Location, LocationNode> {
                 "Swamp Palace Foyer",
                 None,
                 vec![
-                    door!(SwampPalaceExit, door_map),
-                    edge!(SwampPalaceMain, |p| p.has_flippers() && p.has_hookshot()),
+                    edge!(SwampPalaceAntechamber),
+                    edge!(SwampPalaceMain, |p| p.has_flippers() && p.has_hookshot() && p.hearts(6.0)),
                 ],
             ),
         ),

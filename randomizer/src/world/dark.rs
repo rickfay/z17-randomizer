@@ -16,10 +16,21 @@ pub(crate) fn graph(door_map: &DoorMap) -> HashMap<Location, LocationNode> {
         (
             DarkPalaceFoyer,
             location(
+                "Dark Palace Foyer",
+                None,
+                vec![
+                    door!(DarkPalaceExit, door_map),
+                    edge!(DarkPalaceFirstRoom, |p| p.hearts(6.0)),
+                ],
+            ),
+        ),
+        (
+            DarkPalaceFirstRoom,
+            location(
                 "Dark Palace",
                 vec![check!("[PD] (1F) Right Pit", regions::dungeons::dark::palace::SUBREGION, |p| p.has_bombs())],
                 vec![
-                    door!(DarkPalaceExit, door_map),
+                    edge!(DarkPalaceFoyer),
                     edge!(DarkPalaceSecondRoom => {
                         normal: |p| p.has_bombs() && (p.has_lamp() || p.lampless()),
                         hard: |p| p.has_fire_rod() && p.has_nice_ice_rod() && (p.has_lamp() || p.lampless()),

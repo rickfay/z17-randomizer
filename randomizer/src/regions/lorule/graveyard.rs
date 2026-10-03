@@ -1,9 +1,14 @@
 crate::region! {
-    course: FieldLight,
+    course: FieldDark,
     name: "Graveyard",
     color: Purple,
     lorule {
         locations: [
+            "Philosopher's Cave Entrance": None @Door (11[11] PhilosophersCaveEntrance),
+            "Philosopher's Cave Exit": None @Door (CaveDark 5[4] PhilosophersCaveExit),
+            "Lorule Sewers Entrance": None @Door (12[130] LoruleSewersEntrance),
+            "Lorule Sewers Exit": None @Door (AttractionDark 2[106] LoruleSewersExit),
+
             "Philosopher's Cave Crack": None @Crack(CaveDark 5[8] Philosopher),
             "Lorule Graveyard Ledge Crack": None @Crack(FieldDark 12[20] GraveyardLedgeLorule),
 

@@ -17,7 +17,7 @@ pub(crate) fn graph(door_map: &DoorMap) -> HashMap<Location, LocationNode> {
             location(
                 "Tower of Hera Entrance",
                 None,
-                vec![door!(TowerOfHeraExit, door_map), edge!(TowerOfHeraBottom, |p| p.has_hammer())],
+                vec![door!(TowerOfHeraExit, door_map), edge!(TowerOfHeraBottom, |p| p.has_hammer() && p.hearts(4.0))],
             ),
         ),
         (

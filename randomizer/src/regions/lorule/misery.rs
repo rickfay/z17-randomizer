@@ -4,6 +4,9 @@ crate::region! {
     color: Name,
     mire {
         locations: [
+            "Sand Rod Mini Dungeon Entrance": None @Door (37[57] SandRodMiniDungeonEntrance),
+            "Sand Rod Mini Dungeon Exit": None @Door (AttractionDark 3[6] SandRodMiniDungeonExit),
+
             "Misery Mire Exit Crack": None @Crack(37[32] MiseryMireExit),
             "Mire Right Pillar Crack": None @Crack(31[55] MirePillarRight),
             "Mire Left Pillar Crack": None @Crack(31[54] MirePillarLeft),

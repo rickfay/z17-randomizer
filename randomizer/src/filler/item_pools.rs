@@ -342,7 +342,89 @@ pub fn get_maiamai_pool() -> Vec<Item> {
     ]
 }
 
-pub(crate) fn get_door_entrances() -> Vec<Door> {
+pub(crate) fn get_back_door_entrances() -> Vec<Door> {
+    use crate::doors::Door::*;
+    vec![CuccoHouseBackEntrance, WitchCaveBackEntrance, VacantHouseBackEntrance, IceCaveBackEntrance]
+}
+
+pub(crate) fn get_back_door_exits() -> Vec<Door> {
+    use crate::doors::Door::*;
+    vec![CuccoHouseBackExit, WitchCaveBackExit, VacantHouseBackExit, IceCaveBackExit]
+}
+
+pub(crate) fn get_connector_entrances() -> Vec<Door> {
+    use crate::doors::Door::*;
+    vec![
+        HyruleCastleUpperLeftEntrance, HyruleCastleUpperRightEntrance, HyruleCastleMainEntrance,
+        CuccoHouseFrontEntrance, StylishWomansHouseEntrance, SahasrahlaLeftEntrance, SahasrahlaRightEntrance,
+        KakarikoCaveEntrance, HyruleSewersEntrance, SouthernRuinsBombCaveEntrance, SouthernRuinsPillarCaveEntrance,
+        EasternRuinsCaveTopEntrance, EasternRuinsCaveBottomEntrance, WitchCaveFrontEntrance, RossoHouseEntrance,
+        MoldormCaveLowerEntrance, MoldormCaveLedgeEntrance, MoldormCaveTopEntrance, DonkeyCaveLowerEntrance,
+        DonkeyCaveMiddleEntrance, DonkeyCaveUpperEntrance, AmidaCaveLowerEntrance, AmidaCaveMiddleRightEntrance,
+        AmidaCaveMiddleLeftEntrance, AmidaCaveUpperEntrance, SpectacleRockCaveLeftEntrance,
+        SpectacleRockCaveRightEntrance, FireCaveTopEntrance, FireCaveMiddleLeftEntrance, FireCaveMiddleRightEntrance,
+        FireCaveBottomEntrance, IceCaveLowerEntrance, IceCaveMiddleLeftEntrance, IceCaveMiddleRightEntrance,
+        IceCaveUpperEntrance, PhilosophersCaveEntrance, LoruleSewersEntrance, LoruleBlacksmithEntrance,
+    ]
+}
+
+pub(crate) fn get_connector_exits() -> Vec<Door> {
+    use crate::doors::Door::*;
+    vec![
+        HyruleCastleUpperLeftExit, HyruleCastleUpperRightExit, HyruleCastleMainExit, CuccoHouseFrontExit,
+        StylishWomansHouseExit, SahasrahlaLeftExit, SahasrahlaRightExit, KakarikoCaveExit, HyruleSewersExit,
+        SouthernRuinsBombCaveExit, SouthernRuinsPillarCaveExit, EasternRuinsCaveTopExit, EasternRuinsCaveBottomExit,
+        WitchCaveFrontExit, RossoHouseExit, MoldormCaveLowerExit, MoldormCaveLedgeExit, MoldormCaveTopExit,
+        DonkeyCaveLowerExit, DonkeyCaveMiddleExit, DonkeyCaveUpperExit, AmidaCaveLowerExit, AmidaCaveMiddleRightExit,
+        AmidaCaveMiddleLeftExit, AmidaCaveUpperExit, SpectacleRockCaveLeftExit, SpectacleRockCaveRightExit,
+        FireCaveTopExit, FireCaveMiddleLeftExit, FireCaveMiddleRightExit, FireCaveBottomExit, IceCaveLowerExit,
+        IceCaveMiddleLeftExit, IceCaveMiddleRightExit, IceCaveUpperExit, PhilosophersCaveExit, LoruleSewersExit,
+        LoruleBlacksmithExit,
+    ]
+}
+
+pub(crate) fn get_non_dungeon_front_door_entrances() -> Vec<Door> {
+    use crate::doors::Door::*;
+    vec![
+        YourHouseEntrance, BlacksmithEntrance, BlacksmithCaveEntrance, CuccoMiniDungeonEntrance,
+        HyruleCastleLowerLeftEntrance, HyruleCastleLowerRightEntrance, MilkBarEntrance, BeeGuyHouseEntrance,
+        HyruleFortunesChoiceEntrance, WomanHouseEntrance, KakarikoItemShopEntrance, JailEntrance,
+        SouthernRuinsFairyCaveEntrance, RunawayItemSellerCaveEntrance, SouthernRuinsMiniDungeonEntrance,
+        DesertBigFairyCaveEntrance, DesertFairyCaveEntrance, GraveyardLedgeCaveEntrance, ZorasDomainEntrance,
+        WaterfallCaveEntrance, WitchHouseEntrance, RiverMiniDungeonEntrance, MergeMiniDungeonEntrance,
+        EasternRuinsFairyCaveEntrance, EasternRuinsBigFairyCaveEntrance, LakeHyliaDarkCaveEntrance,
+        LakesideItemShopEntrance, MotherMaiamaiCaveEntrance, IceRodCaveLeftEntrance, IceRodCaveRightEntrance,
+        FortuneTellerTentEntrance, FortuneTellerCaveEntrance, RumorGuyCaveEntrance, RossoCaveEntrance,
+        DeathMountainBombCaveEntrance, DeathMountainWeatherVaneLeftCaveEntrance, DeathMountainWestFairyCaveEntrance,
+        HookshotMiniDungeonEntrance, DeathMountainBigFairyCaveEntrance, MysteriousManCaveEntrance,
+        LoruleDeathMountainBigFairyCaveEntrance, HinoxCaveEntrance, DarkRuinsFairyCaveEntrance,
+        DarkRuinsBigFairyCaveEntrance, TurtleRockFairyCaveEntrance, LoruleLakeItemShopEntrance,
+        VacantHouseFrontEntrance, ThiefGirlCaveEntrance, SwampCaveEntrance, BombFlowerCaveEntrance,
+        GreatRupeeFairyCaveEntrance, BombFlowerShopEntrance, LoruleFortuneTellerEntrance, LoruleMilkBarEntrance,
+        VeteransHouseEntrance, LoruleFortunesChoiceEntrance, ThievesTownItemShopEntrance, SandRodMiniDungeonEntrance,
+    ]
+}
+
+pub(crate) fn get_non_dungeon_front_door_exits() -> Vec<Door> {
+    use crate::doors::Door::*;
+    vec![
+        YourHouseExit, BlacksmithExit, BlacksmithCaveExit, CuccoMiniDungeonExit, HyruleCastleLowerLeftExit,
+        HyruleCastleLowerRightExit, MilkBarExit, BeeGuyHouseExit, HyruleFortunesChoiceExit, WomanHouseExit,
+        KakarikoItemShopExit, JailExit, SouthernRuinsFairyCaveExit, RunawayItemSellerCaveExit,
+        SouthernRuinsMiniDungeonExit, DesertBigFairyCaveExit, DesertFairyCaveExit, GraveyardLedgeCaveExit,
+        ZorasDomainExit, WaterfallCaveExit, WitchHouseExit, RiverMiniDungeonExit, MergeMiniDungeonExit,
+        EasternRuinsFairyCaveExit, EasternRuinsBigFairyCaveExit, LakeHyliaDarkCaveExit, LakesideItemShopExit,
+        MotherMaiamaiCaveExit, IceRodCaveLeftExit, IceRodCaveRightExit, FortuneTellerTentExit, FortuneTellerCaveExit,
+        RumorGuyCaveExit, RossoCaveExit, DeathMountainBombCaveExit, DeathMountainWeatherVaneLeftCaveExit,
+        DeathMountainWestFairyCaveExit, HookshotMiniDungeonExit, DeathMountainBigFairyCaveExit, MysteriousManCaveExit,
+        LoruleDeathMountainBigFairyCaveExit, HinoxCaveExit, DarkRuinsFairyCaveExit, DarkRuinsBigFairyCaveExit,
+        TurtleRockFairyCaveExit, LoruleLakeItemShopExit, VacantHouseFrontExit, ThiefGirlCaveExit, SwampCaveExit,
+        BombFlowerCaveExit, GreatRupeeFairyCaveExit, BombFlowerShopExit, LoruleFortuneTellerExit, LoruleMilkBarExit,
+        VeteransHouseExit, LoruleFortunesChoiceExit, ThievesTownItemShopExit, SandRodMiniDungeonExit,
+    ]
+}
+
+pub(crate) fn get_dungeon_door_entrances() -> Vec<Door> {
     use crate::doors::Door::*;
     vec![
         EasternPalaceEntrance, HouseOfGalesEntrance, TowerOfHeraEntrance, InsideHyruleCastleEntrance,
@@ -351,7 +433,7 @@ pub(crate) fn get_door_entrances() -> Vec<Door> {
     ]
 }
 
-pub(crate) fn get_door_exits() -> Vec<Door> {
+pub(crate) fn get_dungeon_door_exits() -> Vec<Door> {
     use crate::doors::Door::*;
     vec![
         EasternPalaceExit, HouseOfGalesExit, TowerOfHeraExit, InsideHyruleCastleExit, DarkPalaceExit, SwampPalaceExit,
@@ -362,56 +444,81 @@ pub(crate) fn get_door_exits() -> Vec<Door> {
 pub(crate) fn get_default_weather_vanes(settings: &Settings) -> Vec<Vane> {
     use modinfo::settings::WeatherVanes::*;
     match settings.weather_vanes {
-        Standard => get_standard_weather_vane_flags(settings),
-        Shuffled => vec![],
-        Convenient => get_convenient_weather_vane_flags(settings),
-        Hyrule => get_hyrule_weather_vane_flags(),
-        Lorule => get_lorule_weather_vane_flags(),
-        All => get_all_weather_vane_flags(),
+        Standard => get_standard_weather_vanes(settings),
+        Shuffled => get_shuffled_weather_vanes(settings),
+        Convenient => get_convenient_weather_vanes(settings),
+        Hyrule => get_hyrule_weather_vanes(settings),
+        Lorule => get_lorule_weather_vanes(settings),
+        All => get_all_weather_vanes(),
     }
 }
 
 /// Flags of Standard Weather Vanes
-pub(crate) fn get_standard_weather_vane_flags(settings: &Settings) -> Vec<Vane> {
+pub(crate) fn get_standard_weather_vanes(settings: &Settings) -> Vec<Vane> {
     let mut standard_weather_vanes = vec![YourHouseWV];
 
-    // Include Vacant House as a complimentary Weather Vane only when Door + Crack shuffle are both
+    // Include Vacant House as a complimentary Weather Vane only when Crack shuffle is
     // off, so that it doesn't accidentally create a path to LCA earlier than intended.
-    if settings.door_shuffle == DoorShuffle::Off && settings.crack_shuffle == CrackShuffle::Off {
+    if settings.crack_shuffle == CrackShuffle::Off {
         standard_weather_vanes.push(VacantHouseWV);
     }
 
     standard_weather_vanes
 }
 
+/// Flags of Shuffled Weather Vanes
+pub(crate) fn get_shuffled_weather_vanes(settings: &Settings) -> Vec<Vane> {
+    // Don't give out any by default, unless it's Crossed Door ER, for softlock reasons
+    match settings.door_shuffle {
+        DoorShuffle::Crossed => vec![YourHouseWV, VacantHouseWV],
+        _ => vec![],
+    }
+}
+
 /// Flags of "Convenient" Weather Vanes, that don't affect logic but save time
-pub(crate) fn get_convenient_weather_vane_flags(settings: &Settings) -> Vec<Vane> {
+pub(crate) fn get_convenient_weather_vanes(settings: &Settings) -> Vec<Vane> {
     let mut convenient_weather_vanes = vec![YourHouseWV, KakarikoVillageWV, WitchsHouseWV, SanctuaryWV];
 
-    if settings.door_shuffle == DoorShuffle::Off && settings.crack_shuffle == CrackShuffle::Off {
+    if settings.crack_shuffle == CrackShuffle::Off {
         convenient_weather_vanes.extend(&[LoruleCastleWV, ThievesTownWV, BlacksmithWV, VacantHouseWV]);
     }
 
     convenient_weather_vanes
 }
 
-pub(crate) fn get_hyrule_weather_vane_flags() -> Vec<Vane> {
-    vec![
+pub(crate) fn get_hyrule_weather_vanes(settings: &Settings) -> Vec<Vane> {
+    let mut hyrule_weather_vanes = vec![
         YourHouseWV, KakarikoVillageWV, EasternPalaceWV, HouseOfGalesWV, TowerOfHeraWV, WitchsHouseWV,
         DeathMountainHyruleWV, DesertPalaceWV, SanctuaryWV,
-    ]
+    ];
+
+    // Give Vacant House in Door ER for softlock reasons
+    if settings.door_shuffle == DoorShuffle::Crossed {
+        hyrule_weather_vanes.push(VacantHouseWV);
+    }
+
+    hyrule_weather_vanes
 }
 
-pub(crate) fn get_lorule_weather_vane_flags() -> Vec<Vane> {
-    vec![
+pub(crate) fn get_lorule_weather_vanes(settings: &Settings) -> Vec<Vane> {
+    let mut lorule_weather_vanes = vec![
         SkullWoodsWV, TreacherousTowerWV, IceRuinsWV, LoruleCastleWV, GraveyardWV, ThievesTownWV, DarkPalaceWV,
         BlacksmithWV, VacantHouseWV, MiseryMireWV, SwampPalaceWV, TurtleRockWV, DeathMountainLoruleWV,
-    ]
+    ];
+
+    // Give Vacant House in Door ER for softlock reasons
+    if settings.door_shuffle == DoorShuffle::Crossed {
+        lorule_weather_vanes.push(YourHouseWV);
+    }
+
+    lorule_weather_vanes
 }
 
-pub(crate) fn get_all_weather_vane_flags() -> Vec<Vane> {
-    let mut flags = Vec::with_capacity(22);
-    flags.extend(get_hyrule_weather_vane_flags());
-    flags.extend(get_lorule_weather_vane_flags());
-    flags
+pub(crate) fn get_all_weather_vanes() -> Vec<Vane> {
+    vec![
+        YourHouseWV, KakarikoVillageWV, EasternPalaceWV, HouseOfGalesWV, TowerOfHeraWV, WitchsHouseWV,
+        DeathMountainHyruleWV, DesertPalaceWV, SanctuaryWV, SkullWoodsWV, TreacherousTowerWV, IceRuinsWV,
+        LoruleCastleWV, GraveyardWV, ThievesTownWV, DarkPalaceWV, BlacksmithWV, VacantHouseWV, MiseryMireWV,
+        SwampPalaceWV, TurtleRockWV, DeathMountainLoruleWV,
+    ]
 }

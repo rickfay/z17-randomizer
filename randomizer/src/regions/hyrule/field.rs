@@ -6,6 +6,23 @@ crate::region! {
         locations: [
             "Inside Hyrule Castle Entrance": None @Door(18[155] InsideHyruleCastleEntrance),
 
+            "Blacksmith Entrance": None @Door(21[79] BlacksmithEntrance),
+            "Blacksmith Exit": None @Door(IndoorLight 19[2] BlacksmithExit),
+            "Blacksmith Cave Entrance": None @Door(21[150] BlacksmithCaveEntrance),
+            "Blacksmith Cave Exit": None @Door(CaveLight 16[4] BlacksmithCaveExit),
+            "Cucco Mini Dungeon Entrance": None @Door(32[62] CuccoMiniDungeonEntrance),
+            "Cucco Mini Dungeon Exit": None @Door(AttractionLight 3[12] CuccoMiniDungeonExit),
+            "Hyrule Castle Upper Left Entrance": None @Door(18[159] HyruleCastleUpperLeftEntrance),
+            "Hyrule Castle Upper Left Exit": None @Door(IndoorLight 12[19] HyruleCastleUpperLeftExit),
+            "Hyrule Castle Upper Right Entrance": None @Door(18[154] HyruleCastleUpperRightEntrance),
+            "Hyrule Castle Upper Right Exit": None @Door(IndoorLight 12[18] HyruleCastleUpperRightExit),
+            "Hyrule Castle Lower Left Entrance": None @Door(18[374] HyruleCastleLowerLeftEntrance),
+            "Hyrule Castle Lower Left Exit": None @Door(IndoorLight 12[50] HyruleCastleLowerLeftExit),
+            "Hyrule Castle Lower Right Entrance": None @Door(18[375] HyruleCastleLowerRightEntrance),
+            "Hyrule Castle Lower Right Exit": None @Door(IndoorLight 12[51] HyruleCastleLowerRightExit),
+            "Hyrule Castle Main Entrance": None @Door(18[160] HyruleCastleMainEntrance),
+            "Hyrule Castle Main Exit": None @Door(IndoorLight 12[17] HyruleCastleMainExit),
+
             "Your House Crack": None @Crack(27[68] YourHouse),
             "Hyrule Right Paradox Crack": None @Crack(32[60] ParadoxRightHyrule),
             "Hyrule Left Paradox Crack": None @Crack(32[56] ParadoxLeftHyrule),

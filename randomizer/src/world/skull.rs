@@ -18,7 +18,10 @@ pub(crate) fn graph(door_map: &DoorMap) -> HashMap<Location, LocationNode> {
             location(
                 "Skull Woods Foyer",
                 None,
-                vec![door!(SkullWoodsExit, door_map), edge!(SkullWoodsMain, |p| p.has_lamp() || p.lampless())],
+                vec![
+                    door!(SkullWoodsExit, door_map),
+                    edge!(SkullWoodsMain, |p| (p.has_lamp() || p.lampless()) && p.hearts(6.0)),
+                ],
             ),
         ),
         (

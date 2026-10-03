@@ -15,12 +15,20 @@ use std::collections::HashMap;
 pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Location, LocationNode> {
     HashMap::from([
         (
+            LoruleCastleFoyer,
+            location(
+                "Lorule Castle Foyer",
+                None,
+                vec![door!(LoruleCastleExit, door_map), edge!(LoruleCastle1F, |p| p.hearts(13.0))],
+            ),
+        ),
+        (
             LoruleCastle1F,
             location(
                 "Lorule Castle 1F",
                 None,
                 vec![
-                    door!(LoruleCastleExit, door_map),
+                    edge!(LoruleCastleFoyer),
                     edge!(LoruleCastleEastLedge1F, |p| p.can_merge()),
                     edge!(LoruleCastle2F3F => {
                         normal: |p| p.can_attack(),

@@ -6,6 +6,11 @@ crate::region! {
         locations: [
             "Desert Palace Entrance": None @Door(31[10] DesertPalaceEntrance),
 
+            "Desert Big Fairy Cave Entrance": None @Door (37[44] DesertBigFairyCaveEntrance),
+            "Desert Big Fairy Cave Exit": None @Door (CaveLight 20[5] DesertBigFairyCaveExit),
+            "Desert Fairy Cave Entrance": None @Door (31[63] DesertFairyCaveEntrance),
+            "Desert Fairy Cave Exit": None @Door (CaveLight 8[5] DesertFairyCaveExit),
+
             "Misery Mire Entrance Crack": None @Crack(37[29] MiseryMireEntrance),
             "Desert Right Pillar Crack": None @Crack(31[42] DesertPillarRight),
             "Desert Left Pillar Crack": None @Crack(31[41] DesertPillarLeft),

@@ -611,26 +611,6 @@ fn patch_dark(patcher: &mut Patcher, seed_info: &SeedInfo, prize: Randomizable) 
             },
         );
     }
-
-    // Remove Maze Guards after Dark Palace
-    // let prize_flag = prize_flag(prize);
-    // patcher.modify_objs(FieldDark, 20, &[
-    //     set_disable_flag(73, prize_flag),
-    //     set_disable_flag(82, prize_flag),
-    //     set_disable_flag(83, prize_flag),
-    //     set_disable_flag(84, prize_flag),
-    //     set_disable_flag(113, prize_flag),
-    //     set_disable_flag(123, prize_flag),
-    //     set_disable_flag(135, prize_flag),
-    //     set_disable_flag(136, prize_flag),
-    //     set_disable_flag(143, prize_flag),
-    //     set_disable_flag(171, prize_flag),
-    //     set_disable_flag(176, prize_flag),
-    //     set_disable_flag(177, prize_flag),
-    //     set_disable_flag(178, prize_flag),
-    //     set_disable_flag(179, prize_flag),
-    //     set_disable_flag(197, prize_flag),
-    // ]);
 }
 
 /// Swamp Palace
@@ -793,11 +773,7 @@ fn patch_ice(patcher: &mut Patcher, seed_info: &SeedInfo, prize: Randomizable) {
 }
 
 fn get_dungeon_prize_spawn(exit: Door, door_map: &DoorMap) -> SpawnPoint {
-    let entrance = door_map.get(&exit).unwrap();
-
-    // If this dungeon exits to the Swamp Palace entrance, spawn them directly outside the
-    // building just like it does in vanilla. Otherwise, just use the entrance's spawn point.
-    if entrance == &Door::SwampPalaceEntrance { SpawnPoint::new(FieldDark, 33, 0) } else { entrance.get_spawn_point() }
+    door_map.get(&exit).unwrap().get_spawn_point()
 }
 
 struct PrizePatchData {

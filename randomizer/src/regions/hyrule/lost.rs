@@ -4,6 +4,21 @@ crate::region! {
     color: Name,
     woods {
         locations: [
+            "Fortune-Teller Tent Entrance": None @Door (9[68] FortuneTellerTentEntrance),
+            "Fortune-Teller Tent Exit": None @Door (IndoorLight 18[5] FortuneTellerTentExit),
+            "Fortune-Teller Cave Entrance": None @Door (9[92] FortuneTellerCaveEntrance),
+            "Fortune-Teller Cave Exit": None @Door (CaveLight 21[3] FortuneTellerCaveExit),
+            "Rumor Guy Cave Entrance": None @Door (1[233] RumorGuyCaveEntrance),
+            "Rumor Guy Cave Exit": None @Door (CaveLight 17[3] RumorGuyCaveExit),
+            "Rosso's House Entrance": None @Door (2[136] RossoHouseEntrance),
+            "Rosso's House Exit": None @Door (IndoorLight 10[5] RossoHouseExit),
+            "Rosso Cave Entrance": None @Door (2[95] RossoCaveEntrance),
+            "Rosso Cave Exit": None @Door (CaveLight 6[7] RossoCaveExit),
+            "Moldorm Cave Lower Entrance": None @Door (6[10] MoldormCaveLowerEntrance),
+            "Moldorm Cave Lower Exit": None @Door (CaveLight 19[4] MoldormCaveLowerExit),
+            "Moldorm Cave Ledge Entrance": None @Door (6[138] MoldormCaveLedgeEntrance),
+            "Moldorm Cave Ledge Exit": None @Door (CaveLight 19[13] MoldormCaveLedgeExit),
+
             "Lost Woods Pillar Crack": None @Crack(1[227] LostWoodsPillar),
             "Rosso's House Crack": None @Crack(IndoorLight 10[19] RossosHouse),
 

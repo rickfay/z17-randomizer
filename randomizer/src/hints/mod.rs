@@ -626,7 +626,7 @@ fn choose_path_hint(
         // Choose a random Ghost for this hint of the ones not already taken
         match chosen_path.logical_ghosts.iter().filter(|&ghost| !taken_ghosts.contains(ghost)).choose_stable(rng) {
             None => {
-                info!("No available Ghosts to give Hint: {:?}", chosen_path);
+                debug!("No available Ghosts to give Hint: {:?}", chosen_path);
             },
             Some(chosen_ghost) => {
                 chosen_path.ghosts.push(*chosen_ghost);

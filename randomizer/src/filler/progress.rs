@@ -8,7 +8,7 @@ use modinfo::settings::keysy::Keysy;
 use modinfo::settings::nice_items::NiceItems;
 use modinfo::settings::ravios_shop::RaviosShop;
 use modinfo::settings::trials_door::TrialsDoor;
-use modinfo::settings::{Settings, pedestal::PedestalSetting};
+use modinfo::settings::{Settings, pedestal::PedestalSetting, DoorShuffle};
 
 #[derive(Clone, Debug)]
 pub struct Progress<'s> {
@@ -252,6 +252,13 @@ impl<'s> Progress<'s> {
 
     pub fn has_bell(&self) -> bool {
         self.has(Item::Bell)
+    }
+
+    pub fn open_maiamai_cave(&self) -> bool {
+        match self.seed_info.settings.door_shuffle {
+            DoorShuffle::Off | DoorShuffle::DungeonEntrances => true,
+            DoorShuffle::Crossed => false,
+        }
     }
 
     pub fn crack_shuffle(&self) -> bool {

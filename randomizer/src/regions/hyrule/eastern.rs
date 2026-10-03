@@ -5,6 +5,18 @@ crate::region! {
     ruins {
         locations: [
             "Eastern Palace Entrance": None @Door(20[36] EasternPalaceEntrance),
+            "Merge Mini Dungeon Entrance": None @Door (20[164] MergeMiniDungeonEntrance),
+            "Merge Mini Dungeon Exit": None @Door (AttractionLight 1[3] MergeMiniDungeonExit),
+            "Eastern Ruins Fairy Cave Entrance": None @Door (30[71] EasternRuinsFairyCaveEntrance),
+            "Eastern Ruins Fairy Cave Exit": None @Door (CaveLight 10[5] EasternRuinsFairyCaveExit),
+            "Eastern Ruins Big Fairy Cave Entrance": None @Door (29[49] EasternRuinsBigFairyCaveEntrance),
+            "Eastern Ruins Big Fairy Cave Exit": None @Door (CaveLight 12[5] EasternRuinsBigFairyCaveExit),
+            "Eastern Ruins Cave Top Entrance": None @Door (20[160] EasternRuinsCaveTopEntrance),
+            "Eastern Ruins Cave Top Exit": None @Door (CaveLight 29[4] EasternRuinsCaveTopExit),
+            "Eastern Ruins Cave Bottom Entrance": None @Door (20[161] EasternRuinsCaveBottomEntrance),
+            "Eastern Ruins Cave Bottom Exit": None @Door (CaveLight 29[3] EasternRuinsCaveBottomExit),
+            "Witch Cave Front Entrance": None @Door (20[162] WitchCaveFrontEntrance),
+            "Witch Cave Front Exit": None @Door (CaveLight 30[3] WitchCaveFrontExit),
 
             "Eastern Ruins Pillar Crack": None @Crack(22[33] EasternRuinsPillar),
             "Eastern Ruins SE Crack": None @Crack(30[54] EasternRuinsSE),

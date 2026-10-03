@@ -110,15 +110,6 @@ pub fn get_seed_settings() -> Result<Settings, String> {
     let maiamai_madness =
         prompt_bool("Maiamai Madness", "This shuffles Maiamai into the pool, adding 100 more locations.");
 
-    let door_shuffle = DoorShuffle::try_from(prompt_u8_in_range(
-        "Door Shuffle",
-        "Choose how to shuffle doors:\n\
-        [0] Off                      - Doors are not shuffled.\n\
-        [1] Dungeon Entrance Shuffle - Dungeon Entrances are shuffled amongst each other.",
-        0,
-        1,
-    ))?;
-
     let cracks = Cracks::try_from(prompt_u8_in_range(
         "Cracks",
         "Choose the initial state of the cracks between worlds:\n\
@@ -138,6 +129,16 @@ pub fn get_seed_settings() -> Result<Settings, String> {
         [4] Mirrored Any World Pairs   - Same as Any World Pairs, but each pair's vanilla counterparts will be in a matching pair.",
         0,
         4,
+    ))?;
+
+    let door_shuffle = DoorShuffle::try_from(prompt_u8_in_range(
+        "Door Shuffle",
+        "Choose how to shuffle doors:\n\
+        [0] Off                      - Doors are not shuffled.\n\
+        [1] Dungeon Entrance Shuffle - Dungeon Doors are shuffled amongst each other.\n\
+        [2] Crossed                  - All Doors are shuffled, and may cross between Hyrule and Lorule.",
+        0,
+        2,
     ))?;
 
     let minigames_excluded = prompt_bool(

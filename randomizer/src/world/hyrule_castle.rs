@@ -10,12 +10,20 @@ use std::collections::HashMap;
 pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Location, LocationNode> {
     HashMap::from([
         (
+            HyruleCastleDungeonFoyer,
+            location(
+                "Inside Hyrule Castle Foyer",
+                None,
+                vec![door!(InsideHyruleCastleExit, door_map), edge!(HyruleCastleDungeon, |p| p.hearts(6.0))],
+            ),
+        ),
+        (
             HyruleCastleDungeon,
             location(
                 "Inside Hyrule Castle",
                 None,
                 vec![
-                    door!(InsideHyruleCastleExit, door_map),
+                    edge!(HyruleCastleDungeonFoyer),
                     edge!(HyruleCastleDungeonBoss => {
                         normal: |p| (p.can_merge() && p.can_attack()) || p.has_ice_rod(), // add Nice TRod, when nice items figured out
                         hard: |p| p.has_bow() || p.has_nice_bombs(),

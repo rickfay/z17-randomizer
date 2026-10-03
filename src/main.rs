@@ -44,7 +44,8 @@ fn main() {
     });
 
     // Generate Seed in a retryable manner
-    const MAX_RETRIES: u16 = 100;
+    const MAX_RETRIES: u16 = 10000;
+    let stopwatch = std::time::Instant::now();
     for x in 0..MAX_RETRIES {
         info!("Attempt:                        #{}", x + 1);
         info!(
@@ -54,11 +55,14 @@ fn main() {
         info!("Version:                        {}", VERSION);
         info!("Seed:                           {:0>10}", seed);
 
-        let stopwatch = std::time::Instant::now();
         match randomizer::generate_seed(seed, settings.clone(), &user_config, opt.no_patch, opt.no_spoiler) {
             Ok(_) => {
                 println!();
-                info!("Successfully Generated ALBWR Seed {} in {} seconds! :D", seed, stopwatch.elapsed().as_secs());
+                info!(
+                    "Successfully Generated ALBWR Seed {:0>10} in {} seconds! :D",
+                    seed,
+                    stopwatch.elapsed().as_secs()
+                );
                 println!();
                 info!("For help installing this seed: https://github.com/rickfay/z17-randomizer#setup");
                 info!("List of known issues: https://github.com/rickfay/z17-randomizer#known-issues");
@@ -69,7 +73,7 @@ fn main() {
                 error!("{:?}", err);
                 if x < MAX_RETRIES {
                     if !seeded {
-                        info!("A retryable error was encountered.\n");
+                        println!("\n{}\n", "-".repeat(80));
                         seed = rand::random();
                     } else {
                         fail!("Couldn't generate Seed: \"{}\" with the given settings.", seed);

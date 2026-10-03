@@ -5,6 +5,10 @@ crate::region! {
     lorule {
         locations: [
             "Turtle Rock Entrance": None @Door(35[29] TurtleRockEntrance),
+            "Turtle Rock Fairy Cave Entrance": None @Door (36[44] TurtleRockFairyCaveEntrance),
+            "Turtle Rock Fairy Cave Exit": None @Door (CaveDark 11[6] TurtleRockFairyCaveExit),
+            "Lorule Lake Item Shop Entrance": None @Door (35[79] LoruleLakeItemShopEntrance),
+            "Lorule Lake Item Shop Exit": None @Door (IndoorDark 9[1] LoruleLakeItemShopExit),
 
             "Lorule River Crack": None @Crack(29[53] RiverLorule),
             "Lorule Lake Crack": None @Crack(35[30] LoruleLake),
