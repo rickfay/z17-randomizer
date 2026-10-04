@@ -1661,9 +1661,12 @@ pub(crate) fn build_door_map(settings: &Settings, rng: &mut StdRng) -> crate::Re
             randomly_pair_doors(dungeon_entrances, dungeon_exits, &mut door_map, rng);
 
             // Other Doors (vanilla)
-            let other_doors =
-                vec![item_pools::get_non_dungeon_front_door_entrances(), item_pools::get_back_door_entrances()]
-                    .concat();
+            let other_doors = vec![
+                item_pools::get_non_dungeon_front_door_entrances(),
+                item_pools::get_back_door_entrances(),
+                item_pools::get_connector_entrances(),
+            ]
+            .concat();
             set_doors_to_vanilla(other_doors, &mut door_map);
         },
         DoorShuffle::Crossed => {
