@@ -6,10 +6,10 @@ use crate::patch::code::arm::data::{add, cmp, mov};
 use crate::patch::code::arm::ls::{ldr, ldrb, str_, strb};
 use crate::patch::code::arm::lsm::{pop, push};
 use crate::patch::code::arm::{Instruction, LR, PC, SP, b, bl};
-use crate::{Layout, Result, SeedInfo, patch::util::prize_flag, regions};
+use crate::{Door, DoorMap, Layout, Result, SeedInfo, patch::util::prize_flag, regions};
 use game::Item;
 use game::Item::*;
-use modinfo::settings::{Settings, pedestal::PedestalSetting::*};
+use modinfo::settings::{Settings, DoorShuffle, pedestal::PedestalSetting::*};
 use rom::ExHeader;
 use rom::flag::Flag;
 use rom::scene::SpawnPoint;
@@ -192,6 +192,7 @@ pub fn create(patcher: &Patcher, seed_info: &SeedInfo) -> Code {
     pause_menu_warp(&mut code);
     purple_potion_bottles(&mut code, &seed_info.settings);
     patch_final_boss_requirement(&mut code, &seed_info.settings);
+    patch_scoot_fruit(&mut code, &seed_info.settings, &seed_info.door_map);
     // golden_bees(&mut code);
     // file_select_screen_background(&mut code);
 
@@ -1088,6 +1089,50 @@ fn ore_progress(code: &mut Code) {
     code.patch(0x4637B8, [bl(get_sword_fake)]);
 }
 
+fn patch_scoot_fruit(code: &mut Code, settings: &Settings, door_map: &DoorMap) {
+    if settings.door_shuffle == DoorShuffle::Off {
+        return;
+    }
+
+    let dungeon_entrances = [
+        Door::EasternPalaceExit,
+        Door::HouseOfGalesExit,
+        Door::TowerOfHeraExit,
+        Door::InsideHyruleCastleExit,
+        Door::DarkPalaceExit,
+        Door::SwampPalaceExit,
+        Door::SkullWoodsExit,
+        Door::ThievesHideoutExit,
+        Door::IceRuinsExit,
+        Door::DesertPalaceExit,
+        Door::TurtleRockExit,
+        Door::LoruleCastleExit,
+        Door::LoruleCastleExit,
+    ].map(|door| door_map.get(&door).unwrap().get_spawn_point());
+
+    let course_table = code.rodata().declare(dungeon_entrances.map(|entrance| entrance.course as u8));
+    let scene_table = code.rodata().declare(dungeon_entrances.map(|entrance| (entrance.scene - 1) as u8));
+    let spawn_table = code.rodata().declare(dungeon_entrances.map(|entrance| entrance.spawn as u8));
+
+    let set_scoot_fruit_spawn_point = code.text().define([
+        ldr(R1, GAME_MANAGER_INSTANCE),
+        ldr(R1, (R1, 0)),
+        ldr(R0, course_table),
+        ldrb(R0, (R0, R6)),
+        strb(R0, (R1, 0x30)),
+        ldr(R0, scene_table),
+        ldrb(R0, (R0, R6)),
+        strb(R0, (R1, 0x34)),
+        ldr(R0, spawn_table),
+        ldrb(R0, (R0, R6)),
+        strb(R0, (R1, 0x38)),
+        mov(R0, 1),
+        strb(R0, (R1, 0x3a)),
+        b(0x1bb180),
+    ]);
+    code.patch(0x1bb02c, [b(set_scoot_fruit_spawn_point)]);
+}
+
 fn actor_names(code: &mut Code) -> HashMap<Item, u32> {
     let mut map = IntoIterator::into_iter(ACTOR_NAME_OFFSETS).collect::<HashMap<_, _>>();
     map.extend(IntoIterator::into_iter(ACTOR_NAMES).map(|(item, name)| {
@@ -1293,5 +1338,6 @@ const FN_SET_LOCAL_FLAG_3: u32 = 0x1bb724;
 
 const MAP_MANAGER_INSTANCE: u32 = 0x70c8e0;
 // const PTR_MAP_MANAGER_INSTANCE: u32 = 0x27320c;
+const GAME_MANAGER_INSTANCE: u32 = 0x709df8;
 const PLAYER_OBJECT_SINGLETON: u32 = 0x70FB60;
 const VTABLE_STRING: u32 = 0x6F5988;
