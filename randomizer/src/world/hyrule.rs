@@ -1252,7 +1252,7 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
                 vec![
                     fast_travel_hyrule(),
                     door!(DonkeyCaveMiddleEntrance, door_map),
-                    door!(AmidaCaveLowerEntrance, door_map),
+                    door!(BigRollingRocksCaveLowerEntrance, door_map),
                     edge!(DeathMountainBase),
                     edge!(DeathFairyCaveLedge => {
                         glitched: |p| p.has_fire_rod() || p.has_nice_bombs() || p.has_boomerang() || p.has_hookshot(),
@@ -1268,14 +1268,14 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
             ),
         ),
         (
-            AmidaCaveLower,
+            BigRollingRocksCaveLower,
             location(
-                "Amida Cave Lower",
+                "Big Rolling Rocks Cave Lower",
                 None,
                 vec![
-                    door!(AmidaCaveLowerExit, door_map),
-                    door!(AmidaCaveMiddleRightExit, door_map),
-                    edge!(AmidaCaveUpper => {
+                    door!(BigRollingRocksCaveLowerExit, door_map),
+                    door!(BigRollingRocksCaveMiddleRightExit, door_map),
+                    edge!(BigRollingRocksCaveUpper => {
                         glitched: |p| p.has_boots(),
                     }),
                 ],
@@ -1288,8 +1288,8 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
                 None,
                 vec![
                     fast_travel_hyrule(),
-                    door!(AmidaCaveMiddleRightEntrance, door_map),
-                    door!(AmidaCaveMiddleLeftEntrance, door_map),
+                    door!(BigRollingRocksCaveMiddleRightEntrance, door_map),
+                    door!(BigRollingRocksCaveMiddleLeftEntrance, door_map),
                     edge!(DeathSecondFloor),
                     edge!(DeathWestLedge => {
                         glitched: |p| p.has_fire_rod() || p.has_nice_bombs(),
@@ -1298,14 +1298,14 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
             ),
         ),
         (
-            AmidaCaveUpper,
+            BigRollingRocksCaveUpper,
             location(
-                "Amida Cave Upper",
+                "Big Rolling Rocks Cave Upper",
                 vec![check!("Death Mountain West Highest Cave", regions::hyrule::death::mountain::SUBREGION)],
                 vec![
-                    edge!(AmidaCaveLower),
-                    door!(AmidaCaveMiddleLeftExit, door_map),
-                    door!(AmidaCaveUpperExit, door_map),
+                    edge!(BigRollingRocksCaveLower),
+                    door!(BigRollingRocksCaveMiddleLeftExit, door_map),
+                    door!(BigRollingRocksCaveUpperExit, door_map),
                 ],
             ),
         ),
@@ -1316,7 +1316,7 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
                 vec![ghost(HintGhost::SpectacleRock)],
                 vec![
                     fast_travel_hyrule(),
-                    door!(AmidaCaveUpperEntrance, door_map),
+                    door!(BigRollingRocksCaveUpperEntrance, door_map),
                     edge!(DeathThirdFloor),
                     edge!(SpectacleRock),
                     edge!(DeathMountainWestTop, |p| p.can_merge()),

@@ -360,11 +360,12 @@ pub(crate) fn get_connector_entrances() -> Vec<Door> {
         KakarikoCaveEntrance, HyruleSewersEntrance, SouthernRuinsBombCaveEntrance, SouthernRuinsPillarCaveEntrance,
         EasternRuinsCaveTopEntrance, EasternRuinsCaveBottomEntrance, WitchCaveFrontEntrance, RossoHouseEntrance,
         MoldormCaveLowerEntrance, MoldormCaveLedgeEntrance, MoldormCaveTopEntrance, DonkeyCaveLowerEntrance,
-        DonkeyCaveMiddleEntrance, DonkeyCaveUpperEntrance, AmidaCaveLowerEntrance, AmidaCaveMiddleRightEntrance,
-        AmidaCaveMiddleLeftEntrance, AmidaCaveUpperEntrance, SpectacleRockCaveLeftEntrance,
-        SpectacleRockCaveRightEntrance, FireCaveTopEntrance, FireCaveMiddleLeftEntrance, FireCaveMiddleRightEntrance,
-        FireCaveBottomEntrance, IceCaveLowerEntrance, IceCaveMiddleLeftEntrance, IceCaveMiddleRightEntrance,
-        IceCaveUpperEntrance, PhilosophersCaveEntrance, LoruleSewersEntrance, LoruleBlacksmithEntrance,
+        DonkeyCaveMiddleEntrance, DonkeyCaveUpperEntrance, BigRollingRocksCaveLowerEntrance,
+        BigRollingRocksCaveMiddleRightEntrance, BigRollingRocksCaveMiddleLeftEntrance,
+        BigRollingRocksCaveUpperEntrance, SpectacleRockCaveLeftEntrance, SpectacleRockCaveRightEntrance,
+        FireCaveTopEntrance, FireCaveMiddleLeftEntrance, FireCaveMiddleRightEntrance, FireCaveBottomEntrance,
+        IceCaveLowerEntrance, IceCaveMiddleLeftEntrance, IceCaveMiddleRightEntrance, IceCaveUpperEntrance,
+        PhilosophersCaveEntrance, LoruleSewersEntrance, LoruleBlacksmithEntrance,
     ]
 }
 
@@ -375,11 +376,11 @@ pub(crate) fn get_connector_exits() -> Vec<Door> {
         StylishWomansHouseExit, SahasrahlaLeftExit, SahasrahlaRightExit, KakarikoCaveExit, HyruleSewersExit,
         SouthernRuinsBombCaveExit, SouthernRuinsPillarCaveExit, EasternRuinsCaveTopExit, EasternRuinsCaveBottomExit,
         WitchCaveFrontExit, RossoHouseExit, MoldormCaveLowerExit, MoldormCaveLedgeExit, MoldormCaveTopExit,
-        DonkeyCaveLowerExit, DonkeyCaveMiddleExit, DonkeyCaveUpperExit, AmidaCaveLowerExit, AmidaCaveMiddleRightExit,
-        AmidaCaveMiddleLeftExit, AmidaCaveUpperExit, SpectacleRockCaveLeftExit, SpectacleRockCaveRightExit,
-        FireCaveTopExit, FireCaveMiddleLeftExit, FireCaveMiddleRightExit, FireCaveBottomExit, IceCaveLowerExit,
-        IceCaveMiddleLeftExit, IceCaveMiddleRightExit, IceCaveUpperExit, PhilosophersCaveExit, LoruleSewersExit,
-        LoruleBlacksmithExit,
+        DonkeyCaveLowerExit, DonkeyCaveMiddleExit, DonkeyCaveUpperExit, BigRollingRocksCaveLowerExit,
+        BigRollingRocksCaveMiddleRightExit, BigRollingRocksCaveMiddleLeftExit, BigRollingRocksCaveUpperExit,
+        SpectacleRockCaveLeftExit, SpectacleRockCaveRightExit, FireCaveTopExit, FireCaveMiddleLeftExit,
+        FireCaveMiddleRightExit, FireCaveBottomExit, IceCaveLowerExit, IceCaveMiddleLeftExit, IceCaveMiddleRightExit,
+        IceCaveUpperExit, PhilosophersCaveExit, LoruleSewersExit, LoruleBlacksmithExit,
     ]
 }
 
