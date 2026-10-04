@@ -1129,8 +1129,8 @@ impl Door {
             Door::CuccoHouseBackExit => "Cucco House Back Exit",
             Door::VacantHouseBackEntrance => "Vacant House Back Entrance",
             Door::VacantHouseBackExit => "Vacant House Back Exit",
-            Door::WitchCaveBackEntrance => "Witch's Cave Back Entrance",
-            Door::WitchCaveBackExit => "Witch's Cave Back Exit",
+            Door::WitchCaveBackEntrance => "Witch Cave Back Entrance",
+            Door::WitchCaveBackExit => "Witch Cave Back Exit",
             Door::IceCaveBackEntrance => "Ice Cave Back Entrance",
             Door::IceCaveBackExit => "Ice Cave Back Exit",
 
