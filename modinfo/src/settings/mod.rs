@@ -149,7 +149,7 @@ pub struct Settings {
     #[serde(default)]
     pub minigames_excluded: bool,
 
-    /// Skips the Big Bomb Flower by removing the 5 Big Rocks in Lorule Field (Does not affect Lorule Castle Bomb Trial)
+    /// Skips the Big Bomb Flower Escorts by removing most of the Big Rocks in Lorule Field (Does not affect Vacant House or the Lorule Castle Bomb Trial)
     #[serde(default)]
     pub skip_big_bomb_flower: bool,
 

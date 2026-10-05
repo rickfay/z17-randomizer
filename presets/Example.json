@@ -1,7 +1,7 @@
 {
   // "Visit the project GitHub for details about each option: https://github.com/rickfay/z17-randomizer/tree/dev#game-options"
   "seed": 0,
-  "version": "v0.4.2 - Beta Build 2026-10-03",
+  "version": "v0.4.2 - Beta Build 2026-10-04",
   "settings": {
 
 
@@ -27,7 +27,7 @@
     "minigames_excluded":          false,                     // Excludes the following: Octoball Derby, Dodge the Cuccos, Hyrule Hotfoot, and both Rupee Rushes
     "no_progression_enemies":      false,                     // Removes Enemies from dungeons that are themselves Progression (e.g.: Bawbs, the bomb enemy).
     "purple_potion_bottles":       true,                      // Fills all Empty Bottles with a free Purple Potion.
-    "skip_big_bomb_flower":        true,                      // Skips the Big Bomb Flower by removing the 5 Big Rocks in Lorule Field.
+    "skip_big_bomb_flower":        true,                      // Skips the Big Bomb Flower Escorts by removing most of the Big Rocks in Lorule Field.
     "treacherous_tower_floors":    5,                         // The number (any integer between 2 and 66) of floors the Treacherous Tower minigame will have.
 
     "swordless_mode":              false,                     // Removes *ALL* Swords from the game.

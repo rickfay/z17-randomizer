@@ -189,14 +189,14 @@ pub enum Door {
     DonkeyCaveMiddleExit,
     DonkeyCaveUpperEntrance,
     DonkeyCaveUpperExit,
-    AmidaCaveLowerEntrance,
-    AmidaCaveLowerExit,
-    AmidaCaveMiddleRightEntrance,
-    AmidaCaveMiddleRightExit,
-    AmidaCaveMiddleLeftEntrance,
-    AmidaCaveMiddleLeftExit,
-    AmidaCaveUpperEntrance,
-    AmidaCaveUpperExit,
+    BigRollingRocksCaveLowerEntrance,
+    BigRollingRocksCaveLowerExit,
+    BigRollingRocksCaveMiddleRightEntrance,
+    BigRollingRocksCaveMiddleRightExit,
+    BigRollingRocksCaveMiddleLeftEntrance,
+    BigRollingRocksCaveMiddleLeftExit,
+    BigRollingRocksCaveUpperEntrance,
+    BigRollingRocksCaveUpperExit,
     SpectacleRockCaveLeftEntrance,
     SpectacleRockCaveLeftExit,
     SpectacleRockCaveRightEntrance,
@@ -459,14 +459,14 @@ impl Door {
             DonkeyCaveMiddleExit => DonkeyCaveMiddleEntrance,
             DonkeyCaveUpperEntrance => DonkeyCaveUpperExit,
             DonkeyCaveUpperExit => DonkeyCaveUpperEntrance,
-            AmidaCaveLowerEntrance => AmidaCaveLowerExit,
-            AmidaCaveLowerExit => AmidaCaveLowerEntrance,
-            AmidaCaveMiddleRightEntrance => AmidaCaveMiddleRightExit,
-            AmidaCaveMiddleRightExit => AmidaCaveMiddleRightEntrance,
-            AmidaCaveMiddleLeftEntrance => AmidaCaveMiddleLeftExit,
-            AmidaCaveMiddleLeftExit => AmidaCaveMiddleLeftEntrance,
-            AmidaCaveUpperEntrance => AmidaCaveUpperExit,
-            AmidaCaveUpperExit => AmidaCaveUpperEntrance,
+            BigRollingRocksCaveLowerEntrance => BigRollingRocksCaveLowerExit,
+            BigRollingRocksCaveLowerExit => BigRollingRocksCaveLowerEntrance,
+            BigRollingRocksCaveMiddleRightEntrance => BigRollingRocksCaveMiddleRightExit,
+            BigRollingRocksCaveMiddleRightExit => BigRollingRocksCaveMiddleRightEntrance,
+            BigRollingRocksCaveMiddleLeftEntrance => BigRollingRocksCaveMiddleLeftExit,
+            BigRollingRocksCaveMiddleLeftExit => BigRollingRocksCaveMiddleLeftEntrance,
+            BigRollingRocksCaveUpperEntrance => BigRollingRocksCaveUpperExit,
+            BigRollingRocksCaveUpperExit => BigRollingRocksCaveUpperEntrance,
             SpectacleRockCaveLeftEntrance => SpectacleRockCaveLeftExit,
             SpectacleRockCaveLeftExit => SpectacleRockCaveLeftEntrance,
             SpectacleRockCaveRightEntrance => SpectacleRockCaveRightExit,
@@ -729,14 +729,14 @@ impl Door {
             Door::DonkeyCaveMiddleExit => DonkeyCaveUpper,
             Door::DonkeyCaveUpperEntrance => DeathWestLedge,
             Door::DonkeyCaveUpperExit => DonkeyCaveUpper,
-            Door::AmidaCaveLowerEntrance => DeathSecondFloor,
-            Door::AmidaCaveLowerExit => AmidaCaveLower,
-            Door::AmidaCaveMiddleRightEntrance => DeathThirdFloor,
-            Door::AmidaCaveMiddleRightExit => AmidaCaveLower,
-            Door::AmidaCaveMiddleLeftEntrance => DeathThirdFloor,
-            Door::AmidaCaveMiddleLeftExit => AmidaCaveUpper,
-            Door::AmidaCaveUpperEntrance => DeathTopLeftLedge,
-            Door::AmidaCaveUpperExit => AmidaCaveUpper,
+            Door::BigRollingRocksCaveLowerEntrance => DeathSecondFloor,
+            Door::BigRollingRocksCaveLowerExit => BigRollingRocksCaveLower,
+            Door::BigRollingRocksCaveMiddleRightEntrance => DeathThirdFloor,
+            Door::BigRollingRocksCaveMiddleRightExit => BigRollingRocksCaveLower,
+            Door::BigRollingRocksCaveMiddleLeftEntrance => DeathThirdFloor,
+            Door::BigRollingRocksCaveMiddleLeftExit => BigRollingRocksCaveUpper,
+            Door::BigRollingRocksCaveUpperEntrance => DeathTopLeftLedge,
+            Door::BigRollingRocksCaveUpperExit => BigRollingRocksCaveUpper,
             Door::SpectacleRockCaveLeftEntrance => SpectacleRock,
             Door::SpectacleRockCaveLeftExit => SpectacleRockCaveLeft,
             Door::SpectacleRockCaveRightEntrance => DeathMountainWestTop,
@@ -999,14 +999,14 @@ impl Door {
             Door::DonkeyCaveMiddleExit => (CaveLight, 1, 2),
             Door::DonkeyCaveUpperEntrance => (FieldLight, 3, 6),
             Door::DonkeyCaveUpperExit => (CaveLight, 1, 1),
-            Door::AmidaCaveLowerEntrance => (FieldLight, 3, 8),
-            Door::AmidaCaveLowerExit => (CaveLight, 2, 0),
-            Door::AmidaCaveMiddleRightEntrance => (FieldLight, 3, 22),
-            Door::AmidaCaveMiddleRightExit => (CaveLight, 2, 22),
-            Door::AmidaCaveMiddleLeftEntrance => (FieldLight, 3, 21),
-            Door::AmidaCaveMiddleLeftExit => (CaveLight, 2, 21),
-            Door::AmidaCaveUpperEntrance => (FieldLight, 3, 23),
-            Door::AmidaCaveUpperExit => (CaveLight, 2, 23),
+            Door::BigRollingRocksCaveLowerEntrance => (FieldLight, 3, 8),
+            Door::BigRollingRocksCaveLowerExit => (CaveLight, 2, 0),
+            Door::BigRollingRocksCaveMiddleRightEntrance => (FieldLight, 3, 22),
+            Door::BigRollingRocksCaveMiddleRightExit => (CaveLight, 2, 22),
+            Door::BigRollingRocksCaveMiddleLeftEntrance => (FieldLight, 3, 21),
+            Door::BigRollingRocksCaveMiddleLeftExit => (CaveLight, 2, 21),
+            Door::BigRollingRocksCaveUpperEntrance => (FieldLight, 3, 23),
+            Door::BigRollingRocksCaveUpperExit => (CaveLight, 2, 23),
             Door::SpectacleRockCaveLeftEntrance => (FieldLight, 3, 26),
             Door::SpectacleRockCaveLeftExit => (CaveLight, 3, 6),
             Door::SpectacleRockCaveRightEntrance => (FieldLight, 3, 25),
@@ -1129,8 +1129,8 @@ impl Door {
             Door::CuccoHouseBackExit => "Cucco House Back Exit",
             Door::VacantHouseBackEntrance => "Vacant House Back Entrance",
             Door::VacantHouseBackExit => "Vacant House Back Exit",
-            Door::WitchCaveBackEntrance => "Witch's Cave Back Entrance",
-            Door::WitchCaveBackExit => "Witch's Cave Back Exit",
+            Door::WitchCaveBackEntrance => "Witch Cave Back Entrance",
+            Door::WitchCaveBackExit => "Witch Cave Back Exit",
             Door::IceCaveBackEntrance => "Ice Cave Back Entrance",
             Door::IceCaveBackExit => "Ice Cave Back Exit",
 
@@ -1269,14 +1269,14 @@ impl Door {
             Door::DonkeyCaveMiddleExit => "Donkey Cave Middle Exit",
             Door::DonkeyCaveUpperEntrance => "Donkey Cave Upper Entrance",
             Door::DonkeyCaveUpperExit => "Donkey Cave Upper Exit",
-            Door::AmidaCaveLowerEntrance => "Amida Cave Lower Entrance",
-            Door::AmidaCaveLowerExit => "Amida Cave Lower Exit",
-            Door::AmidaCaveMiddleRightEntrance => "Amida Cave Middle Right Entrance",
-            Door::AmidaCaveMiddleRightExit => "Amida Cave Middle Right Exit",
-            Door::AmidaCaveMiddleLeftEntrance => "Amida Cave Middle Left Entrance",
-            Door::AmidaCaveMiddleLeftExit => "Amida Cave Middle Left Exit",
-            Door::AmidaCaveUpperEntrance => "Amida Cave Upper Entrance",
-            Door::AmidaCaveUpperExit => "Amida Cave Upper Exit",
+            Door::BigRollingRocksCaveLowerEntrance => "Big Rolling Rocks Cave Lower Entrance",
+            Door::BigRollingRocksCaveLowerExit => "Big Rolling Rocks Cave Lower Exit",
+            Door::BigRollingRocksCaveMiddleRightEntrance => "Big Rolling Rocks Cave Middle Right Entrance",
+            Door::BigRollingRocksCaveMiddleRightExit => "Big Rolling Rocks Cave Middle Right Exit",
+            Door::BigRollingRocksCaveMiddleLeftEntrance => "Big Rolling Rocks Cave Middle Left Entrance",
+            Door::BigRollingRocksCaveMiddleLeftExit => "Big Rolling Rocks Cave Middle Left Exit",
+            Door::BigRollingRocksCaveUpperEntrance => "Big Rolling Rocks Cave Upper Entrance",
+            Door::BigRollingRocksCaveUpperExit => "Big Rolling Rocks Cave Upper Exit",
             Door::SpectacleRockCaveLeftEntrance => "Spectacle Rock Cave Left Entrance",
             Door::SpectacleRockCaveLeftExit => "Spectacle Rock Cave Left Exit",
             Door::SpectacleRockCaveRightEntrance => "Spectacle Rock Cave Right Entrance",
@@ -1494,14 +1494,14 @@ impl Door {
             | Door::DonkeyCaveMiddleExit
             | Door::DonkeyCaveUpperEntrance
             | Door::DonkeyCaveUpperExit
-            | Door::AmidaCaveLowerEntrance
-            | Door::AmidaCaveLowerExit
-            | Door::AmidaCaveMiddleRightEntrance
-            | Door::AmidaCaveMiddleRightExit
-            | Door::AmidaCaveMiddleLeftEntrance
-            | Door::AmidaCaveMiddleLeftExit
-            | Door::AmidaCaveUpperEntrance
-            | Door::AmidaCaveUpperExit
+            | Door::BigRollingRocksCaveLowerEntrance
+            | Door::BigRollingRocksCaveLowerExit
+            | Door::BigRollingRocksCaveMiddleRightEntrance
+            | Door::BigRollingRocksCaveMiddleRightExit
+            | Door::BigRollingRocksCaveMiddleLeftEntrance
+            | Door::BigRollingRocksCaveMiddleLeftExit
+            | Door::BigRollingRocksCaveUpperEntrance
+            | Door::BigRollingRocksCaveUpperExit
             | Door::SpectacleRockCaveLeftEntrance
             | Door::SpectacleRockCaveLeftExit
             | Door::SpectacleRockCaveRightEntrance
@@ -1738,7 +1738,7 @@ fn get_entrances_that_need_connectors(settings: &Settings, rng: &mut StdRng) -> 
         WeatherVanes::Shuffled | WeatherVanes::Hyrule | WeatherVanes::All => {},
         _ => entrances_that_need_connectors.push(
             vec![
-                Door::AmidaCaveUpperEntrance,
+                Door::BigRollingRocksCaveUpperEntrance,
                 Door::SpectacleRockCaveRightEntrance,
                 Door::TowerOfHeraEntrance,
                 Door::FireCaveTopEntrance,

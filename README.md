@@ -674,7 +674,7 @@ For Citra (emulator):
   - Purple Potions deal 4x your current Sword damage to all loaded enemies!
 
 `skip_big_bomb_flower`
-- Skips the Big Bomb Flower by removing the 5 Big Rocks in Lorule Field.
+- Skips the Big Bomb Flower Escorts by removing most of the Big Rocks in Lorule Field.
 - This setting does not affect the Vacant House or the Lorule Castle Bomb Trial.
 
 `treacherous_tower_floors`

@@ -126,6 +126,7 @@ fn get_initial_flags_to_set(SeedInfo { trials_config, settings, .. }: &SeedInfo)
         906, // Monster Guts
         907, // Monster Tail
         908, // Monster Horn
+        911, // Golden Bee Spawns
         919, // Skip Hint Ghost tutorial
         // 920, // Link's House Weather Vane
         // 940, // Vacant House Weather Vane
