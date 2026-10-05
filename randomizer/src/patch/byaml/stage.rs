@@ -2104,7 +2104,7 @@ fn patch_big_bomb_flower_skip(patcher: &mut Patcher, settings: &Settings) {
         FieldDark,
         24,
         [
-            disable(86), // Unlock Big Bomb Flower
+            // Don't unlock the Big Bomb Flower field itself
             disable(93), // Great Rupee Fairy
         ],
     );

@@ -148,8 +148,8 @@ pub fn get_seed_settings() -> Result<Settings, String> {
 
     let skip_big_bomb_flower = prompt_bool(
         "Skip Big Bomb Flower",
-        "Skips the Big Bomb Flower by removing the 5 Big Rocks in Lorule Field.\n\
-        Note: Does not affect the Big Rock in the Lorule Castle Bomb Trial.",
+        "Skips the Big Bomb Flower Escorts by removing most of the Big Rocks in Lorule Field.\n\
+        Note: Does not affect Vacant House or the Lorule Castle Bomb Trial.",
     );
 
     let trials_door = TrialsDoor::try_from(prompt_u8_in_range(
