@@ -1492,6 +1492,17 @@ fn patch_door_shuffle(patcher: &mut Patcher, seed_info: &SeedInfo) {
     // Blacksmith Cave Big Rock - Make it not disappear
     patcher.modify_objs(FieldLight, 21, [clear_disable_flag(47)]);
     patcher.modify_system(FieldLight, 21, [clear_disable_flag(47)]);
+
+    // Moldorm Cave Rocks - Make them not disappear
+    patcher.modify_objs(FieldLight, 6, [clear_disable_flag(83)]);
+    patcher.modify_system(
+        FieldLight,
+        6,
+        [clear_disable_flag(83), clear_disable_flag(84), clear_disable_flag(133), clear_disable_flag(134)],
+    );
+
+    // Ice Ruins Ice Gimos Blocker - Make it not disappear
+    patcher.modify_objs(FieldDark, 5, [clear_disable_flag(27)]);
 }
 
 fn patch_lorule_castle_entrance(patcher: &mut Patcher) {
