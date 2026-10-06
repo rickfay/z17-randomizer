@@ -541,11 +541,17 @@ fn patch_rosso(patcher: &mut Patcher) -> Result<()> {
     Ok(())
 }
 
-/// Big Fairies
+/// Big Fairies - Skip Text
 fn patch_big_fairies(patcher: &mut Patcher) -> Result<()> {
     apply!(patcher,
+        // Hyrule Big Fairies
         CaveLight/Cave {
-            [0 into_start] => 4, // Skip "I will soothe your wounds and provide comfort. Close your eyes and relax..."
+            [0 into_start] => 4,
+        },
+
+        // Lorule Big Fairies
+        CaveDark/Cave {
+            [0 into_start] => 4,
         },
     );
 
