@@ -2,14 +2,14 @@ use super::Patcher;
 use crate::filler::filler_item::Item::*;
 use crate::filler::filler_item::Randomizable;
 use crate::patch::code::arm::Register::*;
-use crate::patch::code::arm::data::{add, cmp, mov};
+use crate::patch::code::arm::data::{add, cmp, mov, nop};
 use crate::patch::code::arm::ls::{ldr, ldrb, str_, strb};
 use crate::patch::code::arm::lsm::{pop, push};
 use crate::patch::code::arm::{Instruction, LR, PC, SP, b, bl};
 use crate::{Door, DoorMap, Layout, Result, SeedInfo, patch::util::prize_flag, regions};
 use game::Item;
 use game::Item::*;
-use modinfo::settings::{Settings, DoorShuffle, pedestal::PedestalSetting::*};
+use modinfo::settings::{DoorShuffle, Settings, pedestal::PedestalSetting::*};
 use rom::ExHeader;
 use rom::flag::Flag;
 use rom::scene::SpawnPoint;
@@ -359,11 +359,9 @@ fn do_dev_stuff(code: &mut Code, seed_info: &SeedInfo) {
 fn patch_final_boss_requirement(code: &mut Code, settings: &Settings) {
     let return_address = 0x30bc44;
     let final_boss_sage_check = code.text().define([
-
         // Return to normal flow if we don't meet Sage requirement
         cmp(R5, settings.final_boss_requirement as u32),
         b(return_address).ne(),
-
         // Set Flag 708
         ldr(R0, EVENT_FLAG_PTR),
         mov(R2, 0x1),
@@ -383,17 +381,13 @@ fn remove_charm_from_gear_menu(code: &mut Code) {
     code.text().patch(0x42644c, [b(0x4264a8).ne()]);
 }
 
-/// For what are certainly reasons, Nintendo decided to rotate all of Link's movements ever so
-/// slightly (about 5 degrees) counterclockwise in the vanilla game. This isn't often complained
-/// about by people who play on physical 3DS hardware because reasons, but is very jarring to folks
-/// who play on Emulators, and makes navigating the Ice Cave much more difficult than intended.
+/// For some reason, Nintendo decided to rotate all of Link's movement about 5 degrees
+/// counterclockwise in the vanilla game. This isn't hugely noticable when playing on console, but
+/// becomes immediately apparent when playing on an emulator.
 ///
 /// This code sets the rotation angle for each direction to zero, eliminating the issue.
 fn fix_joystick_rotation(code: &mut Code) {
-    code.overwrite(0x6c3ae8, [0x0; 8]); // Fix Down
-    code.overwrite(0x6c3ef0, [0x0; 8]); // Fix Right
-    code.overwrite(0x6c42e8, [0x0; 8]); // Fix Up
-    code.overwrite(0x6c46f0, [0x0; 8]); // Fix Left
+    code.patch(0x5e333c, [nop()]);
 }
 
 /// File Select Screen Background
@@ -1108,7 +1102,8 @@ fn patch_scoot_fruit(code: &mut Code, settings: &Settings, door_map: &DoorMap) {
         Door::TurtleRockExit,
         Door::LoruleCastleExit,
         Door::LoruleCastleExit,
-    ].map(|door| door_map.get(&door).unwrap().get_spawn_point());
+    ]
+    .map(|door| door_map.get(&door).unwrap().get_spawn_point());
 
     let course_table = code.rodata().declare(dungeon_entrances.map(|entrance| entrance.course as u8));
     let scene_table = code.rodata().declare(dungeon_entrances.map(|entrance| (entrance.scene - 1) as u8));

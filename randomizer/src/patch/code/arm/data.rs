@@ -68,7 +68,6 @@ where
     instruction(operand2.into().code(), 0b1101, false, R0, rd)
 }
 
-#[allow(unused)]
 pub fn nop() -> Instruction {
     mov(R0, R0) // fixme not actually the NOP command
 }
