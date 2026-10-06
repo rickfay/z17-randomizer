@@ -385,7 +385,7 @@ fn remove_charm_from_gear_menu(code: &mut Code) {
 /// counterclockwise in the vanilla game. This isn't hugely noticable when playing on console, but
 /// becomes immediately apparent when playing on an emulator.
 ///
-/// This code sets the rotation angle for each direction to zero, eliminating the issue.
+/// This patch prevents the rotation value from being set, eliminating the issue.
 fn fix_joystick_rotation(code: &mut Code) {
     code.patch(0x5e333c, [nop()]);
 }
