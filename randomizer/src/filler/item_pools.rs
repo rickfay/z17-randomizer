@@ -460,7 +460,8 @@ pub(crate) fn get_standard_weather_vanes(settings: &Settings) -> Vec<Vane> {
 
     // Include Vacant House as a complimentary Weather Vane only when Crack shuffle is
     // off, so that it doesn't accidentally create a path to LCA earlier than intended.
-    if settings.crack_shuffle == CrackShuffle::Off {
+    // Exception: when Door Shuffle is Crossed, for softlock reasons
+    if settings.crack_shuffle == CrackShuffle::Off || settings.door_shuffle == DoorShuffle::Crossed {
         standard_weather_vanes.push(VacantHouseWV);
     }
 
@@ -480,7 +481,7 @@ pub(crate) fn get_shuffled_weather_vanes(settings: &Settings) -> Vec<Vane> {
 pub(crate) fn get_convenient_weather_vanes(settings: &Settings) -> Vec<Vane> {
     let mut convenient_weather_vanes = vec![YourHouseWV, KakarikoVillageWV, WitchsHouseWV, SanctuaryWV];
 
-    if settings.crack_shuffle == CrackShuffle::Off {
+    if settings.crack_shuffle == CrackShuffle::Off || settings.door_shuffle == DoorShuffle::Crossed {
         convenient_weather_vanes.extend(&[LoruleCastleWV, ThievesTownWV, BlacksmithWV, VacantHouseWV]);
     }
 
