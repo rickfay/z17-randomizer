@@ -54,6 +54,13 @@ where
     instruction(operand2.into().code(), 0b0100, false, rn, rd)
 }
 
+pub fn sub<O>(rd: Register, rn: Register, operand2: O) -> Instruction
+where
+    O: Into<ShifterOperand>,
+{
+    instruction(operand2.into().code(), 0b0010, false, rn, rd)
+}
+
 pub fn cmp<O>(rn: Register, operand2: O) -> Instruction
 where
     O: Into<ShifterOperand>,
@@ -66,6 +73,17 @@ where
     O: Into<ShifterOperand>,
 {
     instruction(operand2.into().code(), 0b1101, false, R0, rd)
+}
+
+pub fn tst<O>(rn: Register, operand2: O) -> Instruction
+where
+    O: Into<ShifterOperand>,
+{
+    instruction(operand2.into().code(), 0b1000, true, rn, R0)
+}
+
+pub fn mul(rd: Register, rm: Register, rs: Register) -> Instruction {
+    Instruction::new(rm.shift(0) | 0b1001 << 4 | rs.shift(8) | rd.shift(16))
 }
 
 #[allow(unused)]

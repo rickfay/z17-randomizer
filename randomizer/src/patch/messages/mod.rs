@@ -33,6 +33,7 @@ pub fn patch_messages(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()>
     patch_treacherous_tower(patcher, seed_info)?;
     patch_thief_girl(patcher)?;
     patch_cross_old_man(patcher)?;
+    patch_pause_menu(patcher)?;
 
     patch_street_merchant(patcher, seed_info)?;
     patch_sahasrahla(patcher, seed_info)?;
@@ -306,6 +307,13 @@ fn patch_cross_old_man(patcher: &mut Patcher) -> Result<()> {
 
     patcher.update(msbt.dump())?;
 
+    Ok(())
+}
+
+fn patch_pause_menu(patcher: &mut Patcher) -> Result<()> {
+    let mut msbt = load_msbt(patcher, LanguageBoot, "Gm_PauseT")?;
+    msbt.add("L_Btn_04_T_GmOvr_00", "Return Home");
+    patcher.update(msbt.dump())?;
     Ok(())
 }
 
