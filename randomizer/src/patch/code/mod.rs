@@ -1,13 +1,10 @@
 use super::Patcher;
 use crate::filler::filler_item::Item::*;
 use crate::filler::filler_item::Randomizable;
-use crate::patch::code::arm::Register::*;
-use crate::patch::code::arm::data::{add, cmp, mov, nop};
-use crate::patch::code::arm::ls::{ldr, ldrb, str_, strb};
-use crate::patch::code::arm::{FloatRegister::*, Register::*};
 use crate::patch::code::arm::data::{add, cmp, mov, mul, nop, sub, tst};
 use crate::patch::code::arm::ls::{ldr, ldrb, str_, strb, strh, vldr};
 use crate::patch::code::arm::lsm::{pop, push};
+use crate::patch::code::arm::{FloatRegister::*, Register::*};
 use crate::patch::code::arm::{Instruction, LR, PC, SP, b, bl, label};
 use crate::{Door, DoorMap, Layout, Result, SeedInfo, patch::util::prize_flag, regions};
 use game::Item;
@@ -672,10 +669,7 @@ fn pause_menu_warp(code: &mut Code) {
         add(R1, R4, 0xc0),
         b(0x4432f8),
     ]);
-    code.patch(0x443268, [
-        str_(R0, (R4, 0xc0)),
-        b(add_button3),
-    ]);
+    code.patch(0x443268, [str_(R0, (R4, 0xc0)), b(add_button3)]);
 
     // Initialize all three buttons when initialized
     code.patch(0x441c08, [cmp(R4, 3), add(R0, R5, 0xcc)]);
@@ -692,7 +686,7 @@ fn pause_menu_warp(code: &mut Code) {
     const FN_ANIM_PLAY: u32 = 0x2317c0;
     const FN_ANIM_STOP: u32 = 0x231448;
     const FN_SE_PLAY: u32 = 0x587f74;
-    
+
     let fn_button_select = code.text().define([
         push([R4, LR]),
         mov(R4, R0),
@@ -736,14 +730,19 @@ fn pause_menu_warp(code: &mut Code) {
     let label1 = code.rodata().declare("L_Btn_00_T_GmOvr_00\0");
     let label2 = code.rodata().declare("L_Btn_04_T_GmOvr_00\0");
     let label3 = code.rodata().declare("L_Btn_01_T_GmOvr_00\0");
-    let button_text_labels = code.rodata().declare([
-        VTABLE_STRING.to_le_bytes(),
-        label1.to_le_bytes(),
-        VTABLE_STRING.to_le_bytes(),
-        label2.to_le_bytes(),
-        VTABLE_STRING.to_le_bytes(),
-        label3.to_le_bytes(),
-    ].into_iter().flatten().collect::<Vec<_>>());
+    let button_text_labels = code.rodata().declare(
+        [
+            VTABLE_STRING.to_le_bytes(),
+            label1.to_le_bytes(),
+            VTABLE_STRING.to_le_bytes(),
+            label2.to_le_bytes(),
+            VTABLE_STRING.to_le_bytes(),
+            label3.to_le_bytes(),
+        ]
+        .into_iter()
+        .flatten()
+        .collect::<Vec<_>>(),
+    );
 
     // Patch function for entering cState_BtnIn
     let patch_enter_btn_in = code.text().define([
@@ -787,181 +786,187 @@ fn pause_menu_warp(code: &mut Code) {
     // Patch function for entering cState_SelectCnt
     // While the original code uses this only for when "Continue" is selected,
     // we repurpose it for when any of the three buttons is selected
-    code.patch(0x442a5c, [
-        push([LR]),
-        ldr(R1, 0),
-        ldr(R2, (R0, 0xcc)),
-        strb(R1, (R2, 0x49)),
-        ldr(R2, (R0, 0xd0)),
-        strb(R1, (R2, 0x49)),
-        ldr(R2, (R0, 0xd4)),
-        strb(R1, (R2, 0x49)),
-        pop([PC]),
-    ]);
+    code.patch(
+        0x442a5c,
+        [
+            push([LR]),
+            ldr(R1, 0),
+            ldr(R2, (R0, 0xcc)),
+            strb(R1, (R2, 0x49)),
+            ldr(R2, (R0, 0xd0)),
+            strb(R1, (R2, 0x49)),
+            ldr(R2, (R0, 0xd4)),
+            strb(R1, (R2, 0x49)),
+            pop([PC]),
+        ],
+    );
 
     // Patch function for cState_SelectCnt
     let se_s_decide_s = code.rodata().declare("SE_S_DECIDE_S");
     let se_s_pause_out = code.rodata().declare("SE_S_PAUSE_OUT");
     let se_s_select = code.rodata().declare("SE_S_SELECT");
-    let patch_select_cnt_len = code.patch(0x4422e4, [
-        push([R4, R5, LR]),
-        mov(R4, R0),
-        sub(SP, SP, 0xc),
-        // set R5 = selected button
-        add(R5, R4, 0xcc),
-        ldr(R0, (R4, 0xd8)),
-        ldr(R5, (R5, R0, 2)),
-        // is button pressed
-        ldrb(R1, (R5, 0x49)),
-        cmp(R1, 0),
-        b("not_pressed").eq(),
-        // is button's animation active
-        add(R0, R5, 0x38),
-        bl(0x532c78),
-        cmp(R0, 0),
-        b("return").ne(),
-        // if button is pressed and animation is done:
-        ldr(R0, (R4, 0xd8)),
-        // button 0: unpause
-        cmp(R0, 0),
-        b("unpause").eq(),
-        // button 1: warp home
-        cmp(R0, 1),
-        bl("warp_home").eq(),
-        // button 2: confirm exit
-        cmp(R0, 2),
-        mov(R1, 3).eq(),
-        add(R0, R4, 0x98).eq(),
-        bl(0x66c88c).eq(),
-        b("return"),
-        // code to unpause, used by button 0:
-        label("unpause"),
-        ldr(R0, UI_MANAGER_INSTANCE),
-        ldr(R0, (R0, 0)),
-        bl(0x51c54c),
-        b("return"),
-        // code to warp home, used by button 1:
-        label("warp_home"),
-        ldr(R0, UI_MANAGER_INSTANCE),
-        ldr(R0, (R0, 0)),
-        bl(0x51c54c),
-        bl(warp_home),
-        b("return"),
-        // if button is not pressed:
-        label("not_pressed"),
-        ldr(R0, VTABLE_STRING),
-        str_(R0, (SP, 0)),
-        ldr(R3, AUDIO_MANAGER_INSTANCE),
-        // set R0 = input's mPadTrig
-        ldr(R0, INPUT_MANAGER_INSTANCE),
-        ldr(R0, (R0, 0)),
-        add(R0, R0, 0x20),
-        ldrb(R1, (R4, 0x70)),
-        mov(R2, 0x190),
-        mul(R1, R2, R1),
-        ldr(R0, (R0, R1)),
-        // if A pressed:
-        tst(R0, 1),
-        b("not_a").eq(),
-        // play sound effect
-        ldr(R0, se_s_decide_s),
-        str_(R0, (SP, 4)),
-        ldr(R0, (R3, 0)),
-        mov(R1, SP),
-        mov(R2, 0),
-        bl(FN_SE_PLAY),
-        // play button animation
-        add(R0, R5, 0x38),
-        vldr(S0, 1.0),
-        bl(FN_ANIM_PLAY),
-        // press button
-        mov(R0, 1),
-        strb(R0, (R5, 0x49)),
-        b("return"),
-        // if B pressed:
-        label("not_a"),
-        tst(R0, 2),
-        b("not_b").eq(),
-        // play sound effect
-        ldr(R0, se_s_pause_out),
-        str_(R0, (SP, 4)),
-        ldr(R0, (R3, 0)),
-        mov(R1, SP),
-        mov(R2, 0),
-        bl(FN_SE_PLAY),
-        // select button 0
-        mov(R0, 0),
-        str_(R0, (R4, 0xd8)),
-        ldr(R5, (R4, 0xcc)),
-        // play button animation
-        add(R0, R5, 0x38),
-        vldr(S0, 1.0),
-        bl(FN_ANIM_PLAY),
-        // press button
-        mov(R0, 1),
-        strb(R0, (R5, 0x49)),
-        b("change_selection"),
-        // if up pressed:
-        label("not_b"),
-        tst(R0, 0x10000),
-        tst(R0, 0x100000).eq(),
-        b("not_up").eq(),
-        // play sound effect
-        ldr(R0, se_s_select),
-        str_(R0, (SP, 4)),
-        ldr(R0, (R3, 0)),
-        mov(R1, SP),
-        mov(R2, 0),
-        bl(FN_SE_PLAY),
-        // change button selection
-        ldr(R0, (R4, 0xd8)),
-        cmp(R0, 0),
-        mov(R0, 3).eq(),
-        sub(R0, R0, 1),
-        str_(R0, (R4, 0xd8)),
-        b("change_selection"),
-        // if down pressed:
-        label("not_up"),
-        tst(R0, 0x20000),
-        tst(R0, 0x200000).eq(),
-        b("return").eq(),
-        // play sound effect
-        ldr(R0, se_s_select),
-        str_(R0, (SP, 4)),
-        ldr(R0, (R3, 0)),
-        mov(R1, SP),
-        mov(R2, 0),
-        bl(FN_SE_PLAY),
-        // change button selection
-        ldr(R0, (R4, 0xd8)),
-        add(R0, R0, 1),
-        cmp(R0, 3),
-        mov(R0, 0).eq(),
-        str_(R0, (R4, 0xd8)),
-        b("change_selection"),
-        // if selected button has changed, update animations
-        label("change_selection"),
-        ldr(R5, (R4, 0xd8)),
-        ldr(R0, (R4, 0xcc)),
-        cmp(R5, 0),
-        bl(fn_button_select).eq(),
-        cmp(R5, 0),
-        bl(fn_button_deselect).ne(),
-        ldr(R0, (R4, 0xd0)),
-        cmp(R5, 1),
-        bl(fn_button_select).eq(),
-        cmp(R5, 1),
-        bl(fn_button_deselect).ne(),
-        ldr(R0, (R4, 0xd4)),
-        cmp(R5, 2),
-        bl(fn_button_select).eq(),
-        cmp(R5, 2),
-        bl(fn_button_deselect).ne(),
-        // all done
-        label("return"),
-        add(SP, SP, 0xc),
-        pop([R4, R5, PC]),
-    ]);
+    let patch_select_cnt_len = code.patch(
+        0x4422e4,
+        [
+            push([R4, R5, LR]),
+            mov(R4, R0),
+            sub(SP, SP, 0xc),
+            // set R5 = selected button
+            add(R5, R4, 0xcc),
+            ldr(R0, (R4, 0xd8)),
+            ldr(R5, (R5, R0, 2)),
+            // is button pressed
+            ldrb(R1, (R5, 0x49)),
+            cmp(R1, 0),
+            b("not_pressed").eq(),
+            // is button's animation active
+            add(R0, R5, 0x38),
+            bl(0x532c78),
+            cmp(R0, 0),
+            b("return").ne(),
+            // if button is pressed and animation is done:
+            ldr(R0, (R4, 0xd8)),
+            // button 0: unpause
+            cmp(R0, 0),
+            b("unpause").eq(),
+            // button 1: warp home
+            cmp(R0, 1),
+            bl("warp_home").eq(),
+            // button 2: confirm exit
+            cmp(R0, 2),
+            mov(R1, 3).eq(),
+            add(R0, R4, 0x98).eq(),
+            bl(0x66c88c).eq(),
+            b("return"),
+            // code to unpause, used by button 0:
+            label("unpause"),
+            ldr(R0, UI_MANAGER_INSTANCE),
+            ldr(R0, (R0, 0)),
+            bl(0x51c54c),
+            b("return"),
+            // code to warp home, used by button 1:
+            label("warp_home"),
+            ldr(R0, UI_MANAGER_INSTANCE),
+            ldr(R0, (R0, 0)),
+            bl(0x51c54c),
+            bl(warp_home),
+            b("return"),
+            // if button is not pressed:
+            label("not_pressed"),
+            ldr(R0, VTABLE_STRING),
+            str_(R0, (SP, 0)),
+            ldr(R3, AUDIO_MANAGER_INSTANCE),
+            // set R0 = input's mPadTrig
+            ldr(R0, INPUT_MANAGER_INSTANCE),
+            ldr(R0, (R0, 0)),
+            add(R0, R0, 0x20),
+            ldrb(R1, (R4, 0x70)),
+            mov(R2, 0x190),
+            mul(R1, R2, R1),
+            ldr(R0, (R0, R1)),
+            // if A pressed:
+            tst(R0, 1),
+            b("not_a").eq(),
+            // play sound effect
+            ldr(R0, se_s_decide_s),
+            str_(R0, (SP, 4)),
+            ldr(R0, (R3, 0)),
+            mov(R1, SP),
+            mov(R2, 0),
+            bl(FN_SE_PLAY),
+            // play button animation
+            add(R0, R5, 0x38),
+            vldr(S0, 1.0),
+            bl(FN_ANIM_PLAY),
+            // press button
+            mov(R0, 1),
+            strb(R0, (R5, 0x49)),
+            b("return"),
+            // if B pressed:
+            label("not_a"),
+            tst(R0, 2),
+            b("not_b").eq(),
+            // play sound effect
+            ldr(R0, se_s_pause_out),
+            str_(R0, (SP, 4)),
+            ldr(R0, (R3, 0)),
+            mov(R1, SP),
+            mov(R2, 0),
+            bl(FN_SE_PLAY),
+            // select button 0
+            mov(R0, 0),
+            str_(R0, (R4, 0xd8)),
+            ldr(R5, (R4, 0xcc)),
+            // play button animation
+            add(R0, R5, 0x38),
+            vldr(S0, 1.0),
+            bl(FN_ANIM_PLAY),
+            // press button
+            mov(R0, 1),
+            strb(R0, (R5, 0x49)),
+            b("change_selection"),
+            // if up pressed:
+            label("not_b"),
+            tst(R0, 0x10000),
+            tst(R0, 0x100000).eq(),
+            b("not_up").eq(),
+            // play sound effect
+            ldr(R0, se_s_select),
+            str_(R0, (SP, 4)),
+            ldr(R0, (R3, 0)),
+            mov(R1, SP),
+            mov(R2, 0),
+            bl(FN_SE_PLAY),
+            // change button selection
+            ldr(R0, (R4, 0xd8)),
+            cmp(R0, 0),
+            mov(R0, 3).eq(),
+            sub(R0, R0, 1),
+            str_(R0, (R4, 0xd8)),
+            b("change_selection"),
+            // if down pressed:
+            label("not_up"),
+            tst(R0, 0x20000),
+            tst(R0, 0x200000).eq(),
+            b("return").eq(),
+            // play sound effect
+            ldr(R0, se_s_select),
+            str_(R0, (SP, 4)),
+            ldr(R0, (R3, 0)),
+            mov(R1, SP),
+            mov(R2, 0),
+            bl(FN_SE_PLAY),
+            // change button selection
+            ldr(R0, (R4, 0xd8)),
+            add(R0, R0, 1),
+            cmp(R0, 3),
+            mov(R0, 0).eq(),
+            str_(R0, (R4, 0xd8)),
+            b("change_selection"),
+            // if selected button has changed, update animations
+            label("change_selection"),
+            ldr(R5, (R4, 0xd8)),
+            ldr(R0, (R4, 0xcc)),
+            cmp(R5, 0),
+            bl(fn_button_select).eq(),
+            cmp(R5, 0),
+            bl(fn_button_deselect).ne(),
+            ldr(R0, (R4, 0xd0)),
+            cmp(R5, 1),
+            bl(fn_button_select).eq(),
+            cmp(R5, 1),
+            bl(fn_button_deselect).ne(),
+            ldr(R0, (R4, 0xd4)),
+            cmp(R5, 2),
+            bl(fn_button_select).eq(),
+            cmp(R5, 2),
+            bl(fn_button_deselect).ne(),
+            // all done
+            label("return"),
+            add(SP, SP, 0xc),
+            pop([R4, R5, PC]),
+        ],
+    );
     assert!(patch_select_cnt_len <= 0x4425b4 - 0x4422e4);
 }
 
