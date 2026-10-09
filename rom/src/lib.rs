@@ -23,6 +23,7 @@ pub use {
     files::{Cxi, File, IntoBytes, byaml, exheader::ExHeader, romfs::RomFs, sarc::Sarc},
     item::GetItem,
     language::Language,
+    lyt::Lyt,
     scene::{Scene, Stage},
 };
 
@@ -37,6 +38,7 @@ pub mod flag;
 pub mod flow;
 pub mod item;
 pub mod language;
+pub mod lyt;
 pub mod scene;
 
 pub type Result<T, E = Error> = ::std::result::Result<T, E>;
@@ -198,6 +200,11 @@ impl Rom {
         let flow = self.flow_chart.get().load().course(course).unwrap_or_default().iter().cloned();
         let archive = self.romfs.borrow_mut().read(format!("US_English/{}.szs", course.as_str()))?.map(Sarc::from);
         Ok(Language::new(flow, archive))
+    }
+
+    pub fn lyt(&self, name: &str) -> Result<Lyt> {
+        let archive = self.romfs.borrow_mut().read(format!("Archive/Lyt_{}.arc", name))?.try_map(Sarc::from_uncompressed)?;
+        Ok(Lyt::new(archive))
     }
 
     pub(crate) fn scene(&self, course: CourseId, stage: u16) -> Result<Scene> {

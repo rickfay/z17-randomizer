@@ -18,6 +18,10 @@ impl Sarc {
         Self(RefCell::new(Inner::Compressed(data)))
     }
 
+    pub fn from_uncompressed(data: Box<[u8]>) -> Result<Self> {
+        Ok(Self(RefCell::new(Inner::Decompressed(Archive::from(data)?))))
+    }
+
     fn decompress(&self) -> Result<Ref<'_, Archive>> {
         self.0.borrow_mut().decompress()?;
         Ok(Ref::map(self.0.borrow(), |inner| match inner {
@@ -156,7 +160,7 @@ impl Inner {
 #[derive(Debug)]
 pub struct Archive {
     multiplier: u32,
-    files: BTreeMap<u32, Vec<u8>>,
+    files: BTreeMap<u32, (Option<String>, Vec<u8>)>,
 }
 
 impl Archive {
@@ -178,6 +182,7 @@ impl Archive {
             let (sfat, nodes) = SFAT::try_from_slice(sfat)?;
             let mut nodes: Vec<_> = nodes.into();
             nodes.truncate(0x10 * sfat.count as usize);
+            let nametable = &file[0x28 + 0x10 * sfat.count as usize ..];
             let data = &file[header.offset as usize..];
             typedef! { struct Node: TryFromBytes<'_> [0x10] {
                 [0] hash: u32,
@@ -189,12 +194,18 @@ impl Archive {
                 .chunks(0x10)
                 .map(|chunk| {
                     let (node, _) = Node::try_from_slice(chunk)?;
-                    if node.attr != 0 {
-                        Err(Error::new("Hash collision".to_string()))
-                    } else {
+                    if node.attr == 0 {
                         let start = node.start as usize;
                         let end = node.end as usize;
-                        Ok((node.hash, data[start..end].to_vec()))
+                        Ok((node.hash, (None, data[start..end].to_vec())))
+                    } else if node.attr >> 24 == 1 {
+                        let start = node.start as usize;
+                        let end = node.end as usize;
+                        let nametable_offset = (node.attr & 0xffffff) as usize * 4;
+                        let name = bytes_to_string(&nametable[nametable_offset..])?;
+                        Ok((node.hash, (Some(name), data[start..end].to_vec())))
+                    } else {
+                        Err(Error::new("Hash collision".to_string()))
                     }
                 })
                 .collect::<Result<_>>()?;
@@ -209,17 +220,17 @@ impl Archive {
     }
 
     fn get(&self, path: &str) -> Result<&[u8]> {
-        self.files.get(&self.hash(path)).map(|file| &file[..]).ok_or(Error::new(format!("File not found: {path}")))
+        self.files.get(&self.hash(path)).map(|(_, file)| &file[..]).ok_or(Error::new(format!("File not found: {path}")))
     }
 
     fn get_mut(&mut self, path: &str) -> Result<&mut [u8]> {
-        self.files.get_mut(&self.hash(path)).map(|file| &mut file[..]).ok_or(Error::new(format!("File not found: {path}")))
+        self.files.get_mut(&self.hash(path)).map(|(_, file)| &mut file[..]).ok_or(Error::new(format!("File not found: {path}")))
     }
 
     fn update(&mut self, file: File<Box<[u8]>>) {
         debug!("Updating: {}", file.path);
-        if self.files.contains_key(&self.hash(&file.path)) {
-            self.files.insert(self.hash(&file.path), file.inner.into());
+        if let Some(entry) = self.files.get_mut(&self.hash(&file.path)) {
+            entry.1 = file.inner.into();
         } else {
             panic!("Can't update non-existent file: {}", file.path);
         }
@@ -230,7 +241,7 @@ impl Archive {
         if self.files.contains_key(&self.hash(&file.path)) {
             debug!("Not adding duplicate file: {}", file.path);
         } else {
-            self.files.insert(self.hash(&file.path), file.inner.into());
+            self.files.insert(self.hash(&file.path), (None, file.inner.into()));
         }
     }
 }
@@ -249,19 +260,31 @@ impl IntoBytes for Archive {
         buf.extend_from_slice(&count.to_le_bytes());
         buf.extend_from_slice(&self.multiplier.to_le_bytes());
         let mut offset = 0u32;
-        for (hash, file) in &self.files {
+        let mut nametable = vec![];
+        for (hash, (name, file)) in &self.files {
             buf.extend_from_slice(&hash.to_le_bytes());
-            buf.extend_from_slice(&[0, 0, 0, 0]);
+            let attr = if let Some(name) = name {
+                let offset = nametable.len() >> 2;
+                nametable.extend_from_slice(&name.clone().into_bytes());
+                nametable.push(0);
+                nametable.resize(align::<4>(nametable.len() as u32) as usize, 0);
+                0x01000000u32 | offset as u32
+            } else {
+                0u32
+            };
+            buf.extend_from_slice(&attr.to_le_bytes());
             buf.extend_from_slice(&offset.to_le_bytes());
-            offset = align::<0x80>(offset + file.len() as u32);
+            offset += file.len() as u32;
             buf.extend_from_slice(&offset.to_le_bytes());
+            offset = align::<0x80>(offset);
         }
         buf.extend_from_slice(b"SFNT");
         buf.extend_from_slice(&[0x8, 0, 0, 0]);
+        buf.extend_from_slice(&nametable);
         buf.resize(align::<0x80>(buf.len() as u32) as usize, 0);
         let file_offset = buf.len() as u32;
         buf[0xc..0x10].copy_from_slice(&file_offset.to_le_bytes());
-        for (_, file) in &self.files {
+        for (_, (_, file)) in &self.files {
             buf.extend_from_slice(&file);
             buf.resize(align::<0x80>(buf.len() as u32) as usize, 0);
         }
@@ -300,6 +323,14 @@ fn compress(data: &[u8]) -> Box<[u8]> {
         .compress_and_write(&data, yaz0::CompressionLevel::Lookahead { quality: 1 })
         .expect("Yaz0 compression failed.");
     buf.into()
+}
+
+fn bytes_to_string(data: &[u8]) -> Result<String> {
+    let pos = data.iter().position(|&c| c == 0);
+    let data = if let Some(pos) = pos { &data[..pos] } else { data };
+    str::from_utf8(data)
+        .map(|s| s.to_string())
+        .map_err(|_| Error::new("Error decoding UTF-8 string"))
 }
 
 #[cfg(test)]

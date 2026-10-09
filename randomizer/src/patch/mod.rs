@@ -19,7 +19,7 @@ use rom::byaml::scene_env::SceneEnvFile;
 use rom::flag::Flag;
 use rom::scene::{Transform, Vec3};
 use rom::{
-    File, IntoBytes, Language, Rom, Scene,
+    File, IntoBytes, Language, Lyt, Rom, Scene,
     flow::FlowMut,
     scene::{Arg, Obj, Rail, SceneMeta},
 };
@@ -36,6 +36,7 @@ mod demo;
 pub mod lms;
 mod messages;
 mod prizes;
+mod ui;
 pub mod util;
 
 #[non_exhaustive]
@@ -59,6 +60,7 @@ pub struct Patcher {
     rentals: [Item; 9],
     merchant: [Item; 3],
     courses: HashMap<CourseId, Course>,
+    lyts: HashMap<String, Lyt>,
 }
 
 impl Patcher {
@@ -70,6 +72,7 @@ impl Patcher {
             rentals: [Item::KeySmall; 9],
             merchant: [Item::KeySmall; 3],
             courses: Default::default(),
+            lyts: HashMap::new(),
         })
     }
 
@@ -261,6 +264,14 @@ impl Patcher {
         C: Into<Option<CourseId>>,
     {
         Ok(self.language(course)?.flow_mut())
+    }
+
+    fn lyt(&mut self, name: &str) -> Result<&mut Lyt> {
+        if !self.lyts.contains_key(name) {
+            let archive = self.game.lyt(name)?;
+            self.lyts.insert(name.to_string(), archive);
+        }
+        Ok(self.lyts.get_mut(name).unwrap())
     }
 
     /// Perform patching operations for each patch, depending on what type it is.
@@ -613,6 +624,7 @@ impl Patcher {
         actors::patch(&mut self, seed_info)?;
         lms::msbf::patch(&mut self, seed_info)?;
         messages::patch_messages(&mut self, seed_info)?;
+        ui::patch(&mut self)?;
         let prizes = get_dungeon_prizes(&seed_info.layout);
         prizes::patch_dungeon_prizes(&mut self, seed_info, &prizes);
         // byaml::get_item::patch(&mut self)?;
@@ -647,7 +659,7 @@ impl Patcher {
             kakariko_actors.add(item_actors.get(&merchant[2]).unwrap().clone())?;
         }
         let code = code::create(&self, seed_info);
-        let Self { game, boot, courses, .. } = self;
+        let Self { game, boot, courses, mut lyts, .. } = self;
         let mut romfs = Files(vec![]);
 
         // Add Actors to Common Archive
@@ -675,6 +687,9 @@ impl Patcher {
         }
         for cutscene in cutscenes {
             romfs.add(cutscene);
+        }
+        for (_, lyt) in lyts.drain() {
+            romfs.add(lyt.archive);
         }
         Ok(Patches { game, code, romfs })
     }
