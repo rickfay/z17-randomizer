@@ -47,9 +47,16 @@ impl MsbtFile {
     }
 
     /// Add a new `message` to the [`MsbtFile`] with the corresponding `label`
-    #[allow(unused)]
-    pub(crate) fn add(&self, label: &str, message: &str) {
-        unimplemented!();
+    pub(crate) fn add(&mut self, label: &str, message: &str) {
+        let hash = calc_hash(String::from(label), self.lbl1.num_slots) as usize;
+        let hash_table_slot = self.lbl1.hash_table.get_mut(hash).unwrap();
+
+        let item_index = self.txt2.messages.len() as u32;
+        self.txt2.messages.push(format!("{}\0", message));
+
+        hash_table_slot.number_of_labels += 1;
+        hash_table_slot.labels.push(Label {label: String::from(label), item_index});
+        self.recalc_offsets();
     }
 
     fn get_item_index(&self, key: &str) -> Option<usize> {
@@ -57,6 +64,17 @@ impl MsbtFile {
         let hash_table_slot = self.lbl1.hash_table.get(hash).unwrap();
 
         return hash_table_slot.labels.iter().find(|&label| label.label.eq(key)).map(|label| label.item_index as usize);
+    }
+
+    fn recalc_offsets(&mut self) {
+        let mut offset = 4 + self.lbl1.num_slots * 8;
+        let num_slots = self.lbl1.num_slots as usize;
+        for i in 0..num_slots {
+            self.lbl1.hash_table[i].offset_to_labels = offset;
+            for label in &self.lbl1.hash_table[i].labels {
+                offset += (label.label.len() + 5) as u32;
+            }
+        }
     }
 
     #[allow(unused)]

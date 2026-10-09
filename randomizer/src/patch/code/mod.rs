@@ -4,8 +4,11 @@ use crate::filler::filler_item::Randomizable;
 use crate::patch::code::arm::Register::*;
 use crate::patch::code::arm::data::{add, cmp, mov, nop};
 use crate::patch::code::arm::ls::{ldr, ldrb, str_, strb};
+use crate::patch::code::arm::{FloatRegister::*, Register::*};
+use crate::patch::code::arm::data::{add, cmp, mov, mul, nop, sub, tst};
+use crate::patch::code::arm::ls::{ldr, ldrb, str_, strb, strh, vldr};
 use crate::patch::code::arm::lsm::{pop, push};
-use crate::patch::code::arm::{Instruction, LR, PC, SP, b, bl};
+use crate::patch::code::arm::{Instruction, LR, PC, SP, b, bl, label};
 use crate::{Door, DoorMap, Layout, Result, SeedInfo, patch::util::prize_flag, regions};
 use game::Item;
 use game::Item::*;
@@ -25,7 +28,9 @@ mod arm;
 #[derive(Debug)]
 pub struct Code {
     text: u32,
+    text_end: u32,
     rodata: u32,
+    rodata_end: u32,
     ips: Ips,
 }
 
@@ -33,17 +38,19 @@ impl Code {
     pub fn new(exheader: &ExHeader) -> Self {
         let entry = exheader.get_text_address();
         let text = entry + exheader.get_text_size();
+        let text_end = exheader.get_rodata_address();
         let rodata = exheader.get_rodata_address() + exheader.get_rodata_size();
+        let rodata_end = exheader.get_data_address();
         let ips = Ips::new(entry);
-        Self { text, rodata, ips }
+        Self { text, text_end, rodata, rodata_end, ips }
     }
 
     pub fn text(&mut self) -> Segment<'_> {
-        Segment { address: &mut self.text, ips: &mut self.ips }
+        Segment { name: "text", address: &mut self.text, ips: &mut self.ips, end_address: &self.text_end }
     }
 
     pub fn rodata(&mut self) -> Segment<'_> {
-        Segment { address: &mut self.rodata, ips: &mut self.ips }
+        Segment { name: "rodata", address: &mut self.rodata, ips: &mut self.ips, end_address: &self.rodata_end }
     }
 
     pub fn patch<const N: usize>(&mut self, addr: u32, instructions: [Instruction; N]) -> u32 {
@@ -81,7 +88,9 @@ impl Code {
 
 #[derive(Debug)]
 pub struct Segment<'a> {
+    name: &'static str,
     address: &'a mut u32,
+    end_address: &'a u32,
     ips: &'a mut Ips,
 }
 
@@ -97,6 +106,7 @@ impl<'a> Segment<'a> {
         data.resize(padded as usize, 0);
         self.ips.append(addr, data);
         *self.address += padded;
+        assert!(*self.address <= *self.end_address, "{} segment overflow", self.name);
         addr
     }
 
@@ -104,6 +114,7 @@ impl<'a> Segment<'a> {
         let addr = *self.address;
         let len = self.patch(addr, instructions);
         *self.address += len;
+        assert!(*self.address <= *self.end_address, "{} segment overflow", self.name);
         addr
     }
 
@@ -633,41 +644,325 @@ fn mother_maiamai(code: &mut Code, layout: &Layout, item_names: &HashMap<Item, u
 }
 
 fn pause_menu_warp(code: &mut Code) {
-    // Pause Menu...?
-    // code.patch(0x441ee8, [mov(R0, R0)]); // Don't call function to return to FSS?
-    // code.patch(0x441eec, [mov(R0, R0)]); // Don't call function to return to FSS?
+    // Change size of pause menu class
+    // We use offset 0xcc to store the array of 3 buttons
+    // and 0xd8 to store the index of the currently selected button
+    code.patch(0x519364, [mov(R0, 0xdc)]);
 
-    let _fn_load_scene_links_house = code.text().define([
-        mov(R0, 0x0),
-        bl(0x4eefa0),
-        mov(R0, 0x1), // ???
-        strb(R0, (SP, 0xA)),
-        mov(R0, 0x2), // scene = IndoorLight
-        str_(R0, (SP, 0x0)),
-        mov(R0, 0x0), // index = 1
-        str_(R0, (SP, 0x4)),
-        mov(R0, 0x1), // spawn = 0
-        strb(R0, (SP, 0x8)),
-        mov(R3, 0x0),
-        mov(R2, 0x0),
-        mov(R1, SP),
-        ldr(R0, 0x709df8),
-        // ldr(R0, (R0, 0x0)),
-        bl(0x4ef418), // Load Scene Function
-        b(0x441eec),
+    // Patch UIPauseT constructor to create a third button
+    let button3_name = code.text().declare("L_Btn3_00\0");
+    let add_button3 = code.text().define([
+        ldr(R0, (R4, 0xbc)),
+        str_(R0, (R4, 0xd4)),
+        ldr(R0, (R4, 0xc0)),
+        str_(R0, (R4, 0xcc)),
+        ldr(R1, (SP, 0x10)),
+        mov(R0, 0x4c),
+        bl(FN_NEW),
+        cmp(R0, 0),
+        b("skip").eq(),
+        ldr(R1, button3_name),
+        str_(R1, (SP, 4)),
+        mov(R2, SP),
+        mov(R1, R6),
+        str_(R5, (SP, 0)),
+        bl(0x441934), // UIPauseButton constructor
+        label("skip"),
+        str_(R0, (R4, 0xd0)),
+        add(R1, R4, 0xc0),
+        b(0x4432f8),
+    ]);
+    code.patch(0x443268, [
+        str_(R0, (R4, 0xc0)),
+        b(add_button3),
     ]);
 
-    // code.patch(0x441ee8, [b(fn_load_scene_links_house)]);
+    // Initialize all three buttons when initialized
+    code.patch(0x441c08, [cmp(R4, 3), add(R0, R5, 0xcc)]);
+    code.patch(0x441c20, [cmp(R4, 3), add(R0, R5, 0xcc)]);
+    code.patch(0x441c44, [cmp(R4, 3), add(R0, R5, 0xcc)]);
+    code.patch(0x441c5c, [cmp(R4, 3)]);
 
-    // different attempt...
-    // let fn_death_warp = code.text().define([
-    //     ldr(R0, (R4, 0x0)), // ???
-    //     bl(0x502d24),
-    // ]);
-    //
-    // code.patch(0x441edc, [b(fn_death_warp)]);
-    //
-    // code.patch(0x0, 0x0);
+    // Destroy all three buttons when destroyed
+    code.patch(0x442e2c, [cmp(R4, 3), add(R0, R5, 0xcc)]);
+    code.patch(0x442e50, [cmp(R4, 3), add(R0, R5, 0xcc)]);
+    code.patch(0x442e78, [cmp(R4, 3), add(R0, R5, 0xcc)]);
+    code.patch(0x442e94, [cmp(R4, 3)]);
+
+    const FN_ANIM_PLAY: u32 = 0x2317c0;
+    const FN_ANIM_STOP: u32 = 0x231448;
+    const FN_SE_PLAY: u32 = 0x587f74;
+    
+    let fn_button_select = code.text().define([
+        push([R4, LR]),
+        mov(R4, R0),
+        ldrb(R0, (R4, 0x48)),
+        cmp(R0, 0),
+        b("skip").ne(),
+        mov(R0, 0),
+        strh(R0, (R4, 0x20)),
+        add(R0, R4, 0x20),
+        vldr(S0, 1.0),
+        bl(FN_ANIM_PLAY),
+        mov(R0, 1),
+        strb(R0, (R4, 0x48)),
+        label("skip"),
+        add(R0, R4, 0x2c),
+        vldr(S0, 1.0),
+        bl(FN_ANIM_PLAY),
+        pop([R4, PC]),
+    ]);
+
+    let fn_button_deselect = code.text().define([
+        push([R4, LR]),
+        mov(R4, R0),
+        ldrb(R0, (R4, 0x48)),
+        cmp(R0, 0),
+        b("skip").eq(),
+        mov(R0, 2),
+        strh(R0, (R4, 0x20)),
+        add(R0, R4, 0x20),
+        vldr(S0, 1.0),
+        bl(FN_ANIM_PLAY),
+        mov(R0, 0),
+        strb(R0, (R4, 0x48)),
+        label("skip"),
+        add(R0, R4, 0x2c),
+        bl(FN_ANIM_STOP),
+        pop([R4, PC]),
+    ]);
+
+    // Text labels for the three buttons
+    let label1 = code.rodata().declare("L_Btn_00_T_GmOvr_00\0");
+    let label2 = code.rodata().declare("L_Btn_04_T_GmOvr_00\0");
+    let label3 = code.rodata().declare("L_Btn_01_T_GmOvr_00\0");
+    let button_text_labels = code.rodata().declare([
+        VTABLE_STRING.to_le_bytes(),
+        label1.to_le_bytes(),
+        VTABLE_STRING.to_le_bytes(),
+        label2.to_le_bytes(),
+        VTABLE_STRING.to_le_bytes(),
+        label3.to_le_bytes(),
+    ].into_iter().flatten().collect::<Vec<_>>());
+
+    // Patch function for entering cState_BtnIn
+    let patch_enter_btn_in = code.text().define([
+        ldr(R0, (R6, 0xcc)),
+        bl(fn_button_select),
+        ldr(R0, (R6, 0xd0)),
+        bl(fn_button_deselect),
+        ldr(R0, (R6, 0xd4)),
+        bl(fn_button_deselect),
+        mov(R0, 0),
+        str_(R0, (R6, 0xd8)),
+        ldr(R9, button_text_labels),
+        b(0x4421fc),
+    ]);
+    code.patch(0x44218c, [b(patch_enter_btn_in)]);
+    code.patch(0x442204, [nop()]);
+    code.patch(0x442210, [cmp(R4, 3), add(R0, R6, 0xcc)]);
+    code.patch(0x4422bc, [cmp(R4, 3)]);
+
+    // Code for when the warp button is pressed
+    let warp_home = code.text().define([
+        push([LR]),
+        sub(SP, SP, 0xc),
+        mov(R0, 2),
+        str_(R0, (SP, 0)),
+        mov(R0, 0),
+        str_(R0, (SP, 4)),
+        mov(R0, 1),
+        strh(R0, (SP, 8)),
+        strb(R0, (SP, 0xa)),
+        ldr(R0, GAME_MANAGER_INSTANCE),
+        ldr(R0, (R0, 0)),
+        mov(R1, SP),
+        mov(R2, 2),
+        mov(R3, 0),
+        bl(0x4ef418),
+        add(SP, SP, 0xc),
+        pop([PC]),
+    ]);
+
+    // Patch function for entering cState_SelectCnt
+    // While the original code uses this only for when "Continue" is selected,
+    // we repurpose it for when any of the three buttons is selected
+    code.patch(0x442a5c, [
+        push([LR]),
+        ldr(R1, 0),
+        ldr(R2, (R0, 0xcc)),
+        strb(R1, (R2, 0x49)),
+        ldr(R2, (R0, 0xd0)),
+        strb(R1, (R2, 0x49)),
+        ldr(R2, (R0, 0xd4)),
+        strb(R1, (R2, 0x49)),
+        pop([PC]),
+    ]);
+
+    // Patch function for cState_SelectCnt
+    let se_s_decide_s = code.rodata().declare("SE_S_DECIDE_S");
+    let se_s_pause_out = code.rodata().declare("SE_S_PAUSE_OUT");
+    let se_s_select = code.rodata().declare("SE_S_SELECT");
+    let patch_select_cnt_len = code.patch(0x4422e4, [
+        push([R4, R5, LR]),
+        mov(R4, R0),
+        sub(SP, SP, 0xc),
+        // set R5 = selected button
+        add(R5, R4, 0xcc),
+        ldr(R0, (R4, 0xd8)),
+        ldr(R5, (R5, R0, 2)),
+        // is button pressed
+        ldrb(R1, (R5, 0x49)),
+        cmp(R1, 0),
+        b("not_pressed").eq(),
+        // is button's animation active
+        add(R0, R5, 0x38),
+        bl(0x532c78),
+        cmp(R0, 0),
+        b("return").ne(),
+        // if button is pressed and animation is done:
+        ldr(R0, (R4, 0xd8)),
+        // button 0: unpause
+        cmp(R0, 0),
+        b("unpause").eq(),
+        // button 1: warp home
+        cmp(R0, 1),
+        bl("warp_home").eq(),
+        // button 2: confirm exit
+        cmp(R0, 2),
+        mov(R1, 3).eq(),
+        add(R0, R4, 0x98).eq(),
+        bl(0x66c88c).eq(),
+        b("return"),
+        // code to unpause, used by button 0:
+        label("unpause"),
+        ldr(R0, UI_MANAGER_INSTANCE),
+        ldr(R0, (R0, 0)),
+        bl(0x51c54c),
+        b("return"),
+        // code to warp home, used by button 1:
+        label("warp_home"),
+        ldr(R0, UI_MANAGER_INSTANCE),
+        ldr(R0, (R0, 0)),
+        bl(0x51c54c),
+        bl(warp_home),
+        b("return"),
+        // if button is not pressed:
+        label("not_pressed"),
+        ldr(R0, VTABLE_STRING),
+        str_(R0, (SP, 0)),
+        ldr(R3, AUDIO_MANAGER_INSTANCE),
+        // set R0 = input's mPadTrig
+        ldr(R0, INPUT_MANAGER_INSTANCE),
+        ldr(R0, (R0, 0)),
+        add(R0, R0, 0x20),
+        ldrb(R1, (R4, 0x70)),
+        mov(R2, 0x190),
+        mul(R1, R2, R1),
+        ldr(R0, (R0, R1)),
+        // if A pressed:
+        tst(R0, 1),
+        b("not_a").eq(),
+        // play sound effect
+        ldr(R0, se_s_decide_s),
+        str_(R0, (SP, 4)),
+        ldr(R0, (R3, 0)),
+        mov(R1, SP),
+        mov(R2, 0),
+        bl(FN_SE_PLAY),
+        // play button animation
+        add(R0, R5, 0x38),
+        vldr(S0, 1.0),
+        bl(FN_ANIM_PLAY),
+        // press button
+        mov(R0, 1),
+        strb(R0, (R5, 0x49)),
+        b("return"),
+        // if B pressed:
+        label("not_a"),
+        tst(R0, 2),
+        b("not_b").eq(),
+        // play sound effect
+        ldr(R0, se_s_pause_out),
+        str_(R0, (SP, 4)),
+        ldr(R0, (R3, 0)),
+        mov(R1, SP),
+        mov(R2, 0),
+        bl(FN_SE_PLAY),
+        // select button 0
+        mov(R0, 0),
+        str_(R0, (R4, 0xd8)),
+        ldr(R5, (R4, 0xcc)),
+        // play button animation
+        add(R0, R5, 0x38),
+        vldr(S0, 1.0),
+        bl(FN_ANIM_PLAY),
+        // press button
+        mov(R0, 1),
+        strb(R0, (R5, 0x49)),
+        b("change_selection"),
+        // if up pressed:
+        label("not_b"),
+        tst(R0, 0x10000),
+        tst(R0, 0x100000).eq(),
+        b("not_up").eq(),
+        // play sound effect
+        ldr(R0, se_s_select),
+        str_(R0, (SP, 4)),
+        ldr(R0, (R3, 0)),
+        mov(R1, SP),
+        mov(R2, 0),
+        bl(FN_SE_PLAY),
+        // change button selection
+        ldr(R0, (R4, 0xd8)),
+        cmp(R0, 0),
+        mov(R0, 3).eq(),
+        sub(R0, R0, 1),
+        str_(R0, (R4, 0xd8)),
+        b("change_selection"),
+        // if down pressed:
+        label("not_up"),
+        tst(R0, 0x20000),
+        tst(R0, 0x200000).eq(),
+        b("return").eq(),
+        // play sound effect
+        ldr(R0, se_s_select),
+        str_(R0, (SP, 4)),
+        ldr(R0, (R3, 0)),
+        mov(R1, SP),
+        mov(R2, 0),
+        bl(FN_SE_PLAY),
+        // change button selection
+        ldr(R0, (R4, 0xd8)),
+        add(R0, R0, 1),
+        cmp(R0, 3),
+        mov(R0, 0).eq(),
+        str_(R0, (R4, 0xd8)),
+        b("change_selection"),
+        // if selected button has changed, update animations
+        label("change_selection"),
+        ldr(R5, (R4, 0xd8)),
+        ldr(R0, (R4, 0xcc)),
+        cmp(R5, 0),
+        bl(fn_button_select).eq(),
+        cmp(R5, 0),
+        bl(fn_button_deselect).ne(),
+        ldr(R0, (R4, 0xd0)),
+        cmp(R5, 1),
+        bl(fn_button_select).eq(),
+        cmp(R5, 1),
+        bl(fn_button_deselect).ne(),
+        ldr(R0, (R4, 0xd4)),
+        cmp(R5, 2),
+        bl(fn_button_select).eq(),
+        cmp(R5, 2),
+        bl(fn_button_deselect).ne(),
+        // all done
+        label("return"),
+        add(SP, SP, 0xc),
+        pop([R4, R5, PC]),
+    ]);
+    assert!(patch_select_cnt_len <= 0x4425b4 - 0x4422e4);
 }
 
 fn purple_potion_bottles(code: &mut Code, settings: &Settings) {
@@ -1334,5 +1629,9 @@ const FN_SET_LOCAL_FLAG_3: u32 = 0x1bb724;
 const MAP_MANAGER_INSTANCE: u32 = 0x70c8e0;
 // const PTR_MAP_MANAGER_INSTANCE: u32 = 0x27320c;
 const GAME_MANAGER_INSTANCE: u32 = 0x709df8;
+const UI_MANAGER_INSTANCE: u32 = 0x7142c8;
+const INPUT_MANAGER_INSTANCE: u32 = 0x7124f0;
+const AUDIO_MANAGER_INSTANCE: u32 = 0x711f50;
 const PLAYER_OBJECT_SINGLETON: u32 = 0x70FB60;
 const VTABLE_STRING: u32 = 0x6F5988;
+const FN_NEW: u32 = 0x10bab4;

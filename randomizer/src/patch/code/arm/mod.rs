@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use crate::patch::code::arm::Register::*;
 
 pub(crate) mod data;
@@ -46,6 +47,43 @@ impl From<Register> for RegisterW {
     fn from(r: Register) -> Self {
         Self(r, false)
     }
+}
+
+#[allow(unused)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum FloatRegister {
+    S0 = 0,
+    S1 = 1,
+    S2 = 2,
+    S3 = 3,
+    S4 = 4,
+    S5 = 5,
+    S6 = 6,
+    S7 = 7,
+    S8 = 8,
+    S9 = 9,
+    S10 = 10,
+    S11 = 11,
+    S12 = 12,
+    S13 = 13,
+    S14 = 14,
+    S15 = 15,
+    S16 = 16,
+    S17 = 17,
+    S18 = 18,
+    S19 = 19,
+    S20 = 20,
+    S21 = 21,
+    S22 = 22,
+    S23 = 23,
+    S24 = 24,
+    S25 = 25,
+    S26 = 26,
+    S27 = 27,
+    S28 = 28,
+    S29 = 29,
+    S30 = 30,
+    S31 = 31,
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -162,12 +200,14 @@ impl From<u32> for Address {
 #[derive(Debug)]
 pub enum Pseudo {
     Ldr(ls::Pseudo),
+    Vldr(ls::PseudoFloat),
 }
 
 impl Pseudo {
     fn into_raw(self, assembler: &mut Assembler) -> Instruction {
         match self {
             Self::Ldr(pseudo) => pseudo.to_raw(assembler),
+            Self::Vldr(pseudo) => pseudo.to_raw(assembler),
         }
     }
 }
@@ -178,11 +218,36 @@ impl From<ls::Pseudo> for Pseudo {
     }
 }
 
+impl From<ls::PseudoFloat> for Pseudo {
+    fn from(pseudo: ls::PseudoFloat) -> Self {
+        Self::Vldr(pseudo)
+    }
+}
+
+#[derive(Debug)]
+pub enum Target {
+    Address(u32),
+    Label(String),
+}
+
+impl From<u32> for Target {
+    fn from(address: u32) -> Self {
+        Self::Address(address)
+    }
+}
+
+impl From<&str> for Target {
+    fn from(label: &str) -> Self {
+        Self::Label(label.to_string())
+    }
+}
+
 #[derive(Debug)]
 pub enum Instruction {
     Raw(u32),
-    Branch { cond: Condition, target_address: Address, link: bool },
+    Branch { cond: Condition, target: Target, link: bool },
     Pseudo(Condition, Pseudo),
+    Label(String),
 }
 
 #[allow(unused)]
@@ -194,19 +259,21 @@ impl Instruction {
     fn with_condition(self, cond: Condition) -> Self {
         match self {
             Self::Raw(raw) => Self::Raw(raw & 0x0FFFFFFF | cond.shift()),
-            Self::Branch { target_address, link, .. } => Self::Branch { cond, target_address, link },
+            Self::Branch { target, link, .. } => Self::Branch { cond, target, link },
             Self::Pseudo(_, pseudo) => Self::Pseudo(cond, pseudo),
+            Self::Label(label) => Self::Label(label),
         }
     }
 
-    fn assemble(self, assembler: &mut Assembler) -> u32 {
+    fn assemble(self, assembler: &mut Assembler) -> Option<u32> {
         match self {
-            Self::Raw(code) => code,
-            Self::Branch { cond, target_address, link } => {
-                let signed_immed_24 = ((target_address.diff(assembler.pc()) - 8) >> 2) & 0xFFFFFF;
-                0xA000000 | (link as u32) << 24 | u32::from_ne_bytes(signed_immed_24.to_ne_bytes()) | cond.shift()
+            Self::Raw(code) => Some(code),
+            Self::Branch { cond, target, link } => {
+                let signed_immed_24 = ((assembler.resolve(target).diff(assembler.pc()) - 8) >> 2) & 0xFFFFFF;
+                Some(0xA000000 | (link as u32) << 24 | u32::from_ne_bytes(signed_immed_24.to_ne_bytes()) | cond.shift())
             },
-            Self::Pseudo(cond, pseudo) => pseudo.into_raw(assembler).assemble(assembler) | cond.shift(),
+            Self::Pseudo(cond, pseudo) => Some(pseudo.into_raw(assembler).assemble(assembler).unwrap() | cond.shift()),
+            Self::Label(_) => None,
         }
     }
 
@@ -290,12 +357,13 @@ impl Instruction {
 pub struct Assembler {
     start: Address,
     offset: usize,
+    labels: HashMap<String, Address>,
     bytes: Vec<u8>,
 }
 
 impl Assembler {
-    fn new(start: Address, len: usize) -> Self {
-        Self { start, offset: 0, bytes: vec![0u8; len] }
+    fn new(start: Address) -> Self {
+        Self { start, offset: 0, labels: HashMap::new(), bytes: Vec::new() }
     }
 
     fn write(&mut self, code: u32) {
@@ -307,35 +375,63 @@ impl Assembler {
         self.start.offset(self.offset as u32)
     }
 
-    fn dcd(&mut self, value: u32) -> Address {
+    fn dcd(&mut self, value: &[u8]) -> Address {
         let addr = self.start.offset(self.bytes.len() as u32);
-        self.bytes.extend_from_slice(&value.to_le_bytes());
+        self.bytes.extend_from_slice(value);
         addr
+    }
+
+    fn compute_labels(&mut self, instructions: &[Instruction]) {
+        let mut offset = 0;
+        for instruction in instructions {
+            match instruction {
+                Instruction::Branch { .. } | Instruction::Raw(..) | Instruction::Pseudo(..) => {
+                    offset += 4;
+                },
+                Instruction::Label(label) => {
+                    self.labels.insert(label.clone(), self.start.offset(offset as u32));
+                }
+            }
+        }
+        self.bytes = vec![0u8; offset];
+    }
+
+    fn resolve(&self, target: Target) -> Address {
+        match target {
+            Target::Address(address) => Address(address),
+            Target::Label(label) => *self.labels.get(&label).unwrap(),
+        }
     }
 }
 
 pub fn b<A>(target_address: A) -> Instruction
 where
-    A: Into<Address>,
+    A: Into<Target>,
 {
-    Instruction::Branch { cond: Default::default(), target_address: target_address.into(), link: false }
+    Instruction::Branch { cond: Default::default(), target: target_address.into(), link: false }
 }
 
 pub fn bl<A>(target_address: A) -> Instruction
 where
-    A: Into<Address>,
+    A: Into<Target>,
 {
-    Instruction::Branch { cond: Default::default(), target_address: target_address.into(), link: true }
+    Instruction::Branch { cond: Default::default(), target: target_address.into(), link: true }
+}
+
+pub fn label(name: &str) -> Instruction {
+    Instruction::Label(name.to_string())
 }
 
 pub fn assemble<A, const N: usize>(start: A, instructions: [Instruction; N]) -> Box<[u8]>
 where
     A: Into<Address>,
 {
-    let mut assembler = Assembler::new(start.into(), N * 4);
+    let mut assembler = Assembler::new(start.into());
+    assembler.compute_labels(&instructions);
     for instruction in IntoIterator::into_iter(instructions) {
-        let code = instruction.assemble(&mut assembler);
-        assembler.write(code);
+        if let Some(code) = instruction.assemble(&mut assembler) {
+            assembler.write(code);
+        }
     }
     assembler.bytes.into_boxed_slice()
 }

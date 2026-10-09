@@ -28,6 +28,10 @@ impl ExHeader {
     pub fn set_rodata_size(&mut self, size: u32) {
         self.0[0x28..0x2C].copy_from_slice(&size.to_le_bytes());
     }
+
+    pub fn get_data_address(&self) -> u32 {
+        unsafe { u32::from_slice_unchecked(&self.0[0x30..]) }
+    }
 }
 
 impl AsRef<[u8]> for ExHeader {
