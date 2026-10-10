@@ -146,9 +146,7 @@ fn get_base_progression_pool() -> Vec<Item> {
         GreatSpin, Lamp01, Bow01, Boomerang01, Hookshot01, Hammer01, Bombs01, FireRod01, IceRod01, TornadoRod01,
         SandRod01, Net01, HintGlasses, Bottle01, Bottle02, Bottle03, Bottle04, Bell, StaminaScroll, PegasusBoots,
         Flippers, HylianShield, SmoothGem, Glove01, Glove02, Mail01, Mail02, OreYellow, OreGreen, OreBlue, OreRed,
-        // ScootFruit01,
-        // ScootFruit02,
-        FoulFruit01, // FoulFruit02,
+        ScootFruit01, ScootFruit02, FoulFruit01, // FoulFruit02,
         Shield01, Shield02, Shield03, Shield04, GoldBee01, Charm,
     ];
 
@@ -446,10 +444,10 @@ pub(crate) fn get_default_weather_vanes(settings: &Settings) -> Vec<Vane> {
     use modinfo::settings::WeatherVanes::*;
     match settings.weather_vanes {
         Standard => get_standard_weather_vanes(settings),
-        Shuffled => get_shuffled_weather_vanes(settings),
+        Shuffled => get_shuffled_weather_vanes(),
         Convenient => get_convenient_weather_vanes(settings),
-        Hyrule => get_hyrule_weather_vanes(settings),
-        Lorule => get_lorule_weather_vanes(settings),
+        Hyrule => get_hyrule_weather_vanes(),
+        Lorule => get_lorule_weather_vanes(),
         All => get_all_weather_vanes(),
     }
 }
@@ -458,10 +456,10 @@ pub(crate) fn get_default_weather_vanes(settings: &Settings) -> Vec<Vane> {
 pub(crate) fn get_standard_weather_vanes(settings: &Settings) -> Vec<Vane> {
     let mut standard_weather_vanes = vec![YourHouseWV];
 
-    // Include Vacant House as a complimentary Weather Vane only when Crack shuffle is
-    // off, so that it doesn't accidentally create a path to LCA earlier than intended.
-    // Exception: when Door Shuffle is Crossed, for softlock reasons
-    if settings.crack_shuffle == CrackShuffle::Off || settings.door_shuffle == DoorShuffle::Crossed {
+    // Include Vacant House only when Overworld ER is off
+    if settings.crack_shuffle == CrackShuffle::Off
+        && (settings.door_shuffle == DoorShuffle::Off || settings.door_shuffle == DoorShuffle::DungeonEntrances)
+    {
         standard_weather_vanes.push(VacantHouseWV);
     }
 
@@ -469,51 +467,36 @@ pub(crate) fn get_standard_weather_vanes(settings: &Settings) -> Vec<Vane> {
 }
 
 /// Flags of Shuffled Weather Vanes
-pub(crate) fn get_shuffled_weather_vanes(settings: &Settings) -> Vec<Vane> {
-    // Don't give out any by default, unless it's Crossed Door ER, for softlock reasons
-    match settings.door_shuffle {
-        DoorShuffle::Crossed => vec![YourHouseWV, VacantHouseWV],
-        _ => vec![],
-    }
+pub(crate) fn get_shuffled_weather_vanes() -> Vec<Vane> {
+    vec![]
 }
 
 /// Flags of "Convenient" Weather Vanes, that don't affect logic but save time
 pub(crate) fn get_convenient_weather_vanes(settings: &Settings) -> Vec<Vane> {
     let mut convenient_weather_vanes = vec![YourHouseWV, KakarikoVillageWV, WitchsHouseWV, SanctuaryWV];
 
-    if settings.crack_shuffle == CrackShuffle::Off || settings.door_shuffle == DoorShuffle::Crossed {
+    // Include LCA Weather Vanes only when Overworld ER is off
+    if settings.crack_shuffle == CrackShuffle::Off
+        && (settings.door_shuffle == DoorShuffle::Off || settings.door_shuffle == DoorShuffle::DungeonEntrances)
+    {
         convenient_weather_vanes.extend(&[LoruleCastleWV, ThievesTownWV, BlacksmithWV, VacantHouseWV]);
     }
 
     convenient_weather_vanes
 }
 
-pub(crate) fn get_hyrule_weather_vanes(settings: &Settings) -> Vec<Vane> {
-    let mut hyrule_weather_vanes = vec![
+pub(crate) fn get_hyrule_weather_vanes() -> Vec<Vane> {
+    vec![
         YourHouseWV, KakarikoVillageWV, EasternPalaceWV, HouseOfGalesWV, TowerOfHeraWV, WitchsHouseWV,
         DeathMountainHyruleWV, DesertPalaceWV, SanctuaryWV,
-    ];
-
-    // Give Vacant House in Door ER for softlock reasons
-    if settings.door_shuffle == DoorShuffle::Crossed {
-        hyrule_weather_vanes.push(VacantHouseWV);
-    }
-
-    hyrule_weather_vanes
+    ]
 }
 
-pub(crate) fn get_lorule_weather_vanes(settings: &Settings) -> Vec<Vane> {
-    let mut lorule_weather_vanes = vec![
+pub(crate) fn get_lorule_weather_vanes() -> Vec<Vane> {
+    vec![
         SkullWoodsWV, TreacherousTowerWV, IceRuinsWV, LoruleCastleWV, GraveyardWV, ThievesTownWV, DarkPalaceWV,
         BlacksmithWV, VacantHouseWV, MiseryMireWV, SwampPalaceWV, TurtleRockWV, DeathMountainLoruleWV,
-    ];
-
-    // Give Vacant House in Door ER for softlock reasons
-    if settings.door_shuffle == DoorShuffle::Crossed {
-        lorule_weather_vanes.push(YourHouseWV);
-    }
-
-    lorule_weather_vanes
+    ]
 }
 
 pub(crate) fn get_all_weather_vanes() -> Vec<Vane> {

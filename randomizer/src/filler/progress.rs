@@ -20,9 +20,6 @@ impl<'s> Progress<'s> {
     pub fn new(seed_info: &'s SeedInfo) -> Progress<'s> {
         let mut items: DashSet<Randomizable> = Default::default();
 
-        // Starting Inventory
-        items.insert(Item::ScootFruit01.into());
-
         // Weather Vanes
         let vanes = item_pools::get_default_weather_vanes(&seed_info.settings);
         vanes.iter().for_each(|&vane| {
@@ -263,14 +260,6 @@ impl<'s> Progress<'s> {
 
     pub fn crack_shuffle(&self) -> bool {
         self.seed_info.settings.crack_shuffle != CrackShuffle::Off
-    }
-
-    pub fn can_escape(&self) -> bool {
-        self.has_bell() || self.has_fire_rod() || self.has_bombs()
-    }
-
-    pub fn can_escape_dungeon(&self) -> bool {
-        self.has_fire_rod() || self.has_bombs() || self.has_scoot_fruit()
     }
 
     pub fn has_stamina_scroll(&self) -> bool {

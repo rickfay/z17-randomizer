@@ -1,6 +1,6 @@
 use crate::patch::Patcher;
 use crate::{Result, SeedInfo};
-use game::{Course, Item};
+use game::Course;
 use log::info;
 use modinfo::Settings;
 use modinfo::settings::keysy::Keysy;
@@ -175,12 +175,7 @@ fn patch_ravio_shop(patcher: &mut Patcher) -> Result<()> {
 
             [766 into_start] => 312, // 312 starts music
             [312] => 237, // 237 gives item
-            [445 convert_into_action] each [
-                arg1(6), // give out item
-                = 0xB, // give out item
-                value(Item::EscapeFruit as u32), // start the player with Scoot Fruit
-                => None,
-            ],
+            [237] => None,
 
             // ???
             [192 into_start] => 319,
