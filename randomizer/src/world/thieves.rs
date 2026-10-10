@@ -30,7 +30,7 @@ pub(crate) fn graph(door_map: &DoorMap) -> HashMap<Location, LocationNode> {
                     check!("[TT] (B1) Jail Cell", regions::dungeons::thieves::hideout::SUBREGION => {
                         normal: |p| p.can_merge(),
                         glitched: |p| p.has_boots(), // jailbreak
-                        hell: |p| p.hell_thieves_statue_clip() && p.has_tornado_rod() && p.can_escape_dungeon(),
+                        hell: |p| p.hell_thieves_statue_clip() && p.has_tornado_rod(),
                     }),
                     goal!("Thieves' Hideout B1 Door Open", Goal::ThievesB1DoorOpen => {
                         normal: |p| p.can_merge() && p.can_hit_switch(),
@@ -46,7 +46,7 @@ pub(crate) fn graph(door_map: &DoorMap) -> HashMap<Location, LocationNode> {
                     goal!("Thieves' Hideout B2 Door Open", Goal::ThievesB2DoorOpen => {
                         normal: |p| p.thieves_b1_door_open() && p.can_merge() && (p.progression_enemies() || p.has_bombs()),
                         glitched: |p| p.thieves_b1_door_open() && p.can_great_spin(),
-                        adv_glitched: |p| (p.can_merge() || p.can_escape_dungeon()) && p.adv_thieves_statue_clip(),
+                        adv_glitched: |p| p.can_merge() && p.adv_thieves_statue_clip(),
                         hell: |p| p.has_bombs(),
                     }),
                     check!("[TT] (B2) Jail Cell", regions::dungeons::thieves::hideout::SUBREGION => {
@@ -100,7 +100,7 @@ pub(crate) fn graph(door_map: &DoorMap) -> HashMap<Location, LocationNode> {
                     }),
                     check!("[TT] (B1) Behind Wall", regions::dungeons::thieves::hideout::SUBREGION => {
                         normal: |p| p.thieves_escape_equipment() && p.can_attack(),
-                        hell: |p| p.hell_thieves_statue_clip() && p.has_tornado_rod() && p.can_escape_dungeon(),
+                        hell: |p| p.hell_thieves_statue_clip() && p.has_tornado_rod(),
                     }),
                     check!("[TT] (B1) Big Chest (Entrance)", regions::dungeons::thieves::hideout::SUBREGION => {
                         normal: |p| p.thieves_escape_equipment() && p.can_attack(),

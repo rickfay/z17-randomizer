@@ -120,7 +120,7 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
                         regions::hyrule::lost::woods::SUBREGION => {
                             normal: |p| p.has_titans_mitt() || (p.has_power_glove() && p.has_hammer()),
                             glitched: |p| {
-                                p.has_power_glove() && (p.has_hookshot() || (p.has_boomerang() && p.can_escape()))
+                                p.has_power_glove() && (p.has_hookshot() || p.has_boomerang())
                             },
                             hell: |p| p.has_foul_fruit() && (p.has_bombs() || p.has_fire_rod()),
                         }
@@ -799,12 +799,13 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
                 vec![
                     check!("Lost Woods Alcove", regions::hyrule::lost::woods::SUBREGION => {
                         normal: |p| p.can_merge(),
-                        glitched: |p| p.can_escape() && (p.has_boomerang() || (p.not_nice_mode() && p.has_hookshot())),
-                        hell: |p| p.has_boomerang() || (p.not_nice_mode() && p.has_hookshot()) || p.has_foul_fruit(), // Use Crow to escape
+                        glitched: |p| p.has_boomerang() || (p.not_nice_mode() && p.has_hookshot()),
+                        hell: |p| p.has_foul_fruit(),
                     }),
                     check!("Lost Woods Chest", regions::hyrule::lost::woods::SUBREGION => {
                         normal: |p| p.has_titans_mitt(),
-                        hell: |p| p.has_boomerang() || (p.not_nice_mode() && p.has_hookshot()) || p.has_foul_fruit(), // Use Crow to escape
+                        glitched: |p| p.has_boomerang() || (p.not_nice_mode() && p.has_hookshot()),
+                        hell: |p| p.has_foul_fruit(),
                     }),
                     check!("[Mai] Lost Woods Bush", regions::hyrule::lost::woods::SUBREGION),
                     check!("[Mai] Lost Woods Rock", regions::hyrule::lost::woods::SUBREGION, |p| p.has_power_glove()),
@@ -929,9 +930,9 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
             location(
                 "Kakariko Item Shop",
                 vec![
-                    // check!("Kakariko Item Shop (1)", regions::hyrule::kakariko::village::SUBREGION),
-                    // check!("Kakariko Item Shop (2)", regions::hyrule::kakariko::village::SUBREGION),
-                    check!("Kakariko Item Shop (3)", regions::hyrule::kakariko::village::SUBREGION),
+                    check!("Kakariko Item Shop (Left)", regions::hyrule::kakariko::village::SUBREGION),
+                    // check!("Kakariko Item Shop (Center)", regions::hyrule::kakariko::village::SUBREGION),
+                    check!("Kakariko Item Shop (Right)", regions::hyrule::kakariko::village::SUBREGION),
                 ],
                 vec![door!(KakarikoItemShopExit, door_map)],
             ),
@@ -941,9 +942,9 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
             location(
                 "Lakeside Item Shop",
                 vec![
-                    // check!("Lakeside Item Shop (1)", regions::hyrule::lake::hylia::SUBREGION),
-                    // check!("Lakeside Item Shop (2)", regions::hyrule::lake::hylia::SUBREGION),
-                    check!("Lakeside Item Shop (3)", regions::hyrule::lake::hylia::SUBREGION),
+                    check!("Lakeside Item Shop (Left)", regions::hyrule::lake::hylia::SUBREGION),
+                    // check!("Lakeside Item Shop (Center)", regions::hyrule::lake::hylia::SUBREGION),
+                    check!("Lakeside Item Shop (Right)", regions::hyrule::lake::hylia::SUBREGION),
                 ],
                 vec![door!(LakesideItemShopExit, door_map)],
             ),

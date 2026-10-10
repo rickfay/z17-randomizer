@@ -1,6 +1,6 @@
 use crate::patch::Patcher;
 use crate::{Result, SeedInfo};
-use game::{Course, Item};
+use game::Course;
 use log::info;
 use modinfo::Settings;
 use modinfo::settings::keysy::Keysy;
@@ -175,12 +175,7 @@ fn patch_ravio_shop(patcher: &mut Patcher) -> Result<()> {
 
             [766 into_start] => 312, // 312 starts music
             [312] => 237, // 237 gives item
-            [445 convert_into_action] each [
-                arg1(6), // give out item
-                = 0xB, // give out item
-                value(Item::EscapeFruit as u32), // start the player with Scoot Fruit
-                => None,
-            ],
+            [237] => None,
 
             // ???
             [192 into_start] => 319,
@@ -541,11 +536,17 @@ fn patch_rosso(patcher: &mut Patcher) -> Result<()> {
     Ok(())
 }
 
-/// Big Fairies
+/// Big Fairies - Skip Text
 fn patch_big_fairies(patcher: &mut Patcher) -> Result<()> {
     apply!(patcher,
+        // Hyrule Big Fairies
         CaveLight/Cave {
-            [0 into_start] => 4, // Skip "I will soothe your wounds and provide comfort. Close your eyes and relax..."
+            [0 into_start] => 4,
+        },
+
+        // Lorule Big Fairies
+        CaveDark/Cave {
+            [0 into_start] => 4,
         },
     );
 

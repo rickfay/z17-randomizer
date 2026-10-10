@@ -236,11 +236,6 @@ pub fn patch(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
             [0x10].disable(), // Remove captain
         },
 
-        // Donkey Cave
-        CaveLight 1 {
-            [84].disable(), // Remove a MojVolcanicRock to fix a vanilla softlock
-        },
-
         // Eastern Palace
         DungeonEast 3 {
             // Open door after defeating Yuga
@@ -960,10 +955,12 @@ fn patch_item_shops(patcher: &mut Patcher) {
         IndoorLight,
         8,
         [
-            disable(6), // Scoot Fruit
+            call(6, |obj| {
+                obj.set_translate(-1.25, 0.0, -5.3); // Scoot Fruit
+            }),
             disable(7), // Foul Fruit
             call(11, |obj| {
-                obj.set_translate(0.0, 0.0, -5.4); // center Shield
+                obj.set_translate(1.25, 0.0, -5.4); // center Shield
             }),
         ],
     );
@@ -973,10 +970,12 @@ fn patch_item_shops(patcher: &mut Patcher) {
         IndoorLight,
         6,
         [
-            disable(6), // Scoot Fruit
+            call(6, |obj| {
+                obj.set_translate(-1.0, 0.0, -5.5); // Scoot Fruit
+            }),
             disable(7), // Foul Fruit
             call(11, |obj| {
-                obj.set_translate(0.0, 0.0, -5.5); // center Shield
+                obj.set_translate(1.0, 0.0, -5.5); // center Shield
             }),
         ],
     );
@@ -1021,19 +1020,6 @@ fn patch_blacksmith_lorule(patcher: &mut Patcher) {
             disable(7),           // Disable Blacksmith's Wife's dialog
         ],
     );
-
-    patcher.add_obj(
-        IndoorDark,
-        4,
-        Obj::green_warp(
-            Flag::Event(430),
-            0,
-            Some(13),
-            22,
-            SpawnPoint::new(IndoorDark, 5, 5),
-            Vec3 { x: -0.5, y: 0.0, z: -6.0 },
-        ),
-    )
 }
 
 // Chamber of Sages
@@ -1449,16 +1435,6 @@ fn patch_door_shuffle(patcher: &mut Patcher, seed_info: &SeedInfo) {
         return;
     }
 
-    // Dark Maze - Remove Bell Reject Zones in jail cells
-    patcher.modify_objs(
-        FieldDark,
-        20,
-        [
-            disable(242), // First Jail
-            disable(241), // Second Jail
-        ],
-    );
-
     // Pegs in front of Tower of Hera - make them not disappear
     patcher.modify_objs(FieldLight, 3, [clear_disable_flag(345)]);
     patcher.modify_system(
@@ -1578,12 +1554,10 @@ fn patch_hildas_study(patcher: &mut Patcher, settings: &Settings) {
             Some(14),
             48,
             SpawnPoint::new(Demo, 4, 0),
+            // SpawnPoint::new(IndoorDark, 4, 1),
             Vec3 { x: 63.0, y: 0.0, z: -14.5 },
         ),
     );
-
-    // Add spawn point for the warp (index 5)
-    patcher.add_system(IndoorDark, 5, Obj::spawn_point(5, 1, 15, 49, Vec3 { x: 63.0, y: 0.0, z: -14.5 }));
 
     if settings.progressive_bow_of_light {
         return;

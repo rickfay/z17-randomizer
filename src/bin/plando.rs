@@ -356,9 +356,9 @@ fn build_layout() -> Layout {
     layout.set_item("Bee Guy (1)", regions::hyrule::kakariko::village::SUBREGION, Net01);
     layout.set_item("Bee Guy (2)", regions::hyrule::kakariko::village::SUBREGION, BeeBadge);
     layout.set_item("Dodge the Cuccos", regions::hyrule::kakariko::village::SUBREGION, heart_pieces.pop().unwrap());
-    // layout.set_item("Kakariko Item Shop (1)", regions::hyrule::kakariko::village::SUBREGION, ScootFruit01);
-    // layout.set_item("Kakariko Item Shop (2)", regions::hyrule::kakariko::village::SUBREGION, FoulFruit01);
-    layout.set_item("Kakariko Item Shop (3)", regions::hyrule::kakariko::village::SUBREGION, Shield01);
+    layout.set_item("Kakariko Item Shop (Left)", regions::hyrule::kakariko::village::SUBREGION, ScootFruit01);
+    // layout.set_item("Kakariko Item Shop (Center)", regions::hyrule::kakariko::village::SUBREGION, FoulFruit01);
+    layout.set_item("Kakariko Item Shop (Right)", regions::hyrule::kakariko::village::SUBREGION, Shield01);
     layout.set_item("Kakariko Jail", regions::hyrule::kakariko::village::SUBREGION, silver_rupees.pop().unwrap());
     layout.set_item("Kakariko Well (Bottom)", regions::hyrule::kakariko::village::SUBREGION, Empty);
     layout.set_item("Kakariko Well (Top)", regions::hyrule::kakariko::village::SUBREGION, heart_pieces.pop().unwrap());
@@ -433,9 +433,9 @@ fn build_layout() -> Layout {
     layout.set_item("Ice Rod Cave", regions::hyrule::lake::hylia::SUBREGION, Empty);
     layout.set_item("Lake Hylia Dark Cave", regions::hyrule::lake::hylia::SUBREGION, Empty);
     layout.set_item("Lake Hylia Ledge Chest", regions::hyrule::lake::hylia::SUBREGION, Empty);
-    // layout.set_item("Lakeside Item Shop (1)", regions::hyrule::lake::hylia::SUBREGION, Empty);
-    // layout.set_item("Lakeside Item Shop (2)", regions::hyrule::lake::hylia::SUBREGION, Empty);
-    layout.set_item("Lakeside Item Shop (3)", regions::hyrule::lake::hylia::SUBREGION, Empty);
+    layout.set_item("Lakeside Item Shop (Left)", regions::hyrule::lake::hylia::SUBREGION, Empty);
+    // layout.set_item("Lakeside Item Shop (Center)", regions::hyrule::lake::hylia::SUBREGION, Empty);
+    layout.set_item("Lakeside Item Shop (Right)", regions::hyrule::lake::hylia::SUBREGION, Empty);
     layout.set_item("Lake Hylia Eastern Shore", regions::hyrule::lake::hylia::SUBREGION, Empty);
 
     layout.set_item("[Mai] Hyrule Hotfoot Rock", regions::hyrule::lake::hylia::SUBREGION, maiamai.pop().unwrap());

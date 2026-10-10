@@ -573,8 +573,8 @@ pub fn patch_seed(seed_info: &SeedInfo, user_config: &UserConfig, no_patch: bool
         // patch::lms::msbf::research(&mut patcher, None, "HintGhost", vec![], true)?;
 
         // patch::research_msbf_msbt(&mut patcher,
-        //     game::Course::IndoorLight, "FieldLight_18_InsectNet", // MSBF
-        //     game::Course::IndoorLight, "FieldLight_18", // MSBT
+        //     game::Course::FieldDark, "FieldDark_28_Minigame", // MSBF
+        //     game::Course::FieldDark, "FieldDark_28", // MSBT
         //     true);
 
         regions::patch(&mut patcher, seed_info)?;

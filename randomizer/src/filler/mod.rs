@@ -14,7 +14,6 @@ use queue::Queue;
 use rand::{Rng, rngs::StdRng};
 use rom::Error;
 use std::collections::HashSet;
-use modinfo::settings::DoorShuffle;
 
 pub mod check;
 pub mod cracks;
@@ -184,14 +183,14 @@ fn preplace_items(
     place_static(check_map, progression, Item::HeartPiece28, "Fortune's Choice");
 
     // Kakariko Item Shop
-    //place_static(check_map, progression, Item::ScootFruit01, "Kakariko Item Shop (1)");
-    //place_static(check_map, progression, Item::FoulFruit01, "Kakariko Item Shop (2)");
-    place_static(check_map, progression, Item::Shield01, "Kakariko Item Shop (3)");
+    place_static(check_map, progression, Item::ScootFruit01, "Kakariko Item Shop (Left)");
+    //place_static(check_map, progression, Item::FoulFruit01, "Kakariko Item Shop (Center)");
+    place_static(check_map, progression, Item::Shield01, "Kakariko Item Shop (Right)");
 
     // Lakeside Item Shop
-    //place_static(check_map, progression, Item::ScootFruit02, "Lakeside Item Shop (1)");
-    //place_static(check_map, progression, Item::FoulFruit02, "Lakeside Item Shop (2)");
-    place_static(check_map, progression, Item::Shield02, "Lakeside Item Shop (3)");
+    place_static(check_map, progression, Item::ScootFruit02, "Lakeside Item Shop (Left)");
+    //place_static(check_map, progression, Item::FoulFruit02, "Lakeside Item Shop (Center)");
+    place_static(check_map, progression, Item::Shield02, "Lakeside Item Shop (Right)");
 
     // Mysterious Man
     place_static(check_map, progression, Item::GoldBee01, "Mysterious Man");
@@ -221,7 +220,7 @@ fn preplace_items(
         place_static(check_map, progression, Item::SandRod02, "Maiamai Sand Rod Upgrade");
     }
 
-    let mut shop_positions = vec![
+    let shop_positions = vec![
         "Ravio's Gift", "Ravio's Shop (1)", "Ravio's Shop (2)", "Ravio's Shop (3)", "Ravio's Shop (4)",
         "Ravio's Shop (5)", "Ravio's Shop (7)", "Ravio's Shop (8)", "Ravio's Shop (9)",
     ];
@@ -243,11 +242,7 @@ fn preplace_items(
     let mut shop_items = vec![];
 
     // Bell
-    if settings.door_shuffle == DoorShuffle::Crossed {
-        // Force the player to have Bell in Crossed Door ER, for now
-        place_static(check_map, progression, Item::Bell, "Ravio's Gift");
-        shop_positions.remove(0);
-    } else if settings.bell_in_shop {
+    if settings.bell_in_shop {
         shop_items.push(Item::Bell);
     }
 
@@ -689,7 +684,7 @@ fn verify_all_locations_accessible(
     const MAIAMAI: usize = 100;
     const DUNGEON_PRIZES: usize = 10;
     const RANDOMIZED_JUNK: usize = 1;
-    const STATIC_ITEMS: usize = 16;
+    const STATIC_ITEMS: usize = 18;
     const PROGRESSION_EVENTS: usize = 45; // "Progression Events" (non-item checks that are still progression)
     const WEATHER_VANES: usize = 22;
     const HINT_GHOSTS_OW: usize = 58; // Hint Ghosts (Overworld)
