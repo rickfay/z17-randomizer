@@ -1892,7 +1892,7 @@ fn patch_castles(patcher: &mut Patcher) {
         1,
         [
             disable(265),            // Trial's Door camera pan
-            clear_enable_flag(1193), // Respawn Trial's Skip big rock upon leaving the room
+            clear_active_args(1193), // Respawn Trial's Skip big rock upon leaving the room
         ],
     );
 
