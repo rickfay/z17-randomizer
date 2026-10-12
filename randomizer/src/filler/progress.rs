@@ -215,6 +215,10 @@ impl<'s> Progress<'s> {
         self.has_both(Item::SandRod01, Item::SandRod02)
     }
 
+    pub fn can_sand_hop(&self) -> bool {
+        self.has_sand_rod() && self.has_tornado_rod()
+    }
+
     pub fn can_use_shield(&self) -> bool {
         self.has_sword()
             && self.has_any([Item::Shield01, Item::Shield02, Item::Shield03, Item::Shield04, Item::HylianShield])
