@@ -563,7 +563,7 @@ impl Door {
             Door::EasternPalaceExit => EasternPalaceFoyer,
             Door::HouseOfGalesEntrance => HouseOfGalesIsland,
             Door::HouseOfGalesExit => HouseOfGalesFoyer,
-            Door::TowerOfHeraEntrance => TowerOfHeraEntrancePegs,
+            Door::TowerOfHeraEntrance => DeathMountainWestTop,
             Door::TowerOfHeraExit => TowerOfHeraFoyer,
             Door::InsideHyruleCastleEntrance => HyruleCastleRoof,
             Door::InsideHyruleCastleExit => HyruleCastleDungeonFoyer,

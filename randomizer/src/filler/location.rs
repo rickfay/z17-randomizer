@@ -223,7 +223,6 @@ pub enum Location {
     HouseOfGalesBoss,
     HouseOfGalesPostBoss,
 
-    TowerOfHeraEntrancePegs,
     TowerOfHeraFoyer,
     TowerOfHeraBottom,
     TowerOfHeraMiddle,

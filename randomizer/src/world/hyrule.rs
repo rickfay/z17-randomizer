@@ -1355,20 +1355,12 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
                 vec![
                     fast_travel_hyrule(),
                     door!(SpectacleRockCaveRightEntrance, door_map),
-                    edge!(TowerOfHeraEntrancePegs, |p| p.has_hammer()),
+                    door!(TowerOfHeraEntrance, door_map, |p| p.has_hammer()),
                     edge!(DeathTopLeftLedge, |p| p.can_merge()),
                     edge!(SpectacleRock),
                     edge!(DeathThirdFloor),
                     edge!(DeathMountainEastTop, |p| p.has_hookshot()),
                 ],
-            ),
-        ),
-        (
-            TowerOfHeraEntrancePegs,
-            location(
-                "Tower of Hera Entrance Pegs",
-                None,
-                vec![edge!(DeathMountainWestTop, |p| p.has_hammer()), door!(TowerOfHeraEntrance, door_map)],
             ),
         ),
         (
