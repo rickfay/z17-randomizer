@@ -66,7 +66,6 @@ pub(crate) fn clear_disable_flag(unq: u16) -> (u16, Box<dyn Fn(&mut Obj)>) {
     (unq, Box::new(move |obj: &mut Obj| obj.clear_disable_flag()))
 }
 
-#[allow(unused)]
 pub(crate) fn clear_active_args(unq: u16) -> (u16, Box<dyn Fn(&mut Obj)>) {
     (unq, Box::new(move |obj: &mut Obj| obj.clear_active_args()))
 }

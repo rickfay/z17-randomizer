@@ -159,6 +159,10 @@ impl Stage {
         self.system.push(obj);
     }
 
+    pub fn get_objs(&mut self) -> &Vec<Obj> {
+        &self.objs
+    }
+
     pub fn get_obj(&mut self, unq: u16) -> Option<&Obj> {
         if let Some(i) = self.objs.iter().position(|obj| obj.unq == unq) { self.objs.get(i) } else { None }
     }
@@ -167,12 +171,20 @@ impl Stage {
         if let Some(i) = self.objs.iter().position(|obj| obj.unq == unq) { self.objs.get_mut(i) } else { None }
     }
 
+    pub fn get_rails(&mut self) -> &Vec<Rail> {
+        &self.rails
+    }
+
     pub fn get_rail(&mut self, unq: u16) -> Option<&Rail> {
         if let Some(i) = self.rails.iter().position(|obj| obj.unq == unq) { self.rails.get(i) } else { None }
     }
 
     pub fn get_rails_mut(&mut self, unq: u16) -> Option<&mut Rail> {
         if let Some(i) = self.rails.iter().position(|rail| rail.unq == unq) { self.rails.get_mut(i) } else { None }
+    }
+
+    pub fn get_systems(&mut self) -> &Vec<Obj> {
+        &self.system
     }
 
     pub fn get_system(&mut self, unq: u16) -> Option<&Obj> {
@@ -280,7 +292,10 @@ impl Obj {
 
     /// Generate a new AreaSwitchCube trigger object
     /// ID: 14
-    pub fn trigger_cube(trigger_flag: Flag, clp: i16, ser: u16, unq: u16, srt: Transform) -> Self {
+    pub fn trigger_cube<S>(trigger_flag: Flag, clp: i16, ser: S, unq: u16, srt: Transform) -> Self
+    where
+        S: Into<Option<u16>>,
+    {
         let (arg4, arg6) = trigger_flag.into_pair();
         Self {
             arg: Arg(0, 0, 0, 0, arg4, 0, arg6, 0, 0, 0, 0, 0, 0, 0.0),
@@ -290,7 +305,7 @@ impl Obj {
             lnk: vec![],
             nme: Some(String::from("Invalid")),
             ril: vec![],
-            ser: Some(ser),
+            ser: ser.into(),
             srt,
             typ: 6,
             unq,

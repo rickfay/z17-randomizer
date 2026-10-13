@@ -9,6 +9,7 @@ use rom::flag::Flag;
 use rom::scene::{Arg, Obj, SpawnPoint, Transform, Vec3};
 
 use crate::filler::cracks::Crack;
+use crate::filler::doors::Door;
 use crate::patch::Patcher;
 use crate::{Result, SeedInfo, patch::util::*, regions};
 
@@ -125,7 +126,6 @@ pub fn patch(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
 
     patch_curtain(patcher, seed_info);
     patch_crack_shuffle(patcher);
-    patch_door_shuffle(patcher, seed_info);
     patch_keysy_small(patcher, &seed_info.settings);
     patch_keysy_big(patcher, &seed_info.settings);
     // patch_reverse_desert_palace(patcher, settings);
@@ -137,6 +137,7 @@ pub fn patch(patcher: &mut Patcher, seed_info: &SeedInfo) -> Result<()> {
     patch_magic_shop(patcher);
     patch_ice_ruins(patcher);
     patch_item_shops(patcher);
+    patch_door_shuffle(patcher, seed_info);
 
     patcher.modify_objs(FieldLight, 18, [disable(529)]);
 
@@ -1435,17 +1436,13 @@ fn patch_door_shuffle(patcher: &mut Patcher, seed_info: &SeedInfo) {
         return;
     }
 
-    // Pegs in front of Tower of Hera - make them not disappear
-    patcher.modify_objs(FieldLight, 3, [clear_disable_flag(345)]);
-    patcher.modify_system(
-        FieldLight,
-        3,
+    // Handle Hera's entrance blocker even if just DungeonEntrance rando and not full Crossed ER
+    create_door_shuffle_trigger(&Door::TowerOfHeraEntrance, Flag::Event(360), patcher, seed_info);
+    patcher.modify_objs(
+        DungeonHera,
+        1,
         [
-            clear_disable_flag(345),
-            clear_disable_flag(346),
-            clear_disable_flag(366),
-            clear_disable_flag(367),
-            clear_disable_flag(368),
+            disable(872), // vanilla trigger
         ],
     );
 
@@ -1457,28 +1454,64 @@ fn patch_door_shuffle(patcher: &mut Patcher, seed_info: &SeedInfo) {
     // Vacant House Inner Breakable Wall - Remove to prevent getting stuck
     patcher.modify_objs(IndoorDark, 11, [disable(32)]);
 
-    // Rosso Cave Peg - Make it not disappear
-    patcher.modify_objs(FieldLight, 2, [clear_disable_flag(116)]);
-    patcher.modify_system(FieldLight, 2, [clear_disable_flag(116)]);
+    // Create new triggers at the entrances now paired with our exits
+    for (door, flag, course, scene, unq) in vec![
+        (Door::MoldormCaveLowerEntrance, Flag::Event(348), CaveLight, 19, 10),
+        (Door::IceRuinsEntrance, Flag::Event(610), DungeonIce, 1, 942),
+        (Door::FortuneTellerCaveEntrance, Flag::Event(887), CaveLight, 21, 7),
+        (Door::RossoCaveEntrance, Flag::Event(898), CaveLight, 6, 8),
+        (Door::BlacksmithCaveEntrance, Flag::Event(909), CaveLight, 16, 5),
+    ] {
+        create_door_shuffle_trigger(&door, flag, patcher, seed_info);
+        patcher.modify_objs(
+            course,
+            scene,
+            [
+                disable(unq), // disable vanilla trigger
+            ],
+        );
+    }
+}
 
-    // Fortune-Teller Cave Big Rock - Make it not disappear
-    patcher.modify_objs(FieldLight, 9, [clear_disable_flag(54)]);
-    patcher.modify_system(FieldLight, 9, [clear_disable_flag(54)]);
+fn create_door_shuffle_trigger(entrance: &Door, flag: Flag, patcher: &mut Patcher, seed_info: &SeedInfo) {
+    // Lookup interior Spawn Point for the Exit leading to the given blocked Entrance
+    let exit = seed_info.door_map.get(entrance).unwrap();
+    let SpawnPoint { course, scene, spawn } = exit.get_spawn_point();
 
-    // Blacksmith Cave Big Rock - Make it not disappear
-    patcher.modify_objs(FieldLight, 21, [clear_disable_flag(47)]);
-    patcher.modify_system(FieldLight, 21, [clear_disable_flag(47)]);
+    // Fetch information about the Exit's scene
+    let (unq, ser) = patcher.find_objs_unq_ser(course, scene as u16);
+    let systems = patcher.read_systems(course, scene as u16);
 
-    // Moldorm Cave Rocks - Make them not disappear
-    patcher.modify_objs(FieldLight, 6, [clear_disable_flag(83)]);
-    patcher.modify_system(
-        FieldLight,
-        6,
-        [clear_disable_flag(83), clear_disable_flag(84), clear_disable_flag(133), clear_disable_flag(134)],
+    let mut clp = None;
+    let mut translate = None;
+    let mut spawn_point_found = false;
+
+    // Find the Exit Spawn Point's coordinates and CLP
+    for system in systems {
+        if system.id == 7 && system.arg.0 == spawn {
+            clp = Some(system.clp);
+            translate = Some(system.srt.translate);
+            spawn_point_found = true;
+            break;
+        }
+    }
+
+    if !spawn_point_found {
+        fail!("Could not locate SpawnPoint {{ course: {:?}, scene: {}, spawn: {} }}", course, scene, spawn);
+    }
+
+    // Create a new trigger cube with the found CLP and coordinates
+    let new_trigger = Obj::trigger_cube(
+        flag,
+        clp.unwrap(),
+        ser,
+        unq,
+        Transform { scale: Vec3 { x: 2.0, y: 2.0, z: 2.0 }, rotate: Vec3::ZERO, translate: translate.unwrap() },
     );
 
-    // Ice Ruins Ice Gimos Blocker - Make it not disappear
-    patcher.modify_objs(FieldDark, 5, [clear_disable_flag(27)]);
+    // Add the new trigger cube to the scene
+    patcher.add_obj(course, scene as u16, new_trigger);
+    info!("Adding new trigger to {course:?}{scene}");
 }
 
 fn patch_lorule_castle_entrance(patcher: &mut Patcher) {

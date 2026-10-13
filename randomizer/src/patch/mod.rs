@@ -144,6 +144,17 @@ impl Patcher {
         })
     }
 
+    #[allow(unused)]
+    fn read_objs(&mut self, id: CourseId, stage_index: u16) -> &Vec<Obj> {
+        let stage = self.scene(id, stage_index - 1).unwrap().stage_mut().get_mut();
+        stage.get_objs()
+    }
+
+    fn read_systems(&mut self, id: CourseId, stage_index: u16) -> &Vec<Obj> {
+        let stage = self.scene(id, stage_index - 1).unwrap().stage_mut().get_mut();
+        stage.get_systems()
+    }
+
     fn modify_objs<A>(&mut self, course_id: CourseId, stage_index: u16, actions: A)
     where
         A: Into<Vec<(u16, Box<dyn Fn(&mut Obj)>)>>,
