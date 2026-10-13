@@ -21,66 +21,111 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
             location(
                 "Desert Palace Foyer",
                 None,
-                vec![door!(DesertPalaceExit, door_map), edge!(DesertPalaceStart, |p| p.hearts(9.0))],
+                vec![door!(DesertPalaceExit, door_map), edge!(DesertPalaceFirstRoomSouth, |p| p.hearts(9.0))],
             ),
         ),
         (
-            DesertPalaceStart,
+            DesertPalaceFirstRoomSouth,
             location(
-                "Desert Palace Start",
-                vec![check!("[DP] (1F) Entrance", regions::dungeons::desert::palace::SUBREGION => {
-                    normal: |p| p.has_sand_rod() && p.can_merge(),
-                    hell: |p| p.has_sand_rod() && p.has_tornado_rod(),
-                })],
+                "Desert Palace First Room South",
+                None,
                 vec![
                     edge!(DesertPalaceFoyer),
-                    edge!(DesertPalace1F => {
-                        normal: |p| p.has_sand_rod() && p.can_merge() && p.can_attack(),
-                        hell: |p| p.has_sand_rod() && p.has_tornado_rod() && p.can_attack(),
+                    edge!(DesertPalaceFirstRoomNorth => {
+                        normal: |p| p.has_sand_rod(),
+                    }),
+                    edge!(DesertPalace1FMiniBoss => {
+                        hell: |p| p.can_sand_hop(),
                     }),
                 ],
             ),
         ),
         (
-            DesertPalace1F,
+            DesertPalaceFirstRoomNorth,
             location(
-                "Desert Palace 1F",
+                "Desert Palace First Room North",
+                vec![check!("[DP] (1F) Entrance", regions::dungeons::desert::palace::SUBREGION => {
+                    normal: |p| p.has_sand_rod() && p.can_merge(),
+                    hell: |p| p.can_sand_hop(),
+                })],
+                vec![
+                    edge!(DesertPalaceFirstRoomSouth),
+                    edge!(DesertPalace1FMain => {
+                        normal: |p| p.has_sand_rod() && p.can_merge(),
+                        hell: |p| p.can_sand_hop(),
+                    }),
+                ],
+            ),
+        ),
+        (
+            DesertPalace1FMain,
+            location(
+                "Desert Palace 1F Main",
+                None,
+                vec![edge!(DesertPalace1FMiniBoss => {
+                    normal: |p| p.has_sand_rod() && p.can_hit_switch_bootless(),
+                    glitched: |p| p.has_sand_rod(),
+                })],
+            ),
+        ),
+        (
+            DesertPalace1FMiniBoss,
+            location(
+                "Desert Palace 1F Mini Boss",
+                vec![check!(
+                    "[DP] (1F) Behind Rocks",
+                    regions::dungeons::desert::palace::SUBREGION => {
+                    normal: |p| p.has_sand_rod() && p.has_titans_mitt(),
+                    adv_glitched: |p| p.has_sand_rod() && p.has_bombs(),
+                    hell: |p| p.has_sand_rod(),
+                }
+                )],
+                vec![
+                    edge!(DesertPalaceFirstRoomSouth, |p| p.can_attack()),
+                    edge!(DesertPalace1FNorthWest, |p| p.can_attack()),
+                    edge!(DesertPalace1FLeftHallway, |p| p.has_desert_keys(2) && p.has_titans_mitt()),
+                ],
+            ),
+        ),
+        (
+            DesertPalace1FNorthWest,
+            location(
+                "Desert Palace 1F North West",
                 vec![
                     check!("[DP] (1F) Sand Switch Room", regions::dungeons::desert::palace::SUBREGION => {
                         normal: |p| p.has_sand_rod() && p.can_merge(),
-                        hell: |p| p.has_sand_rod() && p.has_tornado_rod(),
+                        hell: |p| p.can_sand_hop(),
                     }),
                     check!(
                         "[DP] (1F) Sand Room (North)",
                         regions::dungeons::desert::palace::SUBREGION => {
                         normal: |p| p.has_sand_rod() && p.can_merge(),
-                        hell: |p| p.has_sand_rod() && p.has_tornado_rod(),
-                    }
-                    ),
+                        hell: |p| p.can_sand_hop(),
+                    }),
                     check!(
                         "[DP] (1F) Sand Room (South)",
                         regions::dungeons::desert::palace::SUBREGION => {
                         normal: |p| p.has_sand_rod() && p.can_merge(),
-                        hell: |p| p.has_sand_rod() && p.has_tornado_rod(),
-                    }
-                    ),
-                    check!(
-                        "[DP] (1F) Behind Rocks",
-                        regions::dungeons::desert::palace::SUBREGION => {
-                        normal: |p| p.has_sand_rod() && p.has_titans_mitt(),
-                        hell: |p| p.has_sand_rod() && p.has_tornado_rod(),
-                    }
-                    ),
+                        hell: |p| p.can_sand_hop(),
+                    }),
                     check!(
                         "[DP] (1F) Big Chest (Behind Wall)",
                         regions::dungeons::desert::palace::SUBREGION => {
                         normal: |p| p.has_sand_rod() && p.can_merge() && p.has_desert_keys(1),
-                        hell: |p| p.has_sand_rod() && p.has_tornado_rod() && p.has_desert_keys(1),
+                        hell: |p| p.can_sand_hop() && p.has_desert_keys(1),
                     }),
                 ],
+                vec![edge!(DesertPalace1FMiniBoss), edge!(DesertPalace1FMain, |p| p.has_desert_keys(1))],
+            ),
+        ),
+        (
+            DesertPalace1FLeftHallway,
+            location(
+                "Desert Palace 1F Left Hallway",
+                None,
                 vec![
-                    edge!(DesertPalaceFoyer, |p| p.has_sand_rod() && p.can_attack()),
-                    edge!(DesertPalaceMidwayLedge, |p| p.has_desert_keys(2) && p.has_titans_mitt()),
+                    edge!(DesertPalace1FMiniBoss, |p| p.has_titans_mitt() && p.hearts(9.0)),
+                    edge!(DesertPalaceMidwayLedge),
                 ],
             ),
         ),
@@ -92,7 +137,7 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
                 vec![
                     fast_travel_hyrule(),
                     edge!(DesertPalaceWeatherVane),
-                    edge!(DesertPalace1F, |p| p.hearts(9.0)),
+                    edge!(DesertPalace1FLeftHallway),
                     edge!(DesertPalace2FMiniboss, |p| p.hearts(9.0)),
                 ],
             ),
@@ -103,12 +148,10 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
                 "Desert Palace 2F Miniboss",
                 None,
                 vec![
-                    edge!(
-                        DesertPalaceMidwayLedge => {
-                            glitched: |_| true,
-                        }
-                    ),
-                    edge!(DesertPalace1F, |p| p.can_attack()),
+                    edge!(DesertPalaceMidwayLedge => {
+                        glitched: |_| true,
+                    }),
+                    edge!(DesertPalaceFirstRoomNorth, |p| p.can_attack()),
                     edge!(DesertPalace2F => {
                         normal: |p| p.can_attack() && p.has_sand_rod() && p.can_merge(),
                         glitched: |p| p.can_attack() && p.has_sand_rod() && p.has_boots(),
@@ -132,18 +175,17 @@ pub(crate) fn graph(door_map: &DoorMap, crack_map: &CrackMap) -> HashMap<Locatio
                         adv_glitched: |p| p.has_sand_rod() && p.has_tornado_rod() && p.has_titans_mitt(),
                     }),
                     check!("[DP] (2F) Beamos Room", regions::dungeons::desert::palace::SUBREGION, |p| p.has_sand_rod()),
-                    check!("[DP] (2F) Red/Blue Switches", regions::dungeons::desert::palace::SUBREGION, |p| p
-                        .has_sand_rod()),
-                    check!(
-                        "[DP] (2F) Big Chest (Puzzle)",
-                        regions::dungeons::desert::palace::SUBREGION => {
-                            normal: |p| p.has_sand_rod() && p.can_merge(),
-                            adv_glitched: |p| p.has_tornado_rod(),
-                        }
-                    ),
+                    check!("[DP] (2F) Red/Blue Switches", regions::dungeons::desert::palace::SUBREGION => {
+                        normal: |p| p.has_sand_rod() && p.can_merge(),
+                        adv_glitched: |p| p.has_sand_rod() && p.has_tornado_rod(),
+                    }),
+                    check!("[DP] (2F) Big Chest (Puzzle)", regions::dungeons::desert::palace::SUBREGION => {
+                        normal: |p| p.has_sand_rod() && p.can_merge(),
+                        adv_glitched: |p| p.has_sand_rod() && p.has_tornado_rod(),
+                    }),
                     check!("[DP] (2F) Leever Room", regions::dungeons::desert::palace::SUBREGION => {
-                        normal: |p| p.has_desert_keys(3),
-                        adv_glitched: |p| p.has_tornado_rod(),
+                        normal: |p| p.has_sand_rod() && p.can_attack() && p.has_desert_keys(3),
+                        adv_glitched: |p| p.has_sand_rod() && p.can_attack() && p.has_tornado_rod(),
                     }),
                 ],
                 vec![

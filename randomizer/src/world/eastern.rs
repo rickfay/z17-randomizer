@@ -115,7 +115,7 @@ pub(crate) fn graph(door_map: &DoorMap) -> HashMap<Location, LocationNode> {
                         EasternPalaceBoss => {
                         normal: |p| p.has_eastern_big_key() && ((p.has_eastern_keys(2) && p.can_hit_far_switch()) || p.has_ice_rod() || p.has_bombs()),
                         hard: |p| p.has_eastern_big_key() && (p.has_eastern_keys(2) || p.has_ice_rod() || p.has_bombs()),
-                        glitched: |p| p.has_eastern_big_key() && p.has_master_sword() || p.can_great_spin(),
+                        glitched: |p| p.has_eastern_big_key() && (p.has_master_sword() || p.can_great_spin()),
                         adv_glitched: |p| p.has_tornado_rod(),
                     }),
                     edge!(EasternPalaceEscape2F => {
