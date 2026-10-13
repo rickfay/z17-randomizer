@@ -1511,7 +1511,6 @@ fn create_door_shuffle_trigger(entrance: &Door, flag: Flag, patcher: &mut Patche
 
     // Add the new trigger cube to the scene
     patcher.add_obj(course, scene as u16, new_trigger);
-    info!("Adding new trigger to {course:?}{scene}");
 }
 
 fn patch_lorule_castle_entrance(patcher: &mut Patcher) {
